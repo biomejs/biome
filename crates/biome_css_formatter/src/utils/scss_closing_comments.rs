@@ -41,14 +41,6 @@ pub(crate) fn write_include_closing_comments(
     write_closing_comments(node, spacing, f)
 }
 
-/// Formats include-owned closing comments for list helpers.
-pub(crate) fn format_include_closing_comments(
-    node: &CssSyntaxNode,
-    spacing: ClosingCommentSpacing,
-) -> impl Format<CssFormatContext> + '_ {
-    format_with(move |f| write_include_closing_comments(node, spacing, f))
-}
-
 /// Writes comments that stay on the include path before the closing `)`.
 fn write_closing_comments(
     node: &CssSyntaxNode,

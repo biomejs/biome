@@ -2083,6 +2083,7 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssExpression
 	| ScssInterpolatedString
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
@@ -2640,11 +2641,15 @@ ScssEachAtRule =
 ScssEachHeader =
 	bindings: ScssEachBindingList
 	'in'
-	iterable: ScssExpression
+	values: ScssEachValueList
 
 // @each $key, $value in $map { color: $key; }
 //       ^^^^^^^^^^^^
 ScssEachBindingList = ScssVariable (',' ScssVariable)*
+
+// @each $item in puma, sea-slug { color: $item; }
+//                ^^^^^^^^^^^^^^
+ScssEachValueList = ScssExpression (',' ScssExpression)* ','?
 
 // @for $i from 1 through 3 { width: $i * 1px; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2844,6 +2849,7 @@ ScssIncludeAtRule =
 	'include'
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
+	using_clause: ScssIncludeUsingClause?
 	block: CssDeclarationOrRuleBlock?
 	';'?
 
@@ -2857,6 +2863,12 @@ ScssIncludeArgumentList =
 	'('
 	items: CssParameterList
 	')'
+
+// using ($value, $fallback)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIncludeUsingClause =
+	'using'
+	parameters: ScssParameterList
 
 // ($radius: 4px, $args...)
 // ^^^^^^^^^^^^^^^^^^^^^^^^

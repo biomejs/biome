@@ -11,6 +11,7 @@ impl FormatNodeRule<ScssIncludeAtRule> for FormatScssIncludeAtRule {
             include_token,
             name,
             arguments,
+            using_clause,
             block,
             semicolon_token,
         } = node.as_fields();
@@ -24,6 +25,10 @@ impl FormatNodeRule<ScssIncludeAtRule> for FormatScssIncludeAtRule {
                 arguments.format()
             ]
         )?;
+
+        if let Some(using_clause) = using_clause {
+            write!(f, [space(), using_clause.format()])?;
+        }
 
         if let Some(block) = block {
             write!(f, [space(), block.format()])?;

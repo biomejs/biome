@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsNewExpression, JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode,
     JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
 use crate::JsRuleAction;
@@ -93,8 +93,21 @@ fn is_boolean_call(node: &JsSyntaxNode) -> Option<bool> {
     Some(expr.has_callee("Boolean"))
 }
 
+declare_node_union! {
+    pub AnyBooleanCastLike = JsUnaryExpression | JsCallExpression
+}
+
+impl AnyBooleanCastLike {
+    pub(crate) fn as_any_js_expression(&self) -> AnyJsExpression {
+        match self {
+            Self::JsUnaryExpression(expr) => AnyJsExpression::JsUnaryExpression(expr.clone()),
+            Self::JsCallExpression(expr) => AnyJsExpression::JsCallExpression(expr.clone()),
+        }
+    }
+}
+
 impl Rule for NoExtraBooleanCast {
-    type Query = Ast<AnyJsExpression>;
+    type Query = Ast<AnyBooleanCastLike>;
     type State = (AnyJsExpression, ExtraBooleanCastType);
     type Signals = Option<Self::State>;
     type Options = NoExtraBooleanCastOptions;
@@ -215,7 +228,7 @@ impl Rule for NoExtraBooleanCast {
             }
         }
 
-        mutation.replace_node(node.clone(), replacement);
+        mutation.replace_node(node.as_any_js_expression(), replacement);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

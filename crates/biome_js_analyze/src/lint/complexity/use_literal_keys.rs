@@ -79,11 +79,10 @@ impl Rule for UseLiteralKeys {
         };
         let value = inner_expression.as_static_value()?;
         match value {
-            StaticValue::Number(token) => {
-                if is_computed_member_name {
+            StaticValue::Number(token)
+                if is_computed_member_name => {
                     return Some((inner_expression.range(), token, is_computed_member_name));
                 }
-            }
             StaticValue::String(token) => {
                 let value = inner_string_text(&token);
                 // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`

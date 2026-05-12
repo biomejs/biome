@@ -387,10 +387,7 @@ impl Type {
 
     fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
         let mut id = id;
-        loop {
-            let Some(resolved_data) = self.resolver.get_by_resolved_id(id) else {
-                break;
-            };
+        while let Some(resolved_data) = self.resolver.get_by_resolved_id(id) {
             match resolved_data.as_raw_data() {
                 TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
                     id = resolved_data.apply_module_id(*resolved_id);

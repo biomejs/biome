@@ -10,3 +10,18 @@ $commentedNestedMapValue:(key:(other-key:other-other-value),/* end */);
 $emptyBlockCommentMap:(/* comment */);
 $emptyLineCommentMap:(// comment
 );
+$leadingBlockCommentMap:(
+/* comment */
+key1:value,
+key2:value
+);
+$leadingBlockCommentsMap:(
+/* comment */ /* comment */
+key2:value,
+key3:value
+);
+$leadingBlockCommentNestedMap:(
+/* comment */
+key3:(key:value,key:value),
+key4:value
+);

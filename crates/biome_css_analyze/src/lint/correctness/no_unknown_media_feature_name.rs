@@ -87,22 +87,21 @@ impl Rule for NoUnknownMediaFeatureName {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let media_query_list = ctx.query();
         for any_css_media_query in media_query_list {
-            match any_css_media_query.ok()? {
+            let is_invalid = match any_css_media_query.ok()? {
                 AnyCssMediaQuery::CssMediaConditionQuery(css_media_condition_query) => {
-                    if is_invalid_feature_name_included_in_css_media_condition_query(
+                    is_invalid_feature_name_included_in_css_media_condition_query(
                         css_media_condition_query,
-                    )? {
-                        return Some(media_query_list.clone());
-                    }
+                    )?
                 }
                 AnyCssMediaQuery::AnyCssMediaTypeQuery(any_css_media_type_query) => {
-                    if is_invalid_feature_name_included_in_css_media_type_query(
+                    is_invalid_feature_name_included_in_css_media_type_query(
                         any_css_media_type_query,
-                    )? {
-                        return Some(media_query_list.clone());
-                    }
+                    )?
                 }
-                _ => {}
+                _ => false,
+            };
+            if is_invalid {
+                return Some(media_query_list.clone());
             }
         }
         None

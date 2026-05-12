@@ -312,6 +312,7 @@ Generally, mistakes revolve around allocating unnecessary data during rule execu
 
 - Placing `String` or `Box<str>` in a Rule's `State` type. It's a strong indicator that you are allocating a string unnecessarily. If the string comes from a CST token, this usually can be avoided by using `TokenText` instead.
 - Building strings or other data structures only used in the code action in `run()` instead of `action()`. `run()` should only decide whether to emit a diagnostic; `action()` should build the fix. This matters for performance because building the action can be expensive, and we should avoid doing it when no diagnostic is emitted.
+- Recursion. It's often completely unnecessary to write recursive functions, especially when you need to traverse node trees. There are existing utilities like `ancestors()`, `descendants()`, and `preorder()` that can cover the vast majority of cases.
 
 ## Common Query Types
 

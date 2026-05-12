@@ -16,4 +16,8 @@ $arg2:10,
 
 @include single-item-list((a,));
 @include single-item-list($arg: (a,));
+@include single-item-list($arg: (a));
 @include nested-parenthesized($arg: ((a)));
+@include container($foo:2*($bar));
+@include container($foo:($bar,$baz));
+@include container($foo:($bar+$baz,$qux*2));

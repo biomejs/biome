@@ -20,14 +20,14 @@ info: markdown/spec/example-46.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,5 @@
+@@ -1,7 +1,6 @@
  <!-- placeholder for continuous thematic breaks not being treated as yaml -->
  
 ----
 -
 +****
  ## foo
--
+ 
 ----
 +****
 ```
@@ -39,5 +39,6 @@ info: markdown/spec/example-46.md
 
 ****
 ## foo
+
 ****
 ```

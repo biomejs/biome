@@ -319,6 +319,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
+        "ScssIncludeUsingClause" => lang::ScssIncludeUsingClause::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifier" => lang::ScssInterpolatedIdentifier::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
             .iter()
@@ -571,7 +572,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssContentAtRule" => &[("arguments", 1)],
         "ScssDebugAtRule" => &[("value", 1)],
         "ScssEachAtRule" => &[("header", 1), ("block", 2)],
-        "ScssEachHeader" => &[("bindings", 0), ("iterable", 2)],
+        "ScssEachHeader" => &[("bindings", 0), ("values", 2)],
         "ScssElseClause" => &[("body", 2)],
         "ScssErrorAtRule" => &[("value", 1)],
         "ScssExpression" => &[("items", 0)],
@@ -593,7 +594,13 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssHideClause" => &[("members", 1)],
         "ScssIfAtRule" => &[("condition", 1), ("block", 2), ("else_clause", 3)],
         "ScssImportAtRule" => &[("imports", 1)],
-        "ScssIncludeAtRule" => &[("name", 1), ("arguments", 2), ("block", 3)],
+        "ScssIncludeAtRule" => &[
+            ("name", 1),
+            ("arguments", 2),
+            ("using_clause", 3),
+            ("block", 4),
+        ],
+        "ScssIncludeUsingClause" => &[("parameters", 1)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedNthValue" => &[("items", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],

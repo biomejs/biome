@@ -193,10 +193,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }

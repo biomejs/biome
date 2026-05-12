@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-23-flow-content.yml
+---
+# Input
+
+```yml
+- [ a, b ]
+- { a: b }
+- "a"
+- 'b'
+- c
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-- [a, b]
++- [ a, b ]
+ - { a: b }
+ - "a"
+-- "b"
+-- c
++- 'b'
++- c
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- [ a, b ]
+- { a: b }
+- "a"
+- 'b'
+- c```

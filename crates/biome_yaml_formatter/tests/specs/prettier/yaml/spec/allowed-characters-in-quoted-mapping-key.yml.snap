@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/allowed-characters-in-quoted-mapping-key.yml
+---
+# Input
+
+```yml
+"foo\nbar:baz\tx \\$%^&*()x": 23
+'x\ny:z\tx $%^&*()x': 24
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ "foo\nbar:baz\tx \\$%^&*()x": 23
+-'x\ny:z\tx $%^&*()x': 24
++'x\ny:z\tx $%^&*()x': 24
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+"foo\nbar:baz\tx \\$%^&*()x": 23
+'x\ny:z\tx $%^&*()x': 24```

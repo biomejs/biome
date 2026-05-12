@@ -1,0 +1,92 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+~~~ lang`with-backticks`
+fn main() {}
+~~~
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
+            l_fence: TRIPLE_TILDE@0..3 "~~~" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..24 " lang`with-backticks`" [] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..32 "fn main" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..34 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@34..37 " {}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                },
+            ],
+            r_fence_indent: MdIndentTokenList [],
+            r_fence: TRIPLE_TILDE@38..41 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@41..42 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@42..42 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..42
+  0: (empty)
+  1: MD_BLOCK_LIST@0..42
+    0: MD_FENCED_CODE_BLOCK@0..41
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: TRIPLE_TILDE@0..3 "~~~" [] []
+      2: MD_CODE_NAME_LIST@3..24
+        0: MD_TEXTUAL@3..24
+          0: MD_TEXTUAL_LITERAL@3..24 " lang`with-backticks`" [] []
+      3: MD_INLINE_ITEM_LIST@24..38
+        0: MD_TEXTUAL@24..25
+          0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
+        1: MD_TEXTUAL@25..32
+          0: MD_TEXTUAL_LITERAL@25..32 "fn main" [] []
+        2: MD_TEXTUAL@32..33
+          0: MD_TEXTUAL_LITERAL@32..33 "(" [] []
+        3: MD_TEXTUAL@33..34
+          0: MD_TEXTUAL_LITERAL@33..34 ")" [] []
+        4: MD_TEXTUAL@34..37
+          0: MD_TEXTUAL_LITERAL@34..37 " {}" [] []
+        5: MD_TEXTUAL@37..38
+          0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+      4: MD_INDENT_TOKEN_LIST@38..38
+      5: TRIPLE_TILDE@38..41 "~~~" [] []
+    1: MD_NEWLINE@41..42
+      0: NEWLINE@41..42 "\n" [] []
+  2: EOF@42..42 "" [] []
+
+```

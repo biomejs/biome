@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+transition text content
+<p>transition text content</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlContent {
+            value_token: HTML_LITERAL@0..23 "transition text content" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@23..25 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@25..26 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@27..50 "transition text content" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@52..53 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@53..54 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@54..55 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..55
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..54
+    0: HTML_CONTENT@0..23
+      0: HTML_LITERAL@0..23 "transition text content" [] []
+    1: HTML_ELEMENT@23..54
+      0: HTML_OPENING_ELEMENT@23..27
+        0: L_ANGLE@23..25 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@25..26
+          0: HTML_LITERAL@25..26 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@26..26
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..50
+        0: HTML_CONTENT@27..50
+          0: HTML_LITERAL@27..50 "transition text content" [] []
+      2: HTML_CLOSING_ELEMENT@50..54
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..53
+          0: HTML_LITERAL@52..53 "p" [] []
+        3: R_ANGLE@53..54 ">" [] []
+  4: EOF@54..55 "" [Newline("\n")] []
+
+```

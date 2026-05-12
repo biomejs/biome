@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/multi-level-mapping-indent.yml
+---
+# Input
+
+```yml
+a:
+  b:
+    c: d
+  e:
+    f: g
+h: i
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,4 +3,4 @@
+     c: d
+   e:
+     f: g
+-h: i
++h: i
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a:
+  b:
+    c: d
+  e:
+    f: g
+h: i```

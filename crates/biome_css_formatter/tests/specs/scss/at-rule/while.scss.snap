@@ -21,6 +21,21 @@ $gap:$gap - 0.25rem;
 @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1{
 }
 
+@while $very-very-very-very-very-very-long-var == 0 and $very-very-very-long-var == 0{
+}
+
+@while very-long-control-function-name($first-variable + $second-variable, $third-variable + $fourth-variable, $fifth-variable + $sixth-variable) {
+color: red;
+}
+
+@while ($first-variable, $second-variable, $third-variable, $fourth-variable, $fifth-variable, $sixth-variable) {
+color: red;
+}
+
+@while (first: $first-variable, second: $second-variable, third: $third-variable, fourth: $fourth-variable, fifth: $fifth-variable) {
+color: red;
+}
+
 ```
 
 
@@ -41,6 +56,43 @@ $gap:$gap - 0.25rem;
 @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
 	1
 {
+}
+
+@while $very-very-very-very-very-very-long-var ==
+	0 and
+	$very-very-very-long-var ==
+	0
+{
+}
+
+@while very-long-control-function-name(
+	$first-variable + $second-variable,
+	$third-variable + $fourth-variable,
+	$fifth-variable + $sixth-variable
+)
+{
+	color: red;
+}
+
+@while (
+	$first-variable,
+	$second-variable,
+	$third-variable,
+	$fourth-variable,
+	$fifth-variable,
+	$sixth-variable
+) {
+	color: red;
+}
+
+@while (
+	first: $first-variable,
+	second: $second-variable,
+	third: $third-variable,
+	fourth: $fourth-variable,
+	fifth: $fifth-variable
+) {
+	color: red;
 }
 
 ```

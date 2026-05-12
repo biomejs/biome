@@ -76,3 +76,28 @@
 		<UserPanel />
 	</template>
 </template>
+
+<template>
+	<span class="video-length">
+		{{ lengthDisplay }}
+	</span>
+	<span class="video-length">{{ lengthDisplay }}</span>
+</template>
+
+<template>
+	<span>
+		hello
+		world
+	</span>
+</template>
+
+<template>
+	<span>before {{ value }} after</span>
+</template>
+
+<template>
+	<span>
+		hello
+		<em>x</em>
+	</span>
+</template>

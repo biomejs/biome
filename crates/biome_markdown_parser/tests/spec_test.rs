@@ -177,10 +177,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 }
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }

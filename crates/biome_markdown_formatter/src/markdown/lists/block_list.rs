@@ -37,9 +37,22 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         }));
                     }
 
-                    node if node.is_newline() => {
-                        prev_content = PrevContentBlock::Other;
+                    node if node.is_any_header() => {
+                        prev_content = PrevContentBlock::Header;
                         joiner.entry(&node.format());
+                    }
+
+                    node if node.is_newline() => {
+                        if prev_content == PrevContentBlock::Header
+                            && iter.peek().is_some_and(|next| !next.is_newline())
+                        {
+                            let entry =
+                                format_with(|f| write!(f, [node.format(), hard_line_break()]));
+                            joiner.entry(&entry);
+                        } else {
+                            joiner.entry(&node.format());
+                        }
+                        prev_content = PrevContentBlock::Other;
                     }
 
                     AnyMdBlock::MdQuotePrefix(prefix)
@@ -82,16 +95,38 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
         // Single forward pass in document order
         let mut still_leading = true;
+        let mut prev_was_header = false;
         let content_count = node.len() - trailing_count;
-        for (index, node) in node.iter().enumerate() {
-            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = node {
+        let mut iter = node.iter().enumerate().peekable();
+        while let Some((index, node)) = iter.next() {
+            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
                 let is_leading = still_leading;
                 let is_trailing = index >= content_count;
-                joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                    should_remove: is_leading || is_trailing,
-                }));
+                if prev_was_header && !is_leading && !is_trailing {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: true,
+                    }));
+                    while iter.peek().is_some_and(|(_, next)| next.is_newline()) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true,
+                            }));
+                        }
+                    }
+                    joiner.entry(&empty_line());
+                } else {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: is_leading || is_trailing,
+                    }));
+                }
+                prev_was_header = false;
             } else {
                 still_leading = false;
+                prev_was_header = node.is_any_header();
                 joiner.entry(&node.format());
             }
         }
@@ -103,6 +138,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum PrevContentBlock {
     None,
+    Header,
     Paragraph,
     Other,
 }

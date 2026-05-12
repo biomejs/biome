@@ -1062,16 +1062,15 @@ fn handle_variable_declarator_comment(
 
     let enclosing = comment.enclosing_node();
     match enclosing.kind() {
-        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
+        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
             // Makes all comments preceding objects/arrays/templates or block comments leading comments of these nodes.
             // ```javascript
             // let a = // comment
             // { };
             // ```
-            if is_complex_value(following) || !comment.kind().is_line() {
+            if (is_complex_value(following) || !comment.kind().is_line()) => {
                 return CommentPlacement::leading(following.clone(), comment);
             }
-        }
         JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
             let variable_declarator = JsVariableDeclarator::unwrap_cast(enclosing.clone());
 

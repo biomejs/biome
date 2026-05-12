@@ -1,17 +1,11 @@
 use crate::prelude::*;
-use crate::utils::scss_each::format_after_each_in;
+use crate::utils::scss_each::FormatGapAfterEachIn;
 use biome_css_syntax::{
-    AnyScssExpressionItem, CssSyntaxNode, CssSyntaxToken, ScssEachBindingList, ScssEachHeader,
-    ScssEachHeaderFields, ScssExpression, ScssListExpression, single_expression_item,
+    CssSyntaxToken, ScssEachBindingList, ScssEachHeader, ScssEachHeaderFields, ScssEachValueList,
 };
-use biome_formatter::{FormatOwnedWithRule, FormatRule, format_args, write};
+use biome_formatter::{format_args, write};
 use biome_rowan::AstSeparatedList;
 
-/// Formats the `@each $item in ...` header.
-///
-/// Direct comma lists use a custom fill layout so `@each $a, $b in x, y`
-/// wraps as one sequence. Other iterables, such as `$items` or `(a: b)`, use
-/// their own formatter.
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssEachHeader;
 impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
@@ -19,231 +13,211 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
         let ScssEachHeaderFields {
             bindings,
             in_token,
-            iterable,
+            values,
         } = node.as_fields();
 
         let in_token = in_token?;
-        let iterable = iterable?;
+        let binding_count = bindings.len();
+        let value_count = values.len();
 
-        // Prettier treats `@each $a, $b in x, y` as one fill sequence across
-        // bindings, `in`, and list items. Map iterables stay on the normal
-        // expression path so the map owns its own layout.
-        if bindings.len() > 0 && is_direct_list_iterable(&iterable) {
+        if value_count == 0 {
             return write!(
                 f,
-                [FormatOwnedWithRule::new(
-                    iterable,
-                    FormatScssEachIterable::new(&bindings, &in_token)
-                )]
+                [
+                    bindings.format(),
+                    soft_line_break_or_space(),
+                    in_token.format()
+                ]
+            );
+        }
+
+        if value_count == 1 {
+            let gap_before_in = format_with(|f| {
+                if binding_count > 0 {
+                    write!(f, [space()])
+                } else {
+                    write!(f, [soft_line_break_or_space()])
+                }
+            });
+
+            return write!(
+                f,
+                [group(&format_args![
+                    bindings.format(),
+                    gap_before_in,
+                    in_token.format(),
+                    FormatGapAfterEachIn::new(&in_token, values.syntax()),
+                    values.format()
+                ])]
             );
         }
 
         write!(
             f,
-            [
-                bindings.format(),
-                space(),
-                in_token.format(),
-                format_after_each_in(&in_token, iterable.syntax()),
-                iterable.format()
-            ]
+            [FormatScssEachMultiValueHeader {
+                bindings: &bindings,
+                in_token: &in_token,
+                values: &values,
+            }]
         )
     }
 }
 
-/// Formats the direct list in `@each $x in a, b` together with the header.
-struct FormatScssEachIterable<'a> {
+/// Formats multi-value `@each` headers as one fill sequence.
+///
+/// Simple headers can call `values.format()` because no value needs to share a
+/// fill entry with `in`. With multiple values, Prettier keeps the first value
+/// with the final binding and `in`:
+///
+/// ```scss
+/// @each $animal, $color, $cursor in (puma, black, default),
+///   (sea-slug, blue, pointer), (egret, white, move)
+/// {
+/// }
+/// ```
+///
+/// A nested `values.format()` would make all values one parent fill entry, so
+/// wrapping would move to the bindings instead of the value list.
+struct FormatScssEachMultiValueHeader<'a> {
     bindings: &'a ScssEachBindingList,
     in_token: &'a CssSyntaxToken,
+    values: &'a ScssEachValueList,
 }
 
-impl<'a> FormatScssEachIterable<'a> {
-    fn new(bindings: &'a ScssEachBindingList, in_token: &'a CssSyntaxToken) -> Self {
-        Self { bindings, in_token }
-    }
-}
-
-impl FormatRule<ScssExpression> for FormatScssEachIterable<'_> {
-    type Context = CssFormatContext;
-
-    fn fmt(&self, node: &ScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<ScssExpression>::fmt(self, node, f)
-    }
-}
-
-impl FormatNodeRule<ScssExpression> for FormatScssEachIterable<'_> {
-    fn fmt_fields(&self, node: &ScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        match single_expression_item(node) {
-            Some(AnyScssExpressionItem::ScssListExpression(list)) => write!(
+impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let bindings = self.bindings;
+        let in_token = self.in_token;
+        let values = self.values;
+        let binding_count = bindings.len();
+        let mut value_elements = values.elements();
+        let Some(first_value) = value_elements.next() else {
+            return write!(
                 f,
-                [FormatOwnedWithRule::new(
-                    list,
-                    FormatScssEachIterableList::new(self.bindings, self.in_token, node.syntax())
-                )]
-            ),
-            _ => Ok(()),
+                [
+                    bindings.format(),
+                    soft_line_break_or_space(),
+                    in_token.format()
+                ]
+            );
+        };
+        let first_value_node = first_value.node()?;
+        let first_value_syntax = first_value_node.syntax();
+
+        if binding_count == 0 {
+            let separator = soft_line_break_or_space();
+            let mut fill = f.fill();
+
+            fill.entry(
+                &separator,
+                &group(&format_args![
+                    bindings.format(),
+                    soft_line_break_or_space(),
+                    in_token.format(),
+                    FormatGapAfterEachIn::new(in_token, first_value_syntax),
+                    format_leading_comments(values.syntax()),
+                    first_value_node.format(),
+                    first_value.trailing_separator()?.format()
+                ]),
+            );
+
+            for value in value_elements {
+                fill.entry(
+                    &separator,
+                    &format_args![value.node()?.format(), value.trailing_separator()?.format()],
+                );
+            }
+
+            return fill.finish();
         }
-    }
 
-    fn fmt_leading_comments(
-        &self,
-        _node: &ScssExpression,
-        _f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        // Iterable comments are printed after `in`.
-        Ok(())
-    }
-}
+        let Some(second_value) = value_elements.next() else {
+            return write!(
+                f,
+                [group(&format_args![
+                    bindings.format(),
+                    space(),
+                    in_token.format(),
+                    FormatGapAfterEachIn::new(in_token, first_value_syntax),
+                    format_leading_comments(values.syntax()),
+                    first_value_node.format(),
+                    first_value.trailing_separator()?.format()
+                ])]
+            );
+        };
 
-/// Formats `@each $x in a, b` so bindings and list items share one fill group.
-struct FormatScssEachIterableList<'a> {
-    bindings: &'a ScssEachBindingList,
-    in_token: &'a CssSyntaxToken,
-    comment_owner: &'a CssSyntaxNode,
-}
+        let separator = soft_line_break_or_space();
+        let has_value_list_line_comment = f
+            .comments()
+            .leading_comments(values.syntax())
+            .iter()
+            .any(|comment| comment.kind().is_line());
+        let mut fill = f.fill();
+        let mut break_after_first_value = false;
 
-impl<'a> FormatScssEachIterableList<'a> {
-    fn new(
-        bindings: &'a ScssEachBindingList,
-        in_token: &'a CssSyntaxToken,
-        comment_owner: &'a CssSyntaxNode,
-    ) -> Self {
-        Self {
-            bindings,
-            in_token,
-            comment_owner,
-        }
-    }
-}
+        for (index, binding) in bindings.elements().enumerate() {
+            if index + 1 == binding_count {
+                // The final binding owns `in` and the first value.
+                if has_value_list_line_comment {
+                    // `@each $x in // list\n a, b` keeps the comment after `in`.
+                    fill.entry(
+                        &separator,
+                        &group(&indent(&format_args![
+                            binding.node()?.format(),
+                            hard_line_break(),
+                            in_token.format(),
+                            space(),
+                            format_leading_comments(values.syntax())
+                        ])),
+                    );
+                    fill.entry(
+                        &separator,
+                        &format_args![
+                            first_value_node.format(),
+                            first_value.trailing_separator()?.format()
+                        ],
+                    );
+                    break_after_first_value = true;
+                    continue;
+                }
 
-impl FormatRule<ScssListExpression> for FormatScssEachIterableList<'_> {
-    type Context = CssFormatContext;
-
-    fn fmt(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<ScssListExpression>::fmt(self, node, f)
-    }
-}
-
-impl FormatNodeRule<ScssListExpression> for FormatScssEachIterableList<'_> {
-    fn fmt_fields(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        write_each_list_header(self.bindings, self.in_token, self.comment_owner, node, f)
-    }
-
-    fn fmt_leading_comments(
-        &self,
-        _node: &ScssListExpression,
-        _f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        // The `@each` fill group prints list comments after `in`.
-        Ok(())
-    }
-}
-
-fn is_direct_list_iterable(iterable: &ScssExpression) -> bool {
-    single_expression_item(iterable).is_some_and(|item| item.as_scss_list_expression().is_some())
-}
-
-/// Formats `@each $x, $y in (a, b), (c, d)` as one fill group.
-fn write_each_list_header(
-    bindings: &ScssEachBindingList,
-    in_token: &CssSyntaxToken,
-    comment_owner: &CssSyntaxNode,
-    iterable: &ScssListExpression,
-    f: &mut CssFormatter,
-) -> FormatResult<()> {
-    let elements = iterable.elements();
-    let mut iterable_elements = elements.elements();
-    let Some(first_iterable) = iterable_elements.next() else {
-        return write!(
-            f,
-            [
-                bindings.format(),
-                soft_line_break_or_space(),
-                in_token.format()
-            ]
-        );
-    };
-    let first_iterable_node = first_iterable.node()?;
-    let first_iterable_separator = first_iterable.trailing_separator()?;
-
-    let separator = soft_line_break_or_space();
-    let has_iterable_line_comment = f
-        .comments()
-        .leading_comments(comment_owner)
-        .iter()
-        .any(|comment| comment.kind().is_line());
-    let mut fill = f.fill();
-    let binding_count = bindings.len();
-    let mut break_after_first_iterable = false;
-
-    for (index, binding) in bindings.elements().enumerate() {
-        if index + 1 == binding_count {
-            // The final binding owns `in` and the first iterable item.
-            if has_iterable_line_comment {
-                // `@each $x in // list\n a, b` must break before `a`.
                 fill.entry(
                     &separator,
                     &group(&indent(&format_args![
                         binding.node()?.format(),
-                        hard_line_break(),
+                        soft_line_break_or_space(),
                         in_token.format(),
-                        space(),
-                        format_leading_comments(comment_owner)
+                        FormatGapAfterEachIn::new(in_token, first_value_syntax),
+                        format_leading_comments(values.syntax()),
+                        first_value_node.format(),
+                        first_value.trailing_separator()?.format()
                     ])),
                 );
-
+            } else {
                 fill.entry(
                     &separator,
                     &format_args![
-                        first_iterable_node.format(),
-                        first_iterable_separator.format()
+                        binding.node()?.format(),
+                        binding.trailing_separator()?.format()
                     ],
                 );
-                break_after_first_iterable = true;
-                continue;
             }
+        }
+
+        for value in std::iter::once(second_value).chain(value_elements) {
+            let value_separator = if break_after_first_value {
+                break_after_first_value = false;
+                hard_line_break()
+            } else {
+                separator
+            };
 
             fill.entry(
-                &separator,
-                &group(&indent(&format_args![
-                    binding.node()?.format(),
-                    soft_line_break_or_space(),
-                    in_token.format(),
-                    format_after_each_in(in_token, first_iterable_node.syntax()),
-                    format_leading_comments(comment_owner),
-                    format_args![
-                        first_iterable_node.format(),
-                        first_iterable_separator.format()
-                    ]
-                ])),
-            );
-        } else {
-            fill.entry(
-                &separator,
-                &format_args![
-                    binding.node()?.format(),
-                    binding.trailing_separator()?.format()
-                ],
+                &value_separator,
+                &format_args![value.node()?.format(), value.trailing_separator()?.format()],
             );
         }
+
+        fill.finish()
     }
-
-    for iterable in iterable_elements {
-        let item_separator = if break_after_first_iterable {
-            break_after_first_iterable = false;
-            hard_line_break()
-        } else {
-            separator
-        };
-
-        fill.entry(
-            &item_separator,
-            &format_args![
-                iterable.node()?.format(),
-                iterable.trailing_separator()?.format()
-            ],
-        );
-    }
-
-    fill.finish()
 }

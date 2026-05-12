@@ -13,9 +13,10 @@ use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::lookup_byte;
 
-use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
-
-const MAX_ORDERED_LIST_MARKER_DIGITS: usize = 9;
+use crate::syntax::{
+    MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
+    MIN_HARD_BREAK_TRAILING_SPACES, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES,
+};
 
 /// Lexer context for different markdown parsing modes
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -587,7 +588,9 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // Check for hard line break: 2+ spaces followed by newline
-        if space_count >= 2 && matches!(self.current_byte(), Some(b'\n' | b'\r')) {
+        if space_count >= MIN_HARD_BREAK_TRAILING_SPACES
+            && matches!(self.current_byte(), Some(b'\n' | b'\r'))
+        {
             // Consume the newline as part of the hard line break
             match self.current_byte() {
                 Some(b'\n') => {
@@ -926,7 +929,7 @@ impl<'src> MarkdownLexer<'src> {
         // Check if this is a valid thematic break: 3+ of same char, only whitespace between,
         // followed by newline or EOF, AND must be at line start (CommonMark requirement)
         if self.after_newline
-            && count >= 3
+            && count >= MIN_THEMATIC_BREAK_RUN
             && matches!(self.current_byte(), Some(b'\n' | b'\r') | None)
         {
             return MD_THEMATIC_BREAK_LITERAL;
@@ -993,7 +996,7 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
                 digit_count += 1;
                 // CommonMark limits to 9 digits max
-                if digit_count > 9 {
+                if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                     // Too many digits, not a valid marker
                     self.position = start_position;
                     return self.consume_textual(MarkdownLexContext::Regular);
@@ -1097,7 +1100,7 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // At line start with 3+ backticks: fenced code block
-        if self.after_newline && count >= 3 {
+        if self.after_newline && count >= MIN_FENCE_RUN_LENGTH {
             self.advance(count);
             return TRIPLE_BACKTICK;
         }
@@ -1122,7 +1125,7 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // At line start with 3+ tildes: fenced code block
-        if self.after_newline && count >= 3 {
+        if self.after_newline && count >= MIN_FENCE_RUN_LENGTH {
             self.advance(count);
             return TRIPLE_TILDE;
         }
@@ -1297,7 +1300,7 @@ impl<'src> MarkdownLexer<'src> {
 
         while pos < bytes.len() && bytes[pos].is_ascii_digit() {
             digit_count += 1;
-            if digit_count > 9 {
+            if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                 return false;
             }
             pos += 1;
@@ -1367,7 +1370,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Check if current position starts a potential hard line break pattern.
-    /// Returns true if there are 2+ spaces followed by a newline.
+    /// Returns true if enough trailing spaces are followed by a newline.
     fn is_potential_hard_line_break(&self) -> bool {
         // Must have at least one space at current position (already checked by caller)
         let mut offset = 0;
@@ -1379,9 +1382,9 @@ impl<'src> MarkdownLexer<'src> {
             offset += 1;
         }
 
-        if space_count >= 2 {
-            // A hard line break requires 2+ spaces followed by a newline
-            // (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
+        if space_count >= MIN_HARD_BREAK_TRAILING_SPACES {
+            // A hard line break requires enough trailing spaces followed by a
+            // newline (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
             // Trailing spaces at EOF are never a valid hard line break,
             // but they must be split from the preceding text so the
             // formatter can strip them without idempotency issues.

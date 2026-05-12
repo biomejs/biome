@@ -7973,6 +7973,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssIncludeUsingClause>
+    for crate::scss::auxiliary::include_using_clause::FormatScssIncludeUsingClause
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssIncludeUsingClause,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssIncludeUsingClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssIncludeUsingClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssIncludeUsingClause,
+        crate::scss::auxiliary::include_using_clause::FormatScssIncludeUsingClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::include_using_clause::FormatScssIncludeUsingClause::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeUsingClause {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssIncludeUsingClause,
+        crate::scss::auxiliary::include_using_clause::FormatScssIncludeUsingClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::include_using_clause::FormatScssIncludeUsingClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssInterpolatedIdentifier>
     for crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier
 {
@@ -10778,6 +10816,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachBindingList {
         FormatOwnedWithRule::new(
             self,
             crate::scss::lists::each_binding_list::FormatScssEachBindingList::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssEachValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssEachValueList,
+        crate::scss::lists::each_value_list::FormatScssEachValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::lists::each_value_list::FormatScssEachValueList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssEachValueList,
+        crate::scss::lists::each_value_list::FormatScssEachValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::lists::each_value_list::FormatScssEachValueList::default(),
         )
     }
 }

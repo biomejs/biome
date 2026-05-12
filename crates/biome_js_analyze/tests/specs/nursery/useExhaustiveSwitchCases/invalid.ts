@@ -114,3 +114,9 @@ function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
 			return 1;
 	}
 }
+
+function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
+	const wrappedSwitch = { kind: "wrapped" as const };
+	switch (wrappedSwitch.kind) {
+	}
+}

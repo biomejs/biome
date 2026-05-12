@@ -3229,14 +3229,14 @@ pub fn scss_each_at_rule(
 pub fn scss_each_header(
     bindings: ScssEachBindingList,
     in_token: SyntaxToken,
-    iterable: ScssExpression,
+    values: ScssEachValueList,
 ) -> ScssEachHeader {
     ScssEachHeader::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_HEADER,
         [
             Some(SyntaxElement::Node(bindings.into_syntax())),
             Some(SyntaxElement::Token(in_token)),
-            Some(SyntaxElement::Node(iterable.into_syntax())),
+            Some(SyntaxElement::Node(values.into_syntax())),
         ],
     ))
 }
@@ -3530,6 +3530,7 @@ pub fn scss_include_at_rule(
         include_token,
         name,
         arguments: None,
+        using_clause: None,
         block: None,
         semicolon_token: None,
     }
@@ -3538,12 +3539,17 @@ pub struct ScssIncludeAtRuleBuilder {
     include_token: SyntaxToken,
     name: AnyScssIncludeTarget,
     arguments: Option<ScssIncludeArgumentList>,
+    using_clause: Option<ScssIncludeUsingClause>,
     block: Option<CssDeclarationOrRuleBlock>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl ScssIncludeAtRuleBuilder {
     pub fn with_arguments(mut self, arguments: ScssIncludeArgumentList) -> Self {
         self.arguments = Some(arguments);
+        self
+    }
+    pub fn with_using_clause(mut self, using_clause: ScssIncludeUsingClause) -> Self {
+        self.using_clause = Some(using_clause);
         self
     }
     pub fn with_block(mut self, block: CssDeclarationOrRuleBlock) -> Self {
@@ -3562,6 +3568,8 @@ impl ScssIncludeAtRuleBuilder {
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 self.arguments
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.using_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.block
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
@@ -3569,6 +3577,18 @@ impl ScssIncludeAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn scss_include_using_clause(
+    using_token: SyntaxToken,
+    parameters: ScssParameterList,
+) -> ScssIncludeUsingClause {
+    ScssIncludeUsingClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INCLUDE_USING_CLAUSE,
+        [
+            Some(SyntaxElement::Token(using_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+        ],
+    ))
 }
 pub fn scss_interpolated_identifier(
     items: ScssInterpolatedIdentifierPartList,
@@ -5075,6 +5095,27 @@ where
     let length = items.len() + separators.len();
     ScssEachBindingList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_each_value_list<I, S>(items: I, separators: S) -> ScssEachValueList
+where
+    I: IntoIterator<Item = ScssExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssEachValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_VALUE_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

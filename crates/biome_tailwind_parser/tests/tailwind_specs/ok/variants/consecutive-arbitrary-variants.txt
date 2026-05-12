@@ -1,0 +1,1 @@
+[@supports(display:grid)]:grid [&:not(:first-child)]:mt-4 [&[data-active]]:bg-blue-500 hover:[&_p]:underline

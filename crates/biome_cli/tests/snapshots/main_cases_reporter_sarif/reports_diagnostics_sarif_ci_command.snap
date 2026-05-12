@@ -294,7 +294,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "The imports and exports are not sorted."
+            "text": "Sort these imports."
           },
           "locations": [
             {
@@ -305,8 +305,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
                 "region": {
                   "startLine": 1,
                   "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 21
+                  "endLine": 2,
+                  "endColumn": 33
                 }
               }
             }
@@ -464,7 +464,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "The imports and exports are not sorted."
+            "text": "Sort these imports."
           },
           "locations": [
             {
@@ -475,8 +475,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
                 "region": {
                   "startLine": 1,
                   "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 21
+                  "endLine": 2,
+                  "endColumn": 33
                 }
               }
             }

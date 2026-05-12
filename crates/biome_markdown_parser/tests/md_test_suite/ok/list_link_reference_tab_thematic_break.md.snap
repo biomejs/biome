@@ -1,0 +1,146 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- [a]: /url
+	---
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdLinkReferenceDefinition {
+                            indent: MdIndentTokenList [],
+                            l_brack_token: L_BRACK@2..3 "[" [] [],
+                            label: MdLinkLabel {
+                                content: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@3..4 "a" [] [],
+                                    },
+                                ],
+                            },
+                            r_brack_token: R_BRACK@4..5 "]" [] [],
+                            colon_token: COLON@5..6 ":" [] [],
+                            destination: MdLinkDestination {
+                                content: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@6..7 " " [] [],
+                                    },
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@7..11 "/url" [] [],
+                                    },
+                                ],
+                            },
+                            title: missing (optional),
+                        },
+                        MdParagraph {
+                            list: MdInlineItemList [],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@11..12 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@12..13 "\t" [] [],
+                                },
+                            ],
+                        },
+                        MdThematicBreakBlock {
+                            parts: MdThematicBreakPartList [
+                                MdThematicBreakChar {
+                                    value: MINUS@13..14 "-" [] [],
+                                },
+                                MdThematicBreakChar {
+                                    value: MINUS@14..15 "-" [] [],
+                                },
+                                MdThematicBreakChar {
+                                    value: MINUS@15..16 "-" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@17..17 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..17
+  0: (empty)
+  1: MD_BLOCK_LIST@0..17
+    0: MD_BULLET_LIST_ITEM@0..16
+      0: MD_BULLET_LIST@0..16
+        0: MD_BULLET@0..16
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..16
+            0: MD_LINK_REFERENCE_DEFINITION@2..11
+              0: MD_INDENT_TOKEN_LIST@2..2
+              1: L_BRACK@2..3 "[" [] []
+              2: MD_LINK_LABEL@3..4
+                0: MD_INLINE_ITEM_LIST@3..4
+                  0: MD_TEXTUAL@3..4
+                    0: MD_TEXTUAL_LITERAL@3..4 "a" [] []
+              3: R_BRACK@4..5 "]" [] []
+              4: COLON@5..6 ":" [] []
+              5: MD_LINK_DESTINATION@6..11
+                0: MD_INLINE_ITEM_LIST@6..11
+                  0: MD_TEXTUAL@6..7
+                    0: MD_TEXTUAL_LITERAL@6..7 " " [] []
+                  1: MD_TEXTUAL@7..11
+                    0: MD_TEXTUAL_LITERAL@7..11 "/url" [] []
+              6: (empty)
+            1: MD_PARAGRAPH@11..11
+              0: MD_INLINE_ITEM_LIST@11..11
+              1: (empty)
+            2: MD_NEWLINE@11..12
+              0: NEWLINE@11..12 "\n" [] []
+            3: MD_CONTINUATION_INDENT@12..13
+              0: MD_INDENT_TOKEN_LIST@12..13
+                0: MD_INDENT_TOKEN@12..13
+                  0: MD_INDENT_CHAR@12..13 "\t" [] []
+            4: MD_THEMATIC_BREAK_BLOCK@13..16
+              0: MD_THEMATIC_BREAK_PART_LIST@13..16
+                0: MD_THEMATIC_BREAK_CHAR@13..14
+                  0: MINUS@13..14 "-" [] []
+                1: MD_THEMATIC_BREAK_CHAR@14..15
+                  0: MINUS@14..15 "-" [] []
+                2: MD_THEMATIC_BREAK_CHAR@15..16
+                  0: MINUS@15..16 "-" [] []
+    1: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+  2: EOF@17..17 "" [] []
+
+```

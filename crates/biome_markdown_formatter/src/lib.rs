@@ -7,6 +7,7 @@ mod prelude;
 mod shared;
 mod trivia;
 mod verbatim;
+pub(crate) mod words;
 
 pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};

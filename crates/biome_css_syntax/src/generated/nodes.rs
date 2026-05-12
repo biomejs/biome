@@ -9410,7 +9410,7 @@ impl ScssEachHeader {
         ScssEachHeaderFields {
             bindings: self.bindings(),
             in_token: self.in_token(),
-            iterable: self.iterable(),
+            values: self.values(),
         }
     }
     pub fn bindings(&self) -> ScssEachBindingList {
@@ -9419,8 +9419,8 @@ impl ScssEachHeader {
     pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn iterable(&self) -> SyntaxResult<ScssExpression> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn values(&self) -> ScssEachValueList {
+        support::list(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssEachHeader {
@@ -9435,7 +9435,7 @@ impl Serialize for ScssEachHeader {
 pub struct ScssEachHeaderFields {
     pub bindings: ScssEachBindingList,
     pub in_token: SyntaxResult<SyntaxToken>,
-    pub iterable: SyntaxResult<ScssExpression>,
+    pub values: ScssEachValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssElseClause {
@@ -10071,6 +10071,7 @@ impl ScssIncludeAtRule {
             include_token: self.include_token(),
             name: self.name(),
             arguments: self.arguments(),
+            using_clause: self.using_clause(),
             block: self.block(),
             semicolon_token: self.semicolon_token(),
         }
@@ -10084,11 +10085,14 @@ impl ScssIncludeAtRule {
     pub fn arguments(&self) -> Option<ScssIncludeArgumentList> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn block(&self) -> Option<CssDeclarationOrRuleBlock> {
+    pub fn using_clause(&self) -> Option<ScssIncludeUsingClause> {
         support::node(&self.syntax, 3usize)
     }
+    pub fn block(&self) -> Option<CssDeclarationOrRuleBlock> {
+        support::node(&self.syntax, 4usize)
+    }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 4usize)
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for ScssIncludeAtRule {
@@ -10104,8 +10108,49 @@ pub struct ScssIncludeAtRuleFields {
     pub include_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyScssIncludeTarget>,
     pub arguments: Option<ScssIncludeArgumentList>,
+    pub using_clause: Option<ScssIncludeUsingClause>,
     pub block: Option<CssDeclarationOrRuleBlock>,
     pub semicolon_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssIncludeUsingClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssIncludeUsingClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssIncludeUsingClauseFields {
+        ScssIncludeUsingClauseFields {
+            using_token: self.using_token(),
+            parameters: self.parameters(),
+        }
+    }
+    pub fn using_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<ScssParameterList> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssIncludeUsingClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssIncludeUsingClauseFields {
+    pub using_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<ScssParameterList>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolatedIdentifier {
@@ -15613,6 +15658,7 @@ impl AnyCssUrlModifier {
 pub enum AnyCssUrlValue {
     CssString(CssString),
     CssUrlValueRaw(CssUrlValueRaw),
+    ScssExpression(ScssExpression),
     ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssUrlValue {
@@ -15625,6 +15671,12 @@ impl AnyCssUrlValue {
     pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
         match &self {
             Self::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -27765,7 +27817,7 @@ impl std::fmt::Debug for ScssEachHeader {
             f.debug_struct("ScssEachHeader")
                 .field("bindings", &self.bindings())
                 .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .field("values", &self.values())
                 .finish()
         } else {
             f.debug_struct("ScssEachHeader").finish()
@@ -28524,6 +28576,10 @@ impl std::fmt::Debug for ScssIncludeAtRule {
                     "arguments",
                     &support::DebugOptionalElement(self.arguments()),
                 )
+                .field(
+                    "using_clause",
+                    &support::DebugOptionalElement(self.using_clause()),
+                )
                 .field("block", &support::DebugOptionalElement(self.block()))
                 .field(
                     "semicolon_token",
@@ -28544,6 +28600,57 @@ impl From<ScssIncludeAtRule> for SyntaxNode {
 }
 impl From<ScssIncludeAtRule> for SyntaxElement {
     fn from(n: ScssIncludeAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssIncludeUsingClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INCLUDE_USING_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INCLUDE_USING_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssIncludeUsingClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssIncludeUsingClause")
+                .field(
+                    "using_token",
+                    &support::DebugSyntaxResult(self.using_token()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .finish()
+        } else {
+            f.debug_struct("ScssIncludeUsingClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssIncludeUsingClause> for SyntaxNode {
+    fn from(n: ScssIncludeUsingClause) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssIncludeUsingClause> for SyntaxElement {
+    fn from(n: ScssIncludeUsingClause) -> Self {
         n.syntax.into()
     }
 }
@@ -40183,6 +40290,11 @@ impl From<CssUrlValueRaw> for AnyCssUrlValue {
         Self::CssUrlValueRaw(node)
     }
 }
+impl From<ScssExpression> for AnyCssUrlValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssUrlValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -40192,17 +40304,19 @@ impl AstNode for AnyCssUrlValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET
         .union(CssUrlValueRaw::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_INTERPOLATED_STRING
+            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_EXPRESSION | SCSS_INTERPOLATED_STRING
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_VALUE_RAW => Self::CssUrlValueRaw(CssUrlValueRaw { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -40214,6 +40328,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.syntax(),
             Self::CssUrlValueRaw(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
@@ -40221,6 +40336,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlValueRaw(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -40230,6 +40346,7 @@ impl std::fmt::Debug for AnyCssUrlValue {
         match self {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -40239,6 +40356,7 @@ impl From<AnyCssUrlValue> for SyntaxNode {
         match n {
             AnyCssUrlValue::CssString(it) => it.into_syntax(),
             AnyCssUrlValue::CssUrlValueRaw(it) => it.into_syntax(),
+            AnyCssUrlValue::ScssExpression(it) => it.into_syntax(),
             AnyCssUrlValue::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -44064,6 +44182,11 @@ impl std::fmt::Display for ScssIncludeArgumentList {
     }
 }
 impl std::fmt::Display for ScssIncludeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssIncludeUsingClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -49375,6 +49498,88 @@ impl IntoIterator for ScssEachBindingList {
 impl IntoIterator for &ScssEachBindingList {
     type Item = SyntaxResult<ScssVariable>;
     type IntoIter = AstSeparatedListNodesIterator<Language, ScssVariable>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssEachValueList {
+    syntax_list: SyntaxList,
+}
+impl ScssEachValueList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssEachValueList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EACH_VALUE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EACH_VALUE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssEachValueList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for ScssEachValueList {
+    type Language = Language;
+    type Node = ScssExpression;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssEachValueList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssEachValueList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for ScssEachValueList {
+    type Item = SyntaxResult<ScssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &ScssEachValueList {
+    type Item = SyntaxResult<ScssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssExpression>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

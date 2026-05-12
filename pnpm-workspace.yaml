@@ -8,3 +8,9 @@ packages:
   - "packages/@biomejs/*"
 ignoredOptionalDependencies:
   - "@biomejs/cli*-"
+# three days
+minimumReleaseAge: 4320
+allowBuilds:
+  dprint: true
+  esbuild: false
+  tombi: true

@@ -1037,6 +1037,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssIncludeAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INCLUDE_USING_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssIncludeUsingClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER => {
                     let $pattern =
                         unsafe { $crate::ScssInterpolatedIdentifier::new_unchecked(node) };
@@ -1558,6 +1562,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_EACH_BINDING_LIST => {
                     let $pattern = unsafe { $crate::ScssEachBindingList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_EACH_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::ScssEachValueList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => {

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/include.scss
+info: scss/at-rule/include.scss
 ---
 
 # Input
@@ -21,6 +21,10 @@ $args...
 $radius:4px
 );
 
+@include button using($value){color:$value;}
+
+@include card($radius:4px)using($value,$fallback){color:$value;background:$fallback;}
+
 @include hover{
 color:red;
 }
@@ -38,6 +42,15 @@ color:red;
 @include size($width, $height: $width, $args...);
 
 @include library.button($radius: 4px);
+
+@include button using ($value) {
+	color: $value;
+}
+
+@include card($radius: 4px) using ($value, $fallback) {
+	color: $value;
+	background: $fallback;
+}
 
 @include hover {
 	color: red;

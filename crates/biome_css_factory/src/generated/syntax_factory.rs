@@ -6636,7 +6636,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && ScssExpression::can_cast(element.kind())
+                    && ScssEachValueList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7123,7 +7123,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_INCLUDE_AT_RULE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![include]
@@ -7141,6 +7141,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && ScssIncludeArgumentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssIncludeUsingClause::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7167,6 +7174,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_INCLUDE_AT_RULE, children)
+            }
+            SCSS_INCLUDE_USING_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![using]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssParameterList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INCLUDE_USING_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INCLUDE_USING_CLAUSE, children)
             }
             SCSS_INTERPOLATED_IDENTIFIER => {
                 let mut elements = (&children).into_iter();
@@ -8966,6 +8999,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 ScssVariable::can_cast,
                 T ! [,],
                 false,
+            ),
+            SCSS_EACH_VALUE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                ScssExpression::can_cast,
+                T ! [,],
+                true,
             ),
             SCSS_EXPRESSION_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyScssExpressionItem::can_cast)

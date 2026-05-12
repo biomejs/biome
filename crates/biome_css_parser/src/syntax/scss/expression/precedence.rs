@@ -51,11 +51,7 @@ pub(super) fn parse_scss_binary_expression(
         Absent => return Absent,
     };
 
-    loop {
-        let Some(prec) = scss_binary_precedence(p) else {
-            break;
-        };
-
+    while let Some(prec) = scss_binary_precedence(p) {
         if prec < min_prec {
             break;
         }

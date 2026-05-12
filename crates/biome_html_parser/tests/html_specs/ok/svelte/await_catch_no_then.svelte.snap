@@ -54,9 +54,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@43..48 "catch" [] [],
+                    catch_token: CATCH_KW@43..49 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@48..54 " error" [] [],
+                        html_literal_token: HTML_LITERAL@49..54 "error" [] [],
                     },
                     r_curly_token: R_CURLY@54..55 "}" [] [],
                     children: HtmlElementList [
@@ -136,9 +136,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@40..106
         0: SVELTE_AWAIT_CATCH_BLOCK@40..106
           0: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] []
-          1: CATCH_KW@43..48 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@48..54
-            0: HTML_LITERAL@48..54 " error" [] []
+          1: CATCH_KW@43..49 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@49..54
+            0: HTML_LITERAL@49..54 "error" [] []
           3: R_CURLY@54..55 "}" [] []
           4: HTML_ELEMENT_LIST@55..106
             0: HTML_ELEMENT@55..106

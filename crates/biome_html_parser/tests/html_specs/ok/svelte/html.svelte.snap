@@ -35,9 +35,9 @@ HtmlRoot {
             children: HtmlElementList [
                 SvelteHtmlBlock {
                     sv_curly_at_token: SV_CURLY_AT@9..13 "{@" [Newline("\n"), Whitespace("\t")] [],
-                    html_token: HTML_KW@13..17 "html" [] [],
+                    html_token: HTML_KW@13..18 "html" [] [Whitespace(" ")],
                     expression: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@17..25 " content" [] [],
+                        html_literal_token: HTML_LITERAL@18..25 "content" [] [],
                     },
                     r_curly_token: R_CURLY@25..26 "}" [] [],
                 },
@@ -53,9 +53,9 @@ HtmlRoot {
         },
         SvelteHtmlBlock {
             sv_curly_at_token: SV_CURLY_AT@37..41 "{@" [Newline("\n"), Newline("\n")] [],
-            html_token: HTML_KW@41..45 "html" [] [],
+            html_token: HTML_KW@41..46 "html" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@45..53 " '<div>'" [] [],
+                html_literal_token: HTML_LITERAL@46..53 "'<div>'" [] [],
             },
             r_curly_token: R_CURLY@53..54 "}" [] [],
         },
@@ -64,9 +64,9 @@ HtmlRoot {
         },
         SvelteHtmlBlock {
             sv_curly_at_token: SV_CURLY_AT@61..63 "{@" [] [],
-            html_token: HTML_KW@63..67 "html" [] [],
+            html_token: HTML_KW@63..68 "html" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@67..76 " '</div>'" [] [],
+                html_literal_token: HTML_LITERAL@68..76 "'</div>'" [] [],
             },
             r_curly_token: R_CURLY@76..77 "}" [] [],
         },
@@ -93,9 +93,9 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@9..26
         0: SVELTE_HTML_BLOCK@9..26
           0: SV_CURLY_AT@9..13 "{@" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_KW@13..17 "html" [] []
-          2: HTML_TEXT_EXPRESSION@17..25
-            0: HTML_LITERAL@17..25 " content" [] []
+          1: HTML_KW@13..18 "html" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@18..25
+            0: HTML_LITERAL@18..25 "content" [] []
           3: R_CURLY@25..26 "}" [] []
       2: HTML_CLOSING_ELEMENT@26..37
         0: L_ANGLE@26..28 "<" [Newline("\n")] []
@@ -105,17 +105,17 @@ HtmlRoot {
         3: R_ANGLE@36..37 ">" [] []
     1: SVELTE_HTML_BLOCK@37..54
       0: SV_CURLY_AT@37..41 "{@" [Newline("\n"), Newline("\n")] []
-      1: HTML_KW@41..45 "html" [] []
-      2: HTML_TEXT_EXPRESSION@45..53
-        0: HTML_LITERAL@45..53 " '<div>'" [] []
+      1: HTML_KW@41..46 "html" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@46..53
+        0: HTML_LITERAL@46..53 "'<div>'" [] []
       3: R_CURLY@53..54 "}" [] []
     2: HTML_CONTENT@54..61
       0: HTML_LITERAL@54..61 "content" [] []
     3: SVELTE_HTML_BLOCK@61..77
       0: SV_CURLY_AT@61..63 "{@" [] []
-      1: HTML_KW@63..67 "html" [] []
-      2: HTML_TEXT_EXPRESSION@67..76
-        0: HTML_LITERAL@67..76 " '</div>'" [] []
+      1: HTML_KW@63..68 "html" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@68..76
+        0: HTML_LITERAL@68..76 "'</div>'" [] []
       3: R_CURLY@76..77 "}" [] []
   4: EOF@77..78 "" [Newline("\n")] []
 

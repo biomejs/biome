@@ -6,7 +6,7 @@ use crate::syntax::scss::{
     parse_scss_variable,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::{is_at_ratio, parse_ratio, parse_regular_identifier, parse_regular_number};
+use crate::syntax::{parse_regular_identifier, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NUMBER_LITERAL, SCSS_MODULE_MEMBER_ACCESS, SCSS_NAMESPACED_VARIABLE,
 };
@@ -98,24 +98,18 @@ fn parse_scss_module_variable_operand(p: &mut CssParser) -> ParsedSyntax {
 }
 
 /// Parses an interpolatable value such as `$value#{suffix}`, `10px#{suffix}`,
-/// `10#{unit}`, or `10/10`.
+/// or `10#{unit}`.
 ///
 /// Examples:
 /// ```scss
 /// $value#{suffix}
 /// 10px#{suffix}
 /// 10#{unit}
-/// 10/10
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
 fn parse_scss_interpolatable_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_ratio(p) {
-        // `10/10`: parse the ratio before `/` can become an SCSS binary operator.
-        return parse_ratio(p);
-    }
-
     let first_part = match parse_scss_interpolatable_value_first_part(p) {
         Present(first_part) => first_part,
         Absent => return Absent,
@@ -142,8 +136,6 @@ fn parse_scss_interpolatable_value(p: &mut CssParser) -> ParsedSyntax {
 /// 10px#{suffix}
 /// 10#{unit}
 /// ```
-///
-/// `10/10` is not returned here because it is already a `CssRatio`.
 #[inline]
 fn parse_scss_interpolatable_value_first_part(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_variable(p) {

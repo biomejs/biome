@@ -11,26 +11,33 @@ div {
 }
 
 .division {
-  $var: a / b; // division
-  decl: a / b; // not division
-  with-parens: (a / b); // division
+  $var: a / b;
+  decl: a / b;
+  with-parens: (a / b);
 }
 
-/* TODO(scss at-rules):
 @function f() {
-  @return a / b; // division
+  @return a / b;
+  @return 10 / 2;
 }
-@debug 15px / 30px; // not division
-@debug 1 * 2 / 3; // division
-@debug (1 + 2) / 3; // division
-@debug fn() / 3; // division
-@debug $var / 3; // division
-@debug mod.$var / 3; // division
-*/
+
+@debug 15px / 30px;
+@debug 10 / 2;
+@debug 10/2;
+@debug (10 / 2);
+@debug (bold 10 / 2 sans-serif);
+@debug (10 / 2 bold);
+@debug (10 / 2, bold);
+@debug (a: b, c: 10 / 2);
+@debug (10 / 2 bold: b, c: 10 / 2);
+@debug 10 / 2 + 1;
+@debug 10/2+1;
+@debug 1 * 2 / 3;
+@debug (1 + 2) / 3;
+@debug fn() / 3;
+@debug $var / 3;
+@debug mod.$var / 3;
 
 a {
   prop: a,-1*b;
 }
-
-
-

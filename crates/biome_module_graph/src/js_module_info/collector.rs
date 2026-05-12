@@ -519,6 +519,7 @@ impl JsModuleInfoCollector {
         let references = self.get_writable_references(semantic_model, binding.range);
         let mut union_collector = UnionCollector::new();
         union_collector.add(ty.clone());
+        let mut saw_widening_reference = false;
         for reference in references {
             let node = reference.syntax();
             let reference_scope = reference.scope().id();
@@ -536,7 +537,12 @@ impl JsModuleInfoCollector {
                 let data = TypeData::from_any_js_expression(self, scope_id, &right);
                 let assigned_type = self.reference_to_owned_data(data);
                 union_collector.add(assigned_type);
+                saw_widening_reference = true;
             }
+        }
+
+        if !saw_widening_reference {
+            return ty.clone();
         }
 
         let id = self.register_type(union_collector.finish());

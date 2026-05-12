@@ -572,17 +572,32 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
 }
 
 pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
-    let mut column = 0usize;
-
-    for c in p.source_after_current().chars() {
+    // Tab expansion is relative to the absolute column position in the line:
+    // a tab at column 2 (e.g. just after `> `) only advances 2 columns to the
+    // next tab stop, not a full TAB_STOP_SPACES. Counting from column 0 here
+    // overstates the indent and misclassifies `> \t- nested` as code.
+    let rest = p.source_after_current();
+    // Fast path: no tabs means column-relative math is unnecessary.
+    if !rest
+        .as_bytes()
+        .iter()
+        .take_while(|b| matches!(b, b' ' | b'\t'))
+        .any(|b| *b == b'\t')
+    {
+        let spaces = rest.as_bytes().iter().take_while(|b| **b == b' ').count();
+        return spaces >= INDENT_CODE_BLOCK_SPACES;
+    }
+    let cur: usize = p.cur_range().start().into();
+    let start_col = p.cached_absolute_column_at(cur);
+    let mut column = start_col;
+    for c in rest.chars() {
         match c {
             ' ' => column += 1,
             '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
-
-    column >= INDENT_CODE_BLOCK_SPACES
+    column - start_col >= INDENT_CODE_BLOCK_SPACES
 }
 
 fn quote_tab_starts_nested_prefix(p: &mut MarkdownParser) -> bool {

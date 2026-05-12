@@ -61,6 +61,14 @@ function objectNoConst(): { a: string; b: string } {
     return { a: "x", b: "y" };
 }
 
+function propertyLiteralWithoutAsConst(): { a: string } {
+    return { a: "x" };
+}
+
+function propertyAsConstExact(): { a: "x" } {
+    return { a: "x" as const };
+}
+
 function asConstMatch(): "hello" { return "hello" as const; }
 
 function bareReturn(): void { return; }
@@ -274,3 +282,30 @@ function emptyClassCast(): object { return {} as EmptyClass; }
 interface NarrowInterface { a: number; }
 interface InterfaceWithInheritedMembers extends NarrowInterface {}
 function inheritedInterfaceCast(): object { return {} as InterfaceWithInheritedMembers; }
+
+// Every union variant is returned — nothing to narrow
+declare const someStr: string;
+declare const someNum: number;
+function allVariantsCovered(b: 0 | 1 | 2): string | number | null {
+    if (b === 0) return someStr;
+    if (b === 1) return someNum;
+    return null;
+}
+
+function unionWithAny(): string | any { return "hello"; }
+
+function unionWithUnknown(): string | unknown { return "hello"; }
+
+async function asyncUnionUnknown(): Promise<string | unknown> { return "hello"; }
+
+function unionWithNever(): string | never { return "hello"; }
+
+function literalAbsorbedByPrimitive(): "a" | string { return "a"; }
+
+function unionCollapsesToPrimitive(): "a" | "b" | string { return "a"; }
+
+function collapseNumber(): 1 | 2 | number { return 1; }
+
+function collapseBigint(): 1n | bigint { return 1n; }
+
+function collapseMismatchLiteral(): "a" | string { return "b"; }

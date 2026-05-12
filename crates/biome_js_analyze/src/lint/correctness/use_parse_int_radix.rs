@@ -182,7 +182,11 @@ pub enum State {
 
 fn is_global_identifier(callee: &AnyJsExpression) -> bool {
     // If the call is a direct reference to `parseInt`
-    if global_identifier(callee).is_some() {
+    if callee
+        .as_any_global_identifier_expression()
+        .and_then(|expr| global_identifier(&expr))
+        .is_some()
+    {
         return true;
     }
 
@@ -193,7 +197,11 @@ fn is_global_identifier(callee: &AnyJsExpression) -> bool {
         _ => return false,
     };
 
-    object.and_then(|expr| global_identifier(&expr)).is_some()
+    object
+        .and_then(|expr| {
+            global_identifier(&expr.as_any_global_identifier_expression()?)
+        })
+        .is_some()
 }
 
 /// Checks whether a given node is a valid value of radix or not.

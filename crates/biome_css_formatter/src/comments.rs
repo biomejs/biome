@@ -7,9 +7,9 @@ use crate::utils::scss_include_comments::{
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
     CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
-    ScssAtRootSelector, ScssEachHeader, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
-    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T,
-    TextLen, TextSize, is_in_scss_include_arguments, single_expression_item,
+    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
+    ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
+    ScssMapExpressionPair, T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -18,7 +18,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::SyntaxTriviaPieceComments;
+use biome_rowan::{AstSeparatedList, SyntaxTriviaPieceComments};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -108,7 +108,7 @@ impl CommentStyle for CssCommentStyle {
         handle_scss_map_trailing_separator_comment(comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
-            .or_else(handle_scss_each_iterable_comment)
+            .or_else(handle_scss_each_value_list_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
@@ -165,15 +165,23 @@ fn handle_scss_list_trailing_separator_comment(
     place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
 }
 
-/// Keeps `@each ... in /* comment */ (a, b)` comments with the iterable.
-fn handle_scss_each_iterable_comment(
+/// Keeps `@each ... in /* comment */ a, b` comments after `in`.
+fn handle_scss_each_value_list_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
     let Some(expression) = comment.following_node().and_then(ScssExpression::cast_ref) else {
         return CommentPlacement::Default(comment);
     };
 
-    if !expression
+    let Some(value_list) = expression
+        .syntax()
+        .parent()
+        .and_then(ScssEachValueList::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !value_list
         .syntax()
         .parent()
         .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
@@ -181,13 +189,18 @@ fn handle_scss_each_iterable_comment(
         return CommentPlacement::Default(comment);
     }
 
-    if !single_expression_item(&expression).is_some_and(|item| {
-        item.as_scss_list_expression().is_some() || item.as_scss_map_expression().is_some()
-    }) {
+    let Some(first_value) = value_list.elements().next() else {
         return CommentPlacement::Default(comment);
-    }
+    };
+    let Ok(first_value) = first_value.node() else {
+        return CommentPlacement::Default(comment);
+    };
 
-    CommentPlacement::leading(expression.into_syntax(), comment)
+    if first_value.syntax() == expression.syntax() {
+        CommentPlacement::leading(value_list.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_scss_expression_item_trailing_line_comment(

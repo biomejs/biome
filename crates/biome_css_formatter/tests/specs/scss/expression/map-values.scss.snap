@@ -20,7 +20,9 @@ $mapValueMapBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:v
 
 ```scss
 $mapValueScalar: (
-	key: (value),
+	key: (
+		value,
+	),
 );
 $mapValueList: (
 	key: (
@@ -39,7 +41,7 @@ $mapValueMap: (
 );
 $mapValueScalarBroken: (
 	key: (
-		very-very-very-very-very-very-very-very-very-very-very-very-very-long-scalar
+		very-very-very-very-very-very-very-very-very-very-very-very-very-long-scalar,
 	),
 );
 $mapValueListBroken: (
@@ -55,7 +57,7 @@ $mapValueMapBroken: (
 			very-very-very-very-very-very-very-very-long-map-key:
 				very-very-very-very-very-very-very-very-long-map-value,
 			other-key: other-other-value,
-		)
+		),
 	),
 );
 

@@ -162,7 +162,10 @@ impl CallInfo {
 
 fn get_callee(expr: &JsCallExpression, model: &SemanticModel) -> Option<&'static str> {
     let callee = expr.callee().ok()?.omit_parentheses();
-    if let Some((reference, name)) = global_identifier(&callee) {
+    if let Some((reference, name)) = callee
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    {
         if name.text() == "parseInt" && model.binding(&reference).is_none() {
             return Some("parseInt()");
         }
@@ -173,7 +176,8 @@ fn get_callee(expr: &JsCallExpression, model: &SemanticModel) -> Option<&'static
         return None;
     }
     let object = callee.object().ok()?.omit_parentheses();
-    let (reference, name) = global_identifier(&object)?;
+    let (reference, name) =
+        global_identifier(&object.as_any_global_identifier_expression()?)?;
     if name.text() == "Number" && model.binding(&reference).is_none() {
         return Some("Number.parseInt()");
     }
