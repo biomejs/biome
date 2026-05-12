@@ -112,3 +112,19 @@
 {
 	await using foo = object.foo;
 }
+/* assignment result used as value should not trigger */
+{
+	return foo = object.foo;
+}
+{
+	call(foo = object.foo);
+}
+{
+	let x = foo = object.foo;
+}
+{
+	(foo = object.foo) ? a : b;
+}
+{
+	return foo = array[0];
+}

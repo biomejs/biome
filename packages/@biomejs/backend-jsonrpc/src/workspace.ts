@@ -8159,7 +8159,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
-export type UseDestructuringOptions = {};
+export interface UseDestructuringOptions {
+	assignmentExpression?: DestructuringConfig;
+	variableDeclarator?: DestructuringConfig;
+}
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export type UseDomQuerySelectorOptions = {};
@@ -8797,6 +8800,10 @@ export type MethodSignatureStyle = "property" | "method";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export interface DestructuringConfig {
+	array?: boolean;
+	object?: boolean;
+}
 export type CheckInputType = "off" | "loose" | "strict";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.

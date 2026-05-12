@@ -1547,6 +1547,14 @@
 				}
 			]
 		},
+		"DestructuringConfig": {
+			"type": "object",
+			"properties": {
+				"array": { "type": ["boolean", "null"] },
+				"object": { "type": ["boolean", "null"] }
+			},
+			"additionalProperties": false
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -14551,6 +14559,20 @@
 		},
 		"UseDestructuringOptions": {
 			"type": "object",
+			"properties": {
+				"assignmentExpression": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				},
+				"variableDeclarator": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseDisposablesConfiguration": {
