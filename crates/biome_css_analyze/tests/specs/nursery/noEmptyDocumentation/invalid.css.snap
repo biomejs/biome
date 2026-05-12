@@ -7,7 +7,14 @@ expression: invalid.css
 /* should generate diagnostics */
 
 /* */
-.invalid {
+.invalid1 {
+	display: flex;
+}
+
+/*
+
+*/
+.invalid2 {
 	display: flex;
 }
 
@@ -23,8 +30,20 @@ invalid.css:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━
     2 │ 
   > 3 │ /* */
       │ ^^^^^
-    4 │ .invalid {
+    4 │ .invalid1 {
     5 │ 	display: flex;
+  
+  i More empty documentation.
+  
+     6 │ }
+     7 │ 
+   > 8 │ /*
+       │ ^^
+   > 9 │ 
+  > 10 │ */
+       │ ^^
+    11 │ .invalid2 {
+    12 │ 	display: flex;
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

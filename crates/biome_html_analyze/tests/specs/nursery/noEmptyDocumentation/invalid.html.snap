@@ -6,7 +6,12 @@ expression: invalid.html
 ```html
 <!-- should generate diagnostics -->
 
-<!--  -->
+<!-- -->
+<div>invalid</div>
+
+<!--
+
+-->
 <div>invalid</div>
 
 ```
@@ -19,10 +24,22 @@ invalid.html:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━�
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
-  > 3 │ <!--  -->
-      │ ^^^^^^^^^
+  > 3 │ <!-- -->
+      │ ^^^^^^^^
     4 │ <div>invalid</div>
     5 │ 
+  
+  i More empty documentation.
+  
+     4 │ <div>invalid</div>
+     5 │ 
+   > 6 │ <!--
+       │ ^^^^
+   > 7 │ 
+   > 8 │ -->
+       │ ^^^
+     9 │ <div>invalid</div>
+    10 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

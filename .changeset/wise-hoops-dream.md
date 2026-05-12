@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the new nursery rule [`noEmptyDocumentation`](https://biomejs.dev/linter/rules/no-empty-documentation), which disallows empty documentation (comments & descriptions) in HTML, CSS, JavaScript, JSON & GraphQL.
+Added the new nursery rule [`noEmptyDocumentation`](https://biomejs.dev/linter/rules/no-empty-documentation), which disallows empty documentation (comments & descriptions) in HTML, CSS, JavaScript, JSONC & GraphQL.
 
 ```html
 <!-- -->

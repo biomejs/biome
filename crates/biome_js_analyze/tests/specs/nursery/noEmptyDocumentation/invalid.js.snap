@@ -12,10 +12,18 @@ let invalid1 = 1;
 /* */
 let invalid2 = 1;
 
+/*
+
+*/
+let invalid3 = 1;
+
+/** */
+let invalid4 = 1;
+
 /**
  *
  */
-let invalid3 = 1;
+let invalid5 = 1;
 
 ```
 
@@ -45,13 +53,34 @@ invalid.js:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━�
   
      7 │ let invalid2 = 1;
      8 │ 
-   > 9 │ /**
-       │ ^^^
-  > 10 │  *
-  > 11 │  */
-       │  ^^
+   > 9 │ /*
+       │ ^^
+  > 10 │ 
+  > 11 │ */
+       │ ^^
     12 │ let invalid3 = 1;
     13 │ 
+  
+  i More empty documentation.
+  
+    12 │ let invalid3 = 1;
+    13 │ 
+  > 14 │ /** */
+       │ ^^^^^^
+    15 │ let invalid4 = 1;
+    16 │ 
+  
+  i More empty documentation.
+  
+    15 │ let invalid4 = 1;
+    16 │ 
+  > 17 │ /**
+       │ ^^^
+  > 18 │  *
+  > 19 │  */
+       │  ^^
+    20 │ let invalid5 = 1;
+    21 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

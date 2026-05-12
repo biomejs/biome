@@ -6,7 +6,15 @@ let Valid1 = 1;
 /* Valid */
 let Valid2 = 1;
 
+/*
+	Valid
+*/
+let Valid3 = 1;
+
+/** Valid */
+let Valid4 = 1;
+
 /**
  * Valid
  */
-let Valid3 = 1;
+let Valid5 = 1;

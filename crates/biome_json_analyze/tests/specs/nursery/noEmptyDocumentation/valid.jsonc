@@ -1,8 +1,10 @@
 {
+  // Valid
+  "valid1": 1,
+  /* Valid */
+  "valid2": 1,
   /*
     Valid
   */
-  "name": "Jane Doe",
-  // Valid
-  "age": 1
+  "valid3": 1
 }

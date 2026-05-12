@@ -5,10 +5,14 @@ expression: invalid.jsonc
 # Input
 ```jsonc
 {
-  /**/
-  "name": "Jane Doe",
   //
-  "age": 1
+  "invalid1": 1,
+  /* */
+  "invalid2": 1,
+  /*
+
+  */
+  "invalid3": 1
 }
 
 ```
@@ -20,19 +24,31 @@ invalid.jsonc:2:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━�
   i Unexpected empty documentation.
   
     1 │ {
-  > 2 │   /**/
-      │   ^^^^
-    3 │   "name": "Jane Doe",
-    4 │   //
+  > 2 │   //
+      │   ^^
+    3 │   "invalid1": 1,
+    4 │   /* */
   
   i More empty documentation.
   
-    2 │   /**/
-    3 │   "name": "Jane Doe",
-  > 4 │   //
-      │   ^^
-    5 │   "age": 1
-    6 │ }
+    2 │   //
+    3 │   "invalid1": 1,
+  > 4 │   /* */
+      │   ^^^^^
+    5 │   "invalid2": 1,
+    6 │   /*
+  
+  i More empty documentation.
+  
+     4 │   /* */
+     5 │   "invalid2": 1,
+   > 6 │   /*
+       │   ^^
+   > 7 │ 
+   > 8 │   */
+       │   ^^
+     9 │   "invalid3": 1
+    10 │ }
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

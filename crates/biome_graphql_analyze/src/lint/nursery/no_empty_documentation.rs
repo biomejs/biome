@@ -1,18 +1,19 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    trivia::LeadingCommentTriviaPieces,
 };
 use biome_console::markup;
-use biome_graphql_syntax::{GraphqlDescription, GraphqlLanguage, GraphqlRoot};
-use biome_rowan::{AstNode, SyntaxNode, SyntaxTriviaPiece, TextRange};
+use biome_graphql_syntax::{GraphqlDescription, GraphqlRoot};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_empty_documentation::NoEmptyDocumentationOptions;
 
 declare_lint_rule! {
     /// Disallow empty documentation.
     ///
-    /// Enforces that comments are not empty. This helps maintain code quality by preventing meaningless
-    /// or placeholder comments that don't provide any documentation value.
+    /// Enforces that documentation cannot be empty.
+    /// This helps maintain code quality by preventing meaningless or placeholder nodes that don't provide any value.
     ///
-    /// Empty comments clutter the codebase and should be removed. This rule catches single-line comments (`#`),
+    /// Empty documentation nodes clutter the codebase and should be removed. This rule catches comments (`#`),
     /// single-line descriptions (`" "`), and multi-line descriptions (`""" """`) that contain no meaningful content.
     ///
     /// ## Examples
@@ -82,12 +83,12 @@ impl Rule for NoEmptyDocumentation {
         let node = ctx.query();
         let syntax_node = node.syntax();
 
-        let mut found = Vec::new();
-        found.append(&mut empty_comments(syntax_node));
+        let mut found: Vec<_> = LeadingCommentTriviaPieces::new(syntax_node)
+            .filter(|comment| is_empty_comment(comment.text().trim()))
+            .map(|comment| comment.text_range())
+            .collect();
 
         for descendant in syntax_node.descendants() {
-            found.append(&mut empty_comments(&descendant));
-
             if let Some(description) = GraphqlDescription::cast(descendant) {
                 let value = description.to_trimmed_text();
                 if is_empty_comment(value.text().trim()) {
@@ -130,34 +131,6 @@ impl Rule for NoEmptyDocumentation {
     }
 }
 
-fn leading_comments(
-    syntax_node: &SyntaxNode<GraphqlLanguage>,
-) -> Vec<SyntaxTriviaPiece<GraphqlLanguage>> {
-    if let Some(token) = syntax_node.first_token() {
-        token
-            .leading_trivia()
-            .pieces()
-            .filter(|piece| piece.is_comments())
-            .collect()
-    } else {
-        Vec::new()
-    }
-}
-
-fn trailing_comments(
-    syntax_node: &SyntaxNode<GraphqlLanguage>,
-) -> Vec<SyntaxTriviaPiece<GraphqlLanguage>> {
-    if let Some(token) = syntax_node.first_token() {
-        token
-            .trailing_trivia()
-            .pieces()
-            .filter(|piece| piece.is_comments())
-            .collect()
-    } else {
-        Vec::new()
-    }
-}
-
 fn is_empty_comment(text: &str) -> bool {
     // Remove comment prefixes and check if anything remains
     let content = if let Some(stripped) = text.strip_prefix("#") {
@@ -179,17 +152,4 @@ fn is_empty_comment(text: &str) -> bool {
     };
 
     content.is_empty()
-}
-
-fn empty_comments(syntax_node: &SyntaxNode<GraphqlLanguage>) -> Vec<TextRange> {
-    let mut comments = Vec::new();
-
-    comments.append(&mut leading_comments(syntax_node));
-    comments.append(&mut trailing_comments(syntax_node));
-
-    comments
-        .iter()
-        .filter(|comment| is_empty_comment(comment.text().trim()))
-        .map(|comment| comment.text_range())
-        .collect()
 }

@@ -1,6 +1,10 @@
 {
-  /**/
-  "name": "Jane Doe",
   //
-  "age": 1
+  "invalid1": 1,
+  /* */
+  "invalid2": 1,
+  /*
+
+  */
+  "invalid3": 1
 }

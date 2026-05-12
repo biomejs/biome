@@ -23,6 +23,7 @@ mod signals;
 mod suppression_action;
 mod suppressions;
 mod syntax;
+pub mod trivia;
 pub mod utils;
 mod visitor;
 

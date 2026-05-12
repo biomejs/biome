@@ -1,6 +1,13 @@
 /* should not generate diagnostics */
 
 /* Valid */
-.valid {
+.valid1 {
+	display: flex;
+}
+
+/*
+	Valid
+*/
+.valid2 {
 	display: flex;
 }

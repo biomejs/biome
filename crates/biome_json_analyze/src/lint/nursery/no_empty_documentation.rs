@@ -1,19 +1,20 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    trivia::LeadingCommentTriviaPieces,
 };
 use biome_console::markup;
-use biome_json_syntax::{JsonLanguage, JsonRoot};
-use biome_rowan::{AstNode, SyntaxNode, SyntaxTriviaPiece, TextRange};
+use biome_json_syntax::JsonRoot;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_empty_documentation::NoEmptyDocumentationOptions;
 
 declare_lint_rule! {
     /// Disallow empty documentation.
     ///
-    /// Enforces that comments are not empty. This helps maintain code quality by preventing meaningless
-    /// or placeholder comments that don't provide any documentation value.
+    /// Enforces that documentation cannot be empty.
+    /// This helps maintain code quality by preventing meaningless or placeholder nodes that don't provide any value.
     ///
     /// Empty comments clutter the codebase and should be removed. This rule catches single-line comments (`//`)
-    /// and block comments (`/* */`) that contain no meaningful content.
+    /// and multi-line comments (`/* */`) that contain no meaningful content.
     ///
     /// ## Examples
     ///
@@ -68,12 +69,10 @@ impl Rule for NoEmptyDocumentation {
         let node = ctx.query();
         let syntax_node = node.syntax();
 
-        let mut found = Vec::new();
-        found.append(&mut empty_comments(syntax_node));
-
-        for descendant in syntax_node.descendants() {
-            found.append(&mut empty_comments(&descendant));
-        }
+        let mut found: Vec<_> = LeadingCommentTriviaPieces::new(syntax_node)
+            .filter(|comment| is_empty_comment(comment.text().trim()))
+            .map(|comment| comment.text_range())
+            .collect();
 
         found.sort_unstable_by_key(|range| (range.start(), range.end()));
         found.dedup();
@@ -109,37 +108,7 @@ impl Rule for NoEmptyDocumentation {
     }
 }
 
-fn leading_comments(
-    syntax_node: &SyntaxNode<JsonLanguage>,
-) -> Vec<SyntaxTriviaPiece<JsonLanguage>> {
-    if let Some(token) = syntax_node.first_token() {
-        token
-            .leading_trivia()
-            .pieces()
-            .filter(|piece| piece.is_comments())
-            .collect()
-    } else {
-        Vec::new()
-    }
-}
-
-fn trailing_comments(
-    syntax_node: &SyntaxNode<JsonLanguage>,
-) -> Vec<SyntaxTriviaPiece<JsonLanguage>> {
-    if let Some(token) = syntax_node.first_token() {
-        token
-            .trailing_trivia()
-            .pieces()
-            .filter(|piece| piece.is_comments())
-            .collect()
-    } else {
-        Vec::new()
-    }
-}
-
-fn is_empty_comment(trivia_piece: &SyntaxTriviaPiece<JsonLanguage>) -> bool {
-    let text = trivia_piece.text().trim();
-
+fn is_empty_comment(text: &str) -> bool {
     // Remove comment prefixes and check if anything remains
     let content = if let Some(stripped) = text.strip_prefix("//") {
         stripped.trim()
@@ -154,17 +123,4 @@ fn is_empty_comment(trivia_piece: &SyntaxTriviaPiece<JsonLanguage>) -> bool {
     };
 
     content.is_empty()
-}
-
-fn empty_comments(syntax_node: &SyntaxNode<JsonLanguage>) -> Vec<TextRange> {
-    let mut comments = Vec::new();
-
-    comments.append(&mut leading_comments(syntax_node));
-    comments.append(&mut trailing_comments(syntax_node));
-
-    comments
-        .iter()
-        .filter(|comment| is_empty_comment(comment))
-        .map(|comment| comment.text_range())
-        .collect()
 }

@@ -9,12 +9,15 @@ expression: valid.graphql
 # Valid
 enum Valid1 {}
 
+"Valid"
+enum Valid2 {}
+
+"""Valid"""
+enum Valid3 {}
+
 """
 Valid
 """
-enum Valid2 {}
-
-"Valid"
-enum Valid3 {}
+enum Valid4 {}
 
 ```

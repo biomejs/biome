@@ -9,12 +9,15 @@ expression: invalid.graphql
 #
 enum Invalid1 {}
 
-"""
-"""
+""
 enum Invalid2 {}
 
-""
+""" """
 enum Invalid3 {}
+
+"""
+"""
+enum Invalid4 {}
 
 ```
 
@@ -35,21 +38,30 @@ invalid.graphql:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━�
   
     4 │ enum Invalid1 {}
     5 │ 
-  > 6 │ """
-      │ ^^^
-  > 7 │ """
-      │ ^^^
-    8 │ enum Invalid2 {}
-    9 │ 
+  > 6 │ ""
+      │ ^^
+    7 │ enum Invalid2 {}
+    8 │ 
   
   i More empty documentation.
   
-     8 │ enum Invalid2 {}
-     9 │ 
-  > 10 │ ""
-       │ ^^
-    11 │ enum Invalid3 {}
-    12 │ 
+     7 │ enum Invalid2 {}
+     8 │ 
+   > 9 │ """ """
+       │ ^^^^^^^
+    10 │ enum Invalid3 {}
+    11 │ 
+  
+  i More empty documentation.
+  
+    10 │ enum Invalid3 {}
+    11 │ 
+  > 12 │ """
+       │ ^^^
+  > 13 │ """
+       │ ^^^
+    14 │ enum Invalid4 {}
+    15 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   
