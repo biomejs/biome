@@ -2635,13 +2635,16 @@ fn check_continuation_indent(
                 );
 
             // CommonMark §5.2: ordered markers that do not start with `1`
-            // cannot interrupt a paragraph, even when they are nested too
-            // deeply for at_order_list_item to recognise at this base indent.
+            // cannot interrupt an ongoing paragraph. Detect any ordered
+            // marker on the line, even when at_order_list_item misses it at
+            // this base indent, then verify whether it starts with `1`.
             let force_paragraph_continuation = state.last_block_was_paragraph
                 && !prev_was_blank
                 && line_starts_with_ordered_marker_after_whitespace(p)
                 && !nested_ordered_marker_starts_with_one(p);
             if force_paragraph_continuation {
+                // Clear nested ordered matches so the line is parsed as
+                // paragraph continuation below instead of as a child list.
                 starts_nested_ordered = false;
                 starts_nested_ordered_textual = false;
             }
