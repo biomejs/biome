@@ -33,7 +33,7 @@ expression: basic.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"style": {
 				"noRestrictedGlobals": {
 					"level": "error",

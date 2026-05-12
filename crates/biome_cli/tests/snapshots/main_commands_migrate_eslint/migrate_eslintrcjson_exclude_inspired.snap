@@ -22,7 +22,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   i Configuration file can be updated.
   
     1   │ - {}
-      1 │ + {·"linter":·{·"rules":·{·"recommended":·false·}·}·}
+      1 │ + {·"linter":·{·"rules":·{·"preset":·"none"·}·}·}
       2 │ + 
   
 

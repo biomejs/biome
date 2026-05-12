@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
 use biome_configuration::Configuration;
+use biome_service::settings::{EditorFeature, EditorFeatures};
+use biome_service::workspace::ScanKind;
 use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
@@ -31,6 +33,9 @@ pub struct WorkspaceSettings {
 
     /// Inline configuration, which gets merged before applying querying instructions via workspace
     pub inline_config: Option<Configuration>,
+
+    /// Enables the "go-to" features, by-passing the use of linting or assist. Enabled by default.
+    pub go_to_definition: Option<bool>,
 }
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
@@ -77,5 +82,25 @@ impl ExtensionSettings {
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {
         self.settings.inline_config.clone()
+    }
+
+    pub(crate) fn editor_features(&self) -> EditorFeatures {
+        let go_to_definition = self.settings.go_to_definition.unwrap_or(true);
+        let mut features = EditorFeatures::default();
+        if go_to_definition {
+            features.insert(EditorFeature::GotoDefinition);
+        }
+
+        features
+    }
+
+    /// Which [ScanKind] is required for the current editor features
+    pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
+        let features = self.editor_features();
+        if features.contains(EditorFeature::GotoDefinition) {
+            ScanKind::Project
+        } else {
+            ScanKind::KnownFiles
+        }
     }
 }

@@ -1,6 +1,6 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_built_in_functions::BuiltIns;
-use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
+use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile, new_file_owner};
 use crate::grit_definitions::{
     Definitions, ScannedDefinitionInfo, compile_definitions, scan_definitions,
 };
@@ -9,6 +9,7 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetSyntaxKind;
 use crate::grit_tree::GritTargetTree;
+use crate::linearization::apply_effects;
 use crate::pattern_compiler::{PatternCompiler, auto_wrap_pattern};
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
@@ -16,6 +17,7 @@ use crate::pattern_compiler::{
 use crate::variables::{VarRegistry, VariableLocations};
 use crate::{BuiltInFunction, CompileError};
 use biome_analyze::RuleDiagnostic;
+use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
@@ -149,25 +151,8 @@ impl GritQuery {
         if anchor_kinds.is_empty() {
             return self.execute(file);
         }
-        // Create tree independently of state to avoid borrow conflicts.
-        // from_cached_parse_result wraps the existing parsed tree — O(1).
-        let mut logs: AnalysisLogs = Vec::new().into();
-        let tree = self.language.get_parser().from_cached_parse_result(
-            &file.parse,
-            Some(file.path.as_std_path()),
-            &mut logs,
-        );
-        let Some(tree) = tree else {
-            return self.execute(file);
-        };
 
-        // Collect anchor-kind nodes from the independent tree.
-        // Use Vec::contains — anchor_kinds is tiny (1-3 items), faster than hashing.
-        let root = tree.root_node();
-        let anchor_nodes: Vec<_> = root
-            .descendants()
-            .filter(|node| anchor_kinds.contains(&node.kind()))
-            .collect();
+        let mut logs: AnalysisLogs = Vec::new().into();
 
         // Set up context and state (same as execute).
         let file_owners = FileOwners::new();
@@ -179,6 +164,17 @@ impl GritQuery {
         // Load file (creates FileOwner in file_owners, loads into state.files).
         let grit_file = GritFile::Ptr(file_ptr);
         context.load_file(&grit_file, &mut state, &mut logs)?;
+
+        // Collect anchor-kind nodes from the LOADED tree so that effect
+        // bindings reference the same source allocation as the file owner.
+        // `get_file_owner` returns `&'a FileOwner` (lifetime from file_owners,
+        // not from &self on state), so anchor_nodes don't borrow state.
+        let file_owner = state.files.get_file_owner(file_ptr);
+        let root = file_owner.tree.root_node();
+        let anchor_nodes: Vec<_> = root
+            .descendants()
+            .filter(|node| anchor_kinds.contains(&node.kind()))
+            .collect();
 
         // Replicate the global-variable binding from `FilePattern::execute` in
         // `grit-pattern-matcher` (crate `grit-pattern-matcher`, module `pattern/file_pattern.rs`).
@@ -231,7 +227,39 @@ impl GritQuery {
                 suppressed,
             };
             let file_owner = state.files.get_file_owner(file_ptr);
-            file_owner.matches.borrow_mut().input_matches = Some(input_ranges);
+            let mut match_log = file_owner.matches.borrow_mut();
+            if match_log.input_matches.is_none() {
+                match_log.input_matches = Some(input_ranges);
+            }
+        }
+
+        // Apply effects: if there are accumulated effects, linearize
+        // them to produce rewritten source and push a new file version.
+        // This replicates the logic from exec_step in grit_context.rs.
+        if !state.effects.is_empty() {
+            let file_owner = state.files.get_file_owner(file_ptr);
+            let source = file_owner.tree.text();
+
+            let new_src = apply_effects(
+                source,
+                &state.effects,
+                &state.files,
+                &context.lang,
+                &mut logs,
+            )?;
+
+            if new_src != source {
+                let file_name = file_owner.name.clone();
+                if let Some(new_owner) =
+                    new_file_owner(file_name, &new_src, &self.language, &mut logs)?
+                {
+                    file_owners.push(new_owner);
+                    state
+                        .files
+                        .push_revision(&file_ptr, file_owners.last().unwrap());
+                }
+            }
+            state.effects = vec![];
         }
 
         // Collect effects.
@@ -340,7 +368,7 @@ impl GritQuery {
 #[derive(Debug)]
 pub struct GritQueryResult {
     pub effects: Vec<GritQueryEffect>,
-    pub diagnostics: Vec<RuleDiagnostic>,
+    pub diagnostics: Vec<(RuleDiagnostic, Applicability)>,
     pub logs: AnalysisLogs,
 }
 
@@ -623,13 +651,13 @@ fn extract_anchor_kinds_from_predicate(
 /// Returns None if the pattern structure doesn't match the expected
 /// auto-wrap chain.
 ///
-/// Note: only inspects the first step of Sequential, matching the
-/// auto-wrap structure where Contains is always in the first step.
+/// Note: only extracts from single-step Sequential patterns, matching
+/// the auto-wrap structure. Multi-step Sequential falls back to `execute()`.
 fn extract_contains_inner(
     pattern: &Pattern<GritQueryContext>,
 ) -> Option<&Pattern<GritQueryContext>> {
     match pattern {
-        Pattern::Sequential(seq) => seq
+        Pattern::Sequential(seq) if seq.len() == 1 => seq
             .first()
             .and_then(|step| extract_contains_inner(&step.pattern)),
         Pattern::File(file) => extract_contains_inner(&file.body),
@@ -643,7 +671,6 @@ fn extract_contains_inner(
         // collects from ALL And branches, so there may be an asymmetry when
         // multiple Contains exist. See the matching NOTE there.
         Pattern::And(and) => and.patterns.iter().find_map(extract_contains_inner),
-        Pattern::Limit(limit) => extract_contains_inner(&limit.pattern),
         _ => None,
     }
 }
@@ -795,6 +822,27 @@ mod tests {
         assert!(
             result.diagnostics.is_empty(),
             "fallback should not produce errors"
+        );
+    }
+
+    #[test]
+    fn execute_optimized_matches_execute_for_rewrite() {
+        let query = compile_js_query("`console.log($msg)` => `console.info($msg)`");
+        let code = r#"console.log("hello");"#;
+
+        let opt_result = query
+            .execute_optimized(make_js_file(code))
+            .expect("optimized failed");
+        let full_result = query.execute(make_js_file(code)).expect("execute failed");
+
+        assert!(
+            !full_result.effects.is_empty(),
+            "full execute should produce rewrite effects"
+        );
+        assert_eq!(
+            opt_result.effects.len(),
+            full_result.effects.len(),
+            "rewrite: optimized and full should produce same number of effects"
         );
     }
 

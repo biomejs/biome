@@ -22,7 +22,7 @@ expression: basic.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"useExplicitReturnType": "error",
 				"useExplicitType": "error"

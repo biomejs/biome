@@ -7,6 +7,7 @@ mod utils;
 mod visitor;
 
 use crate::ModuleGraph;
+use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
@@ -90,6 +91,12 @@ impl JsModuleInfo {
         module_graph.find_exported_symbol(self, name)
     }
 
+    /// Finds the default exported symbol
+    #[inline]
+    pub fn find_js_default_export_symbol(&self, module_graph: &ModuleGraph) -> Option<JsOwnExport> {
+        module_graph.find_exported_symbol(self, "default")
+    }
+
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
@@ -142,9 +149,7 @@ impl JsModuleInfo {
                 .map(|(specifier, JsImportPath { resolved_path, .. })| {
                     (
                         specifier.to_string(),
-                        resolved_path
-                            .as_ref()
-                            .map_or_else(|_| specifier.to_string(), ToString::to_string),
+                        resolved_path.dump().unwrap_or(specifier.to_string()),
                     )
                 })
                 .collect(),
@@ -160,7 +165,29 @@ impl JsModuleInfo {
                 .iter()
                 .map(|(text, _)| text.to_string())
                 .collect::<BTreeSet<_>>(),
+
+            referenced_classes: self
+                .referenced_classes
+                .iter()
+                .flat_map(|r| {
+                    r.token
+                        .text()
+                        .split_ascii_whitespace()
+                        .map(|s| s.to_string())
+                })
+                .collect::<BTreeSet<_>>(),
         }
+    }
+
+    pub fn find_resolved_path_by_symbol(&self, name: &str) -> Option<&Utf8Path> {
+        self.static_imports
+            .get(name)
+            .and_then(|import| import.resolved_path.as_path())
+            .or_else(|| {
+                self.dynamic_import_paths
+                    .get(name)
+                    .and_then(|import| import.resolved_path.as_path())
+            })
     }
 }
 
@@ -244,6 +271,13 @@ pub struct JsModuleInfoInner {
 
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
+
+    /// CSS class references from JSX `className` or `class` attributes.
+    ///
+    /// Each entry represents one attribute occurrence (e.g., `className="foo bar"`),
+    /// which may contain multiple space-separated class names.
+    /// Only static string literals are collected; dynamic values are excluded.
+    pub referenced_classes: Vec<CssClassReference>,
 }
 
 #[derive(Debug, Default)]
@@ -527,4 +561,7 @@ pub struct SerializedJsModuleInfo {
 
     /// Exported symbols.
     pub exports: BTreeSet<String>,
+
+    /// CSS class names referenced in JSX `className` or `class` attributes.
+    pub referenced_classes: BTreeSet<String>,
 }

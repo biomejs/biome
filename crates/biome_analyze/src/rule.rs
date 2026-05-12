@@ -48,6 +48,8 @@ pub struct RuleMetadata {
     /// Use this field to tag the rule as being worked, which means the rule is still far from being completed.
     /// Possible bugs should be reported in that issue.
     pub issue_number: Option<&'static str>,
+    /// A preset this rule belongs to.
+    pub rule_presets: &'static [RulePreset],
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -200,8 +202,16 @@ pub enum RuleSource<'a> {
     EslintYml(&'a str),
     /// Rules from [Eslint CSS](https://github.com/eslint/css)
     EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://sveltejs.github.io/eslint-plugin-svelte/)
+    EslintSvelte(&'a str),
+    /// Rules from [Eslint Plugin Astro](https://ota-meshi.github.io/eslint-plugin-astro/)
+    EslintAstro(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
+    /// Action for https://github.com/keithamus/sort-package-json
+    SortPackageJson,
+    /// Rules from [Sherif](https://github.com/QuiiBz/sherif)
+    Sherif(&'a str),
     /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
     EslintTypescriptSortKeys(&'a str),
 }
@@ -263,7 +273,11 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
+            Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::SortPackageJson => write!(f, "sort-package-json"),
+            Self::Sherif(_) => write!(f, "Sherif"),
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
         }
     }
@@ -348,8 +362,12 @@ impl<'a> RuleSource<'a> {
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
             | Self::EslintYml(rule_name)
+            | Self::EslintSvelte(rule_name)
+            | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name)
-            | Self::EslintTypescriptSortKeys(rule_name) => rule_name,
+            | Self::Sherif(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
+            Self::EslintTypescriptSortKeys(rule_name) => rule_name,
         }
     }
 
@@ -359,7 +377,9 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
-            | Self::Stylelint(_) => "",
+            | Self::SortPackageJson
+            | Self::Stylelint(_)
+            | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
@@ -405,6 +425,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
+            Self::EslintSvelte(_) => "svelte",
+            Self::EslintAstro(_) => "astro",
             Self::EslintDrizzle(_) => "drizzle",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
         }
@@ -470,7 +492,11 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}"),
+            Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
+            Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
         }
     }
@@ -493,6 +519,8 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::SortPackageJson
+                | Self::Sherif(_)
         )
     }
 
@@ -794,6 +822,7 @@ impl RuleMetadata {
             severity: Severity::Information,
             domains: &[],
             issue_number: None,
+            rule_presets: &[],
         }
     }
 
@@ -834,6 +863,11 @@ impl RuleMetadata {
 
     pub const fn issue_number(mut self, issue_number: Option<&'static str>) -> Self {
         self.issue_number = issue_number;
+        self
+    }
+
+    pub const fn rule_presets(mut self, rule_presets: &'static [RulePreset]) -> Self {
+        self.rule_presets = rule_presets;
         self
     }
 
@@ -1025,6 +1059,16 @@ macro_rules! declare_source_rule {
                 $( $key: $value, )*
             }
         );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[expect(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
 
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[expect(unused_macros)]
@@ -1487,12 +1531,6 @@ pub struct RuleDiagnostic {
     advice_offset: Option<TextSize>,
 }
 
-impl RuleDiagnostic {
-    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
-        self.advice_offset = Some(offset);
-    }
-}
-
 impl Diagnostic for RuleDiagnostic {
     fn severity(&self) -> Severity {
         self.severity
@@ -1597,6 +1635,10 @@ impl RuleDiagnostic {
             severity: Severity::default(),
             advice_offset: None,
         }
+    }
+
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
     }
 
     /// Marks this diagnostic as deprecated code, which will
@@ -1731,4 +1773,34 @@ impl<L: Language> RuleAction<L> {
 pub struct SuppressAction<L: Language> {
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+}
+
+// NOTE: you must update the JSON schema representation of [biome_configuration::PresetConfig] every time you add a new variant
+/// A preset configuration for enabling a set of rules.
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        biome_deserialize_macros::Deserializable,
+        biome_deserialize_macros::Merge
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum RulePreset {
+    /// A set of rules that are enabled by default.
+    Recommended,
+}
+
+impl FromStr for RulePreset {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "recommended" => Ok(Self::Recommended),
+            _ => Err("Invalid rule preset."),
+        }
+    }
 }

@@ -4,6 +4,7 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::borrow::Cow;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
@@ -53,10 +54,10 @@ impl AnalyzerRules {
 }
 
 /// A data structured derived from the `biome.json` file
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    pub(crate) rules: AnalyzerRules,
+    pub(crate) rules: Rc<AnalyzerRules>,
 
     /// A collection of bindings that the analyzers should consider as "external".
     ///
@@ -86,7 +87,7 @@ pub struct AnalyzerConfiguration {
 
 impl AnalyzerConfiguration {
     pub fn with_rules(mut self, rules: AnalyzerRules) -> Self {
-        self.rules = rules;
+        self.rules = Rc::new(rules);
         self
     }
 
@@ -132,7 +133,7 @@ impl AnalyzerConfiguration {
 }
 
 /// A set of information useful to the analyzer infrastructure
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
     pub(crate) configuration: AnalyzerConfiguration,
@@ -142,11 +143,19 @@ pub struct AnalyzerOptions {
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
+
+    /// The working directory for the caller.
+    pub working_directory: Arc<Option<Utf8PathBuf>>,
 }
 
 impl AnalyzerOptions {
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
         self.file_path = Arc::new(file_path.into());
+        self
+    }
+
+    pub fn with_working_directory(mut self, working_directory: impl Into<Utf8PathBuf>) -> Self {
+        self.working_directory = Arc::new(Some(working_directory.into()));
         self
     }
 

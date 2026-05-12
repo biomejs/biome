@@ -22,7 +22,7 @@ expression: defaults.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"useConsistentTestIt": {
 					"level": "error",

@@ -96,6 +96,10 @@ where
         false
     }
 
+    fn is_watch_mode(&self) -> bool {
+        false
+    }
+
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         self.deref().minimal_scan_kind()
     }

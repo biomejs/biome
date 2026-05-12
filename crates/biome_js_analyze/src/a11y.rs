@@ -1,4 +1,6 @@
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_aria::event_handlers::matches_event_handler;
+use biome_js_syntax::{AnyJsxAttributeName, jsx_ext::AnyJsxElement};
+use biome_rowan::AstNodeList;
 
 /// Check the element is hidden from screen reader.
 ///
@@ -33,4 +35,19 @@ pub(crate) fn is_content_editable(element: &AnyJsxElement) -> bool {
         .and_then(|attribute| attribute.as_static_value())
         .and_then(|value| value.as_string_constant().map(|value| value == "true"))
         .unwrap_or_default()
+}
+
+/// Check if the element contains event handler
+pub fn has_event_handler(handler_types: &[&str], element: &AnyJsxElement) -> bool {
+    element.attributes().iter().any(|attribute| {
+        if let Some(jsx_attribute) = attribute.as_jsx_attribute()
+            && let Ok(AnyJsxAttributeName::JsxName(name)) = jsx_attribute.name()
+            && let Ok(value_token) = name.value_token()
+            && matches_event_handler(handler_types, value_token.text_trimmed())
+        {
+            return !jsx_attribute.is_value_null_or_undefined();
+        }
+
+        false
+    })
 }

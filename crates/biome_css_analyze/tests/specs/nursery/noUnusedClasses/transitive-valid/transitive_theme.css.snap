@@ -1,0 +1,16 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: transitive_theme.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* This file imports transitive_valid.css and adds its own .theme class. */
+@import "./transitive_valid.css";
+
+.theme {
+	background: white;
+}
+
+```

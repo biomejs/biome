@@ -47,6 +47,13 @@ impl ManifestServices {
             .as_deref()
             .is_some_and(|pkg| pkg.optional_dependencies.contains(specifier))
     }
+
+    pub(crate) fn is_bundle_dependency(&self, specifier: &str) -> bool {
+        self.manifest.as_deref().is_some_and(|pkg| {
+            pkg.bundle_dependencies.contains(specifier)
+                || pkg.bundled_dependencies.contains(specifier)
+        })
+    }
 }
 
 impl FromServices for ManifestServices {

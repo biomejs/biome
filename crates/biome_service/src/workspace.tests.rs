@@ -53,6 +53,7 @@ fn debug_control_flow() {
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -76,6 +77,7 @@ fn recognize_typescript_definition_file() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -98,6 +100,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -114,6 +117,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -130,6 +134,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -146,6 +151,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -162,6 +168,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -178,6 +185,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -198,6 +206,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -218,6 +227,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -242,6 +252,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -279,6 +290,7 @@ type User {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -311,6 +323,7 @@ fn correctly_pulls_lint_diagnostics() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -350,6 +363,7 @@ fn pull_grit_debug_info() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -406,7 +420,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
                         .clone()),
                 Some(BTreeMap::from([(
                     "./b.ts".to_string(),
-                    "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),
+                    "/project/b.ts".to_string(),
                 )])),
             );
         }};
@@ -422,6 +436,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -486,6 +501,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -547,6 +563,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -621,6 +638,7 @@ language css;
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -691,6 +709,7 @@ fn plugins_may_use_invalid_span() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -826,6 +845,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             })
             .unwrap();
 
@@ -853,6 +873,132 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         let snapshot_name = format!("diagnostics_{path}");
         assert_debug_snapshot!(snapshot_name, plugin_diagnostics);
         assert!(plugin_diagnostics.len() == expect_diagnosis_count);
+    }
+}
+
+#[test]
+fn correctly_scope_plugin_with_includes() {
+    let files: &[(&str, &[u8])] = &[
+        (
+            "/project/plugin_a.grit",
+            br#"`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}"#,
+        ),
+        (
+            "/project/src/foo.ts",
+            b"const a = Object.assign({ foo: 'bar' });",
+        ),
+        (
+            "/project/lib/bar.ts",
+            b"const a = Object.assign({ foo: 'bar' });",
+        ),
+        (
+            "/project/src/foo.test.ts",
+            b"const a = Object.assign({ foo: 'bar' });",
+        ),
+    ];
+
+    let fs = MemoryFileSystem::default();
+    for (path, content) in files {
+        fs.insert(Utf8PathBuf::from(*path), *content);
+    }
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::PathWithOptions(
+                    biome_plugin_loader::PluginWithOptions {
+                        path: "./plugin_a.grit".to_string(),
+                        includes: Some(vec![
+                            biome_glob::NormalizedGlob::from_str("**/src/**/*.ts").unwrap(),
+                            biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
+                        ]),
+                    },
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    // src/foo.ts should trigger the plugin (matches includes)
+    // lib/bar.ts should NOT trigger the plugin (doesn't match includes)
+    // src/foo.test.ts should NOT trigger the plugin (excluded by negated glob)
+    for (path, expect_diagnosis_count) in [
+        ("/project/src/foo.ts", 1),
+        ("/project/lib/bar.ts", 0),
+        ("/project/src/foo.test.ts", 0),
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let result = workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: BiomePath::new(path),
+                categories: RuleCategories::default(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: Vec::new(),
+                include_code_fix: true,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap();
+
+        let plugin_diagnostics: Vec<_> = result
+            .diagnostics
+            .iter()
+            .filter(|diag| diag.category().is_some_and(|cat| cat.name() == "plugin"))
+            .collect();
+
+        assert_eq!(
+            plugin_diagnostics.len(),
+            expect_diagnosis_count,
+            "Expected {expect_diagnosis_count} plugin diagnostics for {path}, got {}",
+            plugin_diagnostics.len()
+        );
+
+        if expect_diagnosis_count > 0 {
+            let snapshot_name = format!("scoped_plugin_diagnostics_{path}");
+            assert_debug_snapshot!(snapshot_name, plugin_diagnostics);
+        }
     }
 }
 
@@ -889,6 +1035,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -924,6 +1071,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -959,6 +1107,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -966,6 +1115,108 @@ class Person {
     let result = file.get_semantic_model();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
+}
+
+#[test]
+fn debug_module_graph_mixed_project() {
+    let fs = MemoryFileSystem::default();
+
+    // CSS file that defines two classes. One is referenced from JSX via
+    // className, the other from HTML via class attribute.
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".button { color: blue; } .container { margin: 0; }",
+    );
+
+    // JSX file: imports styles.css as a side-effect and uses className="button".
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+    );
+
+    // HTML file: links the stylesheet and uses class="container".
+    fs.insert(
+        Utf8PathBuf::from("/project/page.html"),
+        b"<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><div class=\"container\"></div></body></html>",
+    );
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::from_client(".button { color: blue; } .container { margin: 0; }"),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/App.jsx"),
+            content: FileContent::from_client(
+                "import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/page.html"),
+            content: FileContent::from_client(
+                "<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"./styles.css\"></head><body><div class=\"container\"></div></body></html>",
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/styles.css"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/App.jsx"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/page.html"),
+            update_kind: UpdateKind::AddOrUpdate,
+            project_key,
+        })
+        .unwrap();
+
+    let result = workspace.get_module_graph(GetModuleGraphParams {}).unwrap();
+
+    // Collect into a BTreeMap so the snapshot is in deterministic path order.
+    let sorted: BTreeMap<_, _> = result.data.into_iter().collect();
+    assert_debug_snapshot!(sorted)
 }
 
 #[test]
@@ -996,6 +1247,7 @@ async function test() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1014,6 +1266,7 @@ export const debounce = function debounce() {};
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1030,6 +1283,7 @@ export const squash = function squash() {};
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

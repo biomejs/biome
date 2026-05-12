@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: style-grouping.js
+---
+# Input
+```js
+import A from "./a.js"
+import "./style.css"
+import B from "./b.js"
+import "./style.sass"
+import C from "./c.js"
+import "./style.scss"
+import D from "./d.js"
+import "./style.styl"
+import E from "./e.js"
+import "./style.pcss"
+import F from "./f.js"
+import "./style.sss"
+import G from "./g.js"
+import "./style.less"
+import H from "./h.js"
+import "./not-a-style.csssssss"
+
+```
+
+# Diagnostics
+```
+style-grouping.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Sort these imports.
+  
+   > 1 │ import A from "./a.js"
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ import "./style.css"
+   > 3 │ import B from "./b.js"
+   > 4 │ import "./style.sass"
+        ...
+  > 13 │ import G from "./g.js"
+  > 14 │ import "./style.less"
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    15 │ import H from "./h.js"
+    16 │ import "./not-a-style.csssssss"
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+     1    │ - import·A·from·"./a.js"
+     2    │ - import·"./style.css"
+     3    │ - import·B·from·"./b.js"
+        1 │ + import·"./style.css"
+        2 │ + import·"./style.less"
+        3 │ + import·"./style.pcss"
+     4  4 │   import "./style.sass"
+     5    │ - import·C·from·"./c.js"
+     6    │ - import·"./style.scss"
+     7    │ - import·D·from·"./d.js"
+     8    │ - import·"./style.styl"
+     9    │ - import·E·from·"./e.js"
+    10    │ - import·"./style.pcss"
+    11    │ - import·F·from·"./f.js"
+    12    │ - import·"./style.sss"
+    13    │ - import·G·from·"./g.js"
+    14    │ - import·"./style.less"
+        5 │ + import·"./style.scss"
+        6 │ + import·"./style.sss"
+        7 │ + import·"./style.styl"
+        8 │ + import·A·from·"./a.js"
+        9 │ + import·B·from·"./b.js"
+       10 │ + import·C·from·"./c.js"
+       11 │ + import·D·from·"./d.js"
+       12 │ + import·E·from·"./e.js"
+       13 │ + import·F·from·"./f.js"
+       14 │ + import·G·from·"./g.js"
+    15 15 │   import H from "./h.js"
+    16 16 │   import "./not-a-style.csssssss"
+  
+
+```

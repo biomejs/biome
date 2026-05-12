@@ -1,9 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{
     GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
     RulePlainConfiguration, SeverityOrGroup,
 };
+use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -336,6 +338,7 @@ pub enum RuleName {
     NoTopLevelLiterals,
     NoTsIgnore,
     NoUnassignedVariables,
+    NoUndeclaredClasses,
     NoUndeclaredDependencies,
     NoUndeclaredEnvVars,
     NoUndeclaredVariables,
@@ -360,6 +363,7 @@ pub enum RuleName {
     NoUnsafeOptionalChaining,
     NoUnsafePlusOperands,
     NoUntrustedLicenses,
+    NoUnusedClasses,
     NoUnusedExpressions,
     NoUnusedFunctionParameters,
     NoUnusedImports,
@@ -848,6 +852,7 @@ impl RuleName {
             Self::NoTopLevelLiterals => "noTopLevelLiterals",
             Self::NoTsIgnore => "noTsIgnore",
             Self::NoUnassignedVariables => "noUnassignedVariables",
+            Self::NoUndeclaredClasses => "noUndeclaredClasses",
             Self::NoUndeclaredDependencies => "noUndeclaredDependencies",
             Self::NoUndeclaredEnvVars => "noUndeclaredEnvVars",
             Self::NoUndeclaredVariables => "noUndeclaredVariables",
@@ -872,6 +877,7 @@ impl RuleName {
             Self::NoUnsafeOptionalChaining => "noUnsafeOptionalChaining",
             Self::NoUnsafePlusOperands => "noUnsafePlusOperands",
             Self::NoUntrustedLicenses => "noUntrustedLicenses",
+            Self::NoUnusedClasses => "noUnusedClasses",
             Self::NoUnusedExpressions => "noUnusedExpressions",
             Self::NoUnusedFunctionParameters => "noUnusedFunctionParameters",
             Self::NoUnusedImports => "noUnusedImports",
@@ -1356,6 +1362,7 @@ impl RuleName {
             Self::NoTopLevelLiterals => RuleGroup::Nursery,
             Self::NoTsIgnore => RuleGroup::Suspicious,
             Self::NoUnassignedVariables => RuleGroup::Suspicious,
+            Self::NoUndeclaredClasses => RuleGroup::Nursery,
             Self::NoUndeclaredDependencies => RuleGroup::Correctness,
             Self::NoUndeclaredEnvVars => RuleGroup::Nursery,
             Self::NoUndeclaredVariables => RuleGroup::Correctness,
@@ -1380,6 +1387,7 @@ impl RuleName {
             Self::NoUnsafeOptionalChaining => RuleGroup::Correctness,
             Self::NoUnsafePlusOperands => RuleGroup::Nursery,
             Self::NoUntrustedLicenses => RuleGroup::Nursery,
+            Self::NoUnusedClasses => RuleGroup::Nursery,
             Self::NoUnusedExpressions => RuleGroup::Suspicious,
             Self::NoUnusedFunctionParameters => RuleGroup::Correctness,
             Self::NoUnusedImports => RuleGroup::Correctness,
@@ -1873,6 +1881,7 @@ impl std::str::FromStr for RuleName {
             "noTopLevelLiterals" => Ok(Self::NoTopLevelLiterals),
             "noTsIgnore" => Ok(Self::NoTsIgnore),
             "noUnassignedVariables" => Ok(Self::NoUnassignedVariables),
+            "noUndeclaredClasses" => Ok(Self::NoUndeclaredClasses),
             "noUndeclaredDependencies" => Ok(Self::NoUndeclaredDependencies),
             "noUndeclaredEnvVars" => Ok(Self::NoUndeclaredEnvVars),
             "noUndeclaredVariables" => Ok(Self::NoUndeclaredVariables),
@@ -1897,6 +1906,7 @@ impl std::str::FromStr for RuleName {
             "noUnsafeOptionalChaining" => Ok(Self::NoUnsafeOptionalChaining),
             "noUnsafePlusOperands" => Ok(Self::NoUnsafePlusOperands),
             "noUntrustedLicenses" => Ok(Self::NoUntrustedLicenses),
+            "noUnusedClasses" => Ok(Self::NoUnusedClasses),
             "noUnusedExpressions" => Ok(Self::NoUnusedExpressions),
             "noUnusedFunctionParameters" => Ok(Self::NoUnusedFunctionParameters),
             "noUnusedImports" => Ok(Self::NoUnusedImports),
@@ -2146,6 +2156,9 @@ pub struct Rules {
     #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = r" The rule presets to use."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<SeverityOrGroup<A11y>>,
@@ -2324,8 +2337,15 @@ impl Rules {
             group.set_recommended(None);
         }
     }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
+    #[doc = r" Returns the current preset. Defaults to the recommended set"]
+    pub(crate) fn preset(&self) -> PresetConfig {
+        if matches!(self.recommended, Some(false)) {
+            PresetConfig::None
+        } else if let Some(preset) = &self.preset {
+            preset.clone()
+        } else {
+            PresetConfig::default()
+        }
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -2334,63 +2354,57 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(A11y::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(A11y::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Complexity::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Complexity::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Correctness::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Correctness::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.nursery.as_ref() {
-            group.collect_preset_rules(
-                !self.is_recommended_false() && biome_flags::is_unstable(),
-                &mut enabled_rules,
-            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() && biome_flags::is_unstable() {
-            enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Performance::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Performance::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Security::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Security::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Style::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Style::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Suspicious::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Suspicious::preset_as_filters(self.preset()));
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }

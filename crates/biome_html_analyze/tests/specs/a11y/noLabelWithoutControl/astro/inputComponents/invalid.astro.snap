@@ -1,0 +1,35 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<label>
+	<span>
+		<CustomInput />
+	</span>
+</label>
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <label>
+      │ ^^^^^^^
+  > 3 │ 	<span>
+  > 4 │ 		<CustomInput />
+  > 5 │ 	</span>
+  > 6 │ </label>
+      │ ^^^^^^^^
+    7 │ 
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```

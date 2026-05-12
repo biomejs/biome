@@ -1,0 +1,92 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <article role="article"></article>
+  <button role="button"></button>
+  <h1 role="heading" aria-level="1">title</h1>
+  <nav role="navigation"></nav>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <article role="article"></article>
+      │            ^^^^^^^^^^^^^^
+    4 │   <button role="button"></button>
+    5 │   <h1 role="heading" aria-level="1">title</h1>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ ··<article·role="article"></article>
+      │            --------------           
+
+```
+
+```
+invalid.vue:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
+  
+    2 │ <template>
+    3 │   <article role="article"></article>
+  > 4 │   <button role="button"></button>
+      │           ^^^^^^^^^^^^^
+    5 │   <h1 role="heading" aria-level="1">title</h1>
+    6 │   <nav role="navigation"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ ··<button·role="button"></button>
+      │           -------------          
+
+```
+
+```
+invalid.vue:5:7 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'heading' on the 'h1' element is redundant, because it is implied by its semantics.
+  
+    3 │   <article role="article"></article>
+    4 │   <button role="button"></button>
+  > 5 │   <h1 role="heading" aria-level="1">title</h1>
+      │       ^^^^^^^^^^^^^^
+    6 │   <nav role="navigation"></nav>
+    7 │ </template>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ ··<h1·role="heading"·aria-level="1">title</h1>
+      │       ---------------                         
+
+```
+
+```
+invalid.vue:6:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantics.
+  
+    4 │   <button role="button"></button>
+    5 │   <h1 role="heading" aria-level="1">title</h1>
+  > 6 │   <nav role="navigation"></nav>
+      │        ^^^^^^^^^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    6 │ ··<nav·role="navigation"></nav>
+      │        -----------------       
+
+```

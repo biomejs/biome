@@ -1,16 +1,9 @@
 use crate::{AnyJsonMemberName, JsonMember, JsonMemberList, JsonObjectValue};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::AstSeparatedList;
 
 impl JsonObjectValue {
     pub fn find_member(&self, name: &str) -> Option<JsonMember> {
         self.json_member_list().find_member(name)
-    }
-
-    pub fn with_json_member_list(self, list: JsonMemberList) -> Self {
-        Self::unwrap_cast(
-            self.into_syntax()
-                .splice_slots(1..=1, [Some(list.into_syntax().into())]),
-        )
     }
 }
 

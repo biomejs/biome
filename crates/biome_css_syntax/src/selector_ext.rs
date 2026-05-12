@@ -1,4 +1,4 @@
-use crate::{CssComplexSelector, CssCompoundSelector};
+use crate::{CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector};
 
 impl CssComplexSelector {
     ///
@@ -35,6 +35,20 @@ impl Iterator for CssComplexSelectorIterator {
             .right()
             .ok()
             .and_then(|r| r.as_css_compound_selector().cloned())
+    }
+}
+
+impl CssPseudoClassFunctionSelector {
+    /// Returns `true` if the given pseudo-class function selector is `:global(...)`.
+    ///
+    /// This is used by CSS and HTML module visitors to skip class selectors that
+    /// are globally scoped and cannot be traced to specific `class="..."` attribute
+    /// references.
+    pub fn is_global_pseudo(&self) -> bool {
+        self.name()
+            .ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("global"))
     }
 }
 

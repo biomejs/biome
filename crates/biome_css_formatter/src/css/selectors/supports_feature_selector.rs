@@ -17,12 +17,14 @@ impl FormatNodeRule<CssSupportsFeatureSelector> for FormatCssSupportsFeatureSele
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [group(&format_args![
                 selector_token.format(),
                 l_paren_token.format(),
-                soft_block_indent(&selector.format()),
+                soft_block_indent_with_maybe_space(&selector.format(), should_insert_space),
                 r_paren_token.format()
             ])]
         )
