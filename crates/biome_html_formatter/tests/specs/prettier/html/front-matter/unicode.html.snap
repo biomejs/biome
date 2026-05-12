@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/front-matter/unicode.html
+---
+
+# Input
+
+```html
+---
+title: "ABC 漢字 🇯🇵"
+---
+
+<!-- this is a comment -->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,6 +2,4 @@
+ title: "ABC 漢字 🇯🇵"
+ ---
+ 
+-
+-
+-<!-- this is a comment -
++<!-- this is a comment -->
+\ No newline at end of file
+```
+
+# Output
+
+```html
+---
+title: "ABC 漢字 🇯🇵"
+---
+
+<!-- this is a comment -->```
+
+# Errors
+```
+unicode.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Frontmatter is only valid inside Astro files.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │ title: "ABC 漢字 🇯🇵"
+  > 3 │ ---
+      │ ^^^
+    4 │ 
+    5 │ <!-- this is a comment -->
+  
+  i Remove it or rename the file to have the .astro extension.
+  
+
+```

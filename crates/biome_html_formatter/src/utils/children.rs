@@ -183,6 +183,12 @@ where
             // We do have to manually check to make sure the comment's text range is actually inside this node's text range. Some comments may be included in this call to `leading_trailing_comments` that are not actually part of this node.
 
             let mut trailing_comments_to_format = vec![];
+            for comment in f.comments().leading_comments(text_syntax) {
+                let comment_range = comment.piece().text_range();
+                if comment_range.end() <= value_token.text_range().start() {
+                    comment.mark_formatted();
+                }
+            }
             for comment in f.comments().leading_dangling_trailing_comments(text_syntax) {
                 let comment_range = comment.piece().text_range();
                 // TODO: might be able to make this a debug assertion instead

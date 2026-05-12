@@ -1,0 +1,195 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/comments/surrounding-empty-line.html
+---
+
+# Input
+
+```html
+<ul><!-- 123
+--><li>First</li><!-- 123
+456
+   789
+--><li>Second</li><!--
+
+
+    123
+       456
+          789
+
+
+--><li>Second</li><!--
+
+
+           123
+        456
+    789
+
+
+--></ul>
+<span><!--
+--><span>a</span><!--
+--><span>b</span><!--
+--></span>
+
+<span><!-- 1
+--><span>a</span><!-- 2
+--><span>b</span><!-- 3
+--></span>
+
+<span><!--
+1 --><span>a</span><!--
+2 --><span>b</span><!--
+3 --></span>
+
+123<!---->456
+
+123<!--x-->456
+
+<!-- A
+     B -->
+
+<!--
+The null hero's name is {{nullHero.name}}
+
+See console log:
+  TypeError: Cannot read property 'name' of null in [null]
+-->
+
+<!--
+    The null hero's name is {{nullHero.name}}
+
+    See console log:
+    TypeError: Cannot read property 'name' of null in [null]
+-->
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -28,28 +28,22 @@
+ </ul>
+ <span
+   ><!--
+---><span
+-    >a</span<!--
+--->
+-  ><span>b</span><!--
++--><span>a</span<!--
++-->><span>b</span><!--
+ --></span
+ >
+ 
+ <span
+   ><!-- 1
+---><span
+-    >a</span<!-- 2
+--->
+-  ><span>b</span><!-- 3
++--><span>a</span<!-- 2
++-->><span>b</span><!-- 3
+ --></span
+ >
+ 
+ <span
+   ><!--
+-1 --><span
+-    >a</span<!--
+-2 -->
+-  ><span>b</span><!--
++1 --><span>a</span<!--
++2 -->><span>b</span><!--
+ 3 --></span
+ >
+ 123<!---->456 123<!--x-->456
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -76,15 +76,9 @@
+           <interned 1> [
+             "<!--
+ -->",
+-            group("#element-17", expand: propagated, [
++            group("#element-17", [
+               group("#element-attr-group-id-18", ["<span", soft_line_break]),
+-              indent([
+-                soft_line_break,
+-                ">",
+-                fill([["a"]]),
+-                "</span<!--
+--->"
+-              ]),
++              indent([soft_line_break, ">", fill([["a"]]), "</span"]),
+               soft_line_break
+             ])
+           ]
+@@ -93,6 +87,8 @@
+           if_group_fits_on_line("#non text child-16", [soft_line_break]),
+           group("#non text child-19", expand: propagated, [
+             <interned 2> [
++              "<!--
++-->",
+               group("#element-20", [
+                 group("#element-attr-group-id-21", ["><span", soft_line_break]),
+                 indent([soft_line_break, ">", fill([["b"]]), "</span"]),
+@@ -121,15 +117,9 @@
+           <interned 3> [
+             "<!-- 1
+ -->",
+-            group("#element-26", expand: propagated, [
++            group("#element-26", [
+               group("#element-attr-group-id-27", ["<span", soft_line_break]),
+-              indent([
+-                soft_line_break,
+-                ">",
+-                fill([["a"]]),
+-                "</span<!-- 2
+--->"
+-              ]),
++              indent([soft_line_break, ">", fill([["a"]]), "</span"]),
+               soft_line_break
+             ])
+           ]
+@@ -138,6 +128,8 @@
+           if_group_fits_on_line("#non text child-25", [soft_line_break]),
+           group("#non text child-28", expand: propagated, [
+             <interned 4> [
++              "<!-- 2
++-->",
+               group("#element-29", [
+                 group("#element-attr-group-id-30", ["><span", soft_line_break]),
+                 indent([soft_line_break, ">", fill([["b"]]), "</span"]),
+@@ -166,15 +158,9 @@
+           <interned 5> [
+             "<!--
+ 1 -->",
+-            group("#element-35", expand: propagated, [
++            group("#element-35", [
+               group("#element-attr-group-id-36", ["<span", soft_line_break]),
+-              indent([
+-                soft_line_break,
+-                ">",
+-                fill([["a"]]),
+-                "</span<!--
+-2 -->"
+-              ]),
++              indent([soft_line_break, ">", fill([["a"]]), "</span"]),
+               soft_line_break
+             ])
+           ]
+@@ -183,6 +169,8 @@
+           if_group_fits_on_line("#non text child-34", [soft_line_break]),
+           group("#non text child-37", expand: propagated, [
+             <interned 6> [
++              "<!--
++2 -->",
+               group("#element-38", [
+                 group("#element-attr-group-id-39", ["><span", soft_line_break]),
+                 indent([soft_line_break, ">", fill([["b"]]), "</span"]),
+
+```
