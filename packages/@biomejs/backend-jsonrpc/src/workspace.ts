@@ -8796,14 +8796,14 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
-export interface DestructuringConfig {
-	array?: boolean;
-	object?: boolean;
-}
 /**
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export interface DestructuringConfig {
+	array?: boolean;
+	object?: boolean;
+}
 export type CheckInputType = "off" | "loose" | "strict";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
