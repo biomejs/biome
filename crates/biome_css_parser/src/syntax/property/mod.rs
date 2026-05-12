@@ -14,9 +14,10 @@ use crate::syntax::scss::{
     parse_scss_interpolated_property_name,
 };
 use crate::syntax::{
-    CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string,
-    is_nth_at_identifier, parse_any_value, parse_custom_identifier_with_keywords,
-    parse_dashed_identifier, parse_regular_identifier, parse_string,
+    CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_at_any_value_with_context,
+    is_at_dashed_identifier, is_at_identifier, is_at_string, is_nth_at_identifier,
+    parse_any_value_with_context, parse_custom_identifier_with_keywords, parse_dashed_identifier,
+    parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -412,20 +413,39 @@ impl ParseNodeList for GenericComponentValueList {
 }
 
 #[inline]
-pub(crate) fn is_at_generic_component_value(p: &mut CssParser) -> bool {
-    is_at_any_value(p) || is_at_generic_delimiter(p)
+pub(crate) fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
+    parse_generic_component_value_with_context(
+        p,
+        ValueParsingContext::new(p, ValueParsingMode::ScssAware),
+    )
 }
 
 #[inline]
-pub(crate) fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_generic_component_value(p) {
+pub(crate) fn is_at_generic_component_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> bool {
+    is_at_any_value_with_context(p, context) || is_at_generic_delimiter(p)
+}
+
+/// Parses a generic value while preserving the caller's recovery context.
+///
+/// SCSS expressions reuse generic CSS values for identifiers, numbers, and
+/// functions, but `@include foo(a (...))` and `color: rgba (...)` need different
+/// `ident (` handling.
+#[inline]
+pub(crate) fn parse_generic_component_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
+    if !is_at_generic_component_value_with_context(p, context) {
         return Absent;
     }
 
     if is_at_generic_delimiter(p) {
         parse_generic_delimiter(p)
     } else {
-        parse_any_value(p)
+        parse_any_value_with_context(p, context)
     }
 }
 

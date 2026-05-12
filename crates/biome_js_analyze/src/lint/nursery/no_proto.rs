@@ -83,22 +83,20 @@ impl Rule for NoProto {
 
         match node {
             NoProtoQuery::AnyJsAssignment(assignment) => match assignment {
-                AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
+                AnyJsAssignment::JsComputedMemberAssignment(assignment)
                     if assignment
                         .member()
                         .ok()?
                         .to_trimmed_text()
                         .trim_matches(['\'', '"', '`'])
                         == "__proto__"
-                    {
+                    => {
                         return Some(());
                     }
-                }
-                AnyJsAssignment::JsStaticMemberAssignment(assignment) => {
-                    if assignment.member().ok()?.to_trimmed_text() == "__proto__" {
+                AnyJsAssignment::JsStaticMemberAssignment(assignment)
+                    if assignment.member().ok()?.to_trimmed_text() == "__proto__" => {
                         return Some(());
                     }
-                }
                 _ => {}
             },
             NoProtoQuery::AnyJsMemberExpression(expr) => match expr {

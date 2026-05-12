@@ -2,8 +2,9 @@ use std::collections::HashSet;
 
 use crate::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
-    AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement, JsxOpeningElement,
-    JsxSelfClosingElement, JsxString, inner_string_text, static_value::StaticValue,
+    AnyJsxObjectName, AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement,
+    JsxMemberName, JsxOpeningElement, JsxSelfClosingElement, JsxString, inner_string_text,
+    static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
@@ -57,6 +58,14 @@ impl AnyJsxTag {
             Self::JsxFragment(_) => None,
             Self::JsxSelfClosingElement(element) => Some(element.attributes()),
         }
+    }
+
+    /// Returns `true` if the tag name matches the given name.
+    /// See [`AnyJsxElementName::matches_name`]. Fragments never match.
+    pub fn matches_name(&self, expected: &str) -> bool {
+        self.name()
+            .and_then(|name| name.matches_name(expected).ok())
+            .unwrap_or(false)
     }
 }
 
@@ -346,6 +355,145 @@ impl AnyJsxElementName {
             Self::JsMetavariable(metavariable) => metavariable.value_token(),
         }
     }
+
+    /// Checks whether the current component matches the expected name.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make::{
+    ///     ident, js_name, jsx_member_name, jsx_name, jsx_namespace_name,
+    ///     jsx_reference_identifier, token,
+    /// };
+    /// use biome_js_syntax::{AnyJsxElementName, AnyJsxObjectName, T};
+    ///
+    /// // Lowercase HTML tag: `<div />`
+    /// let div = AnyJsxElementName::JsxName(jsx_name(ident("div")));
+    /// assert!(div.matches_name("div").unwrap());
+    /// assert!(!div.matches_name("span").unwrap());
+    ///
+    /// // Component reference: `<Text />`
+    /// let text = AnyJsxElementName::JsxReferenceIdentifier(
+    ///     jsx_reference_identifier(ident("Text")),
+    /// );
+    /// assert!(text.matches_name("Text").unwrap());
+    /// assert!(!text.matches_name("View").unwrap());
+    ///
+    /// // Namespaced name: `<svg:text />`
+    /// let svg_text = AnyJsxElementName::JsxNamespaceName(jsx_namespace_name(
+    ///     jsx_name(ident("svg")),
+    ///     token(T![:]),
+    ///     jsx_name(ident("text")),
+    /// ));
+    /// assert!(svg_text.matches_name("svg:text").unwrap());
+    /// assert!(!svg_text.matches_name("svg").unwrap());
+    ///
+    /// // Member expression: `<Animated.Text />`
+    /// let animated_text = AnyJsxElementName::JsxMemberName(jsx_member_name(
+    ///     AnyJsxObjectName::JsxReferenceIdentifier(
+    ///         jsx_reference_identifier(ident("Animated")),
+    ///     ),
+    ///     token(T![.]),
+    ///     js_name(ident("Text")),
+    /// ));
+    /// assert!(animated_text.matches_name("Animated.Text").unwrap());
+    /// assert!(!animated_text.matches_name("Animated").unwrap());
+    /// ```
+    pub fn matches_name(&self, expected: &str) -> SyntaxResult<bool> {
+        match self {
+            Self::JsxName(name) => Ok(name.value_token()?.text_trimmed() == expected),
+            Self::JsxReferenceIdentifier(identifier) => {
+                Ok(identifier.value_token()?.text_trimmed() == expected)
+            }
+            Self::JsxNamespaceName(namespace_name) => {
+                let Some((namespace, local)) = expected.split_once(':') else {
+                    return Ok(false);
+                };
+                Ok(
+                    namespace_name.namespace()?.value_token()?.text_trimmed() == namespace
+                        && namespace_name.name()?.value_token()?.text_trimmed() == local,
+                )
+            }
+            Self::JsxMemberName(member) => member.matches_name(expected),
+            Self::JsMetavariable(_) => Ok(false),
+        }
+    }
+}
+
+impl JsxMemberName {
+    /// Returns `Ok(true)` if this member chain matches the given dotted name,
+    /// e.g. `Animated.Text`. Comparison walks the CST from the last member
+    /// back through the object chain, matching one segment at a time against
+    /// `expected.split('.')` without allocating a joined string.
+    ///
+    /// Namespaced names anywhere in the object chain always resolve to
+    /// `Ok(false)` because JSX member chains cannot nest namespaces.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make::{
+    ///     ident, js_name, jsx_member_name, jsx_reference_identifier, token,
+    /// };
+    /// use biome_js_syntax::{AnyJsxObjectName, T};
+    ///
+    /// // Simple member chain: `<Animated.Text />`
+    /// let animated_text = jsx_member_name(
+    ///     AnyJsxObjectName::JsxReferenceIdentifier(
+    ///         jsx_reference_identifier(ident("Animated")),
+    ///     ),
+    ///     token(T![.]),
+    ///     js_name(ident("Text")),
+    /// );
+    /// assert!(animated_text.matches_name("Animated.Text").unwrap());
+    /// assert!(!animated_text.matches_name("Animated.View").unwrap());
+    /// // The expected path must fully cover the CST chain.
+    /// assert!(!animated_text.matches_name("Text").unwrap());
+    /// assert!(!animated_text.matches_name("Root.Animated.Text").unwrap());
+    ///
+    /// // Nested member chain: `<Root.Animated.Text />`
+    /// let nested = jsx_member_name(
+    ///     AnyJsxObjectName::JsxMemberName(animated_text),
+    ///     token(T![.]),
+    ///     js_name(ident("Inner")),
+    /// );
+    /// assert!(nested.matches_name("Animated.Text.Inner").unwrap());
+    /// assert!(!nested.matches_name("Animated.Text").unwrap());
+    /// ```
+    pub fn matches_name(&self, expected: &str) -> SyntaxResult<bool> {
+        let mut segments = expected.rsplit('.');
+
+        let Some(last_expected) = segments.next() else {
+            return Ok(false);
+        };
+        if self.member()?.value_token()?.text_trimmed() != last_expected {
+            return Ok(false);
+        }
+
+        let mut object = self.object()?;
+        while let Some(expected_segment) = segments.next() {
+            match object {
+                AnyJsxObjectName::JsxMemberName(inner) => {
+                    if inner.member()?.value_token()?.text_trimmed() != expected_segment {
+                        return Ok(false);
+                    }
+                    object = inner.object()?;
+                }
+                AnyJsxObjectName::JsxReferenceIdentifier(identifier) => {
+                    // The reference identifier marks the root of the chain.
+                    // The expected path must end here too, otherwise it is
+                    // longer than the actual CST chain.
+                    return Ok(identifier.value_token()?.text_trimmed() == expected_segment
+                        && segments.next().is_none());
+                }
+                AnyJsxObjectName::JsxNamespaceName(_) => return Ok(false),
+            }
+        }
+
+        // The expected path ran out before the CST chain did, meaning the CST
+        // chain is longer than the expected path.
+        Ok(false)
+    }
 }
 
 declare_node_union! {
@@ -369,6 +517,12 @@ impl AnyJsxElement {
 
     pub fn name_value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         self.name()?.name_value_token()
+    }
+
+    /// Returns `Ok(true)` if the element name matches the given name.
+    /// See [`AnyJsxElementName::matches_name`].
+    pub fn matches_name(&self, expected: &str) -> SyntaxResult<bool> {
+        self.name()?.matches_name(expected)
     }
 
     /// Returns `true` if the current element is actually a component.

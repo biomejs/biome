@@ -1,7 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    expected_scss_expression, is_at_scss_identifier, parse_scss_expression_until,
-    parse_scss_identifier,
+    expected_scss_expression, is_at_scss_variable, parse_scss_expression_until, parse_scss_variable,
 };
 use biome_css_syntax::CssSyntaxKind::{
     self, CSS_BOGUS_PARAMETER, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,
@@ -18,16 +17,19 @@ const SCSS_PARAMETER_DEFAULT_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![...]];
 const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')'], T!['{']];
 
-/// Parses the SCSS parameter list used by `@mixin` and `@function`.
+/// Parses the SCSS parameter list used by `@mixin`, `@function`, and
+/// `@include ... using (...)`.
 ///
 /// # Example
 ///
 /// ```scss
-/// @mixin button($radius: 4px, $args...) {}
-///              ^^^^^^^^^^^^^^^^^^^^^^^^
+/// @include button using ($value, $fallback) {}
+///                       ^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(super) fn parse_scss_parameter_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_list(p) {
@@ -50,14 +52,14 @@ fn is_at_scss_parameter_list(p: &mut CssParser) -> bool {
 
 #[inline]
 fn parse_scss_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_identifier(p) {
+    if !is_at_scss_variable(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    // We only enter this branch after `is_at_scss_identifier`, so `Absent` is impossible here.
-    parse_scss_identifier(p).ok();
+    // We only enter this branch after `is_at_scss_variable`, so `Absent` is impossible here.
+    parse_scss_variable(p).ok();
     // The default value is optional in the grammar, so `Absent` is expected when `:` is missing.
     parse_scss_parameter_default_value(p).ok();
 
@@ -75,7 +77,9 @@ fn parse_scss_parameter(p: &mut CssParser) -> ParsedSyntax {
 ///                       ^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 fn parse_scss_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_default_value(p) {

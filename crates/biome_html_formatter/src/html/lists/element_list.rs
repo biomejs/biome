@@ -193,8 +193,8 @@ use crate::{
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElement,
-    HtmlElementList, HtmlRoot, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,
+    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
 
@@ -313,6 +313,13 @@ struct ChildrenMeta {
     /// `true` if children contains a block-like element
     has_block_element: bool,
 
+    /// `true` if children contains any non-text child (element, expression, etc.)
+    has_non_text_child: bool,
+
+    /// `true` if children contains text (Word) content
+    /// Comments are not included.
+    has_word: bool,
+
     /// `true` if there are multiple non-text children
     multiple_block_elements: bool,
 }
@@ -326,6 +333,7 @@ impl FormatHtmlElementList {
         for child in children {
             match child {
                 HtmlChild::NonText(element) => {
+                    meta.has_non_text_child = true;
                     // Check if this is a block element
                     let display = get_element_css_display(element);
                     if display.is_block_like() {
@@ -334,7 +342,14 @@ impl FormatHtmlElementList {
                     }
                 }
                 HtmlChild::Verbatim(_) => {
+                    meta.has_non_text_child = true;
                     block_element_count += 1;
+                }
+                HtmlChild::Comment(_) => {
+                    meta.has_non_text_child = true;
+                }
+                HtmlChild::Word(_) => {
+                    meta.has_word = true;
                 }
                 _ => {}
             }
@@ -364,6 +379,12 @@ impl FormatHtmlElementList {
 
         // Trim trailing new lines from children
         let mut children = children;
+        let has_leading_newline = children
+            .first()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
+        let had_trailing_newline = children
+            .last()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
         if !self.is_container_whitespace_sensitive {
             while matches!(
                 children.last(),
@@ -400,12 +421,32 @@ impl FormatHtmlElementList {
                 }
             }
 
-            // Force multiline if there was a leading newline AND there are block elements
-            // This respects the user's intent to break when they have:
+            // Force multiline if there was a leading newline AND:
+            // - There are block elements (original behavior), OR
+            // - Children are exclusively non-text (no mixed text content)
+            //
+            // The first case handles block elements mixed with text:
+            // <div>a<div>b</div>c</div>
+            //
+            // The second case preserves the user's intent to break non-text children:
             // <div>
-            //   <div>...</div>
+            //   <span>...</span>
             // </div>
-            if had_leading_newline && children_meta.has_block_element {
+            // <div>
+            //   {expression}
+            // </div>
+            if had_leading_newline
+                && (children_meta.has_block_element
+                    || (children_meta.has_non_text_child && !children_meta.has_word))
+            {
+                force_multiline = true;
+            }
+
+            if self.is_container_whitespace_sensitive
+                && has_leading_newline
+                && had_trailing_newline
+                && has_single_interpolation_child(&children)
+            {
                 force_multiline = true;
             }
 
@@ -442,13 +483,21 @@ impl FormatHtmlElementList {
                 if self.is_container_whitespace_sensitive && child.is_any_whitespace() {
                     if is_first_child {
                         // Leading whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         is_first_child = false;
                         last = Some(child);
                         continue;
                     } else if is_last_child {
                         // Trailing whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         last = Some(child);
                         continue;
                     }
@@ -920,6 +969,22 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
+}
+
+fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {
+    let mut meaningful_children = children.iter().filter(|child| !child.is_any_whitespace());
+
+    let Some(HtmlChild::NonText(AnyHtmlElement::AnyHtmlContent(
+        AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+            | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+        ),
+    ))) = meaningful_children.next()
+    else {
+        return false;
+    };
+
+    meaningful_children.next().is_none()
 }
 
 fn format_partial_closing_tag(

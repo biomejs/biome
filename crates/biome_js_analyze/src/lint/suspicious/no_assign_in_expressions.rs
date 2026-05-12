@@ -72,6 +72,12 @@ impl Rule for NoAssignInExpressions {
             return None;
         }
 
+        // Skip assignments in Svelte const blocks ({@const name = value})
+        // These are declaration statements, not accidental assignments in expressions
+        if file_source.is_svelte_const_block() {
+            return None;
+        }
+
         let assign = ctx.query();
         let mut ancestor = assign
             .syntax()

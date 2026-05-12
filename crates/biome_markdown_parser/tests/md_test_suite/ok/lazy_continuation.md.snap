@@ -271,14 +271,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@334..335 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@335..336 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@335..373 " This list item ends lazy continuation" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@336..373 "This list item ends lazy continuation" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@373..374 "\n" [] [],
@@ -571,16 +571,16 @@ MdDocument {
     15: MD_BULLET_LIST_ITEM@334..374
       0: MD_BULLET_LIST@334..374
         0: MD_BULLET@334..374
-          0: MD_LIST_MARKER_PREFIX@334..335
+          0: MD_LIST_MARKER_PREFIX@334..336
             0: MD_INDENT_TOKEN_LIST@334..334
             1: MINUS@334..335 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@335..335
-          1: MD_BLOCK_LIST@335..374
-            0: MD_PARAGRAPH@335..374
-              0: MD_INLINE_ITEM_LIST@335..374
-                0: MD_TEXTUAL@335..373
-                  0: MD_TEXTUAL_LITERAL@335..373 " This list item ends lazy continuation" [] []
+            2: MD_LIST_POST_MARKER_SPACE@335..336 " " [] []
+            3: MD_INDENT_TOKEN_LIST@336..336
+          1: MD_BLOCK_LIST@336..374
+            0: MD_PARAGRAPH@336..374
+              0: MD_INLINE_ITEM_LIST@336..374
+                0: MD_TEXTUAL@336..373
+                  0: MD_TEXTUAL_LITERAL@336..373 "This list item ends lazy continuation" [] []
                 1: MD_TEXTUAL@373..374
                   0: MD_TEXTUAL_LITERAL@373..374 "\n" [] []
               1: (empty)

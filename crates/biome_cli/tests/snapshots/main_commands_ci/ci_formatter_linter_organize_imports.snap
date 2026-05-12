@@ -92,14 +92,15 @@ file.js:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━�
 ```block
 file.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The imports and exports are not sorted.
+  × Sort these imports.
   
   > 2 │ import { B, C } from "b.js"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ import A from "a.js"
+  > 3 │ import A from "a.js"
+      │ ^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   
     2   │ - import·{·B,·C·}·from·"b.js"

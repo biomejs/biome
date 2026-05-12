@@ -108,6 +108,33 @@ pub(crate) fn unterminated_fenced_code(
     ))
 }
 
+/// Backtick fence info string contains a backtick.
+///
+/// Per CommonMark §4.5, the info string of a backtick-fenced code block must
+/// not contain any backtick characters. When this happens, the line is not a
+/// fenced code block — it falls through to paragraph parsing — so users get a
+/// silent demotion without this diagnostic.
+///
+/// ````markdown
+/// ```lang`with-backtick`
+///     ^ stray backtick here
+/// ````
+///
+/// `range` must point at the offending backtick (not the whole info string).
+pub(crate) fn info_string_contains_backtick(
+    p: &MarkdownParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Backtick fence info string cannot contain backtick characters.",
+        range,
+    )
+    .with_detail(range, "stray backtick here")
+    .with_hint(
+        "Use a tilde fence instead, or remove the backtick. Otherwise, the line is parsed as a paragraph, not a code block.",
+    )
+}
+
 /// Block quote nesting too deep.
 ///
 /// ```markdown

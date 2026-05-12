@@ -6,7 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
+    AnyJsFunction, JsFileSource, JsSyntaxToken, Language, TsAsExpression, TsReferenceType,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions;
@@ -64,12 +64,19 @@ declare_lint_rule! {
 
 impl Rule for NoUndeclaredVariables {
     type Query = SemanticServices;
-    type State = (TextRange, Box<str>);
+    type State = JsSyntaxToken;
     type Signals = Box<[Self::State]>;
     type Options = NoUndeclaredVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        ctx.query()
+        let model = ctx.query();
+        let source_type = ctx.source_type::<JsFileSource>();
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+        let flavor = model.flavor();
+
+        model
             .all_unresolved_references()
             .filter_map(|reference| {
                 let identifier = reference.tree();
@@ -80,17 +87,19 @@ impl Rule for NoUndeclaredVariables {
 
                 let token = identifier.value_token().ok()?;
                 let text = token.text_trimmed();
+                // Semantic resolution handles declared `$store` bindings; this fallback keeps
+                // configured globals and embedded bindings aligned on `store`.
+                let store_name = flavor.store_reference_name(text);
 
-                let source_type = ctx.source_type::<JsFileSource>();
-
-                if ctx.is_global(text) {
+                if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name))
+                {
                     return None;
                 }
 
-                let embedded_bindings = ctx
-                    .get_service::<EmbeddedBindings>()
-                    .expect("embedded bindings service");
-                if embedded_bindings.contains_binding(text) {
+                if embedded_bindings.contains_binding(text)
+                    || store_name
+                        .is_some_and(|store_name| embedded_bindings.contains_binding(store_name))
+                {
                     return None;
                 }
 
@@ -121,20 +130,18 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
-                let span = token.text_trimmed_range();
-                let text = text.into();
-                Some((span, text))
+                Some(token)
             })
             .collect::<Vec<_>>()
             .into_boxed_slice()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (span, name): &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            *span,
+            token.text_trimmed_range(),
             markup! {
-                "The "<Emphasis>{name.as_ref()}</Emphasis>" variable is undeclared."
+                "The "<Emphasis>{token.text_trimmed()}</Emphasis>" variable is undeclared."
             },
         ).note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."

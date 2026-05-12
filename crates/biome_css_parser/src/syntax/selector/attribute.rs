@@ -2,7 +2,10 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
-use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
+use crate::syntax::scss::{
+    is_at_scss_interpolated_string, is_at_scss_interpolation, is_nth_at_scss_interpolation,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_string,
+};
 use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -78,10 +81,11 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
     p.bump_any();
     parse_attribute_matcher_value(p).or_add_diagnostic(p, expected_any_attribute_matcher_name);
 
+    // `html[lang=prefix-#{$locale ]`: let the missing `]` check report EOF.
     let modifier = p.cur();
     if modifier.is_attribute_modifier_keyword() {
         p.bump(modifier);
-    } else if modifier != T![']'] {
+    } else if modifier != T![']'] && modifier != EOF {
         // if we have an invalid modifier, we should add a diagnostic and bump it
         let diagnostic = expected_any_attribute_modifier(p, p.cur_range());
         p.error(diagnostic);
@@ -93,7 +97,18 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attribute_matcher_value(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
+    is_at_scss_interpolated_attribute_matcher_value(p)
+        || is_at_identifier(p)
+        || is_at_string(p)
+        || is_at_scss_interpolated_string(p)
+}
+
+#[inline]
+fn is_at_scss_interpolated_attribute_matcher_value(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+        || is_at_identifier(p)
+            && is_nth_at_scss_interpolation(p, 1)
+            && !p.has_nth_preceding_whitespace(1)
 }
 #[inline]
 fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
@@ -103,7 +118,9 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if is_at_scss_interpolated_string(p) {
+    if is_at_scss_interpolated_attribute_matcher_value(p) {
+        parse_scss_interpolated_identifier(p).ok();
+    } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p).ok();
     } else if is_at_string(p) {
         parse_string(p).ok();

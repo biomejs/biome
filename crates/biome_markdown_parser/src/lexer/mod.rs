@@ -13,7 +13,10 @@ use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::lookup_byte;
 
-use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use crate::syntax::{
+    MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
+    MIN_HARD_BREAK_TRAILING_SPACES, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES,
+};
 
 /// Lexer context for different markdown parsing modes
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -21,12 +24,8 @@ pub enum MarkdownLexContext {
     /// Normal markdown parsing with inline element detection.
     #[default]
     Regular,
-    /// Inside fenced code block - no markdown parsing.
-    #[expect(dead_code)]
-    FencedCodeBlock,
-    /// Inside HTML block - minimal markdown parsing.
-    #[expect(dead_code)]
-    HtmlBlock,
+    /// Inside code info strings. Newlines end them.
+    CodeInfoString,
     /// Inside link definition (after `]:`). Whitespace separates destination from title.
     LinkDefinition,
     /// Inside inline code span. Backslashes are literal per CommonMark §6.1.
@@ -44,6 +43,10 @@ pub enum MarkdownLexContext {
     /// separately. This allows the parser to consume trailing spaces as
     /// Whitespace trivia without swallowing the newline.
     HeadingContent,
+    /// After an ordered list marker (e.g. `1.`). Consumes only leading
+    /// spaces/tabs into a single token so the parser can capture them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -56,19 +59,15 @@ impl LexContext for MarkdownLexContext {
 /// Re-lexing context for when token interpretation changes.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
-    /// Re-lex using regular markdown rules.
-    #[expect(dead_code)]
-    Regular,
     /// Re-lex for link definition (whitespace is significant).
     LinkDefinition,
     /// Re-lex for emphasis (emit single tokens for partial consumption).
     EmphasisInline,
-    /// Re-lex for thematic break parts decomposition.
-    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
-    /// Currently unused: we use `force_relex_in_context(MarkdownLexContext::ThematicBreakParts)`
-    /// directly, but kept for symmetry with the lex context enum.
-    #[expect(dead_code)]
-    ThematicBreakParts,
+    /// Inside the code block list, where strings doesn't have particular meaning
+    CodeInfoString,
+    /// After an ordered list marker. Splits leading whitespace from content
+    /// so the parser can capture it as `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -138,6 +137,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         if !kind.is_trivia()
             && kind != NEWLINE
             && kind != MD_HARD_LINE_LITERAL
+            && kind != UNICODE_BOM
             && !(kind == MD_TEXTUAL_LITERAL
                 && self.after_newline
                 && self.current_text_is_whitespace())
@@ -235,6 +235,14 @@ impl<'src> MarkdownLexer<'src> {
         context: MarkdownLexContext,
     ) -> MarkdownSyntaxKind {
         let dispatched = lookup_byte(current);
+        // Info strings are plain text (CommonMark https://spec.commonmark.org/0.31.2/#info-string) — only newlines end them.
+        if matches!(context, MarkdownLexContext::CodeInfoString) {
+            return if current == b'\n' || current == b'\r' {
+                self.consume_newline()
+            } else {
+                self.consume_code_info_string()
+            };
+        }
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
             // 1. Check newline first (highest priority - block separator)
@@ -248,6 +256,8 @@ impl<'src> MarkdownLexer<'src> {
             WHS => {
                 if current == b'\n' || current == b'\r' {
                     self.consume_newline()
+                } else if matches!(context, MarkdownLexContext::ListPostMarker) {
+                    self.consume_list_post_marker_whitespace()
                 } else if matches!(context, MarkdownLexContext::ThematicBreakParts) {
                     // In ThematicBreakParts context, emit one MD_INDENT_CHAR per space/tab.
                     self.advance(1);
@@ -260,13 +270,18 @@ impl<'src> MarkdownLexer<'src> {
                     // In link definition context, whitespace separates tokens.
                     // We consume it as textual literal so it's not treated as trivia by the parser.
                     self.consume_link_definition_whitespace()
-                } else if self.after_newline && matches!(current, b' ' | b'\t') {
+                } else if self.after_newline && is_space_or_tab_byte(current) {
                     // At line start, emit single whitespace tokens to allow
                     // indentation handling and quote marker spacing.
                     self.consume_single_whitespace_as_text()
-                } else if matches!(current, b' ' | b'\t') && self.is_after_block_quote_marker() {
+                } else if is_space_or_tab_byte(current) && self.is_after_block_quote_marker() {
                     // After a block quote marker, emit a single whitespace token
                     // so the parser can skip the optional space.
+                    self.consume_single_whitespace_as_text()
+                } else if is_space_or_tab_byte(current) && self.is_in_list_marker_whitespace() {
+                    // While consuming the leading whitespace after a list marker,
+                    // emit one space/tab per token so the parser can distinguish
+                    // the optional post-marker separator from content indent.
                     self.consume_single_whitespace_as_text()
                 } else if current == b' '
                     && !matches!(context, MarkdownLexContext::HeadingContent)
@@ -307,6 +322,13 @@ impl<'src> MarkdownLexer<'src> {
             // = at line start could be setext heading underline
             EQL if self.after_newline => self.consume_setext_underline_or_textual(),
             _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+
                 // Check for ordered list markers: digits followed by . or ) at line start
                 if current.is_ascii_digit()
                     && (self.after_newline || self.force_ordered_list_marker)
@@ -512,13 +534,6 @@ impl<'src> MarkdownLexer<'src> {
             .all(|b| *b == b' ' || *b == b'\t')
     }
 
-    /// Bumps the current byte and creates a lexed token of the passed in kind.
-    /// Reserved for single-byte token consumption patterns.
-    #[expect(dead_code)]
-    fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
-        self.advance(1);
-        tok
-    }
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
@@ -573,7 +588,9 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // Check for hard line break: 2+ spaces followed by newline
-        if space_count >= 2 && matches!(self.current_byte(), Some(b'\n' | b'\r')) {
+        if space_count >= MIN_HARD_BREAK_TRAILING_SPACES
+            && matches!(self.current_byte(), Some(b'\n' | b'\r'))
+        {
             // Consume the newline as part of the hard line break
             match self.current_byte() {
                 Some(b'\n') => {
@@ -610,7 +627,40 @@ impl<'src> MarkdownLexer<'src> {
         MD_TEXTUAL_LITERAL
     }
 
+    /// Consumes the tokens of a code info string
+    fn consume_code_info_string(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            if byte == b'\n' || byte == b'\r' {
+                break;
+            } else {
+                self.advance(1);
+            }
+        }
+
+        MD_TEXTUAL_LITERAL
+    }
+
     /// Consume a single whitespace character at line start as text.
+    /// Consumes all leading spaces/tabs after an ordered list marker into a
+    /// single token. Per CommonMark §5.2, 1–4 spaces after the marker
+    /// determine the continuation indent; the parser captures them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    fn consume_list_post_marker_whitespace(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            if byte == b' ' || byte == b'\t' {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        MD_TEXTUAL_LITERAL
+    }
+
     fn consume_single_whitespace_as_text(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
@@ -681,6 +731,118 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         saw_marker
+    }
+
+    /// Returns true if the current whitespace is part of the leading
+    /// space/tab run immediately following a top-level list marker.
+    fn is_in_list_marker_whitespace(&self) -> bool {
+        let bytes = self.source.as_bytes();
+        let Some(&current) = bytes.get(self.position) else {
+            return false;
+        };
+        if !is_space_or_tab_byte(current) {
+            return false;
+        }
+
+        let before = &self.source[..self.position];
+        let last_newline_pos = before.rfind(['\n', '\r']);
+        let line_start = match last_newline_pos {
+            Some(pos) => {
+                let before_bytes = before.as_bytes();
+                if before_bytes.get(pos) == Some(&b'\r')
+                    && before_bytes.get(pos + 1) == Some(&b'\n')
+                {
+                    pos + 2
+                } else {
+                    pos + 1
+                }
+            }
+            None => 0,
+        };
+
+        let prefix = &bytes[line_start..self.position];
+        let mut idx = 0usize;
+        let mut indent = 0usize;
+
+        while prefix.get(idx).copied().is_some_and(is_space_or_tab_byte) {
+            if prefix[idx] == b'\t' {
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
+            } else {
+                indent += 1;
+            }
+            if indent > MAX_BLOCK_PREFIX_INDENT {
+                return false;
+            }
+            idx += 1;
+        }
+
+        if idx >= prefix.len() {
+            return false;
+        }
+
+        match lookup_byte(prefix[idx]) {
+            MIN | MUL | PLS => {
+                idx += 1;
+            }
+            ZER | DIG => {
+                let digit_start = idx;
+                while prefix.get(idx).copied().is_some_and(is_ascii_digit_byte) {
+                    idx += 1;
+                    if idx - digit_start > MAX_ORDERED_LIST_MARKER_DIGITS {
+                        return false;
+                    }
+                }
+
+                let Some(delimiter) = prefix.get(idx).copied() else {
+                    return false;
+                };
+                if !matches!(lookup_byte(delimiter), PRD | PNC) {
+                    return false;
+                }
+                idx += 1;
+            }
+            _ => return false,
+        }
+
+        let trailing = &prefix[idx..];
+        if trailing.is_empty() {
+            let mut saw_tab = current == b'\t';
+            let mut next = self.position + 1;
+            while bytes.get(next).copied().is_some_and(is_space_or_tab_byte) {
+                if bytes[next] == b'\t' {
+                    saw_tab = true;
+                }
+                next += 1;
+            }
+
+            if !saw_tab {
+                return false;
+            }
+
+            if current == b'\t' {
+                return !bytes
+                    .get(self.position + 1)
+                    .copied()
+                    .is_some_and(is_space_or_tab_byte);
+            }
+
+            return true;
+        }
+
+        if !trailing.iter().copied().all(is_space_or_tab_byte) || trailing[0] != b' ' {
+            return false;
+        }
+
+        let mut saw_tab = current == b'\t' || trailing.contains(&b'\t');
+        let mut next = self.position + 1;
+        while bytes.get(next).copied().is_some_and(is_space_or_tab_byte) {
+            if bytes[next] == b'\t' {
+                saw_tab = true;
+            }
+            next += 1;
+        }
+
+        saw_tab
     }
 
     /// Consumes thematic break, setext underline, or emphasis markers (*, -, _).
@@ -767,7 +929,7 @@ impl<'src> MarkdownLexer<'src> {
         // Check if this is a valid thematic break: 3+ of same char, only whitespace between,
         // followed by newline or EOF, AND must be at line start (CommonMark requirement)
         if self.after_newline
-            && count >= 3
+            && count >= MIN_THEMATIC_BREAK_RUN
             && matches!(self.current_byte(), Some(b'\n' | b'\r') | None)
         {
             return MD_THEMATIC_BREAK_LITERAL;
@@ -834,7 +996,7 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
                 digit_count += 1;
                 // CommonMark limits to 9 digits max
-                if digit_count > 9 {
+                if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                     // Too many digits, not a valid marker
                     self.position = start_position;
                     return self.consume_textual(MarkdownLexContext::Regular);
@@ -938,7 +1100,7 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // At line start with 3+ backticks: fenced code block
-        if self.after_newline && count >= 3 {
+        if self.after_newline && count >= MIN_FENCE_RUN_LENGTH {
             self.advance(count);
             return TRIPLE_BACKTICK;
         }
@@ -963,7 +1125,7 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         // At line start with 3+ tildes: fenced code block
-        if self.after_newline && count >= 3 {
+        if self.after_newline && count >= MIN_FENCE_RUN_LENGTH {
             self.advance(count);
             return TRIPLE_TILDE;
         }
@@ -1138,7 +1300,7 @@ impl<'src> MarkdownLexer<'src> {
 
         while pos < bytes.len() && bytes[pos].is_ascii_digit() {
             digit_count += 1;
-            if digit_count > 9 {
+            if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                 return false;
             }
             pos += 1;
@@ -1208,7 +1370,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Check if current position starts a potential hard line break pattern.
-    /// Returns true if there are 2+ spaces followed by a newline.
+    /// Returns true if enough trailing spaces are followed by a newline.
     fn is_potential_hard_line_break(&self) -> bool {
         // Must have at least one space at current position (already checked by caller)
         let mut offset = 0;
@@ -1220,11 +1382,17 @@ impl<'src> MarkdownLexer<'src> {
             offset += 1;
         }
 
-        // Check if followed by newline
-        if space_count >= 2
-            && let Some(next) = self.byte_at(offset)
-        {
-            return next == b'\n' || next == b'\r';
+        if space_count >= MIN_HARD_BREAK_TRAILING_SPACES {
+            // A hard line break requires enough trailing spaces followed by a
+            // newline (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
+            // Trailing spaces at EOF are never a valid hard line break,
+            // but they must be split from the preceding text so the
+            // formatter can strip them without idempotency issues.
+            match self.byte_at(offset) {
+                None => return true,
+                Some(b'\n' | b'\r') => return true,
+                _ => {}
+            }
         }
 
         false
@@ -1237,16 +1405,26 @@ impl<'src> MarkdownLexer<'src> {
     }
 }
 
+#[inline]
+fn is_space_or_tab_byte(byte: u8) -> bool {
+    byte == b' ' || byte == b'\t'
+}
+
+#[inline]
+fn is_ascii_digit_byte(byte: u8) -> bool {
+    matches!(lookup_byte(byte), ZER | DIG)
+}
+
 impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
         let old_position = self.position;
         self.position = u32::from(self.current_start) as usize;
 
         let lex_context = match context {
-            MarkdownReLexContext::Regular => MarkdownLexContext::Regular,
             MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
             MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
-            MarkdownReLexContext::ThematicBreakParts => MarkdownLexContext::ThematicBreakParts,
+            MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
+            MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
         };
 
         let re_lexed_kind = match self.current_byte() {

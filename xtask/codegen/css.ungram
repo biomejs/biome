@@ -85,7 +85,7 @@ CssRootItemList = AnyCssRootItem*
 
 AnyCssRootItem =
 	AnyCssRule
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| CssBogus
 
 CssRuleList = AnyCssRule*
@@ -237,7 +237,11 @@ CssAttributeMatcher =
 CssAttributeMatcherValue =
  name: AnyCssAttributeMatcherValue
 
-AnyCssAttributeMatcherValue = CssString | CssIdentifier | ScssInterpolatedString
+AnyCssAttributeMatcherValue =
+	CssString
+	| CssIdentifier
+	| ScssInterpolatedString
+	| ScssInterpolatedIdentifier
 
 // :nth-type(2) {}
 // ^^^^^^^^^^^^
@@ -384,9 +388,11 @@ AnyCssPseudoClassNth =
 //            ^^
 // :nth-child(2) {}
 //            ^
+// :nth-child(#{$i}) {}
+//            ^^^^^
 CssPseudoClassNthNumber =
 	sign: ('+' | '-')?
-	value: CssNumber
+	value: AnyCssPseudoClassNthValue
 
 // :nth-child(odd) {}
 //            ^^^
@@ -399,17 +405,39 @@ CssPseudoClassNthIdentifier =
 //            ^^^^
 // :nth-child(+2n+1) {}
 //            ^^^^^
+// :nth-child(#{$n}n + 1) {}
+//            ^^^^^^^^^
+// :nth-child(2n + #{$offset}) {}
+//            ^^^^^^^^^^^^^^^
 CssPseudoClassNth =
 	sign: ('+' | '-')?
-	value: CssNumber?
+	value: AnyCssPseudoClassNthValue?
 	symbol: 'n'
 	offset: CssNthOffset?
 
 // :nth-child(2n+1) {}
 //              ^^
+// :nth-child(2n + #{$offset}) {}
+//              ^^^^^^^^^^^^
 CssNthOffset =
 	sign: ('+' | '-')
-	value: CssNumber
+	value: AnyCssPseudoClassNthValue
+
+AnyCssPseudoClassNthValue =
+	CssNumber
+	| ScssInterpolation
+	| ScssInterpolatedNthValue
+
+// :nth-child(#{$sign}2n) {}
+//            ^^^^^^^^^
+ScssInterpolatedNthValue =
+	items: ScssInterpolatedNthValuePartList
+
+ScssInterpolatedNthValuePartList = AnyScssInterpolatedNthValuePart*
+
+AnyScssInterpolatedNthValuePart =
+	CssNumber
+	| ScssInterpolation
 
 // :nth-child(2n+1 of li, .test) {}
 //             		 ^^^^^^^^^^^^
@@ -500,7 +528,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
@@ -521,7 +549,7 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
@@ -556,7 +584,7 @@ CssDeclarationList = AnyCssDeclaration*
 
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
@@ -1266,8 +1294,14 @@ CssMediaQueryList = (AnyCssMediaQuery (',' AnyCssMediaQuery)*)
 AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
+	| ScssMediaQuery
 	| CssBogusMediaQuery
 	| CssMetavariable
+
+// @media #{$query} {}
+//        ^^^^^^^^^
+ScssMediaQuery =
+	query: ScssInterpolation
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1476,7 +1510,7 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
@@ -1944,8 +1978,10 @@ AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
 	| CssDashedIdentifier
-	| ScssIdentifier
-	| ScssQualifiedName
+	| ScssVariable
+	| ScssInterpolatedIdentifier
+	| ScssInterpolatedValue
+	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
 	| CssString
 	| ScssInterpolatedString
@@ -2017,7 +2053,8 @@ CssFunction =
 
 AnyCssFunctionName =
 	CssIdentifier
-	| ScssQualifiedName
+	| ScssInterpolatedIdentifier
+	| ScssModuleMemberAccess
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -2046,6 +2083,7 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssExpression
 	| ScssInterpolatedString
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
@@ -2595,20 +2633,29 @@ TwSlotAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssEachAtRule =
 	'each'
+	header: ScssEachHeader
+	block: CssDeclarationOrRuleBlock
+
+// @each $item in $list { color: $item; }
+//       ^^^^^^^^^^^^^^
+ScssEachHeader =
 	bindings: ScssEachBindingList
 	'in'
-	iterable: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	values: ScssEachValueList
 
 // @each $key, $value in $map { color: $key; }
 //       ^^^^^^^^^^^^
-ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
+ScssEachBindingList = ScssVariable (',' ScssVariable)*
+
+// @each $item in puma, sea-slug { color: $item; }
+//                ^^^^^^^^^^^^^^
+ScssEachValueList = ScssExpression (',' ScssExpression)* ','?
 
 // @for $i from 1 through 3 { width: $i * 1px; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssForAtRule =
 	'for'
-	variable: ScssIdentifier
+	variable: ScssVariable
 	'from'
 	lower_bound: ScssExpression
 	operator: ('to' | 'through')
@@ -2782,7 +2829,7 @@ AnyScssModuleConfiguration =
 // $primary: blue !default
 // ^^^^^^^^^^^^^^^^^^^^^^^
 ScssModuleConfiguration =
-	name: ScssIdentifier
+	name: ScssVariable
 	':'
 	value: ScssExpression
 	modifier: ScssVariableModifier?
@@ -2802,12 +2849,13 @@ ScssIncludeAtRule =
 	'include'
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
+	using_clause: ScssIncludeUsingClause?
 	block: CssDeclarationOrRuleBlock?
 	';'?
 
 AnyScssIncludeTarget =
 	CssIdentifier
-	| ScssQualifiedName
+	| ScssModuleMemberAccess
 
 // ($radius: 4px)
 // ^^^^^^^^^^^^^^
@@ -2815,6 +2863,12 @@ ScssIncludeArgumentList =
 	'('
 	items: CssParameterList
 	')'
+
+// using ($value, $fallback)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIncludeUsingClause =
+	'using'
+	parameters: ScssParameterList
 
 // ($radius: 4px, $args...)
 // ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2834,7 +2888,7 @@ AnyScssParameter =
 // $args...
 // ^^^^^^^^
 ScssParameter =
-	name: ScssIdentifier
+	name: ScssVariable
 	default_value: ScssParameterDefaultValue?
 	ellipsis: '...'?
 
@@ -2855,10 +2909,29 @@ ScssInterpolatedIdentifier =
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
 
+// #{$a}-#{$b}
+//      ^
+ScssInterpolatedIdentifierHyphen =
+	'-'
+
 AnyScssInterpolatedIdentifierPart =
 	CssIdentifier
 	| CssCustomIdentifier
+	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
+
+ScssInterpolatedValue =
+	items: ScssInterpolatedValuePartList
+
+ScssInterpolatedValuePartList = AnyScssInterpolatedValuePart*
+
+AnyScssInterpolatedValuePart =
+	ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolation
+	| CssNumber
+	| AnyCssDimension
+	| CssIdentifier
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2927,8 +3000,8 @@ ScssErrorAtRule =
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^
-ScssDeclaration =
-	name: AnyScssDeclarationName
+ScssVariableDeclaration =
+	name: AnyScssVariableDeclarationName
 	':'
 	value: ScssExpression
 	modifiers: ScssVariableModifierList
@@ -2936,16 +3009,16 @@ ScssDeclaration =
 
 // $var: 1
 // ^^^^
-AnyScssDeclarationName =
-	ScssIdentifier
-	| ScssNamespacedIdentifier
+AnyScssVariableDeclarationName =
+	ScssVariable
+	| ScssNamespacedVariable
 
 // ns.$var: 1;
 // ^^^^^^^
-ScssNamespacedIdentifier =
+ScssNamespacedVariable =
 	namespace: CssIdentifier
 	'.'
-	name: ScssIdentifier
+	name: ScssVariable
 
 // font: { family: sans-serif; size: 12px; }
 // ^^^^
@@ -2982,7 +3055,7 @@ AnyScssExpressionItem =
 // @include fn($name: 1);
 //             ^^^^^^^^
 ScssKeywordArgument =
-	name: ScssIdentifier
+	name: ScssVariable
 	':'
 	value: AnyScssExpression
 
@@ -3099,14 +3172,14 @@ ScssParentSelectorValue =
 
 // color: module.$var;
 //        ^^^^^^^^^^^
-ScssQualifiedName =
+ScssModuleMemberAccess =
 	module: CssIdentifier
 	'.'
 	member: AnyScssModuleMember
 
 AnyScssModuleMember =
 	CssIdentifier
-	| ScssIdentifier
+	| ScssVariable
 
 // $var: 1 !default !global;
 //         ^^^^^^^^^^^^^^^^
@@ -3120,4 +3193,4 @@ ScssVariableModifier =
 
 // $var: 1;
 // ^^^^
-ScssIdentifier = dollar: '$' name: CssIdentifier
+ScssVariable = dollar: '$' name: CssIdentifier

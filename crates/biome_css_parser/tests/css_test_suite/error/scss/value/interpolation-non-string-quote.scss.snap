@@ -59,7 +59,7 @@ CssRoot {
                                                                 items: [
                                                                     CssBogus {
                                                                         items: [
-                                                                            ScssIdentifier {
+                                                                            ScssVariable {
                                                                                 dollar_token: DOLLAR@18..19 "$" [] [],
                                                                                 name: CssIdentifier {
                                                                                     value_token: IDENT@19..22 "bar" [] [],
@@ -136,7 +136,7 @@ CssRoot {
                       1: L_CURLY@17..18 "{" [] []
                       2: CSS_BOGUS@18..37
                         0: CSS_BOGUS@18..37
-                          0: SCSS_IDENTIFIER@18..22
+                          0: SCSS_VARIABLE@18..22
                             0: DOLLAR@18..19 "$" [] []
                             1: CSS_IDENTIFIER@19..22
                               0: IDENT@19..22 "bar" [] []

@@ -1280,7 +1280,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                 }
                 has_seen_function_like = true;
             }
-            AnyJsCallArgument::AnyJsExpression(JsCallExpression(call)) => {
+            AnyJsCallArgument::AnyJsExpression(JsCallExpression(call))
                 if call.arguments().is_ok_and(|call_arguments| {
                     call_arguments.args().iter().flatten().any(|arg| {
                         matches!(
@@ -1290,9 +1290,9 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                             )
                         )
                     })
-                }) {
-                    return true;
-                }
+                }) =>
+            {
+                return true;
             }
             _ => {}
         }

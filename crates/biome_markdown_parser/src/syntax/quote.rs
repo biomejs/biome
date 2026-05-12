@@ -42,8 +42,8 @@ use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
 use crate::syntax::{
-    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_paragraph_like,
-    is_whitespace_only,
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
+    is_dash_only_thematic_break_text, is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
 };
 
 /// Check if we're at the start of a block quote (`>`).
@@ -97,6 +97,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     p.state_mut().block_quote_depth += 1;
 
     let marker_space = emit_quote_prefix_node(p);
+    relex_after_quote_prefix_consumed(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
@@ -123,6 +124,68 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 
     prefix_m.complete(p, MD_QUOTE_PREFIX);
     marker_space
+}
+
+/// After consuming a quote prefix, selectively re-lex the current token as if
+/// it were at line start when the remaining line could form a thematic break.
+///
+/// Re-lexing unconditionally perturbs ordinary quoted text tokenization by
+/// splitting leading spaces into separate tokens. We only need line-start
+/// semantics here for thematic-break candidates like `> ---`.
+///
+/// A candidate is any line whose non-whitespace bytes are all the **same**
+/// thematic break character (`-`, `*`, or `_`). Per CommonMark §4.1, mixing
+/// different break characters (e.g. `_*-`) does **not** form a thematic break.
+fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
+    let is_thematic_break_candidate = p.at(T![-])
+        || p.at(T![*])
+        || p.at(UNDERSCORE)
+        || p.at(DOUBLE_UNDERSCORE)
+        || (p.at(MD_TEXTUAL_LITERAL) && is_thematic_break_candidate_text(p.cur_text()));
+
+    if is_thematic_break_candidate {
+        p.force_relex_at_line_start();
+    }
+}
+
+fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
+    force_relex_thematic_break_after_quote_prefix(p);
+}
+
+/// Check if `text` could be a thematic break: all non-whitespace bytes must be
+/// the **same** thematic break character (`-`, `*`, or `_`).
+fn is_thematic_break_candidate_text(text: &str) -> bool {
+    use biome_unicode_table::{
+        Dispatch::{IDT, MIN, MUL, WHS},
+        lookup_byte,
+    };
+
+    let mut break_char: Option<u8> = None;
+    for &b in text.as_bytes() {
+        let dispatched = lookup_byte(b);
+        // Skip whitespace (space, tab, etc.) via the shared lookup table.
+        if dispatched == WHS || matches!(b, b'\n' | b'\r') {
+            continue;
+        }
+        // Match thematic break characters via dispatch variants:
+        // MIN = `-`, MUL = `*`, IDT = `_` (IDT also covers letters, so
+        // narrow to `b'_'` explicitly).
+        let is_break_char = matches!(dispatched, MIN | MUL) || (dispatched == IDT && b == b'_');
+        if is_break_char {
+            if let Some(expected) = break_char {
+                // Mixed break characters like `_*-` are not valid.
+                if b != expected {
+                    return false;
+                }
+            } else {
+                break_char = Some(b);
+            }
+        } else {
+            // Any other non-whitespace byte disqualifies the line.
+            return false;
+        }
+    }
+    break_char.is_some()
 }
 
 /// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
@@ -237,7 +300,10 @@ fn emit_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
             // When preserve_tab is true (e.g. indented code in quote), the tab still
             // semantically counts as the optional post-marker separator, but remains
             // in the stream so the child block can claim it as indentation.
-            if !preserve_tab {
+            if !preserve_tab
+                || !quote_tab_has_following_indent(p)
+                || quote_tab_starts_nested_prefix(p)
+            {
                 p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
             }
             true
@@ -273,6 +339,7 @@ impl QuoteBlockList {
         {
             if has_quote_prefix(p, self.depth) {
                 consume_quote_prefix(p, self.depth);
+                relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
                 return false;
@@ -324,8 +391,17 @@ impl QuoteBlockList {
         // Treat content after '>' as column 0 for block parsing (fence detection).
         let prev_virtual = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        relex_after_quote_prefix_consumed(p);
 
         let parsed = parse_any_block_with_indent_code_policy(p, true);
+        let parsed = if let Present(ref marker) = parsed
+            && marker.kind(p) == MD_LINK_REFERENCE_DEFINITION
+            && quote_link_reference_before_dash_thematic_break(p, self.depth)
+        {
+            Present(parse_empty_paragraph(p))
+        } else {
+            parsed
+        };
 
         p.state_mut().virtual_line_start = prev_virtual;
 
@@ -337,6 +413,21 @@ impl QuoteBlockList {
 
         parsed
     }
+}
+
+fn quote_link_reference_before_dash_thematic_break(p: &mut MarkdownParser, depth: usize) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+        if !consume_quote_prefix(p, depth) {
+            return false;
+        }
+        relex_after_quote_prefix_consumed(p);
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break_text(p.cur_text())
+    })
 }
 
 impl ParseNodeList for QuoteBlockList {
@@ -481,17 +572,49 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
 }
 
 pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
-    let mut column = 0usize;
-
-    for c in p.source_after_current().chars() {
+    // Tab expansion is relative to the absolute column position in the line:
+    // a tab at column 2 (e.g. just after `> `) only advances 2 columns to the
+    // next tab stop, not a full TAB_STOP_SPACES. Counting from column 0 here
+    // overstates the indent and misclassifies `> \t- nested` as code.
+    let rest = p.source_after_current();
+    // Fast path: no tabs means column-relative math is unnecessary.
+    if !rest
+        .as_bytes()
+        .iter()
+        .take_while(|b| matches!(b, b' ' | b'\t'))
+        .any(|b| *b == b'\t')
+    {
+        let spaces = rest.as_bytes().iter().take_while(|b| **b == b' ').count();
+        return spaces >= INDENT_CODE_BLOCK_SPACES;
+    }
+    let cur: usize = p.cur_range().start().into();
+    let start_col = p.cached_absolute_column_at(cur);
+    let mut column = start_col;
+    for c in rest.chars() {
         match c {
             ' ' => column += 1,
             '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
+    column - start_col >= INDENT_CODE_BLOCK_SPACES
+}
 
-    column >= INDENT_CODE_BLOCK_SPACES
+fn quote_tab_starts_nested_prefix(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        p.bump(MD_TEXTUAL_LITERAL);
+        p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")
+    })
+}
+
+fn quote_tab_has_following_indent(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        p.bump(MD_TEXTUAL_LITERAL);
+        p.source_after_current()
+            .chars()
+            .next()
+            .is_some_and(|c| c == ' ' || c == '\t')
+    })
 }
 
 fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> ParsedSyntax {
@@ -532,15 +655,30 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
-    consume_quote_prefix(p, depth);
+    let continues_code_block = p.lookahead(|p| {
+        consume_quote_prefix(p, depth);
 
-    // Blank lines (consecutive newlines) are allowed in indented code
+        // Blank lines (consecutive newlines) are allowed in indented code.
+        if p.at(NEWLINE) {
+            return true;
+        }
+
+        at_quote_indented_code_start(p)
+    });
+
+    if !continues_code_block {
+        return false;
+    }
+
+    consume_quote_prefix(p, depth);
+    relex_after_quote_prefix_consumed(p);
+
+    // Blank lines (consecutive newlines) are allowed in indented code.
     if p.at(NEWLINE) {
         return true;
     }
 
-    // Next line must still be indented to continue the code block
-    at_quote_indented_code_start(p)
+    true
 }
 
 /// Parse a single textual token in an indented code block.
@@ -562,7 +700,8 @@ pub(crate) fn emit_optional_marker_space(p: &mut MarkdownParser, preserve_tab: b
         return true;
     }
     if text == "\t" {
-        if !preserve_tab {
+        if !preserve_tab || !quote_tab_has_following_indent(p) || quote_tab_starts_nested_prefix(p)
+        {
             p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
         }
         return true;

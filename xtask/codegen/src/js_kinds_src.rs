@@ -190,6 +190,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_DECLARATION_MODULE",
         "JS_EXPRESSION_SNIPPET",
         "JS_EXPRESSION_TEMPLATE_ROOT",
+        "JS_SVELTE_SNIPPET_ROOT",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",
         "JS_STATEMENT_LIST",
@@ -512,6 +513,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JSX_ATTRIBUTE_LIST",
         "JSX_ATTRIBUTE",
         "JSX_SPREAD_ATTRIBUTE",
+        "JSX_SHORTHAND_ATTRIBUTE",
         "JSX_ATTRIBUTE_INITIALIZER_CLAUSE",
         "JSX_EXPRESSION_ATTRIBUTE_VALUE",
         "JSX_CHILD_LIST",
@@ -705,6 +707,8 @@ impl Field {
                     ("{#", LanguageKind::Html) => "sv_curly_hash",
                     ("{/", LanguageKind::Html) => "sv_curly_slash",
                     ("{:", LanguageKind::Html) => "sv_curly_colon",
+                    ("'", _) => "single_quote",
+                    ("\"", _) => "double_quote",
                     _ => name,
                 };
 

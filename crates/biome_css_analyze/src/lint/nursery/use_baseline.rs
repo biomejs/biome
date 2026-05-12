@@ -218,7 +218,7 @@ declare_lint_rule! {
         name: "useBaseline",
         language: "css",
         recommended: false,
-        sources: &[RuleSource::EslintCss("use-baseline").inspired()],
+        sources: &[RuleSource::EslintCss("use-baseline").inspired(), RuleSource::HtmlEslint("use-baseline").inspired()],
     }
 }
 

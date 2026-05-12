@@ -2,8 +2,8 @@ mod constants;
 pub mod generated_mappings;
 
 use super::{
-    DisregardedSlotCondition, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
-    normalize_quoted_string,
+    DisregardedSlotCondition, GritNodePatternSource, GritTargetLanguageImpl, LeafEquivalenceClass,
+    LeafNormalizer, normalize_quoted_string,
 };
 use crate::{
     CompileError,
@@ -12,7 +12,7 @@ use crate::{
 use biome_css_syntax::{CssLanguage, CssSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 use constants::DISREGARDED_SNIPPET_SLOTS;
-use generated_mappings::kind_by_name;
+use generated_mappings::{kind_by_name, native_slots_for_name};
 
 const COMMENT_KINDS: SyntaxKindSet<CssLanguage> =
     SyntaxKindSet::from_raw(RawSyntaxKind(CssSyntaxKind::COMMENT as u16)).union(
@@ -33,7 +33,7 @@ impl GritTargetLanguageImpl for CssTargetLanguage {
     /// Returns the syntax kind for a node by name.
     ///
     /// Supports native Biome AST patterns for full language coverage.
-    fn kind_by_name(&self, node_name: &str) -> Option<CssSyntaxKind> {
+    fn native_kind_by_name(&self, node_name: &str) -> Option<CssSyntaxKind> {
         kind_by_name(node_name)
     }
 
@@ -52,9 +52,16 @@ impl GritTargetLanguageImpl for CssTargetLanguage {
     /// For compatibility with existing Grit snippets (as well as the online
     /// Grit playground), node names should be aligned with TreeSitter's
     /// `ts_language_field_name_for_id()`.
-    fn named_slots_for_kind(&self, _kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)] {
-        // TODO: See [super::JsTargetLanguage::named_slots_for_kind()].
-        &[]
+    fn named_slots_for_node(
+        &self,
+        node_name: &str,
+        _kind: GritTargetSyntaxKind,
+        source: GritNodePatternSource,
+    ) -> &'static [(&'static str, u32)] {
+        match source {
+            GritNodePatternSource::LegacyTreeSitter => &[],
+            GritNodePatternSource::Native => native_slots_for_name(node_name),
+        }
     }
 
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)] {

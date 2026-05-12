@@ -1,0 +1,1128 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+height > 50 ? 50 : height;
+height >= 50 ? 50 : height;
+height < 50 ? height : 50;
+height <= 50 ? height : 50;
+
+height > maxHeight ? maxHeight : height;
+height < maxHeight ? height : maxHeight;
+
+window.height > 50 ? 50 : window.height;
+window.height < 50 ? window.height : 50;
+
+height > 50 ? height : 50;
+height >= 50 ? height : 50;
+height < 50 ? 50 : height;
+height <= 50 ? 50 : height;
+
+height > maxHeight ? height : maxHeight;
+height < maxHeight ? maxHeight : height;
+
+function edgeOne() {
+    return +foo > 10 ? 10 : +foo;
+}
+
+function edgeTwo() {
+    return+foo > 10 ? 10 : +foo;
+}
+
+(0, foo) > 10 ? 10 : (0, foo);
+
+foo.bar > 10 ? 10 : foo.bar;
+
+async function asyncEdge() {
+    return await foo.bar > 10 ? 10 : await foo.bar;
+}
+
+async function awaitCall() {
+    await (+foo > 10 ? 10 : +foo);
+}
+
+function groupedTest() {
+    return (foo.bar > 10) ? 10 : foo.bar;
+}
+
+function* yielded() {
+    yield+foo > 10 ? 10 : +foo;
+}
+
+export default +foo > 10 ? 10 : +foo;
+
+foo.length > bar.length ? bar.length : foo.length;
+
+foo > /* keep */ bar ? bar : foo;
+foo > bar ? /* keep */ bar : foo;
+
+// comment before
+alpha > beta ? alpha : beta
+// comment after
+
+lhs /* lhs in condition */ > rhs /* rhs in condition */
+    ? lhs /* lhs in consequent */
+    : /* rhs in alternate */ rhs;
+
+// min before
+minLeft > minRight ? minRight : minLeft
+// min after
+
+maxLeft /* max left in condition */ < maxRight /* max right in condition */
+    ? /* max right in consequent */ maxRight
+    : maxLeft /* max left in alternate */;
+
+minLhs /* min lhs in condition */ > minRhs /* min rhs in condition */
+    ? /* min rhs in consequent */ minRhs
+    : minLhs /* min lhs in alternate */;
+
+leftValue > rightValue
+    ? leftValue /* selected left in consequent */
+    : /* unselected right in alternate */ rightValue;
+
+leftLimit /* left condition trailing */ <= rightLimit /* right condition trailing */
+    ? leftLimit /* left selected in consequent */
+    : /* right alternate leading */ rightLimit;
+
+outerLeft > outerRight
+    ? outerLeft
+    : outerRight;
+/* trailing block comment */
+
+first > second ? first : second; // trailing line comment
+
+commentedObject.left /* object left in condition */ > commentedObject.right /* object right in condition */
+    ? commentedObject.left /* object left in consequent */
+    : /* object right in alternate */ commentedObject.right;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ height > 50 ? 50 : height;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ height >= 50 ? 50 : height;
+    4 │ height < 50 ? height : 50;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - height·>·50·?·50·:·height;
+        2 │ + Math.min(height·,·50);
+     3  3 │   height >= 50 ? 50 : height;
+     4  4 │   height < 50 ? height : 50;
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    1 │ /* should generate diagnostics */
+    2 │ height > 50 ? 50 : height;
+  > 3 │ height >= 50 ? 50 : height;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ height < 50 ? height : 50;
+    5 │ height <= 50 ? height : 50;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   height > 50 ? 50 : height;
+     3    │ - height·>=·50·?·50·:·height;
+        3 │ + Math.min(height·,·50);
+     4  4 │   height < 50 ? height : 50;
+     5  5 │   height <= 50 ? height : 50;
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    2 │ height > 50 ? 50 : height;
+    3 │ height >= 50 ? 50 : height;
+  > 4 │ height < 50 ? height : 50;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ height <= 50 ? height : 50;
+    6 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     2  2 │   height > 50 ? 50 : height;
+     3  3 │   height >= 50 ? 50 : height;
+     4    │ - height·<·50·?·height·:·50;
+        4 │ + Math.min(height·,·50);
+     5  5 │   height <= 50 ? height : 50;
+     6  6 │   
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    3 │ height >= 50 ? 50 : height;
+    4 │ height < 50 ? height : 50;
+  > 5 │ height <= 50 ? height : 50;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ height > maxHeight ? maxHeight : height;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     3  3 │   height >= 50 ? 50 : height;
+     4  4 │   height < 50 ? height : 50;
+     5    │ - height·<=·50·?·height·:·50;
+        5 │ + Math.min(height·,·50);
+     6  6 │   
+     7  7 │   height > maxHeight ? maxHeight : height;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    5 │ height <= 50 ? height : 50;
+    6 │ 
+  > 7 │ height > maxHeight ? maxHeight : height;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ height < maxHeight ? height : maxHeight;
+    9 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     5  5 │   height <= 50 ? height : 50;
+     6  6 │   
+     7    │ - height·>·maxHeight·?·maxHeight·:·height;
+        7 │ + Math.min(height·,·maxHeight);
+     8  8 │   height < maxHeight ? height : maxHeight;
+     9  9 │   
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     7 │ height > maxHeight ? maxHeight : height;
+   > 8 │ height < maxHeight ? height : maxHeight;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ window.height > 50 ? 50 : window.height;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     6  6 │   
+     7  7 │   height > maxHeight ? maxHeight : height;
+     8    │ - height·<·maxHeight·?·height·:·maxHeight;
+        8 │ + Math.min(height·,·maxHeight);
+     9  9 │   
+    10 10 │   window.height > 50 ? 50 : window.height;
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     8 │ height < maxHeight ? height : maxHeight;
+     9 │ 
+  > 10 │ window.height > 50 ? 50 : window.height;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ window.height < 50 ? window.height : 50;
+    12 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     8  8 │   height < maxHeight ? height : maxHeight;
+     9  9 │   
+    10    │ - window.height·>·50·?·50·:·window.height;
+       10 │ + Math.min(window.height·,·50);
+    11 11 │   window.height < 50 ? window.height : 50;
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    10 │ window.height > 50 ? 50 : window.height;
+  > 11 │ window.height < 50 ? window.height : 50;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ height > 50 ? height : 50;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     9  9 │   
+    10 10 │   window.height > 50 ? 50 : window.height;
+    11    │ - window.height·<·50·?·window.height·:·50;
+       11 │ + Math.min(window.height·,·50);
+    12 12 │   
+    13 13 │   height > 50 ? height : 50;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    11 │ window.height < 50 ? window.height : 50;
+    12 │ 
+  > 13 │ height > 50 ? height : 50;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ height >= 50 ? height : 50;
+    15 │ height < 50 ? 50 : height;
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    11 11 │   window.height < 50 ? window.height : 50;
+    12 12 │   
+    13    │ - height·>·50·?·height·:·50;
+       13 │ + Math.max(height·,·50);
+    14 14 │   height >= 50 ? height : 50;
+    15 15 │   height < 50 ? 50 : height;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    13 │ height > 50 ? height : 50;
+  > 14 │ height >= 50 ? height : 50;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ height < 50 ? 50 : height;
+    16 │ height <= 50 ? 50 : height;
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    12 12 │   
+    13 13 │   height > 50 ? height : 50;
+    14    │ - height·>=·50·?·height·:·50;
+       14 │ + Math.max(height·,·50);
+    15 15 │   height < 50 ? 50 : height;
+    16 16 │   height <= 50 ? 50 : height;
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    13 │ height > 50 ? height : 50;
+    14 │ height >= 50 ? height : 50;
+  > 15 │ height < 50 ? 50 : height;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ height <= 50 ? 50 : height;
+    17 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    13 13 │   height > 50 ? height : 50;
+    14 14 │   height >= 50 ? height : 50;
+    15    │ - height·<·50·?·50·:·height;
+       15 │ + Math.max(height·,·50);
+    16 16 │   height <= 50 ? 50 : height;
+    17 17 │   
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    14 │ height >= 50 ? height : 50;
+    15 │ height < 50 ? 50 : height;
+  > 16 │ height <= 50 ? 50 : height;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ height > maxHeight ? height : maxHeight;
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    14 14 │   height >= 50 ? height : 50;
+    15 15 │   height < 50 ? 50 : height;
+    16    │ - height·<=·50·?·50·:·height;
+       16 │ + Math.max(height·,·50);
+    17 17 │   
+    18 18 │   height > maxHeight ? height : maxHeight;
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    16 │ height <= 50 ? 50 : height;
+    17 │ 
+  > 18 │ height > maxHeight ? height : maxHeight;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ height < maxHeight ? maxHeight : height;
+    20 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    16 16 │   height <= 50 ? 50 : height;
+    17 17 │   
+    18    │ - height·>·maxHeight·?·height·:·maxHeight;
+       18 │ + Math.max(height·,·maxHeight);
+    19 19 │   height < maxHeight ? maxHeight : height;
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    18 │ height > maxHeight ? height : maxHeight;
+  > 19 │ height < maxHeight ? maxHeight : height;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ function edgeOne() {
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    17 17 │   
+    18 18 │   height > maxHeight ? height : maxHeight;
+    19    │ - height·<·maxHeight·?·maxHeight·:·height;
+       19 │ + Math.max(height·,·maxHeight);
+    20 20 │   
+    21 21 │   function edgeOne() {
+  
+
+```
+
+```
+invalid.js:22:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    21 │ function edgeOne() {
+  > 22 │     return +foo > 10 ? 10 : +foo;
+       │            ^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    20 20 │   
+    21 21 │   function edgeOne() {
+    22    │ - ····return·+foo·>·10·?·10·:·+foo;
+       22 │ + ····return·Math.min(+foo·,·10);
+    23 23 │   }
+    24 24 │   
+  
+
+```
+
+```
+invalid.js:26:11 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    25 │ function edgeTwo() {
+  > 26 │     return+foo > 10 ? 10 : +foo;
+       │           ^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    24 24 │   
+    25 25 │   function edgeTwo() {
+    26    │ - ····return+foo·>·10·?·10·:·+foo;
+       26 │ + ····returnMath.min(+foo·,·10);
+    27 27 │   }
+    28 28 │   
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    27 │ }
+    28 │ 
+  > 29 │ (0, foo) > 10 ? 10 : (0, foo);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ foo.bar > 10 ? 10 : foo.bar;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    27 27 │   }
+    28 28 │   
+    29    │ - (0,·foo)·>·10·?·10·:·(0,·foo);
+       29 │ + Math.min((0,·foo)·,·10);
+    30 30 │   
+    31 31 │   foo.bar > 10 ? 10 : foo.bar;
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    29 │ (0, foo) > 10 ? 10 : (0, foo);
+    30 │ 
+  > 31 │ foo.bar > 10 ? 10 : foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ async function asyncEdge() {
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    29 29 │   (0, foo) > 10 ? 10 : (0, foo);
+    30 30 │   
+    31    │ - foo.bar·>·10·?·10·:·foo.bar;
+       31 │ + Math.min(foo.bar·,·10);
+    32 32 │   
+    33 33 │   async function asyncEdge() {
+  
+
+```
+
+```
+invalid.js:34:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    33 │ async function asyncEdge() {
+  > 34 │     return await foo.bar > 10 ? 10 : await foo.bar;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    32 32 │   
+    33 33 │   async function asyncEdge() {
+    34    │ - ····return·await·foo.bar·>·10·?·10·:·await·foo.bar;
+       34 │ + ····return·Math.min(await·foo.bar·,·10);
+    35 35 │   }
+    36 36 │   
+  
+
+```
+
+```
+invalid.js:38:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    37 │ async function awaitCall() {
+  > 38 │     await (+foo > 10 ? 10 : +foo);
+       │            ^^^^^^^^^^^^^^^^^^^^^
+    39 │ }
+    40 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    36 36 │   
+    37 37 │   async function awaitCall() {
+    38    │ - ····await·(+foo·>·10·?·10·:·+foo);
+       38 │ + ····await·(Math.min(+foo·,·10));
+    39 39 │   }
+    40 40 │   
+  
+
+```
+
+```
+invalid.js:42:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    41 │ function groupedTest() {
+  > 42 │     return (foo.bar > 10) ? 10 : foo.bar;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    40 40 │   
+    41 41 │   function groupedTest() {
+    42    │ - ····return·(foo.bar·>·10)·?·10·:·foo.bar;
+       42 │ + ····return·Math.min(foo.bar·,·10);
+    43 43 │   }
+    44 44 │   
+  
+
+```
+
+```
+invalid.js:46:10 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    45 │ function* yielded() {
+  > 46 │     yield+foo > 10 ? 10 : +foo;
+       │          ^^^^^^^^^^^^^^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    44 44 │   
+    45 45 │   function* yielded() {
+    46    │ - ····yield+foo·>·10·?·10·:·+foo;
+       46 │ + ····yieldMath.min(+foo·,·10);
+    47 47 │   }
+    48 48 │   
+  
+
+```
+
+```
+invalid.js:49:16 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    47 │ }
+    48 │ 
+  > 49 │ export default +foo > 10 ? 10 : +foo;
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ foo.length > bar.length ? bar.length : foo.length;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    47 47 │   }
+    48 48 │   
+    49    │ - export·default·+foo·>·10·?·10·:·+foo;
+       49 │ + export·default·Math.min(+foo·,·10);
+    50 50 │   
+    51 51 │   foo.length > bar.length ? bar.length : foo.length;
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    49 │ export default +foo > 10 ? 10 : +foo;
+    50 │ 
+  > 51 │ foo.length > bar.length ? bar.length : foo.length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 
+    53 │ foo > /* keep */ bar ? bar : foo;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    49 49 │   export default +foo > 10 ? 10 : +foo;
+    50 50 │   
+    51    │ - foo.length·>·bar.length·?·bar.length·:·foo.length;
+       51 │ + Math.min(foo.length·,·bar.length);
+    52 52 │   
+    53 53 │   foo > /* keep */ bar ? bar : foo;
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    51 │ foo.length > bar.length ? bar.length : foo.length;
+    52 │ 
+  > 53 │ foo > /* keep */ bar ? bar : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ foo > bar ? /* keep */ bar : foo;
+    55 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    51 51 │   foo.length > bar.length ? bar.length : foo.length;
+    52 52 │   
+    53    │ - foo·>·/*·keep·*/·bar·?·bar·:·foo;
+       53 │ + Math.min(foo·,·/*·keep·*/bar);
+    54 54 │   foo > bar ? /* keep */ bar : foo;
+    55 55 │   
+  
+
+```
+
+```
+invalid.js:54:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    53 │ foo > /* keep */ bar ? bar : foo;
+  > 54 │ foo > bar ? /* keep */ bar : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 
+    56 │ // comment before
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    52 52 │   
+    53 53 │   foo > /* keep */ bar ? bar : foo;
+    54    │ - foo·>·bar·?·/*·keep·*/·bar·:·foo;
+       54 │ + Math.min(foo·,·/*·keep·*/bar);
+    55 55 │   
+    56 56 │   // comment before
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    56 │ // comment before
+  > 57 │ alpha > beta ? alpha : beta
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ // comment after
+    59 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    55 55 │   
+    56 56 │   // comment before
+    57    │ - alpha·>·beta·?·alpha·:·beta
+       57 │ + Math.max(alpha·,·beta)
+    58 58 │   // comment after
+    59 59 │   
+  
+
+```
+
+```
+invalid.js:60:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    58 │ // comment after
+    59 │ 
+  > 60 │ lhs /* lhs in condition */ > rhs /* rhs in condition */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 61 │     ? lhs /* lhs in consequent */
+  > 62 │     : /* rhs in alternate */ rhs;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ // min before
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    58 58 │   // comment after
+    59 59 │   
+    60    │ - lhs·/*·lhs·in·condition·*/·>·rhs·/*·rhs·in·condition·*/
+    61    │ - ····?·lhs·/*·lhs·in·consequent·*/
+    62    │ - ····:·/*·rhs·in·alternate·*/·rhs;
+       60 │ + Math.max(lhs/*·lhs·in·condition·*//*·lhs·in·consequent·*/·,·/*·rhs·in·alternate·*/rhs/*·rhs·in·condition·*/);
+    63 61 │   
+    64 62 │   // min before
+  
+
+```
+
+```
+invalid.js:65:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    64 │ // min before
+  > 65 │ minLeft > minRight ? minRight : minLeft
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ // min after
+    67 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    63 63 │   
+    64 64 │   // min before
+    65    │ - minLeft·>·minRight·?·minRight·:·minLeft
+       65 │ + Math.min(minLeft·,·minRight)
+    66 66 │   // min after
+    67 67 │   
+  
+
+```
+
+```
+invalid.js:68:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    66 │ // min after
+    67 │ 
+  > 68 │ maxLeft /* max left in condition */ < maxRight /* max right in condition */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 69 │     ? /* max right in consequent */ maxRight
+  > 70 │     : maxLeft /* max left in alternate */;
+       │     ^^^^^^^^^
+    71 │ 
+    72 │ minLhs /* min lhs in condition */ > minRhs /* min rhs in condition */
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    66 66 │   // min after
+    67 67 │   
+    68    │ - maxLeft·/*·max·left·in·condition·*/·<·maxRight·/*·max·right·in·condition·*/
+    69    │ - ····?·/*·max·right·in·consequent·*/·maxRight
+    70    │ - ····:·maxLeft·/*·max·left·in·alternate·*/;
+       68 │ + Math.max(maxLeft/*·max·left·in·condition·*/·,·/*·max·right·in·consequent·*/maxRight/*·max·right·in·condition·*/)·/*·max·left·in·alternate·*/;
+    71 69 │   
+    72 70 │   minLhs /* min lhs in condition */ > minRhs /* min rhs in condition */
+  
+
+```
+
+```
+invalid.js:72:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    70 │     : maxLeft /* max left in alternate */;
+    71 │ 
+  > 72 │ minLhs /* min lhs in condition */ > minRhs /* min rhs in condition */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 73 │     ? /* min rhs in consequent */ minRhs
+  > 74 │     : minLhs /* min lhs in alternate */;
+       │     ^^^^^^^^
+    75 │ 
+    76 │ leftValue > rightValue
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    70 70 │       : maxLeft /* max left in alternate */;
+    71 71 │   
+    72    │ - minLhs·/*·min·lhs·in·condition·*/·>·minRhs·/*·min·rhs·in·condition·*/
+    73    │ - ····?·/*·min·rhs·in·consequent·*/·minRhs
+    74    │ - ····:·minLhs·/*·min·lhs·in·alternate·*/;
+       72 │ + Math.min(minLhs/*·min·lhs·in·condition·*/·,·/*·min·rhs·in·consequent·*/minRhs/*·min·rhs·in·condition·*/)·/*·min·lhs·in·alternate·*/;
+    75 73 │   
+    76 74 │   leftValue > rightValue
+  
+
+```
+
+```
+invalid.js:76:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    74 │     : minLhs /* min lhs in alternate */;
+    75 │ 
+  > 76 │ leftValue > rightValue
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 77 │     ? leftValue /* selected left in consequent */
+  > 78 │     : /* unselected right in alternate */ rightValue;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ 
+    80 │ leftLimit /* left condition trailing */ <= rightLimit /* right condition trailing */
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    74 74 │       : minLhs /* min lhs in alternate */;
+    75 75 │   
+    76    │ - leftValue·>·rightValue
+    77    │ - ····?·leftValue·/*·selected·left·in·consequent·*/
+    78    │ - ····:·/*·unselected·right·in·alternate·*/·rightValue;
+       76 │ + Math.max(leftValue/*·selected·left·in·consequent·*/·,·/*·unselected·right·in·alternate·*/rightValue);
+    79 77 │   
+    80 78 │   leftLimit /* left condition trailing */ <= rightLimit /* right condition trailing */
+  
+
+```
+
+```
+invalid.js:80:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    78 │     : /* unselected right in alternate */ rightValue;
+    79 │ 
+  > 80 │ leftLimit /* left condition trailing */ <= rightLimit /* right condition trailing */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 81 │     ? leftLimit /* left selected in consequent */
+  > 82 │     : /* right alternate leading */ rightLimit;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ 
+    84 │ outerLeft > outerRight
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    78 78 │       : /* unselected right in alternate */ rightValue;
+    79 79 │   
+    80    │ - leftLimit·/*·left·condition·trailing·*/·<=·rightLimit·/*·right·condition·trailing·*/
+    81    │ - ····?·leftLimit·/*·left·selected·in·consequent·*/
+    82    │ - ····:·/*·right·alternate·leading·*/·rightLimit;
+       80 │ + Math.min(leftLimit/*·left·condition·trailing·*//*·left·selected·in·consequent·*/·,·/*·right·alternate·leading·*/rightLimit/*·right·condition·trailing·*/);
+    83 81 │   
+    84 82 │   outerLeft > outerRight
+  
+
+```
+
+```
+invalid.js:84:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    82 │     : /* right alternate leading */ rightLimit;
+    83 │ 
+  > 84 │ outerLeft > outerRight
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 85 │     ? outerLeft
+  > 86 │     : outerRight;
+       │     ^^^^^^^^^^^^
+    87 │ /* trailing block comment */
+    88 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    82 82 │       : /* right alternate leading */ rightLimit;
+    83 83 │   
+    84    │ - outerLeft·>·outerRight
+    85    │ - ····?·outerLeft
+    86    │ - ····:·outerRight;
+       84 │ + Math.max(outerLeft·,·outerRight);
+    87 85 │   /* trailing block comment */
+    88 86 │   
+  
+
+```
+
+```
+invalid.js:89:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    87 │ /* trailing block comment */
+    88 │ 
+  > 89 │ first > second ? first : second; // trailing line comment
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 
+    91 │ commentedObject.left /* object left in condition */ > commentedObject.right /* object right in condition */
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    87 87 │   /* trailing block comment */
+    88 88 │   
+    89    │ - first·>·second·?·first·:·second;·//·trailing·line·comment
+       89 │ + Math.max(first·,·second);·//·trailing·line·comment
+    90 90 │   
+    91 91 │   commentedObject.left /* object left in condition */ > commentedObject.right /* object right in condition */
+  
+
+```
+
+```
+invalid.js:91:1 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    89 │ first > second ? first : second; // trailing line comment
+    90 │ 
+  > 91 │ commentedObject.left /* object left in condition */ > commentedObject.right /* object right in condition */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 92 │     ? commentedObject.left /* object left in consequent */
+  > 93 │     : /* object right in alternate */ commentedObject.right;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    94 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    89 89 │   first > second ? first : second; // trailing line comment
+    90 90 │   
+    91    │ - commentedObject.left·/*·object·left·in·condition·*/·>·commentedObject.right·/*·object·right·in·condition·*/
+    92    │ - ····?·commentedObject.left·/*·object·left·in·consequent·*/
+    93    │ - ····:·/*·object·right·in·alternate·*/·commentedObject.right;
+       91 │ + Math.max(commentedObject.left/*·object·left·in·condition·*//*·object·left·in·consequent·*/·,·/*·object·right·in·alternate·*/commentedObject.right/*·object·right·in·condition·*/);
+    94 92 │   
+  
+
+```

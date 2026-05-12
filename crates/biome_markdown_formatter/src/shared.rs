@@ -22,11 +22,11 @@ pub(crate) enum TextPrintMode {
     /// ``````
     Clean,
     /// It removes the token/node
-    _Remove,
-    /// Replace the token/node
-    _Replace,
+    Remove,
     /// It cleans the code by using a trimming strategy
     Trim(TrimMode),
+    /// Split prose into words and emit fill IR for line-width-aware wrapping.
+    Fill,
 }
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
@@ -35,25 +35,39 @@ pub(crate) enum TrimMode {
     Start,
     /// Trim start and end of the list
     All,
+    /// If the first and last [MdTextual] are `<` and `>` respectively, they are trimmed.
+    /// If no link has been detected, if falls back to [Self::All]
+    AutoLinkLike,
     /// This mode works similarly to [TrimMode::All], however, text that contains
     /// words and have more than trailing/leading spaces are normalized to one
     NormalizeWords,
+    /// After a newline, keep the whitespace-only tokens that represent
+    /// continuation-line indentation instead of removing them.
+    KeepLeadingSpaces,
     /// Don't trim anything
     #[default]
     None,
 }
 
 impl TextPrintMode {
-    pub(crate) const fn is_start(&self) -> bool {
+    pub(crate) const fn is_trim_start(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::Start))
     }
 
-    pub(crate) const fn is_all(&self) -> bool {
+    pub(crate) const fn is_trim_all(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::All))
     }
 
     pub(crate) const fn is_normalize_words(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::NormalizeWords))
+    }
+
+    pub(crate) const fn is_auto_link_like(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::AutoLinkLike))
+    }
+
+    pub(crate) const fn is_keep_leading_spaces(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::KeepLeadingSpaces))
     }
 
     pub(crate) const fn is_pristine(&self) -> bool {
@@ -62,5 +76,21 @@ impl TextPrintMode {
 
     pub(crate) const fn is_clean(&self) -> bool {
         matches!(self, Self::Clean)
+    }
+
+    pub(crate) const fn is_remove(&self) -> bool {
+        matches!(self, Self::Remove)
+    }
+
+    pub(crate) const fn is_fill(&self) -> bool {
+        matches!(self, Self::Fill)
+    }
+
+    pub(crate) const fn trim_all() -> Self {
+        Self::Trim(TrimMode::All)
+    }
+
+    pub(crate) const fn trim_keep_leading_spaces() -> Self {
+        Self::Trim(TrimMode::KeepLeadingSpaces)
     }
 }

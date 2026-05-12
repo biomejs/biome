@@ -67,32 +67,9 @@ info: markdown/blockquote/ignore-code.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,14 +3,16 @@
- > ```js
- > ugly   ( code ) ;
- > ```
--> ````
-+> 
-+````
- 
- > ```md
- > <!-- prettier-ignore -->
- > - This is a long long
- >   long long long long
- >   long long paragraph.
--> ```
-+> 
-+```
- 
- > - test
- >   ```md
-@@ -36,15 +38,19 @@
- > >   long long long long
- > >   long long paragraph.
+@@ -38,10 +38,12 @@
  > > ```
--> ````
-+> 
-+````
+ > ````
  
 +> 
  > <!-- prettier-ignore -->
@@ -103,11 +80,6 @@ info: markdown/blockquote/ignore-code.md
  
  > ```js
  > // prettier-ignore
- > const x = 1,
- > b = 2
--> ```
-+> 
-+```
 ```
 
 # Output
@@ -118,16 +90,14 @@ info: markdown/blockquote/ignore-code.md
 > ```js
 > ugly   ( code ) ;
 > ```
-> 
-````
+> ````
 
 > ```md
 > <!-- prettier-ignore -->
 > - This is a long long
 >   long long long long
 >   long long paragraph.
-> 
-```
+> ```
 
 > - test
 >   ```md
@@ -153,8 +123,7 @@ info: markdown/blockquote/ignore-code.md
 > >   long long long long
 > >   long long paragraph.
 > > ```
-> 
-````
+> ````
 
 > 
 > <!-- prettier-ignore -->
@@ -167,6 +136,5 @@ info: markdown/blockquote/ignore-code.md
 > // prettier-ignore
 > const x = 1,
 > b = 2
-> 
-```
+> ```
 ```

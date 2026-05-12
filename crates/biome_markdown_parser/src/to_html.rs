@@ -48,8 +48,9 @@ use biome_markdown_syntax::{
     MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock,
     MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic,
     MdInlineItemList, MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    MdLinkTitle, MdNewline, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix,
+    MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak,
+    MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -57,7 +58,76 @@ use std::collections::HashMap;
 
 use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
-use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use crate::syntax::{
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
+    is_dash_only_thematic_break_text,
+};
+
+/// Compute the absolute column (0-indexed) where `node` begins on its line,
+/// after stripping quote-prefix tokens (which are virtual and not rendered).
+///
+/// Walks the syntax tree from `node`'s line start until `node`'s first token,
+/// expanding tabs to the next `TAB_STOP_SPACES` boundary. Tokens that descend
+/// from an `MD_QUOTE_PREFIX` node contribute zero columns, matching how the
+/// renderer strips those prefixes from emitted content.
+fn line_start_column_of(node: &SyntaxNode<MarkdownLanguage>) -> usize {
+    use biome_markdown_syntax::MarkdownSyntaxKind::{
+        MD_QUOTE_INDENT_LIST, MD_QUOTE_POST_MARKER_SPACE, MD_QUOTE_PREFIX, NEWLINE, R_ANGLE,
+    };
+    let Some(first) = node.first_token() else {
+        return 0;
+    };
+    // Locate the most recent token that contains a line break before `first`.
+    let mut anchor = first.prev_token();
+    while let Some(tok) = anchor.clone() {
+        if tok.kind() == NEWLINE || tok.text().contains('\n') || tok.text().contains('\r') {
+            break;
+        }
+        anchor = tok.prev_token();
+    }
+    // Walk forward from after the anchor to `first`, accumulating columns
+    // contributed by non-prefix tokens. No allocation needed because
+    // `next_token` yields the same sequence in original order.
+    let mut col = 0usize;
+    let mut cursor = match anchor {
+        Some(tok) => tok.next_token(),
+        None => node.first_token().and_then(|t| {
+            let mut c = Some(t);
+            while let Some(tok) = c.clone() {
+                if tok.prev_token().is_none() {
+                    return Some(tok);
+                }
+                c = tok.prev_token();
+            }
+            None
+        }),
+    };
+    while let Some(tok) = cursor {
+        if tok == first {
+            break;
+        }
+        let kind = tok.kind();
+        let in_quote_prefix = tok
+            .parent()
+            .and_then(|p| p.ancestors().find(|n| n.kind() == MD_QUOTE_PREFIX))
+            .is_some();
+        if !in_quote_prefix
+            && !matches!(
+                kind,
+                R_ANGLE | MD_QUOTE_POST_MARKER_SPACE | MD_QUOTE_INDENT_LIST
+            )
+        {
+            for c in tok.text().chars() {
+                match c {
+                    '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+                    _ => col += 1,
+                }
+            }
+        }
+        cursor = tok.next_token();
+    }
+    col
+}
 
 /// Compute the column width of an `MdIndentTokenList`.
 fn indent_list_width(list: &biome_markdown_syntax::MdIndentTokenList) -> usize {
@@ -361,35 +431,87 @@ pub fn document_to_html(
 /// Collect link reference definitions from the document.
 fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, Option<String>)> {
     let mut definitions = HashMap::new();
+    let link_definitions: Vec<_> = document
+        .syntax()
+        .descendants()
+        .filter_map(MdLinkReferenceDefinition::cast)
+        .collect();
 
-    for node in document.syntax().descendants() {
-        if let Some(def) = MdLinkReferenceDefinition::cast(node)
-            && let (Ok(label), Ok(dest)) = (def.label(), def.destination())
-        {
-            let label_text = collect_inline_text(&label.content());
-            let normalized = normalize_reference_label(&label_text);
-            if normalized.is_empty() {
-                continue;
-            }
+    for def in link_definitions
+        .iter()
+        .filter(|def| link_reference_definition_before_dash_setext_line(def))
+    {
+        insert_link_definition(&mut definitions, def);
+    }
 
-            // Only keep first definition (per CommonMark spec)
-            if definitions.contains_key(normalized.as_ref()) {
-                continue;
-            }
-
-            let url = collect_inline_text(&dest.content());
-            let url = process_link_destination(&url);
-
-            let title = def.title().map(|t| {
-                let text = collect_inline_text(&t.content());
-                process_link_title(&text)
-            });
-
-            definitions.insert(normalized.into_owned(), (url, title));
-        }
+    for def in &link_definitions {
+        insert_link_definition(&mut definitions, def);
     }
 
     definitions
+}
+
+fn insert_link_definition(
+    definitions: &mut HashMap<String, (String, Option<String>)>,
+    def: &MdLinkReferenceDefinition,
+) {
+    let (Ok(label), Ok(dest)) = (def.label(), def.destination()) else {
+        return;
+    };
+
+    let label_text = collect_inline_text(&label.content());
+    let normalized = normalize_reference_label(&label_text);
+    if normalized.is_empty() || definitions.contains_key(normalized.as_ref()) {
+        return;
+    }
+
+    let url = collect_inline_text(&dest.content());
+    let url = process_link_destination(&url);
+
+    let title = def.title().map(|t| {
+        let text = collect_inline_text(&t.content());
+        process_link_title(&text)
+    });
+
+    definitions.insert(normalized.into_owned(), (url, title));
+}
+
+fn link_reference_definition_before_dash_setext_line(def: &MdLinkReferenceDefinition) -> bool {
+    let mut newline_count = 0;
+
+    for element in def.syntax().siblings_with_tokens(Direction::Next).skip(1) {
+        let Some(node) = element.as_node() else {
+            continue;
+        };
+
+        if MdNewline::cast(node.clone()).is_some() {
+            newline_count += 1;
+            if newline_count > 1 {
+                return false;
+            }
+            continue;
+        }
+
+        if MdQuotePrefix::cast(node.clone()).is_some()
+            || MdContinuationIndent::cast(node.clone()).is_some()
+            || is_empty_paragraph(node)
+        {
+            continue;
+        }
+
+        if let Some(thematic) = MdThematicBreakBlock::cast(node.clone()) {
+            return is_dash_only_thematic_break_text(&thematic.syntax().text_trimmed().to_string());
+        }
+
+        return false;
+    }
+
+    false
+}
+
+fn is_empty_paragraph(node: &SyntaxNode<MarkdownLanguage>) -> bool {
+    MdParagraph::cast(node.clone())
+        .is_some_and(|paragraph| paragraph.syntax().text_trimmed().is_empty())
 }
 
 // ============================================================================
@@ -645,12 +767,12 @@ impl<'a> HtmlRenderer<'a> {
 
             let first_is_paragraph = blocks
                 .iter()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
 
             let leading_newline = !is_tight || !first_is_paragraph;
@@ -953,7 +1075,7 @@ impl<'a> HtmlRenderer<'a> {
                     content = strip_quote_prefixes(&content, state.quote_indent);
                 }
                 let content = strip_paragraph_indent(
-                    content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'),
+                    content.trim_matches(|c| c == ' ' || c == '\t' || c == '\n' || c == '\r'),
                 );
 
                 if state.in_tight_list {
@@ -974,7 +1096,13 @@ impl<'a> HtmlRenderer<'a> {
                 self.push_str("<h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">");
-                self.push_str(buffer.content.trim());
+                // Setext headings can span multiple inline lines; leading
+                // whitespace on each continuation line is structural padding
+                // and must be stripped (matching paragraph rendering).
+                let trimmed = buffer
+                    .content
+                    .trim_matches(|c: char| matches!(c, ' ' | '\t' | '\n' | '\r'));
+                self.push_str(&strip_paragraph_indent(trimmed));
                 self.push_str("</h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">\n");
@@ -1193,7 +1321,14 @@ fn render_fenced_code_block(
     let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
     let fence_indent = fence_leading_indent.min(MAX_BLOCK_PREFIX_INDENT);
-    let content_indent = container_indent + fence_indent;
+    // When a tab spans the boundary between list/quote indent and fence indent,
+    // the tab token gets fully assigned to the surrounding continuation indent
+    // and the fence's own indent slot ends up empty (CST tokens are indivisible).
+    // The actual fence column on the line still includes the post-container
+    // portion of that tab, so we cross-check with the real column position and
+    // use whichever value is larger.
+    let absolute_column = line_start_column_of(code.syntax());
+    let content_indent = (container_indent + fence_indent).max(absolute_column);
 
     // Get info string (language) - process escapes
     let info_string: String = code
@@ -1773,9 +1908,24 @@ fn is_newline_block(block: &AnyMdBlock) -> bool {
     )
 }
 
+/// Check if a block is structural-only and produces no rendered content.
+/// This includes newline blocks, continuation indents, and quote prefix markers
+/// that can appear as children of list item content when lists are nested
+/// inside blockquotes.
+fn is_transparent_block(block: &AnyMdBlock) -> bool {
+    matches!(
+        block,
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_)
+                | AnyMdLeafBlock::MdContinuationIndent(_)
+                | AnyMdLeafBlock::MdLinkReferenceDefinition(_),
+        ) | AnyMdBlock::MdQuotePrefix(_)
+    )
+}
+
 /// Check if blocks are effectively empty (empty or only newlines).
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
-    blocks.is_empty() || blocks.iter().all(is_newline_block)
+    blocks.is_empty() || blocks.iter().all(is_transparent_block)
 }
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
@@ -1794,6 +1944,16 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 mod tests {
     use super::*;
     use crate::parse_markdown;
+
+    fn render(input: &str) -> String {
+        let parsed = parse_markdown(input);
+        document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        )
+    }
 
     #[test]
     fn test_tab_expansion() {
@@ -1982,17 +2142,32 @@ mod tests {
 
     #[test]
     fn test_title_with_escaped_closing_quote() {
-        let parsed = parse_markdown("[a](/url \"title with \\\" quote\")\n");
-        let html = document_to_html(
-            &parsed.tree(),
-            parsed.list_tightness(),
-            parsed.list_item_indents(),
-            parsed.quote_indents(),
-        );
+        let html = render("[a](/url \"title with \\\" quote\")\n");
         assert_eq!(
             html,
             "<p><a href=\"/url\" title=\"title with &quot; quote\">a</a></p>\n"
         );
+    }
+
+    #[test]
+    fn test_dash_setext_reference_definition_priority() {
+        let html = render("[x]: /first\n***\n> [x]: /second \"title\"\n> ---\n[x]\n");
+        assert_eq!(
+            html,
+            "<hr />\n<blockquote>\n<p></p>\n<hr />\n</blockquote>\n<p><a href=\"/second\" title=\"title\">x</a></p>\n"
+        );
+    }
+
+    #[test]
+    fn test_spaced_dash_thematic_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n - - -\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
+    }
+
+    #[test]
+    fn test_blank_line_before_dash_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n\n---\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
     }
 
     #[test]
@@ -2005,5 +2180,172 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p>foo\\</p>\n");
+    }
+
+    #[test]
+    fn test_hard_break_in_blockquote() {
+        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<p>foo<br />\nbar</p>\n<p>baz</p>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_hard_break_nested_quote_in_list() {
+        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<blockquote>\n<p>quoted<br />\nline</p>\n<p>next para</p>\n</blockquote>\n</li>\n<li>\n<p>after</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_marker_split() {
+        // Two tight lists separated by blank line with different markers
+        let input = "- foo\n- bar\n\n* baz\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<ul>\n<li>baz</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_basic() {
+        let input = "- foo\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_loose_list_same_marker() {
+        let input = "- foo\n\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_ordered_delim_split_tight() {
+        // Different ordered delimiters across blank line → separate tight lists
+        let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ol>\n<li>First</li>\n<li>Second</li>\n</ol>\n<ol>\n<li>Third</li>\n<li>Fourth</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_cross_type_split_tight() {
+        // Bullet → ordered across blank line → separate tight lists
+        let input = "- bullet\n\n1. ordered\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_ordered_list_in_blockquote() {
+        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ol>\n<li>a</li>\n<li>b</li>\n</ol>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_three_item_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_not_in_blockquote() {
+        let parsed = parse_markdown("- a\n- b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
     }
 }

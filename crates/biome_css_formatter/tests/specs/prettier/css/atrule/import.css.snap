@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/atrule/import.css
 ---
 
@@ -14,6 +15,11 @@ info: css/atrule/import.css
 @import "common.css" screen projection;
 @import url('landscape.css') screen and (orientation:landscape);
 
+@import (multiple) "foo.less";
+
+/* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
+/* that nothing is lost when printing. */
+@import "one" two "three";
 
 #main {
     @import "example";
@@ -46,6 +52,12 @@ info: css/atrule/import.css
 
 }
 
+@import "test.less" {}
+@import "test.less" {
+    a: b;
+    c: d;
+}
+
 @import url('foo');
 $dir: 'fonts';
 
@@ -69,6 +81,9 @@ $dir: 'fonts';
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 @import url('landscape.css') screen and (orientation:landscape);
+@import "rounded-corners", "text-shadow";
+@import 'rounded-corners', 'text-shadow';
+$family: unquote("Droid+Sans");
 @import url("http://fonts.googleapis.com/css?family=#{$family}");
 @import url( "foo.css");
 @import url("foo.css" );
@@ -93,30 +108,33 @@ $dir: 'fonts';
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,12 +6,6 @@
- @import "common.css" screen projection;
- @import url("landscape.css") screen and (orientation: landscape);
+@@ -12,8 +12,9 @@
+ /* that nothing is lost when printing. */
+ @import "one" two "three";
  
--@import (multiple) "foo.less";
--
--/* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
--/* that nothing is lost when printing. */
--@import "one" two "three";
--
- #main {
-   @import "example";
- }
-@@ -32,17 +26,10 @@
+-#main {
+-  @import "example";
++#main
++{
++@import "example";
  }
  #main {
    @import "example";
--}
--
+@@ -34,15 +35,16 @@
+   @import "example";
+ }
+ 
 -@import "test.less" {
 -}
 -@import "test.less" {
 -  a: b;
 -  c: d;
++@import "test.less"
++{}
++@import "test.less"
++{
++a:b ;
++    c: d;
  }
  
  @import url("foo");
@@ -125,7 +143,7 @@ $dir: 'fonts';
  
  @import url("foo.css");
  @import url("foo.css");
-@@ -59,14 +46,9 @@
+@@ -59,22 +61,24 @@
  @import url("bluish.css") projection, tv;
  @import url("bluish.css") projection, tv;
  @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
@@ -137,11 +155,32 @@ $dir: 'fonts';
 +@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
  @import url("landscape.css") screen and (orientation: landscape);
 -@import "rounded-corners", "text-shadow";
--@import "rounded-corners", "text-shadow";
--$family: unquote("Droid+Sans");
+ @import "rounded-corners", "text-shadow";
++@import 'rounded-corners', 'text-shadow';
+ $family: unquote("Droid+Sans");
  @import url("http://fonts.googleapis.com/css?family=#{$family}");
- @import url("foo.css");
- @import url("foo.css");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo bar baz.css");
++@import url( "foo.css");
++@import url("foo.css" );
++@import url( "foo.css" );
++@import url(  "foo.css"  );
+ @import url("foo bar baz.css");
++@import url(  "foo bar baz.css"  );
+ @import url("foo  bar  baz.css");
+-@import url("foo.css");
+-@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
+-@import url("foo.css,800");
++@import url(
++"foo.css"
++);
++@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
++@import url(
++"foo.css,800"
++);
 ```
 
 # Output
@@ -155,8 +194,15 @@ $dir: 'fonts';
 @import "common.css" screen projection;
 @import url("landscape.css") screen and (orientation: landscape);
 
-#main {
-  @import "example";
+@import (multiple) "foo.less";
+
+/* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
+/* that nothing is lost when printing. */
+@import "one" two "three";
+
+#main
+{
+@import "example";
 }
 #main {
   @import "example";
@@ -175,6 +221,14 @@ $dir: 'fonts';
 }
 #main {
   @import "example";
+}
+
+@import "test.less"
+{}
+@import "test.less"
+{
+a:b ;
+    c: d;
 }
 
 @import url("foo");
@@ -198,17 +252,24 @@ $dir: 'fonts';
   projection, tv;
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 @import url("landscape.css") screen and (orientation: landscape);
+@import "rounded-corners", "text-shadow";
+@import 'rounded-corners', 'text-shadow';
+$family: unquote("Droid+Sans");
 @import url("http://fonts.googleapis.com/css?family=#{$family}");
-@import url("foo.css");
-@import url("foo.css");
-@import url("foo.css");
-@import url("foo.css");
+@import url( "foo.css");
+@import url("foo.css" );
+@import url( "foo.css" );
+@import url(  "foo.css"  );
 @import url("foo bar baz.css");
-@import url("foo bar baz.css");
+@import url(  "foo bar baz.css"  );
 @import url("foo  bar  baz.css");
-@import url("foo.css");
-@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
-@import url("foo.css,800");
+@import url(
+"foo.css"
+);
+@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
+@import url(
+"foo.css,800"
+);
 ```
 
 # Errors
@@ -226,33 +287,217 @@ import.css:6:29 parse ━━━━━━━━━━━━━━━━━━━�
   
   i Remove projection
   
-import.css:42:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import.css:9:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `"foo.less"`
+  
+     7 │ @import url('landscape.css') screen and (orientation:landscape);
+     8 │ 
+   > 9 │ @import (multiple) "foo.less";
+       │                    ^^^^^^^^^^
+    10 │ 
+    11 │ /* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
+  
+  i Remove "foo.less"
+  
+import.css:15:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `{`
+  
+    13 │ @import "one" two "three";
+    14 │ 
+  > 15 │ #main {
+       │       ^
+    16 │     @import "example";
+    17 │ }
+  
+  i Remove {
+  
+import.css:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    15 │ #main {
+    16 │     @import "example";
+  > 17 │ }
+       │ ^
+    18 │ #main {
+    19 │ @import "example";
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    15 │ #main {
+    16 │     @import "example";
+  > 17 │ }
+       │ ^
+    18 │ #main {
+    19 │ @import "example";
+  
+import.css:46:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media query but instead found '{'.
+  
+    44 │ }
+    45 │ 
+  > 46 │ @import "test.less" {}
+       │                     ^
+    47 │ @import "test.less" {
+    48 │     a: b;
+  
+  i Expected a media query here.
+  
+    44 │ }
+    45 │ 
+  > 46 │ @import "test.less" {}
+       │                     ^
+    47 │ @import "test.less" {
+    48 │     a: b;
+  
+import.css:47:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media query but instead found '{'.
+  
+    46 │ @import "test.less" {}
+  > 47 │ @import "test.less" {
+       │                     ^
+    48 │     a: b;
+    49 │     c: d;
+  
+  i Expected a media query here.
+  
+    46 │ @import "test.less" {}
+  > 47 │ @import "test.less" {
+       │                     ^
+    48 │     a: b;
+    49 │     c: d;
+  
+import.css:48:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    46 │ @import "test.less" {}
+    47 │ @import "test.less" {
+  > 48 │     a: b;
+       │         ^
+    49 │     c: d;
+    50 │ }
+  
+  i Remove ;
+  
+import.css:53:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS variable declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
-    41 │ @import url('foo');
-  > 42 │ $dir: 'fonts';
+    52 │ @import url('foo');
+  > 53 │ $dir: 'fonts';
        │ ^^^^^^^^^^^^^^
-    43 │ 
-    44 │ @import url("foo.css");
+    54 │ 
+    55 │ @import url("foo.css");
   
-import.css:62:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import.css:73:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `tv`
   
-    60 │   tv;
-    61 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
-  > 62 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+    71 │   tv;
+    72 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+  > 73 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
        │                                                                                           ^^
-    63 │ @import url('landscape.css') screen and (orientation:landscape);
-    64 │ @import url("http://fonts.googleapis.com/css?family=#{$family}");
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+    75 │ @import "rounded-corners", "text-shadow";
   
   i Remove tv
+  
+import.css:75:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media query but instead found '"text-shadow";
+    @import 'rounded-corners''.
+  
+    73 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+  > 75 │ @import "rounded-corners", "text-shadow";
+       │                            ^^^^^^^^^^^^^^
+  > 76 │ @import 'rounded-corners', 'text-shadow';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ $family: unquote("Droid+Sans");
+    78 │ @import url("http://fonts.googleapis.com/css?family=#{$family}");
+  
+  i Expected a media query here.
+  
+    73 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+  > 75 │ @import "rounded-corners", "text-shadow";
+       │                            ^^^^^^^^^^^^^^
+  > 76 │ @import 'rounded-corners', 'text-shadow';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ $family: unquote("Droid+Sans");
+    78 │ @import url("http://fonts.googleapis.com/css?family=#{$family}");
+  
+import.css:76:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media query but instead found ''text-shadow';
+    $family: unquote("Droid+Sans");
+    @import url("http://fonts.googleapis.com/css?family=#{$family}");
+    @import url( "foo.css");
+    @import url("foo.css" );
+    @import url( "foo.css" );
+    @import url(  "foo.css"  );
+    @import url("foo bar baz.css");
+    @import url(  "foo bar baz.css"  );
+    @import url("foo  bar  baz.css");
+    @import url(
+    "foo.css"
+    );
+    @import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
+    @import url(
+    "foo.css,800"
+    );'.
+  
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+    75 │ @import "rounded-corners", "text-shadow";
+  > 76 │ @import 'rounded-corners', 'text-shadow';
+       │                            ^^^^^^^^^^^^^^
+  > 77 │ $family: unquote("Droid+Sans");
+        ...
+  > 90 │ @import url(
+  > 91 │ "foo.css,800"
+  > 92 │ );
+       │ ^^
+    93 │ 
+  
+  i Expected a media query here.
+  
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+    75 │ @import "rounded-corners", "text-shadow";
+  > 76 │ @import 'rounded-corners', 'text-shadow';
+       │                            ^^^^^^^^^^^^^^
+  > 77 │ $family: unquote("Droid+Sans");
+        ...
+  > 90 │ @import url(
+  > 91 │ "foo.css,800"
+  > 92 │ );
+       │ ^^
+    93 │ 
+  
+import.css:93:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+    91 │ "foo.css,800"
+    92 │ );
+  > 93 │ 
+       │ 
+  
+  i the file ends here
+  
+    91 │ "foo.css,800"
+    92 │ );
+  > 93 │ 
+       │ 
   
 
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   50: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+   65: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 ```

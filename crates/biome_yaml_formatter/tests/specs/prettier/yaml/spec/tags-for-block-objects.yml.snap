@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tags-for-block-objects.yml
+---
+
+# Input
+
+```yml
+foo: !!seq
+  - !!str a
+  - !!map
+    key: !!str value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ foo: !!seq
+   - !!str a
+   - !!map
+-    key: !!str value
++    key: !!str value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+foo: !!seq
+  - !!str a
+  - !!map
+    key: !!str value```

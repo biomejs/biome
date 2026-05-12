@@ -258,14 +258,15 @@ fn parse_html_attribute_value(bytes: &[u8], mut i: usize) -> Option<usize> {
             let start = i;
             while i < bytes.len() {
                 let b = bytes[i];
-                if b <= b' '
-                    || b == b'"'
-                    || b == b'\''
-                    || b == b'='
-                    || b == b'<'
-                    || b == b'>'
-                    || b == b'`'
-                {
+                if matches!(
+                    biome_unicode_table::lookup_byte(b),
+                    biome_unicode_table::Dispatch::WHS
+                        | biome_unicode_table::Dispatch::QOT
+                        | biome_unicode_table::Dispatch::EQL
+                        | biome_unicode_table::Dispatch::LSS
+                        | biome_unicode_table::Dispatch::MOR
+                        | biome_unicode_table::Dispatch::TPL
+                ) {
                     break;
                 }
                 i += 1;
@@ -291,8 +292,84 @@ fn parse_self_close(bytes: &[u8], i: usize) -> Option<usize> {
 
 // #region Shared helpers
 
+/// Byte classification routed through `biome_unicode_table::lookup_byte`.
+///
+/// The shared dispatch table maps all whitespace to `WHS`, but blockquote-marker
+/// detection needs finer distinctions (CR vs LF vs space vs tab). This enum
+/// refines `WHS` so the scanner can dispatch entirely on classified variants
+/// with no raw byte literals in the loop body.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum HtmlByteKind {
+    /// Line feed `\n` (U+000A)
+    LineFeed,
+    /// Carriage return `\r` (U+000D)
+    CarriageReturn,
+    /// ASCII space (U+0020) — the only whitespace that counts as indent
+    /// before a blockquote marker per CommonMark §5.1.
+    Space,
+    /// Any other WHS byte (tab, vertical tab, form feed)
+    OtherWhitespace,
+    /// `>` — potential blockquote marker
+    MoreThan,
+    /// Everything else
+    Other,
+}
+
+fn classify_html_byte(b: u8) -> HtmlByteKind {
+    use biome_unicode_table::Dispatch::{MOR, WHS};
+    use biome_unicode_table::lookup_byte;
+
+    match lookup_byte(b) {
+        WHS => match b {
+            b'\n' => HtmlByteKind::LineFeed,
+            b'\r' => HtmlByteKind::CarriageReturn,
+            b' ' => HtmlByteKind::Space,
+            _ => HtmlByteKind::OtherWhitespace,
+        },
+        MOR => HtmlByteKind::MoreThan,
+        _ => HtmlByteKind::Other,
+    }
+}
+
+/// Check if an inline HTML span contains a `>` immediately after a newline
+/// (with optional 0-3 leading spaces). In that position `>` is a blockquote
+/// marker per CommonMark §5.1, not part of the HTML tag.
+fn inline_html_crosses_blockquote_marker(span: &str) -> bool {
+    let bytes = span.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+    while i < len {
+        match classify_html_byte(bytes[i]) {
+            HtmlByteKind::LineFeed => {
+                i += 1;
+            }
+            HtmlByteKind::CarriageReturn => {
+                i += 1;
+                // Skip CR+LF pair
+                if i < len && classify_html_byte(bytes[i]) == HtmlByteKind::LineFeed {
+                    i += 1;
+                }
+            }
+            _ => {
+                i += 1;
+                continue;
+            }
+        }
+        // After a line ending, skip 0-3 spaces (CommonMark §5.1 indent rule).
+        let mut spaces = 0;
+        while i < len && classify_html_byte(bytes[i]) == HtmlByteKind::Space && spaces < 3 {
+            i += 1;
+            spaces += 1;
+        }
+        if i < len && classify_html_byte(bytes[i]) == HtmlByteKind::MoreThan {
+            return true;
+        }
+    }
+    false
+}
+
 fn is_html_space(b: u8) -> bool {
-    matches!(b, b' ' | b'\t' | b'\n' | b'\r' | b'\x0c')
+    biome_unicode_table::lookup_byte(b) == biome_unicode_table::Dispatch::WHS
 }
 
 /// Skip whitespace (space, tab, newline, carriage return, form feed).
@@ -327,13 +404,21 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Get the source text starting from current position
-    let source = p.source_after_current();
-
-    // Check if this is valid inline HTML
-    let html_len = match is_inline_html(source) {
-        Some(len) => len,
-        None => return Absent,
+    // Check if this is valid inline HTML and whether it crosses a blockquote
+    // marker. Both checks use the source text, so scope the borrow here.
+    let html_len = {
+        let source = p.source_after_current();
+        let len = match is_inline_html(source) {
+            Some(len) => len,
+            None => return Absent,
+        };
+        // Reject spans where `>` immediately follows a newline (optionally
+        // preceded by 0-3 spaces). In that position `>` is a blockquote
+        // marker per §5.1, not the closing bracket of an open tag.
+        if inline_html_crosses_blockquote_marker(&source[..len]) {
+            return Absent;
+        }
+        len
     };
 
     // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.

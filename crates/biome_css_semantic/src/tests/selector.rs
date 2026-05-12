@@ -10,7 +10,8 @@ fn test_resolve_selector_no_parents() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     assert_eq!(rule.selectors.len(), 1);
     assert_eq!(rule.selectors[0].resolved().to_string(), "div");
 }
@@ -28,7 +29,8 @@ fn test_resolve_selector_simple_parent() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".parent");
 
@@ -55,7 +57,8 @@ fn test_resolve_selector_with_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "a");
 
@@ -81,7 +84,8 @@ fn test_resolve_selector_multiple_parents() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let grandparent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let grandparent_rule = rules.first().unwrap();
     assert_eq!(grandparent_rule.selectors.len(), 1);
     assert_eq!(
         grandparent_rule.selectors[0].resolved().to_string(),
@@ -118,7 +122,8 @@ fn test_resolve_selector_with_multi_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "p");
 
@@ -142,7 +147,8 @@ fn test_resolve_selector_no_ampersand_with_parents() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".list");
 
@@ -167,7 +173,8 @@ fn test_resolve_selector_with_complex_parent() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(
         parent_rule.selectors[0].resolved().to_string(),
@@ -197,7 +204,8 @@ fn test_resolve_selector_with_nested_ampersands() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".btn");
 
@@ -226,7 +234,8 @@ fn test_resolve_selector_with_multiple_parents_and_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let grandparent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let grandparent_rule = rules.first().unwrap();
     assert_eq!(grandparent_rule.selectors.len(), 1);
     assert_eq!(
         grandparent_rule.selectors[0].resolved().to_string(),
@@ -257,7 +266,8 @@ fn test_descendant_combinator() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
 
     assert_eq!(rule.selectors.len(), 1);
     assert_eq!(rule.selectors[0].resolved().to_string(), ".foo .bar");
@@ -334,7 +344,8 @@ fn test_ampersand_nesting_selector() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".foo");
 
@@ -378,7 +389,8 @@ fn test_universal_selector() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     assert_eq!(rule.selectors.len(), 1);
     assert_eq!(rule.selectors[0].resolved().to_string(), "*");
 }
@@ -390,7 +402,8 @@ fn test_id_selector() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     assert_eq!(rule.selectors.len(), 1);
     assert_eq!(rule.selectors[0].resolved().to_string(), "#app");
 }
@@ -424,7 +437,8 @@ fn test_nested_pseudo_element() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "a");
 
     let child_rule_id = parent_rule.child_ids.first().unwrap();
@@ -447,7 +461,8 @@ fn test_selector_list_with_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 2);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".a");
     assert_eq!(parent_rule.selectors[1].resolved().to_string(), ".b");
@@ -473,7 +488,8 @@ fn test_nested_sibling_combinator() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "h2");
 
     let child_rule_id = parent_rule.child_ids.first().unwrap();
@@ -499,7 +515,8 @@ fn test_nested_inside_media() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let card_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let card_rule = rules.first().unwrap();
     assert_eq!(card_rule.selectors[0].resolved().to_string(), ".card");
 
     // The @media rule is a child of .card.
@@ -534,7 +551,8 @@ fn test_nested_inside_supports() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let grid_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let grid_rule = rules.first().unwrap();
     assert_eq!(grid_rule.selectors[0].resolved().to_string(), ".grid");
 
     let supports_rule_id = grid_rule.child_ids.first().unwrap();
@@ -582,7 +600,8 @@ fn test_ampersand_suffix_nesting() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let parent_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let parent_rule = rules.first().unwrap();
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".block");
 
     let child_rule_id = parent_rule.child_ids.first().unwrap();
@@ -610,7 +629,8 @@ fn test_deeply_nested_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let a_rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let a_rule = rules.first().unwrap();
     assert_eq!(a_rule.selectors[0].resolved().to_string(), ".a");
 
     let b_rule_id = a_rule.child_ids.first().unwrap();

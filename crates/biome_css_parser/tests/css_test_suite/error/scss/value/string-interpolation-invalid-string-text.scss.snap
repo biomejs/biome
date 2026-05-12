@@ -58,7 +58,7 @@ CssRoot {
                                                     l_curly_token: L_CURLY@31..32 "{" [] [],
                                                     value: ScssExpression {
                                                         items: ScssExpressionItemList [
-                                                            ScssIdentifier {
+                                                            ScssVariable {
                                                                 dollar_token: DOLLAR@32..33 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@33..36 "bar" [] [],
@@ -95,7 +95,7 @@ CssRoot {
                                                     l_curly_token: L_CURLY@57..58 "{" [] [],
                                                     value: ScssExpression {
                                                         items: ScssExpressionItemList [
-                                                            ScssIdentifier {
+                                                            ScssVariable {
                                                                 dollar_token: DOLLAR@58..59 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@59..62 "bar" [] [],
@@ -164,7 +164,7 @@ CssRoot {
                           1: L_CURLY@31..32 "{" [] []
                           2: SCSS_EXPRESSION@32..36
                             0: SCSS_EXPRESSION_ITEM_LIST@32..36
-                              0: SCSS_IDENTIFIER@32..36
+                              0: SCSS_VARIABLE@32..36
                                 0: DOLLAR@32..33 "$" [] []
                                 1: CSS_IDENTIFIER@33..36
                                   0: IDENT@33..36 "bar" [] []
@@ -188,7 +188,7 @@ CssRoot {
                           1: L_CURLY@57..58 "{" [] []
                           2: SCSS_EXPRESSION@58..62
                             0: SCSS_EXPRESSION_ITEM_LIST@58..62
-                              0: SCSS_IDENTIFIER@58..62
+                              0: SCSS_VARIABLE@58..62
                                 0: DOLLAR@58..59 "$" [] []
                                 1: CSS_IDENTIFIER@59..62
                                   0: IDENT@59..62 "bar" [] []

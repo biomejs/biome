@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-3-mapping-scalars-to-sequences.yml
+---
+# Input
+
+```yml
+american:
+  - Boston Red Sox
+  - Detroit Tigers
+  - New York Yankees
+national:
+  - New York Mets
+  - Chicago Cubs
+  - Atlanta Braves
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,4 +5,4 @@
+ national:
+   - New York Mets
+   - Chicago Cubs
+-  - Atlanta Braves
++  - Atlanta Braves
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+american:
+  - Boston Red Sox
+  - Detroit Tigers
+  - New York Yankees
+national:
+  - New York Mets
+  - Chicago Cubs
+  - Atlanta Braves```

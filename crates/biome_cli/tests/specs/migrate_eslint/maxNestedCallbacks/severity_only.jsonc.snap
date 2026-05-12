@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: severity_only.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "max-nested-callbacks": "error" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": {
+				"noExcessiveNestedCallbacks": {
+					"level": "error",
+					"options": { "max": 10 }
+				}
+			}
+		}
+	}
+}
+
+```

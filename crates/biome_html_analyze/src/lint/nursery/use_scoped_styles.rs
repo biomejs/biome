@@ -6,10 +6,12 @@ use biome_console::markup;
 use biome_html_factory::make;
 use biome_html_syntax::{
     AnyHtmlAttribute, AstroIsDirective, HtmlFileSource, HtmlOpeningElement, HtmlSyntaxKind,
-    HtmlSyntaxToken,
+    HtmlSyntaxToken, element_ext::AnyHtmlTagElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeCast};
 use biome_rule_options::use_scoped_styles::UseScopedStylesOptions;
+
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that `<style>` blocks in Vue SFCs have the `scoped` attribute and that `<style>` blocks in Astro components do not have the `is:global` directive.
@@ -78,22 +80,24 @@ impl Rule for UseScopedStyles {
     type Options = UseScopedStylesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<HtmlFileSource>().is_vue()
-            && !ctx.source_type::<HtmlFileSource>().is_astro()
-        {
+        let source_type = ctx.source_type::<HtmlFileSource>();
+
+        if !source_type.is_vue() && !source_type.is_astro() {
             return None;
         }
 
         let opening = ctx.query();
 
-        let name = opening.name().ok()?;
-        let name_text = name.token_text_trimmed()?;
-        if !name_text.eq_ignore_ascii_case("style") {
+        if !is_html_tag(
+            &AnyHtmlTagElement::from(opening.clone()),
+            source_type,
+            "style",
+        ) {
             return None;
         }
 
         let attributes = opening.attributes();
-        if ctx.source_type::<HtmlFileSource>().is_vue() {
+        if source_type.is_vue() {
             let has_scoped = attributes.find_by_name("scoped").is_some();
             let has_module = attributes.find_by_name("module").is_some();
 
@@ -102,7 +106,7 @@ impl Rule for UseScopedStyles {
             } else {
                 return Some(GlobalStylesKind::Vue);
             }
-        } else if ctx.source_type::<HtmlFileSource>().is_astro() {
+        } else if source_type.is_astro() {
             let is_directives = attributes
                 .iter()
                 .filter_map(|attr| attr.syntax().clone().cast::<AstroIsDirective>());

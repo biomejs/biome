@@ -200,12 +200,20 @@ impl Rule for NoShorthandPropertyOverrides {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.span,
-            markup! {
-                "Unexpected shorthand property "<Emphasis>{state.target_property}</Emphasis>" after "<Emphasis>{state.override_property}</Emphasis>
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.span,
+                markup! {
+                    "This shorthand property "<Emphasis>{state.target_property}</Emphasis>" overrides the earlier "<Emphasis>{state.override_property}</Emphasis>" declaration."
+                },
+            )
+            .note(markup! {
+                "Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly."
+            })
+            .note(markup! {
+                "Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit."
+            }),
+        )
     }
 }

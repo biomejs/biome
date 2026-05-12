@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// String(new String());
     /// ```
     pub NoUselessTypeConversion {
-        version: "next",
+        version: "2.4.11",
         name: "noUselessTypeConversion",
         language: "js",
         recommended: false,
@@ -216,7 +216,12 @@ fn run_builtin_call(
     node: &JsCallExpression,
 ) -> Option<RuleState> {
     let callee = node.callee().ok()?;
-    let (reference, name) = global_identifier(&callee.clone().omit_parentheses())?;
+    let (reference, name) = global_identifier(
+        &callee
+            .clone()
+            .omit_parentheses()
+            .as_any_global_identifier_expression()?,
+    )?;
 
     let primitive = match name.text() {
         "String" => PrimitiveKind::String,

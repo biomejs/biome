@@ -83,14 +83,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@52..53 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@53..54 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@53..69 " List interrupts" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@54..69 "List interrupts" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@69..70 "\n" [] [],
@@ -244,16 +244,16 @@ MdDocument {
     5: MD_BULLET_LIST_ITEM@52..70
       0: MD_BULLET_LIST@52..70
         0: MD_BULLET@52..70
-          0: MD_LIST_MARKER_PREFIX@52..53
+          0: MD_LIST_MARKER_PREFIX@52..54
             0: MD_INDENT_TOKEN_LIST@52..52
             1: MINUS@52..53 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@53..53
-          1: MD_BLOCK_LIST@53..70
-            0: MD_PARAGRAPH@53..70
-              0: MD_INLINE_ITEM_LIST@53..70
-                0: MD_TEXTUAL@53..69
-                  0: MD_TEXTUAL_LITERAL@53..69 " List interrupts" [] []
+            2: MD_LIST_POST_MARKER_SPACE@53..54 " " [] []
+            3: MD_INDENT_TOKEN_LIST@54..54
+          1: MD_BLOCK_LIST@54..70
+            0: MD_PARAGRAPH@54..70
+              0: MD_INLINE_ITEM_LIST@54..70
+                0: MD_TEXTUAL@54..69
+                  0: MD_TEXTUAL_LITERAL@54..69 "List interrupts" [] []
                 1: MD_TEXTUAL@69..70
                   0: MD_TEXTUAL_LITERAL@69..70 "\n" [] []
               1: (empty)

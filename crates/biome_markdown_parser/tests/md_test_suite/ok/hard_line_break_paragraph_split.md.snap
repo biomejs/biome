@@ -1,0 +1,97 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+foo  
+bar with empty line after  
+
+foo  
+bar without empty line after  
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..3 "foo" [] [],
+                },
+                MdHardLine {
+                    value_token: MD_HARD_LINE_LITERAL@3..6 "  \n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..31 "bar with empty line after" [] [],
+                },
+                MdHardLine {
+                    value_token: MD_HARD_LINE_LITERAL@31..34 "  \n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@34..35 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..38 "foo" [] [],
+                },
+                MdHardLine {
+                    value_token: MD_HARD_LINE_LITERAL@38..41 "  \n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..69 "bar without empty line after" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..71 "  " [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@71..71 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..71
+  0: (empty)
+  1: MD_BLOCK_LIST@0..71
+    0: MD_PARAGRAPH@0..34
+      0: MD_INLINE_ITEM_LIST@0..34
+        0: MD_TEXTUAL@0..3
+          0: MD_TEXTUAL_LITERAL@0..3 "foo" [] []
+        1: MD_HARD_LINE@3..6
+          0: MD_HARD_LINE_LITERAL@3..6 "  \n" [] []
+        2: MD_TEXTUAL@6..31
+          0: MD_TEXTUAL_LITERAL@6..31 "bar with empty line after" [] []
+        3: MD_HARD_LINE@31..34
+          0: MD_HARD_LINE_LITERAL@31..34 "  \n" [] []
+      1: (empty)
+    1: MD_NEWLINE@34..35
+      0: NEWLINE@34..35 "\n" [] []
+    2: MD_PARAGRAPH@35..71
+      0: MD_INLINE_ITEM_LIST@35..71
+        0: MD_TEXTUAL@35..38
+          0: MD_TEXTUAL_LITERAL@35..38 "foo" [] []
+        1: MD_HARD_LINE@38..41
+          0: MD_HARD_LINE_LITERAL@38..41 "  \n" [] []
+        2: MD_TEXTUAL@41..69
+          0: MD_TEXTUAL_LITERAL@41..69 "bar without empty line after" [] []
+        3: MD_TEXTUAL@69..71
+          0: MD_TEXTUAL_LITERAL@69..71 "  " [] []
+      1: (empty)
+  2: EOF@71..71 "" [] []
+
+```

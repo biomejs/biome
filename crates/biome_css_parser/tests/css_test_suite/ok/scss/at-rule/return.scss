@@ -1,2 +1,4 @@
 @return 42;
 @return $width * 2;
+@return "#{$prefix}-#{$name}";
+@return clamp(#{$min}, #{$intercept} + #{$slope * 100}vw, #{$max});

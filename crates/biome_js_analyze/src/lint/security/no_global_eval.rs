@@ -2,7 +2,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, global_identifier};
+use biome_js_syntax::{AnyPossibleGlobalIdentifier, global_identifier};
 use biome_rowan::AstNode;
 use biome_rule_options::no_global_eval::NoGlobalEvalOptions;
 
@@ -62,7 +62,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoGlobalEval {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<AnyPossibleGlobalIdentifier>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoGlobalEvalOptions;

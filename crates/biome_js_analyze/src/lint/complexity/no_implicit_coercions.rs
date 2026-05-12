@@ -452,9 +452,7 @@ trait ExpressionExt {
                 AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
             ) => string_literal
                 .inner_string_text()
-                .ok()
-                .filter(|text| text.is_empty())
-                .is_some(),
+                .ok().as_ref().is_some_and(|text| text.is_empty()),
             AnyJsExpression::JsTemplateExpression(template_expression) => {
                 template_expression.elements().len() == 0
             }
@@ -473,9 +471,7 @@ trait ExpressionExt {
                 return false;
             };
             return callee
-                .get_callee_member_name()
-                .filter(|name| name.text_trimmed() == "indexOf")
-                .is_some();
+                .get_callee_member_name().as_ref().is_some_and(|name| name.text_trimmed() == "indexOf");
         }
         false
     }

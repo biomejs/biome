@@ -1,6 +1,7 @@
 mod binding;
 mod builder;
 mod closure;
+mod flavor;
 mod globals;
 mod import;
 mod is_constant;
@@ -13,9 +14,9 @@ mod tests;
 
 use crate::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
-    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier, TextRange, TextSize,
-    TsIdentifierBinding,
+    AnyJsExpression, AnyJsRoot, JsFileSource, JsIdentifierAssignment, JsIdentifierBinding,
+    JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier,
+    TextRange, TextSize, TsIdentifierBinding,
 };
 use biome_rowan::AstNode;
 pub use closure::*;
@@ -29,6 +30,7 @@ use std::{
 pub use binding::*;
 pub use builder::*;
 
+pub use flavor::*;
 pub use globals::*;
 pub use import::*;
 pub use is_constant::*;
@@ -41,6 +43,17 @@ pub use scope::*;
 pub struct SemanticModelOptions {
     /// All the allowed globals names
     pub globals: FxHashSet<String>,
+    /// Additional semantic behavior for embedded/framework-specific syntax.
+    pub flavor: SemanticFlavor,
+}
+
+impl From<&JsFileSource> for SemanticModelOptions {
+    fn from(source_type: &JsFileSource) -> Self {
+        Self {
+            flavor: source_type.into(),
+            ..Self::default()
+        }
+    }
 }
 
 /// Build the complete [SemanticModel] of a parsed file.
@@ -49,7 +62,9 @@ pub fn semantic_model(root: &AnyJsRoot, options: SemanticModelOptions) -> Semant
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
 
-    let SemanticModelOptions { globals } = options;
+    let SemanticModelOptions { globals, flavor } = options;
+    extractor.set_flavor(flavor);
+    builder.set_flavor(flavor);
 
     for global in globals {
         builder.push_global(global);

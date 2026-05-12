@@ -103,9 +103,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
-      JsDoc(
-        Hello, namespace 2.
-      )
+      Exported range: (1129..1177)
     ))
   }
 }
@@ -119,65 +117,42 @@ Imports {
 ```
 foo => BindingTypeData {
   Types Module(0) TypeId(10),
-  JsDoc(
-    @returns {string}
-  ),
-  Exported Ranges: (118..121)
 }
 
 bar => BindingTypeData {
   Types Module(0) TypeId(11),
-  JsDoc(
-    @package
-  ),
-  Exported Ranges: (187..190)
 }
 
 quz  => BindingTypeData {
   Types Module(0) TypeId(0),
-  JsDoc(
-    @private
-  ),
-  Exported Ranges: (250..253)
 }
 
 baz => BindingTypeData {
   Types Module(0) TypeId(13),
-  Exported Ranges: (363..366)
 }
 
 qux  => BindingTypeData {
   Types Module(0) TypeId(1),
-  Exported Ranges: (123..126)
 }
 
 a => BindingTypeData {
   Types Module(0) TypeId(4),
-  Exported Ranges: (426..427)
 }
 
 b => BindingTypeData {
   Types Module(0) TypeId(5),
-  Exported Ranges: (429..430)
 }
 
 d => BindingTypeData {
   Types Module(0) TypeId(7),
-  Exported Ranges: (436..437)
 }
 
 e => BindingTypeData {
   Types Module(0) TypeId(8),
-  Exported Ranges: (439..440)
 }
 
 Component => BindingTypeData {
-  Types Module(0) TypeId(17),
-  JsDoc(
-    @public
-    @returns {JSX.Element}
-  ),
-  Exported Ranges: (909..918)
+  Types Module(0) TypeId(18),
 }
 ```
 
@@ -191,7 +166,7 @@ Module TypeId(0) => Object {
 
 Module TypeId(1) => number: 1
 
-Module TypeId(2) => Module(0) TypeId(15)
+Module TypeId(2) => Module(0) TypeId(16)
 
 Module TypeId(3) => Object {
   prototype: No prototype
@@ -206,7 +181,7 @@ Module TypeId(6) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(7),
+                Module(0) TypeId(14),
             ),
             name: Some(
                 "first",
@@ -229,7 +204,7 @@ Module TypeId(6) => Tuple(
 
 Module TypeId(7) => boolean
 
-Module TypeId(8) => Module(0) TypeId(7) | Module(0) TypeId(14)
+Module TypeId(8) => Module(0) TypeId(14) | Module(0) TypeId(15)
 
 Module TypeId(9) => void
 
@@ -259,9 +234,11 @@ Module TypeId(13) => async Function "baz" {
   returns: Module(0) TypeId(12)
 }
 
-Module TypeId(14) => undefined
+Module TypeId(14) => boolean
 
-Module TypeId(15) => sync Function "getObject" {
+Module TypeId(15) => undefined
+
+Module TypeId(16) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
@@ -269,14 +246,14 @@ Module TypeId(15) => sync Function "getObject" {
   returns: Module(0) TypeId(3)
 }
 
-Module TypeId(16) => unknown
+Module TypeId(17) => unknown
 
-Module TypeId(17) => sync Function "Component" {
+Module TypeId(18) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(16)
+  returns: Module(0) TypeId(17)
 }
 ```
 
@@ -306,7 +283,6 @@ Imports {
 ```
 ohNo => BindingTypeData {
   Types Module(0) TypeId(1),
-  Exported Ranges: (29..33)
 }
 ```
 
@@ -344,9 +320,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
-      JsDoc(
-        Hello, namespace 1.
-      )
+      Exported range: (80..127)
     ))
   }
 }

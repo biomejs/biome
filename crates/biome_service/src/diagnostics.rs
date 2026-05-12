@@ -357,7 +357,7 @@ impl From<CheckFileSizeResult> for FileTooLarge {
 
 impl Diagnostic for FileTooLarge {
     fn severity(&self) -> Severity {
-        Severity::Information
+        Severity::Warning
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {

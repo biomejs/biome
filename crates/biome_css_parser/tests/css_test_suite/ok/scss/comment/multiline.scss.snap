@@ -66,8 +66,8 @@ $special: 10px;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..57 "$" [Comments("/* Standard CSS multi ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@57..60 "var" [] [],
@@ -125,8 +125,8 @@ CssRoot {
                 r_curly_token: R_CURLY@120..122 "}" [Newline("\n")] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@122..193 "$" [Newline("\n"), Newline("\n"), Comments("/* Multi-line comment ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@193..204 "another-var" [] [],
@@ -143,8 +143,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@210..211 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@211..235 "$" [Newline("\n"), Newline("\n"), Comments("// SCSS line comment"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@235..247 "line-comment" [] [],
@@ -202,8 +202,8 @@ CssRoot {
                 r_curly_token: R_CURLY@349..351 "}" [Newline("\n")] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@351..579 "$" [Newline("\n"), Newline("\n"), Comments("/**\n * Documentation  ..."), Newline("\n"), Comments("/* TODO(scss at-rules ..."), Newline("\n"), Newline("\n"), Comments("/* Comment with speci ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@579..586 "special" [] [],
@@ -232,8 +232,8 @@ CssRoot {
 0: CSS_ROOT@0..749
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..593
-    0: SCSS_DECLARATION@0..68
-      0: SCSS_IDENTIFIER@0..60
+    0: SCSS_VARIABLE_DECLARATION@0..68
+      0: SCSS_VARIABLE@0..60
         0: DOLLAR@0..57 "$" [Comments("/* Standard CSS multi ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@57..60
           0: IDENT@57..60 "var" [] []
@@ -270,8 +270,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@119..120 ";" [] []
         2: R_CURLY@120..122 "}" [Newline("\n")] []
-    2: SCSS_DECLARATION@122..211
-      0: SCSS_IDENTIFIER@122..204
+    2: SCSS_VARIABLE_DECLARATION@122..211
+      0: SCSS_VARIABLE@122..204
         0: DOLLAR@122..193 "$" [Newline("\n"), Newline("\n"), Comments("/* Multi-line comment ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@193..204
           0: IDENT@193..204 "another-var" [] []
@@ -282,8 +282,8 @@ CssRoot {
             0: IDENT@206..210 "blue" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@210..210
       4: SEMICOLON@210..211 ";" [] []
-    3: SCSS_DECLARATION@211..254
-      0: SCSS_IDENTIFIER@211..247
+    3: SCSS_VARIABLE_DECLARATION@211..254
+      0: SCSS_VARIABLE@211..247
         0: DOLLAR@211..235 "$" [Newline("\n"), Newline("\n"), Comments("// SCSS line comment"), Newline("\n")] []
         1: CSS_IDENTIFIER@235..247
           0: IDENT@235..247 "line-comment" [] []
@@ -320,8 +320,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@348..349 ";" [] []
         2: R_CURLY@349..351 "}" [Newline("\n")] []
-    5: SCSS_DECLARATION@351..593
-      0: SCSS_IDENTIFIER@351..586
+    5: SCSS_VARIABLE_DECLARATION@351..593
+      0: SCSS_VARIABLE@351..586
         0: DOLLAR@351..579 "$" [Newline("\n"), Newline("\n"), Comments("/**\n * Documentation  ..."), Newline("\n"), Comments("/* TODO(scss at-rules ..."), Newline("\n"), Newline("\n"), Comments("/* Comment with speci ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@579..586
           0: IDENT@579..586 "special" [] []

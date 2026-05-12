@@ -47,3 +47,4 @@ echo 'const x = 1' | bun packages/prettier-compare/bin/prettier-compare.js --reb
 - Reference `packages/prettier-compare/README.md` for deeper CLI details; mirror any updates here, keeping the hard requirement that commands include `--rebuild`.
 - Use single quotes for code snippets passed as CLI arguments to avoid shell interpretation issues.
 - "\n" does not get escaped into a newline when passed as a CLI argument. You should write a literal newline or use a file instead.
+- The tool is OK to run in read-only/planning modes even when running it with `--rebuild` since it only rebuilds the Biome WASM bundle and does not modify any source files.

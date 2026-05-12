@@ -8,8 +8,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
-    AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
+    AnyJsClass, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
+    AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassMemberList, JsFileSource,
     JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
     TsReadonlyModifier,
 };
@@ -124,7 +124,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseReadonlyClassProperties {
-    type Query = SemanticClass<JsClassDeclaration>;
+    type Query = SemanticClass<AnyJsClass>;
     type State = AnyPropertyMember;
     type Signals = Box<[Self::State]>;
     type Options = UseReadonlyClassPropertiesOptions;

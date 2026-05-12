@@ -65,7 +65,7 @@ info: vue/html-vue/upper-case-2.html
 ```
 upper-case-2.html:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file? HTML-as-Vue is not yet supported.
   
     3 │ <!DOCTYPE html><HTML>
     4 │     <body>
@@ -74,7 +74,7 @@ upper-case-2.html:5:12 parse ━━━━━━━━━━━━━━━━━
     6 │   
     7 │   </div>
   
-  i Remove it or enable the parsing using the html.parser.vue option.
+  i Remove it or rename this file to have the .vue file extension.
   
 
 ```

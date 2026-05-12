@@ -22,8 +22,7 @@ info: markdown/spec/example-237.md
 -- foo
 +-    foo
  
--bar
-+  bar
+ bar
 ```
 
 # Output
@@ -31,5 +30,5 @@ info: markdown/spec/example-237.md
 ```md
 -    foo
 
-  bar
+bar
 ```

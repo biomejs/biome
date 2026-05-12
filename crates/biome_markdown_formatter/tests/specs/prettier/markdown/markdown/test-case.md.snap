@@ -220,61 +220,34 @@ This paragraph has some `code` in it.
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,26 +4,27 @@
+@@ -4,6 +4,8 @@
  
      This is a paragraph.
  
--# Header 1
- 
--## Header 2
- 
-+Header 1
-+========
 +
-+Header 2
-+--------
 +
-     Header 1
-     ========
+ # Header 1
  
+ ## Header 2
+@@ -14,6 +16,8 @@
      Header 2
      --------
  
--# Header 1
- 
 +
-+# Header 1
- ## Header 2
--
- ### Header 3
--
- #### Header 4
--
- ##### Header 5
--
- ###### Header 6
++
+ # Header 1
  
-     # Header 1
-@@ -33,16 +34,13 @@
+ ## Header 2
+@@ -33,6 +37,8 @@
      ##### Header 5
      ###### Header 6
  
 +
 +
  # Header 1
--
- ## Header 2
--
- ### Header 3
--
- #### Header 4
--
- ##### Header 5
--
- ###### Header 6
  
-     # Header 1 #
-@@ -52,12 +50,15 @@
+ ## Header 2
+@@ -52,12 +58,15 @@
      ##### Header 5 #####
      ###### Header 6 ######
  
@@ -291,34 +264,35 @@ This paragraph has some `code` in it.
  > 1. This is the first list item.
  > 2. This is the second list item.
  >
-@@ -73,17 +74,23 @@
+@@ -73,18 +82,24 @@
      >
      >     Markdown.generate();
  
 +
 +
 +
++- Red
++- Green
++- Blue
++
++
+ - Red
+ - Green
+ - Blue
+ 
+-* Red
+-* Green
+-* Blue
+ 
  - Red
  - Green
  - Blue
  
 +
-++ Red
-++ Green
-++ Blue
-+
-+
- * Red
- * Green
- * Blue
- 
--- Red
--- Green
--- Blue
- 
  ```markdown
  - Red
-@@ -99,6 +106,8 @@
+ - Green
+@@ -99,6 +114,8 @@
  * Blue
  ```
  
@@ -327,7 +301,7 @@ This paragraph has some `code` in it.
  1. Buy flour and salt
  1. Mix together with water
  1. Bake
-@@ -109,6 +118,8 @@
+@@ -109,6 +126,8 @@
  1. Bake
  ```
  
@@ -336,7 +310,7 @@ This paragraph has some `code` in it.
  Paragraph:
  
      Code
-@@ -119,15 +130,17 @@
+@@ -119,16 +138,18 @@
  
          Code
  
@@ -352,14 +326,15 @@ This paragraph has some `code` in it.
  
 ----
 +*****
-+
+ 
 +- - -
 +
 +---------------------------------------
- 
++
      * * *
  
-@@ -139,6 +152,8 @@
+     ***
+@@ -139,6 +160,8 @@
  
      ---------------------------------------
  
@@ -368,25 +343,16 @@ This paragraph has some `code` in it.
  This is [an example](http://example.com "Example") link.
  
  [This link](http://example.com) has no title attr.
-@@ -159,13 +174,15 @@
+@@ -159,6 +182,8 @@
  
      [id]: http://example.com "Optional Title"
  
--_single asterisks_
++
++
+ _single asterisks_
  
-+
-+*single asterisks*
-+
  _single underscores_
- 
- **double asterisks**
- 
--**double underscores**
-+__double underscores__
- 
-     *single asterisks*
- 
-@@ -175,10 +192,14 @@
+@@ -175,10 +200,14 @@
  
      __double underscores__
  
@@ -414,11 +380,9 @@ This is a paragraph.
 
 
 
-Header 1
-========
+# Header 1
 
-Header 2
---------
+## Header 2
 
     Header 1
     ========
@@ -429,10 +393,15 @@ Header 2
 
 
 # Header 1
+
 ## Header 2
+
 ### Header 3
+
 #### Header 4
+
 ##### Header 5
+
 ###### Header 6
 
     # Header 1
@@ -445,10 +414,15 @@ Header 2
 
 
 # Header 1
+
 ## Header 2
+
 ### Header 3
+
 #### Header 4
+
 ##### Header 5
+
 ###### Header 6
 
     # Header 1 #
@@ -490,14 +464,14 @@ Header 2
 - Blue
 
 
-+ Red
-+ Green
-+ Blue
+- Red
+- Green
+- Blue
 
 
-* Red
-* Green
-* Blue
+- Red
+- Green
+- Blue
 
 
 ```markdown
@@ -584,13 +558,13 @@ This is [an example][id] reference-style link.
 
 
 
-*single asterisks*
+_single asterisks_
 
 _single underscores_
 
 **double asterisks**
 
-__double underscores__
+**double underscores**
 
     *single asterisks*
 
@@ -616,6 +590,6 @@ This paragraph has some `code` in it.
 # Lines exceeding max width of 80 characters
 ```
     1: [View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
-   55: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-   57:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   63: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   65:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
 ```

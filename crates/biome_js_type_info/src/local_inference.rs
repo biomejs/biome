@@ -3,11 +3,12 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsConstructorParameter,
-    AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
+    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
+    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
@@ -44,6 +45,8 @@ use crate::{
     TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
     TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
+
+const MAX_CONST_ASSERTION_DEPTH: usize = 50;
 
 impl TypeData {
     /// Applies the given `pattern` and returns the named bindings, and their
@@ -593,6 +596,32 @@ impl TypeData {
             AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
+            AnyJsExpression::TsAsExpression(expr) => {
+                let Ok(annotation) = expr.ty() else {
+                    return Self::unknown();
+                };
+                let Ok(inner) = expr.expression() else {
+                    return Self::unknown();
+                };
+                if is_const_reference_type(&annotation) {
+                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                } else {
+                    Self::unknown()
+                }
+            }
+            AnyJsExpression::TsTypeAssertionExpression(expr) => {
+                let Ok(annotation) = expr.ty() else {
+                    return Self::unknown();
+                };
+                let Ok(inner) = expr.expression() else {
+                    return Self::unknown();
+                };
+                if is_const_reference_type(&annotation) {
+                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                } else {
+                    Self::unknown()
+                }
+            }
             AnyJsExpression::JsUnaryExpression(expr) => {
                 Self::from_js_unary_expression(resolver, scope_id, expr)
             }
@@ -1837,40 +1866,38 @@ impl TypeMember {
                     ty: ty.into(),
                 })
             }
-            AnyJsClassMember::JsMethodClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let is_async = member.async_token().is_some();
-                    let function = Function {
+            AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
+                let is_async = member.async_token().is_some();
+                let function = Function {
+                    is_async,
+                    type_parameters: generic_params_from_ts_type_params(
+                        resolver,
+                        scope_id,
+                        member.type_parameters(),
+                    ),
+                    name: name.name().map(text_from_class_member_name),
+                    parameters: function_params_from_js_params(
+                        resolver,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: function_return_type(
+                        resolver,
+                        scope_id,
                         is_async,
-                        type_parameters: generic_params_from_ts_type_params(
-                            resolver,
-                            scope_id,
-                            member.type_parameters(),
-                        ),
-                        name: Some(text_from_class_member_name(name.clone())),
-                        parameters: function_params_from_js_params(
-                            resolver,
-                            scope_id,
-                            member.parameters(),
-                        ),
-                        return_type: function_return_type(
-                            resolver,
-                            scope_id,
-                            is_async,
-                            member.return_type_annotation(),
-                            member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
-                        ),
-                    };
-                    let ty = resolver.register_and_resolve(function.into());
-                    let is_static = member
-                        .modifiers()
-                        .into_iter()
-                        .any(|modifier| modifier.as_js_static_modifier().is_some());
-                    Self::from_class_member_info(resolver, name, ty.into(), is_static, false)
-                })
-            }
+                        member.return_type_annotation(),
+                        member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
+                    ),
+                };
+                let ty = resolver.register_and_resolve(function.into());
+                let is_static = member
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some());
+                Self::from_class_member_info(resolver, scope_id, name, ty.into(), is_static, false)
+            }),
             AnyJsClassMember::JsPropertyClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = match member
                         .property_annotation()
                         .and_then(|annotation| annotation.type_annotation().ok())
@@ -1893,7 +1920,14 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
-                    Self::from_class_member_info(resolver, name, ty, is_static, is_optional)
+                    Self::from_class_member_info(
+                        resolver,
+                        scope_id,
+                        name,
+                        ty,
+                        is_static,
+                        is_optional,
+                    )
                 })
             }
             AnyJsClassMember::JsGetterClassMember(member) => {
@@ -1917,11 +1951,8 @@ impl TypeMember {
                     }
                 })
             }
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => member
-                .name()
-                .ok()
-                .and_then(|name| name.name())
-                .and_then(|name| {
+            AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
+                member.name().ok().and_then(|name| {
                     let ty = resolver.reference_to_resolved_expression(
                         scope_id,
                         &member.value().ok()?.expression().ok()?,
@@ -1931,16 +1962,18 @@ impl TypeMember {
                         .into_iter()
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
-                    Some(Self::from_class_member_info(
+                    Self::from_class_member_info(
                         resolver,
+                        scope_id,
                         name,
                         ty,
                         is_static,
                         is_optional,
-                    ))
-                }),
+                    )
+                })
+            }
             AnyJsClassMember::TsPropertySignatureClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = member
                         .property_annotation()
                         .and_then(|annotation| annotation.type_annotation().ok())
@@ -1957,7 +1990,14 @@ impl TypeMember {
                         .as_ref()
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
-                    Self::from_class_member_info(resolver, name, ty, is_static, is_optional)
+                    Self::from_class_member_info(
+                        resolver,
+                        scope_id,
+                        name,
+                        ty,
+                        is_static,
+                        is_optional,
+                    )
                 })
             }
             _ => {
@@ -1994,8 +2034,24 @@ impl TypeMember {
                     }
                 })
             }
-            AnyJsObjectMember::JsMethodObjectMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+            AnyJsObjectMember::JsMethodObjectMember(member) => member
+                .name()
+                .ok()
+                .and_then(|name| match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                        name.expression().ok().map(|expr| {
+                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                                resolver, scope_id, &expr,
+                            ))
+                        })
+                    }
+                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
+                        .name()
+                        .ok()
+                        .map(|name| TypeMemberKind::Named(name.into())),
+                    _ => None,
+                })
+                .map(|kind| {
                     let is_async = member.async_token().is_some();
                     let function = Function {
                         is_async,
@@ -2004,7 +2060,10 @@ impl TypeMember {
                             scope_id,
                             member.type_parameters(),
                         ),
-                        name: Some(name.clone().into()),
+                        name: match &kind {
+                            TypeMemberKind::Named(name) => Some(name.clone()),
+                            _ => None,
+                        },
                         parameters: function_params_from_js_params(
                             resolver,
                             scope_id,
@@ -2019,21 +2078,42 @@ impl TypeMember {
                         ),
                     };
                     Self {
-                        kind: TypeMemberKind::Named(name.into()),
+                        kind,
                         ty: resolver.register_and_resolve(function.into()).into(),
                     }
-                })
-            }
+                }),
             AnyJsObjectMember::JsPropertyObjectMember(member) => member
                 .name()
                 .ok()
-                .and_then(|name| name.name())
-                .map(|name| Self {
-                    kind: TypeMemberKind::Named(name.into()),
-                    ty: member
-                        .value()
-                        .map(|value| resolver.reference_to_resolved_expression(scope_id, &value))
-                        .unwrap_or_default(),
+                .and_then(|name| match name {
+                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                        name.expression().ok().map(|expr| {
+                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
+                                resolver, scope_id, &expr,
+                            ))
+                        })
+                    }
+                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
+                        .name()
+                        .ok()
+                        .map(|name| TypeMemberKind::Named(name.into())),
+                    _ => None,
+                })
+                .map(|kind| {
+                    let value = member.value().ok();
+                    let kind = if value.as_ref().is_some_and(expression_is_const_assertion) {
+                        kind.with_const_asserted()
+                    } else {
+                        kind
+                    };
+                    Self {
+                        kind,
+                        ty: value
+                            .map(|value| {
+                                resolver.reference_to_resolved_expression(scope_id, &value)
+                            })
+                            .unwrap_or_default(),
+                    }
                 }),
             AnyJsObjectMember::JsSetterObjectMember(_) => {
                 // TODO: Handle setters
@@ -2048,7 +2128,7 @@ impl TypeMember {
                     ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
                         ty: TypeReference::unknown(),
-                        scope_id: None,
+                        scope_id: Some(scope_id),
                     })),
                 }),
             AnyJsObjectMember::JsSpread(_) => {
@@ -2198,18 +2278,30 @@ impl TypeMember {
     #[inline]
     fn from_class_member_info(
         resolver: &mut dyn TypeResolver,
-        name: ClassMemberName,
+        scope_id: ScopeId,
+        name: AnyJsClassMemberName,
         ty: TypeReference,
         is_static: bool,
         is_optional: bool,
-    ) -> Self {
-        let name = text_from_class_member_name(name);
-        Self {
-            kind: if is_static {
-                TypeMemberKind::NamedStatic(name)
-            } else {
-                TypeMemberKind::Named(name)
-            },
+    ) -> Option<Self> {
+        let kind = match name {
+            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::IndexSignature(
+                TypeReference::from_any_js_expression(resolver, scope_id, &name.expression().ok()?),
+            ),
+            _ => {
+                let name = text_from_class_member_name(name.name()?);
+                if is_static {
+                    TypeMemberKind::NamedStatic(name)
+                } else if is_optional {
+                    TypeMemberKind::NamedOptional(name)
+                } else {
+                    TypeMemberKind::Named(name)
+                }
+            }
+        };
+
+        Some(Self {
+            kind,
             ty: match is_optional {
                 true => {
                     let id = resolver.optional(ty);
@@ -2217,7 +2309,7 @@ impl TypeMember {
                 }
                 false => ty,
             },
-        }
+        })
     }
 
     #[inline]
@@ -2227,8 +2319,13 @@ impl TypeMember {
         ty: TypeReference,
         is_optional: bool,
     ) -> Self {
+        let name: Text = name.into();
         Self {
-            kind: TypeMemberKind::Named(name.into()),
+            kind: if is_optional {
+                TypeMemberKind::NamedOptional(name)
+            } else {
+                TypeMemberKind::Named(name)
+            },
             ty: match is_optional {
                 true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                 false => ty,
@@ -2260,7 +2357,11 @@ impl TypeMember {
                     {
                         // TODO: Assign accessibility to type members.
                         members.push(Self {
-                            kind: TypeMemberKind::Named(named_param.name.clone()),
+                            kind: if named_param.is_optional {
+                                TypeMemberKind::NamedOptional(named_param.name.clone())
+                            } else {
+                                TypeMemberKind::Named(named_param.name.clone())
+                            },
                             ty: param.parameter.ty().clone(),
                         });
                     }
@@ -2777,6 +2878,144 @@ fn type_from_function_body(
             TypeData::union_of(resolver, return_types)
         }
     }
+}
+
+/// Checks for TypeScript's special `const` assertion target.
+fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
+    let Some(reference_type) = type_annotation.as_ts_reference_type() else {
+        return false;
+    };
+
+    reference_type.type_arguments().is_none()
+        && reference_type.name().ok().is_some_and(|name| {
+            name.as_js_reference_identifier()
+                .and_then(|identifier| identifier.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "const")
+        })
+}
+
+/// Recognizes direct `as const` and `<const>` assertions, allowing parentheses around them.
+fn expression_is_const_assertion(expression: &AnyJsExpression) -> bool {
+    let mut current = expression.clone();
+    loop {
+        match &current {
+            AnyJsExpression::TsAsExpression(expression) => {
+                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+            }
+            AnyJsExpression::TsTypeAssertionExpression(expression) => {
+                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+            }
+            AnyJsExpression::JsParenthesizedExpression(expression) => match expression.expression()
+            {
+                Ok(inner) => current = inner,
+                Err(_) => return false,
+            },
+            _ => return false,
+        }
+    }
+}
+
+/// Builds the type produced by a const assertion expression.
+fn type_data_from_const_assertion_expression(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeData {
+    let expression = expression.clone().omit_parentheses();
+    if let AnyJsExpression::JsUnaryExpression(unary) = &expression
+        && unary.operator().ok() == Some(JsUnaryOperator::Minus)
+        && let Ok(argument) = unary.argument()
+    {
+        match argument.omit_parentheses() {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsBigintLiteralExpression(literal),
+            ) => {
+                if let Some(text) = text_from_token(literal.value_token()) {
+                    return TypeData::Literal(Box::new(Literal::BigInt(format!("-{text}").into())));
+                }
+            }
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) => {
+                if let Some(text) = text_from_token(literal.value_token()) {
+                    return TypeData::Literal(Box::new(Literal::Number(NumberLiteral::new(
+                        format!("-{text}").into(),
+                    ))));
+                }
+            }
+            _ => {}
+        }
+    }
+
+    let inner_type = resolver
+        .resolve_expression(scope_id, &expression)
+        .into_owned();
+    apply_deep_const(resolver, inner_type)
+}
+
+/// Applies const assertion conversion to inferred tuple and object types.
+fn apply_deep_const(resolver: &mut dyn TypeResolver, inner_type: TypeData) -> TypeData {
+    apply_deep_const_inner(resolver, inner_type, 0)
+}
+
+/// Recursively applies `as const` to tuple elements and object members.
+fn apply_deep_const_inner(
+    resolver: &mut dyn TypeResolver,
+    inner_type: TypeData,
+    depth: usize,
+) -> TypeData {
+    if depth >= MAX_CONST_ASSERTION_DEPTH {
+        return inner_type;
+    }
+
+    match inner_type {
+        TypeData::Tuple(tuple) => {
+            let elements = tuple
+                .elements()
+                .iter()
+                .map(|element| TupleElementType {
+                    ty: apply_deep_const_reference(resolver, &element.ty, depth + 1),
+                    name: element.name.clone(),
+                    is_optional: element.is_optional,
+                    is_rest: element.is_rest,
+                })
+                .collect();
+            TypeData::Tuple(Box::new(Tuple(elements)))
+        }
+        TypeData::Object(object) => TypeData::Object(Box::new(Object {
+            prototype: object.prototype.clone(),
+            members: object
+                .members
+                .iter()
+                .map(|member| TypeMember {
+                    kind: member.kind.clone().with_const_asserted(),
+                    ty: apply_deep_const_reference(resolver, &member.ty, depth + 1),
+                })
+                .collect(),
+        })),
+        _ => inner_type,
+    }
+}
+
+/// Resolves a type reference, applies const assertion conversion, and stores the result.
+fn apply_deep_const_reference(
+    resolver: &mut dyn TypeResolver,
+    type_reference: &TypeReference,
+    depth: usize,
+) -> TypeReference {
+    if depth >= MAX_CONST_ASSERTION_DEPTH {
+        return type_reference.clone();
+    }
+
+    let Some(inner_type) = resolver
+        .resolve_and_get(type_reference)
+        .map(|resolved| resolved.to_data())
+    else {
+        return type_reference.clone();
+    };
+
+    let inner_type = apply_deep_const_inner(resolver, inner_type, depth);
+    resolver.reference_to_owned_data(inner_type)
 }
 
 #[inline]

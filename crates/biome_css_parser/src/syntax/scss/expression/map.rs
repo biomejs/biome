@@ -13,7 +13,7 @@ use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set}
 use super::ScssExpressionOptions;
 use super::list::{
     SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET, complete_scss_list_expression,
-    complete_scss_list_expression_element, parse_scss_inner_expression_until,
+    complete_scss_list_expression_element, parse_scss_expression_with_options,
 };
 
 const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
@@ -30,7 +30,10 @@ const SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET: TokenSet<CssSyntaxKind> = token_s
 ///
 /// Docs: https://sass-lang.com/documentation/values/maps
 #[inline]
-pub(super) fn parse_scss_parenthesized_or_map_expression(p: &mut CssParser) -> ParsedSyntax {
+pub(super) fn parse_scss_parenthesized_or_map_expression(
+    p: &mut CssParser,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
     if !p.at(T!['(']) {
         return Absent;
     }
@@ -45,9 +48,11 @@ pub(super) fn parse_scss_parenthesized_or_map_expression(p: &mut CssParser) -> P
         return Present(m.complete(p, SCSS_MAP_EXPRESSION));
     }
 
-    let first_expression =
-        parse_scss_inner_expression_until(p, SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET)
-            .or_add_diagnostic(p, expected_scss_expression);
+    let first_expression = parse_scss_expression_with_options(
+        p,
+        options.with_required_end_ts(SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET),
+    )
+    .or_add_diagnostic(p, expected_scss_expression);
 
     let Some(first_expression) = first_expression else {
         p.expect(T![')']);
@@ -55,8 +60,8 @@ pub(super) fn parse_scss_parenthesized_or_map_expression(p: &mut CssParser) -> P
     };
 
     if p.at(T![:]) {
-        let first_pair = parse_scss_map_expression_pair_with_key(p, first_expression);
-        complete_scss_map_expression_pair_list(p, first_pair);
+        let first_pair = parse_scss_map_expression_pair_with_key(p, first_expression, options);
+        complete_scss_map_expression_pair_list(p, first_pair, options);
         p.expect(T![')']);
         return Present(m.complete(p, SCSS_MAP_EXPRESSION));
     }
@@ -66,7 +71,7 @@ pub(super) fn parse_scss_parenthesized_or_map_expression(p: &mut CssParser) -> P
         complete_scss_list_expression(
             p,
             first_element,
-            ScssExpressionOptions::value(SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET),
+            options.with_end_ts(SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET),
         );
         p.expect(T![')']);
         return Present(m.complete(p, SCSS_PARENTHESIZED_EXPRESSION));
@@ -89,16 +94,24 @@ pub(super) fn parse_scss_parenthesized_or_map_expression(p: &mut CssParser) -> P
 fn parse_scss_map_expression_pair_with_key(
     p: &mut CssParser,
     key: CompletedMarker,
+    options: ScssExpressionOptions,
 ) -> CompletedMarker {
     let pair_marker = key.precede(p);
     p.expect(T![:]);
-    parse_scss_inner_expression_until(p, SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET)
-        .or_add_diagnostic(p, expected_scss_expression);
+    parse_scss_expression_with_options(
+        p,
+        options.with_required_end_ts(SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET),
+    )
+    .or_add_diagnostic(p, expected_scss_expression);
     pair_marker.complete(p, SCSS_MAP_EXPRESSION_PAIR)
 }
 
 #[inline]
-fn complete_scss_map_expression_pair_list(p: &mut CssParser, first_pair: CompletedMarker) {
+fn complete_scss_map_expression_pair_list(
+    p: &mut CssParser,
+    first_pair: CompletedMarker,
+    options: ScssExpressionOptions,
+) {
     let pairs_marker = first_pair.precede(p);
     let mut progress = ParserProgress::default();
 
@@ -111,9 +124,11 @@ fn complete_scss_map_expression_pair_list(p: &mut CssParser, first_pair: Complet
 
         progress.assert_progressing(p);
 
-        let pair = match parse_scss_inner_expression_until(p, SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET)
-        {
-            Present(key) => Present(parse_scss_map_expression_pair_with_key(p, key)),
+        let pair = match parse_scss_expression_with_options(
+            p,
+            options.with_required_end_ts(SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET),
+        ) {
+            Present(key) => Present(parse_scss_map_expression_pair_with_key(p, key, options)),
             Absent => Absent,
         };
 

@@ -7,6 +7,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rowan::TokenText;
 use biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions;
 use enumflags2::BitFlag;
 use rustc_hash::FxHashMap;
@@ -135,7 +136,7 @@ impl Rule for NoVueDuplicateKeys {
             return Box::new([]);
         };
 
-        let mut key_declarations: FxHashMap<String, Vec<VueDeclaration>> = FxHashMap::default();
+        let mut key_declarations: FxHashMap<TokenText, Vec<VueDeclaration>> = FxHashMap::default();
 
         // Collect all declarations across all Vue component sections
         for declaration in component.declarations(
@@ -149,8 +150,7 @@ impl Rule for NoVueDuplicateKeys {
                 {
                     continue;
                 }
-                let key = name.text().to_string();
-                key_declarations.entry(key).or_default().push(declaration);
+                key_declarations.entry(name).or_default().push(declaration);
             }
         }
 
@@ -174,7 +174,7 @@ impl Rule for NoVueDuplicateKeys {
             rule_category!(),
             first_declaration.declaration_name_range()?,
             markup! {
-                "Duplicate key "<Emphasis>{&state.key}</Emphasis>" found in Vue component."
+                "Duplicate key "<Emphasis>{state.key.text()}</Emphasis>" found in Vue component."
             },
         );
 
@@ -184,7 +184,7 @@ impl Rule for NoVueDuplicateKeys {
                 diagnostic = diagnostic.detail(
                     range,
                     markup! {
-                        "Key "<Emphasis>{&state.key}</Emphasis>" is also defined here."
+                        "Key "<Emphasis>{state.key.text()}</Emphasis>" is also defined here."
                     },
                 );
             }
@@ -199,6 +199,6 @@ impl Rule for NoVueDuplicateKeys {
 }
 
 pub struct RuleState {
-    key: String,
+    key: TokenText,
     declarations: Vec<VueDeclaration>,
 }

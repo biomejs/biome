@@ -60,6 +60,52 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignoreTypeValueShadow`
+    ///
+    /// Default: `true`
+    ///
+    /// When enabled, a value binding that shares its name with a type-only
+    /// declaration (type alias or interface) is not flagged, since types and
+    /// values occupy separate namespaces in TypeScript.
+    ///
+    /// When set to `false`, those cases are flagged:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreTypeValueShadow": false
+    ///     }
+    /// }
+    /// ```
+    /// ```ts,expect_diagnostic,use_options
+    /// type Foo = number;
+    /// function f(Foo: string) {}
+    /// ```
+    ///
+    /// ### `ignoreFunctionTypeParameterNameValueShadow`
+    ///
+    /// Default: `true`
+    ///
+    /// When enabled, parameter names in function type annotations
+    /// (e.g. `(x: string) => void`) can share names with outer variables
+    /// without being flagged.
+    ///
+    /// When set to `false`, those cases are flagged:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreFunctionTypeParameterNameValueShadow": false
+    ///     }
+    /// }
+    /// ```
+    /// ```ts,expect_diagnostic,use_options
+    /// const test = 1;
+    /// type Fn = (test: string) => typeof test;
+    /// ```
+    ///
     pub NoShadow {
         version: "2.0.0",
         name: "noShadow",
@@ -68,8 +114,7 @@ declare_lint_rule! {
         severity: Severity::Warning,
         sources: &[
             RuleSource::Eslint("no-shadow").same(),
-            // uncomment when we can handle the test cases from typescript-eslint
-            // RuleSource::EslintTypeScript("no-shadow"),
+            RuleSource::EslintTypeScript("no-shadow").same(),
         ],
     }
 }
@@ -90,9 +135,10 @@ impl Rule for NoShadow {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut shadowed_bindings = Vec::new();
         let model = ctx.query();
+        let options = ctx.options();
 
         for binding in ctx.query().all_bindings() {
-            if let Some(shadowed_binding) = check_shadowing(model, binding) {
+            if let Some(shadowed_binding) = check_shadowing(model, binding, options) {
                 shadowed_bindings.push(shadowed_binding);
             }
         }
@@ -126,7 +172,11 @@ impl Rule for NoShadow {
     }
 }
 
-fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBinding> {
+fn check_shadowing(
+    model: &SemanticModel,
+    binding: Binding,
+    options: &NoShadowOptions,
+) -> Option<ShadowedBinding> {
     if binding.scope().is_global_scope() {
         // global scope bindings can't shadow anything
         return None;
@@ -139,6 +189,13 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
         return None;
     }
 
+    if options.ignore_function_type_parameter_name_value_shadow() && is_in_function_type(&binding) {
+        // Parameters in function type annotations (e.g. `(x: string) => void`)
+        // only create bindings within the type scope. They should not be
+        // treated as shadowing outer variables.
+        return None;
+    }
+
     let name = get_binding_name(&binding)?;
     let binding_hoisted_scope = model
         .scope_hoisted_to(&binding.syntax())
@@ -146,7 +203,7 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
         if let Some(upper_binding) = upper.get_binding(name.clone())
-            && evaluate_shadowing(model, &binding, &upper_binding)
+            && evaluate_shadowing(model, &binding, &upper_binding, options)
         {
             // we found a shadowed binding
             return Some(ShadowedBinding {
@@ -158,12 +215,24 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
     None
 }
 
-fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &Binding) -> bool {
+fn evaluate_shadowing(
+    model: &SemanticModel,
+    binding: &Binding,
+    upper_binding: &Binding,
+    options: &NoShadowOptions,
+) -> bool {
     if binding.syntax() == upper_binding.syntax() {
         // a binding can't shadow itself
         return false;
     }
     if is_on_initializer(binding, upper_binding) {
+        return false;
+    }
+    // A type-only declaration (type alias or interface) and a value binding
+    // occupy separate namespaces in TypeScript and cannot collide at runtime.
+    if options.ignore_type_value_shadow()
+        && is_type_only_declaration(binding) != is_type_only_declaration(upper_binding)
+    {
         return false;
     }
     if is_declaration(binding) && is_declaration(upper_binding) {
@@ -267,6 +336,20 @@ fn is_declaration(binding: &Binding) -> bool {
     )
 }
 
+fn is_type_only_declaration(binding: &Binding) -> bool {
+    let Some(decl) = binding.tree().declaration() else {
+        return false;
+    };
+    matches!(
+        decl,
+        AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+            | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+            | AnyJsBindingDeclaration::TsTypeParameter(_)
+            | AnyJsBindingDeclaration::TsInferType(_)
+            | AnyJsBindingDeclaration::TsMappedType(_)
+    )
+}
+
 fn is_inside_type_parameter(binding: &Binding) -> bool {
     binding
         .syntax()
@@ -291,28 +374,43 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
 }
 
+fn get_parameter_parent_function(binding: &Binding) -> Option<AnyJsParameterParentFunction> {
+    let id = binding.syntax().cast::<JsIdentifierBinding>()?;
+    id.parent::<JsFormalParameter>()
+        .and_then(|p| p.parent_function())
+        .or_else(|| {
+            id.parent::<JsRestParameter>()
+                .and_then(|p| p.parent_function())
+        })
+}
+
 /// Returns true if the binding is a parameter inside a TypeScript overload
 /// signature (constructor, method, or function overload declaration without a
 /// body). These parameters are type-only and should not be considered as
 /// shadowing outer variables.
 fn is_in_overload_signature(binding: &Binding) -> bool {
-    let node = binding.syntax();
-    let parent_function = node.clone().cast::<JsIdentifierBinding>().and_then(|id| {
-        id.parent::<JsFormalParameter>()
-            .and_then(|p| p.parent_function())
-            .or_else(|| {
-                id.parent::<JsRestParameter>()
-                    .and_then(|p| p.parent_function())
-            })
-    });
     matches!(
-        parent_function,
+        get_parameter_parent_function(binding),
         Some(
             AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
+        )
+    )
+}
+
+fn is_in_function_type(binding: &Binding) -> bool {
+    matches!(
+        get_parameter_parent_function(binding),
+        Some(
+            AnyJsParameterParentFunction::TsFunctionType(_)
+                | AnyJsParameterParentFunction::TsConstructorType(_)
+                | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
         )
     )
 }

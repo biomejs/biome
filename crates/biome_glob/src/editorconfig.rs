@@ -239,15 +239,14 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
     let mut alternation_has_coma = false;
     while let Some((i, c)) = it.next() {
         match c {
-            b'\\' => {
+            b'\\'
                 // Eat the escaped character
-                if it.next().is_none() {
+                if it.next().is_none() => {
                     return Err(EditorconfigGlobError::Regular {
                         kind: EditorconfigGlobErrorKind::DanglingEscape,
                         index: i as u32,
                     });
                 }
-            }
             b'/' => {
                 has_no_slashes = false;
                 prev_is_slash = true;

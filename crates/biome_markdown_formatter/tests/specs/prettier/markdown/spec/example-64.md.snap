@@ -21,25 +21,23 @@ Baz
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,6 @@
+@@ -1,6 +1,5 @@
  ---
- Foo
- ---
--
--## Bar
--
-+Bar
-+---
- Baz
+-Foo
+----
++## Foo
+ 
+ ## Bar
+ 
 ```
 
 # Output
 
 ```md
 ---
-Foo
----
-Bar
----
+## Foo
+
+## Bar
+
 Baz
 ```

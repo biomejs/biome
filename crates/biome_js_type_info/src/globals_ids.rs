@@ -183,10 +183,84 @@ define_global_type!(
 );
 define_global_type!(REGEXP_ID, REGEXP_ID_NAME, 42, "RegExp");
 define_global_type!(REGEXP_EXEC_ID, REGEXP_EXEC_ID_NAME, 43, "RegExp.exec");
+define_global_type!(
+    INSTANCEOF_SYMBOL_ID,
+    INSTANCEOF_SYMBOL_ID_NAME,
+    44,
+    "instanceof Symbol"
+);
+define_global_type!(SYMBOL_ID, SYMBOL_ID_NAME, 45, "Symbol");
+define_global_type!(
+    SYMBOL_DISPOSE_ID,
+    SYMBOL_DISPOSE_ID_NAME,
+    46,
+    "Symbol.dispose"
+);
+define_global_type!(
+    SYMBOL_ASYNC_DISPOSE_ID,
+    SYMBOL_ASYNC_DISPOSE_ID_NAME,
+    47,
+    "Symbol.asyncDispose"
+);
+define_global_type!(DISPOSABLE_ID, DISPOSABLE_ID_NAME, 48, "Disposable");
+define_global_type!(
+    DISPOSABLE_DISPOSE_ID,
+    DISPOSABLE_DISPOSE_ID_NAME,
+    49,
+    "Disposable[Symbol.dispose]"
+);
+define_global_type!(
+    ASYNC_DISPOSABLE_ID,
+    ASYNC_DISPOSABLE_ID_NAME,
+    50,
+    "AsyncDisposable"
+);
+define_global_type!(
+    ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
+    ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME,
+    51,
+    "AsyncDisposable[Symbol.asyncDispose]"
+);
+define_global_type!(
+    INSTANCEOF_DATE_ID,
+    INSTANCEOF_DATE_ID_NAME,
+    52,
+    "instanceof Date"
+);
+define_global_type!(DATE_ID, DATE_ID_NAME, 53, "Date");
+define_global_type!(
+    INSTANCEOF_MAP_ID,
+    INSTANCEOF_MAP_ID_NAME,
+    54,
+    "instanceof Map"
+);
+define_global_type!(MAP_ID, MAP_ID_NAME, 55, "Map");
+define_global_type!(
+    INSTANCEOF_SET_ID,
+    INSTANCEOF_SET_ID_NAME,
+    56,
+    "instanceof Set"
+);
+define_global_type!(SET_ID, SET_ID_NAME, 57, "Set");
+define_global_type!(
+    INSTANCEOF_WEAK_MAP_ID,
+    INSTANCEOF_WEAK_MAP_ID_NAME,
+    58,
+    "instanceof WeakMap"
+);
+define_global_type!(WEAK_MAP_ID, WEAK_MAP_ID_NAME, 59, "WeakMap");
+define_global_type!(
+    INSTANCEOF_ERROR_ID,
+    INSTANCEOF_ERROR_ID_NAME,
+    60,
+    "instanceof Error"
+);
+define_global_type!(ERROR_ID, ERROR_ID_NAME, 61, "Error");
+define_global_type!(BOOLEAN_ID, BOOLEAN_ID_NAME, 62, "boolean");
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
-pub const NUM_PREDEFINED_TYPES: usize = 44;
+pub const NUM_PREDEFINED_TYPES: usize = 63;
 
 // Resolved type ID constants (TypeId wrapped with GlobalLevel)
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
@@ -227,3 +301,17 @@ pub const GLOBAL_FETCH_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, FE
 pub const GLOBAL_INSTANCEOF_REGEXP_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_REGEXP_ID);
 pub const GLOBAL_REGEXP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, REGEXP_ID);
+pub const GLOBAL_SYMBOL_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_ID);
+pub const GLOBAL_SYMBOL_DISPOSE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_DISPOSE_ID);
+pub const GLOBAL_SYMBOL_ASYNC_DISPOSE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, SYMBOL_ASYNC_DISPOSE_ID);
+pub const GLOBAL_DISPOSABLE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, DISPOSABLE_ID);
+pub const GLOBAL_ASYNC_DISPOSABLE_ID: ResolvedTypeId =
+    ResolvedTypeId::new(GLOBAL_LEVEL, ASYNC_DISPOSABLE_ID);
+pub const GLOBAL_DATE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, DATE_ID);
+pub const GLOBAL_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, MAP_ID);
+pub const GLOBAL_SET_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, SET_ID);
+pub const GLOBAL_WEAK_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, WEAK_MAP_ID);
+pub const GLOBAL_ERROR_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ERROR_ID);
+pub const GLOBAL_BOOLEAN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, BOOLEAN_ID);

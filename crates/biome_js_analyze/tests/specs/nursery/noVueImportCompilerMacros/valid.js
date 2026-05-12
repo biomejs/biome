@@ -1,0 +1,14 @@
+/* should not generate diagnostics */
+import { ref, computed } from "vue";
+import defineComponent from "vue";
+import * as Vue from "vue";
+import { defineProps } from "not-vue";
+import { defineEmits } from "@vue/runtime-core";
+import { defineSlots, withDefaults as defaults } from "@vue/runtime-dom";
+
+const props = defineProps({});
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
+defaults(defineProps({}), {});
+defineEmits([]);
+defineSlots();

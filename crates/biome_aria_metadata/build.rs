@@ -55,7 +55,7 @@ struct Aria {
     attributes: BTreeMap<String, AriaAttribute>,
 }
 impl Aria {
-    /// Retuurns direct and indirect superclass roles.
+    /// Returns direct and indirect superclass roles.
     fn superclass_roles(&self, role_name: &str) -> Result<BTreeSet<String>, String> {
         let mut result = BTreeSet::new();
         let mut stack = vec![role_name];
@@ -291,7 +291,7 @@ fn main() -> io::Result<()> {
     };
 
     // We print the code even if it cannot be parsed,
-    // this allows to debug the code by directly looking at it.
+    // this allows you to debug the code by directly looking at it.
     let out_dir = env::var("OUT_DIR").unwrap();
     fs::write(PathBuf::from(out_dir).join("roles_and_attributes.rs"), ast)?;
 
@@ -438,7 +438,7 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
         .iter()
         .filter(|(_, data)| data.is_abstract)
         .map(|(name, _)| name);
-    let aria_abstarct_role_enum = generate_enums(aria_abstract_role_names, "AriaAbstractRole");
+    let aria_abstract_role_enum = generate_enums(aria_abstract_role_names, "AriaAbstractRole");
     let aria_concrete_role_names = aria
         .roles
         .iter()
@@ -650,7 +650,7 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
         }
         #html_element_enum
         #html_attribute_enum
-        #aria_abstarct_role_enum
+        #aria_abstract_role_enum
         #aria_concrete_role_enum
         impl AriaRole {
             pub fn is_deprecated(self) -> bool {

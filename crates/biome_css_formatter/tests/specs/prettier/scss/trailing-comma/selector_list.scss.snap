@@ -1,0 +1,126 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/trailing-comma/selector_list.scss
+---
+
+# Input
+
+```scss
+asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
+
+}
+
+.some-class, {
+&.another-class, {
+     color: red;
+ }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,10 @@
+ asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+-asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm {
++asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
++
+ }
+ 
+-.some-class {
+-  &.another-class {
+-    color: red;
+-  }
++.some-class, {
++&.another-class, {
++     color: red;
++ }
+ }
+```
+
+# Output
+
+```scss
+asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
+
+}
+
+.some-class, {
+&.another-class, {
+     color: red;
+ }
+}
+```
+
+# Errors
+```
+selector_list.scss:2:93 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '{'.
+  
+    1 │ asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+  > 2 │ asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
+      │                                                                                             ^
+    3 │ 
+    4 │ }
+  
+  i Expected a selector here.
+  
+    1 │ asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+  > 2 │ asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
+      │                                                                                             ^
+    3 │ 
+    4 │ }
+  
+selector_list.scss:6:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '{'.
+  
+    4 │ }
+    5 │ 
+  > 6 │ .some-class, {
+      │              ^
+    7 │ &.another-class, {
+    8 │      color: red;
+  
+  i Expected a selector here.
+  
+    4 │ }
+    5 │ 
+  > 6 │ .some-class, {
+      │              ^
+    7 │ &.another-class, {
+    8 │      color: red;
+  
+selector_list.scss:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '{'.
+  
+    6 │ .some-class, {
+  > 7 │ &.another-class, {
+      │                  ^
+    8 │      color: red;
+    9 │  }
+  
+  i Expected a relative selector here.
+  
+    6 │ .some-class, {
+  > 7 │ &.another-class, {
+      │                  ^
+    8 │      color: red;
+    9 │  }
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm,
+    2: asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkasdhkajsdhakjsdhkajsdhjkahskjdkjahsjkdjkakjsdm, {
+```

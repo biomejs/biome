@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-12-compact-nested-mapping.yml
+---
+# Input
+
+```yml
+---
+# Products purchased
+- item    : Super Hoop
+  quantity: 1
+- item    : Basketball
+  quantity: 4
+- item    : Big Shoes
+  quantity: 1
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ ---
+ # Products purchased
+-- item: Super Hoop
++- item    : Super Hoop
+   quantity: 1
+-- item: Basketball
++- item    : Basketball
+   quantity: 4
+-- item: Big Shoes
+-  quantity: 1
++- item    : Big Shoes
++  quantity: 1
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+# Products purchased
+- item    : Super Hoop
+  quantity: 1
+- item    : Basketball
+  quantity: 4
+- item    : Big Shoes
+  quantity: 1```

@@ -1,0 +1,10 @@
+.urls {
+	string-plus-variable: url( "../test/" + $test-path );
+	string-plus-string: url( "../test/" + "static/test.jpg" );
+	string-plus-number: url( 'v'+1 );
+	string-plus-dimension: url( 'v'+1px );
+	interpolated-string-plus: url( "#{$bg}" + ".png" );
+	commented-plus: url( $test-path /* c */ + "static/test.jpg" );
+	raw-interpolation: url( fudge#{$x}.css );
+	import-url: url( //fonts.googleapis.com/css?family=#{get-font-family("Roboto")}:100 );
+}

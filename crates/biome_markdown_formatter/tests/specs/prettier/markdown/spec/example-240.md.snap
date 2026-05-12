@@ -22,7 +22,7 @@ info: markdown/spec/example-240.md
 -- foo
 +-
 +
-+  foo
++foo
 ```
 
 # Output
@@ -30,5 +30,5 @@ info: markdown/spec/example-240.md
 ```md
 -
 
-  foo
+foo
 ```

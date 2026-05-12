@@ -12,7 +12,7 @@
 pub mod literal;
 
 use std::borrow::Cow;
-use std::fmt::Debug;
+use std::fmt::{self, Debug, Formatter, Result as FormatResult};
 use std::str::FromStr;
 
 use biome_js_type_info_macros::Resolvable;
@@ -646,7 +646,7 @@ pub struct Interface {
 }
 
 impl Debug for Interface {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Interface")
             .field("name", &self.name)
             .field("type_parameters", &self.type_parameters)
@@ -919,13 +919,38 @@ pub struct TupleElementType {
 }
 
 /// Members of a definition, such as an object, namespace or module.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
     pub ty: TypeReference,
 }
 
+impl Debug for TypeMember {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FormatResult {
+        let mut debug_struct = formatter.debug_struct("TypeMember");
+        debug_struct
+            .field("kind", &self.kind.without_const_asserted())
+            .field("ty", &self.ty);
+        if self.is_const_asserted() {
+            debug_struct.field("is_const_asserted", &true);
+        }
+        debug_struct.finish()
+    }
+}
+
 impl TypeMember {
+    /// Returns whether this member is optional.
+    #[inline]
+    pub fn is_optional(&self) -> bool {
+        self.kind.is_optional()
+    }
+
+    /// Returns whether this member carries `as const` provenance.
+    #[inline]
+    pub fn is_const_asserted(&self) -> bool {
+        self.kind.is_const_asserted()
+    }
+
     /// Returns a reference to the type of the member if we dereference it.
     ///
     /// This means if the member represents a getter or setter, it will
@@ -958,7 +983,10 @@ impl TypeMember {
 
     pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
         match &self.kind {
-            TypeMemberKind::IndexSignature(ty) => predicate(ty),
+            TypeMemberKind::IndexSignature(index_signature_type)
+            | TypeMemberKind::ConstAssertedIndexSignature(index_signature_type) => {
+                predicate(index_signature_type)
+            }
             _ => false,
         }
     }
@@ -983,49 +1011,162 @@ impl TypeMember {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
+    ConstAssertedCallSignature,
+    ConstAssertedConstructor,
+    ConstAssertedGetter(Text),
+    ConstAssertedIndexSignature(TypeReference),
+    ConstAssertedNamed(Text),
+    ConstAssertedNamedOptional(Text),
+    ConstAssertedNamedStatic(Text),
     Constructor,
     Getter(Text),
     IndexSignature(TypeReference),
     Named(Text),
+    NamedOptional(Text),
     NamedStatic(Text),
 }
 
 impl TypeMemberKind {
     pub fn has_name(&self, name: &str) -> bool {
         match self {
-            Self::CallSignature | Self::IndexSignature(_) => false,
-            Self::Constructor => name == "constructor",
-            Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
-                *own_name == name
-            }
+            Self::CallSignature
+            | Self::ConstAssertedCallSignature
+            | Self::IndexSignature(_)
+            | Self::ConstAssertedIndexSignature(_) => false,
+            Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
+            Self::Getter(own_name)
+            | Self::ConstAssertedGetter(own_name)
+            | Self::Named(own_name)
+            | Self::ConstAssertedNamed(own_name)
+            | Self::NamedOptional(own_name)
+            | Self::ConstAssertedNamedOptional(own_name)
+            | Self::NamedStatic(own_name)
+            | Self::ConstAssertedNamedStatic(own_name) => *own_name == name,
         }
+    }
+
+    /// Returns whether this member kind represents an optional member.
+    #[inline]
+    pub fn is_optional(&self) -> bool {
+        matches!(
+            self,
+            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+        )
     }
 
     #[inline]
     pub fn is_call_signature(&self) -> bool {
-        matches!(self, Self::CallSignature)
+        matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
     }
 
     #[inline]
     pub fn is_constructor(&self) -> bool {
-        matches!(self, Self::Constructor)
+        matches!(self, Self::Constructor | Self::ConstAssertedConstructor)
     }
 
     #[inline]
     pub fn is_getter(&self) -> bool {
-        matches!(self, Self::Getter(_))
+        matches!(self, Self::Getter(_) | Self::ConstAssertedGetter(_))
     }
 
     #[inline]
     pub fn is_static(&self) -> bool {
-        matches!(self, Self::Constructor | Self::NamedStatic(_))
+        matches!(
+            self,
+            Self::Constructor
+                | Self::ConstAssertedConstructor
+                | Self::NamedStatic(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
+
+    #[inline]
+    pub fn is_const_asserted(&self) -> bool {
+        matches!(
+            self,
+            Self::ConstAssertedCallSignature
+                | Self::ConstAssertedConstructor
+                | Self::ConstAssertedGetter(_)
+                | Self::ConstAssertedIndexSignature(_)
+                | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
+
+    /// Marks the member kind with `as const` provenance without growing `TypeMember`.
+    pub fn with_const_asserted(self) -> Self {
+        match self {
+            Self::CallSignature | Self::ConstAssertedCallSignature => {
+                Self::ConstAssertedCallSignature
+            }
+            Self::Constructor | Self::ConstAssertedConstructor => Self::ConstAssertedConstructor,
+            Self::Getter(name) | Self::ConstAssertedGetter(name) => Self::ConstAssertedGetter(name),
+            Self::IndexSignature(index_signature_type)
+            | Self::ConstAssertedIndexSignature(index_signature_type) => {
+                Self::ConstAssertedIndexSignature(index_signature_type)
+            }
+            Self::Named(name) | Self::ConstAssertedNamed(name) => Self::ConstAssertedNamed(name),
+            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+                Self::ConstAssertedNamedOptional(name)
+            }
+            Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+                Self::ConstAssertedNamedStatic(name)
+            }
+        }
+    }
+
+    /// Returns the structural member kind without `as const` provenance.
+    pub fn without_const_asserted(&self) -> Self {
+        match self {
+            Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedConstructor => Self::Constructor,
+            Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
+            Self::ConstAssertedIndexSignature(index_signature_type) => {
+                Self::IndexSignature(index_signature_type.clone())
+            }
+            Self::ConstAssertedNamed(name) => Self::Named(name.clone()),
+            Self::ConstAssertedNamedOptional(name) => Self::NamedOptional(name.clone()),
+            Self::ConstAssertedNamedStatic(name) => Self::NamedStatic(name.clone()),
+            other => other.clone(),
+        }
+    }
+
+    /// Makes named properties optional while preserving `as const` provenance.
+    pub fn with_optional(self) -> Self {
+        match self {
+            Self::Named(name) => Self::NamedOptional(name),
+            Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            other => other,
+        }
+    }
+
+    /// Makes optional named properties required while preserving `as const` provenance.
+    pub fn without_optional(self) -> Self {
+        match self {
+            Self::NamedOptional(name) => Self::Named(name),
+            Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            other => other,
+        }
     }
 
     pub fn name(&self) -> Option<Text> {
         match self {
-            Self::CallSignature | Self::IndexSignature(_) => None,
-            Self::Constructor => Some(Text::new_static("constructor")),
-            Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
+            Self::CallSignature
+            | Self::ConstAssertedCallSignature
+            | Self::IndexSignature(_)
+            | Self::ConstAssertedIndexSignature(_) => None,
+            Self::Constructor | Self::ConstAssertedConstructor => {
+                Some(Text::new_static("constructor"))
+            }
+            Self::Getter(name)
+            | Self::ConstAssertedGetter(name)
+            | Self::Named(name)
+            | Self::ConstAssertedNamed(name)
+            | Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::NamedStatic(name)
+            | Self::ConstAssertedNamedStatic(name) => Some(name.clone()),
         }
     }
 }
@@ -1438,6 +1579,61 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Record")
     }
 
+    /// Checks whether this type qualifier references a `Pick` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Pick`, without considering whether another symbol named `Pick` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Pick` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_pick(&self) -> bool {
+        self.path.is_identifier("Pick")
+    }
+
+    /// Checks whether this type qualifier references an `Omit` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Omit`, without considering whether another symbol named `Omit` is
+    /// in scope. It can be used _after_ type resolution has failed to find an
+    /// `Omit` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_omit(&self) -> bool {
+        self.path.is_identifier("Omit")
+    }
+
+    /// Checks whether this type qualifier references a `Partial` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Partial`, without considering whether another symbol named `Partial` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Partial` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_partial(&self) -> bool {
+        self.path.is_identifier("Partial")
+    }
+
+    /// Checks whether this type qualifier references a `Required` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Required`, without considering whether another symbol named `Required` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Required` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_required(&self) -> bool {
+        self.path.is_identifier("Required")
+    }
+
+    /// Checks whether this type qualifier references a `Readonly` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Readonly`, without considering whether another symbol named `Readonly` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Readonly` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_readonly(&self) -> bool {
+        self.path.is_identifier("Readonly")
+    }
+
     /// Checks whether this type qualifier references the `RegExp` type.
     ///
     /// This method simply checks whether the reference is for a literal
@@ -1447,6 +1643,64 @@ impl TypeReferenceQualifier {
     /// resolution.
     pub fn is_regex(&self) -> bool {
         self.path.is_identifier("RegExp")
+    }
+
+    /// Checks whether this type qualifier references the `Symbol` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Symbol`, without considering whether another symbol named `Symbol` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Symbol` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_symbol(&self) -> bool {
+        self.path.is_identifier("Symbol")
+    }
+
+    /// Checks whether this type qualifier references the `Date` type.
+    pub fn is_date(&self) -> bool {
+        self.path.is_identifier("Date")
+    }
+
+    /// Checks whether this type qualifier references the `Map` type.
+    pub fn is_map(&self) -> bool {
+        self.path.is_identifier("Map")
+    }
+
+    /// Checks whether this type qualifier references the `Set` type.
+    pub fn is_set(&self) -> bool {
+        self.path.is_identifier("Set")
+    }
+
+    /// Checks whether this type qualifier references the `WeakMap` type.
+    pub fn is_weak_map(&self) -> bool {
+        self.path.is_identifier("WeakMap")
+    }
+
+    /// Checks whether this type qualifier references the `Error` type.
+    pub fn is_error(&self) -> bool {
+        self.path.is_identifier("Error")
+    }
+
+    /// Checks whether this type qualifier references the `Disposable` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Disposable`, without considering whether another symbol named `Disposable` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Disposable` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_disposable(&self) -> bool {
+        self.path.is_identifier("Disposable")
+    }
+
+    /// Checks whether this type qualifier references the `AsyncDisposable` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `AsyncDisposable`, without considering whether another symbol named `AsyncDisposable` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `AsyncDisposable` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_async_disposable(&self) -> bool {
+        self.path.is_identifier("AsyncDisposable")
     }
 
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {

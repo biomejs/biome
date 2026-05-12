@@ -5,8 +5,8 @@ use crate::syntax::parse_error::{
     expected_svelte_property, expected_text_expression, expected_valid_directive,
 };
 use crate::syntax::{
-    TextExpression, parse_attribute_initializer, parse_html_element, parse_single_text_expression,
-    parse_single_text_expression_content,
+    AttrInitializerContext, TextExpression, parse_attribute_initializer, parse_html_element,
+    parse_single_text_expression, parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -32,8 +32,17 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![await] => parse_await_block(p, m),
         T![snippet] => parse_snippet_block(p, m),
         _ => {
-            m.abandon(p);
-            Absent
+            p.error(p.err_builder(
+                "Expected `if`, `each`, `key`, `await`, or `snippet`",
+                p.cur_range(),
+            ));
+
+            if !p.at(T!['}']) {
+                let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
+            }
+
+            p.expect(T!['}']);
+            Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
 }
@@ -826,8 +835,17 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![render] => parse_render_block(p, m),
         T![const] => parse_const_block(p, m),
         _ => {
-            m.abandon(p);
-            Absent
+            p.error(p.err_builder(
+                "Expected `render`, `html`, `const`, or `debug`",
+                p.cur_range(),
+            ));
+
+            if !p.at(T!['}']) {
+                let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
+            }
+
+            p.expect(T!['}']);
+            Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
 }
@@ -954,6 +972,19 @@ fn parse_svelte_name(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_remap_with_context(IDENT, HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_NAME))
+}
+
+/// Parses a directive-binding property, supporting member expressions like `renderer.in`.
+fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
+    parse_svelte_name(p).map(|mut name| {
+        while p.at(T![.]) {
+            let m = name.precede(p);
+            p.bump_with_context(T![.], HtmlLexContext::Svelte);
+            parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+            name = m.complete(p, SVELTE_MEMBER_PROPERTY);
+        }
+        name
+    })
 }
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
@@ -1166,13 +1197,13 @@ fn parse_directive_value(p: &mut HtmlParser, context_after_colon: HtmlLexContext
     } else if context_after_colon == HtmlLexContext::SvelteBindingLiteral {
         parse_binding_literal(p).or_add_diagnostic(p, expected_svelte_property);
     } else {
-        parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+        parse_svelte_binding_property(p).or_add_diagnostic(p, expected_name);
     }
 
     ModifiersList.parse_list(p);
 
     if p.at(T![=]) {
-        parse_attribute_initializer(p).ok();
+        parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
     } else {
         p.re_lex(HtmlReLexContext::InsideTag);
     }
@@ -1235,7 +1266,7 @@ impl ParseNodeList for ModifiersList {
 
 // #region Check functions
 
-const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![if],
     T![else],
     T![each],

@@ -1,0 +1,323 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/interpolation/3943.scss
+---
+
+# Input
+
+```scss
+.class-#{$var} {
+  #{$var}: #7b3d66;
+  #{$attr}-color: blue;
+  #{$prop}-#{$side}: $value;
+  background-#{$var}: #7b3d66;
+  animation-name: #{var};
+  line-height: #{strip-unit($line-height)}em;
+  height: 1#{$var};
+  width: calc(100% - #{$sidebar-width});
+  max-width: calc(#{$m*100}vw #{$sign} #{$b});
+  font: #{$font-size}/#{$line-height};
+  content: "I have #{8 + 2} books on SASS!";
+  border: #{$var} #{$var} #{$var};
+  filter: #{$var}#{$var}#{$var};
+  prop:  #{  $var  +  $var  }  #{  $var  +  $var  }  #{  $var  +  $var  };
+  prop2:
+      #{
+      $var
+      +
+      $var
+      }
+
+      #{
+      $var
+      +
+      $var
+      }
+
+      #{
+      $var
+      +
+      $var
+      }
+      ;
+  prop3:
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+      ;
+  prop4: -#{$loader-icon-duration};
+  prop5: +#{$loader-icon-duration};
+  prop6: calc(-#{$loader-icon-duration} + 10);
+  prop7: calc(10 + -#{$loader-icon-duration});
+}
+
+/* Framework version for the generated CSS is #{$version}. */
+
+.selector {
+  foo: bar;
+  #{$active} {
+    baz: qux;
+  }
+}
+
+.el:nth-of-type(#{$i}) {}
+
+@media #{$value} {}
+
+$foundation-dir: 'foundation';
+@import url('#{$foundation-dir}/components/grid');
+@import url(#{$foundation-dir}/components/grid);
+@import url($foundation-dir/components/grid);
+@import url($foundation-dir+"/components/grid");
+
+@function get-font-family($family) {
+  @return $family;
+}
+@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+@import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+
+
+@keyframes loader {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  #{50% - $loader-icon-duration} {
+    transform: translate3d(0, $bounce-height, 0);
+  }
+
+  50% {
+    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+  }
+}
+
+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+
+@each $icon in $icons {
+  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    content: "#{nth($icon, 2)}";
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,7 +8,7 @@
+   height: 1#{$var};
+   width: calc(100% - #{$sidebar-width});
+   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
+-  font: #{$font-size}/#{$line-height};
++  font: #{$font-size} / #{$line-height};
+   content: "I have #{8 + 2} books on SASS!";
+   border: #{$var} #{$var} #{$var};
+   filter: #{$var}#{$var}#{$var};
+@@ -45,7 +45,9 @@
+ @function get-font-family($family) {
+   @return $family;
+ }
+-@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
++@import url("//fonts.googleapis.com/css?family=#{get-font-family(
++    "Roboto"
++  )}:100,300,500,700,900&display=swap");
+ @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+ 
+ @keyframes loader {
+@@ -66,10 +68,7 @@
+   }
+ }
+ 
+-$icons:
+-  wifi "\600",
+-  wifi-hotspot "\601",
+-  weather "\602";
++$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+ 
+ @each $icon in $icons {
+   .icon-#{nth($icon, 1)},
+```
+
+# Output
+
+```scss
+.class-#{$var} {
+  #{$var}: #7b3d66;
+  #{$attr}-color: blue;
+  #{$prop}-#{$side}: $value;
+  background-#{$var}: #7b3d66;
+  animation-name: #{var};
+  line-height: #{strip-unit($line-height)}em;
+  height: 1#{$var};
+  width: calc(100% - #{$sidebar-width});
+  max-width: calc(#{$m * 100}vw #{$sign} #{$b});
+  font: #{$font-size} / #{$line-height};
+  content: "I have #{8 + 2} books on SASS!";
+  border: #{$var} #{$var} #{$var};
+  filter: #{$var}#{$var}#{$var};
+  prop: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop2: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop3: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop4: -#{$loader-icon-duration};
+  prop5: +#{$loader-icon-duration};
+  prop6: calc(-#{$loader-icon-duration} + 10);
+  prop7: calc(10 + -#{$loader-icon-duration});
+}
+
+/* Framework version for the generated CSS is #{$version}. */
+
+.selector {
+  foo: bar;
+  #{$active} {
+    baz: qux;
+  }
+}
+
+.el:nth-of-type(#{$i}) {
+}
+
+@media #{$value} {
+}
+
+$foundation-dir: "foundation";
+@import url("#{$foundation-dir}/components/grid");
+@import url(#{$foundation-dir}/components/grid);
+@import url($foundation-dir/components/grid);
+@import url($foundation-dir + "/components/grid");
+
+@function get-font-family($family) {
+  @return $family;
+}
+@import url("//fonts.googleapis.com/css?family=#{get-font-family(
+    "Roboto"
+  )}:100,300,500,700,900&display=swap");
+@import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+
+@keyframes loader {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  #{50% - $loader-icon-duration} {
+    transform: translate3d(0, $bounce-height, 0);
+  }
+
+  50% {
+    transform: translate3d(0, $bounce-height, 0)
+      scale(
+        $loader-bounce-horizontal-expansion,
+        $loader-bounce-vertical-compression
+      );
+  }
+}
+
+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+
+@each $icon in $icons {
+  .icon-#{nth($icon, 1)},
+  %icon-#{nth($icon, 1)} {
+    content: "#{nth($icon, 2)}";
+  }
+}
+```
+
+# Errors
+```
+3943.scss:104:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    102 │   }
+    103 │ 
+  > 104 │   #{50% - $loader-icon-duration} {
+        │   ^
+    105 │     transform: translate3d(0, $bounce-height, 0);
+    106 │   }
+  
+  i Expected one of:
+  
+  - from
+  - to
+  - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
+  
+3943.scss:104:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `{`
+  
+    102 │   }
+    103 │ 
+  > 104 │   #{50% - $loader-icon-duration} {
+        │                                  ^
+    105 │     transform: translate3d(0, $bounce-height, 0);
+    106 │   }
+  
+  i Remove {
+  
+3943.scss:105:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ': translate3d(0'.
+  
+    104 │   #{50% - $loader-icon-duration} {
+  > 105 │     transform: translate3d(0, $bounce-height, 0);
+        │              ^^^^^^^^^^^^^^^
+    106 │   }
+    107 │ 
+  
+  i Expected a SCSS expression here.
+  
+    104 │   #{50% - $loader-icon-duration} {
+  > 105 │     transform: translate3d(0, $bounce-height, 0);
+        │              ^^^^^^^^^^^^^^^
+    106 │   }
+    107 │ 
+  
+3943.scss:105:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    104 │   #{50% - $loader-icon-duration} {
+  > 105 │     transform: translate3d(0, $bounce-height, 0);
+        │                                                ^
+    106 │   }
+    107 │ 
+  
+  i Remove )
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   51: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+```

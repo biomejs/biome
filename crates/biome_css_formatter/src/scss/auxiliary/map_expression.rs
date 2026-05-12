@@ -1,25 +1,25 @@
 use crate::prelude::*;
-use biome_css_syntax::{ScssMapExpression, ScssMapExpressionFields};
-use biome_formatter::{format_args, write};
+use crate::utils::scss_map_layout::ScssMapLayout;
+use biome_css_syntax::ScssMapExpression;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssMapExpression;
 impl FormatNodeRule<ScssMapExpression> for FormatScssMapExpression {
     fn fmt_fields(&self, node: &ScssMapExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssMapExpressionFields {
-            l_paren_token,
-            pairs,
-            r_paren_token,
-        } = node.as_fields();
+        ScssMapLayout::new(node).fmt(f)
+    }
 
-        write!(
-            f,
-            [group(&format_args![
-                l_paren_token.format(),
-                indent(&format_args![soft_line_break(), pairs.format()]),
-                soft_line_break(),
-                r_paren_token.format()
-            ])
-            .should_expand(!pairs.is_empty())]
-        )
+    fn fmt_dangling_comments(
+        &self,
+        node: &ScssMapExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        if ScssMapLayout::new(node).owns_dangling_comments(f) {
+            Ok(())
+        } else {
+            format_dangling_comments(node.syntax())
+                .with_soft_block_indent()
+                .fmt(f)
+        }
     }
 }

@@ -349,9 +349,9 @@ pub(super) fn flattened_expression(
     }
 }
 
-/// Resolves a callee type through layers of indirection (`InstanceOf`,
-/// `Interface`, `Object`) until a `Function` is found, bounded by
-/// [`MAX_FLATTEN_DEPTH`] iterations.
+/// Resolves a callee type through layers of indirection (`TypeofExpression`,
+/// `InstanceOf`, `Interface`, `Object`) until a `Function` is found, bounded
+/// by [`MAX_FLATTEN_DEPTH`] iterations.
 ///
 /// Returns `None` if no function can be reached.
 fn resolve_callee_to_function(
@@ -362,6 +362,12 @@ fn resolve_callee_to_function(
     for _ in 0..MAX_FLATTEN_DEPTH {
         match callee {
             TypeData::Function(function) => return Some(function),
+            // Cross-module generic wrappers (e.g. `export const f = trace(asyncFn)`)
+            // are represented as unflattened `TypeofExpression` nodes when imported.
+            // Eagerly flatten them so the underlying function type is reachable.
+            TypeData::TypeofExpression(expr) => {
+                callee = flattened_expression(&expr, resolver)?;
+            }
             TypeData::InstanceOf(instance) => {
                 let instance_callee = resolver.resolve_and_get(&instance.ty)?;
                 callee = if instance_callee.is_function() {
@@ -410,7 +416,7 @@ fn flattened_call(
                         return_types.push(TypeData::Undefined);
                         continue;
                     }
-                    TypeData::Unknown | TypeData::TypeofExpression(_) => {
+                    TypeData::Unknown => {
                         continue;
                     }
                     _ => {}

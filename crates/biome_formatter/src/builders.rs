@@ -586,7 +586,7 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
     }
 }
 
-/// Inserts a single space. Allows to separate different tokens.
+/// Inserts a single space. Allows you to separate different tokens.
 ///
 /// # Examples
 ///

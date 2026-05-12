@@ -7,6 +7,7 @@ use biome_rowan::AstNode;
 
 pub(crate) mod drizzle;
 pub(crate) mod playwright;
+pub(crate) mod unit_tests;
 pub(crate) mod vue;
 
 pub(crate) fn is_framework_api_reference(
