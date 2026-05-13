@@ -84,6 +84,60 @@ interface FixFileResult {
 	code: string;
 }
 
+export type PatternId = string;
+export type GritTargetLanguage = "CSS" | "JavaScript";
+
+interface ParsePatternParams {
+	/**
+	 * The default language to use for the pattern
+	 */
+	defaultLanguage: GritTargetLanguage;
+	/**
+	 * The GritQL pattern to parse
+	 */
+	pattern: string;
+}
+
+interface ParsePatternResult {
+	/**
+	 * The pattern ID that can be used for searching
+	 */
+	patternId: PatternId;
+}
+
+interface SearchPatternParams {
+	/**
+	 * The path to the file to search
+	 */
+	path: BiomePath;
+	/**
+	 * The pattern ID returned from parsePattern
+	 */
+	pattern: PatternId;
+	/**
+	 * The project key
+	 */
+	projectKey: ProjectKey;
+}
+
+interface SearchResults {
+	/**
+	 * List of text ranges where matches were found
+	 */
+	matches: TextRange[];
+	/**
+	 * The path to the file that was searched
+	 */
+	path: string;
+}
+
+interface DropPatternParams {
+	/**
+	 * The pattern ID to drop
+	 */
+	pattern: PatternId;
+}
+
 export interface DiagnosticPrinter<Diagnostic> {
 	free(): void;
 	print_simple(diagnostic: Diagnostic): void;
@@ -105,6 +159,9 @@ export interface Workspace<Configuration, Diagnostic> {
 	formatFile(params: FormatFileParams): any;
 	getFormatterIr(params: GetFormatterIRParams): string;
 	fixFile(params: FixFileParams): FixFileResult;
+	parsePattern(params: ParsePatternParams): ParsePatternResult;
+	searchPattern(params: SearchPatternParams): SearchResults;
+	dropPattern(params: DropPatternParams): void;
 }
 
 export interface Module<Configuration, Diagnostic> {
