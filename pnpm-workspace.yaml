@@ -4,13 +4,12 @@ packages:
   - "packages/tailwindcss-config-analyzer"
   - "packages/prettier-compare"
   - "crates/biome_formatter_test/src/prettier"
-  - "benchmark"
   - "packages/@biomejs/*"
 ignoredOptionalDependencies:
   - "@biomejs/cli*-"
 # three days
 minimumReleaseAge: 4320
 allowBuilds:
-  dprint: true
+  dprint: false
   esbuild: false
   tombi: true
