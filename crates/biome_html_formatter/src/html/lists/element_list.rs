@@ -673,6 +673,8 @@ impl FormatHtmlElementList {
                             && !self.is_container_whitespace_sensitive
                         {
                             // If the container is not whitespace sensitive, we trim trailing whitespace
+                        } else if is_first_child && !self.is_container_whitespace_sensitive {
+                            // if the container is not whitespace sensitive, we trim leading whitespace
                         } else {
                             write!(f, [space()])?;
                         }
