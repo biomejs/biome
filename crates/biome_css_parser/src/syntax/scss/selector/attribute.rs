@@ -31,6 +31,5 @@ pub(crate) fn parse_scss_interpolated_attribute_modifier(p: &mut CssParser) -> P
     if !is_at_scss_interpolated_attribute_identifier(p) {
         return Absent;
     }
-
     parse_scss_interpolated_identifier(p)
 }
