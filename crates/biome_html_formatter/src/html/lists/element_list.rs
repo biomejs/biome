@@ -385,9 +385,12 @@ impl FormatHtmlElementList {
             f,
         )?;
 
-        EnvConsole::new(ColorMode::Auto).error(markup! {
-            {DisplayHtmlChildSequence::new(&children)}
-        });
+        #[cfg(debug_assertions)]
+        if std::env::var("DEBUG_HTML_FORMATTER_CHILDREN").is_ok() {
+            EnvConsole::new(ColorMode::Auto).error(markup! {
+                {DisplayHtmlChildSequence::new(&children)}
+            });
+        }
 
         let children_meta = self.children_meta(&children);
 
