@@ -1090,7 +1090,8 @@ impl<'a> HtmlRenderer<'a> {
                     content = stripped;
                 }
                 let trimmed = trim_buffer_preserving_entities(&content, &entity_ranges);
-                let content = strip_paragraph_indent(trimmed);
+                let base_offset = trimmed.as_ptr() as usize - content.as_ptr() as usize;
+                let content = strip_paragraph_indent(trimmed, base_offset, &entity_ranges);
 
                 if state.in_tight_list {
                     self.push_str(&content);
@@ -1115,7 +1116,12 @@ impl<'a> HtmlRenderer<'a> {
                 // and must be stripped (matching paragraph rendering).
                 let trimmed =
                     trim_buffer_preserving_entities(&buffer.content, &buffer.entity_ranges);
-                self.push_str(&strip_paragraph_indent(trimmed));
+                let base_offset = trimmed.as_ptr() as usize - buffer.content.as_ptr() as usize;
+                self.push_str(&strip_paragraph_indent(
+                    trimmed,
+                    base_offset,
+                    &buffer.entity_ranges,
+                ));
                 self.push_str("</h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">\n");
@@ -1274,18 +1280,56 @@ fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
 /// initial whitespace, and that whitespace is stripped in the output.
 /// The first line keeps its content unchanged; subsequent lines have all
 /// leading spaces and tabs stripped.
-fn strip_paragraph_indent(content: &str) -> String {
+/// Strip leading whitespace from each continuation line, but preserve
+/// whitespace bytes that fall inside `entity_ranges`. `base_offset` is the
+/// byte position of `content` inside the original buffer the entity ranges
+/// refer to (typically the offset produced by
+/// [`trim_buffer_preserving_entities`]).
+fn strip_paragraph_indent(
+    content: &str,
+    base_offset: usize,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> String {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+    let mut result = String::with_capacity(content.len());
+    let mut line_start = 0usize;
     let mut first_line = true;
-    map_lines(content, |line, out| {
-        if first_line {
-            // First line: keep as-is
-            first_line = false;
-            out.push_str(line);
-        } else {
-            // Continuation lines: strip ALL leading whitespace
-            out.push_str(line.trim_start());
+    let bytes = content.as_bytes();
+    for line in content.split('\n') {
+        let raw_line_len = line.len();
+        if !first_line {
+            result.push('\n');
         }
-    })
+        let line = line.strip_suffix('\r').unwrap_or(line);
+        if first_line {
+            result.push_str(line);
+            first_line = false;
+        } else {
+            let mut skip = 0usize;
+            for (offset, ch) in line.char_indices() {
+                if !ch.is_whitespace() {
+                    skip = offset;
+                    break;
+                }
+                if in_entity(base_offset + line_start + offset) {
+                    skip = offset;
+                    break;
+                }
+                skip = offset + ch.len_utf8();
+            }
+            result.push_str(&line[skip..]);
+        }
+        line_start += raw_line_len;
+        // `split('\n')` consumed exactly one '\n' between segments.
+        if bytes.get(line_start) == Some(&b'\n') {
+            line_start += 1;
+        }
+    }
+    result
 }
 
 /// Render an ATX header (# style).
@@ -2409,5 +2453,28 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_entity_tab_on_continuation_line_is_preserved() {
+        // `&#9;` decodes to a tab. On a continuation line the tab is
+        // entity-sourced and must survive the structural indent trim.
+        let html = render("foo\n&#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
+    }
+
+    #[test]
+    fn test_entity_space_on_continuation_line_is_preserved() {
+        // `&#x20;` decodes to a space; preserved even though it is whitespace.
+        let html = render("foo\n&#x20;bar\n");
+        assert_eq!(html, "<p>foo\n bar</p>\n");
+    }
+
+    #[test]
+    fn test_structural_indent_still_stripped_before_entity() {
+        // Literal leading spaces are structural and stripped; the entity-sourced
+        // whitespace that follows is preserved.
+        let html = render("foo\n   &#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
     }
 }
