@@ -1300,6 +1300,7 @@ AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
 	| CssKeyframesRangeSelector
+	| ScssKeyframesSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1321,6 +1322,12 @@ CssKeyframesPercentageSelector =
 CssKeyframesRangeSelector =
 	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
 	percentage: CssPercentage
+
+// @keyframes loader { #{50% - $duration} {} #{$i}% {} }
+//                     ^^^^^^^^^^^^^^^^^^    ^^^^^^
+ScssKeyframesSelector =
+	selector: ScssInterpolation
+	'%'?
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>

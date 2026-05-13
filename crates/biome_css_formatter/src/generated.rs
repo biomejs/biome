@@ -8372,6 +8372,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolation {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssKeyframesSelector>
+    for crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssKeyframesSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssKeyframesSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssKeyframesSelector,
+        crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssKeyframesSelector,
+        crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssKeywordArgument>
     for crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument
 {

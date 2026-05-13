@@ -7569,6 +7569,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(SCSS_INTERPOLATION, children)
             }
+            SCSS_KEYFRAMES_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolation::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [%]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_KEYFRAMES_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_KEYFRAMES_SELECTOR, children)
+            }
             SCSS_KEYWORD_ARGUMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();

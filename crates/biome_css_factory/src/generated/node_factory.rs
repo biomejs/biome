@@ -3783,6 +3783,31 @@ pub fn scss_interpolation(
         ],
     ))
 }
+pub fn scss_keyframes_selector(selector: ScssInterpolation) -> ScssKeyframesSelectorBuilder {
+    ScssKeyframesSelectorBuilder {
+        selector,
+        percent_token: None,
+    }
+}
+pub struct ScssKeyframesSelectorBuilder {
+    selector: ScssInterpolation,
+    percent_token: Option<SyntaxToken>,
+}
+impl ScssKeyframesSelectorBuilder {
+    pub fn with_percent_token(mut self, percent_token: SyntaxToken) -> Self {
+        self.percent_token = Some(percent_token);
+        self
+    }
+    pub fn build(self) -> ScssKeyframesSelector {
+        ScssKeyframesSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_KEYFRAMES_SELECTOR,
+            [
+                Some(SyntaxElement::Node(self.selector.into_syntax())),
+                self.percent_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
 pub fn scss_keyword_argument(
     name: ScssVariable,
     colon_token: SyntaxToken,
