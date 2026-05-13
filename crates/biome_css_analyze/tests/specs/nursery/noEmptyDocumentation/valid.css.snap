@@ -11,10 +11,16 @@ expression: valid.css
 	display: flex;
 }
 
+/* Valid */
+/* Valid */
+.valid2 {
+	display: flex;
+}
+
 /*
 	Valid
 */
-.valid2 {
+.valid3 {
 	display: flex;
 }
 

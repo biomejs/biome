@@ -12,18 +12,22 @@ let invalid1 = 1;
 /* */
 let invalid2 = 1;
 
+/* */
+/* */
+let invalid3 = 1;
+
 /*
 
 */
-let invalid3 = 1;
+let invalid4 = 1;
 
 /** */
-let invalid4 = 1;
+let invalid5 = 1;
 
 /**
  *
  */
-let invalid5 = 1;
+let invalid6 = 1;
 
 ```
 
@@ -40,7 +44,17 @@ invalid.js:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━�
     4 │ let invalid1 = 1;
     5 │ 
   
-  i More empty documentation.
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
   
     4 │ let invalid1 = 1;
     5 │ 
@@ -49,38 +63,105 @@ invalid.js:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━�
     7 │ let invalid2 = 1;
     8 │ 
   
-  i More empty documentation.
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
   
      7 │ let invalid2 = 1;
      8 │ 
-   > 9 │ /*
-       │ ^^
-  > 10 │ 
-  > 11 │ */
-       │ ^^
-    12 │ let invalid3 = 1;
-    13 │ 
+   > 9 │ /* */
+       │ ^^^^^
+    10 │ /* */
+    11 │ let invalid3 = 1;
   
-  i More empty documentation.
+  i Empty documentation provides no value. Remove them or add meaningful content.
   
-    12 │ let invalid3 = 1;
-    13 │ 
-  > 14 │ /** */
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     9 │ /* */
+  > 10 │ /* */
+       │ ^^^^^
+    11 │ let invalid3 = 1;
+    12 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    11 │ let invalid3 = 1;
+    12 │ 
+  > 13 │ /*
+       │ ^^
+  > 14 │ 
+  > 15 │ */
+       │ ^^
+    16 │ let invalid4 = 1;
+    17 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    16 │ let invalid4 = 1;
+    17 │ 
+  > 18 │ /** */
        │ ^^^^^^
-    15 │ let invalid4 = 1;
-    16 │ 
+    19 │ let invalid5 = 1;
+    20 │ 
   
-  i More empty documentation.
+  i Empty documentation provides no value. Remove them or add meaningful content.
   
-    15 │ let invalid4 = 1;
-    16 │ 
-  > 17 │ /**
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    19 │ let invalid5 = 1;
+    20 │ 
+  > 21 │ /**
        │ ^^^
-  > 18 │  *
-  > 19 │  */
+  > 22 │  *
+  > 23 │  */
        │  ^^
-    20 │ let invalid5 = 1;
-    21 │ 
+    24 │ let invalid6 = 1;
+    25 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

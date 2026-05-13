@@ -1,6 +1,6 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-    trivia::LeadingCommentTriviaPieces,
+    trivia::LeadingCommentTriviaPiecesIterator,
 };
 use biome_console::markup;
 use biome_graphql_syntax::{GraphqlDescription, GraphqlRoot};
@@ -75,15 +75,15 @@ declare_lint_rule! {
 
 impl Rule for NoEmptyDocumentation {
     type Query = Ast<GraphqlRoot>;
-    type State = Vec<TextRange>;
-    type Signals = Option<Self::State>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>;
     type Options = NoEmptyDocumentationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let syntax_node = node.syntax();
 
-        let mut found: Vec<_> = LeadingCommentTriviaPieces::new(syntax_node)
+        let mut found: Vec<_> = LeadingCommentTriviaPiecesIterator::new(syntax_node)
             .filter(|comment| is_empty_comment(comment.text().trim()))
             .map(|comment| comment.text_range())
             .collect();
@@ -97,37 +97,26 @@ impl Rule for NoEmptyDocumentation {
             }
         }
 
-        found.sort_unstable_by_key(|range| (range.start(), range.end()));
-        found.dedup();
-
         if found.is_empty() {
-            return None;
+            return found;
         }
 
-        Some(found)
+        found
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let mut diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            state.first()?,
-            markup! {
-                "Unexpected empty documentation."
-            },
-        );
-
-        for range in &state[1..] {
-            diagnostic = diagnostic.detail(
-                range,
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state,
                 markup! {
-                    "More empty documentation."
+                    "Unexpected empty documentation."
                 },
-            );
-        }
-
-        Some(diagnostic.note(markup! {
-            "Empty documentation provides no value. Remove them or add meaningful content."
-        }))
+            )
+            .note(markup! {
+                "Empty documentation provides no value. Remove them or add meaningful content."
+            }),
+        )
     }
 }
 

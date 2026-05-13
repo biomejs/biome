@@ -9,6 +9,10 @@ expression: invalid.html
 <!-- -->
 <div>invalid</div>
 
+<!-- -->
+<!-- -->
+<div>invalid</div>
+
 <!--
 
 -->
@@ -29,17 +33,64 @@ invalid.html:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━�
     4 │ <div>invalid</div>
     5 │ 
   
-  i More empty documentation.
+  i Empty documentation provides no value. Remove them or add meaningful content.
   
-     4 │ <div>invalid</div>
-     5 │ 
-   > 6 │ <!--
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:6:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    4 │ <div>invalid</div>
+    5 │ 
+  > 6 │ <!-- -->
+      │ ^^^^^^^^
+    7 │ <!-- -->
+    8 │ <div>invalid</div>
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:7:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    6 │ <!-- -->
+  > 7 │ <!-- -->
+      │ ^^^^^^^^
+    8 │ <div>invalid</div>
+    9 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:10:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     8 │ <div>invalid</div>
+     9 │ 
+  > 10 │ <!--
        │ ^^^^
-   > 7 │ 
-   > 8 │ -->
+  > 11 │ 
+  > 12 │ -->
        │ ^^^
-     9 │ <div>invalid</div>
-    10 │ 
+    13 │ <div>invalid</div>
+    14 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   
