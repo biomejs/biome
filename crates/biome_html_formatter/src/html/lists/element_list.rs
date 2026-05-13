@@ -608,6 +608,15 @@ impl FormatHtmlElementList {
                     // HTML comment
                     HtmlChild::Comment(comment) => {
                         write!(f, [comment])?;
+
+                        let next = children_iter.peek();
+                        if let Some(HtmlChild::NonText(next_non_text)) = next {
+                            // when a comment is followed by a block element, we need to add a line break.
+                            let next_css_display = get_element_css_display(next_non_text);
+                            if !next_css_display.is_externally_whitespace_sensitive(f) {
+                                write!(f, [hard_line_break()])?;
+                            }
+                        }
                     }
 
                     // Whitespace between children
