@@ -473,9 +473,9 @@ where
 
             let is_suppressed = f.comments().is_suppressed(child.syntax());
             if is_suppressed {
-                builder.entry(HtmlChild::Verbatim(child.clone()));
+                builder.non_text_entry(HtmlChild::Verbatim(child.clone()), f);
             } else {
-                builder.entry(HtmlChild::NonText(child.clone()));
+                builder.non_text_entry(HtmlChild::NonText(child.clone()), f);
             }
 
             if let Some(last_token) = child.syntax().last_token() {
@@ -591,6 +591,25 @@ impl HtmlSplitChildrenBuilder {
             }
             _ => self.buffer.push(child),
         }
+    }
+
+    fn non_text_entry(&mut self, child: HtmlChild, f: &HtmlFormatter) {
+        let element = match &child {
+            HtmlChild::NonText(element) | HtmlChild::Verbatim(element) => element,
+            _ => unreachable!("non_text_entry must be called with a non-text child"),
+        };
+
+        if !get_element_css_display(element).is_externally_whitespace_sensitive(f)
+            && matches!(self.buffer.last(), Some(HtmlChild::Whitespace))
+            && matches!(
+                self.buffer.iter().rev().nth(1),
+                Some(HtmlChild::Word(_) | HtmlChild::Comment(_))
+            )
+        {
+            self.buffer.pop();
+        }
+
+        self.entry(child);
     }
 
     fn finish(self) -> Vec<HtmlChild> {
