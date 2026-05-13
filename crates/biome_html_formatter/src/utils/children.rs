@@ -1,15 +1,23 @@
 use std::{
+    fmt,
     iter::{FusedIterator, Peekable},
     str::Chars,
 };
 
+use biome_console::{
+    fmt::{Display, Formatter as ConsoleFormatter},
+    markup,
+};
 use biome_formatter::{
     Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
 };
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext};
+use crate::{
+    HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext,
+    utils::metadata::get_element_css_display,
+};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -60,7 +68,6 @@ impl HtmlWord {
         self.text.chars().count() == 1
     }
 
-    #[expect(dead_code)]
     pub(crate) fn text(&self) -> &str {
         &self.text
     }
@@ -136,6 +143,84 @@ pub(crate) enum HtmlChild {
 impl HtmlChild {
     pub(crate) const fn is_any_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::EmptyLine | Self::Newline)
+    }
+}
+
+pub(crate) struct DisplayHtmlChildSequence<'a>(&'a [HtmlChild]);
+
+impl<'a> DisplayHtmlChildSequence<'a> {
+    pub(crate) const fn new(children: &'a [HtmlChild]) -> Self {
+        Self(children)
+    }
+}
+
+impl Display for DisplayHtmlChildSequence<'_> {
+    fn fmt(&self, fmt: &mut ConsoleFormatter) -> std::io::Result<()> {
+        let count = self.0.len();
+        fmt.write_markup(markup! {
+            <Emphasis>"HtmlChild sequence ("{count}"):"</Emphasis>"\n"
+            <Emphasis>"idx  kind        detail"</Emphasis>"\n"
+        })?;
+
+        for (index, child) in self.0.iter().enumerate() {
+            fmt.write_fmt(std::format_args!(
+                "{index:<4} {kind:<11} {detail}\n",
+                kind = html_child_kind(child),
+                detail = HtmlChildDetail(child),
+            ))?;
+        }
+
+        Ok(())
+    }
+}
+
+struct HtmlChildDetail<'a>(&'a HtmlChild);
+
+impl fmt::Display for HtmlChildDetail<'_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            HtmlChild::Word(word) => std::write!(fmt, "{:?}", word.text()),
+            HtmlChild::Comment(comment) => std::write!(fmt, "{:?}", comment.text()),
+            HtmlChild::Whitespace => fmt.write_str("\" \""),
+            HtmlChild::Newline => fmt.write_str("\\n"),
+            HtmlChild::EmptyLine => fmt.write_str("\\n\\n"),
+            HtmlChild::NonText(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
+            HtmlChild::Verbatim(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
+        }
+    }
+}
+
+struct HtmlElementDetail<'a>(&'a AnyHtmlElement);
+
+impl fmt::Display for HtmlElementDetail<'_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(name) = self.0.name() {
+            std::write!(
+                fmt,
+                "<{}> display={:?}",
+                name.text(),
+                get_element_css_display(self.0)
+            )
+        } else {
+            std::write!(
+                fmt,
+                "{:?} display={:?}",
+                self.0.syntax().kind(),
+                get_element_css_display(self.0)
+            )
+        }
+    }
+}
+
+const fn html_child_kind(child: &HtmlChild) -> &'static str {
+    match child {
+        HtmlChild::Word(_) => "Word",
+        HtmlChild::Comment(_) => "Comment",
+        HtmlChild::Whitespace => "Whitespace",
+        HtmlChild::Newline => "Newline",
+        HtmlChild::EmptyLine => "EmptyLine",
+        HtmlChild::NonText(_) => "NonText",
+        HtmlChild::Verbatim(_) => "Verbatim",
     }
 }
 
