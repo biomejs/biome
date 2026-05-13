@@ -534,6 +534,11 @@ struct HtmlRenderer<'a> {
 struct Buffer {
     kind: BufferKind,
     content: String,
+    /// Byte ranges in `content` that originated from a decoded entity /
+    /// numeric character reference. Whitespace inside these ranges must
+    /// NOT be stripped by the paragraph/header close-time trim, so that
+    /// e.g. `&#9;foo` keeps the decoded tab and `&#1;foo` keeps U+0001.
+    entity_ranges: Vec<std::ops::Range<usize>>,
 }
 
 enum BufferKind {
@@ -586,6 +591,7 @@ impl<'a> HtmlRenderer<'a> {
             buffers: vec![Buffer {
                 kind: BufferKind::Root,
                 content: String::new(),
+                entity_ranges: Vec::new(),
             }],
             list_stack: Vec::new(),
             list_item_stack: Vec::new(),
@@ -1058,7 +1064,7 @@ impl<'a> HtmlRenderer<'a> {
         }
 
         if let Some(entity) = MdEntityReference::cast(node) {
-            render_entity_reference(&entity, self.out_mut());
+            render_entity_reference(&entity, self.buffer_mut());
         }
     }
 
@@ -1071,12 +1077,20 @@ impl<'a> HtmlRenderer<'a> {
                     return;
                 }
                 let mut content = buffer.content;
+                let mut entity_ranges = buffer.entity_ranges;
                 if state.quote_indent > 0 {
-                    content = strip_quote_prefixes(&content, state.quote_indent);
+                    let stripped = strip_quote_prefixes(&content, state.quote_indent);
+                    // The byte ranges no longer line up after stripping
+                    // quote prefixes — fall back to the structural trim
+                    // alone for this (rare) case. Entity ranges are kept
+                    // as `Vec::new()` so no preservation applies.
+                    if stripped != content {
+                        entity_ranges = Vec::new();
+                    }
+                    content = stripped;
                 }
-                let content = strip_paragraph_indent(
-                    content.trim_matches(|c| c == ' ' || c == '\t' || c == '\n' || c == '\r'),
-                );
+                let trimmed = trim_buffer_preserving_entities(&content, &entity_ranges);
+                let content = strip_paragraph_indent(trimmed);
 
                 if state.in_tight_list {
                     self.push_str(&content);
@@ -1099,9 +1113,8 @@ impl<'a> HtmlRenderer<'a> {
                 // Setext headings can span multiple inline lines; leading
                 // whitespace on each continuation line is structural padding
                 // and must be stripped (matching paragraph rendering).
-                let trimmed = buffer
-                    .content
-                    .trim_matches(|c: char| matches!(c, ' ' | '\t' | '\n' | '\r'));
+                let trimmed =
+                    trim_buffer_preserving_entities(&buffer.content, &buffer.entity_ranges);
                 self.push_str(&strip_paragraph_indent(trimmed));
                 self.push_str("</h");
                 self.push_str(&state.level.to_string());
@@ -1213,6 +1226,7 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.push(Buffer {
             kind,
             content: String::new(),
+            entity_ranges: Vec::new(),
         });
     }
 
@@ -1220,11 +1234,16 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.pop().unwrap_or(Buffer {
             kind: BufferKind::Root,
             content: String::new(),
+            entity_ranges: Vec::new(),
         })
     }
 
     fn out_mut(&mut self) -> &mut String {
         &mut self.buffers.last_mut().expect("missing buffer").content
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        self.buffers.last_mut().expect("missing buffer")
     }
 
     fn push_str(&mut self, value: &str) {
@@ -1531,18 +1550,61 @@ fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
     out.push_str(&content);
 }
 
-/// Render an entity reference.
-fn render_entity_reference(entity: &MdEntityReference, out: &mut String) {
-    if let Ok(token) = entity.value_token() {
-        let text = token.text();
-        // Decode known entities or pass through
-        if let Some(decoded) = decode_entity(text) {
-            out.push_str(&escape_html(&decoded));
-        } else {
-            // Unknown entity - pass through as-is (escaped)
-            out.push_str(&escape_html(text));
-        }
+/// Render an entity reference into the current buffer.
+///
+/// The byte range covered by the rendered output is recorded on the
+/// buffer's `entity_ranges` so that the paragraph/header close-time
+/// trim can preserve whitespace that was produced by decoding a
+/// numeric character reference (e.g. `&#9;` → `\t`, `&#1;` → U+0001).
+fn render_entity_reference(entity: &MdEntityReference, buffer: &mut Buffer) {
+    let Ok(token) = entity.value_token() else {
+        return;
+    };
+    let text = token.text();
+    let rendered = match decode_entity(text) {
+        Some(decoded) => escape_html(&decoded),
+        None => escape_html(text),
+    };
+    let start = buffer.content.len();
+    buffer.content.push_str(&rendered);
+    let end = buffer.content.len();
+    if end > start {
+        buffer.entity_ranges.push(start..end);
     }
+}
+
+/// Trim leading and trailing structural whitespace from `content`, but
+/// preserve whitespace that lives inside any of the byte ranges in
+/// `entity_ranges` (where each range marks output produced by
+/// [`render_entity_reference`]).
+///
+/// The returned slice borrows from `content`.
+fn trim_buffer_preserving_entities<'a>(
+    content: &'a str,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> &'a str {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+
+    let bytes = content.as_bytes();
+    let mut start = 0;
+    while start < bytes.len()
+        && matches!(bytes[start], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(start)
+    {
+        start += 1;
+    }
+    let mut end = bytes.len();
+    while end > start
+        && matches!(bytes[end - 1], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(end - 1)
+    {
+        end -= 1;
+    }
+    &content[start..end]
 }
 
 /// Render a link title attribute.

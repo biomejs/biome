@@ -1280,15 +1280,17 @@ fn handle_line_continuation(
     emit_indent_tokens: bool,
 ) -> InlineNewlineAction {
     let quote_depth = p.state().block_quote_depth;
+    let line_has_quote_prefix = quote_depth > 0 && has_quote_prefix(p, quote_depth);
     if break_for_quote_prefix_after_inline_newline(p, quote_depth) {
         return InlineNewlineAction::Break;
     }
 
-    // Blockquote lazy continuation is stricter than paragraph interrupt:
-    // a line that begins any new block construct (e.g. an ordered list with
-    // start > 1) ends the blockquote, even though such a line could not
-    // interrupt an active top-level paragraph.
-    if quote_depth > 0 && begins_blockquote_terminating_block(p) {
+    // Unprefixed continuation in a blockquote: a line that begins any new block
+    // construct (e.g. an ordered list with start > 1) ends the blockquote per
+    // CommonMark, even though such a line could not interrupt an active
+    // top-level paragraph. With a `>` prefix, normal lazy-continuation rules
+    // apply and the line stays inside the same paragraph.
+    if quote_depth > 0 && !line_has_quote_prefix && begins_blockquote_terminating_block(p) {
         return InlineNewlineAction::Break;
     }
 

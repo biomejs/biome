@@ -411,18 +411,9 @@ MdDocument {
                                             marker_token: R_ANGLE@121..122 ">" [] [],
                                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@122..123 " " [] [],
                                         },
-                                    ],
-                                    hard_line: missing (optional),
-                                },
-                                MdContinuationIndent {
-                                    indent: MdIndentTokenList [
                                         MdIndentToken {
                                             md_indent_char_token: MD_INDENT_CHAR@123..127 "    " [] [],
                                         },
-                                    ],
-                                },
-                                MdParagraph {
-                                    list: MdInlineItemList [
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@127..129 "2." [] [],
                                         },
@@ -691,8 +682,8 @@ MdDocument {
                 2: MD_LIST_POST_MARKER_SPACE@114..115 " " [] []
                 3: MD_INDENT_TOKEN_LIST@115..115
               1: MD_BLOCK_LIST@115..136
-                0: MD_PARAGRAPH@115..123
-                  0: MD_INLINE_ITEM_LIST@115..123
+                0: MD_PARAGRAPH@115..136
+                  0: MD_INLINE_ITEM_LIST@115..136
                     0: MD_TEXTUAL@115..120
                       0: MD_TEXTUAL_LITERAL@115..120 "outer" [] []
                     1: MD_TEXTUAL@120..121
@@ -701,18 +692,13 @@ MdDocument {
                       0: MD_QUOTE_INDENT_LIST@121..121
                       1: R_ANGLE@121..122 ">" [] []
                       2: MD_QUOTE_POST_MARKER_SPACE@122..123 " " [] []
-                  1: (empty)
-                1: MD_CONTINUATION_INDENT@123..127
-                  0: MD_INDENT_TOKEN_LIST@123..127
-                    0: MD_INDENT_TOKEN@123..127
+                    3: MD_INDENT_TOKEN@123..127
                       0: MD_INDENT_CHAR@123..127 "    " [] []
-                2: MD_PARAGRAPH@127..136
-                  0: MD_INLINE_ITEM_LIST@127..136
-                    0: MD_TEXTUAL@127..129
+                    4: MD_TEXTUAL@127..129
                       0: MD_TEXTUAL_LITERAL@127..129 "2." [] []
-                    1: MD_TEXTUAL@129..135
+                    5: MD_TEXTUAL@129..135
                       0: MD_TEXTUAL_LITERAL@129..135 " inner" [] []
-                    2: MD_TEXTUAL@135..136
+                    6: MD_TEXTUAL@135..136
                       0: MD_TEXTUAL_LITERAL@135..136 "\n" [] []
                   1: (empty)
   2: EOF@136..136 "" [] []
