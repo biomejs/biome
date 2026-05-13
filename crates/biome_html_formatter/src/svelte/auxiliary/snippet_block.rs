@@ -12,4 +12,13 @@ impl FormatNodeRule<SvelteSnippetBlock> for FormatSvelteSnippetBlock {
 
         write!(f, [opening_block.format(), closing_block.format()])
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteSnippetBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

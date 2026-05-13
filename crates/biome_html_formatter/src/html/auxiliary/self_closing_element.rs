@@ -121,6 +121,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         _f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
         if self.comments_as_children {
+            // handled by element list formatter
             return Ok(());
         }
 
@@ -133,6 +134,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         _f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
         if self.comments_as_children {
+            // handled by element list formatter
             return Ok(());
         }
 

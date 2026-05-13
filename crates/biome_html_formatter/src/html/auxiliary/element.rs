@@ -78,6 +78,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
 
     fn fmt_leading_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         if self.comments_as_children {
+            // handled by element list formatter
             return Ok(());
         }
 
@@ -100,6 +101,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
 
     fn fmt_trailing_comments(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         if self.comments_as_children {
+            // handled by element list formatter
             return Ok(());
         }
 
