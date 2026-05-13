@@ -240,7 +240,7 @@ where
     let mut builder = HtmlSplitChildrenBuilder::new();
 
     if let Some(opening_r_angle) = opening_r_angle {
-        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia());
+        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia(), false);
     }
 
     let mut prev_child_was_content = false;
@@ -443,15 +443,16 @@ where
                 }
             }
 
+            let is_suppressed = f.comments().is_suppressed(child.syntax());
+
             if let Some(first_token) = child.syntax().first_token() {
-                push_trivia_children(&mut builder, &first_token.leading_trivia());
+                push_trivia_children(&mut builder, &first_token.leading_trivia(), is_suppressed);
             }
 
             for comment in f.comments().leading_comments(child.syntax()) {
                 comment.mark_formatted();
             }
 
-            let is_suppressed = f.comments().is_suppressed(child.syntax());
             if is_suppressed {
                 builder.non_text_entry(HtmlChild::Verbatim(child.clone()), f);
             } else {
@@ -459,7 +460,7 @@ where
             }
 
             if let Some(last_token) = child.syntax().last_token() {
-                push_trivia_children(&mut builder, &last_token.trailing_trivia());
+                push_trivia_children(&mut builder, &last_token.trailing_trivia(), is_suppressed);
             }
 
             for comment in f.comments().trailing_comments(child.syntax()) {
@@ -480,7 +481,7 @@ where
     if let Some(closing_element) = closing_element
         && let Ok(l_angle_token) = closing_element.l_angle_token()
     {
-        push_trivia_children(&mut builder, &l_angle_token.leading_trivia());
+        push_trivia_children(&mut builder, &l_angle_token.leading_trivia(), false);
     }
 
     Ok(builder.finish())
@@ -489,6 +490,7 @@ where
 fn push_trivia_children(
     builder: &mut HtmlSplitChildrenBuilder,
     trivia: &SyntaxTrivia<HtmlLanguage>,
+    skip_comments: bool,
 ) {
     let mut whitespace = PendingWhitespace::default();
 
@@ -498,7 +500,8 @@ fn push_trivia_children(
         } else if piece.is_comments() {
             whitespace.flush(builder);
 
-            if HtmlCommentStyle::is_suppression(piece.text()) {
+            if skip_comments || HtmlCommentStyle::is_suppression(piece.text()) {
+                // never add comments as children if the node is suppressed, because they will be handled as part of the verbatim content for the suppressed node. This also prevents comments from being added twice in cases where they are included both in the trivia for a node and as leading/trailing comments for the same node.
                 continue;
             }
 
