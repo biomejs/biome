@@ -203,7 +203,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && matches!(element.kind(), T![i] | T![s])
+                    && AnyCssAttributeModifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -236,6 +236,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_ATTRIBUTE_MATCHER_VALUE, children)
             }
+            CSS_ATTRIBUTE_MODIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T![i] | T![s])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_ATTRIBUTE_MODIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_ATTRIBUTE_MODIFIER, children)
+            }
             CSS_ATTRIBUTE_NAME => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -248,7 +267,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssAttributeName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

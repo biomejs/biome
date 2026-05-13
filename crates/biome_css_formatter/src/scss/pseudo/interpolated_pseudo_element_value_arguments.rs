@@ -2,6 +2,8 @@ use crate::prelude::*;
 use biome_css_syntax::{
     ScssInterpolatedPseudoElementValueArguments, ScssInterpolatedPseudoElementValueArgumentsFields,
 };
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedPseudoElementValueArguments;
 impl FormatNodeRule<ScssInterpolatedPseudoElementValueArguments>
@@ -14,6 +16,6 @@ impl FormatNodeRule<ScssInterpolatedPseudoElementValueArguments>
     ) -> FormatResult<()> {
         let ScssInterpolatedPseudoElementValueArgumentsFields { values } = node.as_fields();
 
-        values.format().fmt(f)
+        write!(f, [values.format()])
     }
 }

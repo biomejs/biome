@@ -225,17 +225,28 @@ CssAttributeSelector =
 
 CssAttributeName =
 	namespace: CssNamespace?
-	name: CssIdentifier
+	name: AnyCssAttributeName
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
 CssAttributeMatcher =
 	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
 	value: CssAttributeMatcherValue
-	modifier: ('i' | 's')?
+	modifier: AnyCssAttributeModifier?
+
+AnyCssAttributeModifier =
+	CssAttributeModifier
+	| ScssInterpolatedIdentifier
+
+AnyCssAttributeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+CssAttributeModifier =
+	value: ('i' | 's')
 
 CssAttributeMatcherValue =
- name: AnyCssAttributeMatcherValue
+	name: AnyCssAttributeMatcherValue
 
 AnyCssAttributeMatcherValue =
 	CssString
