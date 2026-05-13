@@ -182,14 +182,20 @@
 //! ```
 
 use crate::{
-    html::auxiliary::element::{FormatHtmlElement, FormatHtmlElementOptions},
+    html::auxiliary::{
+        element::{FormatHtmlElement, FormatHtmlElementOptions},
+        self_closing_element::{FormatHtmlSelfClosingElement, FormatHtmlSelfClosingElementOptions},
+    },
     prelude::*,
     utils::{
-        children::{HtmlChild, HtmlChildrenIterator, html_split_children},
+        children::{
+            DisplayHtmlChildSequence, HtmlChild, HtmlChildrenIterator, html_split_children,
+        },
         css_display::CssDisplay,
         metadata::get_element_css_display,
     },
 };
+use biome_console::{ColorMode, ConsoleExt, EnvConsole, markup};
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
@@ -370,10 +376,18 @@ impl FormatHtmlElementList {
         let children = html_split_children(
             list.iter(),
             list.parent::<HtmlElement>()
+                .and_then(|p| p.opening_element().ok())
+                .and_then(|opening| opening.r_angle_token().ok())
+                .as_ref(),
+            list.parent::<HtmlElement>()
                 .and_then(|p| p.closing_element().ok())
                 .as_ref(),
             f,
         )?;
+
+        EnvConsole::new(ColorMode::Auto).error(markup! {
+            {DisplayHtmlChildSequence::new(&children)}
+        });
 
         let children_meta = self.children_meta(&children);
 
@@ -1026,12 +1040,23 @@ fn format_element_with_borrowing(
                 &FormatHtmlElement::default().with_options(FormatHtmlElementOptions {
                     closing_r_angle_borrowed,
                     borrowed_sibling_r_angle: borrowed_sibling_r_angle.clone(),
+                    comments_as_children: true,
                 }),
                 html_element,
                 f,
             )
+        } else if let AnyHtmlElement::HtmlSelfClosingElement(self_closing_element) = element {
+            FormatNodeRule::fmt(
+                &FormatHtmlSelfClosingElement::default().with_options(
+                    FormatHtmlSelfClosingElementOptions {
+                        comments_as_children: true,
+                    },
+                ),
+                self_closing_element,
+                f,
+            )
         } else {
-            // For other element types (self-closing, etc.), use default formatting
+            // For other element types, use default formatting.
             write!(f, [element.format()])
         }
     })

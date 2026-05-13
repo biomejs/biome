@@ -11,8 +11,12 @@ use biome_console::{
 use biome_formatter::{
     Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
 };
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
-use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
+use biome_html_syntax::{
+    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlLanguage, HtmlSyntaxToken,
+};
+use biome_rowan::{
+    AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
+};
 
 use crate::{
     HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext,
@@ -226,6 +230,7 @@ const fn html_child_kind(child: &HtmlChild) -> &'static str {
 
 pub(crate) fn html_split_children<I>(
     children: I,
+    opening_r_angle: Option<&HtmlSyntaxToken>,
     closing_element: Option<&HtmlClosingElement>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
@@ -233,6 +238,10 @@ where
     I: IntoIterator<Item = AnyHtmlElement>,
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
+
+    if let Some(opening_r_angle) = opening_r_angle {
+        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia());
+    }
 
     let mut prev_child_was_content = false;
     for child in children {
@@ -454,6 +463,14 @@ where
                 }
             }
 
+            if let Some(first_token) = child.syntax().first_token() {
+                push_trivia_children(&mut builder, &first_token.leading_trivia());
+            }
+
+            for comment in f.comments().leading_comments(child.syntax()) {
+                comment.mark_formatted();
+            }
+
             let is_suppressed = f.comments().is_suppressed(child.syntax());
             if is_suppressed {
                 builder.entry(HtmlChild::Verbatim(child.clone()));
@@ -461,30 +478,12 @@ where
                 builder.entry(HtmlChild::NonText(child.clone()));
             }
 
-            // Check for trailing whitespace, and preserve it if
-            // - it's embedded expression content
-            // - it's an element
-            // - it's a bogus element
-            // This preserves spaces between expressions/elements and following text content.
-            if matches!(
-                &child,
-                AnyHtmlElement::AnyHtmlContent(_)
-                    | AnyHtmlElement::HtmlElement(_)
-                    | AnyHtmlElement::HtmlSelfClosingElement(_)
-                    | AnyHtmlElement::HtmlBogusElement(_)
-            ) && let Some(last_token) = child.syntax().last_token()
-                && last_token.has_trailing_whitespace()
-            {
-                // Check if trailing trivia contains a newline
-                let has_newline = last_token
-                    .trailing_trivia()
-                    .pieces()
-                    .any(|piece| piece.is_newline());
-                if has_newline {
-                    builder.entry(HtmlChild::Newline);
-                } else {
-                    builder.entry(HtmlChild::Whitespace);
-                }
+            if let Some(last_token) = child.syntax().last_token() {
+                push_trivia_children(&mut builder, &last_token.trailing_trivia());
+            }
+
+            for comment in f.comments().trailing_comments(child.syntax()) {
+                comment.mark_formatted();
             }
 
             prev_child_was_content = false;
@@ -501,28 +500,63 @@ where
     if let Some(closing_element) = closing_element
         && let Ok(l_angle_token) = closing_element.l_angle_token()
     {
-        let leading_trivia = l_angle_token.leading_trivia();
-        let mut newline_count = 0;
-        let mut has_whitespace = false;
-
-        for piece in leading_trivia.pieces() {
-            if piece.is_newline() {
-                newline_count += 1;
-            } else if piece.is_whitespace() {
-                has_whitespace = true;
-            }
-        }
-
-        if newline_count >= 2 {
-            builder.entry(HtmlChild::EmptyLine);
-        } else if newline_count == 1 {
-            builder.entry(HtmlChild::Newline);
-        } else if has_whitespace {
-            builder.entry(HtmlChild::Whitespace);
-        }
+        push_trivia_children(&mut builder, &l_angle_token.leading_trivia());
     }
 
     Ok(builder.finish())
+}
+
+fn push_trivia_children(
+    builder: &mut HtmlSplitChildrenBuilder,
+    trivia: &SyntaxTrivia<HtmlLanguage>,
+) {
+    let mut whitespace = PendingWhitespace::default();
+
+    for piece in trivia.pieces() {
+        if piece.is_whitespace() || piece.is_newline() {
+            whitespace.add(piece.text());
+        } else if piece.is_comments() {
+            whitespace.flush(builder);
+
+            let token = piece.token();
+            let text = token.token_text();
+            builder.entry(HtmlChild::Comment(HtmlWord::new(
+                text.slice(piece.text_range() - token.text_range().start()),
+                piece.text_range().start(),
+            )));
+        }
+    }
+
+    whitespace.flush(builder);
+}
+
+#[derive(Default)]
+struct PendingWhitespace {
+    has_whitespace: bool,
+    newline_count: usize,
+}
+
+impl PendingWhitespace {
+    fn add(&mut self, text: &str) {
+        if text.is_empty() {
+            return;
+        }
+
+        self.has_whitespace = true;
+        self.newline_count += text.bytes().filter(|byte| *byte == b'\n').count();
+    }
+
+    fn flush(&mut self, builder: &mut HtmlSplitChildrenBuilder) {
+        if self.newline_count >= 2 {
+            builder.entry(HtmlChild::EmptyLine);
+        } else if self.newline_count == 1 {
+            builder.entry(HtmlChild::Newline);
+        } else if self.has_whitespace {
+            builder.entry(HtmlChild::Whitespace);
+        }
+
+        *self = Self::default();
+    }
 }
 
 /// The builder is used to:
