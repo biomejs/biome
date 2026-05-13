@@ -17,10 +17,14 @@ expression: invalid.css
 	display: flex;
 }
 
+.invalid3 {
+	display: flex; /* */
+}
+
 /*
 
 */
-.invalid3 {
+.invalid4 {
 	display: flex;
 }
 
@@ -84,19 +88,37 @@ invalid.css:9:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━
 ```
 
 ```
-invalid.css:14:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:17 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected empty documentation.
   
-    12 │ }
-    13 │ 
-  > 14 │ /*
+    14 │ .invalid3 {
+  > 15 │ 	display: flex; /* */
+       │ 	               ^^^^^
+    16 │ }
+    17 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:18:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    16 │ }
+    17 │ 
+  > 18 │ /*
        │ ^^
-  > 15 │ 
-  > 16 │ */
+  > 19 │ 
+  > 20 │ */
        │ ^^
-    17 │ .invalid3 {
-    18 │ 	display: flex;
+    21 │ .invalid4 {
+    22 │ 	display: flex;
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

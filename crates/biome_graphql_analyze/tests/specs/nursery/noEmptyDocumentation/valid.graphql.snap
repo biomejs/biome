@@ -13,15 +13,17 @@ enum Valid1 {}
 # Valid
 enum Valid2 {}
 
+enum Valid3 {} # Valid
+
 "Valid"
-enum Valid3 {}
+enum Valid4 {}
 
 """Valid"""
-enum Valid4 {}
+enum Valid5 {}
 
 """
 Valid
 """
-enum Valid5 {}
+enum Valid6 {}
 
 ```

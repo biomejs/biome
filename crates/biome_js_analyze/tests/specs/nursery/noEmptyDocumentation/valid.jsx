@@ -14,3 +14,9 @@ const Valid2 = (
 		<input />
 	</div>
 );
+
+const Valid3 = (
+	<div>
+		<input /> {/* valid */}
+	</div>
+);

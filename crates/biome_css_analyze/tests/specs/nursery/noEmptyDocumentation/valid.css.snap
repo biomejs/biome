@@ -17,10 +17,14 @@ expression: valid.css
 	display: flex;
 }
 
+.valid3 {
+	display: flex; /* Valid */
+}
+
 /*
 	Valid
 */
-.valid3 {
+.valid4 {
 	display: flex;
 }
 

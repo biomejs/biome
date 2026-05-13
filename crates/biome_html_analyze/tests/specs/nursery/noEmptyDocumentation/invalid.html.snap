@@ -18,6 +18,8 @@ expression: invalid.html
 -->
 <div>invalid</div>
 
+<div>invalid</div> <!-- -->
+
 ```
 
 # Diagnostics
@@ -91,6 +93,24 @@ invalid.html:10:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━�
        │ ^^^
     13 │ <div>invalid</div>
     14 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:15:20 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    13 │ <div>invalid</div>
+    14 │ 
+  > 15 │ <div>invalid</div> <!-- -->
+       │                    ^^^^^^^^
+    16 │ 
   
   i Empty documentation provides no value. Remove them or add meaningful content.
   

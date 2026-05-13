@@ -12,10 +12,11 @@ expression: valid.jsonc
   /* Valid */
   /* Valid */
   "valid3": 1,
+  "valid4": 1, /* Valid */
   /*
     Valid
   */
-  "valid4": 1
+  "valid5": 1
 }
 
 ```

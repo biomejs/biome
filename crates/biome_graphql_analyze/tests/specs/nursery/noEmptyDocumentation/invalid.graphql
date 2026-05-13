@@ -7,12 +7,14 @@ enum Invalid1 {}
 #
 enum Invalid2 {}
 
-""
-enum Invalid3 {}
+enum Invalid3 {} #
 
-""" """
+""
 enum Invalid4 {}
 
-"""
-"""
+""" """
 enum Invalid5 {}
+
+"""
+"""
+enum Invalid6 {}

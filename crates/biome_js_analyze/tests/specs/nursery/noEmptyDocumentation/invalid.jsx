@@ -14,3 +14,9 @@ const Invalid2 = (
 		<input />
 	</div>
 );
+
+const Invalid3 = (
+	<div>
+		<input /> {/* */}
+	</div>
+);
