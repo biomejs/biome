@@ -5,6 +5,7 @@ pub(crate) mod attr_fallback_value;
 pub(crate) mod attr_function;
 pub(crate) mod attribute_matcher;
 pub(crate) mod attribute_matcher_value;
+pub(crate) mod attribute_modifier;
 pub(crate) mod attribute_name;
 pub(crate) mod binary_expression;
 pub(crate) mod bracketed_value;

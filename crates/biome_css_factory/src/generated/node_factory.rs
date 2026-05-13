@@ -94,17 +94,17 @@ pub fn css_attribute_matcher(
     CssAttributeMatcherBuilder {
         operator_token,
         value,
-        modifier_token: None,
+        modifier: None,
     }
 }
 pub struct CssAttributeMatcherBuilder {
     operator_token: SyntaxToken,
     value: CssAttributeMatcherValue,
-    modifier_token: Option<SyntaxToken>,
+    modifier: Option<AnyCssAttributeModifier>,
 }
 impl CssAttributeMatcherBuilder {
-    pub fn with_modifier_token(mut self, modifier_token: SyntaxToken) -> Self {
-        self.modifier_token = Some(modifier_token);
+    pub fn with_modifier(mut self, modifier: AnyCssAttributeModifier) -> Self {
+        self.modifier = Some(modifier);
         self
     }
     pub fn build(self) -> CssAttributeMatcher {
@@ -113,7 +113,8 @@ impl CssAttributeMatcherBuilder {
             [
                 Some(SyntaxElement::Token(self.operator_token)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
-                self.modifier_token.map(|token| SyntaxElement::Token(token)),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
@@ -124,14 +125,20 @@ pub fn css_attribute_matcher_value(name: AnyCssAttributeMatcherValue) -> CssAttr
         [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
-pub fn css_attribute_name(name: CssIdentifier) -> CssAttributeNameBuilder {
+pub fn css_attribute_modifier(value_token: SyntaxToken) -> CssAttributeModifier {
+    CssAttributeModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTRIBUTE_MODIFIER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_attribute_name(name: AnyCssAttributeName) -> CssAttributeNameBuilder {
     CssAttributeNameBuilder {
         name,
         namespace: None,
     }
 }
 pub struct CssAttributeNameBuilder {
-    name: CssIdentifier,
+    name: AnyCssAttributeName,
     namespace: Option<CssNamespace>,
 }
 impl CssAttributeNameBuilder {

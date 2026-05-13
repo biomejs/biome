@@ -6,6 +6,8 @@ pub(crate) mod attr_name;
 pub(crate) mod attr_type;
 pub(crate) mod attr_unit;
 pub(crate) mod attribute_matcher_value;
+pub(crate) mod attribute_modifier;
+pub(crate) mod attribute_name;
 pub(crate) mod bracketed_value_item;
 pub(crate) mod composes_import_source;
 pub(crate) mod compound_selector;

@@ -423,6 +423,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_SELECTOR",
         "CSS_ATTRIBUTE",
         "CSS_ATTRIBUTE_NAME",
+        "CSS_ATTRIBUTE_MODIFIER",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
         // Values

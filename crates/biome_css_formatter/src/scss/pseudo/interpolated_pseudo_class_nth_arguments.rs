@@ -2,6 +2,8 @@ use crate::prelude::*;
 use biome_css_syntax::{
     ScssInterpolatedPseudoClassNthArguments, ScssInterpolatedPseudoClassNthArgumentsFields,
 };
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedPseudoClassNthArguments;
 impl FormatNodeRule<ScssInterpolatedPseudoClassNthArguments>
@@ -14,6 +16,6 @@ impl FormatNodeRule<ScssInterpolatedPseudoClassNthArguments>
     ) -> FormatResult<()> {
         let ScssInterpolatedPseudoClassNthArgumentsFields { selector } = node.as_fields();
 
-        selector.format().fmt(f)
+        write!(f, [selector.format()])
     }
 }

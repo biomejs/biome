@@ -96,11 +96,11 @@ impl CssAttributeMatcher {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_modifier_token(self, element: Option<SyntaxToken>) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
-        )
+    pub fn with_modifier(self, element: Option<AnyCssAttributeModifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl CssAttributeMatcherValue {
@@ -111,6 +111,14 @@ impl CssAttributeMatcherValue {
         )
     }
 }
+impl CssAttributeModifier {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssAttributeName {
     pub fn with_namespace(self, element: Option<CssNamespace>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
@@ -118,7 +126,7 @@ impl CssAttributeName {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAttributeName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

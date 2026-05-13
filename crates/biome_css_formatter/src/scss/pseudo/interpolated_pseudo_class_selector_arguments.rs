@@ -3,6 +3,8 @@ use biome_css_syntax::{
     ScssInterpolatedPseudoClassSelectorArguments,
     ScssInterpolatedPseudoClassSelectorArgumentsFields,
 };
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedPseudoClassSelectorArguments;
 impl FormatNodeRule<ScssInterpolatedPseudoClassSelectorArguments>
@@ -15,6 +17,6 @@ impl FormatNodeRule<ScssInterpolatedPseudoClassSelectorArguments>
     ) -> FormatResult<()> {
         let ScssInterpolatedPseudoClassSelectorArgumentsFields { selectors } = node.as_fields();
 
-        selectors.format().fmt(f)
+        write!(f, [selectors.format()])
     }
 }

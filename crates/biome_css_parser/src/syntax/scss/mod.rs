@@ -49,7 +49,8 @@ pub(crate) use property::{
     parse_scss_interpolated_property_name,
 };
 pub(crate) use selector::{
-    is_at_scss_pseudo_class_nth, is_nth_at_scss_placeholder_selector,
+    is_at_scss_interpolated_attribute_identifier, is_at_scss_pseudo_class_nth,
+    is_nth_at_scss_placeholder_selector, parse_scss_interpolated_attribute_modifier,
     parse_scss_interpolated_pseudo_class_function_arguments,
     parse_scss_interpolated_pseudo_element_function_arguments, parse_scss_placeholder_selector,
     parse_scss_pseudo_class_nth,

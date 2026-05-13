@@ -48,6 +48,9 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
 
+    /// Cached syntax kinds targeted by the compiled pattern.
+    anchor_kinds: Vec<GritTargetSyntaxKind>,
+
     /// Definitions for named patterns, predicates and functions.
     pub definitions: Definitions,
 
@@ -124,11 +127,10 @@ impl GritQuery {
 
     /// Returns the syntax kinds that this query's pattern targets.
     ///
-    /// Extracts kinds from the inner CodeSnippet or AstNode patterns
-    /// by navigating the compiled pattern tree. Returns an empty vec
-    /// if the pattern structure can't be analyzed.
-    pub fn anchor_kinds(&self) -> Vec<GritTargetSyntaxKind> {
-        extract_anchor_kinds(&self.pattern)
+    /// Returns an empty slice if the pattern structure can't be statically
+    /// analyzed.
+    pub fn anchor_kinds(&self) -> &[GritTargetSyntaxKind] {
+        &self.anchor_kinds
     }
 
     /// Optimized execution that replaces the Contains full-tree walk
@@ -162,7 +164,7 @@ impl GritQuery {
         };
 
         // Collect anchor-kind nodes from the independent tree.
-        // Use Vec::contains — anchor_kinds is tiny (1-3 items), faster than hashing.
+        // Use slice::contains — anchor_kinds is tiny (1-3 items), faster than hashing.
         let root = tree.root_node();
         let anchor_nodes: Vec<_> = root
             .descendants()
@@ -319,6 +321,8 @@ impl GritQuery {
             None,
         )?;
 
+        let anchor_kinds = extract_anchor_kinds(&pattern);
+
         let name = source_path
             .and_then(Utf8Path::file_stem)
             .map(|stem| stem.to_string());
@@ -327,6 +331,7 @@ impl GritQuery {
 
         Ok(Self {
             pattern,
+            anchor_kinds,
             definitions,
             name,
             built_ins,
