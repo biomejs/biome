@@ -276,7 +276,6 @@ where
             // Manually mark these comments as formatted because they are. Because we override the formatting of text content in here, the formatter does not seem to recognize them as formatted.
             // We do have to manually check to make sure the comment's text range is actually inside this node's text range. Some comments may be included in this call to `leading_trailing_comments` that are not actually part of this node.
 
-            let mut trailing_comments_to_format = vec![];
             for comment in f.comments().leading_comments(text_syntax) {
                 let comment_range = comment.piece().text_range();
                 if comment_range.end() <= value_token.text_range().start() {
@@ -298,7 +297,7 @@ where
                 if !(comment_range.start() >= value_token.text_range().start()
                     && comment_range.end() <= value_token.text_range().end())
                 {
-                    trailing_comments_to_format.push(comment);
+                    comment.mark_formatted();
                 }
             }
 
@@ -407,25 +406,6 @@ where
                     }
                 }
                 prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
-            }
-
-            // There may be trailing comments that we attached to the content if this is the last child of an Element. They won't show up in the `value_token.text()` because they are actually attached to the leading token of the closing tag. This means we have to format them manually.
-            for comment in trailing_comments_to_format {
-                // This might not actually be the best way to handle the whitespace before the comment. If there are bugs here involving whitespace preceding the comment, try this:
-                // Instead of the below match on `comment.lines_before()`, try to include the whitespace in the sliced range from the token text. Right now, that preceding whitespace is excluded, and we add it back in via the `lines_before` match below.
-                match comment.lines_before() {
-                    0 => {}
-                    1 => builder.entry(HtmlChild::Newline),
-                    _ => builder.entry(HtmlChild::EmptyLine),
-                }
-                let token = comment.piece().as_piece().token();
-                let text = token.token_text();
-
-                builder.entry(HtmlChild::Comment(HtmlWord::new(
-                    text.slice(comment.piece().text_range() - token.text_range().start()),
-                    comment.piece().text_range().start(),
-                )));
-                comment.mark_formatted();
             }
 
             prev_child_was_content = true;
