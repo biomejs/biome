@@ -498,6 +498,10 @@ fn push_trivia_children(
         } else if piece.is_comments() {
             whitespace.flush(builder);
 
+            if HtmlCommentStyle::is_suppression(piece.text()) {
+                continue;
+            }
+
             let token = piece.token();
             let text = token.token_text();
             builder.entry(HtmlChild::Comment(HtmlWord::new(
