@@ -278,78 +278,78 @@ CssRoot {
 keyframes-interpolation.scss:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `opacity`
-
+  
     1 │ @keyframes loader {
     2 │   #{50% - $duration}
   > 3 │     opacity: 1;
       │     ^^^^^^^
     4 │   }
     5 │ }
-
+  
   i Remove opacity
-
+  
 keyframes-interpolation.scss:8:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-
+  
      7 │ @keyframes loader {
    > 8 │   #{50% - $duration {
        │                     ^
      9 │     opacity: 1;
     10 │   }
-
+  
   i Expected a SCSS expression here.
-
+  
      7 │ @keyframes loader {
    > 8 │   #{50% - $duration {
        │                     ^
      9 │     opacity: 1;
     10 │   }
-
+  
 keyframes-interpolation.scss:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': 1'.
-
+  
      7 │ @keyframes loader {
      8 │   #{50% - $duration {
    > 9 │     opacity: 1;
        │            ^^^
     10 │   }
     11 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
      7 │ @keyframes loader {
      8 │   #{50% - $duration {
    > 9 │     opacity: 1;
        │            ^^^
     10 │   }
     11 │ }
-
+  
 keyframes-interpolation.scss:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead found `;`
-
+  
      7 │ @keyframes loader {
      8 │   #{50% - $duration {
    > 9 │     opacity: 1;
        │               ^
     10 │   }
     11 │ }
-
+  
   i Remove ;
-
+  
 keyframes-interpolation.scss:10:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `}`
-
+  
      8 │   #{50% - $duration {
      9 │     opacity: 1;
   > 10 │   }
        │   ^
     11 │ }
-    12 │
-
+    12 │ 
+  
   i Remove }
-
+  
 ```
