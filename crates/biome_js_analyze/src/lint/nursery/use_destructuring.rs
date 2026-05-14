@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsExpression,
     AnyJsLiteralExpression, AnyJsName, JsAssignmentExpression, JsAssignmentOperator,
-    JsVariableDeclaration, JsVariableDeclarator,
+    JsExpressionStatement, JsVariableDeclaration, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::use_destructuring::UseDestructuringOptions;
@@ -44,12 +44,65 @@ declare_lint_rule! {
     /// const foo: string = object.foo;
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `variableDeclarator`
+    ///
+    /// Default: `{ "array": true, "object": true }`
+    ///
+    /// Controls whether to enforce destructuring in variable declarations.
+    /// Set `array` or `object` to `false` to disable enforcement for that pattern.
+    ///
+    /// In the following example, array destructuring is disabled in declarations:
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "variableDeclarator": {
+    ///             "array": false
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,ignore
+    /// var foo = array[0]; // allowed
+    /// var foo = object.foo; // still flagged
+    /// ```
+    ///
+    /// ### `assignmentExpression`
+    ///
+    /// Default: `{ "array": true, "object": true }`
+    ///
+    /// Controls whether to enforce destructuring in assignment expressions.
+    /// Set `array` or `object` to `false` to disable enforcement for that pattern.
+    /// When enabled for objects, the diagnostic instructs users to wrap in parentheses: `({ prop } = object)`.
+    ///
+    /// In the following example, assignment destructuring is disabled entirely:
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "assignmentExpression": {
+    ///             "array": false,
+    ///             "object": false
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,ignore
+    /// foo = object.foo; // allowed
+    /// ```
+    ///
     pub UseDestructuring {
         version: "2.3.9",
         name: "useDestructuring",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("prefer-destructuring").same()],
+        sources: &[RuleSource::Eslint("prefer-destructuring").inspired()],
     }
 }
 
@@ -61,9 +114,24 @@ impl Rule for UseDestructuring {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
+        let options = ctx.options();
 
         match query {
             UseDestructuringQuery::JsAssignmentExpression(node) => {
+                let config = options.assignment_expression.unwrap_or_default();
+                if !config.array() && !config.object() {
+                    return None;
+                }
+
+                // Only suggest destructuring when the assignment result is discarded.
+                // `foo = obj.foo` evaluates to `obj.foo`, but `({ foo } = obj)` evaluates to `obj`.
+                // Suggesting destructuring when the result is used (e.g., return, call argument)
+                // would change program behavior.
+                let parent = node.syntax().parent()?;
+                if !JsExpressionStatement::can_cast(parent.kind()) {
+                    return None;
+                }
+
                 let op = node.operator().ok()?;
                 if op != JsAssignmentOperator::Assign {
                     return None;
@@ -76,12 +144,28 @@ impl Rule for UseDestructuring {
                 ) = left
                 {
                     let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
+                    let kind = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match kind {
+                        DestructuringKind::Array if config.array() => {
+                            Some(UseDestructuringState::Array)
+                        }
+                        DestructuringKind::Object if config.object() => {
+                            Some(UseDestructuringState::Object {
+                                is_assignment: true,
+                            })
+                        }
+                        _ => None,
+                    };
                 }
 
                 None
             }
             UseDestructuringQuery::JsVariableDeclarator(node) => {
+                let config = options.variable_declarator.unwrap_or_default();
+                if !config.array() && !config.object() {
+                    return None;
+                }
+
                 let initializer = node.initializer()?;
                 let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
                 let has_await_using = declaration.await_token().is_some();
@@ -100,7 +184,18 @@ impl Rule for UseDestructuring {
                     left
                 {
                     let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
+                    let kind = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match kind {
+                        DestructuringKind::Array if config.array() => {
+                            Some(UseDestructuringState::Array)
+                        }
+                        DestructuringKind::Object if config.object() => {
+                            Some(UseDestructuringState::Object {
+                                is_assignment: false,
+                            })
+                        }
+                        _ => None,
+                    };
                 }
 
                 None
@@ -128,22 +223,27 @@ impl Rule for UseDestructuring {
                     }),
                 )
             }
-            UseDestructuringState::Object => {
-                Some(
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        node.range(),
-                        markup! {
-                            "Use object destructuring instead of accessing object properties."
-                        },
-                    )
-                    .note(markup! {
-                        "Object destructuring is more readable and expressive than accessing individual properties."
-                    })
-                    .note(markup! {
-                        "Replace the property access with object destructuring syntax."
-                    }),
+            UseDestructuringState::Object { is_assignment } => {
+                let diagnostic = RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "Use object destructuring instead of accessing object properties."
+                    },
                 )
+                .note(markup! {
+                    "Object destructuring is more readable and expressive than accessing individual properties."
+                });
+
+                Some(if *is_assignment {
+                    diagnostic.note(markup! {
+                        "Wrap the assignment in parentheses to use object destructuring: "<Emphasis>"({ prop } = object)"</Emphasis>"."
+                    })
+                } else {
+                    diagnostic.note(markup! {
+                        "Replace the property access with object destructuring syntax."
+                    })
+                })
             }
         }
     }
@@ -153,10 +253,15 @@ declare_node_union! {
     pub UseDestructuringQuery = JsVariableDeclarator |  JsAssignmentExpression
 }
 
+enum DestructuringKind {
+    Array,
+    Object,
+}
+
 fn should_suggest_destructuring(
     left: &str,
     right: &AnyJsExpression,
-) -> Option<UseDestructuringState> {
+) -> Option<DestructuringKind> {
     match right {
         AnyJsExpression::JsComputedMemberExpression(expr) => {
             if expr.is_optional_chain() {
@@ -166,13 +271,13 @@ fn should_suggest_destructuring(
             let member = expr.member().ok()?;
             if let AnyJsExpression::AnyJsLiteralExpression(expr) = member {
                 if matches!(expr, AnyJsLiteralExpression::JsNumberLiteralExpression(_)) {
-                    return Some(UseDestructuringState::Array);
+                    return Some(DestructuringKind::Array);
                 }
 
                 let value = expr.value_token().ok()?;
 
                 if left == value.text_trimmed() {
-                    return Some(UseDestructuringState::Object);
+                    return Some(DestructuringKind::Object);
                 }
             }
 
@@ -190,7 +295,7 @@ fn should_suggest_destructuring(
             }
             let member = expr.member().ok()?.value_token().ok()?;
             if left == member.text_trimmed() {
-                return Some(UseDestructuringState::Object);
+                return Some(DestructuringKind::Object);
             }
             None
         }
@@ -199,6 +304,6 @@ fn should_suggest_destructuring(
 }
 
 pub enum UseDestructuringState {
-    Object,
+    Object { is_assignment: bool },
     Array,
 }

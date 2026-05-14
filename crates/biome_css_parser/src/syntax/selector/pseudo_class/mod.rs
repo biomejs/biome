@@ -18,7 +18,8 @@ use self::function_identifier::{
     is_at_pseudo_class_function_identifier, parse_pseudo_class_function_identifier,
 };
 pub(crate) use self::function_nth::{
-    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
+    PSEUDO_CLASS_NTH_SIGN_SET, is_at_pseudo_class_nth_argument,
+    parse_pseudo_class_nth_dimension_value, parse_pseudo_class_nth_selector,
 };
 use self::function_nth::{is_at_pseudo_class_function_nth, parse_pseudo_class_function_nth};
 use self::function_relative_selector_list::{
@@ -31,13 +32,14 @@ use self::function_selector::{
 use self::function_selector_list::{
     is_at_pseudo_class_function_selector_list, parse_pseudo_class_function_selector_list,
 };
+pub(crate) use self::function_value_list::{PseudoValueList, is_at_pseudo_value};
 use self::function_value_list::{
     is_at_pseudo_class_function_value_list, parse_pseudo_class_function_value_list,
 };
 use self::identifier::parse_pseudo_class_identifier;
 use crate::parser::CssParser;
-use crate::syntax::is_at_identifier;
 use crate::syntax::parse_error::expected_any_pseudo_class;
+use crate::syntax::selector::is_at_selector_identifier;
 use crate::syntax::selector::pseudo_class::function_custom_identifier::{
     is_at_pseudo_class_function_custom_identifier, parse_pseudo_class_function_custom_identifier,
 };
@@ -81,7 +83,7 @@ pub(crate) fn parse_pseudo_class_selector(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_pseudo_class(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_selector_identifier(p) {
         return Absent;
     }
 

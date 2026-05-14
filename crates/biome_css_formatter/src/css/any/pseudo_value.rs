@@ -10,7 +10,9 @@ impl FormatRule<AnyCssPseudoValue> for FormatAnyCssPseudoValue {
         match node {
             AnyCssPseudoValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssPseudoValue::CssString(node) => node.format().fmt(f),
+            AnyCssPseudoValue::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssPseudoValue::ScssInterpolatedString(node) => node.format().fmt(f),
+            AnyCssPseudoValue::ScssInterpolation(node) => node.format().fmt(f),
         }
     }
 }
