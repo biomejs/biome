@@ -194,7 +194,10 @@ pub struct Configuration {
     pub markdown: Option<MarkdownConfiguration>,
 
     /// Specific configuration for the YAML language
-    #[cfg_attr(feature = "cli", bpaf(external(yaml_configuration), optional, hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(crate::yaml::yaml_configuration), optional, hide)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "yaml")]
     pub yaml: Option<crate::yaml::YamlConfiguration>,
