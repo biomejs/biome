@@ -431,7 +431,7 @@ CssRoot {
                         l_paren_token: L_PAREN@258..259 "(" [] [],
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: ScssInterpolatedIdentifier {
+                                name: ScssInterpolatedDashedIdentifier {
                                     items: ScssInterpolatedIdentifierPartList [
                                         CssIdentifier {
                                             value_token: IDENT@259..267 "--theme-" [] [],
@@ -775,7 +775,7 @@ CssRoot {
             0: L_PAREN@258..259 "(" [] []
             1: CSS_DECLARATION@259..276
               0: CSS_GENERIC_PROPERTY@259..276
-                0: SCSS_INTERPOLATED_IDENTIFIER@259..275
+                0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@259..275
                   0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@259..275
                     0: CSS_IDENTIFIER@259..267
                       0: IDENT@259..267 "--theme-" [] []
