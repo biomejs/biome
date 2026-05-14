@@ -142,9 +142,40 @@ CssCompoundSelector =
 // &&&&&&&.class {}
 // ^^^^^^^
 // }
-CssNestedSelectorList = CssNestedSelector*
+CssNestedSelectorList = AnyCssNestedSelector*
+
+AnyCssNestedSelector =
+	CssNestedSelector
+	| ScssParentSelector
+
 CssNestedSelector =
 	'&'
+
+// .button {
+//   &--active {}
+//   ^^^^^^^^^
+//   &-100\.200 {}
+//   ^^^^^^^^^^
+//   &#{$state} {}
+//   ^^^^^^^^^^
+// }
+ScssParentSelector =
+	'&'
+	suffix: ScssParentSelectorSuffix
+
+ScssParentSelectorSuffix =
+	items: ScssParentSelectorSuffixPartList
+
+ScssParentSelectorSuffixPartList = AnyScssParentSelectorSuffixPart*
+
+AnyScssParentSelectorSuffixPart =
+	CssIdentifier
+	| CssNumber
+	| ScssInterpolation
+	| ScssParentSelectorSuffixHyphen
+
+ScssParentSelectorSuffixHyphen =
+	'-'
 
 CssSubSelectorList = AnyCssSubSelector*
 

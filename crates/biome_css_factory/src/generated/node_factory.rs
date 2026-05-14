@@ -4065,6 +4065,34 @@ pub fn scss_parameter_list(
         ],
     ))
 }
+pub fn scss_parent_selector(
+    amp_token: SyntaxToken,
+    suffix: ScssParentSelectorSuffix,
+) -> ScssParentSelector {
+    ScssParentSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR,
+        [
+            Some(SyntaxElement::Token(amp_token)),
+            Some(SyntaxElement::Node(suffix.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_parent_selector_suffix(
+    items: ScssParentSelectorSuffixPartList,
+) -> ScssParentSelectorSuffix {
+    ScssParentSelectorSuffix::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR_SUFFIX,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
+pub fn scss_parent_selector_suffix_hyphen(
+    minus_token: SyntaxToken,
+) -> ScssParentSelectorSuffixHyphen {
+    ScssParentSelectorSuffixHyphen::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
 pub fn scss_parent_selector_value(amp_token: SyntaxToken) -> ScssParentSelectorValue {
     ScssParentSelectorValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE,
@@ -4970,7 +4998,7 @@ where
 }
 pub fn css_nested_selector_list<I>(items: I) -> CssNestedSelectorList
 where
-    I: IntoIterator<Item = CssNestedSelector>,
+    I: IntoIterator<Item = AnyCssNestedSelector>,
     I::IntoIter: ExactSizeIterator,
 {
     CssNestedSelectorList::unwrap_cast(SyntaxNode::new_detached(
@@ -5481,6 +5509,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn scss_parent_selector_suffix_part_list<I>(items: I) -> ScssParentSelectorSuffixPartList
+where
+    I: IntoIterator<Item = AnyScssParentSelectorSuffixPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssParentSelectorSuffixPartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn scss_variable_modifier_list<I>(items: I) -> ScssVariableModifierList

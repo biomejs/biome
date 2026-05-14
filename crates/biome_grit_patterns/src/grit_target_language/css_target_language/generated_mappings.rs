@@ -384,6 +384,11 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssNestingDeclaration" => lang::ScssNestingDeclaration::KIND_SET.iter().next(),
         "ScssParameter" => lang::ScssParameter::KIND_SET.iter().next(),
         "ScssParameterDefaultValue" => lang::ScssParameterDefaultValue::KIND_SET.iter().next(),
+        "ScssParentSelector" => lang::ScssParentSelector::KIND_SET.iter().next(),
+        "ScssParentSelectorSuffix" => lang::ScssParentSelectorSuffix::KIND_SET.iter().next(),
+        "ScssParentSelectorSuffixHyphen" => {
+            lang::ScssParentSelectorSuffixHyphen::KIND_SET.iter().next()
+        }
         "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
         "ScssParenthesizedExpression" => lang::ScssParenthesizedExpression::KIND_SET.iter().next(),
         "ScssPlaceholderSelector" => lang::ScssPlaceholderSelector::KIND_SET.iter().next(),
@@ -672,6 +677,8 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssNestingDeclaration" => &[("name", 0), ("value", 2), ("block", 3)],
         "ScssParameter" => &[("name", 0), ("default_value", 1)],
         "ScssParameterDefaultValue" => &[("value", 1)],
+        "ScssParentSelector" => &[("suffix", 1)],
+        "ScssParentSelectorSuffix" => &[("items", 0)],
         "ScssParenthesizedExpression" => &[("expression", 1)],
         "ScssPlaceholderSelector" => &[("name", 1)],
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],

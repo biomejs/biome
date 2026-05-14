@@ -8994,6 +8994,116 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParameterList {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssParentSelector>
+    for crate::scss::selectors::parent_selector::FormatScssParentSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssParentSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssParentSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssParentSelector,
+        crate::scss::selectors::parent_selector::FormatScssParentSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::selectors::parent_selector::FormatScssParentSelector::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssParentSelector,
+        crate::scss::selectors::parent_selector::FormatScssParentSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::selectors::parent_selector::FormatScssParentSelector::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssParentSelectorSuffix>
+    for crate::scss::auxiliary::parent_selector_suffix::FormatScssParentSelectorSuffix
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssParentSelectorSuffix,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssParentSelectorSuffix>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffix {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssParentSelectorSuffix,
+        crate::scss::auxiliary::parent_selector_suffix::FormatScssParentSelectorSuffix,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::parent_selector_suffix::FormatScssParentSelectorSuffix::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffix {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssParentSelectorSuffix,
+        crate::scss::auxiliary::parent_selector_suffix::FormatScssParentSelectorSuffix,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::parent_selector_suffix::FormatScssParentSelectorSuffix::default(
+            ),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssParentSelectorSuffixHyphen>
+    for crate::scss::auxiliary::parent_selector_suffix_hyphen::FormatScssParentSelectorSuffixHyphen
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssParentSelectorSuffixHyphen,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssParentSelectorSuffixHyphen>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffixHyphen {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssParentSelectorSuffixHyphen,
+        crate::scss::auxiliary::parent_selector_suffix_hyphen::FormatScssParentSelectorSuffixHyphen,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: parent_selector_suffix_hyphen :: FormatScssParentSelectorSuffixHyphen :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffixHyphen {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssParentSelectorSuffixHyphen,
+        crate::scss::auxiliary::parent_selector_suffix_hyphen::FormatScssParentSelectorSuffixHyphen,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: parent_selector_suffix_hyphen :: FormatScssParentSelectorSuffixHyphen :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssParentSelectorValue>
     for crate::scss::auxiliary::parent_selector_value::FormatScssParentSelectorValue
 {
@@ -11293,6 +11403,18 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParameterItemList {
             self,
             crate::scss::lists::parameter_item_list::FormatScssParameterItemList::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffixPartList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssParentSelectorSuffixPartList , crate :: scss :: lists :: parent_selector_suffix_part_list :: FormatScssParentSelectorSuffixPartList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: lists :: parent_selector_suffix_part_list :: FormatScssParentSelectorSuffixPartList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorSuffixPartList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssParentSelectorSuffixPartList , crate :: scss :: lists :: parent_selector_suffix_part_list :: FormatScssParentSelectorSuffixPartList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: lists :: parent_selector_suffix_part_list :: FormatScssParentSelectorSuffixPartList :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssVariableModifierList {
@@ -14207,6 +14329,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssNamespaceUrl {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssNestedSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssNestedSelector,
+        crate::css::any::nested_selector::FormatAnyCssNestedSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::nested_selector::FormatAnyCssNestedSelector::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssNestedSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssNestedSelector,
+        crate::css::any::nested_selector::FormatAnyCssNestedSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::nested_selector::FormatAnyCssNestedSelector::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssPageAtRuleBlock {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -15514,6 +15661,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssParameter {
             self,
             crate::scss::any::parameter::FormatAnyScssParameter::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssParentSelectorSuffixPart {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssParentSelectorSuffixPart,
+        crate::scss::any::parent_selector_suffix_part::FormatAnyScssParentSelectorSuffixPart,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: any :: parent_selector_suffix_part :: FormatAnyScssParentSelectorSuffixPart :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssParentSelectorSuffixPart {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssParentSelectorSuffixPart,
+        crate::scss::any::parent_selector_suffix_part::FormatAnyScssParentSelectorSuffixPart,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: any :: parent_selector_suffix_part :: FormatAnyScssParentSelectorSuffixPart :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssUseNamespace {

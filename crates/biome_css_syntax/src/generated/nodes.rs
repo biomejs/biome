@@ -11463,6 +11463,116 @@ pub struct ScssParameterListFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssParentSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssParentSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssParentSelectorFields {
+        ScssParentSelectorFields {
+            amp_token: self.amp_token(),
+            suffix: self.suffix(),
+        }
+    }
+    pub fn amp_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn suffix(&self) -> SyntaxResult<ScssParentSelectorSuffix> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssParentSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssParentSelectorFields {
+    pub amp_token: SyntaxResult<SyntaxToken>,
+    pub suffix: SyntaxResult<ScssParentSelectorSuffix>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssParentSelectorSuffix {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssParentSelectorSuffix {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssParentSelectorSuffixFields {
+        ScssParentSelectorSuffixFields {
+            items: self.items(),
+        }
+    }
+    pub fn items(&self) -> ScssParentSelectorSuffixPartList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssParentSelectorSuffix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssParentSelectorSuffixFields {
+    pub items: ScssParentSelectorSuffixPartList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssParentSelectorSuffixHyphen {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssParentSelectorSuffixHyphen {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssParentSelectorSuffixHyphenFields {
+        ScssParentSelectorSuffixHyphenFields {
+            minus_token: self.minus_token(),
+        }
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssParentSelectorSuffixHyphen {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssParentSelectorSuffixHyphenFields {
+    pub minus_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssParentSelectorValue {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15057,6 +15167,25 @@ impl AnyCssNamespaceUrl {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssNestedSelector {
+    CssNestedSelector(CssNestedSelector),
+    ScssParentSelector(ScssParentSelector),
+}
+impl AnyCssNestedSelector {
+    pub fn as_css_nested_selector(&self) -> Option<&CssNestedSelector> {
+        match &self {
+            Self::CssNestedSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_parent_selector(&self) -> Option<&ScssParentSelector> {
+        match &self {
+            Self::ScssParentSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssPageAtRuleBlock(CssPageAtRuleBlock),
@@ -16888,6 +17017,39 @@ impl AnyScssParameter {
     pub fn as_scss_parameter(&self) -> Option<&ScssParameter> {
         match &self {
             Self::ScssParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssParentSelectorSuffixPart {
+    CssIdentifier(CssIdentifier),
+    CssNumber(CssNumber),
+    ScssInterpolation(ScssInterpolation),
+    ScssParentSelectorSuffixHyphen(ScssParentSelectorSuffixHyphen),
+}
+impl AnyScssParentSelectorSuffixPart {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_parent_selector_suffix_hyphen(&self) -> Option<&ScssParentSelectorSuffixHyphen> {
+        match &self {
+            Self::ScssParentSelectorSuffixHyphen(item) => Some(item),
             _ => None,
         }
     }
@@ -30877,6 +31039,151 @@ impl From<ScssParameterList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssParentSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARENT_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARENT_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssParentSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssParentSelector")
+                .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
+                .field("suffix", &support::DebugSyntaxResult(self.suffix()))
+                .finish()
+        } else {
+            f.debug_struct("ScssParentSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssParentSelector> for SyntaxNode {
+    fn from(n: ScssParentSelector) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssParentSelector> for SyntaxElement {
+    fn from(n: ScssParentSelector) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssParentSelectorSuffix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARENT_SELECTOR_SUFFIX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARENT_SELECTOR_SUFFIX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssParentSelectorSuffix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssParentSelectorSuffix")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("ScssParentSelectorSuffix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssParentSelectorSuffix> for SyntaxNode {
+    fn from(n: ScssParentSelectorSuffix) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssParentSelectorSuffix> for SyntaxElement {
+    fn from(n: ScssParentSelectorSuffix) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssParentSelectorSuffixHyphen {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssParentSelectorSuffixHyphen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssParentSelectorSuffixHyphen")
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssParentSelectorSuffixHyphen").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssParentSelectorSuffixHyphen> for SyntaxNode {
+    fn from(n: ScssParentSelectorSuffixHyphen) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssParentSelectorSuffixHyphen> for SyntaxElement {
+    fn from(n: ScssParentSelectorSuffixHyphen) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssParentSelectorValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -38622,6 +38929,66 @@ impl From<AnyCssNamespaceUrl> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssNestedSelector> for AnyCssNestedSelector {
+    fn from(node: CssNestedSelector) -> Self {
+        Self::CssNestedSelector(node)
+    }
+}
+impl From<ScssParentSelector> for AnyCssNestedSelector {
+    fn from(node: ScssParentSelector) -> Self {
+        Self::ScssParentSelector(node)
+    }
+}
+impl AstNode for AnyCssNestedSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssNestedSelector::KIND_SET.union(ScssParentSelector::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_NESTED_SELECTOR | SCSS_PARENT_SELECTOR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_NESTED_SELECTOR => Self::CssNestedSelector(CssNestedSelector { syntax }),
+            SCSS_PARENT_SELECTOR => Self::ScssParentSelector(ScssParentSelector { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssNestedSelector(it) => it.syntax(),
+            Self::ScssParentSelector(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssNestedSelector(it) => it.into_syntax(),
+            Self::ScssParentSelector(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssNestedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssNestedSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssParentSelector(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssNestedSelector> for SyntaxNode {
+    fn from(n: AnyCssNestedSelector) -> Self {
+        match n {
+            AnyCssNestedSelector::CssNestedSelector(it) => it.into_syntax(),
+            AnyCssNestedSelector::ScssParentSelector(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssNestedSelector> for SyntaxElement {
+    fn from(n: AnyCssNestedSelector) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusBlock> for AnyCssPageAtRuleBlock {
     fn from(node: CssBogusBlock) -> Self {
         Self::CssBogusBlock(node)
@@ -43579,6 +43946,93 @@ impl From<AnyScssParameter> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyScssParentSelectorSuffixPart {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<CssNumber> for AnyScssParentSelectorSuffixPart {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
+impl From<ScssInterpolation> for AnyScssParentSelectorSuffixPart {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl From<ScssParentSelectorSuffixHyphen> for AnyScssParentSelectorSuffixPart {
+    fn from(node: ScssParentSelectorSuffixHyphen) -> Self {
+        Self::ScssParentSelectorSuffixHyphen(node)
+    }
+}
+impl AstNode for AnyScssParentSelectorSuffixPart {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+        .union(CssNumber::KIND_SET)
+        .union(ScssInterpolation::KIND_SET)
+        .union(ScssParentSelectorSuffixHyphen::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_IDENTIFIER | CSS_NUMBER | SCSS_INTERPOLATION | SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN => {
+                Self::ScssParentSelectorSuffixHyphen(ScssParentSelectorSuffixHyphen { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+            Self::ScssParentSelectorSuffixHyphen(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+            Self::ScssParentSelectorSuffixHyphen(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssParentSelectorSuffixPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssParentSelectorSuffixHyphen(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssParentSelectorSuffixPart> for SyntaxNode {
+    fn from(n: AnyScssParentSelectorSuffixPart) -> Self {
+        match n {
+            AnyScssParentSelectorSuffixPart::CssIdentifier(it) => it.into_syntax(),
+            AnyScssParentSelectorSuffixPart::CssNumber(it) => it.into_syntax(),
+            AnyScssParentSelectorSuffixPart::ScssInterpolation(it) => it.into_syntax(),
+            AnyScssParentSelectorSuffixPart::ScssParentSelectorSuffixHyphen(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssParentSelectorSuffixPart> for SyntaxElement {
+    fn from(n: AnyScssParentSelectorSuffixPart) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyScssUseNamespace {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -44307,6 +44761,11 @@ impl std::fmt::Display for AnyCssNamespaceUrl {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssNestedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssPageAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -44588,6 +45047,11 @@ impl std::fmt::Display for AnyScssModuleMember {
     }
 }
 impl std::fmt::Display for AnyScssParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssParentSelectorSuffixPart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -45963,6 +46427,21 @@ impl std::fmt::Display for ScssParameterDefaultValue {
     }
 }
 impl std::fmt::Display for ScssParameterList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssParentSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssParentSelectorSuffix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssParentSelectorSuffixHyphen {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -49749,7 +50228,7 @@ impl Serialize for CssNestedSelectorList {
 }
 impl AstNodeList for CssNestedSelectorList {
     type Language = Language;
-    type Node = CssNestedSelector;
+    type Node = AnyCssNestedSelector;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -49764,15 +50243,15 @@ impl Debug for CssNestedSelectorList {
     }
 }
 impl IntoIterator for &CssNestedSelectorList {
-    type Item = CssNestedSelector;
-    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
+    type Item = AnyCssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, AnyCssNestedSelector>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssNestedSelectorList {
-    type Item = CssNestedSelector;
-    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
+    type Item = AnyCssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, AnyCssNestedSelector>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -52153,6 +52632,88 @@ impl IntoIterator for ScssParameterItemList {
 impl IntoIterator for &ScssParameterItemList {
     type Item = SyntaxResult<AnyScssParameter>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyScssParameter>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssParentSelectorSuffixPartList {
+    syntax_list: SyntaxList,
+}
+impl ScssParentSelectorSuffixPartList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssParentSelectorSuffixPartList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssParentSelectorSuffixPartList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for ScssParentSelectorSuffixPartList {
+    type Language = Language;
+    type Node = AnyScssParentSelectorSuffixPart;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssParentSelectorSuffixPartList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssParentSelectorSuffixPartList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &ScssParentSelectorSuffixPartList {
+    type Item = AnyScssParentSelectorSuffixPart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssParentSelectorSuffixPart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for ScssParentSelectorSuffixPartList {
+    type Item = AnyScssParentSelectorSuffixPart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssParentSelectorSuffixPart>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

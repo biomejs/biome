@@ -4609,6 +4609,36 @@ impl ScssParameterList {
         )
     }
 }
+impl ScssParentSelector {
+    pub fn with_amp_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_suffix(self, element: ScssParentSelectorSuffix) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssParentSelectorSuffix {
+    pub fn with_items(self, element: ScssParentSelectorSuffixPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssParentSelectorSuffixHyphen {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssParentSelectorValue {
     pub fn with_amp_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

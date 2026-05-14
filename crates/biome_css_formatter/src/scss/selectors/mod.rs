@@ -2,4 +2,5 @@
 
 pub(crate) mod at_root_selector;
 pub(crate) mod keyframes_selector;
+pub(crate) mod parent_selector;
 pub(crate) mod placeholder_selector;

@@ -8081,6 +8081,70 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(SCSS_PARAMETER_LIST, children)
             }
+            SCSS_PARENT_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [&]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssParentSelectorSuffix::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_PARENT_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_PARENT_SELECTOR, children)
+            }
+            SCSS_PARENT_SELECTOR_SUFFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssParentSelectorSuffixPartList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_PARENT_SELECTOR_SUFFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_PARENT_SELECTOR_SUFFIX, children)
+            }
+            SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [-]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN, children)
+            }
             SCSS_PARENT_SELECTOR_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -9177,7 +9241,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 false,
             ),
             CSS_NESTED_SELECTOR_LIST => {
-                Self::make_node_list_syntax(kind, children, CssNestedSelector::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyCssNestedSelector::can_cast)
             }
             CSS_PAGE_AT_RULE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssPageAtRuleItem::can_cast)
@@ -9331,6 +9395,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 AnyScssParameter::can_cast,
                 T ! [,],
                 true,
+            ),
+            SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST => Self::make_node_list_syntax(
+                kind,
+                children,
+                AnyScssParentSelectorSuffixPart::can_cast,
             ),
             SCSS_VARIABLE_MODIFIER_LIST => {
                 Self::make_node_list_syntax(kind, children, ScssVariableModifier::can_cast)
