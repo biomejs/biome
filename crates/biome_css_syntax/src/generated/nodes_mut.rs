@@ -4127,6 +4127,14 @@ impl ScssIncludeUsingClause {
         )
     }
 }
+impl ScssInterpolatedDashedIdentifier {
+    pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedIdentifier {
     pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
         Self::unwrap_cast(

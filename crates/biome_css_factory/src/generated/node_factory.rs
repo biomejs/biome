@@ -3597,6 +3597,14 @@ pub fn scss_include_using_clause(
         ],
     ))
 }
+pub fn scss_interpolated_dashed_identifier(
+    items: ScssInterpolatedIdentifierPartList,
+) -> ScssInterpolatedDashedIdentifier {
+    ScssInterpolatedDashedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_DASHED_IDENTIFIER,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
 pub fn scss_interpolated_identifier(
     items: ScssInterpolatedIdentifierPartList,
 ) -> ScssInterpolatedIdentifier {

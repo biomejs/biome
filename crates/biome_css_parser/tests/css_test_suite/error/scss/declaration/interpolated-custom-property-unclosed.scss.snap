@@ -1,0 +1,186 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.box {
+  --#{$prop: 10px;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "box" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..6 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssBogusSupportsCondition {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    ScssInterpolatedIdentifierHyphen {
+                                                        minus_token: MINUS@6..10 "-" [Newline("\n"), Whitespace("  ")] [],
+                                                    },
+                                                    ScssInterpolatedIdentifierHyphen {
+                                                        minus_token: MINUS@10..11 "-" [] [],
+                                                    },
+                                                    CssBogus {
+                                                        items: [
+                                                            HASH@11..12 "#" [] [],
+                                                            L_CURLY@12..13 "{" [] [],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            ScssVariable {
+                                                                                dollar_token: DOLLAR@13..14 "$" [] [],
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@14..18 "prop" [] [],
+                                                                                },
+                                                                            },
+                                                                            CssBogusPropertyValue {
+                                                                                items: [
+                                                                                    COLON@18..20 ":" [] [Whitespace(" ")],
+                                                                                    CSS_DIMENSION_VALUE@20..22 "10" [] [],
+                                                                                    PX_KW@22..24 "px" [] [],
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    ScssExpression {
+                                        items: ScssExpressionItemList [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@24..25 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@25..27 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@27..28 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..28
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..27
+    0: CSS_QUALIFIED_RULE@0..27
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "box" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..27
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..25
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..25
+            0: CSS_DECLARATION@6..24
+              0: CSS_BOGUS_PROPERTY@6..24
+                0: CSS_BOGUS_SUPPORTS_CONDITION@6..24
+                  0: CSS_BOGUS@6..24
+                    0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@6..10
+                      0: MINUS@6..10 "-" [Newline("\n"), Whitespace("  ")] []
+                    1: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@10..11
+                      0: MINUS@10..11 "-" [] []
+                    2: CSS_BOGUS@11..24
+                      0: HASH@11..12 "#" [] []
+                      1: L_CURLY@12..13 "{" [] []
+                      2: CSS_BOGUS@13..24
+                        0: CSS_BOGUS@13..24
+                          0: SCSS_VARIABLE@13..18
+                            0: DOLLAR@13..14 "$" [] []
+                            1: CSS_IDENTIFIER@14..18
+                              0: IDENT@14..18 "prop" [] []
+                          1: CSS_BOGUS_PROPERTY_VALUE@18..24
+                            0: COLON@18..20 ":" [] [Whitespace(" ")]
+                            1: CSS_DIMENSION_VALUE@20..22 "10" [] []
+                            2: PX_KW@22..24 "px" [] []
+                1: SCSS_EXPRESSION@24..24
+                  0: SCSS_EXPRESSION_ITEM_LIST@24..24
+              1: (empty)
+            1: SEMICOLON@24..25 ";" [] []
+        2: R_CURLY@25..27 "}" [Newline("\n")] []
+  2: EOF@27..28 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolated-custom-property-unclosed.scss:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ': 10px'.
+  
+    1 │ .box {
+  > 2 │   --#{$prop: 10px;
+      │            ^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .box {
+  > 2 │   --#{$prop: 10px;
+      │            ^^^^^^
+    3 │ }
+    4 │ 
+  
+interpolated-custom-property-unclosed.scss:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `;`
+  
+    1 │ .box {
+  > 2 │   --#{$prop: 10px;
+      │                  ^
+    3 │ }
+    4 │ 
+  
+  i Remove ;
+  
+```

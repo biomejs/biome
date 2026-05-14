@@ -1,6 +1,7 @@
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector,
-    CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression,
+    AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule, CssRelativeSelector,
+    CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -135,8 +136,14 @@ impl SemanticEventExtractor {
                             };
 
                             let property = match name {
-                                AnyCssDeclarationName::CssDashedIdentifier(name) => {
-                                    CssProperty::from(name)
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::CssDashedIdentifier(name),
+                                ) => CssProperty::from(name),
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
+                                )
+                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                    return;
                                 }
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
@@ -146,9 +153,6 @@ impl SemanticEventExtractor {
                                         return;
                                     };
                                     CssProperty::from(ident)
-                                }
-                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
-                                    return;
                                 }
                             };
 

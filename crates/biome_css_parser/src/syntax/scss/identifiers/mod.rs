@@ -1,4 +1,5 @@
 mod identifier;
+mod interpolated_dashed;
 mod interpolated_identifier;
 mod interpolated_regular;
 mod interpolated_selector;
@@ -7,6 +8,10 @@ mod module_member_access;
 pub(crate) use identifier::{
     is_at_scss_namespaced_variable, is_at_scss_variable, parse_scss_namespaced_variable,
     parse_scss_variable,
+};
+pub(crate) use interpolated_dashed::{
+    is_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_dashed_identifier,
 };
 pub(crate) use interpolated_identifier::{
     is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,

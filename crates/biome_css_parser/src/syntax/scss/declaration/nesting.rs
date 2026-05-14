@@ -5,7 +5,8 @@ use crate::syntax::declaration::{
 };
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
-    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression, is_at_scss_interpolated_identifier,
+    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression,
+    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
     is_at_scss_interpolated_property, parse_scss_interpolated_identifier,
     parse_scss_optional_value_until,
 };
@@ -45,6 +46,7 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
 pub(crate) fn is_at_scss_nesting_declaration(p: &mut CssParser) -> bool {
     CssSyntaxFeatures::Scss.is_supported(p)
         && !is_at_dashed_identifier(p)
+        && !is_at_scss_interpolated_dashed_identifier(p)
         && !p.at(T![composes])
         && (is_at_scss_interpolated_property(p) || (is_at_identifier(p) && p.nth_at(1, T![:])))
 }

@@ -21,9 +21,10 @@ use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
-    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_variable,
-    is_at_scss_variable_declaration, parse_scss_function,
+    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
+    is_at_scss_interpolated_string, is_at_scss_module_member_access,
+    is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
+    parse_scss_function, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
     parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
     parse_scss_variable_declaration,
@@ -554,6 +555,8 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             .map(|marker| {
                 add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
             })
+    } else if is_at_scss_interpolated_dashed_identifier(p) {
+        parse_scss_interpolated_dashed_identifier(p)
     } else if is_at_scss_interpolated_function_or_value(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
