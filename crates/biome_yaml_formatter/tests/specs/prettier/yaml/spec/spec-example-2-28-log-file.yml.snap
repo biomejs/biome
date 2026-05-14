@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-2-28-log-file.yml
 ---
+
 # Input
 
 ```yml

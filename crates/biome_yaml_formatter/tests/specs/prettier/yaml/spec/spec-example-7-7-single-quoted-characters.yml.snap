@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-7-single-quoted-characters.yml
 ---
+
 # Input
 
 ```yml

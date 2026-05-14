@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/sequence-entry-that-looks-like-two-with-wrong-indentation.yml
 ---
+
 # Input
 
 ```yml
