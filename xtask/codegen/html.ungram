@@ -598,7 +598,22 @@ SvelteDirectiveValue =
 	':'
 	property: AnySvelteBindingProperty
 	modifiers: SvelteDirectiveModifierList
-	initializer: HtmlAttributeInitializerClause?
+	initializer: AnySvelteDirectiveInitializerClause?
+
+AnySvelteDirectiveInitializerClause =
+	HtmlAttributeInitializerClause
+	| SvelteBindFunctionBindingInitializerClause
+
+SvelteBindFunctionBindingInitializerClause =
+	'='
+	value: SvelteBindFunctionBindingExpression
+
+SvelteBindFunctionBindingExpression =
+	'{'
+	get: HtmlTextExpression
+	','
+	set: HtmlTextExpression
+	'}'
 
 AnySvelteBindingProperty =
 	SvelteName

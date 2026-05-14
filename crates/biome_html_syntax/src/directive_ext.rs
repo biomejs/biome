@@ -1,4 +1,7 @@
-use crate::{AnyAstroDirective, AnySvelteDirective, HtmlAttributeInitializerClause};
+use crate::{
+    AnyAstroDirective, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
+    HtmlAttributeInitializerClause,
+};
 
 impl AnyAstroDirective {
     /// Returns the initializer from an Astro directive's value, if available.
@@ -16,7 +19,7 @@ impl AnyAstroDirective {
 
 impl AnySvelteDirective {
     /// Returns the initializer from a Svelte directive's value, if available.
-    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+    pub fn initializer(&self) -> Option<AnySvelteDirectiveInitializerClause> {
         match self {
             Self::SvelteBindDirective(dir) => dir.value().ok()?.initializer(),
             Self::SvelteTransitionDirective(dir) => dir.value().ok()?.initializer(),
