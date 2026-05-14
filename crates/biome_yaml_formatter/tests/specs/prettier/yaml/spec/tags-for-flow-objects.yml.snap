@@ -25,7 +25,6 @@ info: yaml/spec/tags-for-flow-objects.yml
 +  k: !!seq
 +  [ a, !!str b]
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -34,4 +33,5 @@ info: yaml/spec/tags-for-flow-objects.yml
 !!map {
   k: !!seq
   [ a, !!str b]
-}```
+}
+```

@@ -7,7 +7,7 @@ use biome_formatter::{
     TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, prelude::*};
-use biome_yaml_syntax::{YamlFileSource, YamlLanguage};
+use biome_yaml_syntax::YamlLanguage;
 
 use crate::YamlCommentStyle;
 use crate::comments::{FormatYamlLeadingComment, YamlComments};
@@ -65,14 +65,11 @@ pub struct YamlFormatOptions {
     line_width: LineWidth,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
-    /// The kind of file
-    _file_source: YamlFileSource,
 }
 
 impl YamlFormatOptions {
-    pub fn new(file_source: YamlFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }

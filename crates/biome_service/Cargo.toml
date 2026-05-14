@@ -65,6 +65,7 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 biome_yaml_formatter     = { workspace = true, features = ["serde"] }
+biome_yaml_parser        = { workspace = true }
 biome_yaml_syntax        = { workspace = true }
 boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
@@ -113,6 +114,7 @@ schema    = [
   "biome_yaml_formatter/schema",
   "dep:schemars",
 ]
+yaml      = ["biome_configuration/yaml"]
 
 [lints]
 workspace = true

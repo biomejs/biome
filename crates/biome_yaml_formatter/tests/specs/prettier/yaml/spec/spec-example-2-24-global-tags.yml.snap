@@ -44,13 +44,6 @@ info: yaml/spec/spec-example-2-24-global-tags.yml
    radius: 7
  - !line
    start: *ORIGIN
-@@ -12,4 +11,4 @@
- - !label
-   start: *ORIGIN
-   color: 0xFFEEBB
--  text: Pretty vector drawing.
-+  text: Pretty vector drawing.
-\ No newline at end of file
 ```
 
 # Output
@@ -69,7 +62,8 @@ info: yaml/spec/spec-example-2-24-global-tags.yml
 - !label
   start: *ORIGIN
   color: 0xFFEEBB
-  text: Pretty vector drawing.```
+  text: Pretty vector drawing.
+```
 
 # Errors
 ```

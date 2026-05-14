@@ -32,7 +32,6 @@ info: yaml/spec/spec-example-6-12-separation-spaces.yml
    avg: # Average
 -    0.278
 +   0.278
-\ No newline at end of file
 ```
 
 # Output
@@ -43,4 +42,5 @@ info: yaml/spec/spec-example-6-12-separation-spaces.yml
   hr:  # Home runs
      65
   avg: # Average
-   0.278```
+   0.278
+```

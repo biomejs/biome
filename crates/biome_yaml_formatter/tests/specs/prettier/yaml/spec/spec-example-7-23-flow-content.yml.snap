@@ -26,10 +26,8 @@ info: yaml/spec/spec-example-7-23-flow-content.yml
  - { a: b }
  - "a"
 -- "b"
--- c
 +- 'b'
-+- c
-\ No newline at end of file
+ - c
 ```
 
 # Output
@@ -39,4 +37,5 @@ info: yaml/spec/spec-example-7-23-flow-content.yml
 - { a: b }
 - "a"
 - 'b'
-- c```
+- c
+```

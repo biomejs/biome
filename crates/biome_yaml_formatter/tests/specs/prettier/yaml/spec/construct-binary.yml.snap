@@ -49,7 +49,6 @@ description:
 + AgjoEwnuNAFOhpEMTRiggcz4BNJHrv/zCFcLiwMWYNG84BwwEeECcgggoBADs=
 +description:
 + The binary value above is a tiny arrow encoded as a gif image.
-\ No newline at end of file
 ```
 
 # Output
@@ -66,4 +65,5 @@ generic: !!binary |
  +f/++f/++f/++f/++f/++SH+Dk1hZGUgd2l0aCBHSU1QACwAAAAADAAMAAAFLC
  AgjoEwnuNAFOhpEMTRiggcz4BNJHrv/zCFcLiwMWYNG84BwwEeECcgggoBADs=
 description:
- The binary value above is a tiny arrow encoded as a gif image.```
+ The binary value above is a tiny arrow encoded as a gif image.
+```

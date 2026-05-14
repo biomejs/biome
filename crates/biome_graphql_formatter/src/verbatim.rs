@@ -49,8 +49,7 @@ impl Format<GraphqlFormatContext> for FormatGraphqlVerbatimNode<'_> {
                 .map_or_else(|| range, |source_map| source_map.source_range(range))
         }
 
-        let preserve_outer_trivia =
-            matches!(self.kind, VerbatimKind::Suppressed) && self.node.parent().is_none();
+        let preserve_outer_trivia = self.node.parent().is_none();
 
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {

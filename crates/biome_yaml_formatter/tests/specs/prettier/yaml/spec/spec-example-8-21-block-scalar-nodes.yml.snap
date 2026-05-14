@@ -25,12 +25,10 @@ folded:
  literal: |2
    value
 -folded: !foo >1
-- value
 +folded:
 +   !foo
 +  >1
-+ value
-\ No newline at end of file
+  value
 ```
 
 # Output
@@ -41,4 +39,5 @@ literal: |2
 folded:
    !foo
   >1
- value```
+ value
+```

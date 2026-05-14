@@ -65,13 +65,6 @@ Stack:
  Stack:
    - file: TopClass.py
      line: 23
-@@ -20,4 +23,4 @@
-   - file: MoreClass.py
-     line: 58
-     code: |-
--      foo = bar
-+      foo = bar
-\ No newline at end of file
 ```
 
 # Output
@@ -102,7 +95,8 @@ Stack:
   - file: MoreClass.py
     line: 58
     code: |-
-      foo = bar```
+      foo = bar
+```
 
 # Errors
 ```

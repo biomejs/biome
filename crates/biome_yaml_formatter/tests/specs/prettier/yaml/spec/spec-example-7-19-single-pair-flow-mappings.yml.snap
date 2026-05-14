@@ -23,7 +23,6 @@ foo: bar
 +[
 +foo: bar
 +]
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ foo: bar
 ```yml
 [
 foo: bar
-]```
+]
+```

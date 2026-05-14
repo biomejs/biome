@@ -23,8 +23,7 @@ rbi: 147   # Runs Batted In
 +hr:  65    # Home runs
  avg: 0.278 # Batting average
 -rbi: 147 # Runs Batted In
-+rbi: 147   
-\ No newline at end of file
++rbi: 147   # Runs Batted In
 ```
 
 # Output
@@ -32,4 +31,5 @@ rbi: 147   # Runs Batted In
 ```yml
 hr:  65    # Home runs
 avg: 0.278 # Batting average
-rbi: 147   ```
+rbi: 147   # Runs Batted In
+```

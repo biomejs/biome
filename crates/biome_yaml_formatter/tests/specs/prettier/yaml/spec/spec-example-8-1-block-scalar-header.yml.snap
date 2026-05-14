@@ -35,9 +35,7 @@ info: yaml/spec/spec-example-8-1-block-scalar-header.yml
 + keep
  
  - >1- # Both indicators↓
--  strip
-+  strip
-\ No newline at end of file
+   strip
 ```
 
 # Output
@@ -51,4 +49,5 @@ info: yaml/spec/spec-example-8-1-block-scalar-header.yml
  keep
 
 - >1- # Both indicators↓
-  strip```
+  strip
+```

@@ -21,11 +21,11 @@ key:
  key:
 -  - value
 +- value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 key:
-- value```
+- value
+```

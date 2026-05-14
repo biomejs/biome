@@ -34,7 +34,7 @@ does not suffice: >
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,19 @@
+@@ -1,12 +1,17 @@
  failing:
    {
      "object-does-not-fit-within-print-width": "------",
@@ -54,10 +54,6 @@ does not suffice: >
  does not suffice: >
    {
      "object-does-not-fit-within-print-width": "------",
-     "TEST": "comma NOT here — but object's now a string due to '>'"
--  }
-+  }
-\ No newline at end of file
 ```
 
 # Output
@@ -81,7 +77,8 @@ does not suffice: >
   {
     "object-does-not-fit-within-print-width": "------",
     "TEST": "comma NOT here — but object's now a string due to '>'"
-  }```
+  }
+```
 
 # Errors
 ```

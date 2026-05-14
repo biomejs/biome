@@ -24,7 +24,6 @@ key:
 -  - item2
 + - item1
 + - item2
-\ No newline at end of file
 ```
 
 # Output
@@ -32,4 +31,5 @@ key:
 ```yml
 key:
  - item1
- - item2```
+ - item2
+```

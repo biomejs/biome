@@ -24,9 +24,7 @@ bar:
 -  - 42
 +- 42
  bar:
--  - 44
-+  - 44
-\ No newline at end of file
+   - 44
 ```
 
 # Output
@@ -35,4 +33,5 @@ bar:
 foo:
 - 42
 bar:
-  - 44```
+  - 44
+```

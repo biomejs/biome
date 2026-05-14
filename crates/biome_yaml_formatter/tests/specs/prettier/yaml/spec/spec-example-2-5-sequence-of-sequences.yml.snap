@@ -24,7 +24,6 @@ info: yaml/spec/spec-example-2-5-sequence-of-sequences.yml
  - [Mark McGwire, 65, 0.278]
 -- [Sammy Sosa, 63, 0.288]
 +- [Sammy Sosa  , 63, 0.288]
-\ No newline at end of file
 ```
 
 # Output
@@ -32,4 +31,5 @@ info: yaml/spec/spec-example-2-5-sequence-of-sequences.yml
 ```yml
 - [name        , hr, avg  ]
 - [Mark McGwire, 65, 0.278]
-- [Sammy Sosa  , 63, 0.288]```
+- [Sammy Sosa  , 63, 0.288]
+```

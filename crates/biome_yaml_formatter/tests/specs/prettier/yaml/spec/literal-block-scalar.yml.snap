@@ -35,7 +35,6 @@ a: |
 -  cd
 -  ef
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -48,4 +47,5 @@ a: |
  ef
  
 
-...```
+...
+```

@@ -28,7 +28,7 @@ A:
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,10 +4,8 @@
+@@ -4,10 +4,10 @@
  
  a:
    b:
@@ -38,11 +38,11 @@ A:
 + #a
  
  A:
--  B:
+   B:
 -  #A
 -  #A
-+  B:
-\ No newline at end of file
++ #A
++   #A
 ```
 
 # Output
@@ -58,4 +58,7 @@ a:
  #a
 
 A:
-  B:```
+  B:
+ #A
+   #A
+```

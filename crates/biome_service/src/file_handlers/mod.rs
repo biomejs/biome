@@ -9,6 +9,7 @@ use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
+use crate::file_handlers::yaml::YamlFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
@@ -50,6 +51,7 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_yaml_syntax::YamlFileSource;
 use camino::Utf8Path;
 use either::Either;
 use grit::GritFileHandler;
@@ -88,6 +90,7 @@ pub enum DocumentFileSource {
     Html(HtmlFileSource),
     Grit(GritFileSource),
     Markdown(MdFileSource),
+    Yaml(YamlFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -136,6 +139,12 @@ impl From<MdFileSource> for DocumentFileSource {
     }
 }
 
+impl From<YamlFileSource> for DocumentFileSource {
+    fn from(value: YamlFileSource) -> Self {
+        Self::Yaml(value)
+    }
+}
+
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
         Self::from_path(path, false)
@@ -175,6 +184,11 @@ impl DocumentFileSource {
 
         #[cfg(feature = "markdown")]
         if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "yaml")]
+        if let Ok(file_source) = YamlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -221,7 +235,12 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "markdown")]
         if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
+        #[cfg(feature = "yaml")]
+        if let Ok(file_source) = YamlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownExtension)
@@ -252,7 +271,13 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "markdown")]
         if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "yaml")]
+        if let Ok(file_source) = YamlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -410,7 +435,8 @@ impl DocumentFileSource {
             | Self::Json(_)
             | Self::Html(_)
             | Self::Grit(_)
-            | Self::Markdown(_) => true,
+            | Self::Markdown(_)
+            | Self::Yaml(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -426,7 +452,8 @@ impl DocumentFileSource {
             | Self::Json(_)
             | Self::Html(_)
             | Self::Grit(_)
-            | Self::Markdown(_) => true,
+            | Self::Markdown(_)
+            | Self::Yaml(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -443,7 +470,8 @@ impl DocumentFileSource {
             | Self::Grit(_)
             | Self::Markdown(_)
             | Self::Ignore
-            | Self::Unknown => false,
+            | Self::Unknown
+            | Self::Yaml(_) => false,
         }
     }
 }
@@ -478,6 +506,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Grit(_) => write!(fmt, "Grit"),
             Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
+            Self::Yaml(_) => write!(fmt, "YAML"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
     }
@@ -1240,6 +1269,7 @@ pub(crate) struct Features {
     html: HtmlFileHandler,
     grit: GritFileHandler,
     markdown: MarkdownFileHandler,
+    yaml: YamlFileHandler,
     ignore: IgnoreFileHandler,
 }
 
@@ -1257,6 +1287,7 @@ impl Features {
             grit: GritFileHandler {},
             markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
+            yaml: YamlFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -1286,6 +1317,7 @@ impl Features {
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }

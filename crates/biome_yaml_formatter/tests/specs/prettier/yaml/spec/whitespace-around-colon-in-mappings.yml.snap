@@ -49,7 +49,6 @@ top6:
 +  scalar5
 +top6: 
 +  &anchor6 'key6' : scalar6
-\ No newline at end of file
 ```
 
 # Output
@@ -66,7 +65,8 @@ top4:
 top5   :    
   scalar5
 top6: 
-  &anchor6 'key6' : scalar6```
+  &anchor6 'key6' : scalar6
+```
 
 # Errors
 ```

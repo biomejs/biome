@@ -48,7 +48,6 @@ application specific tag: !something |
 + The semantics of the tag
 + above may be different for
 + different documents.
-\ No newline at end of file
 ```
 
 # Output
@@ -66,4 +65,5 @@ picture: !!binary |
 application specific tag: !something |
  The semantics of the tag
  above may be different for
- different documents.```
+ different documents.
+```

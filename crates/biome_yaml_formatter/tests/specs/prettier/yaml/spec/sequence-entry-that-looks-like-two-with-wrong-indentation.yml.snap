@@ -21,11 +21,11 @@ info: yaml/spec/sequence-entry-that-looks-like-two-with-wrong-indentation.yml
  - single multiline
 -  - sequence entry
 + - sequence entry
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 - single multiline
- - sequence entry```
+ - sequence entry
+```

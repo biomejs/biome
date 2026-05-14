@@ -19,10 +19,10 @@ info: yaml/spec/flow-mapping.yml
 @@ -1 +1 @@
 -{ foo: you, bar: far }
 +{foo: you, bar: far}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-{foo: you, bar: far}```
+{foo: you, bar: far}
+```

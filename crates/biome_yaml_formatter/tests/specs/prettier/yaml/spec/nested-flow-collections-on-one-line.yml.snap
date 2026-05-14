@@ -21,14 +21,14 @@ info: yaml/spec/nested-flow-collections-on-one-line.yml
  ---
 -{ a: [b, c, { d: [e, f] }] }
 +{ a: [b, c, { d: [e, f] } ] }
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 ---
-{ a: [b, c, { d: [e, f] } ] }```
+{ a: [b, c, { d: [e, f] } ] }
+```
 
 # Errors
 ```

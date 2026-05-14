@@ -25,20 +25,17 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,13 +1,5 @@
+@@ -1,11 +1,8 @@
  [
    "# Comment only.",
    hard_line_break,
 -  "# Comment only.",
 -  hard_line_break,
--  verbatim([
--    "# Comment only.",
--    hard_line_break,
--    "# Comment only.",
--    hard_line_break,
--    ""
--  ])
-+  verbatim(["# Comment only.", hard_line_break, ""])
+   verbatim([
+     "# Comment only.
+-# Comment only.
+ "
+   ])
  ]
 \ No newline at end of file
 

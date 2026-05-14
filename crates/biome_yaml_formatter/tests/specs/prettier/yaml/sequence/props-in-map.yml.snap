@@ -24,7 +24,6 @@ a: !!set &anchor
 -  - 456
 +- 123
 +- 456
-\ No newline at end of file
 ```
 
 # Output
@@ -32,7 +31,8 @@ a: !!set &anchor
 ```yml
 a: !!set &anchor
 - 123
-- 456```
+- 456
+```
 
 # Errors
 ```
