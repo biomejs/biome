@@ -10,6 +10,8 @@ pub(crate) mod await_opening_block;
 pub(crate) mod await_then_block;
 pub(crate) mod await_then_clause;
 pub(crate) mod bind_directive;
+pub(crate) mod bind_function_binding_expression;
+pub(crate) mod bind_function_binding_initializer_clause;
 pub(crate) mod class_directive;
 pub(crate) mod const_block;
 pub(crate) mod curly_destructured_name;

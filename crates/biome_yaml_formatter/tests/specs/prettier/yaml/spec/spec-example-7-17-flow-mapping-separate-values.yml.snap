@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-17-flow-mapping-separate-values.yml
+---
+# Input
+
+```yml
+{
+unquoted : "separate",
+http://foo.com,
+omitted value:,
+: omitted key,
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,6 @@
+-{ unquoted: "separate", http://foo.com, omitted value, : omitted key }
++{
++unquoted : "separate",
++http://foo.com,
++omitted value:,
++: omitted key,
++}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+{
+unquoted : "separate",
+http://foo.com,
+omitted value:,
+: omitted key,
+}```

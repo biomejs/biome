@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/tab-after-document-header.yml
+---
+# Input
+
+```yml
+---	scalar
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+----
+-scalar
++---	scalar
+```
+
+# Output
+
+```yml
+---	scalar
+```

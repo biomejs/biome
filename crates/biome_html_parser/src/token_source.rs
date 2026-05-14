@@ -104,6 +104,8 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
+    /// Stops at `,`
+    Comma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
@@ -113,7 +115,7 @@ pub(crate) enum RestrictedExpressionStopAt {
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma => byte == b',',
+            Self::AsOrComma | Self::Comma => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -122,6 +124,7 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
             Self::AsOrComma => keyword == AS_KW,
+            Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }

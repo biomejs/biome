@@ -1830,6 +1830,101 @@ pub struct SvelteBindDirectiveFields {
     pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteBindFunctionBindingExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteBindFunctionBindingExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteBindFunctionBindingExpressionFields {
+        SvelteBindFunctionBindingExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            get: self.get(),
+            comma_token: self.comma_token(),
+            set: self.set(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn get(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn comma_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn set(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for SvelteBindFunctionBindingExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteBindFunctionBindingExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub get: SyntaxResult<HtmlTextExpression>,
+    pub comma_token: SyntaxResult<SyntaxToken>,
+    pub set: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteBindFunctionBindingInitializerClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteBindFunctionBindingInitializerClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteBindFunctionBindingInitializerClauseFields {
+        SvelteBindFunctionBindingInitializerClauseFields {
+            eq_token: self.eq_token(),
+            value: self.value(),
+        }
+    }
+    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<SvelteBindFunctionBindingExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for SvelteBindFunctionBindingInitializerClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteBindFunctionBindingInitializerClauseFields {
+    pub eq_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SvelteBindFunctionBindingExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteClassDirective {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2085,7 +2180,7 @@ impl SvelteDirectiveValue {
     pub fn modifiers(&self) -> SvelteDirectiveModifierList {
         support::list(&self.syntax, 2usize)
     }
-    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+    pub fn initializer(&self) -> Option<AnySvelteDirectiveInitializerClause> {
         support::node(&self.syntax, 3usize)
     }
 }
@@ -2102,7 +2197,7 @@ pub struct SvelteDirectiveValueFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub property: SyntaxResult<AnySvelteBindingProperty>,
     pub modifiers: SvelteDirectiveModifierList,
-    pub initializer: Option<HtmlAttributeInitializerClause>,
+    pub initializer: Option<AnySvelteDirectiveInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteEachAsKeyedItem {
@@ -4819,6 +4914,27 @@ impl AnySvelteDirective {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteDirectiveInitializerClause {
+    HtmlAttributeInitializerClause(HtmlAttributeInitializerClause),
+    SvelteBindFunctionBindingInitializerClause(SvelteBindFunctionBindingInitializerClause),
+}
+impl AnySvelteDirectiveInitializerClause {
+    pub fn as_html_attribute_initializer_clause(&self) -> Option<&HtmlAttributeInitializerClause> {
+        match &self {
+            Self::HtmlAttributeInitializerClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_bind_function_binding_initializer_clause(
+        &self,
+    ) -> Option<&SvelteBindFunctionBindingInitializerClause> {
+        match &self {
+            Self::SvelteBindFunctionBindingInitializerClause(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteEachName {
     AnySvelteDestructuredName(AnySvelteDestructuredName),
     HtmlTextExpression(HtmlTextExpression),
@@ -7238,6 +7354,118 @@ impl From<SvelteBindDirective> for SyntaxNode {
 }
 impl From<SvelteBindDirective> for SyntaxElement {
     fn from(n: SvelteBindDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteBindFunctionBindingExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SVELTE_BIND_FUNCTION_BINDING_EXPRESSION as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_BIND_FUNCTION_BINDING_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteBindFunctionBindingExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteBindFunctionBindingExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("get", &support::DebugSyntaxResult(self.get()))
+                .field(
+                    "comma_token",
+                    &support::DebugSyntaxResult(self.comma_token()),
+                )
+                .field("set", &support::DebugSyntaxResult(self.set()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteBindFunctionBindingExpression")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteBindFunctionBindingExpression> for SyntaxNode {
+    fn from(n: SvelteBindFunctionBindingExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteBindFunctionBindingExpression> for SyntaxElement {
+    fn from(n: SvelteBindFunctionBindingExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteBindFunctionBindingInitializerClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteBindFunctionBindingInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteBindFunctionBindingInitializerClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteBindFunctionBindingInitializerClause")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteBindFunctionBindingInitializerClause> for SyntaxNode {
+    fn from(n: SvelteBindFunctionBindingInitializerClause) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteBindFunctionBindingInitializerClause> for SyntaxElement {
+    fn from(n: SvelteBindFunctionBindingInitializerClause) -> Self {
         n.syntax.into()
     }
 }
@@ -11586,6 +11814,79 @@ impl From<AnySvelteDirective> for SyntaxElement {
         node.into()
     }
 }
+impl From<HtmlAttributeInitializerClause> for AnySvelteDirectiveInitializerClause {
+    fn from(node: HtmlAttributeInitializerClause) -> Self {
+        Self::HtmlAttributeInitializerClause(node)
+    }
+}
+impl From<SvelteBindFunctionBindingInitializerClause> for AnySvelteDirectiveInitializerClause {
+    fn from(node: SvelteBindFunctionBindingInitializerClause) -> Self {
+        Self::SvelteBindFunctionBindingInitializerClause(node)
+    }
+}
+impl AstNode for AnySvelteDirectiveInitializerClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = HtmlAttributeInitializerClause::KIND_SET
+        .union(SvelteBindFunctionBindingInitializerClause::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            HTML_ATTRIBUTE_INITIALIZER_CLAUSE | SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_ATTRIBUTE_INITIALIZER_CLAUSE => {
+                Self::HtmlAttributeInitializerClause(HtmlAttributeInitializerClause { syntax })
+            }
+            SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => {
+                Self::SvelteBindFunctionBindingInitializerClause(
+                    SvelteBindFunctionBindingInitializerClause { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlAttributeInitializerClause(it) => it.syntax(),
+            Self::SvelteBindFunctionBindingInitializerClause(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlAttributeInitializerClause(it) => it.into_syntax(),
+            Self::SvelteBindFunctionBindingInitializerClause(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteDirectiveInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HtmlAttributeInitializerClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteBindFunctionBindingInitializerClause(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteDirectiveInitializerClause> for SyntaxNode {
+    fn from(n: AnySvelteDirectiveInitializerClause) -> Self {
+        match n {
+            AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(it) => {
+                it.into_syntax()
+            }
+            AnySvelteDirectiveInitializerClause::SvelteBindFunctionBindingInitializerClause(it) => {
+                it.into_syntax()
+            }
+        }
+    }
+}
+impl From<AnySvelteDirectiveInitializerClause> for SyntaxElement {
+    fn from(n: AnySvelteDirectiveInitializerClause) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<HtmlTextExpression> for AnySvelteEachName {
     fn from(node: HtmlTextExpression) -> Self {
         Self::HtmlTextExpression(node)
@@ -12280,6 +12581,11 @@ impl std::fmt::Display for AnySvelteDirective {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnySvelteDirectiveInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnySvelteEachName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -12521,6 +12827,16 @@ impl std::fmt::Display for SvelteAwaitThenClause {
     }
 }
 impl std::fmt::Display for SvelteBindDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteBindFunctionBindingExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteBindFunctionBindingInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

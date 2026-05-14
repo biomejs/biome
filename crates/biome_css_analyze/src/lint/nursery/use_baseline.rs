@@ -236,13 +236,27 @@ impl Rule for UseBaseline {
             AnyBaselineCheckable::CssGenericProperty(prop) => check_property(prop, options),
             AnyBaselineCheckable::CssFunction(func) => check_function(func, options),
             AnyBaselineCheckable::CssPseudoClassIdentifier(pseudo) => check_pseudo(
-                pseudo.name().ok()?.value_token().ok()?.token_text_trimmed(),
+                // `:foo-#{$name}` cannot be checked until Sass resolves the name.
+                pseudo
+                    .name()
+                    .ok()?
+                    .as_css_identifier()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
                 pseudo.syntax().text_trimmed_range(),
                 "pseudo-class",
                 options,
             ),
             AnyBaselineCheckable::CssPseudoElementIdentifier(pseudo) => check_pseudo(
-                pseudo.name().ok()?.value_token().ok()?.token_text_trimmed(),
+                // `::foo-#{$name}` cannot be checked until Sass resolves the name.
+                pseudo
+                    .name()
+                    .ok()?
+                    .as_css_identifier()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
                 pseudo.syntax().text_trimmed_range(),
                 "pseudo-element",
                 options,

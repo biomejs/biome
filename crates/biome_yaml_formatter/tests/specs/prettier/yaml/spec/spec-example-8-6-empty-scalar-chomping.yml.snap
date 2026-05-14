@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-6-empty-scalar-chomping.yml
+---
+# Input
+
+```yml
+strip: >-
+
+clip: >
+
+keep: |+
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,5 +2,4 @@
+ 
+ clip: >
+ 
+-keep: |+
+-
++keep: |+
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+strip: >-
+
+clip: >
+
+keep: |+```

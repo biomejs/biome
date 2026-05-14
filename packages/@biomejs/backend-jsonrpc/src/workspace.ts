@@ -1159,6 +1159,10 @@ has syntax errors
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+	 */
+	trailingCommas?: JsTrailingCommas;
+	/**
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
@@ -2741,6 +2745,11 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-else
 See https://biomejs.dev/linter/rules/use-vue-valid-v-else-if 
 	 */
 	useVueValidVElseIf?: UseVueValidVElseIfConfiguration;
+	/**
+	* Enforces valid v-for directives in Vue templates.
+See https://biomejs.dev/linter/rules/use-vue-valid-v-for 
+	 */
+	useVueValidVFor?: UseVueValidVForConfiguration;
 	/**
 	* Enforce valid v-html directives.
 See https://biomejs.dev/linter/rules/use-vue-valid-v-html 
@@ -4709,6 +4718,9 @@ export type UseVueValidVElseConfiguration =
 export type UseVueValidVElseIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVElseIfOptions;
+export type UseVueValidVForConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVForOptions;
 export type UseVueValidVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVHtmlOptions;
@@ -6649,6 +6661,10 @@ export interface RuleWithUseVueValidVElseIfOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVElseIfOptions;
 }
+export interface RuleWithUseVueValidVForOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVForOptions;
+}
 export interface RuleWithUseVueValidVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVHtmlOptions;
@@ -8143,7 +8159,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
-export type UseDestructuringOptions = {};
+export interface UseDestructuringOptions {
+	assignmentExpression?: DestructuringConfig;
+	variableDeclarator?: DestructuringConfig;
+}
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export type UseDomQuerySelectorOptions = {};
@@ -8323,6 +8342,7 @@ export type UseVueValidVBindOptions = {};
 export type UseVueValidVCloakOptions = {};
 export type UseVueValidVElseOptions = {};
 export type UseVueValidVElseIfOptions = {};
+export type UseVueValidVForOptions = {};
 export type UseVueValidVHtmlOptions = {};
 export type UseVueValidVIfOptions = {};
 export interface UseVueValidVOnOptions {
@@ -8780,6 +8800,10 @@ export type MethodSignatureStyle = "property" | "method";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export interface DestructuringConfig {
+	array?: boolean;
+	object?: boolean;
+}
 export type CheckInputType = "off" | "loose" | "strict";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.

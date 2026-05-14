@@ -913,7 +913,7 @@ pub trait FormatOptions {
     /// Whether to add a trailing newline at the end of the file.
     fn trailing_newline(&self) -> TrailingNewline;
 
-    /// Derives the print options from the these format options
+    /// Derives the print options from these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
 

@@ -14,11 +14,12 @@ use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
-    AnySvelteDestructuredName, AnySvelteDirective, AnySvelteEachName, AstroEmbeddedContent,
-    HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression,
-    HtmlDoubleTextExpression, HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective, VueVBindShorthandDirective,
-    VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
+    AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
+    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
+    HtmlSingleTextExpression, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName,
+    VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
@@ -298,16 +299,15 @@ pub(crate) fn parse_embedded_nodes(
             // Pass 4: directive attributes and attributes which initializer is a text expression
             for element in html_root.syntax().descendants() {
                 // Handle special Svelte directives (bind:, class:, etc.)
-                if let Some(directive) = AnySvelteDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_svelte_directive_candidate(&initializer)
-                {
-                    ctx.parse_and_push(
-                        &candidate,
-                        &doc_file_source,
-                        Some(embedded_file_source),
-                        &mut nodes,
-                    );
+                if let Some(directive) = AnySvelteDirective::cast_ref(&element) {
+                    for candidate in build_svelte_directive_candidates(&directive) {
+                        ctx.parse_and_push(
+                            &candidate,
+                            &doc_file_source,
+                            Some(embedded_file_source),
+                            &mut nodes,
+                        );
+                    }
                 }
 
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
@@ -535,10 +535,54 @@ fn parse_svelte_blocks(
 ///
 /// Svelte directives use curly brace text expressions (`on:click={handler}`).
 /// The JS content is the literal token inside the expression node.
-fn build_svelte_directive_candidate(
-    initializer: &HtmlAttributeInitializerClause,
+fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<EmbedCandidate> {
+    let Some(initializer) = directive.initializer() else {
+        return Vec::new();
+    };
+
+    match initializer {
+        AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(initializer) => {
+            build_attribute_expression_candidate(&initializer)
+                .into_iter()
+                .collect()
+        }
+        AnySvelteDirectiveInitializerClause::SvelteBindFunctionBindingInitializerClause(
+            initializer,
+        ) => {
+            let Ok(value) = initializer.value() else {
+                return Vec::new();
+            };
+
+            let mut candidates = Vec::new();
+            if let Ok(get) = value.get()
+                && let Some(candidate) = build_text_expression_directive_candidate(&get)
+            {
+                candidates.push(candidate);
+            }
+            if let Ok(set) = value.set()
+                && let Some(candidate) = build_text_expression_directive_candidate(&set)
+            {
+                candidates.push(candidate);
+            }
+            candidates
+        }
+    }
+}
+
+fn build_text_expression_directive_candidate(
+    expression: &HtmlTextExpression,
 ) -> Option<EmbedCandidate> {
-    build_attribute_expression_candidate(initializer)
+    let content_token = expression.html_literal_token().ok()?;
+
+    Some(EmbedCandidate::Directive {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
+        },
+        is_event_handler: false,
+    })
 }
 
 /// Build an `EmbedCandidate::Directive` from an initializer clause containing
@@ -568,15 +612,14 @@ fn build_attribute_expression_candidate(
 /// Build an `EmbedCandidate::Frontmatter` from Astro's `---` block.
 fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<EmbedCandidate> {
     let content_token = element.content_token()?;
+    let content_range = content_token.text_trimmed_range();
 
     Some(EmbedCandidate::Frontmatter {
         content: EmbedContent {
             element_range: element.range(),
-            content_range: content_token.text_trimmed_range(),
-            content_offset: content_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: content_token.token_text(),
+            content_range,
+            content_offset: content_range.start(),
+            text: content_token.token_text_trimmed(),
         },
     })
 }

@@ -17,13 +17,14 @@ const SCSS_PARAMETER_DEFAULT_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![...]];
 const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')'], T!['{']];
 
-/// Parses the SCSS parameter list used by `@mixin` and `@function`.
+/// Parses the SCSS parameter list used by `@mixin`, `@function`, and
+/// `@include ... using (...)`.
 ///
 /// # Example
 ///
 /// ```scss
-/// @mixin button($radius: 4px, $args...) {}
-///              ^^^^^^^^^^^^^^^^^^^^^^^^
+/// @include button using ($value, $fallback) {}
+///                       ^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
 /// Docs:

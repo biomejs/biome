@@ -20,6 +20,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssAttrFunction" => lang::CssAttrFunction::KIND_SET.iter().next(),
         "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
         "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
+        "CssAttributeModifier" => lang::CssAttributeModifier::KIND_SET.iter().next(),
         "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
         "CssAttributeSelector" => lang::CssAttributeSelector::KIND_SET.iter().next(),
         "CssBinaryExpression" => lang::CssBinaryExpression::KIND_SET.iter().next(),
@@ -319,11 +320,52 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
+        "ScssIncludeUsingClause" => lang::ScssIncludeUsingClause::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifier" => lang::ScssInterpolatedIdentifier::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
             .iter()
             .next(),
         "ScssInterpolatedNthValue" => lang::ScssInterpolatedNthValue::KIND_SET.iter().next(),
+        "ScssInterpolatedPseudoClassFunction" => {
+            lang::ScssInterpolatedPseudoClassFunction::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassNthArguments" => {
+            lang::ScssInterpolatedPseudoClassNthArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassRelativeSelectorArguments" => {
+            lang::ScssInterpolatedPseudoClassRelativeSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassSelectorArguments" => {
+            lang::ScssInterpolatedPseudoClassSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassValueArguments" => {
+            lang::ScssInterpolatedPseudoClassValueArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementFunction" => {
+            lang::ScssInterpolatedPseudoElementFunction::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementSelectorArguments" => {
+            lang::ScssInterpolatedPseudoElementSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementValueArguments" => {
+            lang::ScssInterpolatedPseudoElementValueArguments::KIND_SET
+                .iter()
+                .next()
+        }
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
@@ -385,7 +427,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssAtRuleDeclarator" => &[("declarator", 1)],
         "CssAttrFallbackValue" => &[("value", 1)],
         "CssAttrFunction" => &[("attr_name", 2), ("attr_type", 3), ("fallback_value", 4)],
-        "CssAttributeMatcher" => &[("value", 1)],
+        "CssAttributeMatcher" => &[("value", 1), ("modifier", 2)],
         "CssAttributeMatcherValue" => &[("name", 0)],
         "CssAttributeName" => &[("namespace", 0), ("name", 1)],
         "CssAttributeSelector" => &[("name", 1), ("matcher", 2)],
@@ -593,9 +635,23 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssHideClause" => &[("members", 1)],
         "ScssIfAtRule" => &[("condition", 1), ("block", 2), ("else_clause", 3)],
         "ScssImportAtRule" => &[("imports", 1)],
-        "ScssIncludeAtRule" => &[("name", 1), ("arguments", 2), ("block", 3)],
+        "ScssIncludeAtRule" => &[
+            ("name", 1),
+            ("arguments", 2),
+            ("using_clause", 3),
+            ("block", 4),
+        ],
+        "ScssIncludeUsingClause" => &[("parameters", 1)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedNthValue" => &[("items", 0)],
+        "ScssInterpolatedPseudoClassFunction" => &[("name", 0), ("arguments", 2)],
+        "ScssInterpolatedPseudoClassNthArguments" => &[("selector", 0)],
+        "ScssInterpolatedPseudoClassRelativeSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoClassSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoClassValueArguments" => &[("values", 0)],
+        "ScssInterpolatedPseudoElementFunction" => &[("name", 0), ("arguments", 2)],
+        "ScssInterpolatedPseudoElementSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoElementValueArguments" => &[("values", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],

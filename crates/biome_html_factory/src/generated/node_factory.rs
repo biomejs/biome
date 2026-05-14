@@ -692,6 +692,36 @@ pub fn svelte_bind_directive(
         ],
     ))
 }
+pub fn svelte_bind_function_binding_expression(
+    l_curly_token: SyntaxToken,
+    get: HtmlTextExpression,
+    comma_token: SyntaxToken,
+    set: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> SvelteBindFunctionBindingExpression {
+    SvelteBindFunctionBindingExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(get.into_syntax())),
+            Some(SyntaxElement::Token(comma_token)),
+            Some(SyntaxElement::Node(set.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn svelte_bind_function_binding_initializer_clause(
+    eq_token: SyntaxToken,
+    value: SvelteBindFunctionBindingExpression,
+) -> SvelteBindFunctionBindingInitializerClause {
+    SvelteBindFunctionBindingInitializerClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE,
+        [
+            Some(SyntaxElement::Token(eq_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_class_directive(
     class_token: SyntaxToken,
     value: SvelteDirectiveValue,
@@ -778,10 +808,10 @@ pub struct SvelteDirectiveValueBuilder {
     colon_token: SyntaxToken,
     property: AnySvelteBindingProperty,
     modifiers: SvelteDirectiveModifierList,
-    initializer: Option<HtmlAttributeInitializerClause>,
+    initializer: Option<AnySvelteDirectiveInitializerClause>,
 }
 impl SvelteDirectiveValueBuilder {
-    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+    pub fn with_initializer(mut self, initializer: AnySvelteDirectiveInitializerClause) -> Self {
         self.initializer = Some(initializer);
         self
     }

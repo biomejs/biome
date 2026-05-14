@@ -1068,6 +1068,7 @@ impl<'src> CssLexer<'src> {
             b"forward" => FORWARD_KW,
             b"hide" => HIDE_KW,
             b"include" => INCLUDE_KW,
+            b"using" => USING_KW,
             b"mixin" => MIXIN_KW,
             b"optional" => OPTIONAL_KW,
             b"while" => WHILE_KW,
@@ -1661,6 +1662,22 @@ impl<'src> CssLexer<'src> {
     pub(crate) fn is_at_scss_interpolated_function(&self, start: usize) -> bool {
         self.scan_cursor_at(start)
             .is_at_scss_interpolated_function()
+    }
+
+    /// Returns true when `start` begins a quoted string followed by SassScript
+    /// concatenation, without consuming lexer state.
+    ///
+    /// Examples: `url('v'+1)` or `url("#{$bg}" + ".png")`.
+    pub(crate) fn is_at_scss_string_concatenation(&self, start: usize) -> bool {
+        self.scan_cursor_at(start).is_at_scss_string_concatenation()
+    }
+
+    /// Returns true when `start` is followed by SassScript `+`, without
+    /// consuming lexer state.
+    ///
+    /// Example: `url('v'+1)`.
+    pub(crate) fn is_at_scss_concatenation_plus(&self, start: usize) -> bool {
+        self.scan_cursor_at(start).is_at_scss_concatenation_plus()
     }
 
     fn take_pending_url_raw_value_scan_at_current_position(

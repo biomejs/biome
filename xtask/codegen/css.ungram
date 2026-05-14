@@ -225,17 +225,28 @@ CssAttributeSelector =
 
 CssAttributeName =
 	namespace: CssNamespace?
-	name: CssIdentifier
+	name: AnyCssAttributeName
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
 CssAttributeMatcher =
 	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
 	value: CssAttributeMatcherValue
-	modifier: ('i' | 's')?
+	modifier: AnyCssAttributeModifier?
+
+AnyCssAttributeModifier =
+	CssAttributeModifier
+	| ScssInterpolatedIdentifier
+
+AnyCssAttributeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+CssAttributeModifier =
+	value: ('i' | 's')
 
 CssAttributeMatcherValue =
- name: AnyCssAttributeMatcherValue
+	name: AnyCssAttributeMatcherValue
 
 AnyCssAttributeMatcherValue =
 	CssString
@@ -261,10 +272,11 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionNth
 	| CssPseudoClassFunctionCustomIdentifierList
 	| CssPseudoClassFunctionCustomIdentifier
+	| ScssInterpolatedPseudoClassFunction
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
@@ -339,7 +351,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: CssIdentifier
+	name: CssIdentifier
 	'('
 	values: CssPseudoValueList
 	')'
@@ -352,6 +364,8 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 //       ^^  ^^
 AnyCssPseudoValue =
 	CssIdentifier
+	| ScssInterpolation
+	| ScssInterpolatedIdentifier
 	| CssString
 	| ScssInterpolatedString
 
@@ -461,6 +475,40 @@ CssPseudoClassFunctionCustomIdentifierList =
 	items: CssCustomIdentifierCommaSeparatedList
 	')'
 
+// :foo-#{$name}(.item, 2n + #{$offset}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoClassFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoClassFunctionArguments =
+	ScssInterpolatedPseudoClassRelativeSelectorArguments
+	| ScssInterpolatedPseudoClassSelectorArguments
+	| ScssInterpolatedPseudoClassNthArguments
+	| ScssInterpolatedPseudoClassValueArguments
+
+// :#{$name}(> img) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassRelativeSelectorArguments =
+	selectors: CssRelativeSelectorList
+
+// :#{$name}(.item) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassSelectorArguments =
+	selectors: CssSelectorList
+
+// :#{$name}(2n + #{$offset}) {}
+//            ^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassNthArguments =
+	selector: CssPseudoClassNthSelector
+
+// :#{$name}(en, #{$locale}) {}
+//            ^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassValueArguments =
+	values: CssPseudoValueList
+
 // a::after {}
 //  ^^^^^^^^
 // video::cue(b) {}
@@ -476,12 +524,13 @@ AnyCssPseudoElement =
 	| CssPseudoElementFunctionSelector
 	| CssPseudoElementFunctionCustomIdentifier
 	| CssPseudoElementFunction
+	| ScssInterpolatedPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
 CssPseudoElementIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -506,6 +555,28 @@ CssPseudoElementFunction =
 	'('
 	items: CssPseudoElementFunctionParameterList
 	')'
+
+// ::foo-#{$name}(.item, #{$arg}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoElementFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoElementFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoElementFunctionArguments =
+	ScssInterpolatedPseudoElementSelectorArguments
+	| ScssInterpolatedPseudoElementValueArguments
+
+// ::#{$name}(.item) {}
+//             ^^^^^
+ScssInterpolatedPseudoElementSelectorArguments =
+	selectors: CssSelectorList
+
+// ::#{$name}(#{$part}) {}
+//             ^^^^^^^^
+ScssInterpolatedPseudoElementValueArguments =
+	values: CssPseudoValueList
 
 CssPseudoElementFunctionParameterList = CssIdentifier*
 
@@ -2083,6 +2154,7 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssExpression
 	| ScssInterpolatedString
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
@@ -2848,6 +2920,7 @@ ScssIncludeAtRule =
 	'include'
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
+	using_clause: ScssIncludeUsingClause?
 	block: CssDeclarationOrRuleBlock?
 	';'?
 
@@ -2861,6 +2934,12 @@ ScssIncludeArgumentList =
 	'('
 	items: CssParameterList
 	')'
+
+// using ($value, $fallback)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIncludeUsingClause =
+	'using'
+	parameters: ScssParameterList
 
 // ($radius: 4px, $args...)
 // ^^^^^^^^^^^^^^^^^^^^^^^^

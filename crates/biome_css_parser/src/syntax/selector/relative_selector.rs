@@ -157,7 +157,7 @@ const RELATIVE_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
 /// This function uses `RELATIVE_SELECTOR_COMBINATOR_SET` to determine if the current
 /// position in the CSS parser is at a combinator that can be used in a relative selector.
 #[inline]
-fn is_at_relative_selector_combinator(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_relative_selector_combinator(p: &mut CssParser) -> bool {
     p.at_ts(RELATIVE_SELECTOR_COMBINATOR_SET)
 }
 

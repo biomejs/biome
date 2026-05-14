@@ -500,6 +500,7 @@ pub mod use_vue_valid_v_bind;
 pub mod use_vue_valid_v_cloak;
 pub mod use_vue_valid_v_else;
 pub mod use_vue_valid_v_else_if;
+pub mod use_vue_valid_v_for;
 pub mod use_vue_valid_v_html;
 pub mod use_vue_valid_v_if;
 pub mod use_vue_valid_v_on;

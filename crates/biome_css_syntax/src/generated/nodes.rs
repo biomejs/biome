@@ -226,8 +226,8 @@ impl CssAttributeMatcher {
     pub fn value(&self) -> SyntaxResult<CssAttributeMatcherValue> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn modifier(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+    pub fn modifier(&self) -> Option<AnyCssAttributeModifier> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssAttributeMatcher {
@@ -242,7 +242,7 @@ impl Serialize for CssAttributeMatcher {
 pub struct CssAttributeMatcherFields {
     pub operator: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<CssAttributeMatcherValue>,
-    pub modifier: Option<SyntaxToken>,
+    pub modifier: Option<AnyCssAttributeModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeMatcherValue {
@@ -278,6 +278,41 @@ pub struct CssAttributeMatcherValueFields {
     pub name: SyntaxResult<AnyCssAttributeMatcherValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssAttributeModifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssAttributeModifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssAttributeModifierFields {
+        CssAttributeModifierFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssAttributeModifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssAttributeModifierFields {
+    pub value: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeName {
     pub(crate) syntax: SyntaxNode,
 }
@@ -300,7 +335,7 @@ impl CssAttributeName {
     pub fn namespace(&self) -> Option<CssNamespace> {
         support::node(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAttributeName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -315,7 +350,7 @@ impl Serialize for CssAttributeName {
 #[derive(Serialize)]
 pub struct CssAttributeNameFields {
     pub namespace: Option<CssNamespace>,
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssAttributeName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeSelector {
@@ -5972,7 +6007,7 @@ impl CssPseudoClassIdentifier {
     pub fn as_fields(&self) -> CssPseudoClassIdentifierFields {
         CssPseudoClassIdentifierFields { name: self.name() }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssSelectorIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
 }
@@ -5986,7 +6021,7 @@ impl Serialize for CssPseudoClassIdentifier {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassIdentifierFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssSelectorIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassNth {
@@ -6400,7 +6435,7 @@ impl CssPseudoElementIdentifier {
     pub fn as_fields(&self) -> CssPseudoElementIdentifierFields {
         CssPseudoElementIdentifierFields { name: self.name() }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssSelectorIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
 }
@@ -6414,7 +6449,7 @@ impl Serialize for CssPseudoElementIdentifier {
 }
 #[derive(Serialize)]
 pub struct CssPseudoElementIdentifierFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssSelectorIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoElementSelector {
@@ -10071,6 +10106,7 @@ impl ScssIncludeAtRule {
             include_token: self.include_token(),
             name: self.name(),
             arguments: self.arguments(),
+            using_clause: self.using_clause(),
             block: self.block(),
             semicolon_token: self.semicolon_token(),
         }
@@ -10084,11 +10120,14 @@ impl ScssIncludeAtRule {
     pub fn arguments(&self) -> Option<ScssIncludeArgumentList> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn block(&self) -> Option<CssDeclarationOrRuleBlock> {
+    pub fn using_clause(&self) -> Option<ScssIncludeUsingClause> {
         support::node(&self.syntax, 3usize)
     }
+    pub fn block(&self) -> Option<CssDeclarationOrRuleBlock> {
+        support::node(&self.syntax, 4usize)
+    }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 4usize)
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for ScssIncludeAtRule {
@@ -10104,8 +10143,49 @@ pub struct ScssIncludeAtRuleFields {
     pub include_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyScssIncludeTarget>,
     pub arguments: Option<ScssIncludeArgumentList>,
+    pub using_clause: Option<ScssIncludeUsingClause>,
     pub block: Option<CssDeclarationOrRuleBlock>,
     pub semicolon_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssIncludeUsingClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssIncludeUsingClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssIncludeUsingClauseFields {
+        ScssIncludeUsingClauseFields {
+            using_token: self.using_token(),
+            parameters: self.parameters(),
+        }
+    }
+    pub fn using_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<ScssParameterList> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssIncludeUsingClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssIncludeUsingClauseFields {
+    pub using_token: SyntaxResult<SyntaxToken>,
+    pub parameters: SyntaxResult<ScssParameterList>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolatedIdentifier {
@@ -10211,6 +10291,316 @@ impl Serialize for ScssInterpolatedNthValue {
 #[derive(Serialize)]
 pub struct ScssInterpolatedNthValueFields {
     pub items: ScssInterpolatedNthValuePartList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoClassFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoClassFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoClassFunctionFields {
+        ScssInterpolatedPseudoClassFunctionFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            arguments: self.arguments(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<ScssInterpolatedIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> Option<AnyScssInterpolatedPseudoClassFunctionArguments> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoClassFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoClassFunctionFields {
+    pub name: SyntaxResult<ScssInterpolatedIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub arguments: Option<AnyScssInterpolatedPseudoClassFunctionArguments>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoClassNthArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoClassNthArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoClassNthArgumentsFields {
+        ScssInterpolatedPseudoClassNthArgumentsFields {
+            selector: self.selector(),
+        }
+    }
+    pub fn selector(&self) -> SyntaxResult<CssPseudoClassNthSelector> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoClassNthArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoClassNthArgumentsFields {
+    pub selector: SyntaxResult<CssPseudoClassNthSelector>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoClassRelativeSelectorArgumentsFields {
+        ScssInterpolatedPseudoClassRelativeSelectorArgumentsFields {
+            selectors: self.selectors(),
+        }
+    }
+    pub fn selectors(&self) -> CssRelativeSelectorList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoClassRelativeSelectorArgumentsFields {
+    pub selectors: CssRelativeSelectorList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoClassSelectorArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoClassSelectorArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoClassSelectorArgumentsFields {
+        ScssInterpolatedPseudoClassSelectorArgumentsFields {
+            selectors: self.selectors(),
+        }
+    }
+    pub fn selectors(&self) -> CssSelectorList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoClassSelectorArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoClassSelectorArgumentsFields {
+    pub selectors: CssSelectorList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoClassValueArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoClassValueArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoClassValueArgumentsFields {
+        ScssInterpolatedPseudoClassValueArgumentsFields {
+            values: self.values(),
+        }
+    }
+    pub fn values(&self) -> CssPseudoValueList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoClassValueArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoClassValueArgumentsFields {
+    pub values: CssPseudoValueList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoElementFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoElementFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoElementFunctionFields {
+        ScssInterpolatedPseudoElementFunctionFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            arguments: self.arguments(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<ScssInterpolatedIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn arguments(&self) -> Option<AnyScssInterpolatedPseudoElementFunctionArguments> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoElementFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoElementFunctionFields {
+    pub name: SyntaxResult<ScssInterpolatedIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub arguments: Option<AnyScssInterpolatedPseudoElementFunctionArguments>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoElementSelectorArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoElementSelectorArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoElementSelectorArgumentsFields {
+        ScssInterpolatedPseudoElementSelectorArgumentsFields {
+            selectors: self.selectors(),
+        }
+    }
+    pub fn selectors(&self) -> CssSelectorList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoElementSelectorArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoElementSelectorArgumentsFields {
+    pub selectors: CssSelectorList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedPseudoElementValueArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedPseudoElementValueArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedPseudoElementValueArgumentsFields {
+        ScssInterpolatedPseudoElementValueArgumentsFields {
+            values: self.values(),
+        }
+    }
+    pub fn values(&self) -> CssPseudoValueList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedPseudoElementValueArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedPseudoElementValueArgumentsFields {
+    pub values: CssPseudoValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolatedString {
@@ -12949,6 +13339,44 @@ impl AnyCssAttributeMatcherValue {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAttributeModifier {
+    CssAttributeModifier(CssAttributeModifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssAttributeModifier {
+    pub fn as_css_attribute_modifier(&self) -> Option<&CssAttributeModifier> {
+        match &self {
+            Self::CssAttributeModifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAttributeName {
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssAttributeName {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssBracketedValueItem {
     AnyCssCustomIdentifier(AnyCssCustomIdentifier),
     CssGenericDelimiter(CssGenericDelimiter),
@@ -14676,6 +15104,7 @@ pub enum AnyCssPseudoClass {
     CssPseudoClassFunctionSelectorList(CssPseudoClassFunctionSelectorList),
     CssPseudoClassFunctionValueList(CssPseudoClassFunctionValueList),
     CssPseudoClassIdentifier(CssPseudoClassIdentifier),
+    ScssInterpolatedPseudoClassFunction(ScssInterpolatedPseudoClassFunction),
 }
 impl AnyCssPseudoClass {
     pub fn as_css_bogus_pseudo_class(&self) -> Option<&CssBogusPseudoClass> {
@@ -14766,6 +15195,14 @@ impl AnyCssPseudoClass {
             _ => None,
         }
     }
+    pub fn as_scss_interpolated_pseudo_class_function(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoClassFunction> {
+        match &self {
+            Self::ScssInterpolatedPseudoClassFunction(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClassNth {
@@ -14845,6 +15282,7 @@ pub enum AnyCssPseudoElement {
     CssPseudoElementFunctionCustomIdentifier(CssPseudoElementFunctionCustomIdentifier),
     CssPseudoElementFunctionSelector(CssPseudoElementFunctionSelector),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
+    ScssInterpolatedPseudoElementFunction(ScssInterpolatedPseudoElementFunction),
 }
 impl AnyCssPseudoElement {
     pub fn as_css_bogus_pseudo_element(&self) -> Option<&CssBogusPseudoElement> {
@@ -14881,12 +15319,22 @@ impl AnyCssPseudoElement {
             _ => None,
         }
     }
+    pub fn as_scss_interpolated_pseudo_element_function(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoElementFunction> {
+        match &self {
+            Self::ScssInterpolatedPseudoElementFunction(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoValue {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolatedString(ScssInterpolatedString),
+    ScssInterpolation(ScssInterpolation),
 }
 impl AnyCssPseudoValue {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
@@ -14901,9 +15349,21 @@ impl AnyCssPseudoValue {
             _ => None,
         }
     }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
         match &self {
             Self::ScssInterpolatedString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -15613,6 +16073,7 @@ impl AnyCssUrlModifier {
 pub enum AnyCssUrlValue {
     CssString(CssString),
     CssUrlValueRaw(CssUrlValueRaw),
+    ScssExpression(ScssExpression),
     ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssUrlValue {
@@ -15625,6 +16086,12 @@ impl AnyCssUrlValue {
     pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
         match &self {
             Self::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -16129,6 +16596,72 @@ impl AnyScssInterpolatedNthValuePart {
     pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
         match &self {
             Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssInterpolatedPseudoClassFunctionArguments {
+    ScssInterpolatedPseudoClassNthArguments(ScssInterpolatedPseudoClassNthArguments),
+    ScssInterpolatedPseudoClassRelativeSelectorArguments(
+        ScssInterpolatedPseudoClassRelativeSelectorArguments,
+    ),
+    ScssInterpolatedPseudoClassSelectorArguments(ScssInterpolatedPseudoClassSelectorArguments),
+    ScssInterpolatedPseudoClassValueArguments(ScssInterpolatedPseudoClassValueArguments),
+}
+impl AnyScssInterpolatedPseudoClassFunctionArguments {
+    pub fn as_scss_interpolated_pseudo_class_nth_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoClassNthArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoClassNthArguments(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_pseudo_class_relative_selector_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoClassRelativeSelectorArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_pseudo_class_selector_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoClassSelectorArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoClassSelectorArguments(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_pseudo_class_value_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoClassValueArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoClassValueArguments(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssInterpolatedPseudoElementFunctionArguments {
+    ScssInterpolatedPseudoElementSelectorArguments(ScssInterpolatedPseudoElementSelectorArguments),
+    ScssInterpolatedPseudoElementValueArguments(ScssInterpolatedPseudoElementValueArguments),
+}
+impl AnyScssInterpolatedPseudoElementFunctionArguments {
+    pub fn as_scss_interpolated_pseudo_element_selector_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoElementSelectorArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoElementSelectorArguments(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_pseudo_element_value_arguments(
+        &self,
+    ) -> Option<&ScssInterpolatedPseudoElementValueArguments> {
+        match &self {
+            Self::ScssInterpolatedPseudoElementValueArguments(item) => Some(item),
             _ => None,
         }
     }
@@ -16674,6 +17207,53 @@ impl From<CssAttributeMatcherValue> for SyntaxNode {
 }
 impl From<CssAttributeMatcherValue> for SyntaxElement {
     fn from(n: CssAttributeMatcherValue) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssAttributeModifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_MODIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_ATTRIBUTE_MODIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssAttributeModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAttributeModifier")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssAttributeModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssAttributeModifier> for SyntaxNode {
+    fn from(n: CssAttributeModifier) -> Self {
+        n.syntax
+    }
+}
+impl From<CssAttributeModifier> for SyntaxElement {
+    fn from(n: CssAttributeModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -28524,6 +29104,10 @@ impl std::fmt::Debug for ScssIncludeAtRule {
                     "arguments",
                     &support::DebugOptionalElement(self.arguments()),
                 )
+                .field(
+                    "using_clause",
+                    &support::DebugOptionalElement(self.using_clause()),
+                )
                 .field("block", &support::DebugOptionalElement(self.block()))
                 .field(
                     "semicolon_token",
@@ -28544,6 +29128,57 @@ impl From<ScssIncludeAtRule> for SyntaxNode {
 }
 impl From<ScssIncludeAtRule> for SyntaxElement {
     fn from(n: ScssIncludeAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssIncludeUsingClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INCLUDE_USING_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INCLUDE_USING_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssIncludeUsingClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssIncludeUsingClause")
+                .field(
+                    "using_token",
+                    &support::DebugSyntaxResult(self.using_token()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .finish()
+        } else {
+            f.debug_struct("ScssIncludeUsingClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssIncludeUsingClause> for SyntaxNode {
+    fn from(n: ScssIncludeUsingClause) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssIncludeUsingClause> for SyntaxElement {
+    fn from(n: ScssIncludeUsingClause) -> Self {
         n.syntax.into()
     }
 }
@@ -28688,6 +29323,422 @@ impl From<ScssInterpolatedNthValue> for SyntaxNode {
 }
 impl From<ScssInterpolatedNthValue> for SyntaxElement {
     fn from(n: ScssInterpolatedNthValue) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoClassFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoClassFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoClassFunction")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoClassFunction")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoClassFunction> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoClassFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoClassFunction> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoClassFunction) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoClassNthArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoClassNthArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoClassNthArguments")
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoClassNthArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoClassNthArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoClassNthArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoClassNthArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoClassNthArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoClassRelativeSelectorArguments")
+                .field("selectors", &self.selectors())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoClassRelativeSelectorArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoClassRelativeSelectorArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoClassRelativeSelectorArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoClassRelativeSelectorArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoClassRelativeSelectorArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoClassSelectorArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoClassSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoClassSelectorArguments")
+                .field("selectors", &self.selectors())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoClassSelectorArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoClassSelectorArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoClassSelectorArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoClassSelectorArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoClassSelectorArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoClassValueArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoClassValueArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoClassValueArguments")
+                .field("values", &self.values())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoClassValueArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoClassValueArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoClassValueArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoClassValueArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoClassValueArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoElementFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoElementFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoElementFunction")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoElementFunction")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoElementFunction> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoElementFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoElementFunction> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoElementFunction) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoElementSelectorArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoElementSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoElementSelectorArguments")
+                .field("selectors", &self.selectors())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoElementSelectorArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoElementSelectorArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoElementSelectorArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoElementSelectorArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoElementSelectorArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssInterpolatedPseudoElementValueArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedPseudoElementValueArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedPseudoElementValueArguments")
+                .field("values", &self.values())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedPseudoElementValueArguments")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedPseudoElementValueArguments> for SyntaxNode {
+    fn from(n: ScssInterpolatedPseudoElementValueArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedPseudoElementValueArguments> for SyntaxElement {
+    fn from(n: ScssInterpolatedPseudoElementValueArguments) -> Self {
         n.syntax.into()
     }
 }
@@ -32456,6 +33507,130 @@ impl From<AnyCssAttributeMatcherValue> for SyntaxNode {
 }
 impl From<AnyCssAttributeMatcherValue> for SyntaxElement {
     fn from(n: AnyCssAttributeMatcherValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssAttributeModifier> for AnyCssAttributeModifier {
+    fn from(node: CssAttributeModifier) -> Self {
+        Self::CssAttributeModifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssAttributeModifier {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssAttributeModifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssAttributeModifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_ATTRIBUTE_MODIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_ATTRIBUTE_MODIFIER => Self::CssAttributeModifier(CssAttributeModifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssAttributeModifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssAttributeModifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAttributeModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssAttributeModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAttributeModifier> for SyntaxNode {
+    fn from(n: AnyCssAttributeModifier) -> Self {
+        match n {
+            AnyCssAttributeModifier::CssAttributeModifier(it) => it.into_syntax(),
+            AnyCssAttributeModifier::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAttributeModifier> for SyntaxElement {
+    fn from(n: AnyCssAttributeModifier) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIdentifier> for AnyCssAttributeName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssAttributeName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssAttributeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAttributeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAttributeName> for SyntaxNode {
+    fn from(n: AnyCssAttributeName) -> Self {
+        match n {
+            AnyCssAttributeName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssAttributeName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAttributeName> for SyntaxElement {
+    fn from(n: AnyCssAttributeName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -37621,6 +38796,11 @@ impl From<CssPseudoClassIdentifier> for AnyCssPseudoClass {
         Self::CssPseudoClassIdentifier(node)
     }
 }
+impl From<ScssInterpolatedPseudoClassFunction> for AnyCssPseudoClass {
+    fn from(node: ScssInterpolatedPseudoClassFunction) -> Self {
+        Self::ScssInterpolatedPseudoClassFunction(node)
+    }
+}
 impl AstNode for AnyCssPseudoClass {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoClass::KIND_SET
@@ -37634,7 +38814,8 @@ impl AstNode for AnyCssPseudoClass {
         .union(CssPseudoClassFunctionSelector::KIND_SET)
         .union(CssPseudoClassFunctionSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionValueList::KIND_SET)
-        .union(CssPseudoClassIdentifier::KIND_SET);
+        .union(CssPseudoClassIdentifier::KIND_SET)
+        .union(ScssInterpolatedPseudoClassFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -37650,6 +38831,7 @@ impl AstNode for AnyCssPseudoClass {
                 | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
                 | CSS_PSEUDO_CLASS_IDENTIFIER
+                | SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -37700,6 +38882,11 @@ impl AstNode for AnyCssPseudoClass {
             CSS_PSEUDO_CLASS_IDENTIFIER => {
                 Self::CssPseudoClassIdentifier(CssPseudoClassIdentifier { syntax })
             }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION => {
+                Self::ScssInterpolatedPseudoClassFunction(ScssInterpolatedPseudoClassFunction {
+                    syntax,
+                })
+            }
             _ => return None,
         };
         Some(res)
@@ -37718,6 +38905,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionSelectorList(it) => it.syntax(),
             Self::CssPseudoClassFunctionValueList(it) => it.syntax(),
             Self::CssPseudoClassIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoClassFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -37734,6 +38922,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionSelectorList(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionValueList(it) => it.into_syntax(),
             Self::CssPseudoClassIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoClassFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -37752,6 +38941,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionSelectorList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedPseudoClassFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -37770,6 +38960,7 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoClass::ScssInterpolatedPseudoClassFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -38020,13 +39211,19 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
         Self::CssPseudoElementIdentifier(node)
     }
 }
+impl From<ScssInterpolatedPseudoElementFunction> for AnyCssPseudoElement {
+    fn from(node: ScssInterpolatedPseudoElementFunction) -> Self {
+        Self::ScssInterpolatedPseudoElementFunction(node)
+    }
+}
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoElement::KIND_SET
         .union(CssPseudoElementFunction::KIND_SET)
         .union(CssPseudoElementFunctionCustomIdentifier::KIND_SET)
         .union(CssPseudoElementFunctionSelector::KIND_SET)
-        .union(CssPseudoElementIdentifier::KIND_SET);
+        .union(CssPseudoElementIdentifier::KIND_SET)
+        .union(ScssInterpolatedPseudoElementFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -38035,6 +39232,7 @@ impl AstNode for AnyCssPseudoElement {
                 | CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER
                 | CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR
                 | CSS_PSEUDO_ELEMENT_IDENTIFIER
+                | SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -38056,6 +39254,11 @@ impl AstNode for AnyCssPseudoElement {
             CSS_PSEUDO_ELEMENT_IDENTIFIER => {
                 Self::CssPseudoElementIdentifier(CssPseudoElementIdentifier { syntax })
             }
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION => {
+                Self::ScssInterpolatedPseudoElementFunction(ScssInterpolatedPseudoElementFunction {
+                    syntax,
+                })
+            }
             _ => return None,
         };
         Some(res)
@@ -38067,6 +39270,7 @@ impl AstNode for AnyCssPseudoElement {
             Self::CssPseudoElementFunctionCustomIdentifier(it) => it.syntax(),
             Self::CssPseudoElementFunctionSelector(it) => it.syntax(),
             Self::CssPseudoElementIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoElementFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -38076,6 +39280,7 @@ impl AstNode for AnyCssPseudoElement {
             Self::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
             Self::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
             Self::CssPseudoElementIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoElementFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -38087,6 +39292,7 @@ impl std::fmt::Debug for AnyCssPseudoElement {
             Self::CssPseudoElementFunctionCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementFunctionSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedPseudoElementFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38098,6 +39304,7 @@ impl From<AnyCssPseudoElement> for SyntaxNode {
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into_syntax(),
+            AnyCssPseudoElement::ScssInterpolatedPseudoElementFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -38117,26 +39324,49 @@ impl From<CssString> for AnyCssPseudoValue {
         Self::CssString(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssPseudoValue {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssPseudoValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
+    }
+}
+impl From<ScssInterpolation> for AnyCssPseudoValue {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
     }
 }
 impl AstNode for AnyCssPseudoValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
         .union(CssString::KIND_SET)
-        .union(ScssInterpolatedString::KIND_SET);
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssInterpolatedString::KIND_SET)
+        .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | CSS_STRING | SCSS_INTERPOLATED_STRING)
+        matches!(
+            kind,
+            CSS_IDENTIFIER
+                | CSS_STRING
+                | SCSS_INTERPOLATED_IDENTIFIER
+                | SCSS_INTERPOLATED_STRING
+                | SCSS_INTERPOLATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             _ => return None,
         };
         Some(res)
@@ -38145,14 +39375,18 @@ impl AstNode for AnyCssPseudoValue {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
         }
     }
 }
@@ -38161,7 +39395,9 @@ impl std::fmt::Debug for AnyCssPseudoValue {
         match self {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38170,7 +39406,9 @@ impl From<AnyCssPseudoValue> for SyntaxNode {
         match n {
             AnyCssPseudoValue::CssIdentifier(it) => it.into_syntax(),
             AnyCssPseudoValue::CssString(it) => it.into_syntax(),
+            AnyCssPseudoValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssPseudoValue::ScssInterpolatedString(it) => it.into_syntax(),
+            AnyCssPseudoValue::ScssInterpolation(it) => it.into_syntax(),
         }
     }
 }
@@ -40183,6 +41421,11 @@ impl From<CssUrlValueRaw> for AnyCssUrlValue {
         Self::CssUrlValueRaw(node)
     }
 }
+impl From<ScssExpression> for AnyCssUrlValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssUrlValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -40192,17 +41435,19 @@ impl AstNode for AnyCssUrlValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET
         .union(CssUrlValueRaw::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_INTERPOLATED_STRING
+            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_EXPRESSION | SCSS_INTERPOLATED_STRING
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_VALUE_RAW => Self::CssUrlValueRaw(CssUrlValueRaw { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -40214,6 +41459,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.syntax(),
             Self::CssUrlValueRaw(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
@@ -40221,6 +41467,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlValueRaw(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -40230,6 +41477,7 @@ impl std::fmt::Debug for AnyCssUrlValue {
         match self {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -40239,6 +41487,7 @@ impl From<AnyCssUrlValue> for SyntaxNode {
         match n {
             AnyCssUrlValue::CssString(it) => it.into_syntax(),
             AnyCssUrlValue::CssUrlValueRaw(it) => it.into_syntax(),
+            AnyCssUrlValue::ScssExpression(it) => it.into_syntax(),
             AnyCssUrlValue::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -41516,6 +42765,189 @@ impl From<AnyScssInterpolatedNthValuePart> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssInterpolatedPseudoClassNthArguments>
+    for AnyScssInterpolatedPseudoClassFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoClassNthArguments) -> Self {
+        Self::ScssInterpolatedPseudoClassNthArguments(node)
+    }
+}
+impl From<ScssInterpolatedPseudoClassRelativeSelectorArguments>
+    for AnyScssInterpolatedPseudoClassFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoClassRelativeSelectorArguments) -> Self {
+        Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(node)
+    }
+}
+impl From<ScssInterpolatedPseudoClassSelectorArguments>
+    for AnyScssInterpolatedPseudoClassFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoClassSelectorArguments) -> Self {
+        Self::ScssInterpolatedPseudoClassSelectorArguments(node)
+    }
+}
+impl From<ScssInterpolatedPseudoClassValueArguments>
+    for AnyScssInterpolatedPseudoClassFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoClassValueArguments) -> Self {
+        Self::ScssInterpolatedPseudoClassValueArguments(node)
+    }
+}
+impl AstNode for AnyScssInterpolatedPseudoClassFunctionArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = ScssInterpolatedPseudoClassNthArguments::KIND_SET
+        .union(ScssInterpolatedPseudoClassRelativeSelectorArguments::KIND_SET)
+        .union(ScssInterpolatedPseudoClassSelectorArguments::KIND_SET)
+        .union(ScssInterpolatedPseudoClassValueArguments::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS
+                | SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS
+                | SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS
+                | SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoClassNthArguments(
+                    ScssInterpolatedPseudoClassNthArguments { syntax },
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(
+                    ScssInterpolatedPseudoClassRelativeSelectorArguments { syntax },
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoClassSelectorArguments(
+                    ScssInterpolatedPseudoClassSelectorArguments { syntax },
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoClassValueArguments(
+                    ScssInterpolatedPseudoClassValueArguments { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssInterpolatedPseudoClassNthArguments(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoClassSelectorArguments(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoClassValueArguments(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssInterpolatedPseudoClassNthArguments(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoClassSelectorArguments(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoClassValueArguments(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssInterpolatedPseudoClassFunctionArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssInterpolatedPseudoClassNthArguments(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedPseudoClassRelativeSelectorArguments(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            Self::ScssInterpolatedPseudoClassSelectorArguments(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedPseudoClassValueArguments(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssInterpolatedPseudoClassFunctionArguments> for SyntaxNode {
+    fn from(n: AnyScssInterpolatedPseudoClassFunctionArguments) -> Self {
+        match n { AnyScssInterpolatedPseudoClassFunctionArguments :: ScssInterpolatedPseudoClassNthArguments (it) => it . into_syntax () , AnyScssInterpolatedPseudoClassFunctionArguments :: ScssInterpolatedPseudoClassRelativeSelectorArguments (it) => it . into_syntax () , AnyScssInterpolatedPseudoClassFunctionArguments :: ScssInterpolatedPseudoClassSelectorArguments (it) => it . into_syntax () , AnyScssInterpolatedPseudoClassFunctionArguments :: ScssInterpolatedPseudoClassValueArguments (it) => it . into_syntax () , }
+    }
+}
+impl From<AnyScssInterpolatedPseudoClassFunctionArguments> for SyntaxElement {
+    fn from(n: AnyScssInterpolatedPseudoClassFunctionArguments) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<ScssInterpolatedPseudoElementSelectorArguments>
+    for AnyScssInterpolatedPseudoElementFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoElementSelectorArguments) -> Self {
+        Self::ScssInterpolatedPseudoElementSelectorArguments(node)
+    }
+}
+impl From<ScssInterpolatedPseudoElementValueArguments>
+    for AnyScssInterpolatedPseudoElementFunctionArguments
+{
+    fn from(node: ScssInterpolatedPseudoElementValueArguments) -> Self {
+        Self::ScssInterpolatedPseudoElementValueArguments(node)
+    }
+}
+impl AstNode for AnyScssInterpolatedPseudoElementFunctionArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssInterpolatedPseudoElementSelectorArguments::KIND_SET
+            .union(ScssInterpolatedPseudoElementValueArguments::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS
+                | SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoElementSelectorArguments(
+                    ScssInterpolatedPseudoElementSelectorArguments { syntax },
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS => {
+                Self::ScssInterpolatedPseudoElementValueArguments(
+                    ScssInterpolatedPseudoElementValueArguments { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssInterpolatedPseudoElementSelectorArguments(it) => it.syntax(),
+            Self::ScssInterpolatedPseudoElementValueArguments(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssInterpolatedPseudoElementSelectorArguments(it) => it.into_syntax(),
+            Self::ScssInterpolatedPseudoElementValueArguments(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssInterpolatedPseudoElementFunctionArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssInterpolatedPseudoElementSelectorArguments(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedPseudoElementValueArguments(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssInterpolatedPseudoElementFunctionArguments> for SyntaxNode {
+    fn from(n: AnyScssInterpolatedPseudoElementFunctionArguments) -> Self {
+        match n { AnyScssInterpolatedPseudoElementFunctionArguments :: ScssInterpolatedPseudoElementSelectorArguments (it) => it . into_syntax () , AnyScssInterpolatedPseudoElementFunctionArguments :: ScssInterpolatedPseudoElementValueArguments (it) => it . into_syntax () , }
+    }
+}
+impl From<AnyScssInterpolatedPseudoElementFunctionArguments> for SyntaxElement {
+    fn from(n: AnyScssInterpolatedPseudoElementFunctionArguments) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<ScssInterpolation> for AnyScssInterpolatedStringPart {
     fn from(node: ScssInterpolation) -> Self {
         Self::ScssInterpolation(node)
@@ -42268,6 +43700,16 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssAttributeModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssAttributeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssBracketedValueItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42833,6 +44275,16 @@ impl std::fmt::Display for AnyScssInterpolatedNthValuePart {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyScssInterpolatedPseudoClassFunctionArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssInterpolatedPseudoElementFunctionArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyScssInterpolatedStringPart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42914,6 +44366,11 @@ impl std::fmt::Display for CssAttributeMatcher {
     }
 }
 impl std::fmt::Display for CssAttributeMatcherValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssAttributeModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -44068,6 +45525,11 @@ impl std::fmt::Display for ScssIncludeAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssIncludeUsingClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssInterpolatedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -44079,6 +45541,46 @@ impl std::fmt::Display for ScssInterpolatedIdentifierHyphen {
     }
 }
 impl std::fmt::Display for ScssInterpolatedNthValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoClassFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoClassNthArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoClassSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoClassValueArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoElementFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoElementSelectorArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedPseudoElementValueArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

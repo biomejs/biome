@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueImportCompilerMacros {
-        version: "next",
+        version: "2.4.15",
         name: "noVueImportCompilerMacros",
         language: "js",
         sources: &[RuleSource::EslintVueJs("no-import-compiler-macros").same()],

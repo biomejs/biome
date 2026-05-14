@@ -74,6 +74,7 @@ pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
+mod yaml;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(

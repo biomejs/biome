@@ -1,6 +1,8 @@
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{CliDiagnostic, CliSession, VERSION, service};
+use biome_analyze::RuleFilter;
+use biome_configuration::analyzer::{DomainSelector, RuleDomainValue};
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
@@ -17,6 +19,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::settings::Settings;
 use biome_service::workspace::{RageEntry, RageParams, client};
 use camino::Utf8PathBuf;
+use std::collections::BTreeSet;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
@@ -348,6 +351,10 @@ impl Display for RageConfiguration<'_> {
                     // Print linter configuration if --linter option is true
                     if self.linter {
                         let linter_configuration = configuration.get_linter_rules();
+                        let enabled_rules = linter_enabled_rules(
+                            &linter_configuration,
+                            configuration.get_linter_domains(),
+                        );
 
                         let javascript_linter = configuration.get_javascript_linter_configuration();
                         let json_linter = configuration.get_json_linter_configuration();
@@ -360,7 +367,7 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair::new("CSS enabled", markup!({DisplayOption(css_linter.enabled)}))}
                             {KeyValuePair::new("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
                             {KeyValuePair::new("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
-                            {RageConfigurationLintRules("Enabled rules", linter_configuration)}
+                            {RageConfigurationLintRules("Enabled rules", enabled_rules)}
                         ).fmt(fmt)?;
                     }
                 }
@@ -376,7 +383,40 @@ impl Display for RageConfiguration<'_> {
     }
 }
 
-struct RageConfigurationLintRules<'a>(&'a str, Rules);
+fn linter_enabled_rules(
+    rules: &Rules,
+    domains: Option<&biome_configuration::analyzer::RuleDomains>,
+) -> BTreeSet<RuleFilter<'static>> {
+    let mut enabled_rules = rules
+        .as_enabled_rules()
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+
+    if let Some(domains) = domains {
+        let recommended_rules = Rules::default().as_enabled_rules();
+        for (domain, domain_value) in domains.iter() {
+            let domain_selector = DomainSelector(domain.as_str());
+            let domain_rules = domain_selector
+                .as_rule_filters()
+                .into_iter()
+                .filter(|rule| rule.group() != "nursery");
+            match domain_value {
+                RuleDomainValue::All => enabled_rules.extend(domain_rules),
+                RuleDomainValue::None => {
+                    for rule in domain_rules {
+                        enabled_rules.remove(&rule);
+                    }
+                }
+                RuleDomainValue::Recommended => enabled_rules
+                    .extend(domain_rules.filter(|rule| recommended_rules.contains(rule))),
+            }
+        }
+    }
+
+    enabled_rules
+}
+
+struct RageConfigurationLintRules<'a>(&'a str, BTreeSet<RuleFilter<'static>>);
 
 impl Display for RageConfigurationLintRules<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
@@ -385,9 +425,7 @@ impl Display for RageConfigurationLintRules<'_> {
         let padding_rules = Padding::new(4);
         fmt.write_markup(markup! {{padding}{rules_str}":"})?;
         fmt.write_markup(markup! {{SOFT_LINE}})?;
-        let rules = self.1.as_enabled_rules();
-        let rules = rules.iter().collect::<std::collections::BTreeSet<_>>();
-        for rule in rules {
+        for rule in &self.1 {
             fmt.write_markup(markup! {{padding_rules}{rule}})?;
             fmt.write_markup(markup! {{SOFT_LINE}})?;
         }

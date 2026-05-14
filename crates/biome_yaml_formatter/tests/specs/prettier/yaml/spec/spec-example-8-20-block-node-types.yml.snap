@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-20-block-node-types.yml
+---
+
+# Input
+
+```yml
+-
+  "flow in block"
+- >
+ Block scalar
+- !!map # Block collection
+  foo : bar
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+-- "flow in block"
++-
++  "flow in block"
+ - >
+-  Block scalar
++ Block scalar
+ - !!map # Block collection
+-  foo: bar
++  foo : bar
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+-
+  "flow in block"
+- >
+ Block scalar
+- !!map # Block collection
+  foo : bar```

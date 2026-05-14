@@ -1292,15 +1292,31 @@ pub(crate) fn textual_starts_with_ordered_marker(text: &str) -> bool {
 }
 
 fn line_indent_from_current(p: &MarkdownParser) -> usize {
-    let mut column = 0usize;
-    for c in p.source_after_current().chars() {
+    // Tab expansion is column-relative (CommonMark §2.2). When the current
+    // position sits past a container prefix such as `> `, treating column 0
+    // as the tab origin overstates the indent and makes tab-indented bullets
+    // appear deeper than they actually are.
+    let rest = p.source_after_current();
+    let bytes = rest.as_bytes();
+    // Fast path: pure-space indentation needs no column-relative tab math.
+    if !bytes
+        .iter()
+        .take_while(|b| matches!(b, b' ' | b'\t'))
+        .any(|b| *b == b'\t')
+    {
+        return bytes.iter().take_while(|b| **b == b' ').count();
+    }
+    let cur: usize = p.cur_range().start().into();
+    let start_col = p.cached_absolute_column_at(cur);
+    let mut column = start_col;
+    for c in rest.chars() {
         match c {
             ' ' => column += 1,
             '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
-    column
+    column - start_col
 }
 
 fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option<usize> {

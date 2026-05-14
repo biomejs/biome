@@ -4,8 +4,8 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_function, is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_nth_at_scss_function, parse_scss_function, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_string,
+    is_at_scss_variable, is_nth_at_scss_function, parse_scss_expression_until, parse_scss_function,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
 };
 use crate::syntax::value::function::{
     is_nth_at_css_function, is_nth_at_function, parse_css_function, parse_function,
@@ -22,6 +22,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
+const SCSS_URL_EXPRESSION_END_SET: TokenSet<CssSyntaxKind> = token_set![T![')']];
 
 /// Determines if the current position of the parser is at the beginning of a URL function.
 pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
@@ -105,7 +106,7 @@ pub(crate) fn parse_url_function_with_context(
         p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
     }
 
-    parse_url_value(p).ok();
+    parse_url_value_with_context(p, context).ok();
 
     UrlModifierList::new(context).parse_list(p);
     p.expect(T![')']);
@@ -113,6 +114,10 @@ pub(crate) fn parse_url_function_with_context(
     Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
+/// Detects a function-shaped URL modifier at lookahead `n`.
+///
+/// Examples: `url("a.png" format("woff2"))` or
+/// `url("a.png" color.adjust($c))`.
 #[inline]
 fn is_at_nth_url_modifier_function(
     p: &mut CssParser,
@@ -126,6 +131,9 @@ fn is_at_nth_url_modifier_function(
     }
 }
 
+/// Detects a URL modifier function in the active parsing context.
+///
+/// Example: `url("a.png" #{format}(woff2))`.
 #[inline]
 fn is_at_url_modifier_function_with_context(
     p: &mut CssParser,
@@ -138,14 +146,25 @@ fn is_at_url_modifier_function_with_context(
 
 /// Detects interpolation-led SCSS function names inside URL modifiers.
 ///
+/// Example: `url("a.png" #{format}(woff2))`.
+///
 /// URL modifier parsing must classify function-shaped interpolation before it
 /// can enter the regular value grammar, so this is the one parser boundary
 /// that still uses lexer-backed interpolation lookahead.
+///
+/// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
 fn is_at_scss_interpolated_url_modifier_function(p: &mut CssParser) -> bool {
     is_at_scss_interpolated_function_or_value(p) && p.source().is_at_scss_interpolated_function()
 }
 
+/// Parses a URL modifier function in the active parsing context.
+///
+/// Examples:
+/// ```scss
+/// url("a.png" format("woff2"))
+/// url("a.png" #{format}(woff2))
+/// ```
 #[inline]
 fn parse_url_modifier_function_with_context(
     p: &mut CssParser,
@@ -172,32 +191,93 @@ fn parse_url_modifier_function_with_context(
     }
 }
 
-/// Determines if the current position of the parser is at a URL value.
+/// Determines if the parser is at a CSS URL value.
 ///
-/// This function checks if the parser's current position is at the beginning of either a raw URL value
-/// or a string.
+/// This covers raw values, quoted strings, and SCSS interpolated strings such
+/// as `url(fudge#{$x}.css)` or `url("#{$bg}")`. SassScript bodies such as
+/// `url($path + ".css")` are context-dependent.
 #[inline]
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
     is_at_url_value_raw(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 
-/// Parses a URL value from the current position of the CSS parser.
+/// Parses a URL value in SCSS-aware mode.
 ///
-/// This function attempts to parse a URL value starting from the parser's current position.
-/// If the current position is at a string, it parses using `parse_string`; otherwise, it uses `parse_url_value_raw` for a raw URL.
+/// Examples:
+/// ```scss
+/// url(fudge#{$x}.css)
+/// url("#{$bg}")
+/// url($path + ".css")
+/// ```
 #[inline]
 pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_url_value(p) {
-        return Absent;
-    }
+    parse_url_value_with_context(p, ValueParsingContext::new(p, ValueParsingMode::ScssAware))
+}
 
-    if is_at_string(p) {
+/// Parses a URL value while preserving the caller's SCSS parsing mode.
+///
+/// Full SCSS mode promotes `url($path + ".css")` and
+/// `url("#{$bg}" + ".png")` to SassScript expressions before falling back to
+/// quoted-string or raw-URL parsing.
+#[inline]
+fn parse_url_value_with_context(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+    if is_at_scss_url_expression(p, context) {
+        parse_scss_url_expression(p)
+    } else if !is_at_url_value(p) {
+        Absent
+    } else if is_at_string(p) {
         parse_string(p)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p)
     } else {
         parse_url_value_raw(p)
     }
+}
+
+/// Detects URL bodies that must be parsed as SassScript expressions.
+///
+/// Examples:
+/// ```scss
+/// url($path + ".css")
+/// url("#{$bg}" + ".png")
+/// ```
+#[inline]
+fn is_at_scss_url_expression(p: &mut CssParser, context: ValueParsingContext) -> bool {
+    context.is_full_scss_parsing_allowed()
+        && (is_at_scss_variable(p) || is_at_scss_string_concatenation(p))
+}
+
+/// Detects quoted-string concatenation in a URL body.
+///
+/// Examples:
+/// ```scss
+/// url("../" + $path)
+/// url("#{$bg}" + ".png")
+/// ```
+#[inline]
+fn is_at_scss_string_concatenation(p: &mut CssParser) -> bool {
+    if is_at_string(p) {
+        return p.nth_at(1, T![+])
+            || p.source()
+                .is_current_token_followed_by_scss_concatenation_plus();
+    }
+
+    is_at_scss_interpolated_string(p) && p.source().is_at_scss_string_concatenation()
+}
+
+/// Parses a SassScript expression as a URL body.
+///
+/// Examples:
+/// ```scss
+/// url($path + ".css")
+/// url("../" + $path)
+/// url("#{$bg}" + ".png")
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/syntax/structure
+#[inline]
+fn parse_scss_url_expression(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_expression_until(p, SCSS_URL_EXPRESSION_END_SET)
 }
 
 /// Determines if the current position of the parser is at a raw URL value.
@@ -279,11 +359,21 @@ impl ParseNodeList for UrlModifierList {
     }
 }
 
+/// Detects one URL modifier.
+///
+/// Examples: `url("a.png" format("woff2"))` or `url("a.png" woff2)`.
 #[inline]
 fn is_at_url_modifier_with_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
     is_at_identifier(p) || is_at_url_modifier_function_with_context(p, context)
 }
 
+/// Parses one URL modifier.
+///
+/// Examples:
+/// ```scss
+/// url("a.png" format("woff2"))
+/// url("a.png" woff2)
+/// ```
 #[inline]
 fn parse_url_modifier_with_context(
     p: &mut CssParser,

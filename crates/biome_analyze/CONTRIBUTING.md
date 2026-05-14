@@ -769,7 +769,7 @@ could be `["e", "f"]` instead of `["f"]`.
 When merging rules options, you usually want to resetting the options instead of combining them.
 
 Note that every option is also wrapped in an `Option<_>`.
-This allows to properly merge options by tracking the ones that are set and the ones that are unset.
+This allows you to properly merge options by tracking the ones that are set and the ones that are unset.
 
 With these types in place, you can set the associated type `Options` of the rule:
 
@@ -1580,7 +1580,7 @@ use biome_analyze::declare_lint_rule;
 declare_lint_rule! {
     /// Disallow the use of `var`.
     ///
-    /// _ES2015_ allows to create variables with block scope instead of function scope
+    /// _ES2015_ allows you to create variables with block scope instead of function scope
     /// using the `let` and `const` keywords.
     /// Block scope is common in many other programming languages and helps to avoid mistakes.
     ///
