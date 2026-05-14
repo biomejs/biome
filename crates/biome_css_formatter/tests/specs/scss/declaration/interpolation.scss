@@ -1,5 +1,8 @@
 .box{
 #{$name}:1px;
 margin-#{$side}:1px;
+--#{$prop}:10px;
 --theme-#{$slot}:red;
+color:var(--#{$name});
+background:var(--theme-#{$slot});
 }

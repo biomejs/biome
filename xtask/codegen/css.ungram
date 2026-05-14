@@ -753,7 +753,11 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDashedIdentifier =
+	CssDashedIdentifier
+	| ScssInterpolatedDashedIdentifier
+
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -2055,7 +2059,7 @@ CssReturnsStatement =
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
-	| CssDashedIdentifier
+	| AnyCssDashedIdentifier
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
@@ -2983,6 +2987,11 @@ ScssPlaceholderSelector =
 	name: AnyCssSelectorCustomIdentifier
 
 ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+// Parser-owned invariant: starts as a custom-property name, either
+// `--#{$prop}` or `--theme-#{$slot}`.
+ScssInterpolatedDashedIdentifier =
 	items: ScssInterpolatedIdentifierPartList
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*

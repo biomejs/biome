@@ -108,7 +108,7 @@ CssRoot {
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: ScssInterpolatedIdentifier {
+                                    name: ScssInterpolatedDashedIdentifier {
                                         items: ScssInterpolatedIdentifierPartList [
                                             CssIdentifier {
                                                 value_token: IDENT@53..64 "--theme-" [Newline("\n"), Whitespace("  ")] [],
@@ -218,7 +218,7 @@ CssRoot {
             2: CSS_DECLARATION_WITH_SEMICOLON@53..78
               0: CSS_DECLARATION@53..77
                 0: CSS_GENERIC_PROPERTY@53..77
-                  0: SCSS_INTERPOLATED_IDENTIFIER@53..72
+                  0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@53..72
                     0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@53..72
                       0: CSS_IDENTIFIER@53..64
                         0: IDENT@53..64 "--theme-" [Newline("\n"), Whitespace("  ")] []

@@ -1,14 +1,14 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    complete_scss_interpolated_identifier, is_at_identifier_continuation,
-    is_at_scss_interpolated_identifier,
+    is_at_identifier_continuation, is_at_scss_interpolated_identifier,
+    parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::is_at_scss_interpolation;
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
 };
-use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
+use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
@@ -81,11 +81,11 @@ fn parse_selector_interpolated_identifier(
         return Present(first_fragment);
     }
 
-    Present(complete_scss_interpolated_identifier(
-        p,
-        first_fragment,
-        |p| parse_selector_identifier_part(p, parse_selector_fragment),
-    ))
+    let parts = parse_scss_interpolated_identifier_parts(p, first_fragment, |p| {
+        parse_selector_identifier_part(p, parse_selector_fragment)
+    });
+
+    Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
 #[inline]

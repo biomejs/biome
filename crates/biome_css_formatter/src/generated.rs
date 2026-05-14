@@ -8049,6 +8049,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeUsingClause {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssInterpolatedDashedIdentifier>
+    for crate::scss::value::interpolated_dashed_identifier::FormatScssInterpolatedDashedIdentifier
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssInterpolatedDashedIdentifier,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssInterpolatedDashedIdentifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedDashedIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssInterpolatedDashedIdentifier,
+        crate::scss::value::interpolated_dashed_identifier::FormatScssInterpolatedDashedIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: value :: interpolated_dashed_identifier :: FormatScssInterpolatedDashedIdentifier :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedDashedIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssInterpolatedDashedIdentifier,
+        crate::scss::value::interpolated_dashed_identifier::FormatScssInterpolatedDashedIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: value :: interpolated_dashed_identifier :: FormatScssInterpolatedDashedIdentifier :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssInterpolatedIdentifier>
     for crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier
 {
@@ -13074,6 +13106,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDashedIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssDashedIdentifier,
+        crate::css::any::dashed_identifier::FormatAnyCssDashedIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::dashed_identifier::FormatAnyCssDashedIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDashedIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssDashedIdentifier,
+        crate::css::any::dashed_identifier::FormatAnyCssDashedIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::dashed_identifier::FormatAnyCssDashedIdentifier::default(),
         )
     }
 }

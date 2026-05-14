@@ -321,6 +321,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
         "ScssIncludeUsingClause" => lang::ScssIncludeUsingClause::KIND_SET.iter().next(),
+        "ScssInterpolatedDashedIdentifier" => lang::ScssInterpolatedDashedIdentifier::KIND_SET
+            .iter()
+            .next(),
         "ScssInterpolatedIdentifier" => lang::ScssInterpolatedIdentifier::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
             .iter()
@@ -643,6 +646,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
             ("block", 4),
         ],
         "ScssIncludeUsingClause" => &[("parameters", 1)],
+        "ScssInterpolatedDashedIdentifier" => &[("items", 0)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedNthValue" => &[("items", 0)],
         "ScssInterpolatedPseudoClassFunction" => &[("name", 0), ("arguments", 2)],

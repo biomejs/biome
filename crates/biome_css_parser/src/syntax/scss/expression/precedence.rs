@@ -1,6 +1,7 @@
 use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
+use crate::syntax::scss::is_at_scss_interpolated_dashed_identifier;
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION,
@@ -88,6 +89,12 @@ fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions
 
 #[inline]
 fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+    // `var(--#{$name})` starts with `-`, but the pair belongs to one
+    // custom-property identifier, not chained unary operators.
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        return false;
+    }
+
     p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }
 
