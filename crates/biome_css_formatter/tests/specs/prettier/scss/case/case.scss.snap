@@ -162,7 +162,7 @@ TABLE {}
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,41 +4,41 @@
+@@ -4,27 +4,27 @@
  //   in selectors, as well as function names and property keywords.
  // - Other things should mostly be lowercase.
  
@@ -203,23 +203,6 @@ TABLE {}
  }
  
  @keyframes KeepAnimationName {
--  from {
-+  FROM {
-     prop: val;
-   }
- 
-   #{$KeepInterpolationVar},
--  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"},
-+  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-   #{$Keep + $Keep15PX} {
-     prop: val;
-   }
- 
--  to {
-+  TO {
-     prop: val;
-   }
- }
 @@ -56,14 +56,14 @@
  }
  
@@ -339,17 +322,17 @@ svg[viewBox] linearGradient,
 }
 
 @keyframes KeepAnimationName {
-  FROM {
+  from {
     prop: val;
   }
 
   #{$KeepInterpolationVar},
-  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"},
   #{$Keep + $Keep15PX} {
     prop: val;
   }
 
-  TO {
+  to {
     prop: val;
   }
 }
@@ -489,88 +472,6 @@ case.scss:7:9 parse ━━━━━━━━━━━━━━━━━━━━
       │         ^^^^
     8 │ 
     9 │ HTML#KeepId.KeepClass,
-  
-case.scss:35:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    33 │   }
-    34 │ 
-  > 35 │   #{$KeepInterpolationVar},
-       │   ^
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-    37 │   #{$Keep + $Keep15PX} {
-  
-  i Expected one of:
-  
-  - from
-  - to
-  - a percentage
-  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
-  
-case.scss:35:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found `,`
-  
-    33 │   }
-    34 │ 
-  > 35 │   #{$KeepInterpolationVar},
-       │                           ^
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-    37 │   #{$Keep + $Keep15PX} {
-  
-  i Remove ,
-  
-case.scss:37:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    35 │   #{$KeepInterpolationVar},
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-  > 37 │   #{$Keep + $Keep15PX} {
-       │   ^
-    38 │     prop: val;
-    39 │   }
-  
-  i Expected one of:
-  
-  - from
-  - to
-  - a percentage
-  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
-  
-case.scss:37:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found `{`
-  
-    35 │   #{$KeepInterpolationVar},
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-  > 37 │   #{$Keep + $Keep15PX} {
-       │                        ^
-    38 │     prop: val;
-    39 │   }
-  
-  i Remove {
-  
-case.scss:38:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a SCSS expression but instead found ': val'.
-  
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-    37 │   #{$Keep + $Keep15PX} {
-  > 38 │     prop: val;
-       │         ^^^^^
-    39 │   }
-    40 │ 
-  
-  i Expected a SCSS expression here.
-  
-    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
-    37 │   #{$Keep + $Keep15PX} {
-  > 38 │     prop: val;
-       │         ^^^^^
-    39 │   }
-    40 │ 
   
 case.scss:147:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,0 +1,11 @@
+@keyframes loader {
+  #{50% - $duration}
+    opacity: 1;
+  }
+}
+
+@keyframes loader {
+  #{50% - $duration {
+    opacity: 1;
+  }
+}

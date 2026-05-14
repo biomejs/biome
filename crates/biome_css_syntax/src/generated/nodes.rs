@@ -10733,6 +10733,46 @@ pub struct ScssInterpolationFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssKeyframesSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssKeyframesSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssKeyframesSelectorFields {
+        ScssKeyframesSelectorFields {
+            selector: self.selector(),
+            percent_token: self.percent_token(),
+        }
+    }
+    pub fn selector(&self) -> SyntaxResult<ScssInterpolation> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn percent_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssKeyframesSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssKeyframesSelectorFields {
+    pub selector: SyntaxResult<ScssInterpolation>,
+    pub percent_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeywordArgument {
     pub(crate) syntax: SyntaxNode,
 }
@@ -14687,6 +14727,7 @@ pub enum AnyCssKeyframesSelector {
     CssKeyframesIdentSelector(CssKeyframesIdentSelector),
     CssKeyframesPercentageSelector(CssKeyframesPercentageSelector),
     CssKeyframesRangeSelector(CssKeyframesRangeSelector),
+    ScssKeyframesSelector(ScssKeyframesSelector),
 }
 impl AnyCssKeyframesSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -14710,6 +14751,12 @@ impl AnyCssKeyframesSelector {
     pub fn as_css_keyframes_range_selector(&self) -> Option<&CssKeyframesRangeSelector> {
         match &self {
             Self::CssKeyframesRangeSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_keyframes_selector(&self) -> Option<&ScssKeyframesSelector> {
+        match &self {
+            Self::ScssKeyframesSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -29900,6 +29947,57 @@ impl From<ScssInterpolation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssKeyframesSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_KEYFRAMES_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_KEYFRAMES_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssKeyframesSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssKeyframesSelector")
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "percent_token",
+                    &support::DebugOptionalElement(self.percent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssKeyframesSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssKeyframesSelector> for SyntaxNode {
+    fn from(n: ScssKeyframesSelector) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssKeyframesSelector> for SyntaxElement {
+    fn from(n: ScssKeyframesSelector) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssKeywordArgument {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -37558,12 +37656,18 @@ impl From<CssKeyframesRangeSelector> for AnyCssKeyframesSelector {
         Self::CssKeyframesRangeSelector(node)
     }
 }
+impl From<ScssKeyframesSelector> for AnyCssKeyframesSelector {
+    fn from(node: ScssKeyframesSelector) -> Self {
+        Self::ScssKeyframesSelector(node)
+    }
+}
 impl AstNode for AnyCssKeyframesSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssKeyframesIdentSelector::KIND_SET)
         .union(CssKeyframesPercentageSelector::KIND_SET)
-        .union(CssKeyframesRangeSelector::KIND_SET);
+        .union(CssKeyframesRangeSelector::KIND_SET)
+        .union(ScssKeyframesSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -37571,6 +37675,7 @@ impl AstNode for AnyCssKeyframesSelector {
                 | CSS_KEYFRAMES_IDENT_SELECTOR
                 | CSS_KEYFRAMES_PERCENTAGE_SELECTOR
                 | CSS_KEYFRAMES_RANGE_SELECTOR
+                | SCSS_KEYFRAMES_SELECTOR
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -37585,6 +37690,9 @@ impl AstNode for AnyCssKeyframesSelector {
             CSS_KEYFRAMES_RANGE_SELECTOR => {
                 Self::CssKeyframesRangeSelector(CssKeyframesRangeSelector { syntax })
             }
+            SCSS_KEYFRAMES_SELECTOR => {
+                Self::ScssKeyframesSelector(ScssKeyframesSelector { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -37595,6 +37703,7 @@ impl AstNode for AnyCssKeyframesSelector {
             Self::CssKeyframesIdentSelector(it) => it.syntax(),
             Self::CssKeyframesPercentageSelector(it) => it.syntax(),
             Self::CssKeyframesRangeSelector(it) => it.syntax(),
+            Self::ScssKeyframesSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -37603,6 +37712,7 @@ impl AstNode for AnyCssKeyframesSelector {
             Self::CssKeyframesIdentSelector(it) => it.into_syntax(),
             Self::CssKeyframesPercentageSelector(it) => it.into_syntax(),
             Self::CssKeyframesRangeSelector(it) => it.into_syntax(),
+            Self::ScssKeyframesSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -37613,6 +37723,7 @@ impl std::fmt::Debug for AnyCssKeyframesSelector {
             Self::CssKeyframesIdentSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesPercentageSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesRangeSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssKeyframesSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -37623,6 +37734,7 @@ impl From<AnyCssKeyframesSelector> for SyntaxNode {
             AnyCssKeyframesSelector::CssKeyframesIdentSelector(it) => it.into_syntax(),
             AnyCssKeyframesSelector::CssKeyframesPercentageSelector(it) => it.into_syntax(),
             AnyCssKeyframesSelector::CssKeyframesRangeSelector(it) => it.into_syntax(),
+            AnyCssKeyframesSelector::ScssKeyframesSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -45596,6 +45708,11 @@ impl std::fmt::Display for ScssInterpolatedValue {
     }
 }
 impl std::fmt::Display for ScssInterpolation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssKeyframesSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
