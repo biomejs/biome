@@ -9,7 +9,6 @@ use crate::settings::{
 };
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
-use biome_configuration::markdown::MarkdownFormatterEnabled;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
