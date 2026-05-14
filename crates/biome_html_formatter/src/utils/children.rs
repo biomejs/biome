@@ -150,6 +150,9 @@ impl HtmlChild {
     }
 }
 
+/// A debug helper for displaying a sequence of [HtmlChild] in a more human readable way. Can be activated in debug builds by setting `DEBUG_HTML_FORMATTER_CHILDREN=1` in the environment variables.
+///
+/// This exists because just dbg! printing the the children can be very verbose, and its hard to tell what CssDisplay each element has, which is often the most important part when debugging whitespace sensitivity issues.
 pub(crate) struct DisplayHtmlChildSequence<'a>(&'a [HtmlChild]);
 
 impl<'a> DisplayHtmlChildSequence<'a> {
@@ -583,7 +586,10 @@ impl HtmlSplitChildrenBuilder {
     fn non_text_entry(&mut self, child: HtmlChild, f: &HtmlFormatter) {
         let element = match &child {
             HtmlChild::NonText(element) | HtmlChild::Verbatim(element) => element,
+            #[cfg(debug_assertions)]
             _ => unreachable!("non_text_entry must be called with a non-text child"),
+            #[cfg(not(debug_assertions))]
+            _ => return, // avoid panicking in release builds
         };
 
         if !get_element_css_display(element).is_externally_whitespace_sensitive(f)
