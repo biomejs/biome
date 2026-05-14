@@ -9796,7 +9796,8 @@ export type DocumentFileSource =
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource };
+	| { Markdown: MdFileSource }
+	| { Yaml: YamlFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -9834,6 +9835,7 @@ export interface GritFileSource {
 export interface MdFileSource {
 	variant: MarkdownVariant;
 }
+export type YamlFileSource = {};
 export type EmbeddingKind =
 	| "None"
 	| {
