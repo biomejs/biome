@@ -12,7 +12,7 @@ function _A(A) {}
 ```
 issue6692.js:1:13 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter A is unused.
   
   > 1 │ function _A(A) {}
       │             ^

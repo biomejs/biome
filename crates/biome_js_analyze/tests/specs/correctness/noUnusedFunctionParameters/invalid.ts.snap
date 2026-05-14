@@ -22,7 +22,7 @@ function withTwoUnused({ a, b, c }): unknown {
 ```
 invalid.ts:2:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter a is unused.
   
     1 │ class D {
   > 2 │ 	f(a: D): D | undefined { return; }
@@ -46,7 +46,7 @@ invalid.ts:2:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━�
 ```
 invalid.ts:5:26 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter a is unused.
   
     3 │ }
     4 │ 
@@ -63,7 +63,7 @@ invalid.ts:5:26 lint/correctness/noUnusedFunctionParameters ━━━━━━�
 ```
 invalid.ts:9:26 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter a is unused.
   
      7 │ }
      8 │ 
@@ -80,7 +80,7 @@ invalid.ts:9:26 lint/correctness/noUnusedFunctionParameters ━━━━━━�
 ```
 invalid.ts:9:32 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  ! This parameter c is unused.
   
      7 │ }
      8 │ 
