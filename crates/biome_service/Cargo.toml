@@ -112,6 +112,7 @@ schema    = [
   "biome_module_graph/schema",
   "biome_text_edit/schema",
   "biome_yaml_formatter/schema",
+  "biome_yaml_syntax/schema",
   "dep:schemars",
 ]
 yaml      = ["biome_configuration/yaml"]
