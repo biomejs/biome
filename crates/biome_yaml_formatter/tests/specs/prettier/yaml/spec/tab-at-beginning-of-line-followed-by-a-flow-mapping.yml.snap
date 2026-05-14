@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/tab-at-beginning-of-line-followed-by-a-flow-mapping.yml
 ---
+
 # Input
 
 ```yml
