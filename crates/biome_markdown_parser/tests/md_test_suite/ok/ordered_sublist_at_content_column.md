@@ -13,6 +13,3 @@
 
 > 1. quoted
 >    1. sub
-
-> 10. outer
->     2. inner

@@ -2427,18 +2427,18 @@ fn line_starts_with_ordered_marker_after_whitespace(p: &mut MarkdownParser) -> b
     })
 }
 
-/// Emit an explicit `MdContinuationIndent` covering exactly `required_indent`
-/// columns at the current line start.
+/// Emit an explicit `MdContinuationIndent` covering exactly `indent` columns
+/// at the current line start.
 ///
 /// Used before recursing into a nested list item so the outer item's
 /// continuation indent appears in the CST instead of being absorbed into
 /// the child marker's pre-marker indent (CommonMark §5.2).
-fn emit_required_continuation_indent(p: &mut MarkdownParser, required_indent: usize) {
+fn emit_required_continuation_indent(p: &mut MarkdownParser, indent: usize) {
     let ci_m = p.start();
-    if let Some(indent_bytes) = current_line_required_indent_byte_count(p, required_indent) {
+    if let Some(indent_bytes) = current_line_required_indent_byte_count(p, indent) {
         emit_current_line_indent_list_bytes(p, indent_bytes);
     } else {
-        p.emit_line_indent(required_indent);
+        p.emit_line_indent(indent);
     }
     ci_m.complete(p, MD_CONTINUATION_INDENT);
 }
@@ -2650,10 +2650,11 @@ fn check_continuation_indent(
             }
 
             if starts_nested_bullet || starts_nested_ordered || starts_nested_ordered_textual {
-                // The outer item's required_indent columns are continuation
-                // indent, not child pre-marker indent. Emit them before
-                // recursing so the child prefix contains only excess indent.
-                emit_required_continuation_indent(p, state.required_indent);
+                // CommonMark §5.2: all leading columns before a nested list
+                // marker belong to the outer item's continuation. Emit them
+                // before recursing so the child marker prefix starts at the
+                // marker itself.
+                emit_required_continuation_indent(p, indent);
                 p.set_virtual_line_start();
 
                 if starts_nested_bullet {

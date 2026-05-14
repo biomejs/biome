@@ -47,17 +47,16 @@ MdDocument {
                                 MdIndentToken {
                                     md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
                                 },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
+                                },
                             ],
                         },
                         MdOrderedListItem {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
-                                            },
-                                        ],
+                                        pre_marker_indent: MdIndentTokenList [],
                                         marker: MD_ORDERED_LIST_MARKER@11..13 "1." [] [],
                                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
                                         content_indent: MdIndentTokenList [],
@@ -109,19 +108,19 @@ MdDocument {
                 1: MD_TEXTUAL@7..8
                   0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
               1: (empty)
-            1: MD_CONTINUATION_INDENT@8..10
-              0: MD_INDENT_TOKEN_LIST@8..10
+            1: MD_CONTINUATION_INDENT@8..11
+              0: MD_INDENT_TOKEN_LIST@8..11
                 0: MD_INDENT_TOKEN@8..9
                   0: MD_INDENT_CHAR@8..9 " " [] []
                 1: MD_INDENT_TOKEN@9..10
                   0: MD_INDENT_CHAR@9..10 " " [] []
-            2: MD_ORDERED_LIST_ITEM@10..21
-              0: MD_BULLET_LIST@10..21
-                0: MD_BULLET@10..21
-                  0: MD_LIST_MARKER_PREFIX@10..14
-                    0: MD_INDENT_TOKEN_LIST@10..11
-                      0: MD_INDENT_TOKEN@10..11
-                        0: MD_INDENT_CHAR@10..11 " " [] []
+                2: MD_INDENT_TOKEN@10..11
+                  0: MD_INDENT_CHAR@10..11 " " [] []
+            2: MD_ORDERED_LIST_ITEM@11..21
+              0: MD_BULLET_LIST@11..21
+                0: MD_BULLET@11..21
+                  0: MD_LIST_MARKER_PREFIX@11..14
+                    0: MD_INDENT_TOKEN_LIST@11..11
                     1: MD_ORDERED_LIST_MARKER@11..13 "1." [] []
                     2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
                     3: MD_INDENT_TOKEN_LIST@14..14

@@ -22,9 +22,6 @@ expression: snapshot
 > 1. quoted
 >    1. sub
 
-> 10. outer
->     2. inner
-
 ```
 
 
@@ -378,71 +375,17 @@ MdDocument {
                 },
             ],
         },
-        MdNewline {
-            value_token: NEWLINE@108..109 "\n" [] [],
-        },
-        MdQuote {
-            prefix: MdQuotePrefix {
-                pre_marker_indent: MdQuoteIndentList [],
-                marker_token: R_ANGLE@109..110 ">" [] [],
-                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@110..111 " " [] [],
-            },
-            content: MdBlockList [
-                MdOrderedListItem {
-                    md_bullet_list: MdBulletList [
-                        MdBullet {
-                            prefix: MdListMarkerPrefix {
-                                pre_marker_indent: MdIndentTokenList [],
-                                marker: MD_ORDERED_LIST_MARKER@111..114 "10." [] [],
-                                post_marker_space_token: MD_LIST_POST_MARKER_SPACE@114..115 " " [] [],
-                                content_indent: MdIndentTokenList [],
-                            },
-                            content: MdBlockList [
-                                MdParagraph {
-                                    list: MdInlineItemList [
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@115..120 "outer" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@120..121 "\n" [] [],
-                                        },
-                                        MdQuotePrefix {
-                                            pre_marker_indent: MdQuoteIndentList [],
-                                            marker_token: R_ANGLE@121..122 ">" [] [],
-                                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@122..123 " " [] [],
-                                        },
-                                        MdIndentToken {
-                                            md_indent_char_token: MD_INDENT_CHAR@123..127 "    " [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@127..129 "2." [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@129..135 " inner" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@135..136 "\n" [] [],
-                                        },
-                                    ],
-                                    hard_line: missing (optional),
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        },
     ],
-    eof_token: EOF@136..136 "" [] [],
+    eof_token: EOF@108..108 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_DOCUMENT@0..136
+0: MD_DOCUMENT@0..108
   0: (empty)
-  1: MD_BLOCK_LIST@0..136
+  1: MD_BLOCK_LIST@0..108
     0: MD_ORDERED_LIST_ITEM@0..59
       0: MD_BULLET_LIST@0..59
         0: MD_BULLET@0..17
@@ -665,42 +608,6 @@ MdDocument {
                             1: MD_TEXTUAL@107..108
                               0: MD_TEXTUAL_LITERAL@107..108 "\n" [] []
                           1: (empty)
-    5: MD_NEWLINE@108..109
-      0: NEWLINE@108..109 "\n" [] []
-    6: MD_QUOTE@109..136
-      0: MD_QUOTE_PREFIX@109..111
-        0: MD_QUOTE_INDENT_LIST@109..109
-        1: R_ANGLE@109..110 ">" [] []
-        2: MD_QUOTE_POST_MARKER_SPACE@110..111 " " [] []
-      1: MD_BLOCK_LIST@111..136
-        0: MD_ORDERED_LIST_ITEM@111..136
-          0: MD_BULLET_LIST@111..136
-            0: MD_BULLET@111..136
-              0: MD_LIST_MARKER_PREFIX@111..115
-                0: MD_INDENT_TOKEN_LIST@111..111
-                1: MD_ORDERED_LIST_MARKER@111..114 "10." [] []
-                2: MD_LIST_POST_MARKER_SPACE@114..115 " " [] []
-                3: MD_INDENT_TOKEN_LIST@115..115
-              1: MD_BLOCK_LIST@115..136
-                0: MD_PARAGRAPH@115..136
-                  0: MD_INLINE_ITEM_LIST@115..136
-                    0: MD_TEXTUAL@115..120
-                      0: MD_TEXTUAL_LITERAL@115..120 "outer" [] []
-                    1: MD_TEXTUAL@120..121
-                      0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
-                    2: MD_QUOTE_PREFIX@121..123
-                      0: MD_QUOTE_INDENT_LIST@121..121
-                      1: R_ANGLE@121..122 ">" [] []
-                      2: MD_QUOTE_POST_MARKER_SPACE@122..123 " " [] []
-                    3: MD_INDENT_TOKEN@123..127
-                      0: MD_INDENT_CHAR@123..127 "    " [] []
-                    4: MD_TEXTUAL@127..129
-                      0: MD_TEXTUAL_LITERAL@127..129 "2." [] []
-                    5: MD_TEXTUAL@129..135
-                      0: MD_TEXTUAL_LITERAL@129..135 " inner" [] []
-                    6: MD_TEXTUAL@135..136
-                      0: MD_TEXTUAL_LITERAL@135..136 "\n" [] []
-                  1: (empty)
-  2: EOF@136..136 "" [] []
+  2: EOF@108..108 "" [] []
 
 ```
