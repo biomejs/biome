@@ -14,7 +14,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
-use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
+use biome_tailwind_logic::syntax_service::{TailwindClassString, TailwindClassStringHost};
 
 pub trait ClassStringLikeOptions {
     fn has_function(&self, name: &str) -> bool;
@@ -23,20 +23,6 @@ pub trait ClassStringLikeOptions {
 }
 
 impl ClassStringLikeOptions for UseSortedClassesOptions {
-    fn has_function(&self, name: &str) -> bool {
-        self.has_function(name)
-    }
-
-    fn match_function(&self, name: &str) -> bool {
-        self.match_function(name)
-    }
-
-    fn has_attribute(&self, name: &str) -> bool {
-        self.has_attribute(name)
-    }
-}
-
-impl ClassStringLikeOptions for UseTailwindShorthandClassesOptions {
     fn has_function(&self, name: &str) -> bool {
         self.has_function(name)
     }
@@ -61,6 +47,17 @@ impl ClassStringLikeOptions for NoDuplicateClassesOptions {
 
     fn has_attribute(&self, name: &str) -> bool {
         self.deref().has_attribute(name)
+    }
+}
+
+impl TailwindClassStringHost for AnyClassStringLike {
+    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+        match self {
+            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(),
+            Self::JsxString(node) => node.tailwind_class_string(),
+            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(),
+            Self::JsLiteralMemberName(node) => node.tailwind_class_string(),
+        }
     }
 }
 

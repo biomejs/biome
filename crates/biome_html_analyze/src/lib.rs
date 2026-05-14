@@ -19,6 +19,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -103,6 +104,7 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(TwSyntaxService::default());
 
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),

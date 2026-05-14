@@ -21,6 +21,7 @@ use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{TextRange, TokenText};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -235,6 +236,7 @@ where
         .map(Arc::new);
 
     services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(TwSyntaxService::default());
     services.insert_service(source_type);
     services.insert_service(module_graph);
     services.insert_service(node_manifest);

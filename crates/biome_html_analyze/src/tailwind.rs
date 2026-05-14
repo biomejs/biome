@@ -1,28 +1,6 @@
 use biome_html_factory::make;
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken};
-use biome_rowan::{BatchMutation, TextRange, TextSize, TokenText};
-use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
-
-pub(crate) trait TailwindClassStringOptions {
-    fn has_attribute(&self, name: &str) -> bool;
-}
-
-impl TailwindClassStringOptions for UseTailwindShorthandClassesOptions {
-    fn has_attribute(&self, name: &str) -> bool {
-        self.has_attribute(name)
-    }
-}
-
-pub(crate) fn class_string(
-    attribute: &HtmlAttribute,
-    options: &impl TailwindClassStringOptions,
-) -> Option<TokenText> {
-    if !options.has_attribute(attribute_name(attribute)?.text_trimmed()) {
-        return None;
-    }
-
-    html_string(attribute)?.inner_string_text().ok()
-}
+use biome_rowan::{BatchMutation, TextRange, TextSize};
 
 pub(crate) fn html_string(attribute: &HtmlAttribute) -> Option<HtmlString> {
     attribute
@@ -57,10 +35,6 @@ pub(crate) fn apply_fixed_class_string(
     };
     mutation.replace_node(html_string, make::html_string(new_token));
     Some(())
-}
-
-fn attribute_name(attribute: &HtmlAttribute) -> Option<biome_html_syntax::HtmlSyntaxToken> {
-    attribute.name().ok()?.value_token().ok()
 }
 
 fn html_string_literal_single_quotes(text: &str) -> HtmlSyntaxToken {

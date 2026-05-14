@@ -1746,8 +1746,11 @@ version = "0.1.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_diagnostics",
+ "biome_html_syntax",
+ "biome_js_syntax",
+ "biome_parser",
  "biome_rowan",
- "biome_rule_options",
  "biome_tailwind_factory",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",

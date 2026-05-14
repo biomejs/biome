@@ -1,22 +1,13 @@
-use crate::shared::any_class_string_like::{AnyClassStringLike, ClassStringLikeOptions};
+use crate::shared::any_class_string_like::AnyClassStringLike;
 use biome_analyze::options::PreferredQuote;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_js_syntax::JsLanguage;
-use biome_rowan::{BatchMutation, TextRange, TextSize, TokenText};
+use biome_rowan::{BatchMutation, TextRange, TextSize};
 
 pub(crate) type AnyTailwindClassString = AnyClassStringLike;
-
-pub(crate) fn class_string(
-    node: &AnyTailwindClassString,
-    options: &impl ClassStringLikeOptions,
-) -> Option<TokenText> {
-    node.should_visit(options)
-        .unwrap_or(false)
-        .then(|| node.value())?
-}
 
 pub(crate) fn host_range(node: &AnyTailwindClassString, range: TextRange) -> Option<TextRange> {
     let start = inner_text_start(node)?;

@@ -1,26 +1,18 @@
 use crate::JsRuleAction;
-use crate::tailwind::{
-    AnyTailwindClassString, apply_fixed_class_string, class_string, host_range,
-};
+use crate::tailwind::{AnyTailwindClassString, apply_fixed_class_string, host_range};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    FixKind, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::{Diagnostic, MessageAndDescription};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
-use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
+use biome_rowan::{AstNode, BatchMutationExt};
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use biome_tailwind_logic::use_tailwind_shorthand_classes::{
     TailwindShorthandViolation, analyze_tailwind_shorthand, auto_fix,
 };
-use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::TwRoot;
 
 pub enum TailwindShorthandState {
-    ParseError {
-        range: TextRange,
-        message: MessageAndDescription,
-    },
     Violation {
         root: TwRoot,
         violation: TailwindShorthandViolation,
@@ -48,48 +40,7 @@ declare_lint_rule! {
     /// <div className="size-4" />;
     /// ```
     ///
-    /// ## Options
-    ///
-    /// ### `attributes`
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "attributes": ["classList"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Default: `[]`
-    ///
-    /// Class lists in the `class` and `className` JSX attributes are always checked.
-    /// Use this option to add more attribute names that should be treated as Tailwind class lists.
-    ///
-    /// #### Invalid
-    ///
-    /// ```jsx,expect_diagnostic,use_options
-    /// <div classList="w-4 h-4" />;
-    /// ```
-    ///
-    /// #### Valid
-    ///
-    /// ```jsx,use_options
-    /// <div classList="size-4" />;
-    /// ```
-    ///
-    /// ### `functions`
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "functions": ["clsx", "tw"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Default: `["clsx", "tw", "twMerge", "twJoin", "cva", "tv", "cn", "cc", "cnb", "ctl"]`
-    ///
-    /// Use this option to check string arguments and tagged template literals passed to helper functions.
+    /// The rule checks string arguments and tagged template literals passed to known helper functions.
     /// This is useful for libraries like [`clsx`](https://github.com/lukeed/clsx),
     /// [`cva`](https://cva.style/), or CSS-in-JS helpers such as `tw`.
     ///
@@ -116,21 +67,21 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic
     /// clsx("w-4 h-4");
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic
     /// tw.div`w-4 h-4`;
     /// ```
     ///
     /// #### Valid
     ///
-    /// ```js,use_options
+    /// ```js
     /// clsx("size-4");
     /// ```
     ///
-    /// ```js,use_options
+    /// ```js
     /// tw.div`size-4`;
     /// ```
     ///
@@ -146,31 +97,17 @@ declare_lint_rule! {
 }
 
 impl Rule for UseTailwindShorthandClasses {
-    type Query = Ast<AnyTailwindClassString>;
+    type Query = TailwindSyntax<AnyTailwindClassString>;
     type State = TailwindShorthandState;
     type Signals = Box<[Self::State]>;
-    type Options = UseTailwindShorthandClassesOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(value) = class_string(ctx.query(), ctx.options()) else {
+        if ctx.query().tailwind_has_errors() {
             return Vec::new().into_boxed_slice();
-        };
-        let parse = parse_tailwind(value.text());
-        if parse.has_errors() {
-            return parse
-                .diagnostics()
-                .iter()
-                .filter_map(|diagnostic| {
-                    Some(TailwindShorthandState::ParseError {
-                        range: host_range(ctx.query(), diagnostic.location().span?)?,
-                        message: diagnostic.message.clone(),
-                    })
-                })
-                .collect::<Vec<_>>()
-                .into_boxed_slice();
         }
 
-        let root = parse.tree();
+        let root = ctx.query().tailwind_root();
         analyze_tailwind_shorthand(&root.candidates())
             .into_iter()
             .map(|violation| TailwindShorthandState::Violation {
@@ -182,21 +119,10 @@ impl Rule for UseTailwindShorthandClasses {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let violation = match state {
-            TailwindShorthandState::ParseError { range, message } => {
-                return Some(
-                    RuleDiagnostic::new(rule_category!(), *range, markup! {{message}}).note(
-                        markup! {
-                            "Biome could not analyze this Tailwind class list because it contains invalid syntax."
-                        },
-                    ),
-                );
-            }
-            TailwindShorthandState::Violation { violation, .. } => violation,
-        };
+        let TailwindShorthandState::Violation { violation, .. } = state;
 
         let first_range = host_range(
-            ctx.query(),
+            ctx.query().node(),
             violation.uncompressed_nodes.first()?.range(),
         )?;
 
@@ -209,7 +135,7 @@ impl Rule for UseTailwindShorthandClasses {
         );
 
         for candidate in violation.uncompressed_nodes.iter().skip(1) {
-            if let Some(range) = host_range(ctx.query(), candidate.range()) {
+                if let Some(range) = host_range(ctx.query().node(), candidate.range()) {
                 diagnostic = diagnostic.detail(
                     range,
                     markup! {
@@ -227,15 +153,13 @@ impl Rule for UseTailwindShorthandClasses {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let TailwindShorthandState::Violation { root, violation } = state else {
-            return None;
-        };
+        let TailwindShorthandState::Violation { root, violation } = state;
 
         let fixed = auto_fix(root, violation)?.commit().to_string();
         let mut mutation = ctx.root().begin();
         apply_fixed_class_string(
             &mut mutation,
-            ctx.query(),
+            ctx.query().node(),
             &fixed,
             ctx.preferred_quote(),
             ctx.preferred_jsx_quote(),

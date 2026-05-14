@@ -39,8 +39,9 @@ pub use crate::categories::{
     SourceActionKind,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
-use crate::matcher::SignalRuleKey;
-pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
+pub use crate::matcher::{
+    InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry, SignalRuleKey,
+};
 pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
 pub use crate::registry::{

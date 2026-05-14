@@ -14,9 +14,9 @@ _Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid-tailwind.jsx:3:27 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-tailwind.jsx:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected a value but instead found '['.
+  × Expected a value but instead found '['.
   
     1 │ /* should generate diagnostics */
     2 │ 
@@ -24,9 +24,13 @@ invalid-tailwind.jsx:3:27 lint/nursery/useTailwindShorthandClasses ━━━━�
       │                           ^
     4 │ 
   
-  i Biome could not analyze this Tailwind class list because it contains invalid syntax.
+  i Expected a value here.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ return <div className="bg-["></div>
+      │                           ^
+    4 │ 
   
 
 ```

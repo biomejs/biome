@@ -8273,16 +8273,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
-export interface UseTailwindShorthandClassesOptions {
-	/**
-	 * Additional attributes that will be treated as Tailwind class lists.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of functions or tagged templates whose string arguments should be checked.
-	 */
-	functions?: string[];
-}
+export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**

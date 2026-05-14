@@ -15751,18 +15751,6 @@
 		},
 		"UseTailwindShorthandClassesOptions": {
 			"type": "object",
-			"properties": {
-				"attributes": {
-					"description": "Additional attributes that will be treated as Tailwind class lists.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"functions": {
-					"description": "Names of functions or tagged templates whose string arguments should be checked.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				}
-			},
 			"additionalProperties": false
 		},
 		"UseTemplateConfiguration": {
