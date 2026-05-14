@@ -1,15 +1,15 @@
 [package]
-name                 = "biome_yaml_formatter"
-version              = "0.1.0"
-authors.workspace    = true
-edition.workspace    = true
-description          = "Biome's YAML formatter"
-homepage.workspace   = true
+name = "biome_yaml_formatter"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+description = "Biome's YAML formatter"
+homepage.workspace = true
 repository.workspace = true
-license.workspace    = true
-keywords.workspace   = true
+license.workspace = true
+keywords.workspace = true
 categories.workspace = true
-publish              = true
+publish = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,29 +20,29 @@ independent = true
 [dependencies]
 biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
-biome_formatter   = { workspace = true }
-biome_rowan       = { workspace = true }
+biome_formatter = { workspace = true }
+biome_rowan = { workspace = true }
 biome_suppression = { workspace = true }
 biome_yaml_syntax = { workspace = true }
-schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"], optional = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
-biome_configuration  = { workspace = true, features = ["yaml"] }
-biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
+biome_configuration = { path = "../biome_configuration/", features = ["yaml"] }
+biome_formatter = { path = "../biome_formatter", features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_fs             = { path = "../biome_fs" }
-biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
-biome_yaml_parser    = { path = "../biome_yaml_parser" }
-camino               = { workspace = true }
-countme              = { workspace = true, features = ["enable"] }
-similar-asserts      = { workspace = true }
-tests_macros         = { path = "../tests_macros" }
+biome_fs = { path = "../biome_fs" }
+biome_parser = { path = "../biome_parser" }
+biome_service = { path = "../biome_service" }
+biome_yaml_parser = { path = "../biome_yaml_parser" }
+camino = { workspace = true }
+countme = { workspace = true, features = ["enable"] }
+similar-asserts = { workspace = true }
+tests_macros = { path = "../tests_macros" }
 
 [features]
 schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
+serde = ["dep:serde"]
 
 [lints]
 workspace = true

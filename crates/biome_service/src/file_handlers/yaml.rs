@@ -10,7 +10,7 @@ use crate::settings::{
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::markdown::MarkdownFormatterEnabled;
-use biome_configuration::yaml::YamlFormatterConfiguration;
+use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
 use biome_parser::{AnyParse, NodeParse};
@@ -29,7 +29,7 @@ pub struct YamlFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub trailing_newline: Option<TrailingNewline>,
-    pub enabled: Option<MarkdownFormatterEnabled>,
+    pub enabled: Option<YamlFormatterEnabled>,
 }
 
 impl From<YamlFormatterConfiguration> for YamlFormatterSettings {
