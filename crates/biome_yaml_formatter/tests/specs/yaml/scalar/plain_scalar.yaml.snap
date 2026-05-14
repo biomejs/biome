@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/scalar/plain_scalar.yaml
+---
+
+# Input
+
+```yaml
+simple_plain
+
+```
+
+
+# Formatted
+
+```yaml
+simple_plain
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"simple_plain\n" => 0..13
