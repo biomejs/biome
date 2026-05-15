@@ -1,3 +1,4 @@
+use crate::list_ext::AnyListItem;
 use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock};
 
 impl AnyMdBlock {
@@ -41,5 +42,17 @@ impl AnyMdBlock {
 
     pub const fn is_newline(&self) -> bool {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)))
+    }
+
+    pub fn as_any_list_item(&self) -> Option<AnyListItem> {
+        match self {
+            AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {
+                Some(AnyListItem::MdBulletListItem(item.clone()))
+            }
+            AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdOrderedListItem(item)) => {
+                Some(AnyListItem::MdOrderedListItem(item.clone()))
+            }
+            _ => None,
+        }
     }
 }

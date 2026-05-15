@@ -3,6 +3,7 @@ use biome_formatter::{Format, FormatResult};
 use biome_markdown_syntax::{AnyMdInline, MdHardLine, MdInlineItemList};
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
 
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed};
 
 /// A word slice from a syntax token — stores the text and source position for source maps.
@@ -215,8 +216,12 @@ fn build_word_stream(
                 current_word_group.push(ProseAtom::InlineElement(item));
                 flush_word_group(&mut stream, &mut current_word_group);
             }
-            AnyMdInline::MdQuotePrefix(_) => {
-                // No need to do anything, it gets formatted as part of the formatting infra
+            AnyMdInline::MdQuotePrefix(prefix) => {
+                prefix
+                    .format()
+                    .with_options(FormatMdQuotePrefixOptions { should_remove: true })
+                    .fmt(f)
+                    .ok();
             }
         }
     }

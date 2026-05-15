@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::{MdListMarkerPrefix, MdListMarkerPrefixFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdListMarkerPrefix {
@@ -26,8 +26,20 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             None => write!(f, [marker.format()])?,
         }
 
+        let list_marker = node.list_marker()?;
         if let Some(post_marker_space_token) = post_marker_space_token {
-            write!(f, [format_replaced(&post_marker_space_token, &space())])?;
+            if list_marker.is_ordered() {
+                write!(
+                    f,
+                    [
+                        format_replaced(&post_marker_space_token, &format_args![&space()],),
+                        // The printer dedupes spaces that appear one after the other, so we use a text
+                        token(" ")
+                    ]
+                )?;
+            } else {
+                write!(f, [format_replaced(&post_marker_space_token, &space())])?;
+            }
         }
         write!(f, [content_indent.format()])
     }

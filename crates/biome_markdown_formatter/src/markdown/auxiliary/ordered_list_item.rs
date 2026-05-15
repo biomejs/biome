@@ -1,13 +1,19 @@
-use crate::bullet_list::BulletListPrinter;
 use crate::prelude::*;
-use biome_markdown_syntax::{MdOrderedListItem, MdOrderedListItemFields};
+use biome_markdown_syntax::MdOrderedListItem;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdOrderedListItem;
 impl FormatNodeRule<MdOrderedListItem> for FormatMdOrderedListItem {
-    fn fmt_fields(&self, node: &MdOrderedListItem, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let MdOrderedListItemFields { md_bullet_list } = node.as_fields();
-        let list_printer = BulletListPrinter::new(&md_bullet_list, true);
-        list_printer.fmt(f)
+    fn fmt_fields(
+        &self,
+        _node: &MdOrderedListItem,
+        _f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        debug_assert!(
+            false,
+            "This node should be formatted via FmtAnyList. Match AnyMdBlock and use as_any_list_item."
+        );
+
+        Ok(())
     }
 }
