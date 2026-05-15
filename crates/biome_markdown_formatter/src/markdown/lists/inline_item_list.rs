@@ -127,9 +127,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         joiner.entry(&entry);
                     } else {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            print_mode: if (self.print_mode.is_trim_start() && index == 0)
-                                || (self.print_mode.is_keep_leading_spaces() && seen_new_line)
-                            {
+                            print_mode: if self.print_mode.is_trim_start() && index == 0 {
                                 self.print_mode
                             } else {
                                 TextPrintMode::default()
@@ -253,9 +251,7 @@ impl FormatMdInlineItemList {
                             seen_new_line = false;
                             after_hard_line = false;
                             joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
-                                print_mode: if was_after_newline
-                                    && self.print_mode.is_keep_leading_spaces()
-                                {
+                                print_mode: if was_after_newline {
                                     self.print_mode
                                 } else {
                                     TextPrintMode::default()
@@ -277,12 +273,11 @@ impl FormatMdInlineItemList {
                         let next_is_newline_or_end = items.get(i + 1).is_none_or(|n| {
                             matches!(n, AnyMdInline::MdTextual(t) if t.is_newline().unwrap_or_default())
                         });
-                        let print_mode =
-                            if was_after_newline && self.print_mode.is_keep_leading_spaces() {
-                                self.print_mode
-                            } else {
-                                TextPrintMode::default()
-                            };
+                        let print_mode = if was_after_newline {
+                            self.print_mode
+                        } else {
+                            TextPrintMode::default()
+                        };
 
                         if next_is_newline_or_end {
                             let token = md_text.value_token()?;
