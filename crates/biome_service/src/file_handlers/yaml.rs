@@ -37,9 +37,9 @@ impl From<YamlFormatterConfiguration> for YamlFormatterSettings {
             line_ending: configuration.line_ending,
             line_width: configuration.line_width,
             indent_width: configuration.indent_width,
-            indent_style: configuration.indent_style,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
+            indent_style: Some(IndentStyle::Space),
         }
     }
 }
@@ -80,10 +80,6 @@ impl ServiceLanguage for YamlLanguage {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, path);
 
-        let indent_style = language
-            .indent_style
-            .or(global.indent_style)
-            .unwrap_or_default();
         let line_width = language
             .line_width
             .or(global.line_width)
@@ -101,7 +97,6 @@ impl ServiceLanguage for YamlLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
         YamlFormatOptions::new()
-            .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)

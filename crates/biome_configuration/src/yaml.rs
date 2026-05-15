@@ -1,6 +1,6 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth, TrailingNewline};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -34,11 +34,6 @@ pub struct YamlFormatterConfiguration {
     #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<YamlFormatterEnabled>,
-
-    /// The indent style applied to Yaml files.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to Yaml files. Defaults to 2.
     #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
