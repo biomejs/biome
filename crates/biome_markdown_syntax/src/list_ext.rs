@@ -59,4 +59,8 @@ impl MdListMarkerPrefix {
             Ok(ListMarker::Unordered)
         }
     }
+
+    pub fn post_marker_len(&self) -> Option<usize> {
+        Some(self.post_marker_space_token()?.text_trimmed().len())
+    }
 }

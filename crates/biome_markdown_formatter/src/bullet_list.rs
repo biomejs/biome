@@ -131,7 +131,8 @@ impl Format<MarkdownFormatContext> for ListBullet {
             Some("-")
         };
 
-        biome_formatter::write!(
+        let post_marker_len = prefix.post_marker_len().unwrap_or(2) as u8;
+        write!(
             f,
             [prefix
                 .format()
@@ -142,9 +143,9 @@ impl Format<MarkdownFormatContext> for ListBullet {
         // Ordered: marker (e.g. "1." = 2 chars) + space() + token(" ") = marker.len() + 2
         // Unordered: marker ("-"/"*"/"+" = 1 char) + space() = 2
         let alignment = if list_marker.is_ordered() {
-            (marker.text_trimmed().len() as u8) + 1
+            (marker.text_trimmed().len() as u8) + post_marker_len
         } else {
-            2
+            post_marker_len
         };
 
         let content = ListBlockList {

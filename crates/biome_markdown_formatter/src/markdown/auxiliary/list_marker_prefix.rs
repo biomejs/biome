@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::{MdListMarkerPrefix, MdListMarkerPrefixFields};
+use biome_rowan::TextSize;
+use std::ops::Add;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdListMarkerPrefix {
     /// Target marker to replace with (e.g. `"-"`). `None` keeps the original.
@@ -43,19 +46,15 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             }
         }
 
-        let list_marker = node.list_marker()?;
         if let Some(post_marker_space_token) = post_marker_space_token {
-            if list_marker.is_ordered() {
-                write!(
-                    f,
-                    [
-                        format_replaced(&post_marker_space_token, &format_args![&space()],),
-                        // The printer dedupes spaces that appear one after the other, so we use a text
-                        // token(" ")
-                    ]
-                )?;
-            } else {
-                write!(f, [format_replaced(&post_marker_space_token, &space())])?;
+            write!(f, [format_removed(&post_marker_space_token)])?;
+
+            for index in 0..post_marker_space_token.text_trimmed().len() {
+                let pos = post_marker_space_token
+                    .text_trimmed_range()
+                    .start()
+                    .add(TextSize::from(index as u32));
+                write!(f, [text(" ", pos),])?;
             }
         }
         write!(f, [content_indent.format()])
