@@ -4,15 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#" - baz
-
-  + ```
-    foo
-
-
-    bar
-    ```
-"#;
+    let source = "   ```\n   aaa\n    aaa\n  aaa\n   ```\n";
     let parse = parse_markdown(source);
 
     // Print CST
