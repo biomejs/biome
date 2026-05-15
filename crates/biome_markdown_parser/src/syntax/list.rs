@@ -1319,6 +1319,35 @@ fn line_indent_from_current(p: &MarkdownParser) -> usize {
     column - start_col
 }
 
+/// Measure indentation between the current virtual line start and cursor.
+///
+/// This is needed after consuming a quote prefix: the lexer can leave the
+/// remaining indentation bundled with the following marker token, so token
+/// walking alone cannot recover the already-consumed quote-prefix boundary.
+fn virtual_line_indent_before_current(p: &MarkdownParser) -> Option<usize> {
+    let virtual_start: usize = p.state().virtual_line_start?.into();
+    let current: usize = p.cur_range().start().into();
+    if virtual_start >= current {
+        return None;
+    }
+
+    let source = p.source().source_text();
+    let text = source.get(virtual_start..current)?;
+    if !text.chars().all(|c| c == ' ' || c == '\t') {
+        return None;
+    }
+
+    let mut column = 0usize;
+    for c in text.chars() {
+        match c {
+            ' ' => column += 1,
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
+            _ => return None,
+        }
+    }
+    Some(column)
+}
+
 fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option<usize> {
     if depth == 0 {
         return None;
@@ -2369,6 +2398,17 @@ fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, mut byte_count: u
     let list_m = p.start();
     while byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
+        if !text.is_empty()
+            && text.starts_with([' ', '\t'])
+            && !text.chars().all(|c| c == ' ' || c == '\t')
+        {
+            let old_range = p.cur_range();
+            p.re_lex(MarkdownReLexContext::ListPostMarker);
+            if p.cur_range() == old_range {
+                break;
+            }
+            continue;
+        }
         if !text.chars().all(|c| c == ' ' || c == '\t') {
             break;
         }
@@ -2593,8 +2633,11 @@ fn check_continuation_indent(
         };
     }
 
-    let indent = line_indent_from_current(p);
-
+    let indent = line_indent_from_current(p).max(
+        virtual_line_indent_before_current(p)
+            .filter(|_| line_started_with_quote_prefix)
+            .unwrap_or(0),
+    );
     if indent < state.marker_indent {
         // Below the marker indent. Lazy continuation is still allowed for
         // plain-text lines per CommonMark §5.2; list item starts and block
