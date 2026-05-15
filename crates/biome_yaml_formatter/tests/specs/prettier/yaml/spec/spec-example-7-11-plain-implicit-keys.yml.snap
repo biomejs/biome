@@ -23,7 +23,6 @@ implicit block key : [
 +implicit block key : [
 +  implicit flow key : value,
 + ]
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ implicit block key : [
 ```yml
 implicit block key : [
   implicit flow key : value,
- ]```
+ ]
+```

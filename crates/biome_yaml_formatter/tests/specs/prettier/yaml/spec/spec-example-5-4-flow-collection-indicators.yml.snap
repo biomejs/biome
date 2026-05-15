@@ -19,14 +19,13 @@ mapping: { sky: blue, sea: green }
 +++ Biome
 @@ -1,2 +1,2 @@
 -sequence: [one, two]
--mapping: { sky: blue, sea: green }
 +sequence: [ one, two, ]
-+mapping: { sky: blue, sea: green }
-\ No newline at end of file
+ mapping: { sky: blue, sea: green }
 ```
 
 # Output
 
 ```yml
 sequence: [ one, two, ]
-mapping: { sky: blue, sea: green }```
+mapping: { sky: blue, sea: green }
+```

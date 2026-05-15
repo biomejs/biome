@@ -18,11 +18,11 @@ info: yaml/spec/tab-at-beginning-of-line-followed-by-a-flow-mapping.yml
 +++ Biome
 @@ -1 +1 @@
 -{}
-+{}
-\ No newline at end of file
++	{}
 ```
 
 # Output
 
 ```yml
-{}```
+	{}
+```

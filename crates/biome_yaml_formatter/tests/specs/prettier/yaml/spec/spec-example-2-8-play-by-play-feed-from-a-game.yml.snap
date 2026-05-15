@@ -35,7 +35,6 @@ action: grand slam
  player: Sammy Sosa
  action: grand slam
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -50,4 +49,5 @@ action: strike (miss)
 time: 20:03:47
 player: Sammy Sosa
 action: grand slam
-...```
+...
+```

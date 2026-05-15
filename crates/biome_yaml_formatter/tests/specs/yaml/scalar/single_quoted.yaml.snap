@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/scalar/single_quoted.yaml
+---
+
+# Input
+
+```yaml
+'single quoted'
+
+```
+
+
+# Formatted
+
+```yaml
+'single quoted'
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"'single quoted'\n" => 0..16

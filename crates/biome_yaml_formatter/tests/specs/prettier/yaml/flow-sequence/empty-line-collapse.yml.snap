@@ -23,7 +23,6 @@ bbb ]
 +[ aaa, 
 +
 +bbb ]
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ bbb ]
 ```yml
 [ aaa, 
 
-bbb ]```
+bbb ]
+```

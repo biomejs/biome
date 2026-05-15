@@ -27,7 +27,6 @@ info: yaml/spec/spec-example-7-9-single-quoted-lines.yml
 -3rd non-empty "
 + 2nd non-empty 
 +	3rd non-empty '
-\ No newline at end of file
 ```
 
 # Output
@@ -36,4 +35,5 @@ info: yaml/spec/spec-example-7-9-single-quoted-lines.yml
 ' 1st non-empty
 
  2nd non-empty 
-	3rd non-empty '```
+	3rd non-empty '
+```

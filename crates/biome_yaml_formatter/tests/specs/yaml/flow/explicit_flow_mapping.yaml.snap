@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/explicit_flow_mapping.yaml
+---
+
+# Input
+
+```yaml
+{
+  ? a: b,
+  ? : d,
+  ? :,
+}
+
+```
+
+
+# Formatted
+
+```yaml
+{
+  ? a: b,
+  ? : d,
+  ? :,
+}
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"{\n  ? a: b,\n  ? : d,\n  ? :,\n}\n" => 0..30

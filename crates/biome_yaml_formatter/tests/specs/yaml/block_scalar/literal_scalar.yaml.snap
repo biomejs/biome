@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block_scalar/literal_scalar.yaml
+---
+
+# Input
+
+```yaml
+- |
+ hello
+ world
+
+- |-
+ stripped
+
+- |+
+ kept
+
+
+```
+
+
+# Formatted
+
+```yaml
+- |
+ hello
+ world
+
+- |-
+ stripped
+
+- |+
+ kept
+
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"- |\n hello\n world\n\n- |-\n stripped\n\n- |+\n kept\n\n" => 0..47

@@ -18,14 +18,16 @@ foo: bar
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1 @@
--foo: bar
--# End Comment - Don't remove previous empty line
-+foo: bar
-\ No newline at end of file
+@@ -1,2 +1,3 @@
+ foo: bar
++
+ # End Comment - Don't remove previous empty line
 ```
 
 # Output
 
 ```yml
-foo: bar```
+foo: bar
+
+# End Comment - Don't remove previous empty line
+```

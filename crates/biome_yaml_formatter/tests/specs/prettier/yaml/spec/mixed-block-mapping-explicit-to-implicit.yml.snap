@@ -20,11 +20,9 @@ info: yaml/spec/mixed-block-mapping-explicit-to-implicit.yml
 +++ Biome
 @@ -1,2 +1,3 @@
 -a: 13
--1.5: d
 +? a
 +: 13
-+1.5: d
-\ No newline at end of file
+ 1.5: d
 ```
 
 # Output
@@ -32,4 +30,5 @@ info: yaml/spec/mixed-block-mapping-explicit-to-implicit.yml
 ```yml
 ? a
 : 13
-1.5: d```
+1.5: d
+```

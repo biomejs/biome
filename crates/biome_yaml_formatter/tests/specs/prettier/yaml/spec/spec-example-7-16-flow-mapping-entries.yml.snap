@@ -27,7 +27,6 @@ implicit: entry,
 +implicit: entry,
 +?
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -37,4 +36,5 @@ implicit: entry,
 ? explicit: entry,
 implicit: entry,
 ?
-}```
+}
+```

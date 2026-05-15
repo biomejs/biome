@@ -33,7 +33,6 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
  ---
  # Empty
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -45,4 +44,5 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
 ...
 ---
 # Empty
-...```
+...
+```

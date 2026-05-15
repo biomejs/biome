@@ -60,7 +60,7 @@ info: yaml/comment/sequence-2.yml
 +
  - none(2)
 -  # none.comment
-+  
++  # none.comment
 \ No newline at end of file
 ```
 
@@ -94,4 +94,4 @@ info: yaml/comment/sequence-2.yml
 
 
 - none(2)
-  ```
+  # none.comment```

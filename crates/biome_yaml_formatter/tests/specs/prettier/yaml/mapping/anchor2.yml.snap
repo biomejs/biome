@@ -22,7 +22,7 @@ key2:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,7 @@
+@@ -1,4 +1,6 @@
 -key1: &default # This key ...
 +key1: &default
 +
@@ -30,9 +30,6 @@ key2:
    subkey1: value1
  
  key2:
--  <<: *default
-+  <<: *default
-\ No newline at end of file
 ```
 
 # Output
@@ -44,7 +41,8 @@ key1: &default
   subkey1: value1
 
 key2:
-  <<: *default```
+  <<: *default
+```
 
 # Errors
 ```

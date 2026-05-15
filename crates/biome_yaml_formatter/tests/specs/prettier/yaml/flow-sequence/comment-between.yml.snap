@@ -25,12 +25,10 @@ info: yaml/flow-sequence/comment-between.yml
 -  ? 123
 -  # comment
 -  : 456,
--]
 +? 123
 +# comment
 +: 456
-+]
-\ No newline at end of file
+ ]
 ```
 
 # Output
@@ -40,4 +38,5 @@ info: yaml/flow-sequence/comment-between.yml
 ? 123
 # comment
 : 456
-]```
+]
+```

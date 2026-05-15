@@ -42,7 +42,7 @@ none(2):
 ```diff
 --- Prettier
 +++ Biome
-@@ -12,13 +12,16 @@
+@@ -12,13 +12,17 @@
    # none.comment
  before(2 line):
  
@@ -57,10 +57,10 @@ none(2):
 +
    # before-after.comment
  
--none(2):
--  # none.comment
 +
-+none(2):
+ none(2):
+-  # none.comment
++  # none.comment
 \ No newline at end of file
 ```
 
@@ -93,4 +93,5 @@ before-after(2 line):
   # before-after.comment
 
 
-none(2):```
+none(2):
+  # none.comment```

@@ -29,9 +29,7 @@ info: yaml/spec/spec-example-8-15-block-sequence-entry-types.yml
 + block node
  - - one # Compact
    - two # sequence
--- one: two # Compact mapping
-+- one: two 
-\ No newline at end of file
+ - one: two # Compact mapping
 ```
 
 # Output
@@ -42,4 +40,5 @@ info: yaml/spec/spec-example-8-15-block-sequence-entry-types.yml
  block node
 - - one # Compact
   - two # sequence
-- one: two ```
+- one: two # Compact mapping
+```

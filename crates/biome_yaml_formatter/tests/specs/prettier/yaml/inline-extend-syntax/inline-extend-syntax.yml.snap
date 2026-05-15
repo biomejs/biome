@@ -25,9 +25,9 @@ bar:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,8 @@
--# 8876
--
+@@ -1,10 +1,10 @@
+ # 8876
+ 
  foo:
 -  <<: &anchor
 -    K1: "One"
@@ -41,12 +41,13 @@ bar:
 -  K3: "Three"
 + <<: *anchor
 + K3: "Three"
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
+# 8876
+
 foo:
  <<: &anchor
    K1: "One"
@@ -54,7 +55,8 @@ foo:
 
 bar:
  <<: *anchor
- K3: "Three"```
+ K3: "Three"
+```
 
 # Errors
 ```

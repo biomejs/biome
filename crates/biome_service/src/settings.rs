@@ -10,6 +10,7 @@ use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguratio
 use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
+use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
@@ -44,6 +45,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -195,6 +197,13 @@ impl Settings {
         {
             if let Some(markdown) = configuration.markdown {
                 self.languages.markdown = markdown.into();
+            }
+        }
+
+        #[cfg(feature = "yaml")]
+        {
+            if let Some(yaml) = configuration.yaml {
+                self.languages.yaml = yaml.into();
             }
         }
 
@@ -690,6 +699,7 @@ pub struct LanguageListSettings {
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
     pub markdown: LanguageSettings<MarkdownLanguage>,
+    pub yaml: LanguageSettings<YamlLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -837,6 +847,17 @@ impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
     fn from(markdown: MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
+        }
+
+        language_setting
+    }
+}
+
+impl From<YamlConfiguration> for LanguageSettings<YamlLanguage> {
+    fn from(yaml: YamlConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = yaml.formatter {
             language_setting.formatter = formatter.into();
         }
 

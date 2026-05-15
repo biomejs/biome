@@ -27,11 +27,7 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,11 @@
--# Outside flow collection:
- - ::vector
- - ": - ()"
- - Up, up, and away!
+@@ -5,4 +5,8 @@
  - -123
  - http://example.com/foo#bar
  # Inside flow collection:
@@ -40,13 +36,13 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 +  ": - ()",
 +  "Up, up and away!",
 +  -123,
-+  http://example.com/foo
-\ No newline at end of file
++  http://example.com/foo#bar ]
 ```
 
 # Output
 
 ```yml
+# Outside flow collection:
 - ::vector
 - ": - ()"
 - Up, up, and away!
@@ -57,7 +53,8 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
   ": - ()",
   "Up, up and away!",
   -123,
-  http://example.com/foo```
+  http://example.com/foo#bar ]
+```
 
 # Errors
 ```

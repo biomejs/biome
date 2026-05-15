@@ -25,7 +25,6 @@ info: yaml/spec/spec-example-7-3-completely-empty-flow-nodes.yml
 +  ? foo :,
 +  : bar,
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -34,4 +33,5 @@ info: yaml/spec/spec-example-7-3-completely-empty-flow-nodes.yml
 {
   ? foo :,
   : bar,
-}```
+}
+```

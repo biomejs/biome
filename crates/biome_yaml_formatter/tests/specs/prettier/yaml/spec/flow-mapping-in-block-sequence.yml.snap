@@ -19,10 +19,10 @@ info: yaml/spec/flow-mapping-in-block-sequence.yml
 @@ -1 +1 @@
 -- { a: b }
 +- {a: b}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-- {a: b}```
+- {a: b}
+```

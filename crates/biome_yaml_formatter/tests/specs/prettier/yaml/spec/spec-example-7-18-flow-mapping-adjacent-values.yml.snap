@@ -27,7 +27,6 @@ info: yaml/spec/spec-example-7-18-flow-mapping-adjacent-values.yml
 +"readable": value,
 +"empty":
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -37,4 +36,5 @@ info: yaml/spec/spec-example-7-18-flow-mapping-adjacent-values.yml
 "adjacent":value,
 "readable": value,
 "empty":
-}```
+}
+```

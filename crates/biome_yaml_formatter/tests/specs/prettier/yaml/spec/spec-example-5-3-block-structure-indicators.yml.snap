@@ -34,7 +34,6 @@ mapping:
 +  ? sky
 +  : blue
 +  sea : green
-\ No newline at end of file
 ```
 
 # Output
@@ -46,4 +45,5 @@ sequence:
 mapping:
   ? sky
   : blue
-  sea : green```
+  sea : green
+```

@@ -23,7 +23,7 @@ Chomping: |
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,8 @@
 -Folding: "Empty line
 -
 +Folding:
@@ -31,9 +31,9 @@ Chomping: |
 +   	
    as a line feed"
  Chomping: |
--  Clipped empty lines
-+  Clipped empty lines
-\ No newline at end of file
+   Clipped empty lines
++ 
++
 ```
 
 # Output
@@ -44,4 +44,7 @@ Folding:
    	
   as a line feed"
 Chomping: |
-  Clipped empty lines```
+  Clipped empty lines
+ 
+
+```

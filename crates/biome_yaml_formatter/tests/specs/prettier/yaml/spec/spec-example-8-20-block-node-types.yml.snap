@@ -31,7 +31,6 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
  - !!map # Block collection
 -  foo: bar
 +  foo : bar
-\ No newline at end of file
 ```
 
 # Output
@@ -42,4 +41,5 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
 - >
  Block scalar
 - !!map # Block collection
-  foo : bar```
+  foo : bar
+```

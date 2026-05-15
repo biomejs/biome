@@ -76,6 +76,7 @@ schema     = [
   "dep:schemars",
 ]
 test-utils = []
+yaml       = []
 
 [lints]
 workspace = true

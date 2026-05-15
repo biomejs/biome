@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block_mapping/nested_block_mapping.yaml
+---
+
+# Input
+
+```yaml
+outer:
+  inner: value
+  nested:
+    deep: leaf
+
+```
+
+
+# Formatted
+
+```yaml
+outer:
+  inner: value
+  nested:
+    deep: leaf
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"outer:\n  inner: value\n  nested:\n    deep: leaf\n" => 0..47

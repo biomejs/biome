@@ -23,7 +23,6 @@ a: 4.2
 -23: d
 +? 23
 +: d
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ a: 4.2
 ```yml
 a: 4.2
 ? 23
-: d```
+: d
+```

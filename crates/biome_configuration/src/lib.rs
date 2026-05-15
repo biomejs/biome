@@ -22,6 +22,7 @@ pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
+pub mod yaml;
 
 #[cfg(feature = "cli")]
 use crate::analyzer::assist::assist_configuration;
@@ -191,6 +192,15 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "markdown")]
     pub markdown: Option<MarkdownConfiguration>,
+
+    /// Specific configuration for the YAML language
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(crate::yaml::yaml_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "yaml")]
+    pub yaml: Option<crate::yaml::YamlConfiguration>,
 
     /// Specific configuration for the GraphQL language
     #[cfg_attr(feature = "cli", bpaf(external(graphql_configuration), optional))]

@@ -23,13 +23,13 @@ info: yaml/flow-mapping/long-value.yml
 -  3: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,
 -}
 +{1: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,3: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-{1: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,3: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong}```
+{1: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,3: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong}
+```
 
 # Lines exceeding max width of 80 characters
 ```

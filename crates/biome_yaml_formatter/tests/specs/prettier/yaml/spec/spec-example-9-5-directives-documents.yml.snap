@@ -35,7 +35,6 @@ info: yaml/spec/spec-example-9-5-directives-documents.yml
  ---
  # Empty
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -48,7 +47,8 @@ info: yaml/spec/spec-example-9-5-directives-documents.yml
 %YAML1.2
 ---
 # Empty
-...```
+...
+```
 
 # Errors
 ```

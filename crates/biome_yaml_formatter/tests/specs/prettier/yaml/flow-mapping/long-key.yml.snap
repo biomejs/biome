@@ -23,13 +23,13 @@ info: yaml/flow-mapping/long-key.yml
 -  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong3,
 -}
 +{? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong1,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong2,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong3}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-{? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong1,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong2,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong3}```
+{? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong1,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong2,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong3}
+```
 
 # Lines exceeding max width of 80 characters
 ```

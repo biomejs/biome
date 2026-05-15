@@ -24,17 +24,17 @@ info: yaml/spec/anchors-and-tags.yml
 -- !!int 2
 -- !!int &c 4
 -- &d d
-+- &a !!str a
++ - &a !!str a
 + - !!int 2
 + - !!int &c 4
 + - &d d
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-- &a !!str a
+ - &a !!str a
  - !!int 2
  - !!int &c 4
- - &d d```
+ - &d d
+```

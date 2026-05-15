@@ -20,14 +20,14 @@ key:    # Comment
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,3 @@
+@@ -1,3 +1,5 @@
 -key: # Comment
 -  # lines
--  value
 +key:    # Comment
 +        # lines
-+  value
-\ No newline at end of file
+   value
++
++
 ```
 
 # Output
@@ -35,4 +35,7 @@ key:    # Comment
 ```yml
 key:    # Comment
         # lines
-  value```
+  value
+
+
+```

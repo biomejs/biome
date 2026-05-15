@@ -26,7 +26,6 @@ info: yaml/spec/tags-in-explicit-mapping.yml
 +: !!int 47
 +? c
 +: !!str d
-\ No newline at end of file
 ```
 
 # Output
@@ -35,4 +34,5 @@ info: yaml/spec/tags-in-explicit-mapping.yml
 ? !!str a
 : !!int 47
 ? c
-: !!str d```
+: !!str d
+```

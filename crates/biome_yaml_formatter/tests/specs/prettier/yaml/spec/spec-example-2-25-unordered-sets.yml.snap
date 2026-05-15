@@ -22,10 +22,10 @@ info: yaml/spec/spec-example-2-25-unordered-sets.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,4 @@
--# Sets are represented as a
--# Mapping where each key is
--# associated with a null value
+@@ -1,8 +1,7 @@
+ # Sets are represented as a
+ # Mapping where each key is
+ # associated with a null value
 ----
 -!!set
 +--- !!set
@@ -37,6 +37,9 @@ info: yaml/spec/spec-example-2-25-unordered-sets.yml
 # Output
 
 ```yml
+# Sets are represented as a
+# Mapping where each key is
+# associated with a null value
 --- !!set
 ? Mark McGwire
 ? Sammy Sosa

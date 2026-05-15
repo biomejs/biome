@@ -29,7 +29,6 @@ omitted value:,
 +omitted value:,
 +: omitted key,
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -40,4 +39,5 @@ unquoted : "separate",
 http://foo.com,
 omitted value:,
 : omitted key,
-}```
+}
+```

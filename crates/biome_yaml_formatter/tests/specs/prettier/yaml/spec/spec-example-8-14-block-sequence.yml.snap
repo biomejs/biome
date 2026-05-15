@@ -23,7 +23,6 @@ block sequence:
    - one
 -  - two: three
 +  - two : three
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ block sequence:
 ```yml
 block sequence:
   - one
-  - two : three```
+  - two : three
+```

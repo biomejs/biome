@@ -365,13 +365,6 @@ foobar: !sexy
  # JS-YAML allows you to specify a custom YAML types for your structures.
  # This is a simple example of custom constructor defined in `js/demo.js` for
  # custom `!sexy` type:
-@@ -206,4 +202,4 @@
- 
- foobar: !sexy
-   - bunny
--  - chocolate
-+  - chocolate
-\ No newline at end of file
 ```
 
 # Output
@@ -581,7 +574,8 @@ function: !!js/function >
 
 foobar: !sexy
   - bunny
-  - chocolate```
+  - chocolate
+```
 
 # Errors
 ```

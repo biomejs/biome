@@ -34,9 +34,11 @@ keep: |+
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,19 +1,17 @@
+@@ -1,19 +1,19 @@
 -# Strip
 -# Comments:
++ # Strip
++  # Comments:
  strip: |-
    # text
 -
@@ -63,12 +65,13 @@ keep: |+
 \ No newline at end of file
 + # Trail
 +  # comments.
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
+ # Strip
+  # Comments:
 strip: |-
   # text
   
@@ -85,4 +88,5 @@ keep: |+
   # text
 
  # Trail
-  # comments.```
+  # comments.
+```

@@ -23,7 +23,6 @@ foo:
 -foo: *a:
 +foo:
 +  *a:
-\ No newline at end of file
 ```
 
 # Output
@@ -31,7 +30,8 @@ foo:
 ```yml
 &a: key: &a value
 foo:
-  *a:```
+  *a:
+```
 
 # Errors
 ```
