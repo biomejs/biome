@@ -26,11 +26,9 @@ $line-comment: true;
  * @param $size - The size value
  * @returns Computed size
  */
-/* TODO(scss at-rules):
 @function compute-size($size) {
   @return $size * 2;
 }
-*/
 
 /* Comment with special chars: @#$%^&*() */
 $special: 10px;
@@ -38,13 +36,9 @@ $special: 10px;
 /*
  * Comment before mixin
  */
-/* TODO(scss at-rules):
 @mixin test-mixin {
   /* Comment inside mixin */
   margin: 0;
 }
-*/
 
 /* Comment at end of file */
-
-

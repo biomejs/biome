@@ -29,7 +29,6 @@ seq:
 + &anchor
 +- a
 +- b
-\ No newline at end of file
 ```
 
 # Output
@@ -39,7 +38,8 @@ seq:
 seq:
  &anchor
 - a
-- b```
+- b
+```
 
 # Errors
 ```

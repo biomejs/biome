@@ -26,9 +26,7 @@ info: yaml/spec/tags-on-empty-scalars.yml
 +-
 +  !!null : a
    b: !!str
--- !!str : !!null
-+- !!str : !!null
-\ No newline at end of file
+ - !!str : !!null
 ```
 
 # Output
@@ -38,4 +36,5 @@ info: yaml/spec/tags-on-empty-scalars.yml
 -
   !!null : a
   b: !!str
-- !!str : !!null```
+- !!str : !!null
+```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/home-assistant/configuration.yml
 ---
+
 # Input
 
 ```yml
@@ -253,7 +254,6 @@ hue:
 -    - host: 192.168.1.1
 +    bridges:
 +        - host: 192.168.1.1
-\ No newline at end of file
 ```
 
 # Output
@@ -350,4 +350,5 @@ switch:
 
 hue:
     bridges:
-        - host: 192.168.1.1```
+        - host: 192.168.1.1
+```

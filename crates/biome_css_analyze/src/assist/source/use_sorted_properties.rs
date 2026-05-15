@@ -266,7 +266,7 @@ impl RecessOrderMember {
                             return NodeKindOrder::UnknownKind;
                         };
                         match prop {
-                            AnyCssDeclarationName::CssDashedIdentifier(_) => {
+                            AnyCssDeclarationName::AnyCssDashedIdentifier(_) => {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,

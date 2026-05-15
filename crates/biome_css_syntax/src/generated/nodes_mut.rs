@@ -4127,6 +4127,14 @@ impl ScssIncludeUsingClause {
         )
     }
 }
+impl ScssInterpolatedDashedIdentifier {
+    pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedIdentifier {
     pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
         Self::unwrap_cast(
@@ -4308,6 +4316,20 @@ impl ScssInterpolation {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssKeyframesSelector {
+    pub fn with_selector(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_percent_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
         )
     }
 }

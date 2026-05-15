@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/blank-lines.yml
 ---
+
 # Input
 
 ```yml
@@ -39,10 +40,8 @@ text: |
  
    c
 -
--  d
 + 
-+  d
-\ No newline at end of file
+   d
 ```
 
 # Output
@@ -59,4 +58,5 @@ text: |
 
   c
  
-  d```
+  d
+```

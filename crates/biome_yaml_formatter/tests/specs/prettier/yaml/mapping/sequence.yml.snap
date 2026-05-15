@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/mapping/sequence.yml
 ---
+
 # Input
 
 ```yml
@@ -20,11 +21,11 @@ key:
  key:
 -  - value
 +- value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 key:
-- value```
+- value
+```

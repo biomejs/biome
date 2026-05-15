@@ -75,7 +75,6 @@ value11
 -!!str &a11 value11
 +!!str &a11
 +value11
-\ No newline at end of file
 ```
 
 # Output
@@ -106,7 +105,8 @@ a6: 1
 !!str &a10 key10: value9
 ---
 !!str &a11
-value11```
+value11
+```
 
 # Errors
 ```

@@ -36,11 +36,9 @@ e
  - !!str c
 ----
 -!!str d
--e
 +--- !!str
 +d
-+e
-\ No newline at end of file
+ e
 ```
 
 # Output
@@ -53,7 +51,8 @@ e
 - !!str c
 --- !!str
 d
-e```
+e
+```
 
 # Errors
 ```

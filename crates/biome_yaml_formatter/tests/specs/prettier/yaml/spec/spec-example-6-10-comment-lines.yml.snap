@@ -19,28 +19,33 @@ info: yaml/spec/spec-example-6-10-comment-lines.yml
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -2,7 +2,3 @@
- 
+@@ -1,9 +1,5 @@
  # Comment
  
 -# Comment
 -
 -# Comment
 -
+   # Comment
+    
+ 
 
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,7 +1 @@
--[
+@@ -1,12 +1,8 @@
+ [
+   "# Comment",
+   empty_line,
 -  "# Comment",
 -  empty_line,
--  "# Comment",
--  empty_line,
--  verbatim(["# Comment", empty_line, "# Comment", empty_line, ""])
--]
-\ No newline at end of file
-+["# Comment", empty_line, verbatim(["# Comment", empty_line, ""])]
-\ No newline at end of file
+   verbatim([
+-    "# Comment
+-
+-  # Comment
++    "  # Comment
+    
+ 
+ 
 
 ```

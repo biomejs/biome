@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-20-single-pair-explicit-entry.yml
 ---
+
 # Input
 
 ```yml
@@ -26,7 +27,6 @@ info: yaml/spec/spec-example-7-20-single-pair-explicit-entry.yml
 +? foo
 + bar : baz
 +]
-\ No newline at end of file
 ```
 
 # Output
@@ -35,4 +35,5 @@ info: yaml/spec/spec-example-7-20-single-pair-explicit-entry.yml
 [
 ? foo
  bar : baz
-]```
+]
+```

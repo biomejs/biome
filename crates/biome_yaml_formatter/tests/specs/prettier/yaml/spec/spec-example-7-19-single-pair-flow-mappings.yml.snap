@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-19-single-pair-flow-mappings.yml
 ---
+
 # Input
 
 ```yml
@@ -22,7 +23,6 @@ foo: bar
 +[
 +foo: bar
 +]
-\ No newline at end of file
 ```
 
 # Output
@@ -30,4 +30,5 @@ foo: bar
 ```yml
 [
 foo: bar
-]```
+]
+```

@@ -753,7 +753,11 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDashedIdentifier =
+	CssDashedIdentifier
+	| ScssInterpolatedDashedIdentifier
+
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -1300,6 +1304,7 @@ AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
 	| CssKeyframesRangeSelector
+	| ScssKeyframesSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1321,6 +1326,12 @@ CssKeyframesPercentageSelector =
 CssKeyframesRangeSelector =
 	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
 	percentage: CssPercentage
+
+// @keyframes loader { #{50% - $duration} {} #{$i}% {} }
+//                     ^^^^^^^^^^^^^^^^^^    ^^^^^^
+ScssKeyframesSelector =
+	selector: ScssInterpolation
+	'%'?
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -2048,7 +2059,7 @@ CssReturnsStatement =
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
-	| CssDashedIdentifier
+	| AnyCssDashedIdentifier
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
@@ -2976,6 +2987,11 @@ ScssPlaceholderSelector =
 	name: AnyCssSelectorCustomIdentifier
 
 ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+// Parser-owned invariant: starts as a custom-property name, either
+// `--#{$prop}` or `--theme-#{$slot}`.
+ScssInterpolatedDashedIdentifier =
 	items: ScssInterpolatedIdentifierPartList
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*

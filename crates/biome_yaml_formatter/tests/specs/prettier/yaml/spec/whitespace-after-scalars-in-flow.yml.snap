@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/whitespace-after-scalars-in-flow.yml
 ---
+
 # Input
 
 ```yml
@@ -30,7 +31,6 @@ info: yaml/spec/whitespace-after-scalars-in-flow.yml
 +   e   : "f"
 +  }
 +- [      ]
-\ No newline at end of file
 ```
 
 # Output
@@ -41,4 +41,5 @@ info: yaml/spec/whitespace-after-scalars-in-flow.yml
    , c : 'd' ,
    e   : "f"
   }
-- [      ]```
+- [      ]
+```

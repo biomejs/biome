@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-8-16-block-mappings.yml
 ---
+
 # Input
 
 ```yml
@@ -20,11 +21,11 @@ block mapping:
  block mapping:
 -  key: value
 + key: value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 block mapping:
- key: value```
+ key: value
+```

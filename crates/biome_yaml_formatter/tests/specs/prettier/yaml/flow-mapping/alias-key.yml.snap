@@ -19,13 +19,13 @@ info: yaml/flow-mapping/alias-key.yml
 @@ -1 +1 @@
 -{ &123 foo, *123 : 456 }
 +{&123 foo, *123 : 456}
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-{&123 foo, *123 : 456}```
+{&123 foo, *123 : 456}
+```
 
 # Errors
 ```

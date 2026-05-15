@@ -1280,15 +1280,17 @@ fn handle_line_continuation(
     emit_indent_tokens: bool,
 ) -> InlineNewlineAction {
     let quote_depth = p.state().block_quote_depth;
+    let line_has_quote_prefix = quote_depth > 0 && has_quote_prefix(p, quote_depth);
     if break_for_quote_prefix_after_inline_newline(p, quote_depth) {
         return InlineNewlineAction::Break;
     }
 
-    // Blockquote lazy continuation is stricter than paragraph interrupt:
-    // a line that begins any new block construct (e.g. an ordered list with
-    // start > 1) ends the blockquote, even though such a line could not
-    // interrupt an active top-level paragraph.
-    if quote_depth > 0 && begins_blockquote_terminating_block(p) {
+    // Unprefixed continuation in a blockquote: a line that begins any new block
+    // construct (e.g. an ordered list with start > 1) ends the blockquote per
+    // CommonMark, even though such a line could not interrupt an active
+    // top-level paragraph. With a `>` prefix, normal lazy-continuation rules
+    // apply and the line stays inside the same paragraph.
+    if quote_depth > 0 && !line_has_quote_prefix && begins_blockquote_terminating_block(p) {
         return InlineNewlineAction::Break;
     }
 
@@ -1785,12 +1787,15 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
     // that interrupt paragraphs - they would be indented code blocks.
     // Tabs count as 4 spaces per CommonMark §2.2.
     if p.line_start_leading_indent() >= INDENT_CODE_BLOCK_SPACES {
-        // Inside list items, allow list markers at the current indent to
-        // interrupt paragraphs (nested lists).
-        if (p.state().list_nesting_depth > 0 || p.state().list_item_required_indent > 0)
-            && (at_bullet_list_item(p) || at_order_list_item(p))
-        {
-            return true;
+        // Inside list items, list markers at the current indent can start
+        // nested lists. Ordered markers still need to satisfy §5.2.
+        if p.state().list_nesting_depth > 0 || p.state().list_item_required_indent > 0 {
+            if at_bullet_list_item(p) {
+                return true;
+            }
+            if at_order_list_item(p) && can_ordered_marker_interrupt_paragraph(p) {
+                return true;
+            }
         }
         return false;
     }
@@ -1829,16 +1834,13 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
         }
     }
 
-    // Ordered list item (1., 2), etc.)
-    // Per CommonMark §5.2: ordered lists can interrupt TOP-LEVEL paragraphs only if:
-    //   - Starting with 1 (not 2, 3, etc.), AND
-    //   - The item has content (empty ordered items cannot interrupt)
-    // Inside a list context, any ordered marker can start a new sibling item.
-    if at_order_list_item(p) || at_order_list_item_at_any_indent(p) {
-        let in_list = p.state().list_nesting_depth > 0;
-        if in_list || (is_ordered_list_starts_with_one(p) && !is_empty_list_item(p)) {
-            return true;
-        }
+    // Ordered markers may interrupt paragraphs only when they start with `1`
+    // and are non-empty (§5.2). In list context, a marker physically before
+    // required_indent is a sibling/parent boundary and is allowed.
+    if (at_order_list_item(p) || at_order_list_item_at_any_indent(p))
+        && can_ordered_marker_interrupt_paragraph(p)
+    {
+        return true;
     }
 
     // HTML block (type 7 does not interrupt paragraphs)
@@ -1877,7 +1879,7 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
         });
     }
 
-    // Ordered marker: per CommonMark §5.1, only ordered lists starting with 1
+    // Ordered marker: per CommonMark §5.2, only ordered lists starting with 1
     // can interrupt paragraphs. Check if text is "1." or "1)" pattern.
     if let Some(rest) = text.strip_prefix('1') {
         // "1." or "1)" followed by space (the space might be in next token)
@@ -1907,6 +1909,73 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
     false
 }
 
+/// Return true when the current ordered marker may interrupt a paragraph.
+///
+/// CommonMark §5.2 requires ordered paragraph interrupters to start with `1`
+/// and be non-empty. Inside a list, physical indent below `required_indent`
+/// means the marker is a sibling/parent boundary instead of an interrupter.
+fn can_ordered_marker_interrupt_paragraph(p: &mut MarkdownParser) -> bool {
+    let in_list = p.state().list_nesting_depth > 0;
+    let required_indent = p.state().list_item_required_indent;
+    let physical_indent = physical_line_start_indent(p);
+    let is_sibling_or_parent = in_list && physical_indent < required_indent;
+
+    if is_sibling_or_parent {
+        return true;
+    }
+
+    ordered_marker_starts_with_one_after_whitespace(p)
+        && !is_ordered_marker_empty_after_whitespace(p)
+}
+
+/// Like [`is_ordered_list_starts_with_one`], but skips leading whitespace.
+fn ordered_marker_starts_with_one_after_whitespace(p: &mut MarkdownParser) -> bool {
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
+        if let Some(rest) = trimmed
+            .strip_prefix("1.")
+            .or_else(|| trimmed.strip_prefix("1)"))
+        {
+            return rest.is_empty() || rest.starts_with([' ', '\t']);
+        }
+    }
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        is_ordered_list_starts_with_one(p)
+    })
+}
+
+/// Like [`is_empty_list_item`], but skips leading whitespace.
+fn is_ordered_marker_empty_after_whitespace(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        is_empty_list_item(p)
+    })
+}
+
+/// Count physical leading columns, ignoring `virtual_line_start`.
+///
+/// This is needed after indentation has already been emitted as CST nodes.
+/// Tabs expand to the next multiple of `TAB_STOP_SPACES`.
+fn physical_line_start_indent(p: &MarkdownParser) -> usize {
+    let source = p.source().source_text();
+    let pos: usize = p.cur_range().start().into();
+    let line_start = source[..pos].rfind('\n').map_or(0, |idx| idx + 1);
+    let mut col = 0usize;
+    for c in source[line_start..].chars() {
+        match c {
+            ' ' => col += 1,
+            '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+            _ => break,
+        }
+    }
+    col
+}
+
 /// Check if an ordered list marker starts with the number 1.
 ///
 /// Per CommonMark §5.2: "In order to solve of an ambiguity in the spec,
@@ -1914,7 +1983,7 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
 ///
 /// This prevents accidental list creation from wrapped lines like:
 /// "The number of windows is 14. The number of doors is 6."
-fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
+pub(crate) fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
     // Raw ordered list marker token: text is the full marker (e.g. "1.", "10.").
     if p.at(MD_ORDERED_LIST_MARKER) {
         let text = p.cur_text();

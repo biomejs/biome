@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
 ---
+
 # Input
 
 ```yml
@@ -22,7 +23,6 @@ info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
  &mapping
 -&key [&item a, b, c]: value
 +&key [ &item a, b, c ]: value
-\ No newline at end of file
 ```
 
 # Output
@@ -30,4 +30,5 @@ info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
 ```yml
 ---
 &mapping
-&key [ &item a, b, c ]: value```
+&key [ &item a, b, c ]: value
+```

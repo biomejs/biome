@@ -25,20 +25,17 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,13 +1,5 @@
+@@ -1,11 +1,8 @@
  [
    "#hello world",
    hard_line_break,
 -  "#hello world",
 -  hard_line_break,
--  verbatim([
--    "#hello world",
--    hard_line_break,
--    "#hello world",
--    hard_line_break,
--    ""
--  ])
-+  verbatim(["#hello world", hard_line_break, ""])
+   verbatim([
+     "#hello world
+-#hello world
+ "
+   ])
  ]
 \ No newline at end of file
 

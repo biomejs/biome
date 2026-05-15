@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/document_markers.yaml
+---
+
+# Input
+
+```yaml
+---
+a: b
+...
+---
+c: d
+
+```
+
+
+# Formatted
+
+```yaml
+---
+a: b
+...
+---
+c: d
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"---\na: b\n...\n---\nc: d\n" => 0..22

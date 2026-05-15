@@ -321,6 +321,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
         "ScssIncludeUsingClause" => lang::ScssIncludeUsingClause::KIND_SET.iter().next(),
+        "ScssInterpolatedDashedIdentifier" => lang::ScssInterpolatedDashedIdentifier::KIND_SET
+            .iter()
+            .next(),
         "ScssInterpolatedIdentifier" => lang::ScssInterpolatedIdentifier::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
             .iter()
@@ -369,6 +372,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
+        "ScssKeyframesSelector" => lang::ScssKeyframesSelector::KIND_SET.iter().next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
@@ -642,6 +646,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
             ("block", 4),
         ],
         "ScssIncludeUsingClause" => &[("parameters", 1)],
+        "ScssInterpolatedDashedIdentifier" => &[("items", 0)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedNthValue" => &[("items", 0)],
         "ScssInterpolatedPseudoClassFunction" => &[("name", 0), ("arguments", 2)],
@@ -655,6 +660,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssInterpolatedString" => &[("parts", 1)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],
+        "ScssKeyframesSelector" => &[("selector", 0)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],

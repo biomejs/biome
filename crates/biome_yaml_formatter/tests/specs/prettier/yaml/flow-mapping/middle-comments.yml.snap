@@ -23,9 +23,7 @@ info: yaml/flow-mapping/middle-comments.yml
 -# comment 1
 +!!map # comment 1
  # comment 2
--{}
-+{}
-\ No newline at end of file
+ {}
 ```
 
 # Output
@@ -33,4 +31,5 @@ info: yaml/flow-mapping/middle-comments.yml
 ```yml
 !!map # comment 1
 # comment 2
-{}```
+{}
+```
