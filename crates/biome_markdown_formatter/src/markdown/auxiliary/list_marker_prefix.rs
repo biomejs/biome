@@ -16,14 +16,31 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
         } = node.as_fields();
 
         let marker = marker?;
-
+        let list_marker = node.list_marker()?;
         write!(f, [pre_marker_indent.format()])?;
         // Note that for `-   `, the parser treats the indent as part of the marker, not the content
         // This is a parser bug that causes a regression
         // in crates/biome_markdown_formatter/tests/specs/prettier/markdown/spec/example-242.md.snap
         match self.target_marker {
             Some(target) => write!(f, [format_replaced(&marker, &token(target))])?,
-            None => write!(f, [marker.format()])?,
+            None => {
+                if list_marker.is_ordered_with_paren()
+                    && let Some(trimmed_text) = marker.text_trimmed().strip_suffix(")")
+                {
+                    write!(
+                        f,
+                        [format_replaced(
+                            &marker,
+                            &format_args![
+                                text(trimmed_text, marker.text_trimmed_range().start(),),
+                                token(".")
+                            ]
+                        )]
+                    )?
+                } else {
+                    write!(f, [marker.format()])?
+                }
+            }
         }
 
         let list_marker = node.list_marker()?;
@@ -34,7 +51,7 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
                     [
                         format_replaced(&post_marker_space_token, &format_args![&space()],),
                         // The printer dedupes spaces that appear one after the other, so we use a text
-                        token(" ")
+                        // token(" ")
                     ]
                 )?;
             } else {
