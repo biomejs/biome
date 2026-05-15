@@ -90,6 +90,10 @@ impl TextPrintMode {
         Self::Trim(TrimMode::All)
     }
 
+    pub(crate) const fn fill() -> Self {
+        Self::Fill
+    }
+
     pub(crate) const fn trim_keep_leading_spaces() -> Self {
         Self::Trim(TrimMode::KeepLeadingSpaces)
     }

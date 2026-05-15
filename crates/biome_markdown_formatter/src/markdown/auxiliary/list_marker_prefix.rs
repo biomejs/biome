@@ -26,8 +26,8 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             None => write!(f, [marker.format()])?,
         }
 
-        if let Some(space) = post_marker_space_token {
-            write!(f, [space.format()])?;
+        if let Some(post_marker_space_token) = post_marker_space_token {
+            write!(f, [format_replaced(&post_marker_space_token, &space())])?;
         }
         write!(f, [content_indent.format()])
     }

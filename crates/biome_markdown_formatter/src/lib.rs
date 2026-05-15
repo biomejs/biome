@@ -1,3 +1,4 @@
+mod bullet_list;
 mod comments;
 pub mod context;
 mod cst;

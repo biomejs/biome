@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "2.3.12",
         name: "noDuplicateAttributes",
         language: "html",
-        recommended: true,
+        recommended: false,
         sources: &[
             RuleSource::HtmlEslint("no-duplicate-attrs").same(),
             RuleSource::EslintVueJs("no-duplicate-attributes").same()

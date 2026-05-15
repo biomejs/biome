@@ -63,7 +63,7 @@ declare_lint_rule! {
         version: "2.3.8",
         name: "noProto",
         language: "js",
-        recommended: true,
+        recommended: false,
         sources: &[RuleSource::Eslint("no-proto").same()],
     }
 }
