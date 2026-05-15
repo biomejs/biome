@@ -279,14 +279,6 @@ TABLE {}
    background-color: orange;
  }
  
-@@ -153,6 +153,5 @@
-   }
-   &-KeepSelector & .KeepClassSelector {
-   }
--  &-100\.200 {
--  }
-+  &-100\.200 {}
- }
 ```
 
 # Output
@@ -447,7 +439,8 @@ TABLE {
   }
   &-KeepSelector & .KeepClassSelector {
   }
-  &-100\.200 {}
+  &-100\.200 {
+  }
 }
 ```
 
@@ -472,30 +465,6 @@ case.scss:7:9 parse ━━━━━━━━━━━━━━━━━━━━
       │         ^^^^
     8 │ 
     9 │ HTML#KeepId.KeepClass,
-  
-case.scss:147:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `-100`
-  
-    145 │ TABLE {}
-    146 │ 
-  > 147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
-        │                                                                  ^^^^
-    148 │ 
-  
-  i Remove -100
-  
-case.scss:147:70 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `\.200`
-  
-    145 │ TABLE {}
-    146 │ 
-  > 147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
-        │                                                                      ^^^^^
-    148 │ 
-  
-  i Remove \.200
   
 
 ```
