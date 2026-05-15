@@ -4,10 +4,10 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"   1. A paragraph
-     with two lines.
-      1. a paragraph
-        with two lines
+    let source = r#"Foo _bar
+baz_
+====
+
 "#;
     let parse = parse_markdown(source);
 
