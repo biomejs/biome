@@ -10,9 +10,8 @@ use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdLeafBlock, MarkdownLanguage, MarkdownSyntaxKind,
-    MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdContinuationIndent, MdNewline,
-    MdQuotePrefix,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
+    MdBulletFields, MdBulletList, MdContinuationIndent, MdNewline, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator};
 use std::collections::VecDeque;
@@ -117,14 +116,15 @@ impl Format<MarkdownFormatContext> for ListBullet {
 
         let prefix = prefix?;
         let marker = prefix.marker()?;
+        let list_marker = prefix.list_marker()?;
 
         // `* - - -` is a bullet containing a `-` thematic break. Normalizing `*`
         // to `-` produces `- - - -` which CommonMark 4.1 parses as a thematic
         // break, not a list item. Same for `+ - - -`. Skip normalization for marker
         // but still format content through child formatters.
-        let target_marker = if marker.kind() == MarkdownSyntaxKind::MINUS
+        let target_marker = if list_marker.is_minus()
             || first_block_is_dash_thematic_break(&content)
-            || marker.kind() == MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER
+            || list_marker.is_ordered()
         {
             None
         } else {
@@ -141,8 +141,8 @@ impl Format<MarkdownFormatContext> for ListBullet {
         // Alignment = formatted prefix width so continuation lines align under content.
         // Ordered: marker (e.g. "1." = 2 chars) + space() + token(" ") = marker.len() + 2
         // Unordered: marker ("-"/"*"/"+" = 1 char) + space() = 2
-        let alignment = if marker.kind() == MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER {
-            (marker.text_trimmed().len() as u8) + 2
+        let alignment = if list_marker.is_ordered() {
+            (marker.text_trimmed().len() as u8) + 1
         } else {
             2
         };
@@ -184,9 +184,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
             for prefix in iter.drain_quote_prefixes() {
                 write!(
                     f,
-                    [prefix
-                        .format()
-                        .with_options(FormatMdQuotePrefixOptions { should_remove: true })]
+                    [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                        should_remove: true
+                    })]
                 )?;
             }
             dbg!(&item);
