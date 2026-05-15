@@ -61,3 +61,9 @@ markdown/spec/example-440.md
 markdown/spec/example-17.md
 markdown/spec/example-39.md
 markdown/spec/example-55.md
+
+
+# Incorrect normalisation
+# https://github.com/prettier/prettier/issues/19146
+markdown/spec/example-5.md
+markdown/spec/example-9.md

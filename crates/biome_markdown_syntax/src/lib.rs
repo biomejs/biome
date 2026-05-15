@@ -5,6 +5,7 @@ pub mod file_source;
 #[macro_use]
 mod generated;
 mod block_ext;
+mod inline_ext;
 mod syntax_node;
 pub mod text_ext;
 
