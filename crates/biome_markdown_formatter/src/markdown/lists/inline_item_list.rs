@@ -30,8 +30,32 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
         Ok(())
     }
 }
+/// Removes leading `Space` items after every `SoftBreak` in the word stream.
+///
+/// When the parser doesn't recognize continuation-line whitespace as
+/// `MdIndentToken` (e.g. because the source list marker had leading spaces
+/// that shift the expected indent), those spaces end up as `MdTextual " "`
+/// tokens → `Space` items in the stream. The structural `align()` in the IR
+/// already provides the correct indentation, so these spaces are artifacts.
+fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
+    let mut i = 0;
+    while i < stream.len() {
+        if matches!(stream[i], ProseItem::SoftBreak) {
+            let start = i + 1;
+            let mut end = start;
+            while end < stream.len() && matches!(stream[end], ProseItem::Space) {
+                end += 1;
+            }
+            if end > start {
+                stream.drain(start..end);
+            }
+        }
+        i += 1;
+    }
+}
+
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
+use biome_markdown_syntax::{AnyMdInline, MdIndentCodeBlock, MdInlineItemList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
@@ -45,7 +69,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         if self.print_mode.is_fill() {
-            return self.fmt_fill(node, f);
+            return self.fmt_fill(node, f, self.inside_list);
         } else if self.inside_list {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
@@ -66,9 +90,16 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
         for (index, item) in node.iter().enumerate() {
             match item {
                 AnyMdInline::MdTextual(text) => {
+                    let inside_indent_code_block = text
+                        .syntax()
+                        .grand_parent()
+                        .is_some_and(|n| MdIndentCodeBlock::can_cast(n.kind()));
+
                     if text.is_empty_and_not_newline()? && seen_new_line {
-                        if self.print_mode.is_keep_leading_spaces() {
-                            joiner.entry(&text.format());
+                        if inside_indent_code_block || self.print_mode.is_fill() {
+                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                                print_mode: TextPrintMode::fill(),
+                            }));
                         } else {
                             let entry = format_with(|f| {
                                 write!(
@@ -566,11 +597,17 @@ impl FormatMdInlineItemList {
     /// using `soft_line_break_or_space()` separators between word-level entries.
     /// The word stream from `build_word_stream_flat` already provides the
     /// granularity needed — just change the emission strategy.
-    fn fmt_fill(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let WordStreamResult {
-            stream,
-            has_trailing_break,
-        } = build_word_stream_flat(node, f).map_err(|_| FormatError::SyntaxError)?;
+    fn fmt_fill(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+        inside_list: bool,
+    ) -> FormatResult<()> {
+        let WordStreamResult { mut stream } = build_word_stream_flat(node, f)?;
+
+        if inside_list {
+            strip_spaces_after_soft_breaks(&mut stream);
+        }
 
         let mut is_first_line = true;
         let mut line_start = 0;
@@ -590,7 +627,7 @@ impl FormatMdInlineItemList {
                         [hard_break
                             .format()
                             .with_options(FormatMdFormatHardLineOptions {
-                                print_mode: TextPrintMode::Fill,
+                                print_mode: TextPrintMode::fill(),
                             })]
                     )?;
                     is_first_line = true;
@@ -603,6 +640,7 @@ impl FormatMdInlineItemList {
                             write!(f, [hard_line_break()])?;
                         }
                         FormatSourceLine(line_items).fmt(f)?;
+                        write!(f, [soft_line_break()])?;
                         is_first_line = false;
                     }
                     line_start = i + 1;
@@ -616,11 +654,18 @@ impl FormatMdInlineItemList {
             if !is_first_line {
                 write!(f, [hard_line_break()])?;
             }
-            FormatSourceLine(remaining).fmt(f)?;
+            let remained = format_with(|f| FormatSourceLine(remaining).fmt(f));
+            let mut remained = remained.memoized();
+            if !remained.inspect(f)?.will_break() && inside_list {
+                write!(f, [&remained, soft_line_break()])?;
+            } else {
+                write!(f, [&remained])?;
+            }
         }
 
-        if has_trailing_break {
+        if !inside_list {
             write!(f, [hard_line_break()])?;
+        } else {
         }
 
         Ok(())

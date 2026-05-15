@@ -82,7 +82,47 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             return joiner.finish();
         }
 
-        let mut iter = node.iter();
+        DefaultBlockListFormatter { node: node.clone() }.fmt(f)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum PrevContentBlock {
+    None,
+    Header,
+    Paragraph,
+    Other,
+}
+
+pub(crate) struct FormatMdBlockListOptions {
+    /// Signals how [MdParagraph] should be formatted
+    pub(crate) paragraph_print_mode: TextPrintMode,
+
+    /// When true, leading and trailing newlines are removed
+    pub(crate) trim: bool,
+}
+
+impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
+    type Options = FormatMdBlockListOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.paragraph_print_mode = options.paragraph_print_mode;
+        self.trim = options.trim;
+        self
+    }
+}
+
+pub(crate) struct DefaultBlockListFormatter {
+    node: MdBlockList,
+}
+
+impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        f.context().comments().is_suppressed(self.node.syntax());
+
+        let mut joiner = f.join();
+
+        let mut iter = self.node.iter();
 
         // Count trailing newlines using next_back
         let mut trailing_count = 0;
@@ -96,8 +136,8 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
         // Single forward pass in document order
         let mut still_leading = true;
         let mut prev_was_header = false;
-        let content_count = node.len() - trailing_count;
-        let mut iter = node.iter().enumerate().peekable();
+        let content_count = self.node.len() - trailing_count;
+        let mut iter = self.node.iter().enumerate().peekable();
         while let Some((index, node)) = iter.next() {
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
                 let is_leading = still_leading;
@@ -132,31 +172,5 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
         }
 
         joiner.finish()
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum PrevContentBlock {
-    None,
-    Header,
-    Paragraph,
-    Other,
-}
-
-pub(crate) struct FormatMdBlockListOptions {
-    /// Signals how [MdParagraph] should be formatted
-    pub(crate) paragraph_print_mode: TextPrintMode,
-
-    /// When true, leading and trailing newlines are removed
-    pub(crate) trim: bool,
-}
-
-impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
-    type Options = FormatMdBlockListOptions;
-
-    fn with_options(mut self, options: Self::Options) -> Self {
-        self.paragraph_print_mode = options.paragraph_print_mode;
-        self.trim = options.trim;
-        self
     }
 }

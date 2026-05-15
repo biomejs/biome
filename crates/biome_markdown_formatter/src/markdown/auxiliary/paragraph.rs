@@ -13,7 +13,7 @@ pub(crate) struct FormatMdParagraph {
 impl Default for FormatMdParagraph {
     fn default() -> Self {
         Self {
-            trim_mode: TextPrintMode::Fill,
+            trim_mode: TextPrintMode::fill(),
             inside_list: false,
         }
     }

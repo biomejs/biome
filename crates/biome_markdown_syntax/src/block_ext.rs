@@ -1,4 +1,4 @@
-use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock};
+use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock};
 
 impl AnyMdBlock {
     pub const fn is_fenced_block(&self) -> bool {
@@ -8,6 +8,27 @@ impl AnyMdBlock {
                 AnyMdCodeBlock::MdFencedCodeBlock(_)
             ))
         )
+    }
+
+    pub const fn is_list(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdContainerBlock(
+                AnyMdContainerBlock::MdBulletListItem(_)
+                    | AnyMdContainerBlock::MdOrderedListItem(_)
+            )
+        )
+    }
+
+    pub const fn is_continuation_indent(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(_))
+        )
+    }
+
+    pub const fn is_paragraph(&self) -> bool {
+        matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(_)))
     }
 
     /// Whether the block is a header or setext header.
