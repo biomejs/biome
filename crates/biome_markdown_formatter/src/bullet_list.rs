@@ -1,19 +1,21 @@
 use crate::context::MarkdownFormatContext;
 use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentOptions;
+use crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlockOptions;
 use crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefixOptions;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
-use crate::shared::TextPrintMode;
+use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
-use biome_formatter::{Format, FormatResult, format_args, write};
+use biome_formatter::{Format, FormatResult, write};
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
-    MdBulletFields, MdBulletList, MdContinuationIndent, MdNewline, MdQuotePrefix,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage,
+    MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
+    MdIndentCodeBlock, MdNewline, MdOrderedListItem, MdQuotePrefix,
 };
-use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator};
+use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
 use std::collections::VecDeque;
 use std::fmt::Debug;
 
@@ -66,15 +68,14 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
         while let Some(item) = iter.next() {
             match item {
                 ListItem::Bullet(bullet) => {
-                    let fmt_bullet = format_with(|f| {
-                        if bullet.has_continuation_indent() {
-                            write!(f, [bullet])
-                        } else {
-                            write!(f, [bullet])
+                    let needs_trailing_break = matches!(iter.peek(), Some(ListItem::Bullet(_)));
+                    joiner.entry(&format_with(|f| {
+                        write!(f, [bullet])?;
+                        if needs_trailing_break {
+                            write!(f, [hard_line_break()])?;
                         }
-                    });
-
-                    joiner.entry(&fmt_bullet);
+                        Ok(())
+                    }));
                 }
 
                 ListItem::Newline(newline) => {
@@ -83,7 +84,8 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
             }
         }
 
-        joiner.finish()
+        joiner.finish()?;
+        write!(f, [hard_line_break()])
     }
 }
 
@@ -131,22 +133,36 @@ impl Format<MarkdownFormatContext> for ListBullet {
             Some("-")
         };
 
+        let keep_pre_marker = self
+            .node
+            .syntax()
+            .ancestors()
+            .find(|a| MdBulletListItem::can_cast(a.kind()) || MdOrderedListItem::can_cast(a.kind()))
+            .is_some_and(|list_item| {
+                list_item
+                    .siblings(Direction::Next)
+                    .skip(1)
+                    .any(|s| MdIndentCodeBlock::can_cast(s.kind()))
+            });
+
         let post_marker_len = prefix.post_marker_len().unwrap_or(2) as u8;
+        let pre_marker_width = if keep_pre_marker {
+            prefix.pre_marker_indent().len() as u8
+        } else {
+            0
+        };
+
         write!(
             f,
             [prefix
                 .format()
-                .with_options(FormatMdListMarkerPrefixOptions { target_marker })]
+                .with_options(FormatMdListMarkerPrefixOptions {
+                    target_marker,
+                    keep_pre_marker,
+                })]
         )?;
 
-        // Alignment = formatted prefix width so continuation lines align under content.
-        // Ordered: marker (e.g. "1." = 2 chars) + space() + token(" ") = marker.len() + 2
-        // Unordered: marker ("-"/"*"/"+" = 1 char) + space() = 2
-        let alignment = if list_marker.is_ordered() {
-            (marker.text_trimmed().len() as u8) + post_marker_len
-        } else {
-            post_marker_len
-        };
+        let alignment = pre_marker_width + (marker.text_trimmed().len() as u8) + post_marker_len;
 
         let content = ListBlockList {
             content: content.clone(),
@@ -175,11 +191,28 @@ struct ListBlockList {
     content: MdBlockList,
 }
 
+fn emit_pending_breaks(
+    pending_breaks: u8,
+    content: &AnyMdBlock,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<()> {
+    let breaks = if content.is_list() {
+        pending_breaks.min(1)
+    } else {
+        pending_breaks
+    };
+    match breaks {
+        0 => {}
+        1 => write!(f, [hard_line_break()])?,
+        _ => write!(f, [empty_line()])?,
+    }
+    Ok(())
+}
+
 impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let mut iter = BlockListIterator::new(self.content.iter());
-
-        let mut seen_continuation_indent = false;
+        let mut pending_breaks: u8 = 0;
 
         while let Some(item) = iter.next() {
             for prefix in iter.drain_quote_prefixes() {
@@ -199,98 +232,92 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
 
-                    let middle_block = format_with(|f| {
-                        if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) =
-                            &middle_block
-                        {
-                            write!(
-                                f,
-                                [newline.format().with_options(FormatMdNewlineOptions {
-                                    should_remove: true
-                                })]
-                            )
-                        } else {
-                            write!(f, [middle_block.format()])
-                        }
-                    });
+                    emit_pending_breaks(pending_breaks, &content, f)?;
+                    fmt_list_content_block(&content, f)?;
 
-                    let fmt_content = format_with(|f| {
-                        if let Some(list_item) = content.as_any_list_item() {
-                            FmtAnyList::new(list_item).fmt(f)
-                        } else {
-                            write!(f, [content.format()])
-                        }
-                    });
+                    if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) =
+                        &middle_block
+                    {
+                        write!(
+                            f,
+                            [newline.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true
+                            })]
+                        )?;
+                    } else {
+                        write!(f, [middle_block.format()])?;
+                    }
 
                     write!(
                         f,
-                        [&align(
-                            1,
-                            &biome_formatter::format_args![
-                                middle_block,
-                                continuation.format().with_options(
-                                    FormatMdContinuationIndentOptions {
-                                        should_remove: true
-                                    }
-                                ),
-                                fmt_content
-                            ],
-                        ),]
+                        [continuation
+                            .format()
+                            .with_options(FormatMdContinuationIndentOptions {
+                                should_remove: true
+                            })]
                     )?;
-                    seen_continuation_indent = true;
+
+                    pending_breaks = if middle_block.is_newline() { 2 } else { 1 };
                 }
+
                 BlockListIteratorItem::OnlyContinuationIndent {
                     content,
                     continuation,
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
-
-                    let fmt_content = format_with(|f| {
-                        if let Some(list_item) = content.as_any_list_item() {
-                            FmtAnyList::new(list_item).fmt(f)
-                        } else {
-                            write!(f, [content.format()])
-                        }
-                    });
-
+                    emit_pending_breaks(pending_breaks, &content, f)?;
+                    fmt_list_content_block(&content, f)?;
                     write!(
                         f,
-                        [&align(
-                            1,
-                            &format_args![
-                                continuation.format().with_options(
-                                    FormatMdContinuationIndentOptions {
-                                        should_remove: true
-                                    }
-                                ),
-                                fmt_content
-                            ],
-                        ),]
+                        [continuation
+                            .format()
+                            .with_options(FormatMdContinuationIndentOptions {
+                                should_remove: true
+                            })]
                     )?;
+                    pending_breaks = 1;
                 }
 
                 BlockListIteratorItem::Simple(content) => {
-                    if seen_continuation_indent && !content.is_list() {
-                        write!(f, [empty_line()])?;
-                    }
-
-                    if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) =
-                        &content
+                    dbg!(&content);
+                    if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
                     {
                         write!(
                             f,
-                            [paragraph.format().with_options(FormatMdParagraphOptions {
-                                trim_mode: TextPrintMode::fill(),
-                                inside_list: true,
+                            [newline.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true
                             })]
                         )?;
-                    } else if let Some(list_item) = content.as_any_list_item() {
-                        FmtAnyList::new(list_item).fmt(f)?;
+                        pending_breaks += 1;
                     } else {
-                        write!(f, [&content.format()])?;
+                        emit_pending_breaks(pending_breaks, &content, f)?;
+                        if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) =
+                            content
+                        {
+                            write!(
+                                f,
+                                [paragraph.format().with_options(FormatMdParagraphOptions {
+                                    trim_mode: TextPrintMode::fill(),
+                                    text_context: TextContext::List,
+                                })]
+                            )?;
+                        } else if let Some(list_item) = content.as_any_list_item() {
+                            FmtAnyList::new(list_item).fmt(f)?;
+                        } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+                            AnyMdCodeBlock::MdIndentCodeBlock(code_block),
+                        )) = content
+                        {
+                            write!(
+                                f,
+                                [code_block.format().with_options(
+                                    FormatMdIndentCodeBlockOptions { in_list: true }
+                                )]
+                            )?;
+                        } else {
+                            write!(f, [content.format()])?;
+                        }
+                        pending_breaks = 1;
                     }
-
-                    seen_continuation_indent = false;
                 }
             }
         }

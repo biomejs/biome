@@ -46,6 +46,21 @@ pub(crate) enum TrimMode {
     None,
 }
 
+/// Where the inline text being formatted is located in the document structure.
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub(crate) enum TextContext {
+    #[default]
+    Neutral,
+    List,
+    Header,
+}
+
+impl TextContext {
+    pub(crate) const fn is_list(&self) -> bool {
+        matches!(self, Self::List)
+    }
+}
+
 impl TextPrintMode {
     pub(crate) const fn is_trim_start(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::Start))

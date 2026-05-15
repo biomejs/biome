@@ -70,3 +70,7 @@ markdown/spec/example-9.md
 
 # Break setext header https://github.com/prettier/prettier/issues/19148
 markdown/spec/example-63.md
+
+# Here "two" is an inline code block, prettier botches it
+markdown/spec/example-217.md
+markdown/spec/example-218.md

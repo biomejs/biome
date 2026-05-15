@@ -8,6 +8,7 @@ use std::ops::Add;
 pub(crate) struct FormatMdListMarkerPrefix {
     /// Target marker to replace with (e.g. `"-"`). `None` keeps the original.
     target_marker: Option<&'static str>,
+    keep_pre_marker: bool,
 }
 impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
     fn fmt_fields(&self, node: &MdListMarkerPrefix, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -20,7 +21,13 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
 
         let marker = marker?;
         let list_marker = node.list_marker()?;
-        write!(f, [pre_marker_indent.format()])?;
+        if self.keep_pre_marker {
+            for indent_token in pre_marker_indent.iter() {
+                write!(f, [indent_token.format()])?;
+            }
+        } else {
+            write!(f, [pre_marker_indent.format()])?;
+        }
         // Note that for `-   `, the parser treats the indent as part of the marker, not the content
         // This is a parser bug that causes a regression
         // in crates/biome_markdown_formatter/tests/specs/prettier/markdown/spec/example-242.md.snap
@@ -64,6 +71,8 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
 pub(crate) struct FormatMdListMarkerPrefixOptions {
     /// Target marker to replace with (e.g. `Some("-")`). `None` keeps the original.
     pub(crate) target_marker: Option<&'static str>,
+    /// When true, emit pre-marker indent tokens verbatim instead of removing them.
+    pub(crate) keep_pre_marker: bool,
 }
 
 impl FormatRuleWithOptions<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
@@ -71,6 +80,7 @@ impl FormatRuleWithOptions<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.target_marker = options.target_marker;
+        self.keep_pre_marker = options.keep_pre_marker;
         self
     }
 }
