@@ -1,6 +1,8 @@
 //! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! Run `pnpm execute:v4` from `packages/tailwindcss-config-analyzer`.
 //!
+//! Structural types live in the sibling `tailwind_preset_v4_types`.
+//!
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
 //! - utilities:       https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utilities.ts
@@ -20,137 +22,9 @@
 
 use phf::{phf_map, phf_set};
 
-use Branch::*;
-use Negative::*;
-
-// CSS value types (from infer-data-type.ts).
-// Matching is dispatched by the consumer on the parser node kind
-// (TwNumberValue / TwPercentageValue / TwModifier+number), not by
-// scanning value text — see sort_v4::resolve_branch.
-#[derive(Copy, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum ValueType {
-    Color,
-    Length,
-    Percentage,
-    Number,
-    Integer,
-    Ratio,
-    Angle,
-    Url,
-    Position,
-    BgSize,
-    LineWidth,
-    Image,
-    AbsoluteSize,
-    RelativeSize,
-    Vector,
-}
-
-// Theme namespaces (from default theme.css).
-#[derive(Copy, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum ThemeNamespace {
-    Color,
-    Spacing,
-    Text,
-    TextShadow,
-    Font,
-    FontWeight,
-    Leading,
-    Tracking,
-    Breakpoint,
-    Container,
-    Radius,
-    Shadow,
-    InsetShadow,
-    DropShadow,
-    Blur,
-    Perspective,
-    Aspect,
-    Ease,
-    Animate,
-    BackgroundImage,
-}
-
-impl ThemeNamespace {
-    pub fn keys(self) -> &'static phf::Set<&'static str> {
-        match self {
-            Self::Color => &THEME_KEYS_COLOR,
-            Self::Spacing => &THEME_KEYS_SPACING,
-            Self::Text => &THEME_KEYS_TEXT,
-            Self::TextShadow => &THEME_KEYS_TEXT_SHADOW,
-            Self::Font => &THEME_KEYS_FONT,
-            Self::FontWeight => &THEME_KEYS_FONT_WEIGHT,
-            Self::Leading => &THEME_KEYS_LEADING,
-            Self::Tracking => &THEME_KEYS_TRACKING,
-            Self::Breakpoint => &THEME_KEYS_BREAKPOINT,
-            Self::Container => &THEME_KEYS_CONTAINER,
-            Self::Radius => &THEME_KEYS_RADIUS,
-            Self::Shadow => &THEME_KEYS_SHADOW,
-            Self::InsetShadow => &THEME_KEYS_INSET_SHADOW,
-            Self::DropShadow => &THEME_KEYS_DROP_SHADOW,
-            Self::Blur => &THEME_KEYS_BLUR,
-            Self::Perspective => &THEME_KEYS_PERSPECTIVE,
-            Self::Aspect => &THEME_KEYS_ASPECT,
-            Self::Ease => &THEME_KEYS_EASE,
-            Self::Animate => &THEME_KEYS_ANIMATE,
-            Self::BackgroundImage => &THEME_KEYS_BACKGROUND_IMAGE,
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct UtilityEntry {
-    pub property_idx: u16,
-    pub property_count: u8,
-    pub registration_idx: u16,
-    pub negative_registration_idx: Option<u16>,
-}
-
-// One dispatch branch inside a functional utility's compileFn.
-//
-// - Named:           named-path theme-namespace lookup
-//                    (`text-lg` ↔ `--text-lg`).
-// - NamedKeyword:    named-path hardcoded keyword set baked into the
-//                    compileFn (`origin-top`, `accent-current`).
-//                    First field is an index into `KEYWORD_POOL`.
-// - NamedTyped:      named-path predicate match for bare value patterns
-//                    (`p-4` Number, `from-25%` Percentage, `w-1/2` Ratio).
-// - ArbitraryTyped:  arbitrary-path predicate match used for utilities
-//                    whose property differs by CSS value type
-//                    (`from-[#fff]` → `--tw-gradient-from`,
-//                    `from-[10px]` → `--tw-gradient-from-position`).
-// - Arbitrary:       arbitrary-path fallback used when the utility emits
-//                    the same property regardless of value type
-//                    (`p-[10px]`, `p-[#fff]` → `padding`).
-//                    Resolved after every `ArbitraryTyped` branch.
-#[derive(Copy, Clone)]
-pub enum Branch {
-    Named(ThemeNamespace, u16, u8),
-    NamedKeyword(u16, u16, u8),
-    NamedTyped(ValueType, u16, u8),
-    ArbitraryTyped(ValueType, u16, u8),
-    Arbitrary(u16, u8),
-}
-
-#[derive(Copy, Clone)]
-pub struct FunctionalEntry {
-    pub registration_idx: u16,
-    pub branches: &'static [Branch],
-    pub negative: Option<Negative>,
-}
-
-#[derive(Copy, Clone)]
-pub enum Negative {
-    SameBranches {
-        registration_idx: u16,
-    },
-    Distinct {
-        registration_idx: u16,
-        branches: &'static [Branch],
-    },
-}
+use super::tailwind_preset_v4_types::{
+    Branch::*, FunctionalEntry, Negative::*, ThemeNamespace, UtilityEntry, ValueType,
+};
 
 // CSS property sort order.
 pub static PROPERTY_ORDER: [&str; 354] = [
@@ -3699,7 +3573,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
 };
 
-static THEME_KEYS_COLOR: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_COLOR: phf::Set<&'static str> = phf_set! {
     "amber-100",
     "amber-200",
     "amber-300",
@@ -3989,8 +3863,8 @@ static THEME_KEYS_COLOR: phf::Set<&'static str> = phf_set! {
     "zinc-900",
     "zinc-950",
 };
-static THEME_KEYS_SPACING: phf::Set<&'static str> = phf_set! {};
-static THEME_KEYS_TEXT: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_SPACING: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_TEXT: phf::Set<&'static str> = phf_set! {
     "2xl",
     "3xl",
     "4xl",
@@ -4005,19 +3879,19 @@ static THEME_KEYS_TEXT: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_TEXT_SHADOW: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_TEXT_SHADOW: phf::Set<&'static str> = phf_set! {
     "2xs",
     "lg",
     "md",
     "sm",
     "xs",
 };
-static THEME_KEYS_FONT: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_FONT: phf::Set<&'static str> = phf_set! {
     "mono",
     "sans",
     "serif",
 };
-static THEME_KEYS_FONT_WEIGHT: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_FONT_WEIGHT: phf::Set<&'static str> = phf_set! {
     "black",
     "bold",
     "extrabold",
@@ -4028,14 +3902,14 @@ static THEME_KEYS_FONT_WEIGHT: phf::Set<&'static str> = phf_set! {
     "semibold",
     "thin",
 };
-static THEME_KEYS_LEADING: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_LEADING: phf::Set<&'static str> = phf_set! {
     "loose",
     "normal",
     "relaxed",
     "snug",
     "tight",
 };
-static THEME_KEYS_TRACKING: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_TRACKING: phf::Set<&'static str> = phf_set! {
     "normal",
     "tight",
     "tighter",
@@ -4043,14 +3917,14 @@ static THEME_KEYS_TRACKING: phf::Set<&'static str> = phf_set! {
     "wider",
     "widest",
 };
-static THEME_KEYS_BREAKPOINT: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_BREAKPOINT: phf::Set<&'static str> = phf_set! {
     "2xl",
     "lg",
     "md",
     "sm",
     "xl",
 };
-static THEME_KEYS_CONTAINER: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_CONTAINER: phf::Set<&'static str> = phf_set! {
     "2xl",
     "2xs",
     "3xl",
@@ -4065,7 +3939,7 @@ static THEME_KEYS_CONTAINER: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_RADIUS: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_RADIUS: phf::Set<&'static str> = phf_set! {
     "2xl",
     "3xl",
     "4xl",
@@ -4075,7 +3949,7 @@ static THEME_KEYS_RADIUS: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_SHADOW: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_SHADOW: phf::Set<&'static str> = phf_set! {
     "2xl",
     "2xs",
     "inner",
@@ -4085,12 +3959,12 @@ static THEME_KEYS_SHADOW: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_INSET_SHADOW: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_INSET_SHADOW: phf::Set<&'static str> = phf_set! {
     "2xs",
     "sm",
     "xs",
 };
-static THEME_KEYS_DROP_SHADOW: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_DROP_SHADOW: phf::Set<&'static str> = phf_set! {
     "2xl",
     "lg",
     "md",
@@ -4098,7 +3972,7 @@ static THEME_KEYS_DROP_SHADOW: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_BLUR: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_BLUR: phf::Set<&'static str> = phf_set! {
     "2xl",
     "3xl",
     "lg",
@@ -4107,25 +3981,25 @@ static THEME_KEYS_BLUR: phf::Set<&'static str> = phf_set! {
     "xl",
     "xs",
 };
-static THEME_KEYS_PERSPECTIVE: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_PERSPECTIVE: phf::Set<&'static str> = phf_set! {
     "distant",
     "dramatic",
     "midrange",
     "near",
     "normal",
 };
-static THEME_KEYS_ASPECT: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_ASPECT: phf::Set<&'static str> = phf_set! {
     "video",
 };
-static THEME_KEYS_EASE: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_EASE: phf::Set<&'static str> = phf_set! {
     "in",
     "in-out",
     "out",
 };
-static THEME_KEYS_ANIMATE: phf::Set<&'static str> = phf_set! {
+pub(super) static THEME_KEYS_ANIMATE: phf::Set<&'static str> = phf_set! {
     "bounce",
     "ping",
     "pulse",
     "spin",
 };
-static THEME_KEYS_BACKGROUND_IMAGE: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_BACKGROUND_IMAGE: phf::Set<&'static str> = phf_set! {};

@@ -6,6 +6,7 @@ mod sort_config;
 pub mod sort_v4;
 mod tailwind_preset;
 mod tailwind_preset_v4;
+mod tailwind_preset_v4_types;
 
 use self::{
     presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,

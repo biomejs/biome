@@ -1,4 +1,10 @@
 // Render the auto-generated Rust file `tailwind_preset_v4.rs`.
+//
+// Codegen scope is intentionally narrow — only the long phf maps,
+// sets, and arrays are emitted. Structural types (`ValueType`,
+// `ThemeNamespace`, `Branch`, `Negative`, `UtilityEntry`,
+// `FunctionalEntry`) live in the hand-written sibling
+// `tailwind_preset_v4_types.rs` and are imported here.
 
 import type {
 	Branch,
@@ -9,10 +15,11 @@ import {
 	THEME_NAMESPACES,
 	type ThemeNamespacePrefix,
 } from "./theme-namespaces.js";
-import { VALUE_TYPES } from "./value-types.js";
 
 const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! Run \`pnpm execute:v4\` from \`packages/tailwindcss-config-analyzer\`.
+//!
+//! Structural types live in the sibling \`tailwind_preset_v4_types\`.
 //!
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
@@ -30,56 +37,9 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 
 use phf::{phf_map, phf_set};
 
-use Branch::*;
-use Negative::*;
-`;
-
-const STRUCT_DEFS = `#[derive(Copy, Clone)]
-pub struct UtilityEntry {
-    pub property_idx: u16,
-    pub property_count: u8,
-    pub registration_idx: u16,
-    pub negative_registration_idx: Option<u16>,
-}
-
-// One dispatch branch inside a functional utility's compileFn.
-//
-// - Named:           named-path theme-namespace lookup
-//                    (\`text-lg\` ↔ \`--text-lg\`).
-// - NamedKeyword:    named-path hardcoded keyword set baked into the
-//                    compileFn (\`origin-top\`, \`accent-current\`).
-//                    First field is an index into \`KEYWORD_POOL\`.
-// - NamedTyped:      named-path predicate match for bare value patterns
-//                    (\`p-4\` Number, \`from-25%\` Percentage, \`w-1/2\` Ratio).
-// - ArbitraryTyped:  arbitrary-path predicate match used for utilities
-//                    whose property differs by CSS value type
-//                    (\`from-[#fff]\` → \`--tw-gradient-from\`,
-//                    \`from-[10px]\` → \`--tw-gradient-from-position\`).
-// - Arbitrary:       arbitrary-path fallback used when the utility emits
-//                    the same property regardless of value type
-//                    (\`p-[10px]\`, \`p-[#fff]\` → \`padding\`).
-//                    Resolved after every \`ArbitraryTyped\` branch.
-#[derive(Copy, Clone)]
-pub enum Branch {
-    Named(ThemeNamespace, u16, u8),
-    NamedKeyword(u16, u16, u8),
-    NamedTyped(ValueType, u16, u8),
-    ArbitraryTyped(ValueType, u16, u8),
-    Arbitrary(u16, u8),
-}
-
-#[derive(Copy, Clone)]
-pub struct FunctionalEntry {
-    pub registration_idx: u16,
-    pub branches: &'static [Branch],
-    pub negative: Option<Negative>,
-}
-
-#[derive(Copy, Clone)]
-pub enum Negative {
-    SameBranches { registration_idx: u16 },
-    Distinct { registration_idx: u16, branches: &'static [Branch] },
-}
+use super::tailwind_preset_v4_types::{
+    Branch::*, FunctionalEntry, Negative::*, ThemeNamespace, UtilityEntry, ValueType,
+};
 `;
 
 function rustString(s: string): string {
@@ -92,43 +52,6 @@ function camelToSnake(s: string): string {
 
 function camelToScreamingSnake(s: string): string {
 	return camelToSnake(s).toUpperCase();
-}
-
-function renderValueTypeEnum(): string {
-	const variants = VALUE_TYPES.map((v) => `    ${v},`).join("\n");
-	return `// CSS value types (from infer-data-type.ts).
-// Matching is dispatched by the consumer on the parser node kind
-// (TwNumberValue / TwPercentageValue / TwModifier+number), not by
-// scanning value text — see sort_v4::resolve_branch.
-#[derive(Copy, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum ValueType {
-${variants}
-}
-`;
-}
-
-function renderThemeNamespaceEnum(): string {
-	const variants = THEME_NAMESPACES.map((n) => `    ${n.variant},`).join("\n");
-	const keysArms = THEME_NAMESPACES.map(
-		(n) =>
-			`            Self::${n.variant} => &THEME_KEYS_${camelToScreamingSnake(n.variant)},`,
-	).join("\n");
-	return `// Theme namespaces (from default theme.css).
-#[derive(Copy, Clone, PartialEq, Eq)]
-#[repr(u8)]
-pub enum ThemeNamespace {
-${variants}
-}
-
-impl ThemeNamespace {
-    pub fn keys(self) -> &'static phf::Set<&'static str> {
-        match self {
-${keysArms}
-        }
-    }
-}
-`;
 }
 
 function renderPropertyOrder(props: string[]): string {
@@ -308,7 +231,7 @@ function renderThemeKeys(keys: Map<ThemeNamespacePrefix, Set<string>>): string {
 					.join("\n")
 			: "";
 		blocks.push(
-			`static THEME_KEYS_${camelToScreamingSnake(ns.variant)}: phf::Set<&'static str> = phf_set! {\n${items}${items ? "\n" : ""}};\n`,
+			`pub(super) static THEME_KEYS_${camelToScreamingSnake(ns.variant)}: phf::Set<&'static str> = phf_set! {\n${items}${items ? "\n" : ""}};\n`,
 		);
 	}
 	return blocks.join("");
@@ -329,9 +252,6 @@ export function renderRust(input: {
 
 	return [
 		HEADER,
-		renderValueTypeEnum(),
-		renderThemeNamespaceEnum(),
-		STRUCT_DEFS,
 		renderPropertyOrder(input.propertyOrder),
 		renderKeywordPool(keywordPool),
 		renderStaticUtilities(input.utilities, propIdx, propCount),

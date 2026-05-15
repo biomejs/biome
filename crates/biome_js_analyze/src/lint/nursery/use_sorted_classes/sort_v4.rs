@@ -5,9 +5,8 @@ use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwRoot,
 };
 
-use super::tailwind_preset_v4::{
-    Branch, FUNCTIONAL_UTILITIES, KEYWORD_POOL, Negative, STATIC_UTILITIES, ValueType,
-};
+use super::tailwind_preset_v4::{FUNCTIONAL_UTILITIES, KEYWORD_POOL, STATIC_UTILITIES};
+use super::tailwind_preset_v4_types::{Branch, Negative, ValueType};
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
