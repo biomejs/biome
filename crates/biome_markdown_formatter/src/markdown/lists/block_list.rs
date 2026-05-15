@@ -157,7 +157,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                             }));
                         }
                     }
-                    joiner.entry(&empty_line());
+                    if prev_was_header {
+                        joiner.entry(&empty_line());
+                    }
                 } else {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         should_remove: is_leading || is_trailing,

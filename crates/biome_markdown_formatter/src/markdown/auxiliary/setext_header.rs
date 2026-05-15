@@ -50,7 +50,7 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
                             keep_fences_in_italics: false,
                             inside_list: false,
                         }),
-                    format_removed(&underline_token)
+                    format_removed(&underline_token),
                 ]
             )
         }
