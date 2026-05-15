@@ -4,13 +4,14 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"1.  A paragraph
-    with two lines.
+    let source = r#" - baz
 
-        indented code
+  + ```
+    foo
 
-    > A block quote.
 
+    bar
+    ```
 "#;
     let parse = parse_markdown(source);
 

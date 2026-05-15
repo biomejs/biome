@@ -2,7 +2,7 @@ use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::{TextContext, TextPrintMode, TrimMode};
 use crate::words::{FormatWordGroup, ProseItem, WordStreamResult, build_word_stream_flat};
 use biome_formatter::Format;
 
@@ -62,15 +62,15 @@ pub(crate) struct FormatMdInlineItemList {
     print_mode: TextPrintMode,
     /// When true, and there's a [MdInlineItalic], it instrustructs the formatter to keep the fences
     keep_fences_in_italics: bool,
-    inside_list: bool,
+    text_context: TextContext,
 }
 
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         if self.print_mode.is_fill() {
-            return self.fmt_fill(node, f, self.inside_list);
-        } else if self.inside_list {
+            return self.fmt_fill(node, f, self.text_context);
+        } else if self.text_context.is_list() {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
             return self.fmt_auto_link_like(node, f);
@@ -596,9 +596,10 @@ impl FormatMdInlineItemList {
         &self,
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
-        inside_list: bool,
+        text_context: TextContext,
     ) -> FormatResult<()> {
         let WordStreamResult { mut stream } = build_word_stream_flat(node, f)?;
+        let inside_list = text_context.is_list();
 
         if inside_list {
             strip_spaces_after_soft_breaks(&mut stream);
@@ -635,7 +636,9 @@ impl FormatMdInlineItemList {
                             write!(f, [hard_line_break()])?;
                         }
                         FormatSourceLine(line_items).fmt(f)?;
-                        write!(f, [soft_line_break()])?;
+                        if !inside_list {
+                            write!(f, [soft_line_break()])?;
+                        }
                         is_first_line = false;
                     }
                     line_start = i + 1;
@@ -643,24 +646,16 @@ impl FormatMdInlineItemList {
                 _ => {}
             }
         }
-        // Emit remaining content
         let remaining = &stream[line_start..];
         if !remaining.is_empty() {
             if !is_first_line {
                 write!(f, [hard_line_break()])?;
             }
-            let remained = format_with(|f| FormatSourceLine(remaining).fmt(f));
-            let mut remained = remained.memoized();
-            if !remained.inspect(f)?.will_break() && inside_list {
-                write!(f, [&remained, soft_line_break()])?;
-            } else {
-                write!(f, [&remained])?;
-            }
+            FormatSourceLine(remaining).fmt(f)?;
         }
 
         if !inside_list {
             write!(f, [hard_line_break()])?;
-        } else {
         }
 
         Ok(())
@@ -673,8 +668,7 @@ pub(crate) struct FormatMdFormatInlineItemListOptions {
     /// When `false`, it lets the node figure it out.
     pub(crate) keep_fences_in_italics: bool,
     pub(crate) print_mode: TextPrintMode,
-    /// When `true`, excess leading spaces on continuation lines are removed.
-    pub(crate) inside_list: bool,
+    pub(crate) text_context: TextContext,
 }
 
 impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
@@ -683,7 +677,7 @@ impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.print_mode = options.print_mode;
         self.keep_fences_in_italics = options.keep_fences_in_italics;
-        self.inside_list = options.inside_list;
+        self.text_context = options.text_context;
         self
     }
 }

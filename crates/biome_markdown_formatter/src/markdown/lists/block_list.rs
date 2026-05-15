@@ -2,7 +2,7 @@ use crate::bullet_list::FmtAnyList;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
-use crate::shared::TextPrintMode;
+use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBlockList, MdBullet};
@@ -19,10 +19,15 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
     fn fmt(&self, node: &MdBlockList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let mut joiner = f.join();
 
-        let inside_list = node
+        let text_context = if node
             .syntax()
             .parent()
-            .is_some_and(|n| MdBullet::can_cast(n.kind()));
+            .is_some_and(|n| MdBullet::can_cast(n.kind()))
+        {
+            TextContext::List
+        } else {
+            TextContext::Neutral
+        };
 
         if !self.trim {
             let mut prev_content = PrevContentBlock::None;
@@ -34,7 +39,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         prev_content = PrevContentBlock::Paragraph;
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
                             trim_mode: self.paragraph_print_mode,
-                            inside_list,
+                            text_context,
                         }));
                     }
 
