@@ -67,3 +67,6 @@ markdown/spec/example-55.md
 # https://github.com/prettier/prettier/issues/19146
 markdown/spec/example-5.md
 markdown/spec/example-9.md
+
+# Break setext header https://github.com/prettier/prettier/issues/19148
+markdown/spec/example-63.md

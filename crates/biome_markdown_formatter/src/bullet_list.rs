@@ -3,32 +3,51 @@ use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentO
 use crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefixOptions;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::shared::TextPrintMode;
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
+use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdBulletListMember, AnyMdLeafBlock, MarkdownLanguage, MarkdownSyntaxKind,
     MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdContinuationIndent, MdNewline,
+    MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator};
 use std::collections::VecDeque;
 use std::fmt::Debug;
+
+/// Thin wrapper around [AnyMdBlock]
+pub struct FmtAnyList {
+    node: AnyListItem,
+}
+
+impl FmtAnyList {
+    pub fn new(node: AnyListItem) -> Self {
+        Self { node }
+    }
+}
+
+impl Format<MarkdownFormatContext> for FmtAnyList {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        f.context().comments().is_suppressed(self.node.syntax());
+        let list = self.node.list();
+        BulletListPrinter::new(&list).fmt(f)
+    }
+}
 
 pub(crate) struct BulletListPrinter {
     bullets: Vec<ListItem>,
 }
 
 impl BulletListPrinter {
-    pub(crate) fn new(node: &MdBulletList, is_ordered: bool) -> Self {
+    pub(crate) fn new(node: &MdBulletList) -> Self {
         let mut bullets = Vec::new();
         for item in node.iter() {
             match item {
                 AnyMdBulletListMember::MdBullet(bullet) => {
-                    bullets.push(ListItem::Bullet(ListBullet {
-                        node: bullet,
-                        is_ordered,
-                    }));
+                    bullets.push(ListItem::Bullet(ListBullet { node: bullet }));
                 }
                 AnyMdBulletListMember::MdNewline(newline) => {
                     bullets.push(ListItem::Newline(newline));
@@ -76,7 +95,6 @@ pub(crate) enum ListItem {
 
 pub(crate) struct ListBullet {
     node: MdBullet,
-    is_ordered: bool,
 }
 
 impl ListBullet {
@@ -120,10 +138,18 @@ impl Format<MarkdownFormatContext> for ListBullet {
                 .with_options(FormatMdListMarkerPrefixOptions { target_marker })]
         )?;
 
+        // Alignment = formatted prefix width so continuation lines align under content.
+        // Ordered: marker (e.g. "1." = 2 chars) + space() + token(" ") = marker.len() + 2
+        // Unordered: marker ("-"/"*"/"+" = 1 char) + space() = 2
+        let alignment = if marker.kind() == MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER {
+            (marker.text_trimmed().len() as u8) + 2
+        } else {
+            2
+        };
+
         let content = ListBlockList {
             content: content.clone(),
         };
-        let alignment = if self.is_ordered { 3 } else { 2 };
         write!(f, [align(alignment, &content),])
     }
 }
@@ -150,11 +176,19 @@ struct ListBlockList {
 
 impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        let mut iter = BlockListIterator::new(self.content.iter()).peekable();
+        let mut iter = BlockListIterator::new(self.content.iter());
 
         let mut seen_continuation_indent = false;
 
         while let Some(item) = iter.next() {
+            for prefix in iter.drain_quote_prefixes() {
+                write!(
+                    f,
+                    [prefix
+                        .format()
+                        .with_options(FormatMdQuotePrefixOptions { should_remove: true })]
+                )?;
+            }
             dbg!(&item);
             match item {
                 BlockListIteratorItem::WithContinuationIndent {
@@ -179,6 +213,14 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         }
                     });
 
+                    let fmt_content = format_with(|f| {
+                        if let Some(list_item) = content.as_any_list_item() {
+                            FmtAnyList::new(list_item).fmt(f)
+                        } else {
+                            write!(f, [content.format()])
+                        }
+                    });
+
                     write!(
                         f,
                         [&align(
@@ -190,7 +232,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                         should_remove: true
                                     }
                                 ),
-                                content.format()
+                                fmt_content
                             ],
                         ),]
                     )?;
@@ -202,6 +244,14 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
 
+                    let fmt_content = format_with(|f| {
+                        if let Some(list_item) = content.as_any_list_item() {
+                            FmtAnyList::new(list_item).fmt(f)
+                        } else {
+                            write!(f, [content.format()])
+                        }
+                    });
+
                     write!(
                         f,
                         [&align(
@@ -212,7 +262,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                         should_remove: true
                                     }
                                 ),
-                                content.format()
+                                fmt_content
                             ],
                         ),]
                     )?;
@@ -224,7 +274,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     }
 
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) =
-                        content
+                        &content
                     {
                         write!(
                             f,
@@ -233,6 +283,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                 inside_list: true,
                             })]
                         )?;
+                    } else if let Some(list_item) = content.as_any_list_item() {
+                        FmtAnyList::new(list_item).fmt(f)?;
                     } else {
                         write!(f, [&content.format()])?;
                     }
@@ -249,13 +301,35 @@ impl Format<MarkdownFormatContext> for ListBlockList {
 struct BlockListIterator {
     content: AstNodeListIterator<MarkdownLanguage, AnyMdBlock>,
     queue: VecDeque<Option<AnyMdBlock>>,
+    quote_prefixes: Vec<MdQuotePrefix>,
 }
 impl BlockListIterator {
     fn new(content: AstNodeListIterator<MarkdownLanguage, AnyMdBlock>) -> Self {
         Self {
             content,
             queue: VecDeque::new(),
+            quote_prefixes: Vec::new(),
         }
+    }
+
+    fn next_block(&mut self) -> Option<AnyMdBlock> {
+        loop {
+            let block = if let Some(queued) = self.queue.pop_front().flatten() {
+                queued
+            } else {
+                self.content.next()?
+            };
+
+            if let AnyMdBlock::MdQuotePrefix(prefix) = &block {
+                self.quote_prefixes.push(prefix.clone());
+                continue;
+            }
+            return Some(block);
+        }
+    }
+
+    fn drain_quote_prefixes(&mut self) -> Vec<MdQuotePrefix> {
+        std::mem::take(&mut self.quote_prefixes)
     }
 }
 
@@ -292,14 +366,8 @@ impl Iterator for BlockListIterator {
     type Item = BlockListIteratorItem;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if !self.queue.is_empty() {
-            if let Some(block) = self.queue.pop_front().flatten() {
-                return Some(BlockListIteratorItem::Simple(block));
-            }
-        }
-
-        let content = self.content.next()?;
-        let second_block = self.content.next();
+        let content = self.next_block()?;
+        let second_block = self.next_block();
         if let Some(second_block) = second_block {
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(continuation)) =
                 second_block
@@ -309,7 +377,7 @@ impl Iterator for BlockListIterator {
                     continuation,
                 })
             } else {
-                let third_block = self.content.next();
+                let third_block = self.next_block();
                 match third_block {
                     Some(third_block) => {
                         if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(
@@ -334,7 +402,6 @@ impl Iterator for BlockListIterator {
                 }
             }
         } else {
-            self.queue.push_back(second_block);
             Some(BlockListIteratorItem::Simple(content))
         }
     }

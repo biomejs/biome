@@ -4,8 +4,9 @@ pub mod emphasis_ext;
 pub mod file_source;
 #[macro_use]
 mod generated;
-mod block_ext;
-mod inline_ext;
+pub mod block_ext;
+pub mod inline_ext;
+pub mod list_ext;
 mod syntax_node;
 pub mod text_ext;
 
