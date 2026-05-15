@@ -1,5 +1,6 @@
 use crate::context::MarkdownFormatContext;
 use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentOptions;
+use crate::markdown::auxiliary::fenced_code_block::FormatMdFencedCodeBlockOptions;
 use crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlockOptions;
 use crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefixOptions;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
@@ -191,22 +192,62 @@ struct ListBlockList {
     content: MdBlockList,
 }
 
-fn emit_pending_breaks(
-    pending_breaks: u8,
-    content: &AnyMdBlock,
-    f: &mut Formatter<MarkdownFormatContext>,
-) -> FormatResult<()> {
-    let breaks = if content.is_list() {
-        pending_breaks.min(1)
-    } else {
-        pending_breaks
-    };
-    match breaks {
-        0 => {}
-        1 => write!(f, [hard_line_break()])?,
-        _ => write!(f, [empty_line()])?,
+impl ListBlockList {
+    fn emit_pending_breaks(
+        pending_breaks: u8,
+        content: &AnyMdBlock,
+        f: &mut Formatter<MarkdownFormatContext>,
+    ) -> FormatResult<()> {
+        let breaks = if content.is_list() {
+            pending_breaks.min(1)
+        } else {
+            pending_breaks
+        };
+        match breaks {
+            0 => {}
+            1 => write!(f, [hard_line_break()])?,
+            _ => write!(f, [empty_line()])?,
+        }
+        Ok(())
     }
-    Ok(())
+
+    fn fmt_list_content(content: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) = content {
+            write!(
+                f,
+                [paragraph.format().with_options(FormatMdParagraphOptions {
+                    trim_mode: TextPrintMode::fill(),
+                    text_context: TextContext::List,
+                })]
+            )
+        } else if let Some(list_item) = content.as_any_list_item() {
+            FmtAnyList::new(list_item).fmt(f)
+        } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+            AnyMdCodeBlock::MdIndentCodeBlock(code_block),
+        )) = content
+        {
+            write!(
+                f,
+                [code_block
+                    .format()
+                    .with_options(FormatMdIndentCodeBlockOptions { in_list: true })]
+            )
+        } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+            AnyMdCodeBlock::MdFencedCodeBlock(code_block),
+        )) = content
+        {
+            write!(
+                f,
+                [code_block
+                    .format()
+                    .with_options(FormatMdFencedCodeBlockOptions {
+                        text_context: TextContext::List,
+                    })]
+            )
+        } else {
+            write!(f, [content.format()])
+        }
+    }
 }
 
 impl Format<MarkdownFormatContext> for ListBlockList {
@@ -223,7 +264,6 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     })]
                 )?;
             }
-            dbg!(&item);
             match item {
                 BlockListIteratorItem::WithContinuationIndent {
                     continuation,
@@ -232,8 +272,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
 
-                    emit_pending_breaks(pending_breaks, &content, f)?;
-                    fmt_list_content_block(&content, f)?;
+                    Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                    Self::fmt_list_content(&content, f)?;
 
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) =
                         &middle_block
@@ -265,8 +305,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     continuation,
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
-                    emit_pending_breaks(pending_breaks, &content, f)?;
-                    fmt_list_content_block(&content, f)?;
+                    Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                    Self::fmt_list_content(&content, f)?;
                     write!(
                         f,
                         [continuation
@@ -279,7 +319,6 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                 }
 
                 BlockListIteratorItem::Simple(content) => {
-                    dbg!(&content);
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
                     {
                         write!(
@@ -290,32 +329,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         )?;
                         pending_breaks += 1;
                     } else {
-                        emit_pending_breaks(pending_breaks, &content, f)?;
-                        if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) =
-                            content
-                        {
-                            write!(
-                                f,
-                                [paragraph.format().with_options(FormatMdParagraphOptions {
-                                    trim_mode: TextPrintMode::fill(),
-                                    text_context: TextContext::List,
-                                })]
-                            )?;
-                        } else if let Some(list_item) = content.as_any_list_item() {
-                            FmtAnyList::new(list_item).fmt(f)?;
-                        } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
-                            AnyMdCodeBlock::MdIndentCodeBlock(code_block),
-                        )) = content
-                        {
-                            write!(
-                                f,
-                                [code_block.format().with_options(
-                                    FormatMdIndentCodeBlockOptions { in_list: true }
-                                )]
-                            )?;
-                        } else {
-                            write!(f, [content.format()])?;
-                        }
+                        Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                        Self::fmt_list_content(&content, f)?;
                         pending_breaks = 1;
                     }
                 }

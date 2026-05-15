@@ -55,7 +55,7 @@ fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
 }
 
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{AnyMdInline, MdIndentCodeBlock, MdInlineItemList};
+use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdIndentCodeBlock, MdInlineItemList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
@@ -68,7 +68,13 @@ pub(crate) struct FormatMdInlineItemList {
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.print_mode.is_fill() {
+        let inside_fenced_code_block = node
+            .syntax()
+            .parent()
+            .is_some_and(|p| MdFencedCodeBlock::can_cast(p.kind()));
+        if self.print_mode.is_fill() && inside_fenced_code_block && self.text_context.is_list() {
+            return self.fmt_fenced_code_block(node, f);
+        } else if self.print_mode.is_fill() {
             return self.fmt_fill(node, f, self.text_context);
         } else if self.text_context.is_list() {
             return self.fmt_inside_list(node, f);
@@ -581,6 +587,86 @@ impl FormatMdInlineItemList {
         }
 
         joiner.finish()
+    }
+
+    /// Formats fenced code block content: each source line becomes a separate
+    /// IR entry joined by `hard_line_break`. Continuation-indent tokens are
+    /// removed (the enclosing `align()` handles indentation). Spaces within
+    /// lines are preserved verbatim. Trailing spaces before a newline are
+    /// stripped.
+    fn fmt_fenced_code_block(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let items: Vec<AnyMdInline> = node.iter().collect();
+        let mut is_first = true;
+
+        for (i, item) in items.iter().enumerate() {
+            match item {
+                AnyMdInline::MdTextual(md_text) => {
+                    if md_text.is_newline()? {
+                        if is_first {
+                            write!(
+                                f,
+                                [md_text.format().with_options(FormatMdTextualOptions {
+                                    print_mode: TextPrintMode::Remove,
+                                })]
+                            )?;
+                            is_first = false;
+                        } else {
+                            write!(
+                                f,
+                                [
+                                    md_text.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                    }),
+                                    hard_line_break()
+                                ]
+                            )?;
+                        }
+                    } else {
+                        is_first = false;
+                        let token = md_text.value_token()?;
+                        let next_is_newline_or_end = items.get(i + 1).is_none_or(|n| {
+                            matches!(n, AnyMdInline::MdTextual(t) if t.is_newline().unwrap_or_default())
+                        });
+                        if next_is_newline_or_end {
+                            let trimmed = token.text().trim_end();
+                            if trimmed.len() < token.text().len() {
+                                f.context()
+                                    .comments()
+                                    .mark_suppression_checked(md_text.syntax());
+                                write!(
+                                    f,
+                                    [format_replaced(
+                                        &token,
+                                        &text(trimmed, token.text_trimmed_range().start())
+                                    )]
+                                )?;
+                            } else {
+                                write!(f, [md_text.format()])?;
+                            }
+                        } else {
+                            write!(f, [md_text.format()])?;
+                        }
+                    }
+                }
+                AnyMdInline::MdIndentToken(indent) => {
+                    f.context()
+                        .comments()
+                        .mark_suppression_checked(indent.syntax());
+                    let char_token = indent.md_indent_char_token()?;
+                    write!(f, [format_removed(&char_token)])?;
+                }
+                _ => {
+                    is_first = false;
+                    write!(f, [item.format()])?;
+                }
+            }
+        }
+
+        write!(f, [hard_line_break()])
     }
 
     /// Formats prose with `proseWrap: "preserve"` semantics.
