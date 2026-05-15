@@ -122,3 +122,21 @@ sorted: text-lg/8 flex
 ---
 input:  flex w-1/foo
 sorted: w-1/foo flex
+---
+input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
+sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm
+---
+input:  bg-accent animate-pulse rounded-md
+sorted: bg-accent animate-pulse rounded-md
+---
+input:  text-primary-foreground bg-primary hover:bg-primary/90
+sorted: text-primary-foreground bg-primary hover:bg-primary/90
+---
+input:  px-4 has-[>svg]:px-3 h-9 py-2
+sorted: has-[>svg]:px-3 h-9 py-2 px-4
+---
+input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50
+sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
+---
+input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
+sorted: items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 focus-visible:border-ring justify-center outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 shrink-0 gap-2 rounded-md text-sm transition-all font-medium
