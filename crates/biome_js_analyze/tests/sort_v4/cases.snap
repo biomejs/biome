@@ -123,6 +123,21 @@ sorted: text-lg/8 flex
 input:  flex w-1/foo
 sorted: w-1/foo flex
 ---
+input:  to-purple-500 from-blue-500 via-pink-500
+sorted: from-blue-500 via-pink-500 to-purple-500
+---
+input:  to-100% via-pink-500 from-blue-500 from-25%
+sorted: from-blue-500 from-25% via-pink-500 to-100%
+---
+input:  bg-red-500 from-blue-500 to-purple-500
+sorted: bg-red-500 from-blue-500 to-purple-500
+---
+input:  p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2
+sorted: m-2 bg-linear-to-r from-blue-500 to-purple-500 p-4
+---
+input:  mask-linear-to-75% mask-linear-from-25%
+sorted: mask-linear-from-25% mask-linear-to-75%
+---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
 sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm
 ---

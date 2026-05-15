@@ -80,6 +80,17 @@
 	"flex text-lg/8",             // line-height modifier — Unknown (TODO: line-height)
 	"flex w-1/foo",               // value=Number, modifier=Named(non-numeric) → Unknown
 
+	// ─── gradients ──────────────────────────────────────────────────
+	// from/via/to are registered in order; sort must preserve that
+	// bucket order when interleaved with other utilities or shuffled
+	// across colors and percentages.
+
+	"to-purple-500 from-blue-500 via-pink-500",                   // colors only, scrambled
+	"to-100% via-pink-500 from-blue-500 from-25%",                // mixed color + percentage stops
+	"bg-red-500 from-blue-500 to-purple-500",                     // bg-color does not interleave with gradient stops
+	"p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2",         // linear gradient with surrounding spacing
+	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
+
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.
 	// Source: github.com/shadcn-ui/ui registry/new-york-v4.
