@@ -55,7 +55,7 @@ declare_lint_rule! {
             RuleSource::Eslint("prefer-spread").same(),
             RuleSource::EslintE18e("prefer-spread-syntax").inspired(),
         ],
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
