@@ -48,9 +48,6 @@ pub struct VcsConfiguration {
     /// The folder where Biome should check for VCS files. By default, Biome will use the same
     /// folder where `biome.json` was found.
     ///
-    /// If your configuration file is not at the root of your VCS repository, you should specify the path
-    /// to the VCS root here. This ensures that Biome can correctly find and follow your VCS ignore files.
-    ///
     /// If Biome can't find the configuration, it will attempt to use the current working directory.
     /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
     /// will be emitted
