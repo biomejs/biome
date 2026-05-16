@@ -3173,24 +3173,25 @@ pub fn scss_binary_expression(
         ],
     ))
 }
-pub fn scss_content_at_rule(
-    content_token: SyntaxToken,
-    semicolon_token: SyntaxToken,
-) -> ScssContentAtRuleBuilder {
+pub fn scss_content_at_rule(content_token: SyntaxToken) -> ScssContentAtRuleBuilder {
     ScssContentAtRuleBuilder {
         content_token,
-        semicolon_token,
         arguments: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssContentAtRuleBuilder {
     content_token: SyntaxToken,
-    semicolon_token: SyntaxToken,
     arguments: Option<ScssIncludeArgumentList>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssContentAtRuleBuilder {
     pub fn with_arguments(mut self, arguments: ScssIncludeArgumentList) -> Self {
         self.arguments = Some(arguments);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
         self
     }
     pub fn build(self) -> ScssContentAtRule {
@@ -3200,7 +3201,8 @@ impl ScssContentAtRuleBuilder {
                 Some(SyntaxElement::Token(self.content_token)),
                 self.arguments
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -3208,16 +3210,34 @@ impl ScssContentAtRuleBuilder {
 pub fn scss_debug_at_rule(
     debug_token: SyntaxToken,
     value: ScssExpression,
-    semicolon_token: SyntaxToken,
-) -> ScssDebugAtRule {
-    ScssDebugAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_DEBUG_AT_RULE,
-        [
-            Some(SyntaxElement::Token(debug_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> ScssDebugAtRuleBuilder {
+    ScssDebugAtRuleBuilder {
+        debug_token,
+        value,
+        semicolon_token: None,
+    }
+}
+pub struct ScssDebugAtRuleBuilder {
+    debug_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssDebugAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssDebugAtRule {
+        ScssDebugAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_DEBUG_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.debug_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
@@ -3264,16 +3284,34 @@ pub fn scss_else_clause(
 pub fn scss_error_at_rule(
     error_token: SyntaxToken,
     value: ScssExpression,
-    semicolon_token: SyntaxToken,
-) -> ScssErrorAtRule {
-    ScssErrorAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_ERROR_AT_RULE,
-        [
-            Some(SyntaxElement::Token(error_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> ScssErrorAtRuleBuilder {
+    ScssErrorAtRuleBuilder {
+        error_token,
+        value,
+        semicolon_token: None,
+    }
+}
+pub struct ScssErrorAtRuleBuilder {
+    error_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssErrorAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssErrorAtRule {
+        ScssErrorAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_ERROR_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.error_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
     ScssExpression::unwrap_cast(SyntaxNode::new_detached(
@@ -4165,16 +4203,34 @@ impl ScssPlainImportBuilder {
 pub fn scss_return_at_rule(
     return_token: SyntaxToken,
     value: ScssExpression,
-    semicolon_token: SyntaxToken,
-) -> ScssReturnAtRule {
-    ScssReturnAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_RETURN_AT_RULE,
-        [
-            Some(SyntaxElement::Token(return_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> ScssReturnAtRuleBuilder {
+    ScssReturnAtRuleBuilder {
+        return_token,
+        value,
+        semicolon_token: None,
+    }
+}
+pub struct ScssReturnAtRuleBuilder {
+    return_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssReturnAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssReturnAtRule {
+        ScssReturnAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_RETURN_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.return_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn scss_show_clause(show_token: SyntaxToken, members: ScssModuleMemberList) -> ScssShowClause {
     ScssShowClause::unwrap_cast(SyntaxNode::new_detached(
@@ -4326,19 +4382,34 @@ pub fn scss_variable_modifier(
         ],
     ))
 }
-pub fn scss_warn_at_rule(
+pub fn scss_warn_at_rule(warn_token: SyntaxToken, value: ScssExpression) -> ScssWarnAtRuleBuilder {
+    ScssWarnAtRuleBuilder {
+        warn_token,
+        value,
+        semicolon_token: None,
+    }
+}
+pub struct ScssWarnAtRuleBuilder {
     warn_token: SyntaxToken,
     value: ScssExpression,
-    semicolon_token: SyntaxToken,
-) -> ScssWarnAtRule {
-    ScssWarnAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_WARN_AT_RULE,
-        [
-            Some(SyntaxElement::Token(warn_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssWarnAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssWarnAtRule {
+        ScssWarnAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_WARN_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.warn_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn scss_while_at_rule(
     while_token: SyntaxToken,

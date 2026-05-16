@@ -64,7 +64,23 @@ pub(super) fn parse_scss_expression_at_rule(
     p.bump(keyword);
     parse_scss_expression_until(p, SCSS_STATEMENT_AT_RULE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
-    p.expect(T![;]);
+    expect_scss_statement_at_rule_end(p);
 
     Present(m.complete(p, kind))
+}
+
+/// Accepts `;` or a closing block boundary for SCSS statement at-rules.
+///
+/// Examples:
+/// ```scss
+/// @mixin x { @content; }
+/// @mixin x { @content }
+/// ```
+#[inline]
+pub(super) fn expect_scss_statement_at_rule_end(p: &mut CssParser) {
+    if p.eat(T![;]) || p.at(T!['}']) {
+        return;
+    }
+
+    p.expect(T![;]);
 }
