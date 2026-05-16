@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: vue/issue-10330/interpolation.vue
+info: vue/issue-10330/surrounded-by-whitespace.vue
 ---
 
 # Input
@@ -12,24 +12,12 @@ info: vue/issue-10330/interpolation.vue
       <div>
         <v-btn v-if="store.state.user" variant="text" to="/my-rooms">
           {{
-            $t('nav.my-rooms')
+            $t("nav.my-rooms")
           }}
         </v-btn>
       </div>
     </span>
   </div>
-</template>
-
-<template>
-<div>
-<span>
-<div>
-<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
-	$t("nav.my-rooms")
-}}</v-btn>
-</div>
-</span>
-</div>
 </template>
 
 ```
@@ -42,11 +30,6 @@ info: vue/issue-10330/interpolation.vue
   "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "formatter": {
     "indentStyle": "space"
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single"
-    }
   }
 }
 ```
@@ -59,23 +42,7 @@ info: vue/issue-10330/interpolation.vue
     <span>
       <div>
         <v-btn v-if="store.state.user" variant="text" to="/my-rooms">
-          {{
-            $t('nav.my-rooms')
-          }}
-        </v-btn>
-      </div>
-    </span>
-  </div>
-</template>
-
-<template>
-  <div>
-    <span>
-      <div>
-        <v-btn v-if="store.state.user" variant="text" to="/my-rooms">
-          {{
-            $t('nav.my-rooms')
-          }}
+          {{ $t("nav.my-rooms") }}
         </v-btn>
       </div>
     </span>

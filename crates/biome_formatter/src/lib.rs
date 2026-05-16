@@ -1033,47 +1033,29 @@ impl<Context> Formatted<Context> {
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
-        self.format_embedded_with_trailing_line(|range| {
-            fn_format_embedded(range).map(|document| (document, true))
-        });
-    }
-
-    /// Visits each embedded element and replaces it with elements contained inside the [Document]
-    /// emitted by `fn_format_embedded`.
-    ///
-    /// The boolean returned by `fn_format_embedded` controls whether the embedded node's end tag is
-    /// replaced with a hard line. Block embeds use the trailing hard line to place the closing host
-    /// token on its own line, while inline embeds can omit it.
-    pub fn format_embedded_with_trailing_line<F>(&mut self, mut fn_format_embedded: F)
-    where
-        F: FnMut(TextRange) -> Option<(Document, bool)>,
-    {
-        let mut last_start_resolved = None;
+        let mut last_start_resolved = false;
         self.document.transform(move |element| match element {
             FormatElement::Tag(Tag::StartEmbedded(range)) => match fn_format_embedded(*range) {
-                Some((document, should_insert_trailing_line)) => {
-                    last_start_resolved = Some(should_insert_trailing_line);
+                Some(document) => {
+                    last_start_resolved = true;
                     Some(FormatElement::Interned(Interned::new(
                         document.into_elements(),
                     )))
                 }
                 None => {
                     // Keep the StartEmbedded tag so it stays paired with EndEmbedded.
-                    last_start_resolved = None;
+                    last_start_resolved = false;
                     None
                 }
             },
-            FormatElement::Tag(Tag::EndEmbedded) => match last_start_resolved.take() {
-                Some(should_insert_trailing_line) => {
-                    if should_insert_trailing_line {
-                        Some(FormatElement::Line(LineMode::Hard))
-                    } else {
-                        Some(FormatElement::Interned(Interned::new(Vec::new())))
-                    }
+            FormatElement::Tag(Tag::EndEmbedded) => {
+                if last_start_resolved {
+                    Some(FormatElement::Line(LineMode::Hard))
+                } else {
+                    // Keep EndEmbedded paired with the unresolved StartEmbedded.
+                    None
                 }
-                // Keep EndEmbedded paired with the unresolved StartEmbedded.
-                None => None,
-            },
+            }
             _ => None,
         });
     }

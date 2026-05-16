@@ -1,11 +1,13 @@
+use crate::html::auxiliary::double_text_expression::FormatHtmlDoubleTextExpression;
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display, get_css_display_from_tag};
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression, HtmlElement,
-    HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
+    HtmlDoubleTextExpression, HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot,
+    HtmlSelfClosingElement, HtmlSyntaxToken,
 };
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
@@ -233,16 +235,13 @@ impl FormatHtmlElement {
         //
         // Elements that force break children (like `select`, `ul`, `ol`, table elements)
         // should NOT borrow tokens because their children are always multiline.
-        let has_single_interpolation_child = has_single_interpolation_child(&children);
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
-            && !has_single_interpolation_child
             && !content_has_leading_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
-            && !has_single_interpolation_child
             && !content_has_trailing_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
@@ -259,6 +258,41 @@ impl FormatHtmlElement {
         };
 
         let attr_group_id = f.group_id("element-attr-group-id");
+
+        if should_borrow_opening_r_angle
+            && should_borrow_closing_tag
+            && let Some(interpolation) = single_double_interpolation_child(&children)
+        {
+            FormatNodeRule::fmt(
+                &FormatHtmlOpeningElement::default().with_options(
+                    FormatHtmlOpeningElementOptions {
+                        r_angle_is_borrowed: false,
+                        attr_group_id,
+                        borrowed_sibling_r_angle: self.borrowed_sibling_r_angle.clone(),
+                    },
+                ),
+                &opening_element,
+                f,
+            )?;
+            FormatNodeRule::fmt(
+                &FormatHtmlDoubleTextExpression::default().with_options(true),
+                &interpolation,
+                f,
+            )?;
+            FormatNodeRule::fmt(
+                &FormatHtmlClosingElement::default().with_options(
+                    FormatHtmlClosingElementOptions {
+                        tag_borrowed: false,
+                        r_angle_borrowed: self.closing_r_angle_borrowed,
+                    },
+                ),
+                &closing_element,
+                f,
+            )?;
+
+            return Ok(());
+        }
+
         FormatNodeRule::fmt(
             &FormatHtmlOpeningElement::default().with_options(FormatHtmlOpeningElementOptions {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
@@ -378,18 +412,17 @@ fn has_text_child(node: &HtmlElementList) -> bool {
     })
 }
 
-fn has_single_interpolation_child(node: &HtmlElementList) -> bool {
+fn single_double_interpolation_child(node: &HtmlElementList) -> Option<HtmlDoubleTextExpression> {
     let mut meaningful_children = node.iter().filter(|child| !is_whitespace_content(child));
 
     let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
-        AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
-        | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+        AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
     ))) = meaningful_children.next()
     else {
-        return false;
+        return None;
     };
 
-    meaningful_children.next().is_none()
+    meaningful_children.next().is_none().then_some(expression)
 }
 
 fn is_whitespace_content(child: &AnyHtmlElement) -> bool {
