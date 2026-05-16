@@ -24,6 +24,14 @@ pub struct UseExhaustiveDependenciesOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     #[deserializable(validate = "non_empty_optional")]
     pub hooks: Option<Box<[Hook]>>,
+
+    /// When set to `true`, suppresses the diagnostic that reports a dependency
+    /// as changing on every re-render. Set this to `true` if your project uses
+    /// the React Compiler, which auto-memoizes such values and makes the
+    /// diagnostic a false positive. The diagnostics for missing and
+    /// unnecessary dependencies continue to fire. Defaults to `false`.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub react_compiler: Option<bool>,
 }
 
 fn non_empty_optional<T: IsEmpty>(
@@ -42,6 +50,7 @@ fn non_empty_optional<T: IsEmpty>(
 impl UseExhaustiveDependenciesOptions {
     pub const DEFAULT_REPORT_UNNECESSARY_DEPENDENCIES: bool = true;
     pub const DEFAULT_REPORT_MISSING_DEPENDENCIES_ARRAY: bool = false;
+    pub const DEFAULT_REACT_COMPILER: bool = false;
 
     /// Returns [`Self::report_unnecessary_dependencies`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_REPORT_UNNECESSARY_DEPENDENCIES`].
@@ -56,6 +65,12 @@ impl UseExhaustiveDependenciesOptions {
         self.report_missing_dependencies_array
             .unwrap_or(Self::DEFAULT_REPORT_MISSING_DEPENDENCIES_ARRAY)
     }
+
+    /// Returns [`Self::react_compiler`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_REACT_COMPILER`].
+    pub fn react_compiler(&self) -> bool {
+        self.react_compiler.unwrap_or(Self::DEFAULT_REACT_COMPILER)
+    }
 }
 
 impl biome_deserialize::Merge for UseExhaustiveDependenciesOptions {
@@ -67,6 +82,7 @@ impl biome_deserialize::Merge for UseExhaustiveDependenciesOptions {
         if let Some(hooks) = other.hooks {
             self.hooks = Some(hooks);
         }
+        self.react_compiler.merge_with(other.react_compiler);
     }
 }
 

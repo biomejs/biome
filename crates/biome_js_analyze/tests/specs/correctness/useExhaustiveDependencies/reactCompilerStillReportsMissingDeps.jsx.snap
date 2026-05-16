@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reactCompilerStillReportsMissingDeps.jsx
+---
+# Input
+```jsx
+import { useEffect } from "react";
+
+function Component({ thing }) {
+    useEffect(() => {
+        console.log(thing);
+    }, []);
+}
+
+```
+
+# Diagnostics
+```
+reactCompilerStillReportsMissingDeps.jsx:4:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This hook does not specify its dependency on thing.
+  
+    3 │ function Component({ thing }) {
+  > 4 │     useEffect(() => {
+      │     ^^^^^^^^^
+    5 │         console.log(thing);
+    6 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    3 │ function Component({ thing }) {
+    4 │     useEffect(() => {
+  > 5 │         console.log(thing);
+      │                     ^^^^^
+    6 │     }, []);
+    7 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency thing to the list.
+  
+    6 │ ····},·[thing]);
+      │         +++++   
+
+```

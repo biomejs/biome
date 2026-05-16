@@ -414,6 +414,35 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ### `reactCompiler`
+    ///
+    /// If enabled, the rule will not report dependencies whose identity changes on every re-render.
+    /// Enable this option when your project uses the React Compiler, which automatically memoizes
+    /// such values and makes the diagnostic a false positive in compiler-managed code paths.
+    /// The diagnostics for missing dependencies and unnecessary dependencies continue to fire.
+    ///
+    /// Default: `false`
+    ///
+    /// ##### Example
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "reactCompiler": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// import { useEffect } from "react";
+    ///
+    /// function Foo() {
+    ///   const onClick = () => {};
+    ///   // not reported because the React Compiler is expected to memoize `onClick`
+    ///   useEffect(() => { onClick(); }, [onClick]);
+    /// }
+    /// ```
+    ///
     pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
@@ -1452,12 +1481,14 @@ impl Rule for UseExhaustiveDependencies {
             });
         }
 
-        for (unstable_dep, kind) in unstable_deps {
-            signals.push(Fix::DependencyTooUnstable {
-                dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
-                dependency_range: unstable_dep.range(),
-                kind,
-            });
+        if !options.react_compiler() {
+            for (unstable_dep, kind) in unstable_deps {
+                signals.push(Fix::DependencyTooUnstable {
+                    dependency_name: unstable_dep.syntax().to_string().into_boxed_str(),
+                    dependency_range: unstable_dep.range(),
+                    kind,
+                });
+            }
         }
 
         signals.into_boxed_slice()
