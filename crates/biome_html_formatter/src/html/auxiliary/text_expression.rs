@@ -2,6 +2,7 @@ use crate::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions};
 use biome_html_syntax::HtmlTextExpression;
+use biome_rowan::TextRange;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlTextExpression {
@@ -28,6 +29,18 @@ impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
                 &text(trimmed_text, token.text_range().start())
             )]
         )
+    }
+
+    fn embedded_node_range(
+        &self,
+        node: &HtmlTextExpression,
+        f: &mut HtmlFormatter,
+    ) -> Option<TextRange> {
+        if self.compact || !f.context().should_delegate_fmt_embedded_nodes() {
+            return None;
+        }
+
+        Some(node.html_literal_token().ok()?.text_range())
     }
 }
 

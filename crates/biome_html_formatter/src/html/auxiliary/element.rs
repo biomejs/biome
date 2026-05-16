@@ -4,8 +4,8 @@ use crate::verbatim::{format_html_leading_comments, format_html_leading_comments
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, HtmlElement, HtmlElementFields,
-    HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression, HtmlElement,
+    HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
 };
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
@@ -233,13 +233,16 @@ impl FormatHtmlElement {
         //
         // Elements that force break children (like `select`, `ul`, `ol`, table elements)
         // should NOT borrow tokens because their children are always multiline.
+        let has_single_interpolation_child = has_single_interpolation_child(&children);
         let should_borrow_opening_r_angle = is_element_internally_whitespace_sensitive
             && !children.is_empty()
+            && !has_single_interpolation_child
             && !content_has_leading_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_element_internally_whitespace_sensitive
             && !children.is_empty()
+            && !has_single_interpolation_child
             && !content_has_trailing_whitespace
             && !should_be_verbatim
             && !should_format_embedded_nodes;
@@ -373,4 +376,28 @@ fn has_text_child(node: &HtmlElementList) -> bool {
             .value_token()
             .is_ok_and(|token| !token.text_trimmed().is_empty())
     })
+}
+
+fn has_single_interpolation_child(node: &HtmlElementList) -> bool {
+    let mut meaningful_children = node.iter().filter(|child| !is_whitespace_content(child));
+
+    let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+        AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+        | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+    ))) = meaningful_children.next()
+    else {
+        return false;
+    };
+
+    meaningful_children.next().is_none()
+}
+
+fn is_whitespace_content(child: &AnyHtmlElement) -> bool {
+    let AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(content)) = child else {
+        return false;
+    };
+
+    content
+        .value_token()
+        .is_ok_and(|token| token.text().chars().all(|c| c.is_ascii_whitespace()))
 }

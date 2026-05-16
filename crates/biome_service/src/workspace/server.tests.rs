@@ -2,10 +2,10 @@ use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
-    FormatterConfiguration, JsConfiguration,
+    FormatterConfiguration, HtmlConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
 
@@ -190,6 +190,90 @@ fn format_html_with_scripts_and_css() {
     		</script>
     	</head>
     </html>
+    "#);
+}
+
+#[test]
+fn format_vue_interpolation_embedded_expression() {
+    // Regression for https://github.com/biomejs/biome/issues/10330
+    const FILE_PATH: &str = "/project/file.vue";
+    const FILE_CONTENT: &str = r#"<template>
+<div>
+<span>
+<div>
+<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+	$t("nav.my-rooms")
+}}</v-btn>
+</div>
+</span>
+</div>
+</template>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    indent_style: Some(IndentStyle::Space),
+                    ..Default::default()
+                }),
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    formatter: Some(JsFormatterConfiguration {
+                        quote_style: Some(QuoteStyle::Single),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            project_key,
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    <template>
+      <div>
+        <span>
+          <div>
+            <v-btn v-if="store.state.user" variant="text" to="/my-rooms">
+              {{
+                $t('nav.my-rooms')
+              }}
+            </v-btn>
+          </div>
+        </span>
+      </div>
+    </template>
     "#);
 }
 
