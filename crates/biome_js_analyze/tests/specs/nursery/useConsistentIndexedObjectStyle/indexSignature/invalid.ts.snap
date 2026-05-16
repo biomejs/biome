@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.ts
+---
+# Input
+```ts
+// Invalid in index-signature mode
+type T1 = Record<string, number>;
+type T2 = Record<string, Record<string, string>>;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:11 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer index signatures over the Record utility type.
+  
+    1 │ // Invalid in index-signature mode
+  > 2 │ type T1 = Record<string, number>;
+      │           ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ type T2 = Record<string, Record<string, string>>;
+    4 │ 
+  
+  i Index signatures are the standard TypeScript way to define indexed objects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use { [key: K]: V } syntax.
+  
+    1 1 │   // Invalid in index-signature mode
+    2   │ - type·T1·=·Record<string,·number>;
+      2 │ + type·T1·=·{·[key:·string]:·number·};
+    3 3 │   type T2 = Record<string, Record<string, string>>;
+    4 4 │   
+  
+
+```
+
+```
+invalid.ts:3:11 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer index signatures over the Record utility type.
+  
+    1 │ // Invalid in index-signature mode
+    2 │ type T1 = Record<string, number>;
+  > 3 │ type T2 = Record<string, Record<string, string>>;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Index signatures are the standard TypeScript way to define indexed objects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use { [key: K]: V } syntax.
+  
+    1 1 │   // Invalid in index-signature mode
+    2 2 │   type T1 = Record<string, number>;
+    3   │ - type·T2·=·Record<string,·Record<string,·string>>;
+      3 │ + type·T2·=·{·[key:·string]:·Record<string,·string>·};
+    4 4 │   
+  
+
+```
+
+```
+invalid.ts:3:26 lint/nursery/useConsistentIndexedObjectStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer index signatures over the Record utility type.
+  
+    1 │ // Invalid in index-signature mode
+    2 │ type T1 = Record<string, number>;
+  > 3 │ type T2 = Record<string, Record<string, string>>;
+      │                          ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Index signatures are the standard TypeScript way to define indexed objects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use { [key: K]: V } syntax.
+  
+    1 1 │   // Invalid in index-signature mode
+    2 2 │   type T1 = Record<string, number>;
+    3   │ - type·T2·=·Record<string,·Record<string,·string>>;
+      3 │ + type·T2·=·Record<string,·{·[key:·string]:·string·}>;
+    4 4 │   
+  
+
+```

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// Valid in record mode
+type T1 = Record<string, number>;
+type T2 = Record<string, Record<string, string>>;
+
+```

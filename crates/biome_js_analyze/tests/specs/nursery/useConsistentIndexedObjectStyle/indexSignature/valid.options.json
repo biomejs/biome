@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "useConsistentIndexedObjectStyle": {
+                    "level": "error",
+                    "options": {
+                        "mode": "indexSignature"
+                    }
+                }
+            }
+        }
+    }
+}

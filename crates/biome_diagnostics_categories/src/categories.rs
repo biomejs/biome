@@ -267,6 +267,7 @@ define_categories! {
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentEnumValueType": "https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
+    "lint/nursery/useConsistentIndexedObjectStyle": "https://biomejs.dev/linter/rules/use-consistent-indexed-object-style",
     "lint/nursery/useConsistentMethodSignatures": "https://biomejs.dev/linter/rules/use-consistent-method-signatures",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",

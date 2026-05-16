@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+// Valid in index-signature mode
+type T1 = { [key: string]: number };
+type T2 = { [key: string]: { [key: string]: string } };
+
+```

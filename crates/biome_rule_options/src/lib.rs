@@ -351,6 +351,7 @@ pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_enum_value_type;
 pub mod use_consistent_graphql_descriptions;
+pub mod use_consistent_indexed_object_style;
 pub mod use_consistent_member_accessibility;
 pub mod use_consistent_method_signatures;
 pub mod use_consistent_object_definitions;
