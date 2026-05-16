@@ -25,3 +25,18 @@ query test {
     email: somethingElse
   }
 }
+
+# Fragment spread duplication (issue #9867)
+fragment memberFields on Member {
+  id
+  firstName
+  lastName
+  age
+}
+
+query Member {
+  member {
+    ...memberFields
+    firstName
+  }
+}

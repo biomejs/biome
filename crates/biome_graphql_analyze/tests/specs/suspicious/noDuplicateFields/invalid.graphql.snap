@@ -1,5 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
+assertion_line: 83
 expression: invalid.graphql
 ---
 # Input
@@ -29,6 +30,21 @@ query test {
     name
     email
     email: somethingElse
+  }
+}
+
+# Fragment spread duplication (issue #9867)
+fragment memberFields on Member {
+  id
+  firstName
+  lastName
+  age
+}
+
+query Member {
+  member {
+    ...memberFields
+    firstName
   }
 }
 
@@ -94,6 +110,23 @@ invalid.graphql:25:5 lint/suspicious/noDuplicateFields ━━━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^
     26 │   }
     27 │ }
+  
+  i Remove the duplicated field.
+  
+
+```
+
+```
+invalid.graphql:40:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Field `firstName` defined multiple times.
+  
+    38 │   member {
+    39 │     ...memberFields
+  > 40 │     firstName
+       │     ^^^^^^^^^
+    41 │   }
+    42 │ }
   
   i Remove the duplicated field.
   
