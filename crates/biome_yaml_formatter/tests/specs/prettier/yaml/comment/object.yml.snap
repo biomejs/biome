@@ -31,27 +31,26 @@ obj:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,8 @@
--#6445
--
+@@ -3,10 +3,8 @@
  obj:
    # before
  
 +
    # before
--
+ 
 -  key: value
  
 -  # after
- 
+-
 -  # after
 +  key: value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
+#6445
+
 obj:
   # before
 
@@ -59,4 +58,5 @@ obj:
   # before
 
 
-  key: value```
+  key: value
+```

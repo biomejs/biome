@@ -23,10 +23,8 @@ key: value
  ---
  scalar1
 ----
--key: value
 +...
-+key: value
-\ No newline at end of file
+ key: value
 ```
 
 # Output
@@ -35,4 +33,5 @@ key: value
 ---
 scalar1
 ...
-key: value```
+key: value
+```

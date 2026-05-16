@@ -20,34 +20,23 @@ action: grand slam
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+spec-example-2-8-play-by-play-feed-from-a-game.yml:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -2,7 +2,9 @@
- time: 20:03:20
- player: Sammy Sosa
- action: strike (miss)
-+...
- ---
- time: 20:03:47
- player: Sammy Sosa
- action: grand slam
-+...
-\ No newline at end of file
+  × Unexpected token.
+  
+     3 │ player: Sammy Sosa
+     4 │ action: strike (miss)
+   > 5 │ ...---
+       │    ^^^
+   > 6 │ time: 20:03:47
+   > 7 │ player: Sammy Sosa
+   > 8 │ action: grand slam
+   > 9 │ ...
+       │ ^^^
+    10 │ 
+  
+
 ```
-
-# Output
-
-```yml
----
-time: 20:03:20
-player: Sammy Sosa
-action: strike (miss)
-...
----
-time: 20:03:47
-player: Sammy Sosa
-action: grand slam
-...```

@@ -57,11 +57,9 @@ none(2):
 +
    # before-after.comment
  
--none(2):
--  # none.comment
 +
-+none(2):
-\ No newline at end of file
+ none(2):
+-  # none.comment
 ```
 
 # Output
@@ -93,4 +91,5 @@ before-after(2 line):
   # before-after.comment
 
 
-none(2):```
+none(2):
+```

@@ -28,7 +28,6 @@ plain: a
  
 -  c
 + c
-\ No newline at end of file
 ```
 
 # Output
@@ -38,4 +37,5 @@ plain: a
 plain: a
  b
 
- c```
+ c
+```

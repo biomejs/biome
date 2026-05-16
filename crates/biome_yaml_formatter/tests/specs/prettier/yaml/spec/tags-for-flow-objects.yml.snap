@@ -14,24 +14,28 @@ info: yaml/spec/tags-for-flow-objects.yml
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,5 +1,4 @@
+ !!map {
+   
+-  
+   k: !!seq [ a, !!str b]
+ }
 
-```diff
---- Prettier
-+++ Biome
-@@ -1 +1,4 @@
--!!map { k: !!seq [a, !!str b] }
-+!!map {
-+  k: !!seq
-+  [ a, !!str b]
-+}
-\ No newline at end of file
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -5,7 +5,6 @@
+     indent([
+       soft_line_break_or_space,
+       "
+-  
+   k: ",
+       verbatim(["!!seq"]),
+       " ",
+
 ```
-
-# Output
-
-```yml
-!!map {
-  k: !!seq
-  [ a, !!str b]
-}```

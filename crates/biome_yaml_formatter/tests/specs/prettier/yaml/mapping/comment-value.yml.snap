@@ -19,10 +19,10 @@ info: yaml/mapping/comment-value.yml
 @@ -1 +1 @@
 -123: # hello
 +123:
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-123:```
+123:
+```

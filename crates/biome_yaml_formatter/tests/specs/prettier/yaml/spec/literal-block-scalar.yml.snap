@@ -23,19 +23,17 @@ a: |
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,8 @@
+@@ -1,5 +1,6 @@
  a: |
 -  ab
+-
+-  cd
+-  ef
 + ab
 + 
 + cd
 + ef
-+ 
- 
--  cd
--  ef
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -46,6 +44,5 @@ a: |
  
  cd
  ef
- 
-
-...```
+...
+```

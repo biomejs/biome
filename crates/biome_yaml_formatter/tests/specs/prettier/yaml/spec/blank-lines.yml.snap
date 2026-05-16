@@ -40,10 +40,8 @@ text: |
  
    c
 -
--  d
 + 
-+  d
-\ No newline at end of file
+   d
 ```
 
 # Output
@@ -60,4 +58,5 @@ text: |
 
   c
  
-  d```
+  d
+```

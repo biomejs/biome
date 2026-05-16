@@ -80,11 +80,11 @@ flow-sequence-mapping.yml:9:5 parse ━━━━━━━━━━━━━━�
        │     ^^
   > 10 │       {
         ...
-  > 30 │         c: check-spelling,
   > 31 │         # d: coverage,
   > 32 │         # e: install-and-run-from-git,
   > 33 │       }
        │       ^
+    34 │ 
   
   i Expected a block mapping entry here.
   
@@ -94,11 +94,11 @@ flow-sequence-mapping.yml:9:5 parse ━━━━━━━━━━━━━━�
        │     ^^
   > 10 │       {
         ...
-  > 30 │         c: check-spelling,
   > 31 │         # d: coverage,
   > 32 │         # e: install-and-run-from-git,
   > 33 │       }
        │       ^
+    34 │ 
   
 
 ```

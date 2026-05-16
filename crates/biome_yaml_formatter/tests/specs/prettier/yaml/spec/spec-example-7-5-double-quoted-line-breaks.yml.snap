@@ -30,7 +30,6 @@ to a line feed, or 	\
  to a line feed, or 	\
 -\ 	non-content"
 + \ 	non-content"
-\ No newline at end of file
 ```
 
 # Output
@@ -40,4 +39,5 @@ to a line feed, or 	\
 to a space,	
  
 to a line feed, or 	\
- \ 	non-content"```
+ \ 	non-content"
+```

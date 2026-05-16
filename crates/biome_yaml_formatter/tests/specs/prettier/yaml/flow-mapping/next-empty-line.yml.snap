@@ -15,34 +15,41 @@ c: 123
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,6 +1,5 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,10 +1,7 @@
  {
--  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,
--  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,
-+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123, 
+   
+-  
+ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,
+-  
+   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,
+-  
+   
  
--  c: 123,
--}
-+c: 123
-+}
-\ No newline at end of file
-```
+ c: 123
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -4,14 +4,11 @@
+     indent([
+       soft_line_break_or_space,
+       "
+-  
+ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,",
+       soft_line_break_or_space,
+-      "
+-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,",
++      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,",
+       soft_line_break_or_space,
+       "
+-  
+ 
+ c: 123
+ "
 
-```yml
-{
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123, 
-
-c: 123
-}```
-
-# Lines exceeding max width of 80 characters
-```
-    2: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123, 
 ```

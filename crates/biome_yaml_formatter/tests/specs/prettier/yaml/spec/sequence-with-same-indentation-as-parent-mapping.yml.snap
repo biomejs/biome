@@ -23,11 +23,9 @@ info: yaml/spec/sequence-with-same-indentation-as-parent-mapping.yml
  1:
 -  - 2
 -  - 3
--4: 5
 +- 2
 +- 3
-+4: 5
-\ No newline at end of file
+ 4: 5
 ```
 
 # Output
@@ -36,4 +34,5 @@ info: yaml/spec/sequence-with-same-indentation-as-parent-mapping.yml
 1:
 - 2
 - 3
-4: 5```
+4: 5
+```

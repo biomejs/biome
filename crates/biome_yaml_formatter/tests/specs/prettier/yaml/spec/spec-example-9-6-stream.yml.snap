@@ -22,13 +22,16 @@ matches %: 20
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,4 +4,4 @@
- ...
- %YAML 1.2
+@@ -1,7 +1,6 @@
+ Document
  ---
--matches %: 20
-+matches %: 20
-\ No newline at end of file
+-# Empty
+-...
+-%YAML 1.2
++# Empty # Empty
++...%YAML 1.2
+ ---
+ matches %: 20
 ```
 
 # Output
@@ -36,11 +39,11 @@ matches %: 20
 ```yml
 Document
 ---
-# Empty
-...
-%YAML 1.2
+# Empty # Empty
+...%YAML 1.2
 ---
-matches %: 20```
+matches %: 20
+```
 
 # Errors
 ```

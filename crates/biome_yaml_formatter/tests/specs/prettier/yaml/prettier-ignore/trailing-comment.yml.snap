@@ -24,7 +24,6 @@ def:     456 # hello
  # prettier-ignore
 -def:     456 # hello
 +def:     456 
-\ No newline at end of file
 ```
 
 # Output
@@ -32,4 +31,5 @@ def:     456 # hello
 ```yml
 abc:     123 # hello
 # prettier-ignore
-def:     456 ```
+def:     456 
+```

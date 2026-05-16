@@ -14,28 +14,36 @@ line3
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,4 @@
+ --- >
+ line1
+-# no commentline3 # no commentline3
++# no commentline3
+ # no comment
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,5 +1,4 @@
-----
-->
--  line1
--  # no comment
--  line3
-+--- >
-+line1
-+# no comment
-+line3
-```
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,10 +1,10 @@
+ [
+   "--- >
+ line1
+-# no commentline3",
+-  line_suffix([" # no commentline3"]),
++# no comment",
++  line_suffix([" # no comment"]),
+   expand_parent,
+-  line_suffix([hard_line_break, "# no comment"]),
+-  expand_parent,
++  "line3
++",
+   hard_line_break
+ ]
+\ No newline at end of file
 
-# Output
-
-```yml
---- >
-line1
-# no comment
-line3
 ```

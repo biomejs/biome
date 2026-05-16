@@ -22,11 +22,11 @@ info: yaml/spec/spec-example-7-13-flow-sequence.yml
 -- [three, four]
 +- [ one, two, ]
 +- [three ,four]
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 - [ one, two, ]
-- [three ,four]```
+- [three ,four]
+```

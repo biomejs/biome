@@ -36,18 +36,15 @@ foo2:
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,9 +8,4 @@
-   - foo
+@@ -9,8 +9,3 @@
  
  foo2:
--  - foo2
+   - foo2
 -
 -  # - foo2
 -
 -  # - foo2
 -  # - foo2
-+  - foo2
-\ No newline at end of file
 ```
 
 # Output
@@ -63,4 +60,5 @@ foo1:
   - foo
 
 foo2:
-  - foo2```
+  - foo2
+```

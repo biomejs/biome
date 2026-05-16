@@ -31,7 +31,6 @@ info: yaml/spec/whitespace-after-scalars-in-flow.yml
 +   e   : "f"
 +  }
 +- [      ]
-\ No newline at end of file
 ```
 
 # Output
@@ -42,4 +41,5 @@ info: yaml/spec/whitespace-after-scalars-in-flow.yml
    , c : 'd' ,
    e   : "f"
   }
-- [      ]```
+- [      ]
+```

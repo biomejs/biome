@@ -19,14 +19,13 @@ key:    # Comment
 +++ Biome
 @@ -1,2 +1,2 @@
 -key: # Comment
--  value
 +key:    # Comment
-+  value
-\ No newline at end of file
+   value
 ```
 
 # Output
 
 ```yml
 key:    # Comment
-  value```
+  value
+```

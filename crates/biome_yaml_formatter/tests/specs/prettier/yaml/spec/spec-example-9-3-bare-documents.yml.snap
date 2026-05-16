@@ -17,32 +17,30 @@ document
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+spec-example-9-3-bare-documents.yml:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,7 +1,7 @@
- Bare
- document
-----
-+...
- # No document
-----
-+...
- |
--  %!PS-Adobe-2.0 # Not the first line
-+%!PS-Adobe-2.0 # Not the first line
-```
+  × Unexpected token.
+  
+    3 │ ...
+    4 │ # No document # No document
+  > 5 │ ...|
+      │    ^
+  > 6 │ %!PS-Adobe-2.0 # Not the first line
+  > 7 │ 
+      │ 
+  
+spec-example-9-3-bare-documents.yml:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Output
+  × Unexpected character `%`
+  
+    4 │ # No document # No document
+    5 │ ...|
+  > 6 │ %!PS-Adobe-2.0 # Not the first line
+      │ ^
+    7 │ 
+  
 
-```yml
-Bare
-document
-...
-# No document
-...
-|
-%!PS-Adobe-2.0 # Not the first line
 ```

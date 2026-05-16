@@ -16,28 +16,7 @@ omitted value:,
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1 +1,6 @@
--{ unquoted: "separate", http://foo.com, omitted value, : omitted key }
-+{
-+unquoted : "separate",
-+http://foo.com,
-+omitted value:,
-+: omitted key,
-+}
-\ No newline at end of file
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```
-
-# Output
-
-```yml
-{
-unquoted : "separate",
-http://foo.com,
-omitted value:,
-: omitted key,
-}```

@@ -17,15 +17,14 @@ info: yaml/flow-mapping/middle-comment.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,2 @@
- !!map #comment
+@@ -1,2 +1 @@
+-!!map #comment
 -{}
-+{}
-\ No newline at end of file
++!!map {} #comment #comment
 ```
 
 # Output
 
 ```yml
-!!map #comment
-{}```
+!!map {} #comment #comment
+```

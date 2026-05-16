@@ -38,11 +38,9 @@ A:
 + #a
  
  A:
--  B:
+   B:
 -  #A
 -  #A
-+  B:
-\ No newline at end of file
 ```
 
 # Output
@@ -58,4 +56,5 @@ a:
  #a
 
 A:
-  B:```
+  B:
+```

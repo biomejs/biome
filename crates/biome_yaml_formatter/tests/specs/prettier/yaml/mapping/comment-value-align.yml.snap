@@ -21,10 +21,10 @@ info: yaml/mapping/comment-value-align.yml
 -123: # hello
 -  # comment
 +123:
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-123:```
+123:
+```

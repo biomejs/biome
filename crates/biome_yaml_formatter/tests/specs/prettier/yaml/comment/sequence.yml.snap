@@ -28,7 +28,7 @@ info: yaml/comment/sequence.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,9 @@
+@@ -1,13 +1,13 @@
 -- - a
 +-  - a
  
@@ -39,15 +39,16 @@ info: yaml/comment/sequence.yml
 +   # - c
  
 -  - e
--
--- - a
 +   - e
  
--  # - b
--
--  # - c
+-- - a
 +-  - a
-\ No newline at end of file
+ 
+-  # - b
++# - b
+ 
+-  # - c
++# - c
 ```
 
 # Output
@@ -61,4 +62,9 @@ info: yaml/comment/sequence.yml
 
    - e
 
--  - a```
+-  - a
+
+# - b
+
+# - c
+```

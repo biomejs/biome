@@ -27,10 +27,9 @@ Not indented:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,9 @@
--# Leading comment line spaces are
--# neither content nor indentation.
--
+@@ -2,12 +2,11 @@
+ # neither content nor indentation.
+ 
  Not indented:
 -  By one space: |
 + By one space: |
@@ -47,12 +46,14 @@ Not indented:
 +  Also by two,    # are neither
 +  	Still by two   # content nor
 +    ]
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
+# Leading comment line spaces are
+# neither content nor indentation.
+
 Not indented:
  By one space: |
     By four
@@ -61,4 +62,5 @@ Not indented:
    By two,        # in flow style
   Also by two,    # are neither
   	Still by two   # content nor
-    ]```
+    ]
+```

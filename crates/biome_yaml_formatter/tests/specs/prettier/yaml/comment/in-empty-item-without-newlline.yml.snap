@@ -17,13 +17,12 @@ a:
 --- Prettier
 +++ Biome
 @@ -1,2 +1 @@
--a:
+ a:
 -  #123
-+a:
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-a:```
+a:
+```

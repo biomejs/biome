@@ -12,22 +12,7 @@ info: yaml/flow-mapping/comment-trailing.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,3 +1,2 @@
--{
--  123, # comment
--}
-+{123, # comment
-+}
-\ No newline at end of file
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```
-
-# Output
-
-```yml
-{123, # comment
-}```

@@ -27,20 +27,16 @@ top6:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,12 @@
+@@ -1,11 +1,7 @@
 -"top1":
 -  "key1": &alias1 scalar1
 -"top2":
 -  "key2": &alias2 scalar2
 -top3: &node3
-+"top1" : 
-+  "key1" : &alias1 scalar1
-+'top2' : 
-+  'key2' : &alias2 scalar2
-+top3: &node3 
-   *alias1 : scalar3
+-  *alias1 : scalar3
 -top4:
-+top4: 
++"top1":"key1": &alias1 scalar1'top2':'key2': &alias2 scalar2top3: &node3 
++  *alias1 : scalar3top4: 
    *alias2 : scalar4
 -top5: scalar5
 -top6:
@@ -49,24 +45,19 @@ top6:
 +  scalar5
 +top6: 
 +  &anchor6 'key6' : scalar6
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-"top1" : 
-  "key1" : &alias1 scalar1
-'top2' : 
-  'key2' : &alias2 scalar2
-top3: &node3 
-  *alias1 : scalar3
-top4: 
+"top1":"key1": &alias1 scalar1'top2':'key2': &alias2 scalar2top3: &node3 
+  *alias1 : scalar3top4: 
   *alias2 : scalar4
 top5   :    
   scalar5
 top6: 
-  &anchor6 'key6' : scalar6```
+  &anchor6 'key6' : scalar6
+```
 
 # Errors
 ```

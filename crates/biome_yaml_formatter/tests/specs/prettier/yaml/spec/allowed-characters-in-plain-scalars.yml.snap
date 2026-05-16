@@ -26,9 +26,7 @@ safe dash: -foo
 +     !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
  safe question mark: ?foo
  safe colon: :foo
--safe dash: -foo
-+safe dash: -foo
-\ No newline at end of file
+ safe dash: -foo
 ```
 
 # Output
@@ -38,7 +36,8 @@ safe: a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
      !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~
 safe question mark: ?foo
 safe colon: :foo
-safe dash: -foo```
+safe dash: -foo
+```
 
 # Errors
 ```

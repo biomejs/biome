@@ -17,32 +17,21 @@ info: yaml/spec/spec-example-9-4-explicit-documents.yml
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+spec-example-9-4-explicit-documents.yml:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,6 +1,7 @@
- ---
--{ ? matches
--    %
--  : 20 }
-+{ matches
-+% : 20 }
-+...
- ---
- # Empty
-+...
-\ No newline at end of file
+  × Unexpected token.
+  
+    2 │ { matches
+    3 │ % : 20 }
+  > 4 │ ...---
+      │    ^^^
+  > 5 │ # Empty # Empty
+  > 6 │ ...
+      │ ^^^
+    7 │ 
+  
+
 ```
-
-# Output
-
-```yml
----
-{ matches
-% : 20 }
-...
----
-# Empty
-...```

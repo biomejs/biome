@@ -19,14 +19,13 @@ double: "text"
 +++ Biome
 @@ -1,2 +1,2 @@
 -single: "text"
--double: "text"
 +single: 'text'
-+double: "text"
-\ No newline at end of file
+ double: "text"
 ```
 
 # Output
 
 ```yml
 single: 'text'
-double: "text"```
+double: "text"
+```

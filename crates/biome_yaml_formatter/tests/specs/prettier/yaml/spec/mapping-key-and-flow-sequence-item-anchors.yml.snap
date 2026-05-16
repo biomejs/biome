@@ -23,7 +23,6 @@ info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
  &mapping
 -&key [&item a, b, c]: value
 +&key [ &item a, b, c ]: value
-\ No newline at end of file
 ```
 
 # Output
@@ -31,4 +30,5 @@ info: yaml/spec/mapping-key-and-flow-sequence-item-anchors.yml
 ```yml
 ---
 &mapping
-&key [ &item a, b, c ]: value```
+&key [ &item a, b, c ]: value
+```

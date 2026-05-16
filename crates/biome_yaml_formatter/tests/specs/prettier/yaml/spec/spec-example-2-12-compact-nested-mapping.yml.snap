@@ -18,35 +18,46 @@ info: yaml/spec/spec-example-2-12-compact-nested-mapping.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,8 +1,8 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,5 +1,7 @@
  ---
- # Products purchased
--- item: Super Hoop
-+- item    : Super Hoop
-   quantity: 1
--- item: Basketball
+-# Products purchased- item    : Super Hoopquantity: 1- item    : Basketball
++# Products purchased- item    : Super Hoop
++  quantity: 1
 +- item    : Basketball
    quantity: 4
--- item: Big Shoes
--  quantity: 1
-+- item    : Big Shoes
+ - item    : Big Shoes
+-  quantity: 1  # Products purchased- item    : Super Hoop
++  quantity: 1 # Products purchased
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,14 +1,15 @@
+ [
+   "---
+-# Products purchased- item    : Super Hoop",
+-  line_suffix([" # Products purchased- item    : Super Hoop"]),
++# Products purchased",
++  line_suffix([" # Products purchased"]),
+   expand_parent,
+-  verbatim(["quantity: 1"]),
+   verbatim([
+-    "- item    : Basketball
++    "- item    : Super Hoop
 +  quantity: 1
++- item    : Basketball
+   quantity: 4
+ - item    : Big Shoes
+-  quantity: 1 "
++  quantity: 1"
+   ]),
+   hard_line_break
+ ]
 \ No newline at end of file
+
 ```
-
-# Output
-
-```yml
----
-# Products purchased
-- item    : Super Hoop
-  quantity: 1
-- item    : Basketball
-  quantity: 4
-- item    : Big Shoes
-  quantity: 1```

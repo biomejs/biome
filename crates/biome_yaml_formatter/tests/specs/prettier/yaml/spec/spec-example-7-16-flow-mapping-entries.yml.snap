@@ -15,26 +15,30 @@ implicit: entry,
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,7 +1,6 @@
+ {
+   ? explicit: entry,
+   
+-  
+ implicit: entry,
+   ?
+ }
 
-```diff
---- Prettier
-+++ Biome
-@@ -1 +1,5 @@
--{ explicit: entry, implicit: entry, : }
-+{
-+? explicit: entry,
-+implicit: entry,
-+?
-+}
-\ No newline at end of file
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -6,7 +6,6 @@
+       "? explicit: entry,",
+       soft_line_break_or_space,
+       "
+-  
+ implicit: entry,",
+       soft_line_break_or_space,
+       "? "
+
 ```
-
-# Output
-
-```yml
-{
-? explicit: entry,
-implicit: entry,
-?
-}```

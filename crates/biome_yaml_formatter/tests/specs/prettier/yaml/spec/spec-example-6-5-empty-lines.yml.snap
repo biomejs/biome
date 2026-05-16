@@ -31,9 +31,7 @@ Chomping: |
 +   	
    as a line feed"
  Chomping: |
--  Clipped empty lines
-+  Clipped empty lines
-\ No newline at end of file
+   Clipped empty lines
 ```
 
 # Output
@@ -44,4 +42,5 @@ Folding:
    	
   as a line feed"
 Chomping: |
-  Clipped empty lines```
+  Clipped empty lines
+```

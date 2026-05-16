@@ -20,23 +20,24 @@ this is#not: a comment
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,4 +2,4 @@
- ?foo: safe question mark
+@@ -1,5 +1,4 @@
+-a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
+-?foo: safe question mark
++a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe?foo: safe question mark
  :foo: safe colon
  -foo: safe dash
 -this is#not: a comment
-+this is
-\ No newline at end of file
++this is #$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
 ```
 
 # Output
 
 ```yml
-a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
-?foo: safe question mark
+a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe?foo: safe question mark
 :foo: safe colon
 -foo: safe dash
-this is```
+this is #$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
+```
 
 # Errors
 ```

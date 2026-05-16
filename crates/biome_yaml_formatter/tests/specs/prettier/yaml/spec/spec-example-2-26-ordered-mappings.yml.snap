@@ -22,27 +22,29 @@ info: yaml/spec/spec-example-2-26-ordered-mappings.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,4 @@
--# Ordered maps are represented as
--# A sequence of mappings, with
--# each mapping having one key
+@@ -1,8 +1,6 @@
+ # Ordered maps are represented as
+ # A sequence of mappings, with
+ # each mapping having one key
 ----
 -!!omap
 +--- !!omap
  - Mark McGwire: 65
- - Sammy Sosa: 63
+-- Sammy Sosa: 63
 -- Ken Griffy: 58
-+- Ken Griffy: 58
-\ No newline at end of file
++- Sammy Sosa: 63- Ken Griffy: 58
 ```
 
 # Output
 
 ```yml
+# Ordered maps are represented as
+# A sequence of mappings, with
+# each mapping having one key
 --- !!omap
 - Mark McGwire: 65
-- Sammy Sosa: 63
-- Ken Griffy: 58```
+- Sammy Sosa: 63- Ken Griffy: 58
+```
 
 # Errors
 ```

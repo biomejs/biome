@@ -254,7 +254,6 @@ hue:
 -    - host: 192.168.1.1
 +    bridges:
 +        - host: 192.168.1.1
-\ No newline at end of file
 ```
 
 # Output
@@ -351,4 +350,5 @@ switch:
 
 hue:
     bridges:
-        - host: 192.168.1.1```
+        - host: 192.168.1.1
+```

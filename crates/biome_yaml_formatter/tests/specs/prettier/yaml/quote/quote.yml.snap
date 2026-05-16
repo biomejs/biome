@@ -38,7 +38,6 @@ info: yaml/quote/quote.yml
  - "\n123"
 -- '''a"b'
 +- "'a\"b"
-\ No newline at end of file
 ```
 
 # Output
@@ -52,4 +51,5 @@ info: yaml/quote/quote.yml
 - "\"\""
 - '\n123'
 - "\n123"
-- "'a\"b"```
+- "'a\"b"
+```

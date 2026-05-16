@@ -15,29 +15,38 @@ info: yaml/flow-mapping/comment-between.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
 @@ -1,5 +1,5 @@
  {
--  ? 123
+   ? 123
+-# comment: 456 # comment: 456
 -  # comment
--  : 456,
--}
-+? 123
++# comment: 456
 +# comment
-+: 456
-+}
-\ No newline at end of file
+ }
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -4,11 +4,11 @@
+     indent([
+       soft_line_break_or_space,
+       "? 123
+-# comment: 456",
+-      line_suffix([" # comment: 456"]),
++# comment",
++      line_suffix([" # comment"]),
+       expand_parent,
+-      line_suffix([hard_line_break, "# comment"]),
+-      expand_parent
++      ": 456
++"
+     ]),
+     soft_line_break_or_space,
+     soft_line_break_or_space
+
 ```
-
-# Output
-
-```yml
-{
-? 123
-# comment
-: 456
-}```

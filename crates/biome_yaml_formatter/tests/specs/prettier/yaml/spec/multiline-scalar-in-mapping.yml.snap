@@ -24,12 +24,10 @@ d:
  a: b
 -  c
 -d: e
--  f
 + c
 +d:
 + e
-+  f
-\ No newline at end of file
+   f
 ```
 
 # Output
@@ -39,4 +37,5 @@ a: b
  c
 d:
  e
-  f```
+  f
+```

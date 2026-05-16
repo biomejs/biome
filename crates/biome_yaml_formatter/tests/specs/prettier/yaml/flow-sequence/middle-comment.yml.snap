@@ -17,15 +17,14 @@ info: yaml/flow-sequence/middle-comment.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,2 @@
- !!set # comment
+@@ -1,2 +1 @@
+-!!set # comment
 -[]
-+[]
-\ No newline at end of file
++!!set [] # comment # comment
 ```
 
 # Output
 
 ```yml
-!!set # comment
-[]```
+!!set [] # comment # comment
+```

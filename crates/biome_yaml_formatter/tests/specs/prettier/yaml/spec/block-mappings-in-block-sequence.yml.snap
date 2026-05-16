@@ -28,6 +28,7 @@ block-mappings-in-block-sequence.yml:3:2 parse ━━━━━━━━━━━
       │  ^
   > 4 │    key3: value3
       │    ^^^^^^^^^^^^
+    5 │ 
   
   i Expected a block sequence entry here.
   
@@ -37,6 +38,7 @@ block-mappings-in-block-sequence.yml:3:2 parse ━━━━━━━━━━━
       │  ^
   > 4 │    key3: value3
       │    ^^^^^^^^^^^^
+    5 │ 
   
 
 ```

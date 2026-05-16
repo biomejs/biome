@@ -25,7 +25,6 @@ Document
  Document
 -... # Suffix
 +... 
-\ No newline at end of file
 ```
 
 # Output
@@ -34,7 +33,8 @@ Document
 %YAML 1.2
 ---
 Document
-... ```
+... 
+```
 
 # Errors
 ```

@@ -21,14 +21,11 @@ keep: |+
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,5 +2,4 @@
- 
+@@ -3,4 +3,3 @@
  clip: >
  
--keep: |+
+ keep: |+
 -
-+keep: |+
-\ No newline at end of file
 ```
 
 # Output
@@ -38,4 +35,5 @@ strip: >-
 
 clip: >
 
-keep: |+```
+keep: |+
+```

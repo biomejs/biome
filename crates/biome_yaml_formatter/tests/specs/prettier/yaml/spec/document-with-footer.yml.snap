@@ -20,11 +20,11 @@ aaa: bbb
 @@ -1 +1,2 @@
  aaa: bbb
 +...
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 aaa: bbb
-...```
+...
+```

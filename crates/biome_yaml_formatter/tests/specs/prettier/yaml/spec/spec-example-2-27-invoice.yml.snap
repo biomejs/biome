@@ -44,7 +44,7 @@ comments:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,29 +1,29 @@
+@@ -1,29 +1,28 @@
 ----
 -!<tag:clarkevans.com,2002:invoice>
 +--- !<tag:clarkevans.com,2002:invoice>
@@ -84,8 +84,7 @@ comments:
 +    - sku         : BL394D
 +      quantity    : 4
 +      description : Basketball
-+      price       : 450.00
-+    - sku         : BL4438H
++      price       : 450.00- sku         : BL4438H
 +      quantity    : 1
 +      description : Super Hoop
 +      price       : 2392.00
@@ -98,7 +97,6 @@ comments:
 +    Late afternoon is best.
 +    Backup contact is Nancy
 +    Billsmer @ 338-4338.
-\ No newline at end of file
 ```
 
 # Output
@@ -122,8 +120,7 @@ product:
     - sku         : BL394D
       quantity    : 4
       description : Basketball
-      price       : 450.00
-    - sku         : BL4438H
+      price       : 450.00- sku         : BL4438H
       quantity    : 1
       description : Super Hoop
       price       : 2392.00
@@ -132,7 +129,8 @@ total: 4443.52
 comments:
     Late afternoon is best.
     Backup contact is Nancy
-    Billsmer @ 338-4338.```
+    Billsmer @ 338-4338.
+```
 
 # Errors
 ```

@@ -15,25 +15,20 @@ xxxxxxxx
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+end-mark-2.yml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,4 +1,5 @@
- ---
- key: value
-+...
- ---
- xxxxxxxx
-```
+  × Unexpected token.
+  
+    1 │ ---
+    2 │ key: value
+  > 3 │ ...---
+      │    ^^^
+  > 4 │ xxxxxxxx
+  > 5 │ 
+      │ 
+  
 
-# Output
-
-```yml
----
-key: value
-...
----
-xxxxxxxx
 ```

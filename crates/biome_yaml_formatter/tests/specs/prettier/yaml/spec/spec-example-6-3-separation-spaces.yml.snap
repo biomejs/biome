@@ -24,7 +24,6 @@ info: yaml/spec/spec-example-6-3-separation-spaces.yml
  - - baz
 -  - baz
 +  -	baz
-\ No newline at end of file
 ```
 
 # Output
@@ -32,4 +31,5 @@ info: yaml/spec/spec-example-6-3-separation-spaces.yml
 ```yml
 - foo:	 bar
 - - baz
-  -	baz```
+  -	baz
+```

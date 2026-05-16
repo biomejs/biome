@@ -14,24 +14,7 @@ info: yaml/spec/spec-example-7-2-empty-content.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1 +1,4 @@
--{ foo: !!str , !!str : bar }
-+{
-+  foo : !!str,
-+  !!str : bar,
-+}
-\ No newline at end of file
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```
-
-# Output
-
-```yml
-{
-  foo : !!str,
-  !!str : bar,
-}```

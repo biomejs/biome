@@ -26,43 +26,67 @@ g
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,10 +1,11 @@
- a
- ---
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,10 +3,12 @@
  b
-----
-+...
+ ...
  c
- ... #
- d
+-... #d #d
+-...---
++... #d
 +...
- ---
++---
  e
  ...
-```
+-#---f
+---- #g #--- #g
++#---
++f
++--- #g
+ # # #
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -4,21 +4,23 @@
+ b
+ ...
+ c
+-... #d",
+-  line_suffix([" #d"]),
++... #",
++  line_suffix([" #"]),
+   expand_parent,
+-  hard_line_break,
+-  "...---
++  "d
++...
++---
+ e
+ ...
+-#---",
+-  line_suffix([" #---"]),
++#",
++  line_suffix([" #"]),
+   expand_parent,
+-  "f
+---- #g",
+-  line_suffix([" #g"]),
++  "---
++f
++--- #",
++  line_suffix([" #"]),
+   expand_parent,
+-  line_suffix([hard_line_break, "# # #"]),
+-  expand_parent,
++  "g
++",
+   hard_line_break
+ ]
+\ No newline at end of file
 
-```yml
-a
----
-b
-...
-c
-... #
-d
-...
----
-e
-...
-#
----
-f
---- #
-g
 ```

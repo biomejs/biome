@@ -14,24 +14,7 @@ info: yaml/spec/spec-example-7-3-completely-empty-flow-nodes.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1 +1,4 @@
--{ foo, : bar }
-+{
-+  ? foo :,
-+  : bar,
-+}
-\ No newline at end of file
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```
-
-# Output
-
-```yml
-{
-  ? foo :,
-  : bar,
-}```

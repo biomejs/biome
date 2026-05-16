@@ -33,15 +33,13 @@ single: pair,
 -  text,
 -  [nested],
 -  single: pair,
--]
 +"double
 + quoted", 'single
 +           quoted',
 +plain
 + text, [ nested ],
 +single: pair,
-+]
-\ No newline at end of file
+ ]
 ```
 
 # Output
@@ -54,4 +52,5 @@ single: pair,
 plain
  text, [ nested ],
 single: pair,
-]```
+]
+```

@@ -30,9 +30,7 @@ block: |
 +  	lines"
  block: |
    text
--   	lines
-+   	lines
-\ No newline at end of file
+    	lines
 ```
 
 # Output
@@ -44,4 +42,5 @@ quoted: "text
   	lines"
 block: |
   text
-   	lines```
+   	lines
+```

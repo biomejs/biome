@@ -18,11 +18,11 @@ info: yaml/flow-mapping/short-key.yml
 +++ Biome
 @@ -1 +1 @@
 -{ 1, 2, 3 }
-+{? 1,? 2,? 3}
-\ No newline at end of file
++{ ? 1, ? 2, ? 3 }
 ```
 
 # Output
 
 ```yml
-{? 1,? 2,? 3}```
+{ ? 1, ? 2, ? 3 }
+```

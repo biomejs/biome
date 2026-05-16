@@ -220,7 +220,14 @@ foobar: !sexy
 ```diff
 --- Prettier
 +++ Biome
-@@ -7,9 +7,9 @@
+@@ -1,15 +1,14 @@
+ ---
+-# Collection Types #############################################################
+-################################################################################
++# Collection Types ############################################################################################################################################# # Collection Types #############################################################
+ 
+ # http://yaml.org/type/map.html -----------------------------------------------#
+ 
  map:
    # Unordered set of key: value pairs.
    Block style: !!map
@@ -233,7 +240,7 @@ foobar: !sexy
    Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }
  
  # http://yaml.org/type/omap.html ----------------------------------------------#
-@@ -22,7 +22,7 @@
+@@ -22,7 +21,7 @@
      - anaconda: South-American constrictor snake. Scaly.
      # Etc.
    # Flow style
@@ -242,7 +249,7 @@ foobar: !sexy
  
  # http://yaml.org/type/pairs.html ---------------------------------------------#
  
-@@ -33,7 +33,7 @@
+@@ -33,7 +32,7 @@
      - meeting: with boss.
      - break: lunch.
      - meeting: with client.
@@ -251,7 +258,7 @@ foobar: !sexy
  
  # http://yaml.org/type/set.html -----------------------------------------------#
  
-@@ -51,26 +51,19 @@
+@@ -51,26 +50,19 @@
  seq:
    # Ordered sequence of nodes
    Block style: !!seq
@@ -291,7 +298,7 @@ foobar: !sexy
  
  # Scalar Types #################################################################
  ################################################################################
-@@ -112,26 +105,26 @@
+@@ -112,26 +104,26 @@
    - &LEFT { x: 0, y: 2 }
    - &BIG { r: 10 }
    - &SMALL { r: 1 }
@@ -326,7 +333,7 @@ foobar: !sexy
      x: 1
      label: big/left/small
  
-@@ -160,20 +153,21 @@
+@@ -160,20 +152,21 @@
  # http://yaml.org/type/timestamp.html -----------------------------------------#
  
  timestamp:
@@ -353,7 +360,7 @@ foobar: !sexy
  
  # https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/undefined
  
-@@ -186,9 +180,11 @@
+@@ -186,9 +179,11 @@
      return 'Wow! JS-YAML Rocks!';
    }
  
@@ -365,21 +372,13 @@ foobar: !sexy
  # JS-YAML allows you to specify a custom YAML types for your structures.
  # This is a simple example of custom constructor defined in `js/demo.js` for
  # custom `!sexy` type:
-@@ -206,4 +202,4 @@
- 
- foobar: !sexy
-   - bunny
--  - chocolate
-+  - chocolate
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 ---
-# Collection Types #############################################################
-################################################################################
+# Collection Types ############################################################################################################################################# # Collection Types #############################################################
 
 # http://yaml.org/type/map.html -----------------------------------------------#
 
@@ -581,7 +580,8 @@ function: !!js/function >
 
 foobar: !sexy
   - bunny
-  - chocolate```
+  - chocolate
+```
 
 # Errors
 ```
@@ -747,4 +747,9 @@ example.yml:127:26 parse ━━━━━━━━━━━━━━━━━━�
   i Remove SMALL 
   
 
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: # Collection Types ############################################################################################################################################# # Collection Types #############################################################
 ```

@@ -23,13 +23,13 @@ info: yaml/flow-sequence/long-key.yml
 -  ? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,
 -]
 +[? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-[? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]```
+[? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong,? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong]
+```
 
 # Lines exceeding max width of 80 characters
 ```

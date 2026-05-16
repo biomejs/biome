@@ -33,14 +33,11 @@ myOtherList:
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,5 +14,4 @@
- 
+@@ -15,4 +15,3 @@
  myOtherList:
    - example1
--  - example2
+   - example2
 -  # - example3
-+  - example2
-\ No newline at end of file
 ```
 
 # Output
@@ -62,4 +59,5 @@ myOtherMap:
 
 myOtherList:
   - example1
-  - example2```
+  - example2
+```

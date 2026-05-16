@@ -12,20 +12,28 @@ info: yaml/comment/set.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,2 +1,2 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1 +1,2 @@
  - 123
--  # 456
 +  
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1 +1,7 @@
+-[verbatim(["- 123"]), hard_line_break]
 \ No newline at end of file
++[
++  verbatim([
++    "- 123
++  "
++  ]),
++  hard_line_break
++]
+\ No newline at end of file
+
 ```
-
-# Output
-
-```yml
-- 123
-  ```

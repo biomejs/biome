@@ -21,11 +21,11 @@ block mapping:
  block mapping:
 -  key: value
 + key: value
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 block mapping:
- key: value```
+ key: value
+```

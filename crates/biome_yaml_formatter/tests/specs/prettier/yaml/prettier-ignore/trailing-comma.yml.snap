@@ -36,11 +36,9 @@ info: yaml/prettier-ignore/trailing-comma.yml
    # prettier-ignore
 -  [ccc    ], # 777
 -  [ddd],
--]
 +          [ccc    ]       # 777
 +  , [ddd    ]
-+]
-\ No newline at end of file
+ ]
 ```
 
 # Output
@@ -54,4 +52,5 @@ info: yaml/prettier-ignore/trailing-comma.yml
   # prettier-ignore
           [ccc    ]       # 777
   , [ddd    ]
-]```
+]
+```

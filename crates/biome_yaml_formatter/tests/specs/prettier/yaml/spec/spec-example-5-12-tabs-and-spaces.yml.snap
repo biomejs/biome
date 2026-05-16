@@ -21,23 +21,23 @@ block:	|
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,5 @@
--# Tabs and spaces
+@@ -1,6 +1,6 @@
+ # Tabs and spaces
  quoted: "Quoted 	"
 -block: |
 +block:	|
    void main() {
    	printf("Hello, world!\n");
--  }
-+  }
-\ No newline at end of file
+   }
 ```
 
 # Output
 
 ```yml
+# Tabs and spaces
 quoted: "Quoted 	"
 block:	|
   void main() {
   	printf("Hello, world!\n");
-  }```
+  }
+```

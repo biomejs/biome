@@ -28,7 +28,6 @@ c: d	#X
 +seq:	
 + - a	
 +c: d	
-\ No newline at end of file
 ```
 
 # Output
@@ -37,4 +36,5 @@ c: d	#X
 a: b	
 seq:	
  - a	
-c: d	```
+c: d	
+```

@@ -44,14 +44,11 @@ empty_content:
 ```diff
 --- Prettier
 +++ Biome
-@@ -25,5 +25,4 @@
-   # sequence.endComments
+@@ -26,4 +26,3 @@
  # documentBody.children
  
--empty_content:
+ empty_content:
 -  # hello world
-+empty_content:
-\ No newline at end of file
 ```
 
 # Output
@@ -84,4 +81,5 @@ f:
   # sequence.endComments
 # documentBody.children
 
-empty_content:```
+empty_content:
+```

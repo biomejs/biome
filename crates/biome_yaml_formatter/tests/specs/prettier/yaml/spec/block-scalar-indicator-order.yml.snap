@@ -23,10 +23,8 @@ info: yaml/spec/block-scalar-indicator-order.yml
  - |2-
    explicit indent and chomp
 -- |2-
--  chomp and explicit indent
 +- |-2
-+  chomp and explicit indent
-\ No newline at end of file
+   chomp and explicit indent
 ```
 
 # Output
@@ -35,4 +33,5 @@ info: yaml/spec/block-scalar-indicator-order.yml
 - |2-
   explicit indent and chomp
 - |-2
-  chomp and explicit indent```
+  chomp and explicit indent
+```

@@ -27,7 +27,6 @@ info: yaml/spec/tags-in-block-sequence.yml
 + - b
 + - !!int 42
 + - d
-\ No newline at end of file
 ```
 
 # Output
@@ -36,4 +35,5 @@ info: yaml/spec/tags-in-block-sequence.yml
 - !!str a
  - b
  - !!int 42
- - d```
+ - d
+```

@@ -17,30 +17,20 @@ aaaaa:
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+document.yml:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,6 +1,6 @@
--# prettier-ignore
- ---
- aaaaa:
-            bbbbb
-----
--aaaaa: bbbbb
-+...
-+aaaaa:
-+           bbbbb
-\ No newline at end of file
+  × Unexpected token.
+  
+    3 │ aaaaa:
+    4 │            bbbbb
+  > 5 │ ...aaaaa:
+      │    ^^^^^^
+  > 6 │            bbbbb
+  > 7 │ 
+      │ 
+  
+
 ```
-
-# Output
-
-```yml
----
-aaaaa:
-           bbbbb
-...
-aaaaa:
-           bbbbb```

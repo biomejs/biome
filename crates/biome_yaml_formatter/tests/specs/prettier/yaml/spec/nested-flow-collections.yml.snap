@@ -33,7 +33,6 @@ info: yaml/spec/nested-flow-collections.yml
 +  }
 + ]
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -46,7 +45,8 @@ info: yaml/spec/nested-flow-collections.yml
    d: [e, f]
   }
  ]
-}```
+}
+```
 
 # Errors
 ```

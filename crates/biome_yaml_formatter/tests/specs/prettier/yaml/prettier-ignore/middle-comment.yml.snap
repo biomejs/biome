@@ -27,9 +27,7 @@ def:  !!str #   hello
 +   123
  # prettier-ignore
  def:  !!str #   hello
--   456
-+   456
-\ No newline at end of file
+    456
 ```
 
 # Output
@@ -39,7 +37,8 @@ abc:  !!str #   hello
    123
 # prettier-ignore
 def:  !!str #   hello
-   456```
+   456
+```
 
 # Errors
 ```

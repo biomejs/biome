@@ -20,21 +20,13 @@ info: yaml/spec/spec-example-7-18-flow-mapping-adjacent-values.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,5 @@
+@@ -1 +1 @@
 -{ "adjacent": value, "readable": value, "empty" }
-+{
-+"adjacent":value,
-+"readable": value,
-+"empty":
-+}
-\ No newline at end of file
++{ "adjacent": value, "readable": value, "empty": }
 ```
 
 # Output
 
 ```yml
-{
-"adjacent":value,
-"readable": value,
-"empty":
-}```
+{ "adjacent": value, "readable": value, "empty": }
+```
