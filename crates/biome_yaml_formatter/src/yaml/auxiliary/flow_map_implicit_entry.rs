@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_rowan::AstNode;
-use biome_yaml_syntax::YamlFlowMapImplicitEntry;
+use biome_formatter::write;
+use biome_yaml_syntax::{YamlFlowMapImplicitEntry, YamlFlowMapImplicitEntryFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlFlowMapImplicitEntry;
 impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry {
@@ -9,6 +9,22 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
         node: &YamlFlowMapImplicitEntry,
         f: &mut YamlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let YamlFlowMapImplicitEntryFields {
+            key,
+            colon_token,
+            value,
+        } = node.as_fields();
+
+        write!(f, [key.format()])?;
+
+        if let Some(colon_token) = colon_token {
+            write!(f, [colon_token.format()])?;
+        }
+
+        if value.is_some() {
+            write!(f, [space(), value.format()])?;
+        }
+
+        Ok(())
     }
 }
