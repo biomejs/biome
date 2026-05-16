@@ -19,14 +19,15 @@ use biome_markdown_syntax::{
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
 use std::collections::VecDeque;
 use std::fmt::Debug;
+use std::iter::FusedIterator;
 
-/// Thin wrapper around [AnyMdBlock]
+/// Thin wrapper around [AnyListItem]
 pub struct FmtAnyList {
     node: AnyListItem,
 }
 
 impl FmtAnyList {
-    pub fn new(node: AnyListItem) -> Self {
+    pub(crate) fn new(node: AnyListItem) -> Self {
         Self { node }
     }
 }
@@ -72,6 +73,7 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
                     let needs_trailing_break = matches!(iter.peek(), Some(ListItem::Bullet(_)));
                     joiner.entry(&format_with(|f| {
                         write!(f, [bullet])?;
+                        // If the next item is a bullet, we need to break on a new line
                         if needs_trailing_break {
                             write!(f, [hard_line_break()])?;
                         }
@@ -100,14 +102,33 @@ pub(crate) struct ListBullet {
 }
 
 impl ListBullet {
-    fn has_continuation_indent(&self) -> bool {
-        let mut content = self.node.content().iter();
-        let first = content.next();
-        let second = content.next();
-        let third = content.next();
-        first.is_some()
-            && second.is_some_and(|second| second.is_newline())
-            && third.is_some_and(|third| third.is_continuation_indent())
+    /// This functions checks if the pre-marker of a bullet item needs to be kept.
+    ///
+    /// Following, the cases when it needs to be kept
+    ///
+    /// ## Cases
+    ///
+    /// When the bullet item is followed by a newline and a inline code block
+    ///
+    /// ```md
+    ///  -    one
+    ///
+    ///      two
+    /// ```
+    ///
+    /// Source: <https://spec.commonmark.org/dingus/?text=%20-%20%20%20%20one%0A%0A%20%20%20%20%20two%0A>
+    fn keep_pre_marker(&self) -> bool {
+        self.node
+            .syntax()
+            .ancestors()
+            .find(|a| MdBulletListItem::can_cast(a.kind()) || MdOrderedListItem::can_cast(a.kind()))
+            .is_some_and(|list_item| {
+                list_item
+                    .siblings(Direction::Next)
+                    // We skip 1 because usually the next sibling is a MdNewline
+                    .skip(1)
+                    .any(|s| MdIndentCodeBlock::can_cast(s.kind()))
+            })
     }
 }
 
@@ -134,19 +155,7 @@ impl Format<MarkdownFormatContext> for ListBullet {
             Some("-")
         };
 
-        let keep_pre_marker = self
-            .node
-            .syntax()
-            .ancestors()
-            .find(|a| MdBulletListItem::can_cast(a.kind()) || MdOrderedListItem::can_cast(a.kind()))
-            .is_some_and(|list_item| {
-                list_item
-                    .siblings(Direction::Next)
-                    .skip(1)
-                    .any(|s| MdIndentCodeBlock::can_cast(s.kind()))
-            });
-
-        let post_marker_len = prefix.post_marker_len().unwrap_or(2) as u8;
+        let keep_pre_marker = self.keep_pre_marker();
         let pre_marker_width = if keep_pre_marker {
             prefix.pre_marker_indent().len() as u8
         } else {
@@ -163,6 +172,8 @@ impl Format<MarkdownFormatContext> for ListBullet {
                 })]
         )?;
 
+        // The alignment is the sum of the pre-marker width, the marker width and the post-marker width.
+        let post_marker_len = prefix.post_marker_len().unwrap_or(2) as u8;
         let alignment = pre_marker_width + (marker.text_trimmed().len() as u8) + post_marker_len;
 
         let content = ListBlockList {
@@ -206,6 +217,8 @@ impl ListBlockList {
         match breaks {
             0 => {}
             1 => write!(f, [hard_line_break()])?,
+            // NOTE: Prettier emits a double hardline, but our Printer is different, it deduplicates continues hardlines.
+            // Our IR has an empty_line for that.
             _ => write!(f, [empty_line()])?,
         }
         Ok(())
@@ -341,6 +354,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
     }
 }
 
+/// Iterator in charge or formatting a [MdBlockList] that is inside a bullet list
 struct BlockListIterator {
     content: AstNodeListIterator<MarkdownLanguage, AnyMdBlock>,
     queue: VecDeque<Option<AnyMdBlock>>,
@@ -449,3 +463,5 @@ impl Iterator for BlockListIterator {
         }
     }
 }
+
+impl FusedIterator for BlockListIterator {}

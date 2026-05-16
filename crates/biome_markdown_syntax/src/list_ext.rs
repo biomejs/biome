@@ -5,11 +5,17 @@ use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug)]
 pub enum ListMarker {
+    /// `1.` or `1)`
     Ordered,
+    /// Only markers with `1)`
     OrderedWithParen,
+    /// `- 1`
     Minus,
+    /// `* 1`
     Star,
+    /// `+ 1`
     Plus,
+    /// Any other marker
     Unordered,
 }
 
@@ -27,6 +33,7 @@ impl AnyListItem {
 }
 
 impl ListMarker {
+    /// `true` if [ListMarker::Ordered] or [ListMarker::OrderedWithParen]
     pub const fn is_ordered(&self) -> bool {
         matches!(self, ListMarker::Ordered | ListMarker::OrderedWithParen)
     }

@@ -74,3 +74,7 @@ markdown/spec/example-63.md
 # Here "two" is an inline code block, prettier botches it
 markdown/spec/example-217.md
 markdown/spec/example-218.md
+
+# It's inline code, it should be change
+# https://github.com/prettier/prettier/issues/19152
+markdown/spec/example-7.md
