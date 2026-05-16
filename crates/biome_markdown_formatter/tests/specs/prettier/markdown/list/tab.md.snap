@@ -33,70 +33,58 @@ info: markdown/list/tab.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,22 +1,23 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -4,7 +4,7 @@
+ - Text
+   - foo
+     - foo
+-      - bar
++    - bar
  - Text
  
--  [title](link)
-+ 	[title](link)
- 
- - Text
--  - foo
--  - foo
--  - bar
- 
-+ 	- foo
-+	- foo
-+	- bar
-+
- - Text
- 
--  # foo
-+ 	# foo
- 
- - Text
- 
--  ```
--  foo
--  ```
-+ 	```
-+ 	foo
-+ 	```
- 
- - Text
- 
--  `foo`
-+ 	`foo`
-```
+   # foo
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -7,20 +7,14 @@
+     "Text",
+     hard_line_break,
+     "- ",
+-    align(2, [
+-      "foo",
+-      hard_line_break,
+-      "- ",
+-      align(2, ["foo", hard_line_break, "- bar"]),
+-      hard_line_break
+-    ]),
++    align(2, ["foo", hard_line_break, "- foo", hard_line_break, "- bar"]),
+     hard_line_break
+   ]),
+   hard_line_break,
+   "- ",
+   align(2, ["Text", empty_line, "# foo"]),
+-  hard_line_break,
+-  "- ",
++  "
++- ",
+   align(2, [
+     "Text",
+     empty_line,
+@@ -31,8 +25,8 @@
+     hard_line_break,
+     "```"
+   ]),
+-  hard_line_break,
+-  "- ",
++  "
++- ",
+   align(2, ["Text", empty_line, "`foo`"]),
+   hard_line_break,
+   hard_line_break
 
-```md
-- Text
-
- 	[title](link)
-
-- Text
-
- 	- foo
-	- foo
-	- bar
-
-- Text
-
- 	# foo
-
-- Text
-
- 	```
- 	foo
- 	```
-
-- Text
-
- 	`foo`
 ```

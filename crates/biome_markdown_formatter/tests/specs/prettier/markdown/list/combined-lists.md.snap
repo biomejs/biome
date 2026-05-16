@@ -27,18 +27,17 @@ info: markdown/list/combined-lists.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,10 +2,12 @@
- 
+@@ -1,11 +1,6 @@
+ - hello1
+-
  - hello2
- 
-+
+-
  - hello3
- 
+-
  - hello4
- 
-+
+-
  - hello5
- 
+-
  - hello6
 ```
 
@@ -46,16 +45,9 @@ info: markdown/list/combined-lists.md
 
 ```md
 - hello1
-
 - hello2
-
-
 - hello3
-
 - hello4
-
-
 - hello5
-
 - hello6
 ```
