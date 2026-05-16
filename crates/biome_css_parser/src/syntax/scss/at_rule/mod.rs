@@ -64,20 +64,20 @@ pub(super) fn parse_scss_expression_at_rule(
     p.bump(keyword);
     parse_scss_expression_until(p, SCSS_STATEMENT_AT_RULE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
-    parse_scss_statement_at_rule_terminator(p);
+    expect_scss_statement_at_rule_end(p);
 
     Present(m.complete(p, kind))
 }
 
-/// Parses the terminator for SCSS statement at-rules.
+/// Accepts `;` or a closing block boundary for SCSS statement at-rules.
 ///
 /// Examples:
 /// ```scss
+/// @mixin x { @content; }
 /// @mixin x { @content }
-/// @function x() { @return 1 }
 /// ```
 #[inline]
-pub(super) fn parse_scss_statement_at_rule_terminator(p: &mut CssParser) {
+pub(super) fn expect_scss_statement_at_rule_end(p: &mut CssParser) {
     if p.eat(T![;]) || p.at(T!['}']) {
         return;
     }
