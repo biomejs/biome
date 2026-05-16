@@ -53,7 +53,7 @@ declare_lint_rule! {
             RuleSource::EslintReactDom("no-script-url").same(),
             RuleSource::EslintReactXyz("dom-no-script-url").same(),
         ],
-        recommended: false,
+        recommended: true,
         severity: Severity::Error,
     }
 }
