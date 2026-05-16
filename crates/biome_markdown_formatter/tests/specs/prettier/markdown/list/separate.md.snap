@@ -17,31 +17,32 @@ info: markdown/list/separate.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -2,6 +2,6 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,6 +1,7 @@
  - 123
  - 123
- 
--* 123
--* 123
--* 123
-+- 123
-+- 123
-+- 123
-```
+ - 123
++
+ - 123
+ - 123
+ - 123
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -8,7 +8,8 @@
+   "- ",
+   align(2, ["123"]),
+   hard_line_break,
+-  "- ",
++  "
++- ",
+   align(2, ["123"]),
+   hard_line_break,
+   "- ",
 
-```md
-- 123
-- 123
-- 123
-
-- 123
-- 123
-- 123
 ```

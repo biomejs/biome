@@ -88,7 +88,7 @@ info: markdown/list/align.md
 -    1.  123
 -    2.  123
 +    1.   123
-+    2.   123
++         2. 123
  
  ---
  
@@ -146,7 +146,7 @@ info: markdown/list/align.md
 1.  123
 2.  123
     1.   123
-    2.   123
+         2. 123
 
 ---
 

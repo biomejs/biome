@@ -62,79 +62,35 @@ info: markdown/blockquote/ignore-code.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -38,10 +38,12 @@
- > > ```
- > ````
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -22,7 +22,6 @@
+   ```
  
-+> 
- > <!-- prettier-ignore -->
- > - This is a long long
- >   long long long long
- >   long long paragraph.
-+> 
  
- > ```js
- > // prettier-ignore
-```
+-
+ ````md
+ > ```md
+ > <!-- biome-ignore format: prettier ignore -->
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -31,12 +31,10 @@
+     hard_line_break,
+     "> ",
+     hard_line_break,
+-    hard_line_break,
+     "```"
+   ]),
+   hard_line_break,
+   "
+-
+ 
+ ````md",
+   hard_line_break,
 
-```md
-> ````md
-> <!-- prettier-ignore -->
-> ```js
-> ugly   ( code ) ;
-> ```
-> ````
-
-> ```md
-> <!-- prettier-ignore -->
-> - This is a long long
->   long long long long
->   long long paragraph.
-> ```
-
-> - test
->   ```md
->   <!-- prettier-ignore -->
->   - This is a long long
->     long long long long
->     long long paragraph.
->   ```
-
-````md
-> ```md
-> <!-- prettier-ignore -->
-> - This is a long long
->   long long long long
->   long long paragraph.
-> ```
-````
-
-> ````md
-> > ```md
-> > <!-- prettier-ignore -->
-> > - This is a long long
-> >   long long long long
-> >   long long paragraph.
-> > ```
-> ````
-
-> 
-> <!-- prettier-ignore -->
-> - This is a long long
->   long long long long
->   long long paragraph.
-> 
-
-> ```js
-> // prettier-ignore
-> const x = 1,
-> b = 2
-> ```
 ```
