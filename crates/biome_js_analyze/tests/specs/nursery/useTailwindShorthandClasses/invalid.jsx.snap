@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+export function Component() {
+	return (
+		<>
+			<div className="w-4 h-4" />
+			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+			<div className={clsx("w-4 h-4")} />
+			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+		</>
+	);
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    2 │ 	return (
+    3 │ 		<>
+  > 4 │ 			<div className="w-4 h-4" />
+      │ 			                ^^^
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  
+  i Compressible utility used here.
+  
+    2 │ 	return (
+    3 │ 		<>
+  > 4 │ 			<div className="w-4 h-4" />
+      │ 			                    ^^^
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     2  2 │     return (
+     3  3 │       <>
+     4    │ - → → → <div·className="w-4·h-4"·/>
+        4 │ + → → → <div·className="size-4"·/>
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6  6 │         <div className={clsx("w-4 h-4")} />
+  
+
+```
+
+```
+invalid.jsx:5:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Compressible utility used here.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                                      ^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Compressible utility used here.
+  
+    3 │ 		<>
+    4 │ 			<div className="w-4 h-4" />
+  > 5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+      │ 			                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 			<div className={clsx("w-4 h-4")} />
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │       <>
+     4  4 │         <div className="w-4 h-4" />
+     5    │ - → → → <div·className="hover:overflow-hidden·hover:text-ellipsis·hover:whitespace-nowrap"·/>
+        5 │ + → → → <div·className="hover:truncate"·/>
+     6  6 │         <div className={clsx("w-4 h-4")} />
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+  
+
+```
+
+```
+invalid.jsx:6:26 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │ 			<div className="w-4 h-4" />
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+  > 6 │ 			<div className={clsx("w-4 h-4")} />
+      │ 			                      ^^^
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+    8 │ 		</>
+  
+  i Compressible utility used here.
+  
+    4 │ 			<div className="w-4 h-4" />
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+  > 6 │ 			<div className={clsx("w-4 h-4")} />
+      │ 			                          ^^^
+    7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+    8 │ 		</>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     4  4 │         <div className="w-4 h-4" />
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6    │ - → → → <div·className={clsx("w-4·h-4")}·/>
+        6 │ + → → → <div·className={clsx("size-4")}·/>
+     7  7 │         <div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+     8  8 │       </>
+  
+
+```
+
+```
+invalid.jsx:7:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                       ^^^^^^^^^^^^^^^
+    8 │ 		</>
+    9 │ 	);
+  
+  i Compressible utility used here.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                                       ^^^^^^^^^^^^^
+    8 │ 		</>
+    9 │ 	);
+  
+  i Compressible utility used here.
+  
+    5 │ 			<div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+    6 │ 			<div className={clsx("w-4 h-4")} />
+  > 7 │ 			<div className={tw.div`overflow-hidden text-ellipsis whitespace-nowrap`} />
+      │ 			                                                     ^^^^^^^^^^^^^^^^^
+    8 │ 		</>
+    9 │ 	);
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     5  5 │         <div className="hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap" />
+     6  6 │         <div className={clsx("w-4 h-4")} />
+     7    │ - → → → <div·className={tw.div`overflow-hidden·text-ellipsis·whitespace-nowrap`}·/>
+        7 │ + → → → <div·className={tw.div`truncate`}·/>
+     8  8 │       </>
+     9  9 │     );
+  
+
+```

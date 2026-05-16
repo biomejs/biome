@@ -1,0 +1,258 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<div class="w-4 h-4"></div>
+<div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+<Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+<button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+  Submit
+</button>
+<div class="-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]"></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div class="w-4 h-4"></div>
+      │             ^^^
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  
+  i Compressible utility used here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div class="w-4 h-4"></div>
+      │                 ^^^
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   
+     3    │ - <div·class="w-4·h-4"></div>
+        3 │ + <div·class="size-4"></div>
+     4  4 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     5  5 │   <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  
+
+```
+
+```
+invalid.svelte:4:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ <div class="w-4 h-4"></div>
+  > 4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │             ^^^^^^^^^^^^^^^
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+    6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+  
+  i Compressible utility used here.
+  
+    3 │ <div class="w-4 h-4"></div>
+  > 4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │                             ^^^^^^^^^^^^^
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+    6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+  
+  i Compressible utility used here.
+  
+    3 │ <div class="w-4 h-4"></div>
+  > 4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │                                           ^^^^^^^^^^^^^^^^^
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+    6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     2  2 │   
+     3  3 │   <div class="w-4 h-4"></div>
+     4    │ - <div·class='overflow-hidden·text-ellipsis·whitespace-nowrap'></div>
+        4 │ + <div·class='truncate'></div>
+     5  5 │   <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+     6  6 │   <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+  
+
+```
+
+```
+invalid.svelte:5:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ <div class="w-4 h-4"></div>
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+  > 5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+      │                           ^^^^^^^^^^^^^^^
+    6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+    7 │   Submit
+  
+  i Compressible utility used here.
+  
+    3 │ <div class="w-4 h-4"></div>
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+  > 5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+      │                                           ^^^^^^^^^^^^^^^
+    6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+    7 │   Submit
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │   <div class="w-4 h-4"></div>
+     4  4 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     5    │ - <Icon·class="inline-block·group-hover:w-5·group-hover:h-5·text-current"·/>
+        5 │ + <Icon·class="inline-block·group-hover:size-5·text-current"·/>
+     6  6 │   <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+     7  7 │     Submit
+  
+
+```
+
+```
+invalid.svelte:6:44 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  > 6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+      │                                            ^^^^
+    7 │   Submit
+    8 │ </button>
+  
+  i Compressible utility used here.
+  
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  > 6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+      │                                  ^^^^
+    7 │   Submit
+    8 │ </button>
+  
+  i Compressible utility used here.
+  
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  > 6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+      │                             ^^^^
+    7 │   Submit
+    8 │ </button>
+  
+  i Compressible utility used here.
+  
+    4 │ <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    5 │ <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+  > 6 │ <button class="rounded px-3 pt-2 pr-2 pb-2 pl-2" disabled={pending}>
+      │                                       ^^^^
+    7 │   Submit
+    8 │ </button>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     4  4 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     5  5 │   <Icon class="inline-block group-hover:w-5 group-hover:h-5 text-current" />
+     6    │ - <button·class="rounded·px-3·pt-2·pr-2·pb-2·pl-2"·disabled={pending}>
+        6 │ + <button·class="rounded·px-3·p-2·"·disabled={pending}>
+     7  7 │     Submit
+     8  8 │   </button>
+  
+
+```
+
+```
+invalid.svelte:9:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     7 │   Submit
+     8 │ </button>
+   > 9 │ <div class="-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]"></div>
+       │             ^^^^^
+    10 │ 
+  
+  i Compressible utility used here.
+  
+     7 │   Submit
+     8 │ </button>
+   > 9 │ <div class="-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]"></div>
+       │                   ^^^^^
+    10 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     7  7 │     Submit
+     8  8 │   </button>
+     9    │ - <div·class="-mt-2·-mb-2·data-[state=open]:w-[10px]·data-[state=open]:h-[10px]"></div>
+        9 │ + <div·class="-my-2·data-[state=open]:w-[10px]·data-[state=open]:h-[10px]"></div>
+    10 10 │   
+  
+
+```
+
+```
+invalid.svelte:9:25 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     7 │   Submit
+     8 │ </button>
+   > 9 │ <div class="-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]"></div>
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Compressible utility used here.
+  
+     7 │   Submit
+     8 │ </button>
+   > 9 │ <div class="-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]"></div>
+       │                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     7  7 │     Submit
+     8  8 │   </button>
+     9    │ - <div·class="-mt-2·-mb-2·data-[state=open]:w-[10px]·data-[state=open]:h-[10px]"></div>
+        9 │ + <div·class="-mt-2·-mb-2·data-[state=open]:size-[10px]"></div>
+    10 10 │   
+  
+
+```

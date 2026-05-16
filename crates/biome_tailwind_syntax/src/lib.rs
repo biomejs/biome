@@ -4,10 +4,12 @@
 mod generated;
 pub mod metadata;
 mod syntax_node;
+mod util;
 
 pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use syntax_node::*;
+pub use util::*;
 
 use crate::TailwindSyntaxKind::{
     TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VALUE, TW_BOGUS_VARIANT,

@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-functions.jsx
+---
+# Input
+```jsx
+const button = cn("px-2 py-2");
+
+const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+
+```
+
+# Diagnostics
+```
+with-functions.jsx:1:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+  > 1 │ const button = cn("px-2 py-2");
+      │                    ^^^^
+    2 │ 
+    3 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+  i Compressible utility used here.
+  
+  > 1 │ const button = cn("px-2 py-2");
+      │                         ^^^^
+    2 │ 
+    3 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    1   │ - const·button·=·cn("px-2·py-2");
+      1 │ + const·button·=·cn("p-2");
+    2 2 │   
+    3 3 │   const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+  
+
+```
+
+```
+with-functions.jsx:3:21 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ const button = cn("px-2 py-2");
+    2 │ 
+  > 3 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                     ^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Compressible utility used here.
+  
+    1 │ const button = cn("px-2 py-2");
+    2 │ 
+  > 3 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                                     ^^^^^^^^^^^^^
+    4 │ 
+  
+  i Compressible utility used here.
+  
+    1 │ const button = cn("px-2 py-2");
+    2 │ 
+  > 3 │ const card = tw.div`overflow-hidden text-ellipsis whitespace-nowrap`;
+      │                                                   ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    1 1 │   const button = cn("px-2 py-2");
+    2 2 │   
+    3   │ - const·card·=·tw.div`overflow-hidden·text-ellipsis·whitespace-nowrap`;
+      3 │ + const·card·=·tw.div`truncate`;
+    4 4 │   
+  
+
+```

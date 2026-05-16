@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+export function Component() {
+	return (
+		<>
+			<div className="size-4" />
+			<div className="hover:truncate" />
+			<div className={clsx("size-4")} />
+			<div className={tw.div`truncate`} />
+			{custom("w-4 h-4")}
+		</>
+	);
+}
+
+```
