@@ -134,15 +134,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,7 +8,7 @@
-   height: 1#{$var};
-   width: calc(100% - #{$sidebar-width});
-   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
--  font: #{$font-size}/#{$line-height};
-+  font: #{$font-size} / #{$line-height};
-   content: "I have #{8 + 2} books on SASS!";
-   border: #{$var} #{$var} #{$var};
-   filter: #{$var}#{$var}#{$var};
 @@ -66,10 +66,7 @@
    }
  }
@@ -170,7 +161,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
   height: 1#{$var};
   width: calc(100% - #{$sidebar-width});
   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
-  font: #{$font-size} / #{$line-height};
+  font: #{$font-size}/#{$line-height};
   content: "I have #{8 + 2} books on SASS!";
   border: #{$var} #{$var} #{$var};
   filter: #{$var}#{$var}#{$var};
