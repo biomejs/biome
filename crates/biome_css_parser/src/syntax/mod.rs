@@ -711,7 +711,12 @@ pub(crate) fn parse_custom_identifier_with_keywords(
 
 #[inline]
 pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--")
+    is_nth_at_dashed_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_dashed_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_identifier(p, n) && p.nth_text(n).is_some_and(|text| text.starts_with("--"))
 }
 
 /// Dashed identifiers are any identifiers that start with two dashes (`--`).
