@@ -81,9 +81,8 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                     _ => {
                         prev_content = PrevContentBlock::Other;
                         if let Some(list_item) = node.as_any_list_item() {
-                            joiner.entry(&format_with(|f| {
-                                FmtAnyList::new(list_item.clone()).fmt(f)
-                            }));
+                            joiner
+                                .entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                         } else {
                             joiner.entry(&node.format());
                         }
@@ -182,9 +181,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 still_leading = false;
                 prev_was_header = node.is_any_header();
                 if let Some(list_item) = node.as_any_list_item() {
-                    joiner.entry(&format_with(|f| {
-                        FmtAnyList::new(list_item.clone()).fmt(f)
-                    }));
+                    joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                 } else {
                     joiner.entry(&node.format());
                 }

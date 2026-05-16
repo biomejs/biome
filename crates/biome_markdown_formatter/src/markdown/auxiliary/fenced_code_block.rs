@@ -70,11 +70,7 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
             ]
         )?;
 
-        let r_fence_excess = if inside_list {
-            r_fence_indent.len()
-        } else {
-            0
-        };
+        let r_fence_excess = if inside_list { r_fence_indent.len() } else { 0 };
         let r_fence_tokens: Vec<_> = r_fence_indent.iter().collect();
         for token in r_fence_tokens.iter().take(r_fence_excess) {
             let char_token = token.md_indent_char_token()?;

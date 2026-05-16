@@ -219,7 +219,9 @@ fn build_word_stream(
             AnyMdInline::MdQuotePrefix(prefix) => {
                 prefix
                     .format()
-                    .with_options(FormatMdQuotePrefixOptions { should_remove: true })
+                    .with_options(FormatMdQuotePrefixOptions {
+                        should_remove: true,
+                    })
                     .fmt(f)
                     .ok();
             }

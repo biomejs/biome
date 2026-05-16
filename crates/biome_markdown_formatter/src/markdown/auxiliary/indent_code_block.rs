@@ -41,19 +41,12 @@ impl FormatNodeRule<MdIndentCodeBlock> for FormatMdIndentCodeBlock {
                             match &item {
                                 AnyMdInline::MdIndentToken(indent) => {
                                     f.context().comments().is_suppressed(indent.syntax());
-                                    write!(
-                                        f,
-                                        [format_removed(&indent.md_indent_char_token()?)]
-                                    )?;
+                                    write!(f, [format_removed(&indent.md_indent_char_token()?)])?;
                                     continue;
                                 }
                                 AnyMdInline::MdTextual(text) => {
                                     let token = text.value_token()?;
-                                    if token
-                                        .text_trimmed()
-                                        .chars()
-                                        .all(|c| c == ' ' || c == '\t')
-                                    {
+                                    if token.text_trimmed().chars().all(|c| c == ' ' || c == '\t') {
                                         f.context().comments().is_suppressed(text.syntax());
                                         write!(f, [format_removed(&token)])?;
                                         continue;
