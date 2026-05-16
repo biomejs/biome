@@ -15,5 +15,6 @@ pub(crate) mod interpolated_value_part;
 pub(crate) mod module_configuration;
 pub(crate) mod module_member;
 pub(crate) mod parameter;
+pub(crate) mod parent_selector_suffix_part;
 pub(crate) mod use_namespace;
 pub(crate) mod variable_declaration_name;

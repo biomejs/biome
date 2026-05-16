@@ -30,6 +30,8 @@ pub(crate) mod nesting_declaration;
 pub(crate) mod parameter;
 pub(crate) mod parameter_default_value;
 pub(crate) mod parameter_list;
+pub(crate) mod parent_selector_suffix;
+pub(crate) mod parent_selector_suffix_hyphen;
 pub(crate) mod parent_selector_value;
 pub(crate) mod parenthesized_expression;
 pub(crate) mod plain_import;
