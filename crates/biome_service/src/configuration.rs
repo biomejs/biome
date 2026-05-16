@@ -76,6 +76,19 @@ impl LoadedLocation {
     }
 }
 
+fn normalize_plugin_paths(configuration: &mut Configuration, base_dir: &Utf8Path) {
+    if let Some(plugins) = configuration.plugins.as_mut() {
+        plugins.normalize_relative_paths(base_dir);
+    }
+    if let Some(overrides) = configuration.overrides.as_mut() {
+        for pattern in overrides.0.iter_mut() {
+            if let Some(plugins) = pattern.plugins.as_mut() {
+                plugins.normalize_relative_paths(base_dir);
+            }
+        }
+    }
+}
+
 impl LoadedConfiguration {
     /// It consumes the payload, applies and extends and returns the final, extended configuration.
     pub fn try_from_payload(
@@ -111,17 +124,8 @@ impl LoadedConfiguration {
                 // still load plugins defined in other configuration files.
                 let config_dir = configuration_file_path
                     .parent()
-                    .unwrap_or(external_resolution_base_path.as_path());
-                if let Some(plugins) = partial_configuration.plugins.as_mut() {
-                    plugins.normalize_relative_paths(config_dir);
-                }
-                if let Some(overrides) = partial_configuration.overrides.as_mut() {
-                    for pattern in overrides.0.iter_mut() {
-                        if let Some(plugins) = pattern.plugins.as_mut() {
-                            plugins.normalize_relative_paths(config_dir);
-                        }
-                    }
-                }
+                    .unwrap_or(&external_resolution_base_path);
+                normalize_plugin_paths(&mut partial_configuration, config_dir);
                 partial_configuration
             }
             None => Configuration::default(),
@@ -701,7 +705,14 @@ impl ConfigurationExt for Configuration {
                     },
                     "",
                 );
-                deserialized_configurations.push(deserialized)
+                let (mut config, diagnostics) = deserialized.consume();
+                if let Some(config) = config.as_mut() {
+                    let config_dir = extend_configuration_file_path
+                        .parent()
+                        .unwrap_or(external_resolution_base_path);
+                    normalize_plugin_paths(config, config_dir);
+                }
+                deserialized_configurations.push(Deserialized::new(config, diagnostics))
             }
         }
         Ok(deserialized_configurations)
@@ -719,6 +730,7 @@ mod test {
         BiomeDiagnostic, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
     };
     use biome_fs::MemoryFileSystem;
+    use biome_plugin_loader::PluginConfiguration;
     use camino::Utf8PathBuf;
 
     #[test]
@@ -784,6 +796,33 @@ mod test {
                 ));
             }
         }
+    }
+
+    #[test]
+    fn should_normalize_plugin_paths_in_extended_configuration() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/package-a/biome-common.json"),
+            r#"{ "plugins": ["./plugins/plugin-a.grit"] }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/package-b/biome.json"),
+            r#"{ "extends": ["/package-a/biome-common.json"] }"#.to_string(),
+        );
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/package-b"));
+
+        let loaded = load_configuration(&fs, path_hint).expect("Config loading should succeed");
+        let plugins = loaded
+            .configuration
+            .plugins
+            .expect("Plugins should be present from extended configuration");
+        let first = match &plugins[0] {
+            PluginConfiguration::Path(path) => path.as_str(),
+        };
+        let normalized = std::path::PathBuf::from(first);
+        let expected = std::path::PathBuf::from("/package-a/plugins/plugin-a.grit");
+
+        assert_eq!(normalized, expected);
     }
 }
 
