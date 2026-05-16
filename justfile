@@ -60,6 +60,10 @@ gen-rules:
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
+# Generates module-replacements data from e18e
+gen-module-replacements:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
+
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
 

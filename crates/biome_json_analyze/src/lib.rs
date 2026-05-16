@@ -3,6 +3,7 @@
 mod assist;
 mod lint;
 
+mod module_replacements_data;
 mod registry;
 mod services;
 mod suppression_action;
