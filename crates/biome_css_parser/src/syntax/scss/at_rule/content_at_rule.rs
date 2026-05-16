@@ -1,4 +1,6 @@
-use super::include_at_rule::parse_scss_include_argument_list;
+use super::{
+    include_at_rule::parse_scss_include_argument_list, parse_scss_statement_at_rule_terminator,
+};
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::SCSS_CONTENT_AT_RULE;
 use biome_css_syntax::T;
@@ -25,7 +27,7 @@ pub(crate) fn parse_scss_content_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![content]);
     // The argument list is optional in the grammar, so a missing `(` is valid.
     parse_scss_include_argument_list(p).ok();
-    p.expect(T![;]);
+    parse_scss_statement_at_rule_terminator(p);
 
     Present(m.complete(p, SCSS_CONTENT_AT_RULE))
 }

@@ -3083,38 +3083,48 @@ ScssWhileAtRule =
 // ^^^^^^^^^
 // @content($value);
 // ^^^^^^^^^^^^^^^^^
+// @content }
+// ^^^^^^^^
 ScssContentAtRule =
 	'content'
 	arguments: ScssIncludeArgumentList?
-	';'
+	';'?
 
 // @return $width * 2;
 // ^^^^^^^^^^^^^^^^^^^
+// @return $width * 2 }
+// ^^^^^^^^^^^^^^^^^^
 ScssReturnAtRule =
 	'return'
 	value: ScssExpression
-	';'
+	';'?
 
 // @debug $width * 2;
 // ^^^^^^^^^^^^^^^^^^
+// @debug $width * 2 }
+// ^^^^^^^^^^^^^^^^^
 ScssDebugAtRule =
 	'debug'
 	value: ScssExpression
-	';'
+	';'?
 
 // @warn "deprecated";
 // ^^^^^^^^^^^^^^^^^^^
+// @warn "deprecated" }
+// ^^^^^^^^^^^^^^^^^^
 ScssWarnAtRule =
 	'warn'
 	value: ScssExpression
-	';'
+	';'?
 
 // @error "Invalid state.";
 // ^^^^^^^^^^^^^^^^^^^^^^^^
+// @error "Invalid state." }
+// ^^^^^^^^^^^^^^^^^^^^^^^
 ScssErrorAtRule =
 	'error'
 	value: ScssExpression
-	';'
+	';'?
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^

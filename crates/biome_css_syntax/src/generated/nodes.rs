@@ -9319,8 +9319,8 @@ impl ScssContentAtRule {
     pub fn arguments(&self) -> Option<ScssIncludeArgumentList> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssContentAtRule {
@@ -9335,7 +9335,7 @@ impl Serialize for ScssContentAtRule {
 pub struct ScssContentAtRuleFields {
     pub content_token: SyntaxResult<SyntaxToken>,
     pub arguments: Option<ScssIncludeArgumentList>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssDebugAtRule {
@@ -9364,8 +9364,8 @@ impl ScssDebugAtRule {
     pub fn value(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssDebugAtRule {
@@ -9380,7 +9380,7 @@ impl Serialize for ScssDebugAtRule {
 pub struct ScssDebugAtRuleFields {
     pub debug_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssEachAtRule {
@@ -9544,8 +9544,8 @@ impl ScssErrorAtRule {
     pub fn value(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssErrorAtRule {
@@ -9560,7 +9560,7 @@ impl Serialize for ScssErrorAtRule {
 pub struct ScssErrorAtRuleFields {
     pub error_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssExpression {
@@ -11769,8 +11769,8 @@ impl ScssReturnAtRule {
     pub fn value(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssReturnAtRule {
@@ -11785,7 +11785,7 @@ impl Serialize for ScssReturnAtRule {
 pub struct ScssReturnAtRuleFields {
     pub return_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssShowClause {
@@ -12194,8 +12194,8 @@ impl ScssWarnAtRule {
     pub fn value(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssWarnAtRule {
@@ -12210,7 +12210,7 @@ impl Serialize for ScssWarnAtRule {
 pub struct ScssWarnAtRuleFields {
     pub warn_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssWhileAtRule {
@@ -28456,7 +28456,7 @@ impl std::fmt::Debug for ScssContentAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -28511,7 +28511,7 @@ impl std::fmt::Debug for ScssDebugAtRule {
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -28713,7 +28713,7 @@ impl std::fmt::Debug for ScssErrorAtRule {
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -31422,7 +31422,7 @@ impl std::fmt::Debug for ScssReturnAtRule {
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -31931,7 +31931,7 @@ impl std::fmt::Debug for ScssWarnAtRule {
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
