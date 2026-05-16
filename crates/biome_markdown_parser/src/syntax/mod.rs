@@ -1705,7 +1705,16 @@ fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
             p.bump(MD_TEXTUAL_LITERAL);
         }
         with_virtual_line_start(p, p.cur_range().start(), |p| {
-            at_block_interrupt(p) || textual_looks_like_list_marker(p)
+            if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return true;
+            }
+            // Mirror `parse_inline_item_list`'s break on non-1 ordered
+            // sibling markers (#10374): `textual_looks_like_list_marker`
+            // only matches `1.`/`1)` for ordered, so a `2.`-style sibling
+            // still folded into `MD_TEXTUAL_LITERAL` would otherwise let
+            // the prescan walk past the paragraph boundary and leak
+            // emphasis delimiters from the next list item.
+            p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
         })
     })
 }
