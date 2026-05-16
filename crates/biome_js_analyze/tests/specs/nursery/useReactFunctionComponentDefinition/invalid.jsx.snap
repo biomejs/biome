@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.jsx
+---
+# Input
+```jsx
+const NamedArrow = () => {
+    return <div />;
+};
+
+const NamedExpression = function() {
+    return <div />;
+};
+
+export default memo(() => {
+    return <div />;
+});
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:7 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React component should be defined using a function declaration.
+  
+  > 1 │ const NamedArrow = () => {
+      │       ^^^^^^^^^^^^^^^^^^^^
+  > 2 │     return <div />;
+  > 3 │ };
+      │ ^
+    4 │ 
+    5 │ const NamedExpression = function() {
+  
+  i Consistent component styles improve readability and maintainability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:7 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React component should be defined using a function declaration.
+  
+    3 │ };
+    4 │ 
+  > 5 │ const NamedExpression = function() {
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │     return <div />;
+  > 7 │ };
+      │ ^
+    8 │ 
+    9 │ export default memo(() => {
+  
+  i Consistent component styles improve readability and maintainability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:8 lint/nursery/useReactFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This React component should be defined using a function declaration.
+  
+     7 │ };
+     8 │ 
+   > 9 │ export default memo(() => {
+       │        ^^^^^^^^^^^^^^^^^^^^
+  > 10 │     return <div />;
+  > 11 │ });
+       │ ^^^
+    12 │ 
+  
+  i Consistent component styles improve readability and maintainability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
