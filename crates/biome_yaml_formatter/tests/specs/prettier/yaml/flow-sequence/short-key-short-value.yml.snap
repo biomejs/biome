@@ -16,13 +16,21 @@ info: yaml/flow-sequence/short-key-short-value.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1 @@
+@@ -1 +1,5 @@
 -[1: a, 2: b, 3: c]
-+[1: a,2: b,3: c]
++[
++  1: a,
++  2: b,
++  3: c
++]
 ```
 
 # Output
 
 ```yml
-[1: a,2: b,3: c]
+[
+  1: a,
+  2: b,
+  3: c
+]
 ```

@@ -18,39 +18,7 @@ single: pair,
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,10 +1,8 @@
- [
--  "double
--  quoted",
--  "single
--  quoted",
--  plain
--  text,
--  [nested],
--  single: pair,
-+"double
-+ quoted", 'single
-+           quoted',
-+plain
-+ text, [ nested ],
-+single: pair,
- ]
-```
-
-# Output
-
-```yml
-[
-"double
- quoted", 'single
-           quoted',
-plain
- text, [ nested ],
-single: pair,
-]
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```

@@ -41,43 +41,34 @@ info: yaml/json/trailing-comma/json.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,24 +1,26 @@
+@@ -1,24 +1,24 @@
  [
    {
      "object-does-not-fit-within-print-width": "------",
 -    "TEST": "comma IS added here",
 +    "TEST": "comma IS added here"
    },
--  { "object-fits-within-print-width": "", "TEST": "comma NOT here" },
+   { "object-fits-within-print-width": "", "TEST": "comma NOT here" },
    {
-+    "object-fits-within-print-width": "",
-+    "TEST": "comma NOT here"
-+  },
-+  {
      "object-does-not-fit-within-print-width": "------",
 -    "TEST": "comma NOT here — but object's now a string due to '>'",
 +    "TEST": "comma NOT here — but object's now a string due to '>'"
    },
    [
--    "object-does-not-fit-within-print-width",
--    "------",
--    "TEST",
+     "object-does-not-fit-within-print-width",
+     "------",
+     "TEST",
 -    "comma IS added here",
-+    "object-does-not-fit-within-print-width", "------",
-+    "TEST", "comma IS added here"
++    "comma IS added here"
    ],
--  ["object-fits-within-print-width", "", "TEST", "comma NOT here"],
+   ["object-fits-within-print-width", "", "TEST", "comma NOT here"],
    [
--    "object-does-not-fit-within-print-width",
--    "------",
--    "TEST",
+     "object-does-not-fit-within-print-width",
+     "------",
+     "TEST",
 -    "comma NOT here — but object's now a string due to '>'",
-+    "object-fits-within-print-width", "",
-+    "TEST", "comma NOT here"
-   ],
-+  [
-+    "object-does-not-fit-within-print-width", "------",
-+    "TEST", "comma NOT here — but object's now a string due to '>'"
+-  ],
++    "comma NOT here — but object's now a string due to '>'"
 +  ]
  ]
 ```
@@ -90,25 +81,23 @@ info: yaml/json/trailing-comma/json.yml
     "object-does-not-fit-within-print-width": "------",
     "TEST": "comma IS added here"
   },
-  {
-    "object-fits-within-print-width": "",
-    "TEST": "comma NOT here"
-  },
+  { "object-fits-within-print-width": "", "TEST": "comma NOT here" },
   {
     "object-does-not-fit-within-print-width": "------",
     "TEST": "comma NOT here — but object's now a string due to '>'"
   },
   [
-    "object-does-not-fit-within-print-width", "------",
-    "TEST", "comma IS added here"
+    "object-does-not-fit-within-print-width",
+    "------",
+    "TEST",
+    "comma IS added here"
   ],
+  ["object-fits-within-print-width", "", "TEST", "comma NOT here"],
   [
-    "object-fits-within-print-width", "",
-    "TEST", "comma NOT here"
-  ],
-  [
-    "object-does-not-fit-within-print-width", "------",
-    "TEST", "comma NOT here — but object's now a string due to '>'"
+    "object-does-not-fit-within-print-width",
+    "------",
+    "TEST",
+    "comma NOT here — but object's now a string due to '>'"
   ]
 ]
 ```

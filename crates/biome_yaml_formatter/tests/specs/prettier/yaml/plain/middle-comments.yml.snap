@@ -18,18 +18,16 @@ hello
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -1,5 +1,4 @@
+@@ -1,3 +1,3 @@
 -!!str # comment 2 # comment 2 # comment 1 # comment 1 # comment 2 # comment 1 # comment 1
--
 +!!str # comment 2 # comment 1 # comment 1
- 
  # comment 2
  hello
 
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,15 +1,10 @@
+@@ -1,10 +1,6 @@
  [
 -  verbatim([
 -    "!!str",
@@ -42,10 +40,5 @@ IR differences:
    expand_parent,
    " # comment 2",
    hard_line_break,
-   "
--
- # comment 2
- hello
- ",
 
 ```

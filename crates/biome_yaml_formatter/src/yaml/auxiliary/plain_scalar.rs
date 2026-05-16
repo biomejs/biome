@@ -9,7 +9,9 @@ impl FormatNodeRule<YamlPlainScalar> for FormatYamlPlainScalar {
         let YamlPlainScalarFields { value_token } = node.as_fields();
         let value_token = value_token?;
         let value_text = value_token.text();
-        let trimmed_value = value_text.trim_end_matches([' ', '\t']);
+        let trimmed_value = value_text
+            .trim_start_matches([' ', '\t', '\n', '\r'])
+            .trim_end_matches([' ', '\t']);
 
         FormatYamlSyntaxToken.format_replaced(
             &value_token,

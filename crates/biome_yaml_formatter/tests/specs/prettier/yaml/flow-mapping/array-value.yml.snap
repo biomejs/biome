@@ -11,52 +11,67 @@ info: yaml/flow-mapping/array-value.yml
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -1,8 +1,5 @@
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,17 @@
  {
--  
-   a: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
--  
-   b: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
--  
-   c: [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]
+-  a:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
+-  b:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
+-  c:
+-    [
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-      longlonglonglonglonglonglonglonglonglonglong,
+-    ],
++  a: [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ],
++  b: [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ],
++  c: [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ]
  }
+```
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -1,24 +1,21 @@
- [
-   "{",
--  group(expand: propagated, [
-+  group([
-     indent([
-       soft_line_break_or_space,
--      "
--  a: ",
-+      "a: ",
-       verbatim([
-         "[longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]"
-       ]),
-       ",",
-       soft_line_break_or_space,
--      "
--  b: ",
-+      "b: ",
-       verbatim([
-         "[longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]"
-       ]),
-       ",",
-       soft_line_break_or_space,
--      "
--  c: ",
-+      "c: ",
-       verbatim([
-         "[longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]"
-       ])
+# Output
 
+```yml
+{
+  a: [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ],
+  b: [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ],
+  c: [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ]
+}
 ```

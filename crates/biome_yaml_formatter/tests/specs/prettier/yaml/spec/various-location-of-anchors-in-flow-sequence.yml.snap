@@ -24,10 +24,10 @@ info: yaml/spec/various-location-of-anchors-in-flow-sequence.yml
 @@ -1 +1,6 @@
 -&flowseq [a: b, &c c: d, { &e e: f }, &g { g: h }]
 +&flowseq [
-+ a: b,
-+ &c c: d,
-+ { &e e: f },
-+ &g { g: h }
++  a: b,
++  &c c: d,
++  { &e e: f },
++  &g { g: h }
 +]
 ```
 
@@ -35,9 +35,9 @@ info: yaml/spec/various-location-of-anchors-in-flow-sequence.yml
 
 ```yml
 &flowseq [
- a: b,
- &c c: d,
- { &e e: f },
- &g { g: h }
+  a: b,
+  &c c: d,
+  { &e e: f },
+  &g { g: h }
 ]
 ```

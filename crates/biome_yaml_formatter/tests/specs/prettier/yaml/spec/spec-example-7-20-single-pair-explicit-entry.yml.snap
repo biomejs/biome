@@ -24,8 +24,8 @@ info: yaml/spec/spec-example-7-20-single-pair-explicit-entry.yml
 -    bar
 -  : baz]
 +[
-+? foo
-+ bar : baz
++  ? foo
++ bar: baz
 +]
 ```
 
@@ -33,7 +33,7 @@ info: yaml/spec/spec-example-7-20-single-pair-explicit-entry.yml
 
 ```yml
 [
-? foo
- bar : baz
+  ? foo
+ bar: baz
 ]
 ```

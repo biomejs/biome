@@ -15,41 +15,27 @@ c: 123
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -1,10 +1,7 @@
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,5 @@
  {
-   
--  
- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,
--  
+   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,
    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,
--  
-   
- 
- c: 123
+-
+-  c: 123,
++  c: 123
+ }
+```
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -4,14 +4,11 @@
-     indent([
-       soft_line_break_or_space,
-       "
--  
- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,",
-       soft_line_break_or_space,
--      "
--  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,",
-+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,",
-       soft_line_break_or_space,
-       "
--  
- 
- c: 123
- "
+# Output
 
+```yml
+{
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123,
+  c: 123
+}
 ```

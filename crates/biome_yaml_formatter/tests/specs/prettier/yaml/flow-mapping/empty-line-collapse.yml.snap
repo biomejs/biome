@@ -13,39 +13,18 @@ bbb }
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -1,7 +1,5 @@
- {
--  
-   aaa,
--  
-   
- 
- bbb
+# Prettier differences
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -3,14 +3,11 @@
-   group(expand: propagated, [
-     indent([
-       soft_line_break_or_space,
--      "
--  aaa,",
-+      "aaa,",
-       soft_line_break_or_space,
-       "
--  
- 
--bbb
--"
-+bbb"
-     ]),
-     soft_line_break_or_space,
-     soft_line_break_or_space
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-{ aaa, bbb }
++{ ? aaa, ? bbb }
+```
 
+# Output
+
+```yml
+{ ? aaa, ? bbb }
 ```

@@ -16,34 +16,56 @@ info: yaml/flow-sequence/array-key.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,17 +1 @@
--[
--  ? [
+@@ -1,17 +1,17 @@
+ [
+   ? [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
--  ? [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ],
+   ? [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
--  ? [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ],
+   ? [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
--]
-+[? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]]
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong
++  ]
+ ]
 ```
 
 # Output
 
 ```yml
-[? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]]
-```
-
-# Lines exceeding max width of 80 characters
-```
-    1: [? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],? [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong]]
+[
+  ? [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ],
+  ? [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ],
+  ? [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong
+  ]
+]
 ```

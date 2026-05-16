@@ -21,7 +21,7 @@ foo: bar
 @@ -1 +1,3 @@
 -[foo: bar]
 +[
-+foo: bar
++  foo: bar
 +]
 ```
 
@@ -29,6 +29,6 @@ foo: bar
 
 ```yml
 [
-foo: bar
+  foo: bar
 ]
 ```
