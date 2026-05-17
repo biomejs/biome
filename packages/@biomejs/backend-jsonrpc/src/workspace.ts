@@ -9956,7 +9956,7 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export interface FileExitsParams {
+export interface FileExistsParams {
 	filePath: BiomePath;
 }
 export interface PathIsIgnoredParams {
@@ -10350,7 +10350,7 @@ export interface Workspace {
 	openFile(params: OpenFileParams): Promise<OpenFileResult>;
 	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<null>;
-	fileExists(params: FileExitsParams): Promise<boolean>;
+	fileExists(params: FileExistsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
 	updateModuleGraph(params: UpdateModuleGraphParams): Promise<null>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
