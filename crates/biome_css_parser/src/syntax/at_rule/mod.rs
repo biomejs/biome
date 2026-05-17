@@ -151,6 +151,10 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![layer] => parse_layer_at_rule(p),
         T![scope] => parse_scope_at_rule(p),
         T![supports] => parse_supports_at_rule(p),
+        T![import] if CssSyntaxFeatures::Scss.is_supported(p) && p.cur_text() != "import" => {
+            // `@IMPORT Keep;` is a plain CSS at-rule in SCSS, not Sass `@import`.
+            parse_unknown_at_rule(p)
+        }
         T![import] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_import_at_rule)
             .or_else(|| parse_import_at_rule(p)),

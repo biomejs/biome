@@ -443,28 +443,3 @@ TABLE {
   }
 }
 ```
-
-# Errors
-```
-case.scss:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a string but instead found 'Keep'.
-  
-    5 │ // - Other things should mostly be lowercase.
-    6 │ 
-  > 7 │ @IMPORT Keep;
-      │         ^^^^
-    8 │ 
-    9 │ HTML#KeepId.KeepClass,
-  
-  i Expected a string here.
-  
-    5 │ // - Other things should mostly be lowercase.
-    6 │ 
-  > 7 │ @IMPORT Keep;
-      │         ^^^^
-    8 │ 
-    9 │ HTML#KeepId.KeepClass,
-  
-
-```

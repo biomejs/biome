@@ -108,6 +108,7 @@ pub(crate) mod syntax_single_component;
 pub(crate) mod syntax_type_name;
 pub(crate) mod ts_type;
 pub(crate) mod unicode_value;
+pub(crate) mod unknown_at_rule_name;
 pub(crate) mod url_modifier;
 pub(crate) mod url_value;
 pub(crate) mod value;

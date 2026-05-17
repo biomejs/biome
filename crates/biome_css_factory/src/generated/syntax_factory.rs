@@ -5970,7 +5970,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssUnknownAtRuleName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6048,7 +6048,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssUnknownAtRuleName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
