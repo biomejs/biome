@@ -51,7 +51,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -7,20 +7,14 @@
+@@ -7,13 +7,7 @@
      "Text",
      hard_line_break,
      "- ",
@@ -66,25 +66,5 @@ IR differences:
      hard_line_break
    ]),
    hard_line_break,
-   "- ",
-   align(2, ["Text", empty_line, "# foo"]),
--  hard_line_break,
--  "- ",
-+  "
-+- ",
-   align(2, [
-     "Text",
-     empty_line,
-@@ -31,8 +25,8 @@
-     hard_line_break,
-     "```"
-   ]),
--  hard_line_break,
--  "- ",
-+  "
-+- ",
-   align(2, ["Text", empty_line, "`foo`"]),
-   hard_line_break,
-   hard_line_break
 
 ```

@@ -220,16 +220,15 @@ This paragraph has some `code` in it.
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -88,9 +88,13 @@
+@@ -89,10 +89,12 @@
+ - Green
+ - Blue
+ 
++
  - Red
  - Green
  - Blue
-+
-+
- - Red
- - Green
- - Blue
-+
+ 
 +
  - Red
  - Green
@@ -251,25 +250,31 @@ IR differences:
    empty_line,
    "    Header 1
      ========
-@@ -104,7 +108,9 @@
+@@ -104,8 +108,10 @@
    hard_line_break,
    "- ",
    align(2, ["Blue"]),
+-  empty_line,
+-  "- ",
 +  hard_line_break,
-   "
++  "
 +
- - ",
++- ",
    align(2, ["Red"]),
    hard_line_break,
-@@ -113,7 +119,9 @@
+   "- ",
+@@ -113,8 +119,10 @@
    hard_line_break,
    "- ",
    align(2, ["Blue"]),
+-  empty_line,
+-  "- ",
 +  hard_line_break,
-   "
++  "
 +
- - ",
++- ",
    align(2, ["Red"]),
    hard_line_break,
+   "- ",
 
 ```
