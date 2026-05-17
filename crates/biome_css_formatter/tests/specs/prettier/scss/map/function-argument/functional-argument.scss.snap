@@ -100,19 +100,7 @@ font-weight:
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,7 +6,10 @@
-     "xs-only":
-       "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
-     "sm-only":
--      "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
-+      "only screen and (min-width: #{map-get(
-+        $grid-breakpoints,
-+        "sm"
-+      )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
-   ),
-   $display-breakpoints
- );
-@@ -31,7 +34,7 @@
+@@ -31,7 +31,7 @@
    "bold": 700,
  );
  @each $name, $boldness in $icons {
@@ -121,7 +109,7 @@ font-weight:
      color: red;
      font-weight: "#{$boldness}";
    }
-@@ -43,7 +46,7 @@
+@@ -43,7 +43,7 @@
    "bold": 700,
  );
  @each $name, $boldness in $icons {
@@ -143,10 +131,7 @@ $display-breakpoints: map-deep-merge(
     "xs-only":
       "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
     "sm-only":
-      "only screen and (min-width: #{map-get(
-        $grid-breakpoints,
-        "sm"
-      )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
+      "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
   ),
   $display-breakpoints
 );
@@ -188,4 +173,9 @@ $font-weights: (
     font-weight: "#{$boldness}";
   }
 }
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9:       "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
 ```

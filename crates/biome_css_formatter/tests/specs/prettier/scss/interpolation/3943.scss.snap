@@ -143,18 +143,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
    content: "I have #{8 + 2} books on SASS!";
    border: #{$var} #{$var} #{$var};
    filter: #{$var}#{$var}#{$var};
-@@ -45,7 +45,9 @@
- @function get-font-family($family) {
-   @return $family;
- }
--@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
-+@import url("//fonts.googleapis.com/css?family=#{get-font-family(
-+    "Roboto"
-+  )}:100,300,500,700,900&display=swap");
- @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
- 
- @keyframes loader {
-@@ -66,10 +68,7 @@
+@@ -66,10 +66,7 @@
    }
  }
  
@@ -218,9 +207,7 @@ $foundation-dir: "foundation";
 @function get-font-family($family) {
   @return $family;
 }
-@import url("//fonts.googleapis.com/css?family=#{get-font-family(
-    "Roboto"
-  )}:100,300,500,700,900&display=swap");
+@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
 @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
 
 @keyframes loader {
@@ -253,5 +240,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 
 # Lines exceeding max width of 80 characters
 ```
-   51: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+   48: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+   49: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
 ```
