@@ -21,7 +21,7 @@ use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumen
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
-    FileExitsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
+    FileExistsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
@@ -1378,7 +1378,7 @@ impl Workspace for WorkspaceServer {
         Ok(OpenFileResult { diagnostics })
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         Ok(self
             .documents
             .pin()
