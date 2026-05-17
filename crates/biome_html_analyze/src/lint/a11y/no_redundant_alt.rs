@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noRedundantAlt",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
+        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -83,6 +83,7 @@ impl Rule for NoRedundantAlt {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
+            AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }
 

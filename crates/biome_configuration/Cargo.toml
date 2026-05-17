@@ -40,6 +40,7 @@ biome_plugin_loader        = { workspace = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
+biome_yaml_syntax          = { workspace = true }
 bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
 regex                      = { workspace = true }
@@ -72,6 +73,7 @@ schema     = [
   "biome_json_syntax/schema",
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
+  "biome_yaml_syntax/schema",
   "dep:schemars",
 ]
 test-utils = []

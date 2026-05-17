@@ -4,17 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"100. Triple-digit marker: required continuation indent is 5.
-     aligned at 5 spaces
-     one-extra-space continuation gets stripped
-       two-extra-space preserved
-
-     loose paragraph aligned at 5
-
-     loose paragraph with single excess
-
-        loose paragraph with multi excess
-"#;
+    let source = "-   With leading text\n- With leading text\n";
     let parse = parse_markdown(source);
 
     // Print CST

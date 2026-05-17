@@ -1822,20 +1822,14 @@ CssRoot {
             colon_token: COLON@1645..1647 ":" [] [Whitespace(" ")],
             value: ScssExpression {
                 items: ScssExpressionItemList [
-                    ScssBinaryExpression {
-                        left: ScssBinaryExpression {
-                            left: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@1647..1650 "-1" [] [Whitespace(" ")],
-                            },
-                            operator: MINUS@1650..1651 "-" [] [],
-                            right: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@1651..1653 "2" [] [Whitespace(" ")],
-                            },
-                        },
-                        operator: MINUS@1653..1654 "-" [] [],
-                        right: CssNumber {
-                            value_token: CSS_NUMBER_LITERAL@1654..1655 "3" [] [],
-                        },
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@1647..1650 "-1" [] [Whitespace(" ")],
+                    },
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@1650..1653 "-2" [] [Whitespace(" ")],
+                    },
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@1653..1655 "-3" [] [],
                     },
                 ],
             },
@@ -3911,16 +3905,12 @@ CssRoot {
       1: COLON@1645..1647 ":" [] [Whitespace(" ")]
       2: SCSS_EXPRESSION@1647..1655
         0: SCSS_EXPRESSION_ITEM_LIST@1647..1655
-          0: SCSS_BINARY_EXPRESSION@1647..1655
-            0: SCSS_BINARY_EXPRESSION@1647..1653
-              0: CSS_NUMBER@1647..1650
-                0: CSS_NUMBER_LITERAL@1647..1650 "-1" [] [Whitespace(" ")]
-              1: MINUS@1650..1651 "-" [] []
-              2: CSS_NUMBER@1651..1653
-                0: CSS_NUMBER_LITERAL@1651..1653 "2" [] [Whitespace(" ")]
-            1: MINUS@1653..1654 "-" [] []
-            2: CSS_NUMBER@1654..1655
-              0: CSS_NUMBER_LITERAL@1654..1655 "3" [] []
+          0: CSS_NUMBER@1647..1650
+            0: CSS_NUMBER_LITERAL@1647..1650 "-1" [] [Whitespace(" ")]
+          1: CSS_NUMBER@1650..1653
+            0: CSS_NUMBER_LITERAL@1650..1653 "-2" [] [Whitespace(" ")]
+          2: CSS_NUMBER@1653..1655
+            0: CSS_NUMBER_LITERAL@1653..1655 "-3" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1655..1655
       4: SEMICOLON@1655..1656 ";" [] []
     27: SCSS_VARIABLE_DECLARATION@1656..1704

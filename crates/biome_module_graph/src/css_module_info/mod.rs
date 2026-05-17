@@ -3,9 +3,9 @@ mod visitor;
 
 use biome_css_syntax::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TokenText};
+use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexMap;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
@@ -23,6 +23,13 @@ pub(crate) use visitor::CssModuleVisitor;
 pub struct CssClassDefinition {
     /// The name of the class.
     pub name: TokenText,
+
+    /// The text range of the class name token (snippet-local for embedded styles).
+    pub range: TextRange,
+
+    /// Content offset of the embedded snippet within the parent document.
+    /// `None` for standalone CSS files, `Some(offset)` for inline `<style>` blocks.
+    pub content_offset: Option<TextSize>,
 
     /// How this CSS class should be applied.
     pub applicability: EmbeddingStyleApplicability,
@@ -106,7 +113,7 @@ impl Deref for CssModuleInfo {
 }
 
 impl CssModuleInfo {
-    pub(crate) fn new(imports: CssImports, classes: IndexSet<TokenText>) -> Self {
+    pub(crate) fn new(imports: CssImports, classes: IndexMap<TextRange, TokenText>) -> Self {
         let info = CssModuleInfoInner { imports, classes };
         Self(Arc::new(info))
     }
@@ -122,7 +129,7 @@ impl CssModuleInfo {
             classes: self
                 .0
                 .classes
-                .iter()
+                .values()
                 .map(|token| token.text().to_string())
                 .collect(),
         }
@@ -139,14 +146,15 @@ pub struct CssModuleInfoInner {
     /// (for instance, if the path is outside the project's scope).
     pub imports: CssImports,
 
-    /// Set of all CSS class names defined in this file (via class selectors).
+    /// Map of all CSS class names to their selector ranges in this file.
     ///
     /// Collected by walking all `CssClassSelector` nodes in the CST, including
     /// those inside nested rules and at-rules. Does not include classes inside
     /// `:global(...)` pseudo-class selectors.
     ///
-    /// Each `TokenText` represents a single class name (e.g., "header" from `.header`).
-    pub classes: IndexSet<TokenText>,
+    /// Keys are class names (e.g., "header" from `.header`), values are the
+    /// `TextRange` of the class selector in the source file.
+    pub classes: IndexMap<TextRange, TokenText>,
 }
 
 #[derive(Debug, Default, Clone)]

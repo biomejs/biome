@@ -1,4 +1,4 @@
-use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
@@ -70,6 +70,7 @@ declare_lint_rule! {
         version: "next",
         name: "noNoninteractiveElementInteractions",
         language: "html",
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions").inspired()],
         recommended: false,
     }
 }

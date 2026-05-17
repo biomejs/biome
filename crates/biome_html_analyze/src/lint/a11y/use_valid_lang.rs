@@ -38,7 +38,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useValidLang",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("lang").same()],
+        sources: &[RuleSource::EslintJsxA11y("lang").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -132,14 +132,13 @@ impl Rule for UseValidLang {
                 }
             }
 
-            (Some(language), None, None) => {
-                if !is_valid_language(language) {
+            (Some(language), None, None)
+                if !is_valid_language(language) => {
                     return Some(UseValidLangState {
                         attribute_range: attribute_value.range(),
                         invalid_kind: InvalidKind::Language,
                     });
                 }
-            }
             _ => {}
         }
 

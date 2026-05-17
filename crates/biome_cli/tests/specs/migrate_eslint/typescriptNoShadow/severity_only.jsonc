@@ -1,0 +1,8 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/no-shadow": "error"
+    }
+  }
+}

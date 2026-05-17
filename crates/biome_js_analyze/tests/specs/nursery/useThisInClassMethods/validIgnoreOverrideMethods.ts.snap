@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIgnoreOverrideMethods.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+abstract class Base {
+    abstract method(): void;
+}
+
+class Derived extends Base {
+    override method() {}
+    override property = () => {};
+}
+
+```

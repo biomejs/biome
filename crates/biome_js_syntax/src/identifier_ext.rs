@@ -75,8 +75,7 @@ impl JsLiteralExportName {
     /// ```
     pub fn is_default(&self) -> bool {
         self.inner_string_text()
-            .map(|x| x.text() == "default")
-            .unwrap_or(false)
+            .is_ok_and(|x| x.text() == "default")
     }
 }
 

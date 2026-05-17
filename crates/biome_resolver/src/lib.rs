@@ -633,8 +633,8 @@ fn resolve_dependency(
 /// Resolves a dependency by its `package_path` and a `subpath`, by checking
 /// whether `package_path` exists, and resolving `subpath` inside it if it does.
 ///
-/// If `package.json` exists inside `package_path`, its `exports`, `main`,
-/// and `types` fields can be used for further resolution. Without a
+/// If `package.json` exists inside `package_path`, its `exports`, `types`,
+/// and `main` fields can be used for further resolution. Without a
 /// `package.json` file, only the `subpath` can be used for resolution.
 fn resolve_package_path(
     package_path: &Utf8Path,
@@ -656,12 +656,25 @@ fn resolve_package_path(
         }
 
         if subpath.is_empty() {
-            let field = if options.resolve_types {
-                &package_json.types
-            } else {
-                &package_json.main
-            };
-            if let Some(target) = field {
+            if options.resolve_types {
+                if let Some(target) = &package_json.types {
+                    let options = options.without_extensions_or_manifests();
+                    return resolve_relative_path(target, &package_path, fs, &options);
+                }
+
+                if let Some(target) = &package_json.main {
+                    let options = options.without_extensions_or_manifests();
+                    // In type-resolution mode, `main` is only useful if it
+                    // points at TypeScript source or lets us discover a
+                    // declaration file. Avoid returning untyped runtime
+                    // JavaScript when no type entrypoint exists.
+                    match resolve_relative_path(target, &package_path, fs, &options) {
+                        Ok(path) if is_type_resolution_path(&path) => return Ok(path),
+                        Ok(_) | Err(ResolveError::NotFound) => { /* fall through */ }
+                        Err(error) => return Err(error),
+                    }
+                }
+            } else if let Some(target) = &package_json.main {
                 let options = options.without_extensions_or_manifests();
                 return resolve_relative_path(target, &package_path, fs, &options);
             }
@@ -716,6 +729,12 @@ fn definition_extension_for_js_extension(extension: &str) -> Option<&'static str
         "mjs" => Some("d.mts"),
         _ => None,
     }
+}
+
+fn is_type_resolution_path(path: &Utf8Path) -> bool {
+    // `Utf8Path::extension()` returns the substring after the last dot, so
+    // declaration files such as `index.d.ts` match through `ts`.
+    matches!(path.extension(), Some("ts" | "tsx" | "cts" | "mts"))
 }
 
 pub fn is_relative_specifier(specifier: &str) -> bool {
@@ -864,7 +883,10 @@ pub struct ResolveOptions<'a> {
     /// TypeScript-like type resolution:
     /// - If no `"types"` export is found in a package, the `package.json`'s
     ///   `types` field  is used as a fallback.
-    /// - The `package.json`'s `main` field will be ignored.
+    /// - If the `package.json`'s `types` field is not configured, the `main`
+    ///   field is used as a fallback only when it resolves to TypeScript source
+    ///   or a declaration file. Untyped runtime JavaScript is intentionally
+    ///   rejected.
     /// - Directories configured in [`Self::type_roots`] will be checked before
     ///   looking for dependencies in `node_modules/`.
     /// - For any import to a **JavaScript** file where an explicit extension is

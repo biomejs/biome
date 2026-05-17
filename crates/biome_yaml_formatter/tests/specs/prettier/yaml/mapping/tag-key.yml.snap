@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/mapping/tag-key.yml
+---
+
+# Input
+
+```yml
+? !!tag key
+: value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,2 @@
+-!!tag key: value
++? !!tag key
++: value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? !!tag key
+: value```

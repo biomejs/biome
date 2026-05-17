@@ -165,11 +165,10 @@ impl Rule for NoLeakedRender {
 
                     if let Some(variable) = find_variable(model, &name) {
                         match variable {
-                            AnyJsExpression::AnyJsLiteralExpression(expr) => {
-                                if is_unsafe_literal(&expr)? {
+                            AnyJsExpression::AnyJsLiteralExpression(expr)
+                                if is_unsafe_literal(&expr)? => {
                                     return Some(());
                                 }
-                            }
                             AnyJsExpression::JsUnaryExpression(_)
                             | AnyJsExpression::JsBinaryExpression(_)
                             | AnyJsExpression::JsCallExpression(_) => return None,

@@ -1,7 +1,7 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
-    ProcessFixAll, ProcessLint, SearchCapabilities,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults,
+    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -310,6 +310,10 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -461,6 +465,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -505,6 +510,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         working_directory,
         compute_actions,
         snippet_services: _,
+        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -534,6 +540,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout)
+        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {

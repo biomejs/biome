@@ -91,7 +91,10 @@ pub(crate) fn void_element_should_not_have_closing_tag(
     _p: &HtmlParser,
     range: TextRange,
 ) -> ParseDiagnostic {
-    ParseDiagnostic::new("Void elements should not have a closing tag.", range)
+    ParseDiagnostic::new(
+        "Void elements should not have a closing tag. Remove the closing tag.",
+        range,
+    )
 }
 
 pub(crate) fn closing_tag_should_not_have_attributes(
@@ -110,9 +113,7 @@ pub(crate) fn expected_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic
 }
 
 pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    // TODO: uncomment when the parser option is implemented
-    // p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
-    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file? HTML-as-Vue is not yet supported.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".vue"</Emphasis>" file extension."))
+    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it, change the extension to "<Emphasis>".vue"</Emphasis>", or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
 
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
@@ -135,4 +136,51 @@ pub(crate) fn expected_valid_directive(p: &HtmlParser, range: TextRange) -> Pars
         range,
     )
     .into_diagnostic(p)
+}
+
+pub(crate) fn expected_vue_v_for_value(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a quoted v-for value.", range)
+        .with_hint(markup!("Add a quoted value like "<Emphasis>"\"item in items\""</Emphasis>"."))
+}
+
+pub(crate) fn expected_vue_v_for_operator(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected `in` or `of` in the v-for directive.", range)
+        .with_hint(markup!("Use "<Emphasis>"in"</Emphasis>" or "<Emphasis>"of"</Emphasis>" between the binding and iterable expression."))
+}
+
+pub(crate) fn expected_vue_v_for_expression(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected an iterable expression after the v-for operator.",
+        range,
+    )
+    .with_hint(markup!("Add the collection or expression to iterate over."))
+}
+
+pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("v-for binding", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn expected_vue_v_for_binding_separator(
+    p: &HtmlParser,
+    range: TextRange,
+    end: &str,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!(
+            "Expected `,` or `{end}` in the v-for destructuring pattern, but found `{}`.",
+            p.cur_text()
+        ),
+        range,
+    )
+    .with_alternatives("Expected one of:", &[",", end])
+}
+
+pub(crate) fn expected_vue_v_for_tuple_binding_end(
+    p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected `)` to close the v-for tuple binding before the iterable expression.",
+        range,
+    )
 }

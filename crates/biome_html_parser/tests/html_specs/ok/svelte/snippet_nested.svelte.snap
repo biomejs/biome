@@ -28,9 +28,9 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..17 " outer()" [] [],
+                    html_literal_token: HTML_LITERAL@10..17 "outer()" [] [],
                 },
                 r_curly_token: R_CURLY@17..18 "}" [] [],
                 children: HtmlElementList [
@@ -47,9 +47,9 @@ HtmlRoot {
                             SvelteSnippetBlock {
                                 opening_block: SvelteSnippetOpeningBlock {
                                     sv_curly_hash_token: SV_CURLY_HASH@26..33 "{#" [Newline("\n"), Whitespace("    ")] [],
-                                    snippet_token: SNIPPET_KW@33..40 "snippet" [] [],
+                                    snippet_token: SNIPPET_KW@33..41 "snippet" [] [Whitespace(" ")],
                                     expression: HtmlTextExpression {
-                                        html_literal_token: HTML_LITERAL@40..48 " inner()" [] [],
+                                        html_literal_token: HTML_LITERAL@41..48 "inner()" [] [],
                                     },
                                     r_curly_token: R_CURLY@48..49 "}" [] [],
                                     children: HtmlElementList [
@@ -118,9 +118,9 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..111
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..100
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..17
-          0: HTML_LITERAL@9..17 " outer()" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@10..17
+          0: HTML_LITERAL@10..17 "outer()" [] []
         3: R_CURLY@17..18 "}" [] []
         4: HTML_ELEMENT_LIST@18..100
           0: HTML_ELEMENT@18..100
@@ -134,9 +134,9 @@ HtmlRoot {
               0: SVELTE_SNIPPET_BLOCK@26..91
                 0: SVELTE_SNIPPET_OPENING_BLOCK@26..76
                   0: SV_CURLY_HASH@26..33 "{#" [Newline("\n"), Whitespace("    ")] []
-                  1: SNIPPET_KW@33..40 "snippet" [] []
-                  2: HTML_TEXT_EXPRESSION@40..48
-                    0: HTML_LITERAL@40..48 " inner()" [] []
+                  1: SNIPPET_KW@33..41 "snippet" [] [Whitespace(" ")]
+                  2: HTML_TEXT_EXPRESSION@41..48
+                    0: HTML_LITERAL@41..48 "inner()" [] []
                   3: R_CURLY@48..49 "}" [] []
                   4: HTML_ELEMENT_LIST@49..76
                     0: HTML_ELEMENT@49..76

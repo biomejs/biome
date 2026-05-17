@@ -41,7 +41,7 @@ declare_lint_rule! {
         version: "next",
         name: "useValidAriaProps",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("aria-props").same()],
+        sources: &[RuleSource::EslintJsxA11y("aria-props").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

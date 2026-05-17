@@ -50,7 +50,7 @@ declare_lint_rule! {
         version: "next",
         name: "noNoninteractiveTabindex",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -143,4 +143,3 @@ impl Rule for NoNoninteractiveTabindex {
 fn is_negative_tabindex(number_like_string: &str) -> bool {
     matches!(number_like_string.trim().parse::<i64>(), Ok(n) if n < 0)
 }
-

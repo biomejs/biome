@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "next",
         name: "noRedundantRoles",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same(), RuleSource::HtmlEslint("no-redundant-role").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").inspired(), RuleSource::HtmlEslint("no-redundant-role").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

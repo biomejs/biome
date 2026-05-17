@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/at-rule/include-keyword-separator-comments.scss
+---
+
+# Input
+
+```scss
+@include nested-keyword-separator-line-comments(
+$arg:(
+a:1px // nested keyword map separator line
+, b:2px
+)
+);
+
+@include closing-block-comments(
+$list:(
+1px,
+2px
+)/* keyword list close */,
+$call:fn(
+1px,
+2px
+)/* keyword call close */
+);
+
+```
+
+
+# Formatted
+
+```scss
+@include nested-keyword-separator-line-comments(
+	$arg: (
+		a: 1px, // nested keyword map separator line
+		b: 2px,
+	)
+);
+
+@include closing-block-comments(
+	$list: (
+		1px,
+		2px,
+	)
+	/* keyword list close */,
+	$call: fn(1px, 2px) /* keyword call close */
+);
+
+```

@@ -34,7 +34,7 @@ pub enum Tag {
     StartGroup(Group),
     EndGroup,
 
-    /// Allows to specify content that gets printed depending on whatever the enclosing group
+    /// Allows you to specify content that gets printed depending on whatever the enclosing group
     /// is printed on a single line or multiple lines. See [crate::builders::if_group_breaks] for examples.
     StartConditionalContent(Condition),
     EndConditionalContent,

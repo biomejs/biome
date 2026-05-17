@@ -10,10 +10,10 @@ use std::sync::Arc;
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-.test{
-  colors: fn((primary: red));
-
-}
+$map: (
+  ('key': 'value'): 'hello world',
+  ('k': 'v', 'k2': 'v2'): 'hello world',
+);
 
 "#;
     let fs = MemoryFileSystem::default();
@@ -38,6 +38,7 @@ fn quick_test() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -67,6 +68,7 @@ fn quick_test() {
             content: printed.as_code().to_string(),
             version: 1,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

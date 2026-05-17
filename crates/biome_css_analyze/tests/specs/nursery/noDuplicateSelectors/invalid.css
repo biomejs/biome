@@ -82,3 +82,9 @@ h3 {
 #main {
   .content {}
 }
+
+/* 16. Duplicate inside the same @scope block */
+@scope (.theme-dark) {
+  .card {}
+  .card {}
+}

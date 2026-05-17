@@ -1,5 +1,8 @@
 use crate::embed::types::{EmbedBlockKind, SvelteBlockKind};
-use biome_html_syntax::{HtmlFileSource, HtmlVariant};
+use biome_html_syntax::{
+    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlFileSource,
+    HtmlRoot, HtmlVariant, VueVForIdentifierBinding, VueVForValue,
+};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
@@ -13,13 +16,37 @@ use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedExportedBindings {
-    pub bindings: Vec<Vec<(TextRange, TokenText)>>,
+    pub bindings: Vec<Vec<EmbeddedBinding>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EmbeddedBinding {
+    /// The range of the binding
+    pub(crate) range: TextRange,
+    /// The text of the binding
+    pub(crate) text: TokenText,
+    /// Optionally, the source of the binding. It represents the path of the import/dynamic import.
+    pub(crate) source: Option<TokenText>,
+}
+
+impl EmbeddedBinding {
+    pub(crate) fn range(&self) -> &TextRange {
+        &self.range
+    }
+
+    pub(crate) fn token_text(&self) -> &TokenText {
+        &self.text
+    }
+
+    pub(crate) fn source(&self) -> Option<&TokenText> {
+        self.source.as_ref()
+    }
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedBuilder {
     /// Bindings tracked inside JavaScript snippets.
-    js_bindings: Vec<(TextRange, TokenText)>,
+    js_bindings: Vec<(TextRange, TokenText, Option<TokenText>)>,
 }
 
 impl EmbeddedExportedBindings {
@@ -28,7 +55,51 @@ impl EmbeddedExportedBindings {
     }
 
     pub(crate) fn finish(&mut self, builder: EmbeddedBuilder) {
-        self.bindings.push(builder.js_bindings);
+        self.bindings.push(
+            builder
+                .js_bindings
+                .into_iter()
+                .map(|(range, text, source)| EmbeddedBinding {
+                    range,
+                    text,
+                    source,
+                })
+                .collect::<Vec<_>>(),
+        );
+    }
+
+    pub(crate) fn get_binding_by_name(&self, binding_name: &str) -> Option<&EmbeddedBinding> {
+        for bindings in self.bindings.iter() {
+            for binding in bindings {
+                if binding.token_text().text() == binding_name {
+                    return Some(binding);
+                }
+            }
+        }
+        None
+    }
+
+    pub(crate) fn get_binding_with_source(&self, binding_name: &str) -> Option<&EmbeddedBinding> {
+        for bindings in self.bindings.iter() {
+            for binding in bindings {
+                if binding.token_text().text() == binding_name && binding.source().is_some() {
+                    return Some(binding);
+                }
+            }
+        }
+        None
+    }
+
+    pub(crate) fn bindings_without_source(self) -> Vec<Vec<(TextRange, TokenText)>> {
+        self.bindings
+            .into_iter()
+            .map(|bindings| {
+                bindings
+                    .into_iter()
+                    .map(|b| (b.range, b.text))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
     }
 }
 impl EmbeddedBuilder {
@@ -38,8 +109,102 @@ impl EmbeddedBuilder {
         }
     }
 
+    /// Register a binding that doesn't have a source. It means it's defined in the same file.
     pub(crate) fn register_binding(&mut self, range: TextRange, text: TokenText) {
-        self.js_bindings.push((range, text));
+        self.js_bindings.push((range, text, None));
+    }
+
+    /// Register a binding with a source. It's usually imported via import clause.
+    pub(crate) fn register_binding_with_source(
+        &mut self,
+        range: TextRange,
+        text: TokenText,
+        source: TokenText,
+    ) {
+        self.js_bindings.push((range, text, Some(source)));
+    }
+
+    /// To call when visiting an HTML root where bindings may be declared in the template itself.
+    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot) {
+        for node in root.syntax().descendants() {
+            if let Some(value) = VueVForValue::cast_ref(&node) {
+                self.visit_vue_v_for_value(&value);
+            }
+        }
+    }
+
+    fn visit_vue_v_for_value(&mut self, value: &VueVForValue) -> Option<()> {
+        let binding = value.binding().ok()?;
+        self.visit_vue_v_for_binding(&binding)
+    }
+
+    fn visit_vue_v_for_binding(&mut self, binding: &AnyVueVForBinding) -> Option<()> {
+        match binding {
+            AnyVueVForBinding::VueVForIdentifierBinding(binding) => {
+                self.register_vue_v_for_identifier_binding(binding);
+            }
+            AnyVueVForBinding::VueVForTupleBinding(tuple) => {
+                self.visit_vue_v_for_binding(&tuple.value().ok()?);
+                if let Some(second) = tuple.second() {
+                    self.visit_vue_v_for_binding(&second.binding().ok()?);
+                }
+                if let Some(third) = tuple.third() {
+                    self.visit_vue_v_for_binding(&third.binding().ok()?);
+                }
+            }
+            AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
+                self.visit_vue_v_for_destructured_binding(binding);
+            }
+        }
+
+        Some(())
+    }
+
+    fn visit_vue_v_for_destructured_binding(
+        &mut self,
+        binding: &AnyVueVForDestructuredBinding,
+    ) -> Option<()> {
+        let bindings = match binding {
+            AnyVueVForDestructuredBinding::VueVForArrayBinding(binding) => binding.bindings(),
+            AnyVueVForDestructuredBinding::VueVForObjectBinding(binding) => binding.bindings(),
+        };
+
+        for binding in bindings.iter().flatten() {
+            self.visit_vue_v_for_binding_list_element(&binding);
+        }
+
+        Some(())
+    }
+
+    fn visit_vue_v_for_binding_list_element(
+        &mut self,
+        binding: &AnyVueVForBindingListElement,
+    ) -> Option<()> {
+        match binding {
+            AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
+                self.register_vue_v_for_identifier_binding(binding);
+            }
+            AnyVueVForBindingListElement::VueVForObjectPropertyBinding(binding) => {
+                self.visit_vue_v_for_binding(&binding.binding().ok()?);
+            }
+            AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
+                self.register_vue_v_for_identifier_binding(&binding.binding().ok()?);
+            }
+            AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
+                self.visit_vue_v_for_destructured_binding(binding);
+            }
+        }
+
+        Some(())
+    }
+
+    fn register_vue_v_for_identifier_binding(
+        &mut self,
+        binding: &VueVForIdentifierBinding,
+    ) -> Option<()> {
+        let token = binding.name_token().ok()?;
+        self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
     }
 
     /// To call when visiting a source snippet, where bindings are defined.
@@ -400,21 +565,33 @@ impl EmbeddedBuilder {
         }
 
         // Handle default clause using accessors generated by the syntax crate.
-        if let Some(import) = clause.as_js_import_default_clause() {
-            let name = import.default_specifier().ok()?;
+        if let Some(this_import) = clause.as_js_import_default_clause() {
+            let name = this_import.default_specifier().ok()?;
             let name = name.local_name().ok()?;
             let name = name.as_js_identifier_binding()?;
             let name = name.name_token().ok()?;
-            self.register_binding(name.text_trimmed_range(), name.token_text_trimmed());
+            let source = import.source_text().ok()?;
+
+            self.register_binding_with_source(
+                name.text_trimmed_range(),
+                name.token_text_trimmed(),
+                source,
+            );
         }
 
         // Namespace imports: `import * as Foo from "bar"` should register `Foo`.
-        if let Some(import) = clause.as_js_import_namespace_clause() {
-            let specifier = import.namespace_specifier().ok()?;
+        if let Some(this_import) = clause.as_js_import_namespace_clause() {
+            let specifier = this_import.namespace_specifier().ok()?;
             let name = specifier.local_name().ok()?;
             let name = name.as_js_identifier_binding()?;
             let name = name.name_token().ok()?;
-            self.register_binding(name.text_trimmed_range(), name.token_text_trimmed());
+            let source = import.source_text().ok()?;
+
+            self.register_binding_with_source(
+                name.text_trimmed_range(),
+                name.token_text_trimmed(),
+                source,
+            );
         }
 
         Some(())
@@ -775,11 +952,19 @@ mod tests {
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {
         for bindings in service.bindings.iter() {
-            if bindings.iter().any(|(_, token)| token.text() == binding) {
+            if bindings.iter().any(|b| b.token_text().text() == binding) {
                 return true;
             }
         }
         false
+    }
+
+    fn visit_html_root(service: &mut EmbeddedBuilder, source: &str) {
+        let parsed = biome_html_parser::parse_html(
+            source,
+            biome_html_parser::HtmlParserOptions::default().with_vue(),
+        );
+        service.visit_html_root(&parsed.tree());
     }
 
     #[test]
@@ -1113,5 +1298,33 @@ const props = defineProps(['foo'])
         visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "foo"));
+    }
+
+    #[test]
+    fn tracks_vue_v_for_bindings() {
+        let source = r#"
+<template>
+  <div v-for="item in items">{{ item }}</div>
+  <div v-for="(value, key, index) of record">{{ value }} {{ key }} {{ index }}</div>
+  <div v-for="({ id, meta: { label }, ...rest }, idx) in rows">{{ id }} {{ label }} {{ rest }} {{ idx }}</div>
+  <div v-for="([first, , ...tail]) in nested">{{ first }} {{ tail }}</div>
+</template>
+"#;
+
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_html_root(&mut builder, source);
+        service.finish(builder);
+
+        assert!(contains_binding(&service, "item"));
+        assert!(contains_binding(&service, "value"));
+        assert!(contains_binding(&service, "key"));
+        assert!(contains_binding(&service, "index"));
+        assert!(contains_binding(&service, "id"));
+        assert!(contains_binding(&service, "label"));
+        assert!(contains_binding(&service, "rest"));
+        assert!(contains_binding(&service, "idx"));
+        assert!(contains_binding(&service, "first"));
+        assert!(contains_binding(&service, "tail"));
     }
 }

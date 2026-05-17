@@ -18,3 +18,16 @@ display:block;
 }
 }
 }
+
+@at-root .foo
+// .bar
+{
+
+}
+
+@at-root
+// .bar
+.foo
+{
+
+}

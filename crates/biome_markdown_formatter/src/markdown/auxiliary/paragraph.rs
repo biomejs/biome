@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::TextPrintMode;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdParagraph, MdParagraphFields};
 
@@ -13,7 +13,7 @@ pub(crate) struct FormatMdParagraph {
 impl Default for FormatMdParagraph {
     fn default() -> Self {
         Self {
-            trim_mode: TextPrintMode::Trim(TrimMode::None),
+            trim_mode: TextPrintMode::Fill,
             inside_list: false,
         }
     }

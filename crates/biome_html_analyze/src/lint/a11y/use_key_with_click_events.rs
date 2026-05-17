@@ -57,7 +57,7 @@ declare_lint_rule! {
         version: "next",
         name: "useKeyWithClickEvents",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("click-events-have-key-events").same()],
+        sources: &[RuleSource::EslintJsxA11y("click-events-have-key-events").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

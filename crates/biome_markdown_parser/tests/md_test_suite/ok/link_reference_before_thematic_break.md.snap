@@ -1,0 +1,136 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+[valid-title]: /url "title"
+---
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..6 "valid" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@6..7 "-" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@7..12 "title" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@12..13 "]" [] [],
+            colon_token: COLON@13..14 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@14..15 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@15..19 "/url" [] [],
+                    },
+                ],
+            },
+            title: MdLinkTitle {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@19..20 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@20..27 "\"title\"" [] [],
+                    },
+                ],
+            },
+        },
+        MdParagraph {
+            list: MdInlineItemList [],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@27..28 "\n" [] [],
+        },
+        MdThematicBreakBlock {
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: MINUS@28..29 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@29..30 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@30..31 "-" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@32..32 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..32
+  0: (empty)
+  1: MD_BLOCK_LIST@0..32
+    0: MD_LINK_REFERENCE_DEFINITION@0..27
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_BRACK@0..1 "[" [] []
+      2: MD_LINK_LABEL@1..12
+        0: MD_INLINE_ITEM_LIST@1..12
+          0: MD_TEXTUAL@1..6
+            0: MD_TEXTUAL_LITERAL@1..6 "valid" [] []
+          1: MD_TEXTUAL@6..7
+            0: MD_TEXTUAL_LITERAL@6..7 "-" [] []
+          2: MD_TEXTUAL@7..12
+            0: MD_TEXTUAL_LITERAL@7..12 "title" [] []
+      3: R_BRACK@12..13 "]" [] []
+      4: COLON@13..14 ":" [] []
+      5: MD_LINK_DESTINATION@14..19
+        0: MD_INLINE_ITEM_LIST@14..19
+          0: MD_TEXTUAL@14..15
+            0: MD_TEXTUAL_LITERAL@14..15 " " [] []
+          1: MD_TEXTUAL@15..19
+            0: MD_TEXTUAL_LITERAL@15..19 "/url" [] []
+      6: MD_LINK_TITLE@19..27
+        0: MD_INLINE_ITEM_LIST@19..27
+          0: MD_TEXTUAL@19..20
+            0: MD_TEXTUAL_LITERAL@19..20 " " [] []
+          1: MD_TEXTUAL@20..27
+            0: MD_TEXTUAL_LITERAL@20..27 "\"title\"" [] []
+    1: MD_PARAGRAPH@27..27
+      0: MD_INLINE_ITEM_LIST@27..27
+      1: (empty)
+    2: MD_NEWLINE@27..28
+      0: NEWLINE@27..28 "\n" [] []
+    3: MD_THEMATIC_BREAK_BLOCK@28..31
+      0: MD_THEMATIC_BREAK_PART_LIST@28..31
+        0: MD_THEMATIC_BREAK_CHAR@28..29
+          0: MINUS@28..29 "-" [] []
+        1: MD_THEMATIC_BREAK_CHAR@29..30
+          0: MINUS@29..30 "-" [] []
+        2: MD_THEMATIC_BREAK_CHAR@30..31
+          0: MINUS@30..31 "-" [] []
+    4: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+  2: EOF@32..32 "" [] []
+
+```

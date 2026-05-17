@@ -42,3 +42,22 @@ markdown/cursor/
 
 # Broken plugin tests
 markdown/broken-plugins/
+
+# Prettier's parser is not CommonMark compliant in these cases
+# After https://github.com/prettier/prettier/issues/19082 is fixed,
+# we should lift this denylist to increase test coverage.
+markdown/spec/example-343.md
+markdown/spec/example-347.md
+markdown/spec/example-381.md
+markdown/spec/example-382.md
+markdown/spec/example-383.md
+markdown/spec/example-390.md
+markdown/spec/example-440.md
+
+# As per commonmark, after 4 spaces, before thematic break or header become
+# simple text. Prettier remove those spaces and falls into incorrect parsing.
+# In the case of setext headers, there's idempotency
+# https://github.com/prettier/prettier/issues/19112
+markdown/spec/example-17.md
+markdown/spec/example-39.md
+markdown/spec/example-55.md

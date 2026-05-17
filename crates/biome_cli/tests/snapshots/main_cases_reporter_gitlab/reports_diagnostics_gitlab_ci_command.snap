@@ -258,9 +258,9 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "The imports and exports are not sorted.",
+    "description": "Sort these imports.",
     "check_name": "assist/source/organizeImports",
-    "fingerprint": "4789482553704082688",
+    "fingerprint": "8459329872035046942",
     "severity": "critical",
     "location": {
       "path": "index.ts",
@@ -678,9 +678,9 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "The imports and exports are not sorted.",
+    "description": "Sort these imports.",
     "check_name": "assist/source/organizeImports",
-    "fingerprint": "71463377061397589",
+    "fingerprint": "15695086553598122883",
     "severity": "critical",
     "location": {
       "path": "main.ts",

@@ -1,12 +1,7 @@
-use std::any::type_name;
-use std::collections::{BTreeMap, HashMap};
-use std::fmt::Display;
-use std::slice;
-use std::str::FromStr;
-
-use super::*;
 use crate::WorkspaceSettings;
-use anyhow::{Context, Error, Result, bail};
+use crate::capabilities::DEFAULT_CODE_ACTION_CAPABILITIES;
+use crate::server_test_utils::*;
+use anyhow::{Context, Result};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::analyzer::assist::AssistConfiguration;
@@ -20,77 +15,27 @@ use biome_service::workspace::{
     ScanProjectResult,
 };
 use biome_service::{Watcher, WatcherOptions};
-use camino::Utf8PathBuf;
-use futures::channel::mpsc::{Sender, channel};
-use futures::{Sink, SinkExt, Stream, StreamExt};
-use serde::Serialize;
-use serde::de::DeserializeOwned;
-use serde_json::{from_value, to_value};
-use tokio::time::{Duration, sleep, timeout};
-use tower::timeout::Timeout;
-use tower::{Service, ServiceExt};
-use tower_lsp_server::LspService;
-use tower_lsp_server::jsonrpc::{self, Request, Response};
+use futures::channel::mpsc::channel;
+use std::collections::{BTreeMap, HashMap};
+use std::str::FromStr;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::task::spawn_blocking;
+use tokio::time::sleep;
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,
-    InitializeResult, InitializedParams, Position, PublishDiagnosticsParams, Range,
-    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
-    VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
+    self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
+    CodeActionOrCommand, CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
+    DiagnosticRelatedInformation, DiagnosticSeverity, DidChangeConfigurationParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
+    DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, InitializeParams,
+    InitializeResult, Location, MessageType, NumberOrString, PartialResultParams, Position,
+    PublishDiagnosticsParams, Range, ShowMessageParams, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit,
+    WorkspaceFolder,
 };
 
-/// Statically build an [Uri] instance that points to the file at `$path`
-/// within the workspace. The filesystem path contained in the return URI is
-/// guaranteed to be a valid path for the underlying operating system, but
-/// doesn't have to refer to an existing file on the host machine.
-macro_rules! uri {
-    ($path:literal) => {
-        if cfg!(windows) {
-            lsp::Uri::from_str(concat!("file:///z%3A/workspace/", $path)).unwrap()
-        } else {
-            lsp::Uri::from_str(concat!("file:///workspace/", $path)).unwrap()
-        }
-    };
-}
-
-macro_rules! await_notification {
-    ($channel:expr) => {
-        sleep(Duration::from_millis(1000)).await;
-
-        timeout(Duration::from_secs(2), $channel.changed())
-            .await
-            .expect("expected notification within timeout")
-            .expect("expected notification");
-    };
-}
-
-macro_rules! clear_notifications {
-    ($channel:expr) => {
-        // On Windows, wait until any previous event has been delivered.
-        // On macOS, wait until the fsevents watcher sets up before receiving the first event.
-        let duration = if cfg!(any(target_os = "windows", target_os = "macos")) {
-            Duration::from_secs(1)
-        } else {
-            Duration::from_millis(200)
-        };
-        sleep(duration).await;
-
-        if $channel
-            .has_changed()
-            .expect("Channel should not be closed")
-        {
-            let _ = $channel.changed().await;
-        }
-    };
-}
-
-fn to_utf8_file_path_buf(uri: Uri) -> Utf8PathBuf {
-    Utf8PathBuf::from_path_buf(uri.to_file_path().unwrap().to_path_buf()).unwrap()
-}
-
-fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
-    Ok(Diagnostic {
+fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
+    Ok(lsp::Diagnostic {
         range: Range {
             start: Position { line, character: 3 },
             end: Position {
@@ -98,8 +43,8 @@ fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
                 character: 11,
             },
         },
-        severity: Some(DiagnosticSeverity::ERROR),
-        code: Some(NumberOrString::String(String::from(
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
             "lint/suspicious/noCompareNegZero",
         ))),
         code_description: None,
@@ -109,426 +54,6 @@ fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
         tags: None,
         data: None,
     })
-}
-
-struct Server {
-    service: Timeout<LspService<LSPServer>>,
-}
-
-impl Server {
-    fn new(service: LspService<LSPServer>) -> Self {
-        Self {
-            service: Timeout::new(service, Duration::from_secs(1)),
-        }
-    }
-
-    async fn notify<P>(&mut self, method: &'static str, params: P) -> Result<()>
-    where
-        P: Serialize,
-    {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(
-                Request::build(method)
-                    .params(to_value(&params).context("failed to serialize params")?)
-                    .finish(),
-            )
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")
-            .and_then(|res| {
-                if let Some(res) = res {
-                    bail!("shutdown returned {:?}", res)
-                } else {
-                    Ok(())
-                }
-            })
-    }
-
-    async fn request<P, R>(
-        &mut self,
-        method: &'static str,
-        id: &'static str,
-        params: P,
-    ) -> Result<Option<R>>
-    where
-        P: Serialize,
-        R: DeserializeOwned,
-    {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(
-                Request::build(method)
-                    .id(id)
-                    .params(to_value(&params).context("failed to serialize params")?)
-                    .finish(),
-            )
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")?
-            .map(|res| {
-                let (_, body) = res.into_parts();
-
-                let body =
-                    body.with_context(|| format!("response to {method:?} contained an error"))?;
-
-                from_value(body.clone()).with_context(|| {
-                    format!(
-                        "failed to deserialize type {} from response {body:?}",
-                        type_name::<R>()
-                    )
-                })
-            })
-            .transpose()
-    }
-
-    /// Basic implementation of the `initialize` request for tests
-    // The `root_path` field is deprecated, but we still need to specify it
-    #[expect(deprecated)]
-    async fn initialize(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities::default(),
-                    trace: None,
-                    workspace_folders: None,
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
-    #[expect(deprecated)]
-    async fn initialize_with_resolve_support(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities {
-                        text_document: Some(TextDocumentClientCapabilities {
-                            code_action: Some(CodeActionClientCapabilities {
-                                resolve_support: Some(CodeActionCapabilityResolveSupport {
-                                    properties: vec!["edit".to_string()],
-                                }),
-                                ..Default::default()
-                            }),
-                            ..Default::default()
-                        }),
-                        ..Default::default()
-                    },
-                    trace: None,
-                    workspace_folders: None,
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// It creates two projects, one at folder `test_one` and the other in `test_two`.
-    ///
-    /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
-    // The `root_path` field is deprecated, but we still need to specify it
-    #[expect(deprecated)]
-    async fn initialize_projects(&mut self) -> Result<()> {
-        let _res: InitializeResult = self
-            .request(
-                "initialize",
-                "_init",
-                InitializeParams {
-                    process_id: None,
-                    root_path: None,
-                    root_uri: Some(uri!("/")),
-                    initialization_options: None,
-                    capabilities: ClientCapabilities::default(),
-                    trace: None,
-                    workspace_folders: Some(vec![
-                        WorkspaceFolder {
-                            name: "test_one".to_string(),
-                            uri: uri!("test_one"),
-                        },
-                        WorkspaceFolder {
-                            name: "test_two".to_string(),
-                            uri: uri!("test_two"),
-                        },
-                    ]),
-                    client_info: None,
-                    locale: None,
-                    work_done_progress_params: Default::default(),
-                },
-            )
-            .await?
-            .context("initialize returned None")?;
-
-        Ok(())
-    }
-
-    /// Basic implementation of the `initialized` notification for tests
-    async fn initialized(&mut self) -> Result<()> {
-        self.notify("initialized", InitializedParams {}).await
-    }
-
-    /// Basic implementation of the `shutdown` notification for tests
-    async fn shutdown(&mut self) -> Result<()> {
-        self.service
-            .ready()
-            .await
-            .map_err(Error::msg)
-            .context("ready() returned an error")?
-            .call(Request::build("shutdown").finish())
-            .await
-            .map_err(Error::msg)
-            .context("call() returned an error")
-            .and_then(|res| {
-                if let Some(res) = res {
-                    bail!("shutdown returned {:?}", res)
-                } else {
-                    Ok(())
-                }
-            })
-    }
-
-    async fn open_document(&mut self, text: impl Display) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: uri!("document.js"),
-                    language_id: String::from("javascript"),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    async fn open_untitled_document(&mut self, text: impl Display) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: uri!("untitled-1"),
-                    language_id: String::from("javascript"),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    /// Opens a document with given contents and given name. The name must contain the extension too
-    async fn open_named_document(
-        &mut self,
-        text: impl Display,
-        document_name: Uri,
-        language: impl Display,
-    ) -> Result<()> {
-        self.notify(
-            "textDocument/didOpen",
-            DidOpenTextDocumentParams {
-                text_document: TextDocumentItem {
-                    uri: document_name,
-                    language_id: language.to_string(),
-                    version: 0,
-                    text: text.to_string(),
-                },
-            },
-        )
-        .await
-    }
-
-    /// When calling this function, remember to insert the file inside the memory file system
-    async fn load_configuration(&mut self) -> Result<()> {
-        self.notify(
-            "workspace/didChangeConfiguration",
-            DidChangeConfigurationParams {
-                settings: to_value(())?,
-            },
-        )
-        .await
-    }
-
-    /// When calling this function, remember to insert the file inside the memory file system
-    async fn load_configuration_with_settings<V>(&mut self, value: V) -> Result<()>
-    where
-        V: Serialize,
-    {
-        self.notify(
-            "workspace/didChangeConfiguration",
-            DidChangeConfigurationParams {
-                settings: to_value(value)?,
-            },
-        )
-        .await
-    }
-
-    async fn change_document(
-        &mut self,
-        version: i32,
-        content_changes: Vec<TextDocumentContentChangeEvent>,
-    ) -> Result<()> {
-        self.notify(
-            "textDocument/didChange",
-            DidChangeTextDocumentParams {
-                text_document: VersionedTextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                    version,
-                },
-                content_changes,
-            },
-        )
-        .await
-    }
-
-    async fn close_document(&mut self) -> Result<()> {
-        self.notify(
-            "textDocument/didClose",
-            DidCloseTextDocumentParams {
-                text_document: TextDocumentIdentifier {
-                    uri: uri!("document.js"),
-                },
-            },
-        )
-        .await
-    }
-
-    /// Basic implementation of the `biome/shutdown` request for tests
-    async fn biome_shutdown(&mut self) -> Result<()> {
-        self.request::<_, ()>("biome/shutdown", "_biome_shutdown", ())
-            .await?
-            .context("biome/shutdown returned None")?;
-        Ok(())
-    }
-}
-
-/// Number of notifications buffered by the server-to-client channel before it starts blocking the current task
-const CHANNEL_BUFFER_SIZE: usize = 8;
-
-#[derive(Debug, PartialEq, Eq)]
-enum ServerNotification {
-    PublishDiagnostics(PublishDiagnosticsParams),
-    ShowMessage(ShowMessageParams),
-}
-impl ServerNotification {
-    pub fn is_publish_diagnostics(&self) -> bool {
-        matches!(self, Self::PublishDiagnostics(_))
-    }
-
-    pub fn is_show_message(&self) -> bool {
-        matches!(self, Self::ShowMessage(_))
-    }
-}
-
-async fn wait_for_notification(
-    receiver: &mut (impl Stream<Item = ServerNotification> + Unpin),
-    check: impl Fn(&ServerNotification) -> bool,
-) -> Option<ServerNotification> {
-    loop {
-        let notification = tokio::select! {
-            msg = receiver.next() => msg,
-            _ = sleep(Duration::from_secs(3)) => {
-                panic!("timed out waiting for the server to send diagnostics")
-            }
-        };
-
-        match notification {
-            Some(notification) => {
-                if check(&notification) {
-                    return Some(notification);
-                }
-            }
-            None => break None,
-        }
-    }
-}
-
-/// Basic handler for requests and notifications coming from the server for tests
-async fn client_handler<I, O>(stream: I, sink: O, notify: Sender<ServerNotification>) -> Result<()>
-where
-    I: Stream<Item = Request> + Unpin,
-    O: Sink<Response> + Unpin,
-{
-    client_handler_with_settings(stream, sink, notify, WorkspaceSettings::default()).await
-}
-
-/// Handler for requests and notifications coming from the server for tests with custom settings
-async fn client_handler_with_settings<I, O>(
-    mut stream: I,
-    mut sink: O,
-    mut notify: Sender<ServerNotification>,
-    settings: WorkspaceSettings,
-) -> Result<()>
-where
-    // This function has to be generic as `RequestStream` and `ResponseSink`
-    // are not exported from `tower_lsp` and cannot be named in the signature
-    I: Stream<Item = Request> + Unpin,
-    O: Sink<Response> + Unpin,
-{
-    while let Some(req) = stream.next().await {
-        let params = req.params().expect("invalid request").clone();
-        if let Some(notification) = match req.method() {
-            "textDocument/publishDiagnostics" => Some(ServerNotification::PublishDiagnostics(
-                from_value(params).expect("invalid params"),
-            )),
-            "window/showMessage" => Some(ServerNotification::ShowMessage(
-                from_value(params).expect("invalid params"),
-            )),
-            _ => None,
-        } {
-            match notify.send(notification).await {
-                Ok(_) => continue,
-                Err(_) => break,
-            }
-        }
-
-        let id = match req.id() {
-            Some(id) => id,
-            None => continue,
-        };
-
-        let res = match req.method() {
-            "workspace/configuration" => {
-                let result =
-                    to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;
-
-                Response::from_ok(id.clone(), result)
-            }
-            _ => Response::from_error(id.clone(), jsonrpc::Error::method_not_found()),
-        };
-
-        sink.send(res).await.ok();
-    }
-
-    Ok(())
 }
 
 #[tokio::test]
@@ -2135,6 +1660,80 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_diagnostics_for_svg_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "html": {
+            "formatter": { "enabled": true }
+        }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let incorrect_config = r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red" /></svg>"#;
+    server
+        .open_named_document(incorrect_config, uri!("document.svg"), "xml")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.svg"),
+                version: Some(0),
+                diagnostics: vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 112,
+                        },
+                    },
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: Some(NumberOrString::String(String::from(
+                        "lint/a11y/noSvgWithoutTitle"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: "https://biomejs.dev/linter/rules/no-svg-without-title".parse()?
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from("Alternative text title element cannot be empty",),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn no_code_actions_for_ignored_json_files() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -2359,7 +1958,7 @@ if(a === -0) {}
     );
 
     let expected_code_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("Organize Imports (Biome)"),
+        title: String::from("Organize imports and exports (Biome)"),
         kind: Some(CodeActionKind::new("source.organizeImports.biome")),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
@@ -4007,6 +3606,7 @@ export function bar() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             },
         )
         .await?
@@ -4235,6 +3835,7 @@ export function bar() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             },
         )
         .await?

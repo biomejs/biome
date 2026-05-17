@@ -1,4 +1,5 @@
-use biome_deserialize::{Deserializable, DeserializationContext, Text};
+use biome_console::markup;
+use biome_deserialize::{Deserializable, DeserializationContext, DeserializationDiagnostic, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
 use biome_resolver::is_builtin_node_module;
@@ -46,6 +47,8 @@ impl biome_deserialize::Merge for ImportGroups {
 
 pub struct ImportCandidate<'a> {
     pub has_type_token: bool,
+    /// Whether the underlying import is a bare (side-effect) import, e.g. `import "polyfill"`.
+    pub is_bare: bool,
     pub source: Option<ImportSourceCandidate<'a>>,
 }
 impl ImportCandidate<'_> {
@@ -167,21 +170,150 @@ impl Deserializable for GroupMatcher {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ImportMatcher {
+    kind: Option<NegatableImportKindMatcher>,
     r#type: Option<bool>,
     source: Option<SourcesMatcher>,
 }
 impl ImportMatcher {
     pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        let matches_kind = self
+            .kind
+            .as_ref()
+            .is_none_or(|kind| kind.is_match(candidate));
         let matches_type = self
             .r#type
             .is_none_or(|r#type| candidate.has_type_token == r#type);
-        matches_type
+        matches_kind
+            && matches_type
             && self.source.as_ref().is_none_or(|src| {
                 candidate
                     .source
                     .as_ref()
                     .is_some_and(|candidate_source| src.is_match(candidate_source))
             })
+    }
+}
+
+/// Kind matcher for [`ImportMatcher::kind`].
+///
+/// Accepts a plain kind (e.g. `"bare"`) or a negated kind (e.g. `"!bare"`).
+#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(try_from = "String", into = "String")]
+pub struct NegatableImportKindMatcher {
+    is_negated: bool,
+    kind: ImportKindMatcher,
+}
+impl NegatableImportKindMatcher {
+    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        self.kind.is_match(candidate) != self.is_negated
+    }
+}
+impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        let text = Text::deserialize(ctx, value, name)?;
+        match text.text().parse() {
+            Ok(matcher) => Some(matcher),
+            Err(error) => {
+                ctx.report(
+                    biome_deserialize::DeserializationDiagnostic::new(error)
+                        .with_range(value.range()),
+                );
+                None
+            }
+        }
+    }
+}
+impl std::fmt::Display for NegatableImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let negation = if self.is_negated { "!" } else { "" };
+        let kind = &self.kind;
+        write!(f, "{negation}{kind}")
+    }
+}
+impl std::fmt::Debug for NegatableImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
+}
+impl From<NegatableImportKindMatcher> for String {
+    fn from(value: NegatableImportKindMatcher) -> Self {
+        value.to_string()
+    }
+}
+impl std::str::FromStr for NegatableImportKindMatcher {
+    type Err = &'static str;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
+            (true, stripped)
+        } else {
+            (false, value)
+        };
+        let kind = ImportKindMatcher::from_str(value)?;
+        Ok(Self { is_negated, kind })
+    }
+}
+impl TryFrom<String> for NegatableImportKindMatcher {
+    type Error = &'static str;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for NegatableImportKindMatcher {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("NegatableImportKindMatcher")
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let schema = ImportKindMatcher::json_schema(generator);
+        if let Some(obj) = schema.as_object() {
+            let mut new_obj = obj.clone();
+            if let Some(enum_values) = new_obj.get_mut("enum").and_then(|v| v.as_array_mut()) {
+                let original_len = enum_values.len();
+                for index in 0..original_len {
+                    if let Some(val) = enum_values[index].as_str() {
+                        enum_values.push(serde_json::Value::from(format!("!{val}")));
+                    }
+                }
+            }
+            schemars::Schema::from(new_obj)
+        } else {
+            schema
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ImportKindMatcher {
+    #[serde(rename = "bare")]
+    Bare,
+}
+impl ImportKindMatcher {
+    fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        match self {
+            Self::Bare => candidate.is_bare,
+        }
+    }
+}
+impl std::fmt::Display for ImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let repr = match self {
+            Self::Bare => "bare",
+        };
+        f.write_str(repr)
+    }
+}
+impl std::str::FromStr for ImportKindMatcher {
+    type Err = &'static str;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "bare" => Ok(Self::Bare),
+            _ => Err("invalid import kind matcher"),
+        }
     }
 }
 
@@ -254,7 +386,27 @@ impl biome_deserialize::Deserializable for SourceMatcher {
     ) -> Option<Self> {
         let text = biome_deserialize::Text::deserialize(ctx, value, name)?;
         if text.ends_with(':') && (text.starts_with(':') || text.starts_with("!:")) {
-            text.parse().ok().map(SourceMatcher::Predefined)
+            match text.parse() {
+                Ok(predefined_group) => Some(SourceMatcher::Predefined(predefined_group)),
+                Err(_error) => {
+                    let diagnostic = if text == ":BLANK_LINE:" {
+                        DeserializationDiagnostic::new(markup! {
+                            <Emphasis>{":BLANK_LINE:"}</Emphasis>
+                            " isn't valid in this position. Remove it."
+                        })
+                    } else {
+                        DeserializationDiagnostic::new(markup! {
+                            "The predefined group "
+                            <Emphasis>{
+                                format_args!("{}", text.strip_prefix("!").unwrap_or(&text))
+                            }</Emphasis>
+                            " doesn't exist. Use a known predefined group."
+                        })
+                    };
+                    ctx.report(diagnostic.with_range(value.range()));
+                    None
+                }
+            }
         } else {
             Deserializable::deserialize(ctx, value, name).map(SourceMatcher::Glob)
         }

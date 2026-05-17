@@ -1,0 +1,11 @@
+html[lang=#{$locale}]{color:red;}
+html[lang=prefix-#{$locale}]{color:blue;}
+html[lang=#{$locale} i]{color:green;}
+.el:nth-of-type(#{$i}){width:1px;}
+.grid:nth-child(#{$numPerRow}n){width:2px;}
+.grid:nth-child(#{$numPerRow}n+1){width:3px;}
+.grid:nth-child(#{$sign}2n+1){width:4px;}
+.grid:nth-child(#{$sign}2n+#{$offset}){width:5px;}
+.grid:nth-child(2n+#{$offset}){width:6px;}
+.grid:nth-child(2n+1#{$offset}){width:7px;}
+.grid:nth-child(n-#{$offset} of .item){width:8px;}

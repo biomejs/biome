@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/block-mappings-in-block-sequence.yml
+---
+
+# Input
+
+```yml
+ - key: value
+   key2: value2
+ -
+   key3: value3
+
+```
+
+
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+block-mappings-in-block-sequence.yml:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block sequence entry but instead found '-
+       key3: value3'.
+  
+    1 │ - key: value
+    2 │    key2: value2
+  > 3 │  -
+      │  ^
+  > 4 │    key3: value3
+      │    ^^^^^^^^^^^^
+  
+  i Expected a block sequence entry here.
+  
+    1 │ - key: value
+    2 │    key2: value2
+  > 3 │  -
+      │  ^
+  > 4 │    key3: value3
+      │    ^^^^^^^^^^^^
+  
+
+```

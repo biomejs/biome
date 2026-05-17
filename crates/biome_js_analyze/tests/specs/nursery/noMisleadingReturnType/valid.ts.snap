@@ -67,6 +67,14 @@ function objectNoConst(): { a: string; b: string } {
     return { a: "x", b: "y" };
 }
 
+function propertyLiteralWithoutAsConst(): { a: string } {
+    return { a: "x" };
+}
+
+function propertyAsConstExact(): { a: "x" } {
+    return { a: "x" as const };
+}
+
 function asConstMatch(): "hello" { return "hello" as const; }
 
 function bareReturn(): void { return; }
@@ -163,6 +171,149 @@ function nestedTuple(): [{ ok: boolean }] { return [{ ok: true }]; }
 // Getter with a same-namespace setter — tsc widens the getter to the setter's type
 class StoreClass { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } set status(v: string) {} }
 const storeObj = { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; }, set status(v: string) {} };
+
+// Union with a `boolean` variant exhausted by both `true` and `false` returns
+declare const a: boolean;
+declare const b: boolean;
+const useCloudLogin = (authenticated: boolean): boolean | null => {
+    if (!authenticated) {
+        if (a) return true;
+        if (b) return false;
+    }
+    return null;
+};
+function booleanOrUndefined(flag: boolean): boolean | undefined { if (flag) return true; if (!flag) return false; return undefined; }
+function booleanOrLiteral(flag: boolean): boolean | "skip" { if (flag) return true; if (!flag) return false; return "skip"; }
+function nullOrBoolean(flag: boolean): null | boolean { if (flag) return null; if (a) return true; return false; }
+function duplicateBooleanReturns(flag: boolean, other: boolean): boolean | null { if (flag) return true; if (other) return true; if (a) return false; return null; }
 class StaticStore { static get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } static set status(v: string) {} }
+
+function asObjectCast(): object { return {} as object; }
+function angleObjectCast(): object { return <object>{}; }
+
+function parenObjectCast(): object { return {} as (object); }
+type ObjectAlias = object;
+function aliasedObjectCast(): object { return {} as ObjectAlias; }
+type NestedObjectAlias = ObjectAlias;
+function nestedAliasedObjectCast(): object { return {} as NestedObjectAlias; }
+
+function multiObjectCast(b: boolean): object {
+    if (b) return {} as object;
+    return {} as object;
+}
+
+namespace NS {
+    export type Obj = object;
+}
+function qualifiedObjectCast(): object { return {} as NS.Obj; }
+
+function inlineIntersectionObjectCast(): object { return {} as (object & {}); }
+type ObjectAndEmpty = object & {};
+function aliasedIntersectionObjectCast(): object { return {} as ObjectAndEmpty; }
+
+function ternaryBothBranchesObjectCast(b: boolean): object {
+    return b ? ({} as object) : ({} as object);
+}
+
+function doubleCastObject(): object { return {} as unknown as object; }
+
+const arrowBodyObjectCast = (): object => ({} as object);
+
+type ObjectAliasL1 = object;
+type ObjectAliasL2 = ObjectAliasL1;
+type ObjectAliasL3 = ObjectAliasL2;
+type ObjectAliasL4 = ObjectAliasL3;
+type ObjectAliasL5 = ObjectAliasL4;
+function deepAliasObjectCast(): object { return {} as ObjectAliasL5; }
+
+type ObjectAliasL6 = ObjectAliasL5;
+type ObjectAliasL7 = ObjectAliasL6;
+function veryDeepAliasObjectCast(): object { return {} as ObjectAliasL7; }
+
+async function asyncObjectCast(): Promise<object> { return {} as object; }
+class ClassObjectCast { m(): object { return {} as object; } }
+const objectObjectCast = { m(): object { return {} as object; } };
+class ClassGetterObjectCast { get o(): object { return {} as object; } }
+const objectGetterObjectCast = { get o(): object { return {} as object; } };
+
+function intersectionUnknownObjectCast(): object {
+    return {} as (unknown & object);
+}
+
+type OuterObjectAlias = object;
+function outerWithInnerCast(): number {
+    function inner(): object { return {} as OuterObjectAlias; }
+    return inner() as unknown as number;
+}
+
+async function awaitObjectCast(): Promise<object> { return await ({} as object); }
+function nonNullObjectCast(): object { return ({} as object)!; }
+declare const maybeObj: object | undefined;
+function logicalFallbackObjectCast(): object { return maybeObj ?? ({} as object); }
+
+declare const declaredObjectValue: object;
+declare function getDeclaredObject(): object;
+function mixedBareAndDeclaredObject(b: boolean): object { if (b) return declaredObjectValue; return { a: 1 }; }
+function mixedBareAndObjectCall(b: boolean): object { if (b) return getDeclaredObject(); return { a: 1 }; }
+
+function identifierBoundToObjectCast(): object { const x = {} as object; return x; }
+
+function bareEmptyObject(): object { return {}; }
+function parenthesizedBareEmpty(): object { return (({})); }
+function identifierBoundToEmpty(): object { const x = {}; return x; }
+function arrowBodyBareEmpty(): object { return {}; }
+const arrowExprBareEmpty = (): object => ({});
+async function asyncBareEmpty(): Promise<object> { return {}; }
+function multipleBareEmptyObjects(b: boolean): object { if (b) return {}; return {}; }
+function mixedBareEmptyAndObjectCast(b: boolean): object { if (b) return {}; return {} as object; }
+function mixedBareAndCast(b: boolean): object { if (b) return {} as object; return { a: 1 }; }
+function mixedTernaryObjectCast(b: boolean): object { return b ? ({} as object) : ({} as { a: number }); }
+function mixedNonNullObjectCast(b: boolean): object { if (b) return ({} as object)!; return { a: 1 }; }
+
+function emptyObjectTypeCast(): object { return {} as {}; }
+function parenEmptyObjectTypeCast(): object { return {} as ({}); }
+function doubleEmptyObjectTypeCast(): object { return {} as {} as {}; }
+function anyIntersectionCast(): object { return {} as (any & { a: number }); }
+
+type ObjectAliasA = object;
+type ObjectAliasB = object;
+function intersectionOfAliasesToObject(): object { return {} as (ObjectAliasA & ObjectAliasB); }
+function intersectionNonPrimitiveUnknown(): object { return {} as (object & unknown); }
+
+interface EmptyInterface {}
+function emptyInterfaceCast(): object { return {} as EmptyInterface; }
+class EmptyClass {}
+function emptyClassCast(): object { return {} as EmptyClass; }
+
+interface NarrowInterface { a: number; }
+interface InterfaceWithInheritedMembers extends NarrowInterface {}
+function inheritedInterfaceCast(): object { return {} as InterfaceWithInheritedMembers; }
+
+// Every union variant is returned — nothing to narrow
+declare const someStr: string;
+declare const someNum: number;
+function allVariantsCovered(b: 0 | 1 | 2): string | number | null {
+    if (b === 0) return someStr;
+    if (b === 1) return someNum;
+    return null;
+}
+
+function unionWithAny(): string | any { return "hello"; }
+
+function unionWithUnknown(): string | unknown { return "hello"; }
+
+async function asyncUnionUnknown(): Promise<string | unknown> { return "hello"; }
+
+function unionWithNever(): string | never { return "hello"; }
+
+function literalAbsorbedByPrimitive(): "a" | string { return "a"; }
+
+function unionCollapsesToPrimitive(): "a" | "b" | string { return "a"; }
+
+function collapseNumber(): 1 | 2 | number { return 1; }
+
+function collapseBigint(): 1n | bigint { return 1n; }
+
+function collapseMismatchLiteral(): "a" | string { return "b"; }
 
 ```

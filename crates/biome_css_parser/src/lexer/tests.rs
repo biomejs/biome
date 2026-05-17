@@ -299,7 +299,8 @@ fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function(
 #[test]
 fn url_body_context_preserves_protocol_relative_url_in_scss() {
     let mut lexer =
-        CssLexer::from_str("url(//cdn.example.com/app.css)").with_source_type(CssFileSource::scss());
+        CssLexer::from_str("url(//cdn.example.com/app.css)\n")
+            .with_source_type(CssFileSource::scss());
 
     assert_eq!(
         lexer.next_token(CssLexContext::Regular),
@@ -340,6 +341,164 @@ fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
         lexer.current_range(),
         TextRange::new(TextSize::from(4), TextSize::from(13))
     );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_keeps_interpolation_parentheses_in_raw_url() {
+    let source = r#"url(//fonts.googleapis.com/css?family=#{get-font-family("Roboto")}:100,300,500,700,900&display=swap)"#;
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(
+        &source[lexer.current_range()],
+        r#"//fonts.googleapis.com/css?family=#{get-font-family("Roboto")}:100,300,500,700,900&display=swap"#
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_keeps_protocol_relative_url_before_newline_as_raw_url() {
+    let source = "url(//cdn.example/a.css)\n.foo {}";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(&source[lexer.current_range()], "//cdn.example/a.css");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_keeps_variable_path_with_plus_as_raw_url() {
+    let source = "url($foo/path+file)";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(&source[lexer.current_range()], "$foo/path+file");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_skips_block_comment_before_scss_url_expression_plus() {
+    let source = r#"url($path /* c */ + "x")"#;
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        T![$]
+    );
+}
+
+#[test]
+fn url_body_context_skips_line_comment_with_parens_before_scss_url_expression_plus() {
+    let source = "url(// TODO(asset)\n$path + 'x')";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::COMMENT
+    );
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::NEWLINE
+    );
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        T![$]
+    );
+}
+
+#[test]
+fn url_body_context_stops_malformed_interpolation_raw_url_at_close() {
+    let source = "url(foo#{1 + 1(bar));";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(&source[lexer.current_range()], "foo#{1 + 1(bar");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_bounds_interpolated_function_probe_to_raw_url_close() {
+    let source = "url(foo#{bar));}(";
+    let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(&source[lexer.current_range()], "foo#{bar");
     assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
 }
 
@@ -624,6 +783,20 @@ fn lexer_helper_ignores_line_comment_inside_interpolation_body() {
         .with_source_type(CssFileSource::scss());
 
     assert!(lexer.is_at_scss_interpolated_function(0));
+}
+
+#[test]
+fn lexer_helper_detects_scss_string_concatenation() {
+    let lexer = CssLexer::from_str("\"#{$bg}\" + \".png\"").with_source_type(CssFileSource::scss());
+
+    assert!(lexer.is_at_scss_string_concatenation(0));
+    assert!(!lexer.is_at_scss_string_concatenation(8));
+
+    let lexer = CssLexer::from_str("'v'+1").with_source_type(CssFileSource::scss());
+
+    assert!(lexer.is_at_scss_string_concatenation(0));
+    assert!(lexer.is_at_scss_concatenation_plus(3));
+    assert!(!lexer.is_at_scss_string_concatenation(3));
 }
 
 #[test]

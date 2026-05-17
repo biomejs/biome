@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-15-block-sequence-entry-types.yml
+---
+# Input
+
+```yml
+- # Empty
+- |
+ block node
+- - one # Compact
+  - two # sequence
+- one: two # Compact mapping
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+--  # Empty
++- # Empty
+ - |
+-  block node
++ block node
+ - - one # Compact
+   - two # sequence
+-- one: two # Compact mapping
++- one: two 
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- # Empty
+- |
+ block node
+- - one # Compact
+  - two # sequence
+- one: two ```

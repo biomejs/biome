@@ -6,18 +6,205 @@ use biome_tailwind_syntax::{
     TailwindSyntaxElement as SyntaxElement, TailwindSyntaxNode as SyntaxNode,
     TailwindSyntaxToken as SyntaxToken, *,
 };
+pub fn css_binary_expression(
+    left: AnyCssExpression,
+    operator_token: SyntaxToken,
+    right: AnyCssExpression,
+) -> CssBinaryExpression {
+    CssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_BINARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_color(value_token: SyntaxToken) -> CssColor {
+    CssColor::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_COLOR,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_dashed_identifier(ident_token: SyntaxToken) -> CssDashedIdentifier {
+    CssDashedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_DASHED_IDENTIFIER,
+        [Some(SyntaxElement::Token(ident_token))],
+    ))
+}
+pub fn css_function(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    parameters: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> CssFunction {
+    CssFunction::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_FUNCTION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
+    CssGenericDelimiter::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_GENERIC_DELIMITER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_identifier(ident_token: SyntaxToken) -> CssIdentifier {
+    CssIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_IDENTIFIER,
+        [Some(SyntaxElement::Token(ident_token))],
+    ))
+}
+pub fn css_list_of_component_values_expression(
+    css_component_value_list: CssComponentValueList,
+) -> CssListOfComponentValuesExpression {
+    CssListOfComponentValuesExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION,
+        [Some(SyntaxElement::Node(
+            css_component_value_list.into_syntax(),
+        ))],
+    ))
+}
+pub fn css_number(value_token: SyntaxToken) -> CssNumber {
+    CssNumber::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_NUMBER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_parenthesized_expression(
+    l_paren_token: SyntaxToken,
+    expression: CssComponentValueList,
+    r_paren_token: SyntaxToken,
+) -> CssParenthesizedExpression {
+    CssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_percentage(value_token: SyntaxToken, remainder_token: SyntaxToken) -> CssPercentage {
+    CssPercentage::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_PERCENTAGE,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(remainder_token)),
+        ],
+    ))
+}
+pub fn css_ratio(left: CssNumber, slash_token: SyntaxToken, right: CssNumber) -> CssRatio {
+    CssRatio::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_RATIO,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_regular_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssRegularDimension {
+    CssRegularDimension::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_REGULAR_DIMENSION,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
+}
+pub fn css_string(value_token: SyntaxToken) -> CssString {
+    CssString::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_STRING,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_unary_expression(
+    operator_token: SyntaxToken,
+    argument: AnyCssValue,
+) -> CssUnaryExpression {
+    CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+        ],
+    ))
+}
+pub fn css_unknown_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssUnknownDimension {
+    CssUnknownDimension::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_UNKNOWN_DIMENSION,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
+}
+pub fn css_url_function(
+    url_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> CssUrlFunctionBuilder {
+    CssUrlFunctionBuilder {
+        url_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssUrlFunctionBuilder {
+    url_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssUrlValue>,
+}
+impl CssUrlFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssUrlFunction {
+        CssUrlFunction::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::CSS_URL_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.url_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
+    CssUrlValueRaw::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_URL_VALUE_RAW,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn tw_arbitrary_candidate(
     l_brack_token: SyntaxToken,
     property_token: SyntaxToken,
     colon_token: SyntaxToken,
-    value_token: SyntaxToken,
+    value: CssGenericComponentValueList,
     r_brack_token: SyntaxToken,
 ) -> TwArbitraryCandidateBuilder {
     TwArbitraryCandidateBuilder {
         l_brack_token,
         property_token,
         colon_token,
-        value_token,
+        value,
         r_brack_token,
         modifier: None,
     }
@@ -26,7 +213,7 @@ pub struct TwArbitraryCandidateBuilder {
     l_brack_token: SyntaxToken,
     property_token: SyntaxToken,
     colon_token: SyntaxToken,
-    value_token: SyntaxToken,
+    value: CssGenericComponentValueList,
     r_brack_token: SyntaxToken,
     modifier: Option<AnyTwModifier>,
 }
@@ -42,7 +229,7 @@ impl TwArbitraryCandidateBuilder {
                 Some(SyntaxElement::Token(self.l_brack_token)),
                 Some(SyntaxElement::Token(self.property_token)),
                 Some(SyntaxElement::Token(self.colon_token)),
-                Some(SyntaxElement::Token(self.value_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
                 Some(SyntaxElement::Token(self.r_brack_token)),
                 self.modifier
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -52,14 +239,14 @@ impl TwArbitraryCandidateBuilder {
 }
 pub fn tw_arbitrary_value(
     l_brack_token: SyntaxToken,
-    value_token: SyntaxToken,
+    value: CssGenericComponentValueList,
     r_brack_token: SyntaxToken,
 ) -> TwArbitraryValue {
     TwArbitraryValue::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_ARBITRARY_VALUE,
         [
             Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))
@@ -249,6 +436,51 @@ pub fn tw_static_variant(base_token: SyntaxToken) -> TwStaticVariant {
         [Some(SyntaxElement::Token(base_token))],
     ))
 }
+pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
+where
+    I: IntoIterator<Item = AnyCssValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssComponentValueList::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
+where
+    I: IntoIterator<Item = AnyCssGenericComponentValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssGenericComponentValueList::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
+where
+    I: IntoIterator<Item = AnyCssExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssParameterList::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_PARAMETER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn tw_candidate_list<I>(items: I) -> TwCandidateList
 where
     I: IntoIterator<Item = AnyTwFullCandidate>,
@@ -280,6 +512,16 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_bogus_property_value<I>(slots: I) -> CssBogusPropertyValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_BOGUS_PROPERTY_VALUE,
+        slots,
     ))
 }
 pub fn tw_bogus<I>(slots: I) -> TwBogus

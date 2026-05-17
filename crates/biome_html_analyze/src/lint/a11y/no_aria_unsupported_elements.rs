@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "next",
         name: "noAriaUnsupportedElements",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").same()],
+        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

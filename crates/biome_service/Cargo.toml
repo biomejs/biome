@@ -13,6 +13,9 @@ publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.cargo-udeps.ignore]
+development = ["biome_service"]
+
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_configuration      = { workspace = true }
@@ -65,6 +68,8 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 biome_unicode_table      = { workspace = true }
+biome_yaml_formatter     = { workspace = true, features = ["serde"] }
+biome_yaml_syntax        = { workspace = true }
 boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
@@ -88,6 +93,7 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
+biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]
@@ -109,6 +115,7 @@ schema    = [
   "biome_markdown_syntax/schema",
   "biome_module_graph/schema",
   "biome_text_edit/schema",
+  "biome_yaml_formatter/schema",
   "dep:schemars",
 ]
 testing   = []

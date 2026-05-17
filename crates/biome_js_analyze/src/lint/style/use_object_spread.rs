@@ -80,7 +80,8 @@ impl Rule for UseObjectSpread {
         let member_expr = callee.as_js_static_member_expression()?;
 
         let obj = member_expr.object().ok()?;
-        let (reference, obj_name) = global_identifier(&obj)?;
+        let (reference, obj_name) =
+            global_identifier(&obj.as_any_global_identifier_expression()?)?;
         if obj_name.text() != "Object" || ctx.model().binding(&reference).is_some() {
             return None;
         }

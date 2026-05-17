@@ -260,6 +260,7 @@ impl<'a> From<&'a ImportInfo> for ImportCandidate<'a> {
     fn from(value: &'a ImportInfo) -> Self {
         Self {
             has_type_token: value.kind.has_type_token(),
+            is_bare: value.kind == ImportStatementKind::Bare,
             source: value.source.as_ref().map(ImportSourceCandidate::new),
         }
     }

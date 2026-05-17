@@ -38,13 +38,13 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    Parser,
+    CompletedMarker, Parser,
     prelude::ParsedSyntax::{self, *},
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
-    parse_fenced_code_block_force,
+    at_fenced_code_block, backtick_info_violation, info_string_has_backtick,
+    parse_fenced_code_block, parse_fenced_code_block_force,
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
@@ -103,9 +103,22 @@ pub(crate) const TAB_STOP_SPACES: usize = 4;
 /// CommonMark allows 0-3 spaces of optional indentation before block-level
 /// markers (blockquotes §5.1, list items §5.2/§5.3, ATX headings §4.2, etc.).
 pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
+/// CommonMark §5.2 caps ordered list markers at 9 digits.
+pub(crate) const MAX_ORDERED_LIST_MARKER_DIGITS: usize = 9;
+/// CommonMark §4.2 caps ATX headings at 6 levels (`#` through `######`).
+pub(crate) const MAX_ATX_HEADING_LEVEL: usize = 6;
+/// CommonMark §6.7 hard line breaks require at least 2 trailing spaces.
+pub(crate) const MIN_HARD_BREAK_TRAILING_SPACES: usize = 2;
+/// CommonMark §4.1 thematic breaks require a run of at least 3 matching
+/// characters (`-`, `_`, or `*`).
+pub(crate) const MIN_THEMATIC_BREAK_RUN: usize = 3;
+/// CommonMark §4.5 fenced code blocks require an opening fence of at
+/// least 3 backticks or tildes.
+pub(crate) const MIN_FENCE_RUN_LENGTH: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
@@ -259,11 +272,15 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
+        if p.at_blank_line() {
+            p.state_mut().link_reference_definition_continuation = false;
+        }
         let m = p.start();
         p.bump(NEWLINE);
         return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
+        p.state_mut().link_reference_definition_continuation = false;
         // Consume blank-line whitespace as whitespace trivia (structural).
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
@@ -282,12 +299,20 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         return Absent;
     }
 
+    let allow_indent_code_block =
+        allow_indent_code_block && !p.state().link_reference_definition_continuation;
+
     let parsed = if allow_indent_code_block && at_indent_code_block(p) {
         parse_indent_code_block(p)
     } else if at_fenced_code_block(p) {
         parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
+    } else if let Some(range) = backtick_info_violation(p) {
+        // Backtick-fence info strings cannot contain backticks (CommonMark §4.5);
+        // emit a diagnostic before delegating to paragraph parsing.
+        p.error(parse_error::info_string_contains_backtick(p, range));
+        parse_paragraph(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -355,7 +380,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             Ok(link)
         });
         if let Ok(parsed) = link_result {
-            parsed
+            p.state_mut().link_reference_definition_continuation = true;
+            if link_reference_definition_before_dash_thematic_break(p) {
+                Present(parse_empty_paragraph(p))
+            } else {
+                parsed
+            }
         } else {
             parse_paragraph(p)
         }
@@ -403,6 +433,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.bump_any();
         }
         return Absent;
+    }
+
+    if let Present(marker) = &parsed
+        && marker.kind(p) != MD_LINK_REFERENCE_DEFINITION
+    {
+        p.state_mut().link_reference_definition_continuation = false;
     }
 
     parsed
@@ -655,6 +691,34 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(completed)
 }
 
+pub(crate) fn parse_empty_paragraph(p: &mut MarkdownParser) -> CompletedMarker {
+    let paragraph = p.start();
+    let list = p.start();
+    list.complete(p, MD_INLINE_ITEM_LIST);
+    paragraph.complete(p, MD_PARAGRAPH)
+}
+
+fn link_reference_definition_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text == " " || text == "\t" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                break;
+            }
+        }
+
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
+    })
+}
+
 fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bool {
     if end <= start {
         return false;
@@ -805,20 +869,58 @@ fn classify_quote_break_after_newline(
 ) -> QuoteBreakKind {
     p.lookahead(|p| {
         consume_quote_prefix_without_virtual(p, quote_depth);
+        // CommonMark §4.3: a setext underline must sit in the same container
+        // as the paragraph it underlines. When the paragraph is inside a list
+        // item and the residual indent after the `>` prefix is below the
+        // list's required indent, the dash line cannot be a setext underline —
+        // it is a thematic break that ends the list. Reporting it as `Other`
+        // (vs `SetextUnderline`) keeps the `>` prefix unconsumed so the outer
+        // blockquote can re-process the line.
+        let required_indent = p.state().list_item_required_indent;
+        let residual_indent = leading_indent_at_current(p);
+        let underline_in_container = required_indent == 0 || residual_indent >= required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             // Re-lex at line start so the lexer produces block-level tokens
             // (e.g. MD_THEMATIC_BREAK_LITERAL for `---`) instead of MINUS.
             p.force_relex_at_line_start();
-            if p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
-            {
+            let at_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p));
+            if at_setext && underline_in_container {
                 QuoteBreakKind::SetextUnderline
-            } else if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+            } else if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
                 QuoteBreakKind::Other
             } else {
                 QuoteBreakKind::None
             }
         })
+    })
+}
+
+/// Count residual indent columns at the current parser position.
+///
+/// Used after lookahead consumes a container prefix such as `> `. This is not
+/// full line-start indent; it only measures spaces/tabs before the next block
+/// candidate without advancing the real parser.
+fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
+    p.lookahead(|p| {
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.is_empty() {
+                break;
+            }
+
+            for c in text.chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => return indent,
+                }
+            }
+
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        indent
     })
 }
 
@@ -1044,32 +1146,10 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    // Inside a nested list item (depth >= 2), break the paragraph when the
-    // continuation line's indent drops to or below the marker column.
-    // Such lines belong to a parent item, not lazy continuation.
-    // We only check nesting depth, not marker_indent alone, because a
-    // top-level list with leading whitespace (e.g. `  1.  text`) still
-    // allows lazy continuation at indent 0 per CommonMark §5.2.
-    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
-        let marker_indent = p.state().list_item_marker_indent;
-        if marker_indent > 0 {
-            let indent = p.line_start_leading_indent();
-            if indent < required_indent && indent <= marker_indent {
-                return InlineNewlineAction::Break;
-            }
-        }
+    // The invalid fence still belongs to this paragraph; only add the diagnostic.
+    if let Some(range) = backtick_info_violation(p) {
+        p.error(parse_error::info_string_contains_backtick(p, range));
     }
-
-    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
-        let marker_indent = p.state().list_item_marker_indent;
-        if marker_indent > 0 {
-            let indent = p.line_start_leading_indent();
-            if indent < required_indent && indent <= marker_indent {
-                return InlineNewlineAction::Break;
-            }
-        }
-    }
-
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
@@ -1369,28 +1449,69 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> boo
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 {
         let indent = p.line_start_leading_indent();
-        if indent < required_indent {
-            return true;
-        }
+        if indent >= required_indent {
+            scan_list_indent(p, required_indent);
 
-        scan_list_indent(p, required_indent);
-
-        // After stripping list indent, re-check setext/thematic markers
-        // to mirror newline handling in the parse path. Without this,
-        // prescan would include indent bytes and stop one iteration later.
-        // We intentionally skip the heavier post-indent block-interrupt
-        // check here; the following non-NEWLINE pass still catches
-        // interrupts for emphasis-context length calculation.
-        if has_content
-            && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL)
-                    && is_dash_only_thematic_break_text(p.cur_text())))
-        {
+            // After stripping list indent, re-check setext/thematic markers
+            // to mirror newline handling in the parse path. Without this,
+            // prescan would include indent bytes and stop one iteration later.
+            // We intentionally skip the heavier post-indent block-interrupt
+            // check here; the following non-NEWLINE pass still catches
+            // interrupts for emphasis-context length calculation.
+            if has_content
+                && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                    || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                        && is_dash_only_thematic_break_text(p.cur_text())))
+            {
+                return true;
+            }
+        } else if at_block_interrupt_after_indent(p) {
+            // CommonMark §5.2: at insufficient indent we keep scanning so
+            // the emphasis context sees lazy-continuation delimiters, but
+            // a sibling/parent list marker (or other block interrupt) at
+            // the next line still ends the paragraph and must stop the
+            // scan early — without this, deeply nested list benchmarks
+            // walk through every leading-whitespace token of every
+            // following line.
             return true;
         }
     }
 
     false
+}
+
+/// Lookahead: skip leading whitespace tokens on the current line and
+/// return whether the resulting position is a block interrupt or list
+/// marker. Used to short-circuit lazy-continuation scanning when the
+/// next line actually starts a new block.
+///
+/// Per CommonMark §5.2, a line indented 4+ columns *past the parent
+/// list marker* is paragraph text (lazy continuation), never a block
+/// interrupt — return false in that window. Lines below that threshold
+/// can still be sibling/parent list markers, so we keep walking and
+/// re-check, which is what restores the fast path for deeply nested
+/// lists where absolute indent is already large.
+fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        let lazy_threshold = p.state().list_item_marker_indent + INDENT_CODE_BLOCK_SPACES;
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            for c in p.cur_text().chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => {}
+                }
+            }
+            if indent >= lazy_threshold {
+                return false;
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        with_virtual_line_start(p, p.cur_range().start(), |p| {
+            at_block_interrupt(p) || textual_looks_like_list_marker(p)
+        })
+    })
 }
 
 /// Strip list-item indent tokens during inline list length scanning.
@@ -1861,7 +1982,7 @@ fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRan
         let range = p.cur_range();
         let count = p.cur_text().len();
 
-        if count > 6 {
+        if count > MAX_ATX_HEADING_LEVEL {
             Some((range, count))
         } else {
             None
@@ -1884,7 +2005,7 @@ fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
         let hash_count = p.cur_text().len();
 
         // Too many hashes - not a valid heading (must be 1-6)
-        if hash_count > 6 {
+        if hash_count > MAX_ATX_HEADING_LEVEL {
             return false;
         }
 

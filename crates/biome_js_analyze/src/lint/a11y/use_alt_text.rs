@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAltText",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("alt-text").same()],
+        sources: &[RuleSource::EslintJsxA11y("alt-text").same(), RuleSource::HtmlEslint("require-img-alt").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -113,32 +113,29 @@ impl Rule for UseAltText {
                     }
                 }
             }
-            "img" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "img"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
                 }
-            }
-            "area" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "area"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((
                         ValidatedElement::Area,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
-            "input" => {
+            "input"
                 if has_type_image_attribute(element)
                     && !has_alt
                     && !has_aria_label
                     && !has_aria_labelledby
                     && !aria_hidden
-                {
+                => {
                     return Some((
                         ValidatedElement::Input,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
             _ => {}
         }
 

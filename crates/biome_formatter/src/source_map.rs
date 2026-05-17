@@ -26,7 +26,7 @@ use std::iter::FusedIterator;
 ///
 /// The source map internally tracks all the ranges that have been deleted from the source code sorted by the start of the deleted range.
 /// It further stores the absolute count of deleted bytes preceding a range. The deleted range together
-/// with the absolute count allows to re-compute the source location for every transformed location
+/// with the absolute count allows you to re-compute the source location for every transformed location
 /// and has the benefit that it requires significantly fewer memory
 /// than source maps that use a source to destination position marker for every token.
 ///

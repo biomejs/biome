@@ -68,7 +68,7 @@ a {
    content: my-fn("_");
    content: "#{my-fn("_")}";
    content: my-fn("-");
-@@ -14,24 +14,28 @@
+@@ -14,14 +14,14 @@
    content: foo "#{my-fn("foo")}" bar;
    content: "foo #{$description} bar";
  
@@ -88,17 +88,11 @@ a {
  }
  
  @mixin theme($css-property, $css-value, $theme-classes: t) {
-   @each $selector in & {
-     @each $class in $theme-classes {
--      @each $theme, $theme-properties in c(themes) {
-+      @each $theme,
-+      $theme-properties in c(themes) {
+@@ -31,7 +31,9 @@
          $value: $css-value;
  
--        @each $theme-name, $theme-value in $theme-properties {
+         @each $theme-name, $theme-value in $theme-properties {
 -          $rgba-value: "rgba(#{red($theme-value)}, #{green($theme-value)}, #{blue($theme-value)}";
-+        @each $theme-name,
-+        $theme-value in $theme-properties {
 +          $rgba-value: "rgba(#{red($theme-value)}, #{green(
 +            $theme-value
 +          )}, #{blue($theme-value)}";
@@ -139,12 +133,10 @@ a {
 @mixin theme($css-property, $css-value, $theme-classes: t) {
   @each $selector in & {
     @each $class in $theme-classes {
-      @each $theme,
-      $theme-properties in c(themes) {
+      @each $theme, $theme-properties in c(themes) {
         $value: $css-value;
 
-        @each $theme-name,
-        $theme-value in $theme-properties {
+        @each $theme-name, $theme-value in $theme-properties {
           $rgba-value: "rgba(#{red($theme-value)}, #{green(
             $theme-value
           )}, #{blue($theme-value)}";

@@ -125,23 +125,9 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-br-with-end.html:1:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Void elements should not have a closing tag.
-  
-  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
-      │                                       ^^
-    2 │ 
-  
 br-with-end.html:1:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a matching closing tag but instead found '</br>'.
-  
-  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
-      │                                     ^^^^^
-    2 │ 
-  
-  i Expected a matching closing tag here.
+  × Void elements should not have a closing tag. Remove the closing tag.
   
   > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
       │                                     ^^^^^

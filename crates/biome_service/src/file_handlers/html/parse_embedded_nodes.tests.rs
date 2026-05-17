@@ -37,6 +37,7 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -95,6 +96,34 @@ fn snippet_svelte_incorrect() {
 {/snippet}
 
 {@render add(1, 2)}
+"#;
+
+    assert_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_with_correct_method_call_key() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+    const numbers = [1, 2, 3, 4];
+</script>
+{#each numbers as number, index (number.toString())}
+  <p>{number}</p>
+{/each}
+"#;
+
+    assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_with_incorrect_method_call_key() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+    const numbers = [1, 2, 3, 4];
+</script>
+{#each numbers as number, index (number.toString(})}
+  <p>{number}</p>
+{/each}
 "#;
 
     assert_diagnostics(FILE_PATH, FILE_CONTENT);

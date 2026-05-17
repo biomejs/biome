@@ -1,4 +1,4 @@
-use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -43,6 +43,7 @@ declare_lint_rule! {
         version: "next",
         name: "useFocusableInteractive",
         language: "html",
+        sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

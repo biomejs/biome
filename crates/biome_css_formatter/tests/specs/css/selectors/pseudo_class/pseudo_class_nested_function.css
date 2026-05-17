@@ -1,0 +1,15 @@
+/* Regression test for https://github.com/biomejs/biome/issues/10045
+   Nested functional pseudo-classes such as `:not(:where(...))` should not
+   accumulate per-entry indentation when the inner list breaks. */
+
+input:not(:where([type='submit'],[type='checkbox'],[type='radio'],[type='button'],[type='reset'])) {
+	inline-size: 100%;
+}
+
+.button:is(:where(.primary, .secondary, .tertiary, .quaternary, .quinary, .senary)) {
+	color: red;
+}
+
+a:not(:is(.foo, .bar, .baz)):not(:is(.qux, .quux, .corge, .grault, .garply)) {
+	color: blue;
+}

@@ -45,6 +45,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
+use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
 use std::ops::Deref;
@@ -424,7 +425,60 @@ impl From<&ScanKind> for ModuleGraphResolutionKind {
     }
 }
 
-pub type SettingsWithEditor<'a> = SettingsHandle<'a, Option<Configuration>>;
+pub type SettingsWithEditor<'a> = SettingsHandle<'a, (Option<Configuration>, EditorFeatures)>;
+
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize,
+)]
+#[enumflags2::bitflags]
+#[repr(u8)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum EditorFeature {
+    GotoDefinition = 1 << 0,
+}
+
+#[derive(
+    Default,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Serialize,
+    serde::Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub struct EditorFeatures(BitFlags<EditorFeature>);
+
+impl EditorFeatures {
+    pub fn contains(&self, feature: EditorFeature) -> bool {
+        self.0.contains(feature)
+    }
+
+    pub fn with(mut self, feature: EditorFeature) -> Self {
+        self.0.insert(feature);
+        self
+    }
+
+    pub fn insert(&mut self, feature: EditorFeature) {
+        self.0.insert(feature);
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for EditorFeatures {
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("EditorFeatures")
+    }
+
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        <Vec<EditorFeature>>::json_schema(generator)
+    }
+}
 
 /// Handle object holding a temporary lock on the workspace settings until
 /// the deferred language-specific options resolution is called
@@ -449,14 +503,27 @@ impl<'a, E> AsRef<Settings> for SettingsHandle<'a, E> {
     }
 }
 
-impl<'a> SettingsHandle<'a, Option<Configuration>> {
+impl<'a> SettingsHandle<'a, (Option<Configuration>, EditorFeatures)> {
+    fn configuration(&self) -> Option<&Configuration> {
+        self.editor.0.as_ref()
+    }
+
+    fn features(&self) -> &EditorFeatures {
+        &self.editor.1
+    }
+
+    /// Whether the editor needs document services. Current features that need it:
+    /// - [EditorFeatures::GotoDefinition]
+    pub(crate) fn needs_document_services(&self) -> bool {
+        self.features().contains(EditorFeature::GotoDefinition)
+    }
+
     pub(crate) fn full_source(&self) -> Option<Arc<ConfigurationSource>> {
         self.as_ref().source.clone()
     }
 
     fn as_merged_settings(&self) -> Settings {
-        self.editor
-            .as_ref()
+        self.configuration()
             .map(|editor| {
                 let mut settings = self.inner.read().unwrap().clone();
                 let workspace_directory = self.as_ref().source.as_ref().and_then(|source| {
@@ -1935,6 +2002,11 @@ impl OverrideSettingPattern {
 
         if let Some(interpolation) = html_parser.interpolation {
             options.set_double_text_expression(interpolation.value());
+        }
+        if options.is_html()
+            && let Some(vue) = html_parser.vue
+        {
+            options.set_vue(vue.value());
         }
     }
 

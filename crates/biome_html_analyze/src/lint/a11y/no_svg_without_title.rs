@@ -5,8 +5,8 @@ use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFile
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 
-use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
 use crate::Aria;
+use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.

@@ -18,3 +18,14 @@ padding:
 1rem;
 }
 }
+
+@function normalize($section) {
+@if index($include, $section) {
+@return true;
+}
+// Keep this comment before else.
+@else if not index($exclude, $section) and index($include, all) {
+@return true;
+}
+@return false;
+}

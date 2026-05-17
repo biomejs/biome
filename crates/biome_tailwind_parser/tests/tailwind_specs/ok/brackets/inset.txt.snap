@@ -25,7 +25,12 @@ TwRoot {
                 minus_token: DASH@7..8 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@8..9 "[" [] [],
-                    value_token: TW_VALUE@9..13 "20px" [] [],
+                    value: CssGenericComponentValueList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@9..11 "20" [] [],
+                            unit_token: IDENT@11..13 "px" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@13..15 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
@@ -40,7 +45,12 @@ TwRoot {
                 minus_token: DASH@22..23 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@23..24 "[" [] [],
-                    value_token: TW_VALUE@24..28 "15px" [] [],
+                    value: CssGenericComponentValueList [
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@24..26 "15" [] [],
+                            unit_token: IDENT@26..28 "px" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@28..29 "]" [] [],
                 },
                 modifier: missing (optional),
@@ -66,7 +76,10 @@ TwRoot {
         1: DASH@7..8 "-" [] []
         2: TW_ARBITRARY_VALUE@8..15
           0: L_BRACKET@8..9 "[" [] []
-          1: TW_VALUE@9..13 "20px" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@9..13
+            0: CSS_REGULAR_DIMENSION@9..13
+              0: CSS_NUMBER_LITERAL@9..11 "20" [] []
+              1: IDENT@11..13 "px" [] []
           2: R_BRACKET@13..15 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
@@ -78,7 +91,10 @@ TwRoot {
         1: DASH@22..23 "-" [] []
         2: TW_ARBITRARY_VALUE@23..29
           0: L_BRACKET@23..24 "[" [] []
-          1: TW_VALUE@24..28 "15px" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@24..28
+            0: CSS_REGULAR_DIMENSION@24..28
+              0: CSS_NUMBER_LITERAL@24..26 "15" [] []
+              1: IDENT@26..28 "px" [] []
           2: R_BRACKET@28..29 "]" [] []
         3: (empty)
       3: (empty)

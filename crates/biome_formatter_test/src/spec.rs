@@ -202,6 +202,7 @@ impl<'a> SpecSnapshot<'a> {
                 document_file_source: self.document_file_source,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             })
             .unwrap();
 
@@ -297,6 +298,7 @@ impl<'a> SpecSnapshot<'a> {
                     content: output_code.clone(),
                     version: 1,
                     inline_config: None,
+                    editor_features: None,
                 })
                 .unwrap();
 

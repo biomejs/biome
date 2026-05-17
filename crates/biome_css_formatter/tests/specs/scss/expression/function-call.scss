@@ -10,6 +10,9 @@ b
 y,  $b:
 z
   );
+keyword-args-empty-line:keyword-args-empty-line($a: 1,
+
+$b: 2);
 mixed-args:mixed-args(  y,
   $b:
 z );

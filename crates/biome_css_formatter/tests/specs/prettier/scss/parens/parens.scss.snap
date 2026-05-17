@@ -309,16 +309,7 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -58,7 +58,7 @@
-   padding-right: (100% * $info-width / (1 - $image-width));
-   padding-bottom: (
-     100% * $image-height /
--      ($image-width-responsive + $image-margin-responsive * 2)
-+    ($image-width-responsive + $image-margin-responsive * 2)
-   );
- }
- 
-@@ -67,15 +67,15 @@
+@@ -67,7 +67,7 @@
    content: attr(data-title);
    color: var(--main-bg-color);
    background-color: rgb(255, 0, 0);
@@ -327,13 +318,12 @@ a {
    width: calc(100% - (#{var(--g-spacing)} - #{$iframe-x-padding}) * 2);
    padding-bottom: (
      100% * $image-height /
--      ($image-width-responsive + $image-margin-responsive * 2)
-+    ($image-width-responsive + $image-margin-responsive * 2)
+@@ -75,7 +75,7 @@
    );
    padding-top: var(--paddingC);
    margin: 1 * 1 (1) * 1 1 * (1) (1) * (1);
 -  prop: -1 * -1 -(-1) * -1 -1 * -(-1) -(-1) * -(-1);
-+  prop: -1 * -1 - (-1) * -1 - 1 * -(-1) - (-1) * -(-1);
++  prop: -1 * -1 - (-1) * -1 -1 * -(-1) - (-1) * -(-1);
    prop1: #{($m) * (10)};
    prop2: #{$m * 10};
    prop3: #{-(-$m) * -(-10)};
@@ -342,9 +332,8 @@ a {
    prop6: word + 1; /* word1 */
    prop7: word - 1; /* word-1 */
 -  prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
--  prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
 +  prop8: +1 + 1 + 1 + 1; /* +1 +1 +1 +1 */
-+  prop9: -1 - 1 - 1 - 1; /* -1 -1 -1 -1 */
+   prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
    prop10: (-1);
    prop11: (+1);
 -  prop12: 10px/8px;
@@ -408,7 +397,7 @@ a {
 +  prop42: 1px + 1px + 1px + 1px;
    prop43: 1px + 1px + 1px + 1px;
 -  prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
-+  prop44: -1 + -1 - (-1) + -1 - 1 + -(-1) - (-1) + -(-1);
++  prop44: -1 + -1 - (-1) + -1 -1 + -(-1) - (-1) + -(-1);
    prop45: round(1.5) * 2 round(1.5) * 2 round(1.5) * 2 round(1.5) * 2;
    prop46: 2 * round(1.5) 2 * round(1.5) 2 * round(1.5) 2 * round(1.5);
    prop47: (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2);
@@ -422,14 +411,14 @@ a {
 -  prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
 +  prop69: "test" + 1 "test" + 1 "test" + 1 "test" + 1;
 +  prop70: 1 + "test" 1 + "test" 1 + "test" 1 + "test";
-+  prop71: "test" - 1 "test" - 1 "test" - 1 "test" - 1;
++  prop71: "test" - 1 "test" -1 "test" - 1 "test" - 1;
 +  prop72: 1 - "test" 1 - "test" 1 - "test" 1 - "test";
    prop73: calc(100% * 2px) calc(100% * 2px) calc(100% * 2px) calc(100% * 2px);
    prop74: calc(100% / 2px) calc(100% / 2px) calc(100% / 2px) calc(100% / 2px);
 -  prop75: calc(100%+2px) calc(100% +2px) calc(100%+ 2px) calc(100% + 2px);
 -  prop76: calc(100%-2px) calc(100% -2px) calc(100%- 2px) calc(100% - 2px);
 +  prop75: calc(100% + 2px) calc(100% + 2px) calc(100% + 2px) calc(100% + 2px);
-+  prop76: calc(100% - 2px) calc(100% - 2px) calc(100% - 2px) calc(100% - 2px);
++  prop76: calc(100% - 2px) calc(100% -2px) calc(100% - 2px) calc(100% - 2px);
    prop77: calc(-5px);
    prop78: calc(+5px);
    prop79: calc(-100px + 100px);
@@ -498,7 +487,7 @@ a {
   padding-right: (100% * $info-width / (1 - $image-width));
   padding-bottom: (
     100% * $image-height /
-    ($image-width-responsive + $image-margin-responsive * 2)
+      ($image-width-responsive + $image-margin-responsive * 2)
   );
 }
 
@@ -511,11 +500,11 @@ a {
   width: calc(100% - (#{var(--g-spacing)} - #{$iframe-x-padding}) * 2);
   padding-bottom: (
     100% * $image-height /
-    ($image-width-responsive + $image-margin-responsive * 2)
+      ($image-width-responsive + $image-margin-responsive * 2)
   );
   padding-top: var(--paddingC);
   margin: 1 * 1 (1) * 1 1 * (1) (1) * (1);
-  prop: -1 * -1 - (-1) * -1 - 1 * -(-1) - (-1) * -(-1);
+  prop: -1 * -1 - (-1) * -1 -1 * -(-1) - (-1) * -(-1);
   prop1: #{($m) * (10)};
   prop2: #{$m * 10};
   prop3: #{-(-$m) * -(-10)};
@@ -524,7 +513,7 @@ a {
   prop6: word + 1; /* word1 */
   prop7: word - 1; /* word-1 */
   prop8: +1 + 1 + 1 + 1; /* +1 +1 +1 +1 */
-  prop9: -1 - 1 - 1 - 1; /* -1 -1 -1 -1 */
+  prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
   prop10: (-1);
   prop11: (+1);
   prop12: 10px / 8px;
@@ -567,7 +556,7 @@ a {
   prop41: --(1);
   prop42: 1px + 1px + 1px + 1px;
   prop43: 1px + 1px + 1px + 1px;
-  prop44: -1 + -1 - (-1) + -1 - 1 + -(-1) - (-1) + -(-1);
+  prop44: -1 + -1 - (-1) + -1 -1 + -(-1) - (-1) + -(-1);
   prop45: round(1.5) * 2 round(1.5) * 2 round(1.5) * 2 round(1.5) * 2;
   prop46: 2 * round(1.5) 2 * round(1.5) 2 * round(1.5) 2 * round(1.5);
   prop47: (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2);
@@ -586,12 +575,12 @@ a {
   prop64: (2 + $width) (2 + $width) (2 + $width) (2 + $width);
   prop69: "test" + 1 "test" + 1 "test" + 1 "test" + 1;
   prop70: 1 + "test" 1 + "test" 1 + "test" 1 + "test";
-  prop71: "test" - 1 "test" - 1 "test" - 1 "test" - 1;
+  prop71: "test" - 1 "test" -1 "test" - 1 "test" - 1;
   prop72: 1 - "test" 1 - "test" 1 - "test" 1 - "test";
   prop73: calc(100% * 2px) calc(100% * 2px) calc(100% * 2px) calc(100% * 2px);
   prop74: calc(100% / 2px) calc(100% / 2px) calc(100% / 2px) calc(100% / 2px);
   prop75: calc(100% + 2px) calc(100% + 2px) calc(100% + 2px) calc(100% + 2px);
-  prop76: calc(100% - 2px) calc(100% - 2px) calc(100% - 2px) calc(100% - 2px);
+  prop76: calc(100% - 2px) calc(100% -2px) calc(100% - 2px) calc(100% - 2px);
   prop77: calc(-5px);
   prop78: calc(+5px);
   prop79: calc(-100px + 100px);

@@ -34,15 +34,45 @@ import { E } from "mod";
 ```
 mergeable_unsorted_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
   
-    1 │ // File header comment
-  > 2 │ import type { T1, T2 } from "mod";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ // Comment 2
-    4 │ import type { U1 } from "package";
+     1 │ // File header comment
+   > 2 │ import type { T1, T2 } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Comment 2
+   > 4 │ import type { U1 } from "package";
+        ...
+  > 21 │ import type { U3 } from "package";
+  > 22 │ // Comment 10
+  > 23 │ import { E } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Sort these imports.
+  
+     1 │ // File header comment
+   > 2 │ import type { T1, T2 } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Comment 2
+   > 4 │ import type { U1 } from "package";
+        ...
+  > 15 │ // Comment 8
+  > 16 │ import type { U2 } from "package";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // Chunk 2
+  
+  i Sort these imports.
+  
+    20 │ // Comment 9
+  > 21 │ import type { U3 } from "package";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 22 │ // Comment 10
+  > 23 │ import { E } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
      1  1 │   // File header comment
      2    │ - import·type·{·T1,·T2·}·from·"mod";
