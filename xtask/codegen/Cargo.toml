@@ -4,6 +4,11 @@ version = "0.0.0"
 edition = "2024"
 publish = false
 
+[[test]]
+name              = "global_types_codegen"
+path              = "tests/global_types_codegen.rs"
+required-features = ["global_types"]
+
 [dependencies]
 anyhow                = { workspace = true }
 biome_analyze         = { workspace = true, features = ["schema"], optional = true }
@@ -41,6 +46,7 @@ quote                 = "1.0.36"
 schemars              = { workspace = true, optional = true }
 serde                 = { workspace = true, optional = true }
 serde_json            = { workspace = true, optional = true }
+sha2                  = { workspace = true, optional = true }
 ureq                  = "3.3.0"
 xtask_glue            = { workspace = true }
 
@@ -62,6 +68,7 @@ configuration = [
   "pulldown-cmark",
 ]
 external_data = ["serde", "serde_json", "ureq/default", "ureq/json"]
+global_types  = ["biome_js_parser", "biome_js_syntax", "biome_rowan", "sha2"]
 schema        = [
   "biome_analyze",
   "biome_configuration",
