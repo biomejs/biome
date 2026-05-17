@@ -150,7 +150,9 @@ impl Rule for NoSvgWithoutTitle {
 
         // TODO: use `aria_roles.has_name_required_image_role` of aria crate
         // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
-        let Some(role_attribute) = node.find_attribute_by_name("role") else {
+        let [role_attribute, aria_label, aria_labelledby] = tag_element
+            .find_multiple_attributes_by_name(&["role", "aria-label", "aria-labelledby"]);
+        let Some(role_attribute) = role_attribute else {
             return Some(());
         };
 
@@ -174,8 +176,6 @@ impl Rule for NoSvgWithoutTitle {
             .any(|role| NAME_REQUIRED_ROLES.contains(&role));
 
         if has_name_required_role {
-            let aria_label = node.find_attribute_by_name("aria-label");
-            let aria_labelledby = node.find_attribute_by_name("aria-labelledby");
             let is_valid_a11y_attribute = aria_label.is_some()
                 || is_valid_attribute_value(aria_labelledby, &html_element.children())
                     .unwrap_or(false);

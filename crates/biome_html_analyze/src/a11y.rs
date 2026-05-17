@@ -184,16 +184,10 @@ pub(crate) fn html_self_closing_element_has_truthy_aria_hidden(
 pub(crate) fn html_self_closing_element_has_accessible_name(
     element: &biome_html_syntax::HtmlSelfClosingElement,
 ) -> bool {
-    let has_aria_label = element
-        .find_attribute_by_name("aria-label")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    let has_aria_labelledby = element
-        .find_attribute_by_name("aria-labelledby")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    let has_title = element
-        .find_attribute_by_name("title")
-        .is_some_and(|attr| has_non_empty_value(&attr));
-    has_aria_label || has_aria_labelledby || has_title
+    element
+        .find_multiple_attributes_by_name(&["aria-label", "aria-labelledby", "title"])
+        .iter()
+        .any(|attr| attr.as_ref().is_some_and(has_non_empty_value))
 }
 
 /// Checks if an [`HtmlSelfClosingElement`] has the named attribute with a non-empty value.
