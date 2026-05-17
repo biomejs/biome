@@ -1160,11 +1160,16 @@ fn break_for_list_interrupt_after_inline_newline(
         return false;
     }
 
+    // Line sits at sibling/parent level. A list marker here ends the
+    // current paragraph (CommonMark §5.2). Tabs need the broad token-aware
+    // lookahead because `MD_TEXTUAL_LITERAL` can absorb the tab and any
+    // following marker; the non-tab path only needs to cover non-1 ordered
+    // siblings continuing an existing list.
     if indent < required_indent {
-        if !line_start_indent_contains_tab(p) {
-            return false;
+        if line_start_indent_contains_tab(p) {
+            return line_starts_with_list_marker_after_indent(p, indent);
         }
-        return line_starts_with_list_marker_after_indent(p, indent);
+        return line_starts_with_nonone_ordered_marker_after_indent(p, indent);
     }
 
     let skip = indent.min(required_indent);
@@ -1181,13 +1186,46 @@ fn break_for_list_interrupt_after_inline_newline(
 }
 
 /// True if current `MD_TEXTUAL_LITERAL`'s leading space/tab run contains a tab.
-/// Gates tab-only dedent recovery in [`break_for_list_interrupt_after_inline_newline`].
 fn line_start_indent_contains_tab(p: &MarkdownParser) -> bool {
     p.at(MD_TEXTUAL_LITERAL)
         && p.cur_text()
             .chars()
             .take_while(|c| *c == ' ' || *c == '\t')
             .any(|c| c == '\t')
+}
+
+/// Lookahead: after skipping `indent` columns of leading whitespace, does
+/// the next token begin a non-1 ordered marker followed by whitespace/EOL?
+/// Covers `parse_inline_item_list`'s blind spot (`textual_looks_like_list_marker`
+/// only matches `1.`/`1)` for ordered); `1.`/`1)` and bullets are left to the
+/// inline loop.
+fn line_starts_with_nonone_ordered_marker_after_indent(
+    p: &mut MarkdownParser,
+    indent: usize,
+) -> bool {
+    p.lookahead(|p| {
+        p.skip_line_indent(indent);
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            let text = p.cur_text();
+            if text == "1." || text == "1)" {
+                return false;
+            }
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text
+                .strip_prefix("1.")
+                .or_else(|| text.strip_prefix("1)"))
+                .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\n', '\r']))
+            {
+                return false;
+            }
+            return textual_starts_with_ordered_marker(text);
+        }
+        false
+    })
 }
 
 /// Lookahead: after skipping `indent` columns of leading whitespace, is the next
@@ -1666,7 +1704,14 @@ fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
             p.bump(MD_TEXTUAL_LITERAL);
         }
         with_virtual_line_start(p, p.cur_range().start(), |p| {
-            at_block_interrupt(p) || textual_looks_like_list_marker(p)
+            if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return true;
+            }
+            // Mirror `parse_inline_item_list`'s break on non-1 ordered
+            // sibling markers: a marker still folded into `MD_TEXTUAL_LITERAL`
+            // would otherwise let the prescan walk past the paragraph boundary
+            // and leak emphasis delimiters from the next list item.
+            p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
         })
     })
 }
