@@ -455,7 +455,7 @@ fn module_replacement_tokens(replacement: &ModuleReplacement) -> proc_macro2::To
 }
 
 pub fn generate_module_replacements(mode: Mode) -> Result<()> {
-    eprintln!("Fetching e18e data");
+    println!("Fetching e18e data");
 
     let manifests = [
         ("native", E18E_NATIVE_DATA_URL),
@@ -467,7 +467,7 @@ pub fn generate_module_replacements(mode: Mode) -> Result<()> {
 
     for (name, url) in manifests {
         let manifest = fetch_manifest(url)?;
-        eprintln!(
+        println!(
             "Loaded {name} manifest: {} mappings, {} replacements",
             manifest.mappings.len(),
             manifest.replacements.len()

@@ -19,12 +19,14 @@
 /crates/biome_css_analyze/src/{lint,assist,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+/crates/biome_css_analyze/src/baseline_data.rs linguist-generated=true text=auto eol=lf
 # JSON
 /crates/biome_json_formatter/src/json/any/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_json_analyze/src/{lint,assist,syntax}.rs linguist-generated=true text=auto eol=lf
 /crates/biome_json_analyze/src/{lint,assist,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_json_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_json_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+/crates/biome_json_analyze/src/module_replacements_data.rs linguist-generated=true text=auto eol=lf
 # JS
 /crates/biome_js_formatter/src/{js,jsx,ts}/any/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/{lint,assist,syntax}.rs linguist-generated=true text=auto eol=lf
