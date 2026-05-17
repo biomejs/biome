@@ -6,7 +6,7 @@ use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
 };
-use biome_console::{BufferConsole, MarkupBuf, markup};
+use biome_console::{BufferConsole, Console, LogLevel, Markup, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -58,6 +58,51 @@ import     { type     something } from "file.svelte";
 const hello  :      string      = "world";
 </script>
 <div></div>"#;
+
+#[derive(Default)]
+struct SanitizingConsole {
+    input: Option<String>,
+    output: String,
+}
+
+impl SanitizingConsole {
+    fn with_input(input: &str) -> Self {
+        Self {
+            input: Some(input.to_string()),
+            output: String::new(),
+        }
+    }
+
+    fn into_output(self) -> String {
+        self.output
+    }
+}
+
+impl Console for SanitizingConsole {
+    fn println(&mut self, level: LogLevel, args: Markup) {
+        self.print(level, args);
+        self.output.push('\n');
+    }
+
+    fn print(&mut self, _level: LogLevel, args: Markup) {
+        let content = markup_to_string(markup! {
+            {args.to_owned()}
+        });
+        self.output.push_str(
+            &content
+                .replace('\u{26a0}', "!")
+                .replace('\u{2714}', "\u{221a}"),
+        );
+    }
+
+    fn print_raw(&mut self, _level: LogLevel, content: &str) {
+        self.output.push_str(content);
+    }
+
+    fn read(&mut self) -> Option<String> {
+        self.input.take()
+    }
+}
 
 const APPLY_TRAILING_COMMAS_BEFORE: &str = r#"
 const a = [
@@ -1186,6 +1231,22 @@ fn format_stdin_successfully() {
         console,
         result,
     ));
+}
+
+#[test]
+fn format_stdin_preserves_single_codepoint_unicode_when_stdout_is_sanitized() {
+    let fs = MemoryFileSystem::default();
+    let input = "const a = `\u{26a0}`;\nconst b = `\u{2714}`;\n";
+    let mut console = SanitizingConsole::with_input(input);
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "probe.ts"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_eq!(console.into_output(), input);
 }
 
 #[test]
