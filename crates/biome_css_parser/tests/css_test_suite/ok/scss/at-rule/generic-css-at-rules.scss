@@ -1,5 +1,3 @@
-@IMPORT Keep;
-
 @#{$rule-name} #{$value};
 
 @unknown #{meta.inspect($value)} {
