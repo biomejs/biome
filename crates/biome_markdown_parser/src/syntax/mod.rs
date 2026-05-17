@@ -1163,9 +1163,8 @@ fn break_for_list_interrupt_after_inline_newline(
     // Line sits at sibling/parent level. A list marker here ends the
     // current paragraph (CommonMark §5.2). Tabs need the broad token-aware
     // lookahead because `MD_TEXTUAL_LITERAL` can absorb the tab and any
-    // following marker (#10333); the non-tab path only needs to cover the
-    // gap in `parse_inline_item_list`'s own marker check — non-1 ordered
-    // siblings continuing an existing list (#10374).
+    // following marker; the non-tab path only needs to cover non-1 ordered
+    // siblings continuing an existing list.
     if indent < required_indent {
         if line_start_indent_contains_tab(p) {
             return line_starts_with_list_marker_after_indent(p, indent);
@@ -1709,11 +1708,9 @@ fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
                 return true;
             }
             // Mirror `parse_inline_item_list`'s break on non-1 ordered
-            // sibling markers (#10374): `textual_looks_like_list_marker`
-            // only matches `1.`/`1)` for ordered, so a `2.`-style sibling
-            // still folded into `MD_TEXTUAL_LITERAL` would otherwise let
-            // the prescan walk past the paragraph boundary and leak
-            // emphasis delimiters from the next list item.
+            // sibling markers: a marker still folded into `MD_TEXTUAL_LITERAL`
+            // would otherwise let the prescan walk past the paragraph boundary
+            // and leak emphasis delimiters from the next list item.
             p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
         })
     })
