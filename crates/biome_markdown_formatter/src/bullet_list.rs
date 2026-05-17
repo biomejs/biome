@@ -87,8 +87,8 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
             }
         }
 
-        joiner.finish()?;
-        write!(f, [hard_line_break()])
+        joiner.finish()
+        // write!(f, [hard_line_break()])
     }
 }
 
@@ -265,25 +265,27 @@ impl ListBlockList {
 
 impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        let mut iter = BlockListIterator::new(self.content.iter());
+        let mut len = self.content.len();
+        let mut iter = BlockListIterator::new(self.content.iter()).enumerate();
         let mut pending_breaks: u8 = 0;
-
-        while let Some(item) = iter.next() {
-            for prefix in iter.drain_quote_prefixes() {
-                write!(
-                    f,
-                    [prefix.format().with_options(FormatMdQuotePrefixOptions {
-                        should_remove: true
-                    })]
-                )?;
-            }
+        while let Some((index, item)) = iter.next() {
             match item {
                 BlockListIteratorItem::WithContinuationIndent {
                     continuation,
                     middle_block,
                     content,
+                    quote_prefix,
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
+
+                    for prefix in quote_prefix {
+                        write!(
+                            f,
+                            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                                should_remove: true
+                            })]
+                        )?;
+                    }
 
                     Self::emit_pending_breaks(pending_breaks, &content, f)?;
                     Self::fmt_list_content(&content, f)?;
@@ -316,8 +318,19 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                 BlockListIteratorItem::OnlyContinuationIndent {
                     content,
                     continuation,
+                    quote_prefix,
                 } => {
                     f.context().comments().is_suppressed(continuation.syntax());
+
+                    for prefix in quote_prefix {
+                        write!(
+                            f,
+                            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                                should_remove: true
+                            })]
+                        )?;
+                    }
+
                     Self::emit_pending_breaks(pending_breaks, &content, f)?;
                     Self::fmt_list_content(&content, f)?;
                     write!(
@@ -331,7 +344,15 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     pending_breaks = 1;
                 }
 
-                BlockListIteratorItem::Simple(content) => {
+                BlockListIteratorItem::Simple((content, quote_prefix)) => {
+                    for prefix in quote_prefix {
+                        write!(
+                            f,
+                            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                                should_remove: true
+                            })]
+                        )?;
+                    }
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
                     {
                         write!(
@@ -395,12 +416,20 @@ enum BlockListIteratorItem {
         content: AnyMdBlock,
         middle_block: AnyMdBlock,
         continuation: MdContinuationIndent,
+        quote_prefix: Vec<MdQuotePrefix>,
     },
     OnlyContinuationIndent {
         content: AnyMdBlock,
         continuation: MdContinuationIndent,
+        quote_prefix: Vec<MdQuotePrefix>,
     },
-    Simple(AnyMdBlock),
+    Simple((AnyMdBlock, Vec<MdQuotePrefix>)),
+}
+
+impl BlockListIteratorItem {
+    fn is_newline(&self) -> bool {
+        matches!(self, BlockListIteratorItem::Simple(block) if block.0.is_newline())
+    }
 }
 
 impl Debug for BlockListIteratorItem {
@@ -429,9 +458,11 @@ impl Iterator for BlockListIterator {
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(continuation)) =
                 second_block
             {
+                let quote_prefix = self.drain_quote_prefixes();
                 Some(BlockListIteratorItem::OnlyContinuationIndent {
                     content,
                     continuation,
+                    quote_prefix,
                 })
             } else {
                 let third_block = self.next_block();
@@ -441,27 +472,39 @@ impl Iterator for BlockListIterator {
                             continuation,
                         )) = third_block
                         {
+                            let quote_prefix = self.drain_quote_prefixes();
                             Some(BlockListIteratorItem::WithContinuationIndent {
                                 content,
                                 middle_block: second_block,
+                                quote_prefix,
                                 continuation,
                             })
                         } else {
                             self.queue.push_back(Some(second_block));
                             self.queue.push_back(Some(third_block));
-                            Some(BlockListIteratorItem::Simple(content))
+                            Some(BlockListIteratorItem::Simple((
+                                content,
+                                self.drain_quote_prefixes(),
+                            )))
                         }
                     }
                     None => {
                         self.queue.push_back(Some(second_block));
-                        Some(BlockListIteratorItem::Simple(content))
+                        Some(BlockListIteratorItem::Simple((
+                            content,
+                            self.drain_quote_prefixes(),
+                        )))
                     }
                 }
             }
         } else {
-            Some(BlockListIteratorItem::Simple(content))
+            Some(BlockListIteratorItem::Simple((
+                content,
+                self.drain_quote_prefixes(),
+            )))
         }
     }
 }
 
 impl FusedIterator for BlockListIterator {}
+impl ExactSizeIterator for BlockListIterator {}

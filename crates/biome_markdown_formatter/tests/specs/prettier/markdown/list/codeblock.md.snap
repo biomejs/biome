@@ -50,7 +50,7 @@ info: markdown/list/codeblock.md
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -12,7 +12,6 @@
+@@ -13,7 +13,6 @@
     ```
  
  
@@ -62,7 +62,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -7,13 +7,15 @@
+@@ -7,6 +7,8 @@
      hard_line_break,
      "const a = 1;",
      hard_line_break,
@@ -71,15 +71,6 @@ IR differences:
      "const b = 2;",
      hard_line_break,
      hard_line_break,
-     "```"
-   ]),
--  hard_line_break,
--  "2. ",
-+  "
-+2. ",
-   align(3, [
-     "ol02",
-     empty_line,
 @@ -21,6 +23,8 @@
      hard_line_break,
      "const a = 1;",
@@ -97,7 +88,7 @@ IR differences:
  
  - ",
    align(2, [
-@@ -38,13 +41,15 @@
+@@ -38,6 +41,8 @@
      hard_line_break,
      "const a = 1;",
      hard_line_break,
@@ -106,15 +97,6 @@ IR differences:
      "const b = 2;",
      hard_line_break,
      hard_line_break,
-     "```"
-   ]),
--  hard_line_break,
--  "- ",
-+  "
-+- ",
-   align(2, [
-     "ul02",
-     empty_line,
 @@ -52,6 +57,8 @@
      hard_line_break,
      "const a = 1;",

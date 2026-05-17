@@ -150,9 +150,12 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let content_count = self.node.len() - trailing_count;
         let mut iter = self.node.iter().enumerate().peekable();
         while let Some((index, node)) = iter.next() {
+            dbg!(node.syntax().kind());
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
                 let is_leading = still_leading;
                 let is_trailing = index >= content_count;
+                let next_is_bull_item = iter.peek().is_some_and(|(_, next)| next.is_list());
+
                 if prev_was_header && !is_leading && !is_trailing {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         should_remove: true,
@@ -173,8 +176,11 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     }
                 } else {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: is_leading || is_trailing,
+                        should_remove: is_leading || is_trailing || next_is_bull_item,
                     }));
+                    if next_is_bull_item {
+                        joiner.entry(&empty_line());
+                    }
                 }
                 prev_was_header = false;
             } else {
