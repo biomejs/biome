@@ -1115,20 +1115,36 @@ impl VcsIgnoredPatterns {
         path: &Utf8Path,
         is_dir: bool,
     ) -> bool {
-        let root_ignored = {
-            let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched(path, is_dir).is_ignore()
-        };
+        let mut last_decision: Option<bool> = None;
 
-        let nested_ignored = nested.iter().any(|gitignore| {
-            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
-                gitignore.matched(stripped_path, is_dir).is_ignore()
-            } else {
-                false
+        if let Ok(stripped) = path.strip_prefix(root.path()) {
+            let m = root.matched_path_or_any_parents(stripped, is_dir);
+            if m.is_ignore() {
+                last_decision = Some(true);
+            } else if m.is_whitelist() {
+                last_decision = Some(false);
             }
-        });
+        }
 
-        root_ignored || nested_ignored
+        let mut applicable: Vec<&Gitignore> = nested
+            .iter()
+            .filter(|gitignore| path.strip_prefix(gitignore.path()).is_ok())
+            .collect();
+        applicable.sort_by_key(|gitignore| gitignore.path().as_os_str().len());
+
+        for gitignore in applicable {
+            let Ok(stripped) = path.strip_prefix(gitignore.path()) else {
+                continue;
+            };
+            let m = gitignore.matched_path_or_any_parents(stripped, is_dir);
+            if m.is_ignore() {
+                last_decision = Some(true);
+            } else if m.is_whitelist() {
+                last_decision = Some(false);
+            }
+        }
+
+        last_decision.unwrap_or(false)
     }
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
