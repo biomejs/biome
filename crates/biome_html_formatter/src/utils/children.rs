@@ -1,15 +1,27 @@
 use std::{
+    fmt,
     iter::{FusedIterator, Peekable},
     str::Chars,
 };
 
+use biome_console::{
+    fmt::{Display, Formatter as ConsoleFormatter},
+    markup,
+};
 use biome_formatter::{
     Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
 };
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlClosingElement};
-use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
+use biome_html_syntax::{
+    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlLanguage, HtmlSyntaxToken,
+};
+use biome_rowan::{
+    AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
+};
 
-use crate::{HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext};
+use crate::{
+    HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext,
+    utils::metadata::get_element_css_display,
+};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
@@ -60,7 +72,6 @@ impl HtmlWord {
         self.text.chars().count() == 1
     }
 
-    #[expect(dead_code)]
     pub(crate) fn text(&self) -> &str {
         &self.text
     }
@@ -139,8 +150,90 @@ impl HtmlChild {
     }
 }
 
+/// A debug helper for displaying a sequence of [HtmlChild] in a more human readable way. Can be activated in debug builds by setting `DEBUG_HTML_FORMATTER_CHILDREN=1` in the environment variables.
+///
+/// This exists because just dbg! printing the the children can be very verbose, and its hard to tell what CssDisplay each element has, which is often the most important part when debugging whitespace sensitivity issues.
+pub(crate) struct DisplayHtmlChildSequence<'a>(&'a [HtmlChild]);
+
+impl<'a> DisplayHtmlChildSequence<'a> {
+    pub(crate) const fn new(children: &'a [HtmlChild]) -> Self {
+        Self(children)
+    }
+}
+
+impl Display for DisplayHtmlChildSequence<'_> {
+    fn fmt(&self, fmt: &mut ConsoleFormatter) -> std::io::Result<()> {
+        let count = self.0.len();
+        fmt.write_markup(markup! {
+            <Emphasis>"HtmlChild sequence ("{count}"):"</Emphasis>"\n"
+            <Emphasis>"idx  kind        detail"</Emphasis>"\n"
+        })?;
+
+        for (index, child) in self.0.iter().enumerate() {
+            fmt.write_fmt(std::format_args!(
+                "{index:<4} {kind:<11} {detail}\n",
+                kind = html_child_kind(child),
+                detail = HtmlChildDetail(child),
+            ))?;
+        }
+
+        Ok(())
+    }
+}
+
+struct HtmlChildDetail<'a>(&'a HtmlChild);
+
+impl fmt::Display for HtmlChildDetail<'_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            HtmlChild::Word(word) => std::write!(fmt, "{:?}", word.text()),
+            HtmlChild::Comment(comment) => std::write!(fmt, "{:?}", comment.text()),
+            HtmlChild::Whitespace => fmt.write_str("\" \""),
+            HtmlChild::Newline => fmt.write_str("\\n"),
+            HtmlChild::EmptyLine => fmt.write_str("\\n\\n"),
+            HtmlChild::NonText(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
+            HtmlChild::Verbatim(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
+        }
+    }
+}
+
+struct HtmlElementDetail<'a>(&'a AnyHtmlElement);
+
+impl fmt::Display for HtmlElementDetail<'_> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(name) = self.0.name() {
+            std::write!(
+                fmt,
+                "<{}> display={:?}",
+                name.text(),
+                get_element_css_display(self.0)
+            )
+        } else {
+            std::write!(
+                fmt,
+                "{:?} display={:?}",
+                self.0.syntax().kind(),
+                get_element_css_display(self.0)
+            )
+        }
+    }
+}
+
+const fn html_child_kind(child: &HtmlChild) -> &'static str {
+    match child {
+        HtmlChild::Word(_) => "Word",
+        HtmlChild::Comment(_) => "Comment",
+        HtmlChild::Whitespace => "Whitespace",
+        HtmlChild::Newline => "Newline",
+        HtmlChild::EmptyLine => "EmptyLine",
+        HtmlChild::NonText(_) => "NonText",
+        HtmlChild::Verbatim(_) => "Verbatim",
+    }
+}
+
 pub(crate) fn html_split_children<I>(
     children: I,
+    opening_r_angle: Option<&HtmlSyntaxToken>,
     closing_element: Option<&HtmlClosingElement>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
@@ -148,6 +241,10 @@ where
     I: IntoIterator<Item = AnyHtmlElement>,
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
+
+    if let Some(opening_r_angle) = opening_r_angle {
+        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia(), false);
+    }
 
     let mut prev_child_was_content = false;
     for child in children {
@@ -182,7 +279,12 @@ where
             // Manually mark these comments as formatted because they are. Because we override the formatting of text content in here, the formatter does not seem to recognize them as formatted.
             // We do have to manually check to make sure the comment's text range is actually inside this node's text range. Some comments may be included in this call to `leading_trailing_comments` that are not actually part of this node.
 
-            let mut trailing_comments_to_format = vec![];
+            for comment in f.comments().leading_comments(text_syntax) {
+                let comment_range = comment.piece().text_range();
+                if comment_range.end() <= value_token.text_range().start() {
+                    comment.mark_formatted();
+                }
+            }
             for comment in f.comments().leading_dangling_trailing_comments(text_syntax) {
                 let comment_range = comment.piece().text_range();
                 // TODO: might be able to make this a debug assertion instead
@@ -198,7 +300,7 @@ where
                 if !(comment_range.start() >= value_token.text_range().start()
                     && comment_range.end() <= value_token.text_range().end())
                 {
-                    trailing_comments_to_format.push(comment);
+                    comment.mark_formatted();
                 }
             }
 
@@ -309,25 +411,6 @@ where
                 prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
             }
 
-            // There may be trailing comments that we attached to the content if this is the last child of an Element. They won't show up in the `value_token.text()` because they are actually attached to the leading token of the closing tag. This means we have to format them manually.
-            for comment in trailing_comments_to_format {
-                // This might not actually be the best way to handle the whitespace before the comment. If there are bugs here involving whitespace preceding the comment, try this:
-                // Instead of the below match on `comment.lines_before()`, try to include the whitespace in the sliced range from the token text. Right now, that preceding whitespace is excluded, and we add it back in via the `lines_before` match below.
-                match comment.lines_before() {
-                    0 => {}
-                    1 => builder.entry(HtmlChild::Newline),
-                    _ => builder.entry(HtmlChild::EmptyLine),
-                }
-                let token = comment.piece().as_piece().token();
-                let text = token.token_text();
-
-                builder.entry(HtmlChild::Comment(HtmlWord::new(
-                    text.slice(comment.piece().text_range() - token.text_range().start()),
-                    comment.piece().text_range().start(),
-                )));
-                comment.mark_formatted();
-            }
-
             prev_child_was_content = true;
         } else {
             let text = child.to_string();
@@ -364,36 +447,27 @@ where
             }
 
             let is_suppressed = f.comments().is_suppressed(child.syntax());
-            if is_suppressed {
-                builder.entry(HtmlChild::Verbatim(child.clone()));
-            } else {
-                builder.entry(HtmlChild::NonText(child.clone()));
+
+            if let Some(first_token) = child.syntax().first_token() {
+                push_trivia_children(&mut builder, &first_token.leading_trivia(), is_suppressed);
             }
 
-            // Check for trailing whitespace, and preserve it if
-            // - it's embedded expression content
-            // - it's an element
-            // - it's a bogus element
-            // This preserves spaces between expressions/elements and following text content.
-            if matches!(
-                &child,
-                AnyHtmlElement::AnyHtmlContent(_)
-                    | AnyHtmlElement::HtmlElement(_)
-                    | AnyHtmlElement::HtmlSelfClosingElement(_)
-                    | AnyHtmlElement::HtmlBogusElement(_)
-            ) && let Some(last_token) = child.syntax().last_token()
-                && last_token.has_trailing_whitespace()
-            {
-                // Check if trailing trivia contains a newline
-                let has_newline = last_token
-                    .trailing_trivia()
-                    .pieces()
-                    .any(|piece| piece.is_newline());
-                if has_newline {
-                    builder.entry(HtmlChild::Newline);
-                } else {
-                    builder.entry(HtmlChild::Whitespace);
-                }
+            for comment in f.comments().leading_comments(child.syntax()) {
+                comment.mark_formatted();
+            }
+
+            if is_suppressed {
+                builder.non_text_entry(HtmlChild::Verbatim(child.clone()), f);
+            } else {
+                builder.non_text_entry(HtmlChild::NonText(child.clone()), f);
+            }
+
+            if let Some(last_token) = child.syntax().last_token() {
+                push_trivia_children(&mut builder, &last_token.trailing_trivia(), is_suppressed);
+            }
+
+            for comment in f.comments().trailing_comments(child.syntax()) {
+                comment.mark_formatted();
             }
 
             prev_child_was_content = false;
@@ -410,28 +484,69 @@ where
     if let Some(closing_element) = closing_element
         && let Ok(l_angle_token) = closing_element.l_angle_token()
     {
-        let leading_trivia = l_angle_token.leading_trivia();
-        let mut newline_count = 0;
-        let mut has_whitespace = false;
-
-        for piece in leading_trivia.pieces() {
-            if piece.is_newline() {
-                newline_count += 1;
-            } else if piece.is_whitespace() {
-                has_whitespace = true;
-            }
-        }
-
-        if newline_count >= 2 {
-            builder.entry(HtmlChild::EmptyLine);
-        } else if newline_count == 1 {
-            builder.entry(HtmlChild::Newline);
-        } else if has_whitespace {
-            builder.entry(HtmlChild::Whitespace);
-        }
+        push_trivia_children(&mut builder, &l_angle_token.leading_trivia(), false);
     }
 
     Ok(builder.finish())
+}
+
+fn push_trivia_children(
+    builder: &mut HtmlSplitChildrenBuilder,
+    trivia: &SyntaxTrivia<HtmlLanguage>,
+    skip_comments: bool,
+) {
+    let mut whitespace = PendingWhitespace::default();
+
+    for piece in trivia.pieces() {
+        if piece.is_whitespace() || piece.is_newline() {
+            whitespace.add(piece.text());
+        } else if piece.is_comments() {
+            whitespace.flush(builder);
+
+            if skip_comments || HtmlCommentStyle::is_suppression(piece.text()) {
+                // never add comments as children if the node is suppressed, because they will be handled as part of the verbatim content for the suppressed node. This also prevents comments from being added twice in cases where they are included both in the trivia for a node and as leading/trailing comments for the same node.
+                continue;
+            }
+
+            let token = piece.token();
+            let text = token.token_text();
+            builder.entry(HtmlChild::Comment(HtmlWord::new(
+                text.slice(piece.text_range() - token.text_range().start()),
+                piece.text_range().start(),
+            )));
+        }
+    }
+
+    whitespace.flush(builder);
+}
+
+#[derive(Default)]
+struct PendingWhitespace {
+    has_whitespace: bool,
+    newline_count: usize,
+}
+
+impl PendingWhitespace {
+    fn add(&mut self, text: &str) {
+        if text.is_empty() {
+            return;
+        }
+
+        self.has_whitespace = true;
+        self.newline_count += text.bytes().filter(|byte| *byte == b'\n').count();
+    }
+
+    fn flush(&mut self, builder: &mut HtmlSplitChildrenBuilder) {
+        if self.newline_count >= 2 {
+            builder.entry(HtmlChild::EmptyLine);
+        } else if self.newline_count == 1 {
+            builder.entry(HtmlChild::Newline);
+        } else if self.has_whitespace {
+            builder.entry(HtmlChild::Whitespace);
+        }
+
+        *self = Self::default();
+    }
 }
 
 /// The builder is used to:
@@ -466,6 +581,28 @@ impl HtmlSplitChildrenBuilder {
             }
             _ => self.buffer.push(child),
         }
+    }
+
+    fn non_text_entry(&mut self, child: HtmlChild, f: &HtmlFormatter) {
+        let element = match &child {
+            HtmlChild::NonText(element) | HtmlChild::Verbatim(element) => element,
+            #[cfg(debug_assertions)]
+            _ => unreachable!("non_text_entry must be called with a non-text child"),
+            #[cfg(not(debug_assertions))]
+            _ => return, // avoid panicking in release builds
+        };
+
+        if !get_element_css_display(element).is_externally_whitespace_sensitive(f)
+            && matches!(self.buffer.last(), Some(HtmlChild::Whitespace))
+            && matches!(
+                self.buffer.iter().rev().nth(1),
+                Some(HtmlChild::Word(_) | HtmlChild::Comment(_))
+            )
+        {
+            self.buffer.pop();
+        }
+
+        self.entry(child);
     }
 
     fn finish(self) -> Vec<HtmlChild> {

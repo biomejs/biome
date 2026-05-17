@@ -1,6 +1,8 @@
 ---
-    invalid:
-invalid:
+[
+    ! should NOT format !
+because: 
+this is INVALID yaml
 ---
 
 <html>
