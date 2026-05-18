@@ -181,6 +181,8 @@
 //! + This will get condensed into a single line because its just text.
 //! ```
 
+#[cfg(debug_assertions)]
+use crate::utils::children::DisplayHtmlChildSequence;
 use crate::{
     html::auxiliary::{
         element::{FormatHtmlElement, FormatHtmlElementOptions},
@@ -188,13 +190,12 @@ use crate::{
     },
     prelude::*,
     utils::{
-        children::{
-            DisplayHtmlChildSequence, HtmlChild, HtmlChildrenIterator, html_split_children,
-        },
+        children::{HtmlChild, HtmlChildrenIterator, html_split_children},
         css_display::CssDisplay,
         metadata::get_element_css_display,
     },
 };
+#[cfg(debug_assertions)]
 use biome_console::{ColorMode, ConsoleExt, EnvConsole, markup};
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};

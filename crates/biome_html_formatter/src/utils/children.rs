@@ -1,9 +1,8 @@
-use std::{
-    fmt,
-    iter::{FusedIterator, Peekable},
-    str::Chars,
-};
+#[cfg(debug_assertions)]
+use std::fmt;
+use std::{iter::FusedIterator, iter::Peekable, str::Chars};
 
+#[cfg(debug_assertions)]
 use biome_console::{
     fmt::{Display, Formatter as ConsoleFormatter},
     markup,
@@ -72,7 +71,8 @@ impl HtmlWord {
         self.text.chars().count() == 1
     }
 
-    pub(crate) fn text(&self) -> &str {
+    #[cfg(debug_assertions)]
+    fn text(&self) -> &str {
         &self.text
     }
 }
@@ -153,14 +153,17 @@ impl HtmlChild {
 /// A debug helper for displaying a sequence of [HtmlChild] in a more human readable way. Can be activated in debug builds by setting `DEBUG_HTML_FORMATTER_CHILDREN=1` in the environment variables.
 ///
 /// This exists because just dbg! printing the the children can be very verbose, and its hard to tell what CssDisplay each element has, which is often the most important part when debugging whitespace sensitivity issues.
+#[cfg(debug_assertions)]
 pub(crate) struct DisplayHtmlChildSequence<'a>(&'a [HtmlChild]);
 
+#[cfg(debug_assertions)]
 impl<'a> DisplayHtmlChildSequence<'a> {
     pub(crate) const fn new(children: &'a [HtmlChild]) -> Self {
         Self(children)
     }
 }
 
+#[cfg(debug_assertions)]
 impl Display for DisplayHtmlChildSequence<'_> {
     fn fmt(&self, fmt: &mut ConsoleFormatter) -> std::io::Result<()> {
         let count = self.0.len();
@@ -181,8 +184,10 @@ impl Display for DisplayHtmlChildSequence<'_> {
     }
 }
 
+#[cfg(debug_assertions)]
 struct HtmlChildDetail<'a>(&'a HtmlChild);
 
+#[cfg(debug_assertions)]
 impl fmt::Display for HtmlChildDetail<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
@@ -197,8 +202,10 @@ impl fmt::Display for HtmlChildDetail<'_> {
     }
 }
 
+#[cfg(debug_assertions)]
 struct HtmlElementDetail<'a>(&'a AnyHtmlElement);
 
+#[cfg(debug_assertions)]
 impl fmt::Display for HtmlElementDetail<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(name) = self.0.name() {
@@ -219,6 +226,7 @@ impl fmt::Display for HtmlElementDetail<'_> {
     }
 }
 
+#[cfg(debug_assertions)]
 const fn html_child_kind(child: &HtmlChild) -> &'static str {
     match child {
         HtmlChild::Word(_) => "Word",
