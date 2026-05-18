@@ -207,7 +207,7 @@ jobs:
           - package: biome_js_analyze
             bench: "--bench js_analyzer_walltime"
             mode: walltime
-            runner: codspeed-macro-arm
+            runner: codspeed-macro
     steps: &bench_steps
       - name: Checkout PR Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
