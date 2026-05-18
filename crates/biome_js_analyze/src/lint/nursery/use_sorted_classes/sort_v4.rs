@@ -6,7 +6,9 @@ use biome_tailwind_syntax::{
     TwRoot,
 };
 
-use super::tailwind_preset_v4::{FUNCTIONAL_UTILITIES, KEYWORD_POOL, STATIC_UTILITIES};
+use super::tailwind_preset_v4::{
+    FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
+};
 use super::tailwind_preset_v4_types::{Branch, Negative, ValueType};
 use super::value_match::value_matches_type;
 
@@ -74,8 +76,24 @@ impl SortKey {
             return Self::Unknown;
         };
         match inner {
-            // TODO: arbitrary CSS `[mask:none]` — needs to read property_token.
-            AnyTwCandidate::TwArbitraryCandidate(_) => Self::Unknown,
+            AnyTwCandidate::TwArbitraryCandidate(a) => {
+                // Modifier semantics are handled with other modifiers later.
+                if a.modifier().is_some() {
+                    return Self::Unknown;
+                }
+                let Ok(property_token) = a.property_token() else {
+                    return Self::Unknown;
+                };
+                let property_text = property_token.text_trimmed();
+                let Some(&property_idx) = PROPERTY_INDEX.get(property_text) else {
+                    return Self::Unknown;
+                };
+                Self::Known {
+                    property_idx,
+                    property_count: 1,
+                    registration_idx: 0,
+                }
+            }
             AnyTwCandidate::TwBogusCandidate(_) => Self::Unknown,
 
             AnyTwCandidate::TwStaticCandidate(s) => {
@@ -468,6 +486,29 @@ mod tests {
     #[test]
     fn sort_routes_arbitrary_values_to_functional_arbitrary_fallback() {
         assert_eq!(sort("p-[10px] flex some-unknown"), "some-unknown flex p-[10px]");
+    }
+
+    #[test]
+    fn arbitrary_candidate_sorts_by_inner_property() {
+        assert_eq!(sort("flex [color:red]"), "flex [color:red]");
+    }
+
+    #[test]
+    fn arbitrary_candidate_with_unknown_property_is_unknown() {
+        assert_eq!(sort("flex [--my-var:1]"), "[--my-var:1] flex");
+    }
+
+    #[test]
+    fn arbitrary_candidate_with_modifier_is_unknown_for_now() {
+        assert_eq!(sort("flex [color:red]/50"), "[color:red]/50 flex");
+    }
+
+    #[test]
+    fn arbitrary_candidate_uses_registration_idx_zero() {
+        let parsed = parse_tailwind("[display:block]");
+        let full = parsed.tree().candidates().iter().next().unwrap();
+        let display_idx = *PROPERTY_INDEX.get("display").unwrap();
+        assert_eq!(SortKey::from_candidate(&full), known(display_idx, 1, 0));
     }
 
     // endregion: sort_class_list edge cases
