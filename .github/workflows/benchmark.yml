@@ -195,7 +195,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    name: Bench JS / ${{ matrix.package }}
+    name: Bench JS / ${{ matrix.package }} / ${{ matrix.mode || 'simulation'}}
     runs-on: ${{ matrix.runner || 'depot-ubuntu-24.04-arm-16' }}
     strategy:
       matrix:
