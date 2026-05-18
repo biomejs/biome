@@ -29,8 +29,10 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 
 // Some preset items are intentionally unused while the v4 sort algorithm is
 // still being implemented incrementally:
-// - \`PROPERTY_ORDER\` is consumed only when classifying arbitrary CSS
-//   (\`[mask:none]\`), which is a TODO.
+// - \`PROPERTY_ORDER\` is the ordered table emitted from the Tailwind property
+//   order source.
+// - \`PROPERTY_INDEX\` is the O(1) lookup table emitted from the same source and
+//   used when classifying arbitrary CSS (\`[mask:none]\`), which is a TODO.
 // - \`Branch::ArbitraryTyped\` and \`Branch::Arbitrary\` payload fields fire only for
 //   bracketed arbitrary values (\`p-[10px]\`), which is a TODO.
 #![expect(dead_code, reason = "intentionally unused while sort algorithm is being implemented; see TODO comment above")]
@@ -60,6 +62,16 @@ function renderPropertyOrder(props: string[]): string {
 pub static PROPERTY_ORDER: [&str; ${props.length}] = [
 ${items}
 ];
+`;
+}
+
+function renderPropertyIndex(props: string[]): string {
+	const items = props
+		.map((p, i) => `    ${rustString(p)} => ${i}u16,`)
+		.join("\n");
+	return `pub static PROPERTY_INDEX: phf::Map<&'static str, u16> = phf_map! {
+${items}
+};
 `;
 }
 
@@ -253,6 +265,7 @@ export function renderRust(input: {
 	return [
 		HEADER,
 		renderPropertyOrder(input.propertyOrder),
+		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
 		renderStaticUtilities(input.utilities, propIdx, propCount),
 		renderFunctionalUtilities(input.utilities, propIdx, propCount, keywordIdx),
