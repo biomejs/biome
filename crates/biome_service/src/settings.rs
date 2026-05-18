@@ -10,12 +10,11 @@ use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguratio
 use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
-use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, JsConfiguration,
-    JsonConfiguration, LinterConfiguration, MarkdownConfiguration, OverrideAssistConfiguration,
+    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
     OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
     push_to_analyzer_assist, push_to_analyzer_rules,
 };
@@ -45,9 +44,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
-use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -195,14 +192,14 @@ impl Settings {
             self.languages.html = html.into();
         }
 
-        #[cfg(feature = "markdown")]
+        #[cfg(feature = "lang_md")]
         {
             if let Some(markdown) = configuration.markdown {
                 self.languages.markdown = markdown.into();
             }
         }
 
-        #[cfg(feature = "yaml")]
+        #[cfg(feature = "lang_yaml")]
         {
             if let Some(yaml) = configuration.yaml {
                 self.languages.yaml = yaml.into();
@@ -701,8 +698,10 @@ pub struct LanguageListSettings {
     pub html: LanguageSettings<HtmlLanguage>,
     #[cfg(feature = "lang_grit")]
     pub grit: LanguageSettings<GritLanguage>,
-    pub markdown: LanguageSettings<MarkdownLanguage>,
-    pub yaml: LanguageSettings<YamlLanguage>,
+    #[cfg(feature = "lang_md")]
+    pub markdown: LanguageSettings<biome_markdown_syntax::MarkdownLanguage>,
+    #[cfg(feature = "lang_yaml")]
+    pub yaml: LanguageSettings<biome_yaml_syntax::YamlLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -847,8 +846,11 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     }
 }
 
-impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
-    fn from(markdown: MarkdownConfiguration) -> Self {
+#[cfg(feature = "lang_md")]
+impl From<biome_configuration::MarkdownConfiguration>
+    for LanguageSettings<biome_markdown_syntax::MarkdownLanguage>
+{
+    fn from(markdown: biome_configuration::MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = markdown.formatter {
             language_setting.formatter = formatter.into();
@@ -858,8 +860,11 @@ impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
     }
 }
 
-impl From<YamlConfiguration> for LanguageSettings<YamlLanguage> {
-    fn from(yaml: YamlConfiguration) -> Self {
+#[cfg(feature = "lang_yaml")]
+impl From<biome_configuration::yaml::YamlConfiguration>
+    for LanguageSettings<biome_yaml_syntax::YamlLanguage>
+{
+    fn from(yaml: biome_configuration::yaml::YamlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = yaml.formatter {
             language_setting.formatter = formatter.into();
