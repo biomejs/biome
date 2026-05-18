@@ -128,7 +128,7 @@ impl SearchProcessFile {
             SearchLanguage::Css => {
                 matches!(file_source, DocumentFileSource::Css(_))
             }
-            SearchLanguage::JSON => {
+            SearchLanguage::Json => {
                 matches!(file_source, DocumentFileSource::Json(_))
             }
         }

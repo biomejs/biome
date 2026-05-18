@@ -9795,6 +9795,7 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
+	| { Grit: GritFileSource }
 	| { Markdown: MdFileSource }
 	| { Yaml: YamlFileSource };
 export interface JsFileSource {
@@ -9827,6 +9828,9 @@ export interface GraphqlFileSource {
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
+}
+export interface GritFileSource {
+	variant: GritVariant;
 }
 export interface MdFileSource {
 	variant: MarkdownVariant;
@@ -9930,6 +9934,7 @@ export type HtmlVariant =
 	| "Astro"
 	| "Vue"
 	| "Svelte";
+export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
@@ -10320,7 +10325,7 @@ export interface ParsePatternParams {
 	defaultLanguage: SearchLanguage;
 	pattern: string;
 }
-export type SearchLanguage = "css" | "js" | "jSON";
+export type SearchLanguage = "css" | "js" | "json";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }

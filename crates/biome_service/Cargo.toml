@@ -120,6 +120,7 @@ schema    = [
   "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
+  "lang_grit",
 ]
 yaml      = ["biome_configuration/yaml"]
 

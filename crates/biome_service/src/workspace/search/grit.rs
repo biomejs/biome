@@ -27,7 +27,7 @@ impl SearchQuery for GritSearchQuery {
         let target_language = match target_language {
             SearchLanguage::Css => GritTargetLanguage::from(CssTargetLanguage),
             SearchLanguage::Js => GritTargetLanguage::from(JsTargetLanguage),
-            SearchLanguage::JSON => GritTargetLanguage::from(JsonTargetLanguage),
+            SearchLanguage::Json => GritTargetLanguage::from(JsonTargetLanguage),
         };
         let options = CompilePatternOptions::default().with_default_language(target_language);
         let pattern = compile_pattern_with_options(pattern, options)?;

@@ -18,7 +18,7 @@ pub enum SearchLanguage {
     Css,
     #[default]
     Js,
-    JSON,
+    Json,
 }
 
 impl FromStr for SearchLanguage {
@@ -28,7 +28,7 @@ impl FromStr for SearchLanguage {
         Ok(match s {
             "css" => Self::Css,
             "javascript" => Self::Js,
-            "json" => Self::JSON,
+            "json" => Self::Json,
             _ => return Err("Target language must be one of: css, javascript, json"),
         })
     }
