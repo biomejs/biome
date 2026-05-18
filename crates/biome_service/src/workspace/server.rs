@@ -137,6 +137,66 @@ pub struct WorkspaceServer {
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 }
 
+fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
+    let path = Utf8Path::new(path);
+    let resolved_path = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        base.join(path)
+    };
+
+    normalize_path(&resolved_path)
+}
+
+fn read_git_info_exclude_patterns(
+    fs: &dyn FsWithResolverProxy,
+    directory: &Utf8Path,
+) -> Option<Vec<String>> {
+    let git_dir = resolve_git_dir(fs, directory)?;
+    let git_common_dir = resolve_git_common_dir(fs, &git_dir);
+
+    // Git treats `$GIT_DIR/info/exclude` as repository-local ignore rules. In a
+    // linked worktree, Git resolves this path through `commondir`, so the
+    // exclude file is shared from the common Git directory.
+    fs.read_file_from_path(git_common_dir.join("info/exclude").as_ref())
+        .map(|content| content.lines().map(String::from).collect())
+        .ok()
+}
+
+fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<Utf8PathBuf> {
+    let dot_git = directory.join(".git");
+
+    // Linked worktrees and submodules use a `.git` file whose `gitdir:` entry
+    // points at the real Git directory. Regular repositories use `.git` as the
+    // Git directory itself.
+    match fs.read_file_from_path(dot_git.as_ref()) {
+        Ok(content) => content.lines().find_map(|line| {
+            let gitdir = line.strip_prefix("gitdir:")?.trim();
+            Some(resolve_git_path(directory, gitdir))
+        }),
+        Err(_) => fs.path_is_dir(&dot_git).then_some(dot_git),
+    }
+}
+
+fn resolve_git_common_dir(fs: &dyn FsWithResolverProxy, git_dir: &Utf8Path) -> Utf8PathBuf {
+    // A linked worktree's gitdir is worktree-specific, while repository-wide
+    // files such as `info/exclude` live under the common Git directory.
+    // `commondir` stores that path, relative to `git_dir` when not absolute.
+    let Ok(content) = fs.read_file_from_path(git_dir.join("commondir").as_ref()) else {
+        return git_dir.to_path_buf();
+    };
+
+    content
+        .lines()
+        .next()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map_or_else(
+            || git_dir.to_path_buf(),
+            |commondir| resolve_git_path(git_dir, commondir),
+        )
+}
+
 /// The `Workspace` object is long-lived, so we want it to be able to cross
 /// unwind boundaries.
 /// In return, we have to make sure operations on the workspace either do not
@@ -1615,26 +1675,39 @@ impl Workspace for WorkspaceServer {
                     Some(VcsClientKind::Git) => {
                         let gitignore = directory.join(".gitignore");
                         let ignore = directory.join(".ignore");
+                        let mut ignore_file_contents = Vec::new();
+                        let git_info_exclude =
+                            read_git_info_exclude_patterns(self.fs.as_ref(), directory.as_ref());
+
                         let result = self
                             .fs
                             .read_file_from_path(gitignore.as_ref())
                             .ok()
                             .or_else(|| self.fs.read_file_from_path(ignore.as_ref()).ok());
-                        match result {
-                            Some(content) => {
-                                let lines: Vec<_> = content.lines().collect();
-                                settings.vcs_settings.store_root_ignore_patterns(
-                                    directory.as_ref(),
-                                    lines.as_slice(),
-                                )?;
-                            }
-                            None => {
-                                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
-                                    VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
-                                        path: directory.to_string(),
-                                    }),
-                                ));
-                            }
+                        if let Some(content) = result {
+                            ignore_file_contents.push(content);
+                        }
+
+                        let mut ignore_file_patterns = ignore_file_contents
+                            .iter()
+                            .flat_map(|content| content.lines())
+                            .collect::<Vec<_>>();
+                        if let Some(git_info_exclude) = git_info_exclude.as_ref() {
+                            ignore_file_patterns
+                                .extend(git_info_exclude.iter().map(String::as_str));
+                        }
+
+                        if ignore_file_patterns.is_empty() {
+                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                                VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
+                                    path: directory.to_string(),
+                                }),
+                            ));
+                        } else {
+                            settings.vcs_settings.store_root_ignore_patterns(
+                                directory.as_ref(),
+                                ignore_file_patterns.as_slice(),
+                            )?;
                         };
                     }
                 }

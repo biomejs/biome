@@ -99,6 +99,86 @@ fn ignore_vcs_os_independent_parse() {
 }
 
 #[test]
+fn ignore_git_info_exclude() {
+    let mut fs = TemporaryFs::new("ignore_git_info_exclude");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        }
+    }"#,
+    );
+
+    fs.create_file(".gitignore", "");
+    fs.create_file(".git/info/exclude", "file2.js\n");
+
+    fs.create_file("file1.js", UNFORMATTED);
+    fs.create_file("file2.js", UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ignore_git_info_exclude",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ignore_git_common_info_exclude() {
+    let mut fs = TemporaryFs::new("ignore_git_common_info_exclude");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        }
+    }"#,
+    );
+
+    fs.create_file(".gitignore", "");
+    fs.create_file(".git", "gitdir: actual.git/worktrees/current\n");
+    fs.create_file("actual.git/worktrees/current/commondir", "../..\n");
+    fs.create_file("actual.git/info/exclude", "file2.js\n");
+
+    fs.create_file("file1.js", UNFORMATTED);
+    fs.create_file("file2.js", UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ignore_git_common_info_exclude",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn ignore_vcs_ignored_file_via_cli() {
     let mut fs = TemporaryFs::new("ignore_vcs_ignored_file_via_cli");
     let mut console = BufferConsole::default();
