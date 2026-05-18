@@ -23,7 +23,7 @@
     "@biomejs/plugin-api": "workspace:",
     "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.0",
-    "@types/node": "24.12.3",
+    "@types/node": "24.12.4",
     "commonmark": "0.31.2",
     "tombi": "0.11.4"
   }
