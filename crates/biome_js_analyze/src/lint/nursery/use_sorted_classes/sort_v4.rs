@@ -2,11 +2,13 @@ use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText};
 use biome_tailwind_syntax::{
-    AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwRoot,
+    AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
+    TwRoot,
 };
 
 use super::tailwind_preset_v4::{FUNCTIONAL_UTILITIES, KEYWORD_POOL, STATIC_UTILITIES};
 use super::tailwind_preset_v4_types::{Branch, Negative, ValueType};
+use super::value_match::value_matches_type;
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
@@ -134,11 +136,18 @@ impl SortKey {
                     Some(_) => return Self::Unknown,
                 };
 
+                if let (AnyTwValue::TwArbitraryValue(arb), false) =
+                    (&value, has_fraction_modifier)
+                {
+                    let kind = ValueKind::Arbitrary(arb.value());
+                    return resolve_branch(branches, &kind, registration_idx)
+                        .unwrap_or(Self::Unknown);
+                }
+
                 let value_token = match &value {
                     AnyTwValue::TwNamedValue(n) => n.value_token(),
                     AnyTwValue::TwNumberValue(n) => n.value_token(),
                     AnyTwValue::TwPercentageValue(p) => p.value_token(),
-                    // TODO: ArbitraryTyped / Arbitrary branches (`bg-[#abc]`, `p-[10px]`).
                     AnyTwValue::TwArbitraryValue(_) => return Self::Unknown,
                     // TODO: CSS variable values (`bg-(--my-color)`).
                     AnyTwValue::TwCssVariableValue(_) => return Self::Unknown,
@@ -201,6 +210,7 @@ enum ValueKind<'a> {
     Number(&'a str),
     Percentage,
     Ratio,
+    Arbitrary(CssGenericComponentValueList),
 }
 
 /// Does this utility's branch list declare a `NamedTyped(Ratio)` slot?
@@ -240,7 +250,7 @@ fn resolve_branch(
             Branch::Named(namespace, p, c) => {
                 let text = match kind {
                     ValueKind::Named(v) | ValueKind::Number(v) => *v,
-                    ValueKind::Percentage | ValueKind::Ratio => continue,
+                    ValueKind::Percentage | ValueKind::Ratio | ValueKind::Arbitrary(_) => continue,
                 };
                 if !namespace.keys().contains(text) {
                     continue;
@@ -269,9 +279,21 @@ fn resolve_branch(
                 }
                 (p, c)
             }
-            // ArbitraryTyped / Arbitrary only fire for bracketed arbitrary values,
-            // which the caller filters out before reaching this loop.
-            _ => continue,
+            Branch::ArbitraryTyped(b_vt, p, c) => {
+                let ValueKind::Arbitrary(list) = kind else {
+                    continue;
+                };
+                if !value_matches_type(list, b_vt) {
+                    continue;
+                }
+                (p, c)
+            }
+            Branch::Arbitrary(p, c) => {
+                let ValueKind::Arbitrary(_) = kind else {
+                    continue;
+                };
+                (p, c)
+            }
         };
         return Some(SortKey::Known {
             property_idx,
@@ -373,6 +395,25 @@ mod tests {
     }
 
     #[test]
+    fn resolve_branch_skips_arbitrary_typed_when_matcher_returns_false_then_falls_back() {
+        let branches = &[
+            Branch::ArbitraryTyped(ValueType::Number, 10, 1),
+            Branch::Arbitrary(20, 1),
+        ];
+        let full = parse_tailwind("p-[10px]").tree().candidates().iter().next().unwrap();
+        let full = full.as_tw_full_candidate().unwrap();
+        let candidate = full.candidate().unwrap();
+        let AnyTwCandidate::TwFunctionalCandidate(functional) = candidate else {
+            panic!("expected functional candidate")
+        };
+        let AnyTwValue::TwArbitraryValue(arbitrary) = functional.value().unwrap() else {
+            panic!("expected arbitrary value")
+        };
+        let kind = ValueKind::Arbitrary(arbitrary.value());
+        assert_eq!(resolve_branch(branches, &kind, 99), Some(known(20, 1, 99)));
+    }
+
+    #[test]
     fn resolve_branch_passes_registration_idx_through() {
         let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
         assert_eq!(
@@ -422,6 +463,11 @@ mod tests {
     #[test]
     fn sort_returns_empty_for_whitespace_only_input() {
         assert_eq!(sort("   "), "");
+    }
+
+    #[test]
+    fn sort_routes_arbitrary_values_to_functional_arbitrary_fallback() {
+        assert_eq!(sort("p-[10px] flex some-unknown"), "some-unknown flex p-[10px]");
     }
 
     // endregion: sort_class_list edge cases

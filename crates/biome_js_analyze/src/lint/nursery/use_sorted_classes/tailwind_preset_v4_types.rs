@@ -3,11 +3,6 @@
 //! surface as a compile error against an unknown variant — add it
 //! (and its `keys()` arm for `ThemeNamespace`) below.
 
-#![expect(
-    dead_code,
-    reason = "ArbitraryTyped / Arbitrary payloads fire for bracketed values, which sort_v4 doesn't route through yet"
-)]
-
 use super::tailwind_preset_v4::{
     THEME_KEYS_ANIMATE, THEME_KEYS_ASPECT, THEME_KEYS_BACKGROUND_IMAGE, THEME_KEYS_BLUR,
     THEME_KEYS_BREAKPOINT, THEME_KEYS_COLOR, THEME_KEYS_CONTAINER, THEME_KEYS_DROP_SHADOW,
@@ -17,9 +12,9 @@ use super::tailwind_preset_v4::{
 };
 
 // CSS value types (from infer-data-type.ts).
-// Matching is dispatched by the consumer on the parser node kind
-// (TwNumberValue / TwPercentageValue / TwModifier+number), not by
-// scanning value text — see sort_v4::resolve_branch.
+// Bare value matching is dispatched by the consumer on parser node kind
+// (TwNumberValue / TwPercentageValue / TwModifier+number); bracketed
+// arbitrary values use AST predicates — see sort_v4::resolve_branch.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ValueType {

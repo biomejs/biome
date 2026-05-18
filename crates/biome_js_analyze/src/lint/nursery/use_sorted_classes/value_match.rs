@@ -10,7 +10,6 @@ use biome_tailwind_syntax::CssGenericComponentValueList;
 
 use super::tailwind_preset_v4_types::ValueType;
 
-#[expect(dead_code, reason = "wired into sort_v4 in a follow-up task")]
 pub fn value_matches_type(_list: &CssGenericComponentValueList, _vt: ValueType) -> bool {
     // TODO: Implement per-ValueType predicates in follow-up tasks.
     false
