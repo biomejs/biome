@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   merge_group:
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize ]
     branches:
       - main
       - next
@@ -196,13 +196,18 @@ jobs:
       contents: read
       pull-requests: write
     name: Bench JS / ${{ matrix.package }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ${{ matrix.runner || 'depot-ubuntu-24.04-arm-16' }}
     strategy:
       matrix:
-        package:
-          - biome_js_parser
-          - biome_js_formatter
-          - biome_js_analyze
+        include:
+          - package: biome_js_parser
+          - package: biome_js_formatter
+          - package: biome_js_analyze
+            bench: "--bench js_analyzer --bench use_sorted_classes_parser"
+          - package: biome_js_analyze
+            bench: "--bench js_analyzer_walltime"
+            mode: walltime
+            runner: codspeed-macro-arm
     steps: &bench_steps
       - name: Checkout PR Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -229,8 +234,8 @@ jobs:
         uses: CodSpeedHQ/action@3194d9a39c4d46684cb44bf7207fc56626aad8fd # v4.15.1
         timeout-minutes: 50
         with:
-          mode: simulation
-          run: cargo codspeed run
+          mode: ${{ matrix.mode || 'simulation' }}
+          run: cargo codspeed run ${{ matrix.bench }}
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   json:
