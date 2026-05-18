@@ -1329,6 +1329,7 @@ mod tests {
     use super::*;
     use biome_fs::MemoryFileSystem;
     use biome_service::WorkspaceServer;
+    use biome_service::workspace::NoopQueryProvider;
     use crossbeam::channel::bounded;
     use std::sync::Mutex;
     use tokio::sync::Notify;
@@ -1356,6 +1357,7 @@ mod tests {
             Arc::new(MemoryFileSystem::default()),
             watcher_tx,
             service_tx,
+            Arc::new(NoopQueryProvider {}),
             None,
         ));
         let cancellation = Arc::new(Notify::new());

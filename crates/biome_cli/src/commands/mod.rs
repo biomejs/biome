@@ -34,10 +34,9 @@ use biome_configuration::{
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::FileSystem;
-use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::workspace::FixFileMode;
+use biome_service::workspace::{FixFileMode, SearchLanguage};
 use biome_service::{WatcherOptions, watcher_options};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -587,7 +586,7 @@ pub enum BiomeCommand {
         ///
         /// When none, the default language is JavaScript.
         #[bpaf(long("language"), short('l'))]
-        language: Option<GritTargetLanguage>,
+        language: Option<SearchLanguage>,
 
         /// The GritQL pattern to search for.
         ///

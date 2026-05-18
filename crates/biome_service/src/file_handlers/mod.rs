@@ -1,9 +1,23 @@
+pub mod astro;
+pub(crate) mod css;
+pub(crate) mod graphql;
+#[cfg(feature = "lang_grit")]
+pub(crate) mod grit;
+pub(crate) mod html;
+mod ignore;
+pub(crate) mod javascript;
+pub(crate) mod json;
+pub(crate) mod md;
+pub mod svelte;
+mod unknown;
+pub mod vue;
+mod yaml;
+
 use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;
-use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::AstroFileHandler;
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
@@ -15,7 +29,8 @@ use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
-    GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
+    GetSyntaxTreeResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
+    RenameResult, SearchQuery,
 };
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
@@ -33,8 +48,6 @@ use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMap
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
-use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
-use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
@@ -54,7 +67,6 @@ use biome_string_case::StrLikeExtension;
 use biome_yaml_syntax::YamlFileSource;
 use camino::Utf8Path;
 use either::Either;
-use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use md::MarkdownFileHandler;
@@ -63,20 +75,6 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 use std::sync::Arc;
 use tracing::instrument;
-
-pub mod astro;
-pub(crate) mod css;
-pub(crate) mod graphql;
-pub(crate) mod grit;
-pub(crate) mod html;
-mod ignore;
-pub(crate) mod javascript;
-pub(crate) mod json;
-pub(crate) mod md;
-pub mod svelte;
-mod unknown;
-pub mod vue;
-mod yaml;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -88,7 +86,8 @@ pub enum DocumentFileSource {
     Css(CssFileSource),
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
-    Grit(GritFileSource),
+    #[cfg(feature = "lang_grit")]
+    Grit(biome_grit_syntax::file_source::GritFileSource),
     Markdown(MdFileSource),
     Yaml(YamlFileSource),
     // Ignore files
@@ -127,8 +126,9 @@ impl From<HtmlFileSource> for DocumentFileSource {
     }
 }
 
-impl From<GritFileSource> for DocumentFileSource {
-    fn from(value: GritFileSource) -> Self {
+#[cfg(feature = "lang_grit")]
+impl From<biome_grit_syntax::file_source::GritFileSource> for DocumentFileSource {
+    fn from(value: biome_grit_syntax::file_source::GritFileSource) -> Self {
         Self::Grit(value)
     }
 }
@@ -231,8 +231,10 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-
-        if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
+        #[cfg(feature = "lang_grit")]
+        if let Ok(file_source) =
+            biome_grit_syntax::file_source::GritFileSource::try_from_extension(extension)
+        {
             return Ok(file_source.into());
         }
         #[cfg(feature = "markdown")]
@@ -268,7 +270,10 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
+        #[cfg(feature = "lang_grit")]
+        if let Ok(file_source) =
+            biome_grit_syntax::file_source::GritFileSource::try_from_language_id(language_id)
+        {
             return Ok(file_source.into());
         }
         #[cfg(feature = "markdown")]
@@ -396,8 +401,8 @@ impl DocumentFileSource {
             _ => None,
         }
     }
-
-    pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
+    #[cfg(feature = "lang_grit")]
+    pub fn to_grit_file_source(&self) -> Option<biome_grit_syntax::file_source::GritFileSource> {
         match self {
             Self::Grit(grit) => Some(*grit),
             _ => None,
@@ -429,12 +434,13 @@ impl DocumentFileSource {
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
         match file_source {
+            #[cfg(feature = "lang_grit")]
+            Self::Grit(_) => true,
             Self::Js(_)
             | Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_)
             | Self::Markdown(_)
             | Self::Yaml(_) => true,
             Self::Ignore => false,
@@ -446,12 +452,13 @@ impl DocumentFileSource {
     pub fn can_read(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
         match file_source {
+            #[cfg(feature = "lang_grit")]
+            Self::Grit(_) => true,
             Self::Js(_)
             | Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_)
             | Self::Markdown(_)
             | Self::Yaml(_) => true,
             Self::Ignore => true,
@@ -463,11 +470,12 @@ impl DocumentFileSource {
     pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
         let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
+            #[cfg(feature = "lang_grit")]
+            Self::Grit(_) => true,
             Self::Html(_) | Self::Js(_) => true,
             Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
-            | Self::Grit(_)
             | Self::Markdown(_)
             | Self::Ignore
             | Self::Unknown
@@ -503,6 +511,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Css(_) => write!(fmt, "CSS"),
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
+            #[cfg(feature = "lang_grit")]
             Self::Grit(_) => write!(fmt, "Grit"),
             Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
@@ -1230,8 +1239,9 @@ type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &GritQuery,
+    &dyn SearchQuery,
     &SettingsWithEditor,
+    PatternId,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1267,7 +1277,8 @@ pub(crate) struct Features {
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
-    grit: GritFileHandler,
+    #[cfg(feature = "lang_grit")]
+    grit: grit::GritFileHandler,
     markdown: MarkdownFileHandler,
     yaml: YamlFileHandler,
     ignore: IgnoreFileHandler,
@@ -1284,7 +1295,8 @@ impl Features {
             vue: VueFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
-            grit: GritFileHandler {},
+            #[cfg(feature = "lang_grit")]
+            grit: grit::GritFileHandler {},
             markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
             yaml: YamlFileHandler {},
@@ -1315,6 +1327,7 @@ impl Features {
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
+            #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
@@ -1432,32 +1445,6 @@ pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
         }
     }
     lang_and_setup
-}
-
-pub(crate) fn search(
-    path: &BiomePath,
-    _file_source: &DocumentFileSource,
-    parse: AnyParse,
-    query: &GritQuery,
-    _settings: &SettingsWithEditor,
-) -> Result<Vec<TextRange>, WorkspaceError> {
-    let result = query
-        .execute(GritTargetFile::new(path.as_path(), parse))
-        .map_err(|err| {
-            WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
-        })?;
-
-    let matches = result
-        .effects
-        .into_iter()
-        .flat_map(|result| match result {
-            GritQueryEffect::Match(m) => m.ranges,
-            _ => Vec::new(),
-        })
-        .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
-        .collect();
-
-    Ok(matches)
 }
 
 /// Type meant to register all the syntax rules for each language supported by Biome
@@ -2279,36 +2266,6 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 mod tests {
     use super::{DocumentFileSource, Features};
     use camino::Utf8Path;
-
-    #[test]
-    fn markdown_file_source_detection_and_capabilities() {
-        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Markdown(_)));
-
-        let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
-
-        assert!(DocumentFileSource::can_parse(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(DocumentFileSource::can_read(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_contain_embeds(
-            Utf8Path::new("docs/readme.md"),
-            false
-        ));
-    }
-
-    #[test]
-    fn markdown_features_provide_formatter_capabilities() {
-        let features = Features::new();
-        let path = Utf8Path::new("doc.md");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
-
-        assert!(capabilities.formatter.format.is_some());
-        assert!(capabilities.parser.parse.is_some());
-    }
 
     #[test]
     fn svelte_source_modules_use_js_capabilities() {

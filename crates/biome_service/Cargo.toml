@@ -31,10 +31,10 @@ biome_graphql_analyze    = { workspace = true }
 biome_graphql_formatter  = { workspace = true }
 biome_graphql_parser     = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
-biome_grit_formatter     = { workspace = true }
-biome_grit_parser        = { workspace = true }
-biome_grit_patterns      = { workspace = true, features = ["serde"] }
-biome_grit_syntax        = { workspace = true }
+biome_grit_formatter     = { workspace = true, optional = true }
+biome_grit_parser        = { workspace = true, optional = true }
+biome_grit_patterns      = { workspace = true, features = ["serde"], optional = true }
+biome_grit_syntax        = { workspace = true, optional = true }
 biome_html_analyze       = { workspace = true }
 biome_html_factory       = { workspace = true }
 biome_html_formatter     = { workspace = true, features = ["serde"] }
@@ -94,6 +94,12 @@ insta               = { workspace = true }
 
 [features]
 js_plugin = ["biome_plugin_loader/js_plugin"]
+lang_grit = [
+  "dep:biome_grit_formatter",
+  "dep:biome_grit_parser",
+  "dep:biome_grit_patterns",
+  "dep:biome_grit_syntax",
+]
 markdown  = ["biome_configuration/markdown"]
 schema    = [
   "biome_configuration/schema",

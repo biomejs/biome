@@ -5,7 +5,9 @@ use crossbeam::channel::{Receiver, unbounded};
 use tokio::sync::watch;
 
 use crate::projects::ProjectKey;
-use crate::workspace::{OpenProjectParams, OpenProjectResult, ServiceNotification};
+use crate::workspace::{
+    NoopQueryProvider, OpenProjectParams, OpenProjectResult, ServiceNotification,
+};
 use crate::{WatcherInstruction, Workspace, WorkspaceServer};
 
 /// Convenience call for setting up the workspace and opening a project.
@@ -33,7 +35,13 @@ pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_recei
 ) -> (WorkspaceServer, ProjectKey, Receiver<WatcherInstruction>) {
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_tx, None);
+    let workspace = WorkspaceServer::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new(project_path),

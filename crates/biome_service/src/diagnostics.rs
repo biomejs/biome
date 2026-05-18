@@ -13,6 +13,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
+#[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
 use biome_plugin_loader::PluginDiagnostic;
@@ -93,6 +94,9 @@ pub enum WorkspaceError {
 
     /// Error in the workspace watcher.
     WatchError(WatchError),
+
+    /// Emitted when the rust gate feature isn't enabled
+    FeatureNotEnabled(FeatureNotEnabledDiagnostic),
 }
 
 impl WorkspaceError {
@@ -163,6 +167,10 @@ impl WorkspaceError {
             self,
             Self::Configuration(ConfigurationDiagnostic::EditorConfig(_))
         )
+    }
+
+    pub fn feature_not_enabled() -> Self {
+        Self::FeatureNotEnabled(FeatureNotEnabledDiagnostic {})
     }
 }
 
@@ -595,6 +603,7 @@ impl From<VcsDiagnostic> for WorkspaceError {
     }
 }
 
+#[cfg(feature = "lang_grit")]
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
         match value {
@@ -709,6 +718,15 @@ pub struct ConfigurationOutsideProject {
     pub config_path: String,
     pub working_directory: String,
 }
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project",
+    severity = Fatal,
+    message = "The rust feature isn't enabled",
+    tags(INTERNAL)
+)]
+pub struct FeatureNotEnabledDiagnostic;
 
 #[cfg(test)]
 mod test {

@@ -14,10 +14,10 @@ use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, JsConfiguration,
+    JsonConfiguration, LinterConfiguration, MarkdownConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -30,7 +30,9 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_grit")]
 use biome_grit_formatter::context::GritFormatOptions;
+#[cfg(feature = "lang_grit")]
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
@@ -697,6 +699,7 @@ pub struct LanguageListSettings {
     pub css: LanguageSettings<CssLanguage>,
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
+    #[cfg(feature = "lang_grit")]
     pub grit: LanguageSettings<GritLanguage>,
     pub markdown: LanguageSettings<MarkdownLanguage>,
     pub yaml: LanguageSettings<YamlLanguage>,
@@ -801,8 +804,9 @@ impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
     }
 }
 
-impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
-    fn from(grit: GritConfiguration) -> Self {
+#[cfg(feature = "lang_grit")]
+impl From<biome_configuration::GritConfiguration> for LanguageSettings<GritLanguage> {
+    fn from(grit: biome_configuration::GritConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = grit.formatter {
             language_setting.formatter = formatter.into();
@@ -1423,6 +1427,7 @@ impl OverrideSettings {
             .unwrap_or(base_setting)
     }
 
+    #[cfg(feature = "lang_grit")]
     pub fn apply_override_grit_format_options(
         &self,
         path: &Utf8Path,
@@ -1794,7 +1799,7 @@ impl OverrideSettingPattern {
             options.set_trailing_newline(trailing_newline);
         }
     }
-
+    #[cfg(feature = "lang_grit")]
     fn apply_overrides_to_grit_format_options(&self, options: &mut GritFormatOptions) {
         let grit_formatter = &self.languages.grit.formatter;
         let formatter = &self.formatter;
@@ -1985,7 +1990,6 @@ pub fn to_override_settings(
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
         let graphql = pattern.graphql.take().unwrap_or_default();
-        let grit = pattern.grit.take().unwrap_or_default();
         let html = pattern.html.take().unwrap_or_default();
 
         languages.javascript =
@@ -1995,7 +1999,12 @@ pub fn to_override_settings(
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
         languages.graphql =
             to_graphql_language_settings(graphql, &current_settings.languages.graphql);
-        languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
+
+        #[cfg(feature = "lang_grit")]
+        {
+            let grit = pattern.grit.take().unwrap_or_default();
+            languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
+        }
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
@@ -2111,9 +2120,9 @@ fn to_graphql_language_settings(
 
     language_setting
 }
-
+#[cfg(feature = "lang_grit")]
 fn to_grit_language_settings(
-    mut conf: GritConfiguration,
+    mut conf: biome_configuration::GritConfiguration,
     _parent_settings: &LanguageSettings<GritLanguage>,
 ) -> LanguageSettings<GritLanguage> {
     let mut language_setting: LanguageSettings<GritLanguage> = LanguageSettings::default();
