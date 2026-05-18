@@ -55,7 +55,6 @@ biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
-dashmap                  = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
 quick-junit              = "0.6.0"
