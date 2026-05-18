@@ -70,7 +70,7 @@ use biome_js_syntax::{
     TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_parser::AnyParse;
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
@@ -81,7 +81,6 @@ use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
-use std::sync::Arc;
 use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -839,10 +838,10 @@ fn debug_formatter_ir(
 fn debug_type_info(
     path: &BiomePath,
     parse: Option<AnyParse>,
-    graph: Arc<ModuleGraph>,
+    module_db: ProjectDatabase,
 ) -> Result<String, WorkspaceError> {
     let Some(parse) = parse else {
-        let result = graph.js_module_info_for_path(path);
+        let result = module_db.js_module_info_for_path(path);
         return match result {
             None => Ok(String::new()),
             // TODO: print correct type info
@@ -990,7 +989,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         .and_then(|s| s.semantic_model.clone());
 
     let mut services = JsAnalyzerServices::from((
-        params.module_graph,
+        params.module_db,
         params.project_layout,
         file_source,
         semantic_model,
@@ -1027,7 +1026,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph,
+        module_db,
         project_layout,
         language,
         only,
@@ -1084,7 +1083,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
-        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
+        JsAnalyzerServices::from((module_db, project_layout, source_type, semantic_model));
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1186,7 +1185,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
             let mut services = JsAnalyzerServices::from((
-                params.module_graph.clone(),
+                params.module_db.clone(),
                 params.project_layout.clone(),
                 file_source,
             ));
@@ -1252,7 +1251,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let mut services = JsAnalyzerServices::from((
-            params.module_graph.clone(),
+            params.module_db.clone(),
             params.project_layout.clone(),
             file_source,
         ));
@@ -1307,7 +1306,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     // Phase 2: run all rules on the fixed tree for final diagnostics
     {
         let mut services = JsAnalyzerServices::from((
-            params.module_graph.clone(),
+            params.module_db.clone(),
             params.project_layout.clone(),
             file_source,
         ));
@@ -1490,7 +1489,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         only,
         skip,
         categories,
-        module_graph,
+        module_db,
         project_layout,
         suppression_reason,
         enabled_selectors,
@@ -1537,7 +1536,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
-        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
+        JsAnalyzerServices::from((module_db, project_layout, source_type, semantic_model));
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

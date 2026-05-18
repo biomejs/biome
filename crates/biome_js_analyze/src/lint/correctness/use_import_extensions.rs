@@ -3,7 +3,7 @@ use biome_module_graph::JsImportPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
-use crate::{JsRuleAction, services::module_graph::ResolvedImports};
+use crate::{JsRuleAction, services::database::ResolvedImports};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };

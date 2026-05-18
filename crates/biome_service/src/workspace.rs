@@ -98,6 +98,8 @@ pub use crate::{
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
+pub mod db;
+
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.

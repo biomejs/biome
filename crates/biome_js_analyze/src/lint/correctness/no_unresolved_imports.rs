@@ -4,13 +4,13 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleDb, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 
 declare_lint_rule! {
     /// Warn when importing non-existing exports.
@@ -138,7 +138,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let options = GetUnresolvedImportsOptions {
-            module_graph: ctx.module_graph(),
+            module_db: ctx.db(),
             specifier,
             target_info,
         };
@@ -236,8 +236,8 @@ impl Rule for NoUnresolvedImports {
 }
 
 struct GetUnresolvedImportsOptions<'a> {
-    /// The module graph to use for further lookups.
-    module_graph: &'a ModuleGraph,
+    /// The module database to use for further lookups.
+    module_db: &'a dyn ModuleDb,
 
     /// The path of the module we're importing from.
     specifier: TokenText,
@@ -268,6 +268,6 @@ fn get_unresolved_imports_from_module_source(
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
     options
         .target_info
-        .find_js_exported_symbol(options.module_graph, import_name.text())
+        .find_js_exported_symbol(options.module_db, import_name.text())
         .is_some()
 }

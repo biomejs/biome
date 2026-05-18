@@ -10,14 +10,23 @@ mod utils;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
-pub use crate::services::module_graph::{HtmlModuleGraph, HtmlModuleGraphService};
+pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 use crate::suppression_action::HtmlSuppressionAction;
 
 /// Services available to HTML lint rules.
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct HtmlAnalyzerServices {
-    pub module_graph: Option<Arc<ModuleGraph>>,
+    pub module_db: Option<ProjectDatabase>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl std::fmt::Debug for HtmlAnalyzerServices {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HtmlAnalyzerServices")
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("project_layout", &self.project_layout)
+            .finish()
+    }
 }
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
@@ -28,7 +37,7 @@ use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::ProjectDatabase;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
@@ -126,8 +135,8 @@ where
 
     services.insert_service(source_type);
     services.insert_service(Arc::new(AriaRoles));
-    if let Some(module_graph) = html_services.module_graph {
-        services.insert_service(module_graph);
+    if let Some(module_db) = html_services.module_db {
+        services.insert_service(module_db);
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);

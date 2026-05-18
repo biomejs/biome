@@ -145,9 +145,9 @@ pub(crate) fn analyze_and_snap(
         let mut project_diagnostics = Vec::new();
         let project_layout = project_layout_for_test_file(input_file, &mut project_diagnostics);
         diagnostics.extend(project_diagnostics);
-        let module_graph = module_graph_for_html_test_file(input_file, &project_layout);
+        let module_db = module_graph_for_html_test_file(input_file, &project_layout);
         HtmlAnalyzerServices {
-            module_graph: Some(module_graph),
+            module_db: Some(module_db),
             project_layout: Some(project_layout),
         }
     } else {
