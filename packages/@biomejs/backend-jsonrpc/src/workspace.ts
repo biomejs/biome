@@ -9795,7 +9795,6 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource }
 	| { Markdown: MdFileSource }
 	| { Yaml: YamlFileSource };
 export interface JsFileSource {
@@ -9828,9 +9827,6 @@ export interface GraphqlFileSource {
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
-}
-export interface GritFileSource {
-	variant: GritVariant;
 }
 export interface MdFileSource {
 	variant: MarkdownVariant;
@@ -9934,7 +9930,6 @@ export type HtmlVariant =
 	| "Astro"
 	| "Vue"
 	| "Svelte";
-export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
@@ -10322,10 +10317,10 @@ export interface RenameResult {
 	range: TextRange;
 }
 export interface ParsePatternParams {
-	defaultLanguage: GritTargetLanguage;
+	defaultLanguage: SearchLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = "CSS" | "JavaScript" | "JSON";
+export type SearchLanguage = "css" | "js" | "jSON";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }
