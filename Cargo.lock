@@ -214,7 +214,6 @@ dependencies = [
  "bpaf",
  "camino",
  "crossbeam",
- "dashmap 6.2.1",
  "directories",
  "insta",
  "libc",
