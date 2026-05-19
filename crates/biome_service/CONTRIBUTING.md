@@ -50,9 +50,9 @@ New languages must be added via [Rust features](https://doc.rust-lang.org/cargo/
 to keep the core lean and small. The `biome_service` is used in many areas of the toolchain (tests, codegen, benchmarks, etc.),
 so we want to pull the features we need.
 
-Features **must opt-in**. When the support for a new language is ready, the feature bust be added in the `biome_cli`, `biome_lsp` and `biome_wasm`.
+Features **must opt in**. When the support for a new language is ready, the feature must be added in the `biome_cli`, `biome_lsp` and `biome_wasm`.
 
-The feature must be have the prefix `lang_*` e.g. `lang_yaml`, and it usually involves multiple crates:
+The feature must have the prefix `lang_*` e.g. `lang_yaml`, and it usually involves multiple crates:
 - `biome_configuration_macros`
   ```toml
   lang_yaml = ["dep:biome_yaml_syntax", "dep:biome_yaml_analyze"]
