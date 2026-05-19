@@ -85,15 +85,6 @@ info: scss/comments/selectors.scss
  .powerPathNavigator .helm button:active:not(.disabledButton),
  .powerPathNavigator table.powerPathInfo th:active,
  .powerPathNavigator table.powerPathInfo th:active + th:last-child {
-@@ -11,7 +13,7 @@
- 
- .foo,
- // comment 3
--.bar {
-+  .bar {
-   display: block;
- }
- 
 @@ -25,8 +27,7 @@
  }
  
@@ -155,7 +146,7 @@ info: scss/comments/selectors.scss
 
 .foo,
 // comment 3
-  .bar {
+.bar {
   display: block;
 }
 

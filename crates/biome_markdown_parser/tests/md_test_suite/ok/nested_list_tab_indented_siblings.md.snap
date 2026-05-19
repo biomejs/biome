@@ -1,0 +1,237 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- Top
+	- Nested 1
+	- Nested 2
+		- Sub-Nested
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..5 "Top" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@6..7 "\t" [] [],
+                                },
+                            ],
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    prefix: MdListMarkerPrefix {
+                                        pre_marker_indent: MdIndentTokenList [],
+                                        marker: MINUS@7..8 "-" [] [],
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@8..9 " " [] [],
+                                        content_indent: MdIndentTokenList [],
+                                    },
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@9..17 "Nested 1" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                                MdBullet {
+                                    prefix: MdListMarkerPrefix {
+                                        pre_marker_indent: MdIndentTokenList [
+                                            MdIndentToken {
+                                                md_indent_char_token: MD_INDENT_CHAR@18..19 "\t" [] [],
+                                            },
+                                        ],
+                                        marker: MINUS@19..20 "-" [] [],
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@20..21 " " [] [],
+                                        content_indent: MdIndentTokenList [],
+                                    },
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@21..29 "Nested 2" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                        MdContinuationIndent {
+                                            indent: MdIndentTokenList [
+                                                MdIndentToken {
+                                                    md_indent_char_token: MD_INDENT_CHAR@30..31 "\t" [] [],
+                                                },
+                                                MdIndentToken {
+                                                    md_indent_char_token: MD_INDENT_CHAR@31..32 "\t" [] [],
+                                                },
+                                            ],
+                                        },
+                                        MdBulletListItem {
+                                            md_bullet_list: MdBulletList [
+                                                MdBullet {
+                                                    prefix: MdListMarkerPrefix {
+                                                        pre_marker_indent: MdIndentTokenList [],
+                                                        marker: MINUS@32..33 "-" [] [],
+                                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@33..34 " " [] [],
+                                                        content_indent: MdIndentTokenList [],
+                                                    },
+                                                    content: MdBlockList [
+                                                        MdParagraph {
+                                                            list: MdInlineItemList [
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@34..37 "Sub" [] [],
+                                                                },
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@37..38 "-" [] [],
+                                                                },
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@38..44 "Nested" [] [],
+                                                                },
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@44..45 "\n" [] [],
+                                                                },
+                                                            ],
+                                                            hard_line: missing (optional),
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@45..45 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..45
+  0: (empty)
+  1: MD_BLOCK_LIST@0..45
+    0: MD_BULLET_LIST_ITEM@0..45
+      0: MD_BULLET_LIST@0..45
+        0: MD_BULLET@0..45
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..45
+            0: MD_PARAGRAPH@2..6
+              0: MD_INLINE_ITEM_LIST@2..6
+                0: MD_TEXTUAL@2..5
+                  0: MD_TEXTUAL_LITERAL@2..5 "Top" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+              1: (empty)
+            1: MD_CONTINUATION_INDENT@6..7
+              0: MD_INDENT_TOKEN_LIST@6..7
+                0: MD_INDENT_TOKEN@6..7
+                  0: MD_INDENT_CHAR@6..7 "\t" [] []
+            2: MD_BULLET_LIST_ITEM@7..45
+              0: MD_BULLET_LIST@7..45
+                0: MD_BULLET@7..18
+                  0: MD_LIST_MARKER_PREFIX@7..9
+                    0: MD_INDENT_TOKEN_LIST@7..7
+                    1: MINUS@7..8 "-" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@8..9 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@9..9
+                  1: MD_BLOCK_LIST@9..18
+                    0: MD_PARAGRAPH@9..18
+                      0: MD_INLINE_ITEM_LIST@9..18
+                        0: MD_TEXTUAL@9..17
+                          0: MD_TEXTUAL_LITERAL@9..17 "Nested 1" [] []
+                        1: MD_TEXTUAL@17..18
+                          0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+                      1: (empty)
+                1: MD_BULLET@18..45
+                  0: MD_LIST_MARKER_PREFIX@18..21
+                    0: MD_INDENT_TOKEN_LIST@18..19
+                      0: MD_INDENT_TOKEN@18..19
+                        0: MD_INDENT_CHAR@18..19 "\t" [] []
+                    1: MINUS@19..20 "-" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@20..21 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@21..21
+                  1: MD_BLOCK_LIST@21..45
+                    0: MD_PARAGRAPH@21..30
+                      0: MD_INLINE_ITEM_LIST@21..30
+                        0: MD_TEXTUAL@21..29
+                          0: MD_TEXTUAL_LITERAL@21..29 "Nested 2" [] []
+                        1: MD_TEXTUAL@29..30
+                          0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+                      1: (empty)
+                    1: MD_CONTINUATION_INDENT@30..32
+                      0: MD_INDENT_TOKEN_LIST@30..32
+                        0: MD_INDENT_TOKEN@30..31
+                          0: MD_INDENT_CHAR@30..31 "\t" [] []
+                        1: MD_INDENT_TOKEN@31..32
+                          0: MD_INDENT_CHAR@31..32 "\t" [] []
+                    2: MD_BULLET_LIST_ITEM@32..45
+                      0: MD_BULLET_LIST@32..45
+                        0: MD_BULLET@32..45
+                          0: MD_LIST_MARKER_PREFIX@32..34
+                            0: MD_INDENT_TOKEN_LIST@32..32
+                            1: MINUS@32..33 "-" [] []
+                            2: MD_LIST_POST_MARKER_SPACE@33..34 " " [] []
+                            3: MD_INDENT_TOKEN_LIST@34..34
+                          1: MD_BLOCK_LIST@34..45
+                            0: MD_PARAGRAPH@34..45
+                              0: MD_INLINE_ITEM_LIST@34..45
+                                0: MD_TEXTUAL@34..37
+                                  0: MD_TEXTUAL_LITERAL@34..37 "Sub" [] []
+                                1: MD_TEXTUAL@37..38
+                                  0: MD_TEXTUAL_LITERAL@37..38 "-" [] []
+                                2: MD_TEXTUAL@38..44
+                                  0: MD_TEXTUAL_LITERAL@38..44 "Nested" [] []
+                                3: MD_TEXTUAL@44..45
+                                  0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
+                              1: (empty)
+  2: EOF@45..45 "" [] []
+
+```

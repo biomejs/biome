@@ -70,6 +70,11 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
 		prettierParser: "html",
 		displayName: "HTML",
 	},
+	vue: {
+		biomeFilePath: "file.vue",
+		prettierParser: "vue",
+		displayName: "Vue",
+	},
 	graphql: {
 		biomeFilePath: "file.graphql",
 		prettierParser: "graphql",

@@ -38,13 +38,13 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    Parser,
+    CompletedMarker, Parser,
     prelude::ParsedSyntax::{self, *},
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
-    parse_fenced_code_block_force,
+    at_fenced_code_block, backtick_info_violation, info_string_has_backtick,
+    parse_fenced_code_block, parse_fenced_code_block_force,
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
@@ -103,9 +103,22 @@ pub(crate) const TAB_STOP_SPACES: usize = 4;
 /// CommonMark allows 0-3 spaces of optional indentation before block-level
 /// markers (blockquotes §5.1, list items §5.2/§5.3, ATX headings §4.2, etc.).
 pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
+/// CommonMark §5.2 caps ordered list markers at 9 digits.
+pub(crate) const MAX_ORDERED_LIST_MARKER_DIGITS: usize = 9;
+/// CommonMark §4.2 caps ATX headings at 6 levels (`#` through `######`).
+pub(crate) const MAX_ATX_HEADING_LEVEL: usize = 6;
+/// CommonMark §6.7 hard line breaks require at least 2 trailing spaces.
+pub(crate) const MIN_HARD_BREAK_TRAILING_SPACES: usize = 2;
+/// CommonMark §4.1 thematic breaks require a run of at least 3 matching
+/// characters (`-`, `_`, or `*`).
+pub(crate) const MIN_THEMATIC_BREAK_RUN: usize = 3;
+/// CommonMark §4.5 fenced code blocks require an opening fence of at
+/// least 3 backticks or tildes.
+pub(crate) const MIN_FENCE_RUN_LENGTH: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
@@ -259,11 +272,15 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
+        if p.at_blank_line() {
+            p.state_mut().link_reference_definition_continuation = false;
+        }
         let m = p.start();
         p.bump(NEWLINE);
         return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
+        p.state_mut().link_reference_definition_continuation = false;
         // Consume blank-line whitespace as whitespace trivia (structural).
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
@@ -282,12 +299,20 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         return Absent;
     }
 
+    let allow_indent_code_block =
+        allow_indent_code_block && !p.state().link_reference_definition_continuation;
+
     let parsed = if allow_indent_code_block && at_indent_code_block(p) {
         parse_indent_code_block(p)
     } else if at_fenced_code_block(p) {
         parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
+    } else if let Some(range) = backtick_info_violation(p) {
+        // Backtick-fence info strings cannot contain backticks (CommonMark §4.5);
+        // emit a diagnostic before delegating to paragraph parsing.
+        p.error(parse_error::info_string_contains_backtick(p, range));
+        parse_paragraph(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -326,21 +351,33 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     } else if at_bullet_list_item(p) {
         parse_bullet_list_item(p)
     } else if at_order_list_item(p) || at_order_list_item_textual(p) {
-        let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
-            p.set_force_ordered_list_marker(true);
-            p.force_relex_regular();
-            true
-        } else {
-            false
-        };
-        let parsed = parse_order_list_item(p);
-        if forced {
-            p.set_force_ordered_list_marker(false);
-        }
-        if parsed.is_absent() {
+        // After a link reference definition with no intervening blank line,
+        // CommonMark treats the next line as paragraph continuation unless it
+        // begins a paragraph-interrupting block. Ordered lists with a starting
+        // number other than 1 cannot interrupt a paragraph (§5.2), so fall
+        // back to paragraph parsing.
+        if p.state().link_reference_definition_continuation
+            && p.state().list_nesting_depth == 0
+            && !is_ordered_list_starts_with_one(p)
+        {
             parse_paragraph(p)
         } else {
-            parsed
+            let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
+                p.set_force_ordered_list_marker(true);
+                p.force_relex_regular();
+                true
+            } else {
+                false
+            };
+            let parsed = parse_order_list_item(p);
+            if forced {
+                p.set_force_ordered_list_marker(false);
+            }
+            if parsed.is_absent() {
+                parse_paragraph(p)
+            } else {
+                parsed
+            }
         }
     } else if at_html_block(p) {
         parse_html_block(p)
@@ -355,7 +392,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             Ok(link)
         });
         if let Ok(parsed) = link_result {
-            parsed
+            p.state_mut().link_reference_definition_continuation = true;
+            if link_reference_definition_before_dash_thematic_break(p) {
+                Present(parse_empty_paragraph(p))
+            } else {
+                parsed
+            }
         } else {
             parse_paragraph(p)
         }
@@ -403,6 +445,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.bump_any();
         }
         return Absent;
+    }
+
+    if let Present(marker) = &parsed
+        && marker.kind(p) != MD_LINK_REFERENCE_DEFINITION
+    {
+        p.state_mut().link_reference_definition_continuation = false;
     }
 
     parsed
@@ -655,6 +703,34 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(completed)
 }
 
+pub(crate) fn parse_empty_paragraph(p: &mut MarkdownParser) -> CompletedMarker {
+    let paragraph = p.start();
+    let list = p.start();
+    list.complete(p, MD_INLINE_ITEM_LIST);
+    paragraph.complete(p, MD_PARAGRAPH)
+}
+
+fn link_reference_definition_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text == " " || text == "\t" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                break;
+            }
+        }
+
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
+    })
+}
+
 fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bool {
     if end <= start {
         return false;
@@ -805,20 +881,132 @@ fn classify_quote_break_after_newline(
 ) -> QuoteBreakKind {
     p.lookahead(|p| {
         consume_quote_prefix_without_virtual(p, quote_depth);
+        // CommonMark §4.3: a setext underline must sit in the same container
+        // as the paragraph it underlines. When the paragraph is inside a list
+        // item and the residual indent after the `>` prefix is below the
+        // list's required indent, the dash line cannot be a setext underline —
+        // it is a thematic break that ends the list. Reporting it as `Other`
+        // (vs `SetextUnderline`) keeps the `>` prefix unconsumed so the outer
+        // blockquote can re-process the line.
+        let required_indent = p.state().list_item_required_indent;
+        let residual_indent = leading_indent_at_current(p);
+        let underline_in_container = required_indent == 0 || residual_indent >= required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             // Re-lex at line start so the lexer produces block-level tokens
             // (e.g. MD_THEMATIC_BREAK_LITERAL for `---`) instead of MINUS.
             p.force_relex_at_line_start();
-            if p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
-            {
-                QuoteBreakKind::SetextUnderline
-            } else if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+            let at_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p));
+            if at_setext && underline_in_container {
+                return QuoteBreakKind::SetextUnderline;
+            }
+            if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return QuoteBreakKind::Other;
+            }
+            // Tab between `>` and a block-level marker (e.g. `> \t- nested`)
+            // leaves the marker token mid-line in the buffer, so the direct
+            // checks miss it. Only enter the lookahead retry when the current
+            // token is a whitespace-only textual run that contains a tab —
+            // otherwise the original checks above are authoritative and the
+            // retry would add lookahead overhead to every quote continuation.
+            let needs_ws_retry = p.at(MD_TEXTUAL_LITERAL) && {
+                let bytes = p.cur_text().as_bytes();
+                !bytes.is_empty()
+                    && bytes.iter().all(|b| matches!(b, b' ' | b'\t'))
+                    && bytes.contains(&b'\t')
+            };
+            if !needs_ws_retry {
+                return QuoteBreakKind::None;
+            }
+            let interrupts_after_ws = p.lookahead(|p| {
+                while p.at(MD_TEXTUAL_LITERAL) {
+                    let bytes = p.cur_text().as_bytes();
+                    if bytes.is_empty() || !bytes.iter().all(|b| matches!(b, b' ' | b'\t')) {
+                        break;
+                    }
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                with_virtual_line_start(p, p.cur_range().start(), |p| {
+                    p.force_relex_at_line_start();
+                    at_block_interrupt(p) || textual_looks_like_list_marker(p)
+                })
+            });
+            if interrupts_after_ws {
                 QuoteBreakKind::Other
             } else {
                 QuoteBreakKind::None
             }
         })
+    })
+}
+
+/// Count residual indent columns at the current parser position.
+///
+/// Used after lookahead consumes a container prefix such as `> `. This is not
+/// full line-start indent; it only measures spaces/tabs before the next block
+/// candidate without advancing the real parser.
+fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
+    p.lookahead(|p| {
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.is_empty() {
+                break;
+            }
+
+            for c in text.chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => return indent,
+                }
+            }
+
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        indent
+    })
+}
+
+/// Returns `true` when the current (no-quote-prefix) line begins a block
+/// construct strict enough to end blockquote lazy continuation.
+///
+/// CommonMark distinguishes "paragraph interrupt" rules (e.g. ordered lists
+/// must start with `1` to interrupt a paragraph) from "begins a new block"
+/// rules used for laziness. An ordered list with start > 1 still *begins a
+/// new block*, so it terminates a lazily continued blockquote even though it
+/// would not interrupt a top-level paragraph.
+fn begins_blockquote_terminating_block(p: &mut MarkdownParser) -> bool {
+    use biome_markdown_syntax::MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER;
+    // The lexer can split a line into a leading whitespace token followed by
+    // the marker token (e.g. `"  "` then `"2."`), so walk past whitespace-only
+    // `MD_TEXTUAL_LITERAL` tokens via a lookahead before testing the marker.
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let bytes = p.cur_text().as_bytes();
+            if bytes.is_empty() || !bytes.iter().all(|b| matches!(b, b' ' | b'\t')) {
+                break;
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        let text = if p.at(MD_TEXTUAL_LITERAL) || p.at(MD_ORDERED_LIST_MARKER) {
+            p.cur_text()
+        } else {
+            return false;
+        };
+        let trimmed = text.trim_start_matches([' ', '\t']);
+        if !crate::syntax::list::textual_starts_with_ordered_marker(trimmed) {
+            return false;
+        }
+        let digit_bytes = trimmed.as_bytes();
+        let digit_len = digit_bytes
+            .iter()
+            .take_while(|b| b.is_ascii_digit())
+            .count();
+        // `1.` / `1)` is handled by the paragraph-interrupt path. Only the
+        // start > 1 case needs the broader laziness rule here. Compare the
+        // borrowed digit prefix instead of allocating a String.
+        !(digit_len == 1 && digit_bytes[0] == b'1')
     })
 }
 
@@ -956,9 +1144,9 @@ fn break_for_setext_after_inline_newline(
     false
 }
 
-/// Break the paragraph when the next line is a block interrupt at
-/// `required_indent`, or when a nested item's continuation drops to
-/// the parent's indent level (§5.2 ownership, depth >= 2).
+/// Break the paragraph when the next line starts a list-interrupting
+/// block, including sibling/parent list markers whose indent is below
+/// the current item's `required_indent` (CommonMark §5.2).
 fn break_for_list_interrupt_after_inline_newline(
     p: &mut MarkdownParser,
     required_indent: usize,
@@ -968,12 +1156,25 @@ fn break_for_list_interrupt_after_inline_newline(
     }
 
     let indent = p.line_start_leading_indent();
-    if indent < required_indent {
+    if indent < required_indent && indent > p.state().list_item_marker_indent {
         return false;
     }
 
+    // Line sits at sibling/parent level. A list marker here ends the
+    // current paragraph (CommonMark §5.2). Tabs need the broad token-aware
+    // lookahead because `MD_TEXTUAL_LITERAL` can absorb the tab and any
+    // following marker; the non-tab path only needs to cover non-1 ordered
+    // siblings continuing an existing list.
+    if indent < required_indent {
+        if line_start_indent_contains_tab(p) {
+            return line_starts_with_list_marker_after_indent(p, indent);
+        }
+        return line_starts_with_nonone_ordered_marker_after_indent(p, indent);
+    }
+
+    let skip = indent.min(required_indent);
     p.lookahead(|p| {
-        p.skip_line_indent(required_indent);
+        p.skip_line_indent(skip);
         let prev_required = p.state().list_item_required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             p.state_mut().list_item_required_indent = 0;
@@ -981,6 +1182,92 @@ fn break_for_list_interrupt_after_inline_newline(
             p.state_mut().list_item_required_indent = prev_required;
             breaks
         })
+    })
+}
+
+/// True if current `MD_TEXTUAL_LITERAL`'s leading space/tab run contains a tab.
+fn line_start_indent_contains_tab(p: &MarkdownParser) -> bool {
+    p.at(MD_TEXTUAL_LITERAL)
+        && p.cur_text()
+            .chars()
+            .take_while(|c| *c == ' ' || *c == '\t')
+            .any(|c| c == '\t')
+}
+
+/// Lookahead: after skipping `indent` columns of leading whitespace, does
+/// the next token begin a non-1 ordered marker followed by whitespace/EOL?
+/// Covers `parse_inline_item_list`'s blind spot (`textual_looks_like_list_marker`
+/// only matches `1.`/`1)` for ordered); `1.`/`1)` and bullets are left to the
+/// inline loop.
+fn line_starts_with_nonone_ordered_marker_after_indent(
+    p: &mut MarkdownParser,
+    indent: usize,
+) -> bool {
+    p.lookahead(|p| {
+        p.skip_line_indent(indent);
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            let text = p.cur_text();
+            if text == "1." || text == "1)" {
+                return false;
+            }
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text
+                .strip_prefix("1.")
+                .or_else(|| text.strip_prefix("1)"))
+                .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\n', '\r']))
+            {
+                return false;
+            }
+            return textual_starts_with_ordered_marker(text);
+        }
+        false
+    })
+}
+
+/// Lookahead: after skipping `indent` columns of leading whitespace, is the next
+/// token a list marker (`-`, `*`, `+`, ordered) followed by whitespace or EOL?
+/// Handles raw marker tokens and markers still folded into `MD_TEXTUAL_LITERAL`
+/// / `MD_SETEXT_UNDERLINE_LITERAL`.
+fn line_starts_with_list_marker_after_indent(p: &mut MarkdownParser, indent: usize) -> bool {
+    p.lookahead(|p| {
+        p.skip_line_indent(indent);
+
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            let trimmed = p.cur_text().trim_matches(|c| c == ' ' || c == '\t');
+            if trimmed != "-" {
+                return false;
+            }
+            p.bump_remap(T![-]);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if !p.at(MD_TEXTUAL_LITERAL) {
+            return false;
+        }
+
+        let text = p.cur_text();
+        let marker_kind = match text {
+            "-" => T![-],
+            "*" => T![*],
+            "+" => T![+],
+            _ => return textual_starts_with_ordered_marker(text),
+        };
+        p.bump_remap(marker_kind);
+        marker_followed_by_whitespace_or_eol(p)
     })
 }
 
@@ -1031,7 +1318,17 @@ fn handle_line_continuation(
     emit_indent_tokens: bool,
 ) -> InlineNewlineAction {
     let quote_depth = p.state().block_quote_depth;
+    let line_has_quote_prefix = quote_depth > 0 && has_quote_prefix(p, quote_depth);
     if break_for_quote_prefix_after_inline_newline(p, quote_depth) {
+        return InlineNewlineAction::Break;
+    }
+
+    // Unprefixed continuation in a blockquote: a line that begins any new block
+    // construct (e.g. an ordered list with start > 1) ends the blockquote per
+    // CommonMark, even though such a line could not interrupt an active
+    // top-level paragraph. With a `>` prefix, normal lazy-continuation rules
+    // apply and the line stays inside the same paragraph.
+    if quote_depth > 0 && !line_has_quote_prefix && begins_blockquote_terminating_block(p) {
         return InlineNewlineAction::Break;
     }
 
@@ -1044,16 +1341,10 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
-        let marker_indent = p.state().list_item_marker_indent;
-        if marker_indent > 0 {
-            let indent = p.line_start_leading_indent();
-            if indent < required_indent && indent <= marker_indent {
-                return InlineNewlineAction::Break;
-            }
-        }
+    // The invalid fence still belongs to this paragraph; only add the diagnostic.
+    if let Some(range) = backtick_info_violation(p) {
+        p.error(parse_error::info_string_contains_backtick(p, range));
     }
-
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
@@ -1353,28 +1644,76 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> boo
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 {
         let indent = p.line_start_leading_indent();
-        if indent < required_indent {
-            return true;
-        }
+        if indent >= required_indent {
+            scan_list_indent(p, required_indent);
 
-        scan_list_indent(p, required_indent);
-
-        // After stripping list indent, re-check setext/thematic markers
-        // to mirror newline handling in the parse path. Without this,
-        // prescan would include indent bytes and stop one iteration later.
-        // We intentionally skip the heavier post-indent block-interrupt
-        // check here; the following non-NEWLINE pass still catches
-        // interrupts for emphasis-context length calculation.
-        if has_content
-            && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL)
-                    && is_dash_only_thematic_break_text(p.cur_text())))
-        {
+            // After stripping list indent, re-check setext/thematic markers
+            // to mirror newline handling in the parse path. Without this,
+            // prescan would include indent bytes and stop one iteration later.
+            // We intentionally skip the heavier post-indent block-interrupt
+            // check here; the following non-NEWLINE pass still catches
+            // interrupts for emphasis-context length calculation.
+            if has_content
+                && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                    || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                        && is_dash_only_thematic_break_text(p.cur_text())))
+            {
+                return true;
+            }
+        } else if at_block_interrupt_after_indent(p) {
+            // CommonMark §5.2: at insufficient indent we keep scanning so
+            // the emphasis context sees lazy-continuation delimiters, but
+            // a sibling/parent list marker (or other block interrupt) at
+            // the next line still ends the paragraph and must stop the
+            // scan early — without this, deeply nested list benchmarks
+            // walk through every leading-whitespace token of every
+            // following line.
             return true;
         }
     }
 
     false
+}
+
+/// Lookahead: skip leading whitespace tokens on the current line and
+/// return whether the resulting position is a block interrupt or list
+/// marker. Used to short-circuit lazy-continuation scanning when the
+/// next line actually starts a new block.
+///
+/// Per CommonMark §5.2, a line indented 4+ columns *past the parent
+/// list marker* is paragraph text (lazy continuation), never a block
+/// interrupt — return false in that window. Lines below that threshold
+/// can still be sibling/parent list markers, so we keep walking and
+/// re-check, which is what restores the fast path for deeply nested
+/// lists where absolute indent is already large.
+fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        let lazy_threshold = p.state().list_item_marker_indent + INDENT_CODE_BLOCK_SPACES;
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            for c in p.cur_text().chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => {}
+                }
+            }
+            if indent >= lazy_threshold {
+                return false;
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        with_virtual_line_start(p, p.cur_range().start(), |p| {
+            if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return true;
+            }
+            // Mirror `parse_inline_item_list`'s break on non-1 ordered
+            // sibling markers: a marker still folded into `MD_TEXTUAL_LITERAL`
+            // would otherwise let the prescan walk past the paragraph boundary
+            // and leak emphasis delimiters from the next list item.
+            p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
+        })
+    })
 }
 
 /// Strip list-item indent tokens during inline list length scanning.
@@ -1493,12 +1832,15 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
     // that interrupt paragraphs - they would be indented code blocks.
     // Tabs count as 4 spaces per CommonMark §2.2.
     if p.line_start_leading_indent() >= INDENT_CODE_BLOCK_SPACES {
-        // Inside list items, allow list markers at the current indent to
-        // interrupt paragraphs (nested lists).
-        if (p.state().list_nesting_depth > 0 || p.state().list_item_required_indent > 0)
-            && (at_bullet_list_item(p) || at_order_list_item(p))
-        {
-            return true;
+        // Inside list items, list markers at the current indent can start
+        // nested lists. Ordered markers still need to satisfy §5.2.
+        if p.state().list_nesting_depth > 0 || p.state().list_item_required_indent > 0 {
+            if at_bullet_list_item(p) {
+                return true;
+            }
+            if at_order_list_item(p) && can_ordered_marker_interrupt_paragraph(p) {
+                return true;
+            }
         }
         return false;
     }
@@ -1537,16 +1879,13 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
         }
     }
 
-    // Ordered list item (1., 2), etc.)
-    // Per CommonMark §5.2: ordered lists can interrupt TOP-LEVEL paragraphs only if:
-    //   - Starting with 1 (not 2, 3, etc.), AND
-    //   - The item has content (empty ordered items cannot interrupt)
-    // Inside a list context, any ordered marker can start a new sibling item.
-    if at_order_list_item(p) || at_order_list_item_at_any_indent(p) {
-        let in_list = p.state().list_nesting_depth > 0;
-        if in_list || (is_ordered_list_starts_with_one(p) && !is_empty_list_item(p)) {
-            return true;
-        }
+    // Ordered markers may interrupt paragraphs only when they start with `1`
+    // and are non-empty (§5.2). In list context, a marker physically before
+    // required_indent is a sibling/parent boundary and is allowed.
+    if (at_order_list_item(p) || at_order_list_item_at_any_indent(p))
+        && can_ordered_marker_interrupt_paragraph(p)
+    {
+        return true;
     }
 
     // HTML block (type 7 does not interrupt paragraphs)
@@ -1585,7 +1924,7 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
         });
     }
 
-    // Ordered marker: per CommonMark §5.1, only ordered lists starting with 1
+    // Ordered marker: per CommonMark §5.2, only ordered lists starting with 1
     // can interrupt paragraphs. Check if text is "1." or "1)" pattern.
     if let Some(rest) = text.strip_prefix('1') {
         // "1." or "1)" followed by space (the space might be in next token)
@@ -1615,6 +1954,73 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
     false
 }
 
+/// Return true when the current ordered marker may interrupt a paragraph.
+///
+/// CommonMark §5.2 requires ordered paragraph interrupters to start with `1`
+/// and be non-empty. Inside a list, physical indent below `required_indent`
+/// means the marker is a sibling/parent boundary instead of an interrupter.
+fn can_ordered_marker_interrupt_paragraph(p: &mut MarkdownParser) -> bool {
+    let in_list = p.state().list_nesting_depth > 0;
+    let required_indent = p.state().list_item_required_indent;
+    let physical_indent = physical_line_start_indent(p);
+    let is_sibling_or_parent = in_list && physical_indent < required_indent;
+
+    if is_sibling_or_parent {
+        return true;
+    }
+
+    ordered_marker_starts_with_one_after_whitespace(p)
+        && !is_ordered_marker_empty_after_whitespace(p)
+}
+
+/// Like [`is_ordered_list_starts_with_one`], but skips leading whitespace.
+fn ordered_marker_starts_with_one_after_whitespace(p: &mut MarkdownParser) -> bool {
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
+        if let Some(rest) = trimmed
+            .strip_prefix("1.")
+            .or_else(|| trimmed.strip_prefix("1)"))
+        {
+            return rest.is_empty() || rest.starts_with([' ', '\t']);
+        }
+    }
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        is_ordered_list_starts_with_one(p)
+    })
+}
+
+/// Like [`is_empty_list_item`], but skips leading whitespace.
+fn is_ordered_marker_empty_after_whitespace(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        is_empty_list_item(p)
+    })
+}
+
+/// Count physical leading columns, ignoring `virtual_line_start`.
+///
+/// This is needed after indentation has already been emitted as CST nodes.
+/// Tabs expand to the next multiple of `TAB_STOP_SPACES`.
+fn physical_line_start_indent(p: &MarkdownParser) -> usize {
+    let source = p.source().source_text();
+    let pos: usize = p.cur_range().start().into();
+    let line_start = source[..pos].rfind('\n').map_or(0, |idx| idx + 1);
+    let mut col = 0usize;
+    for c in source[line_start..].chars() {
+        match c {
+            ' ' => col += 1,
+            '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+            _ => break,
+        }
+    }
+    col
+}
+
 /// Check if an ordered list marker starts with the number 1.
 ///
 /// Per CommonMark §5.2: "In order to solve of an ambiguity in the spec,
@@ -1622,15 +2028,22 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
 ///
 /// This prevents accidental list creation from wrapped lines like:
 /// "The number of windows is 14. The number of doors is 6."
-fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
-    if !p.at(MD_ORDERED_LIST_MARKER) {
-        return false;
+pub(crate) fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
+    // Raw ordered list marker token: text is the full marker (e.g. "1.", "10.").
+    if p.at(MD_ORDERED_LIST_MARKER) {
+        let text = p.cur_text();
+        return text == "1." || text == "1)";
     }
-
-    // The marker text includes digits + delimiter (e.g., "1.", "2)", "10.")
-    // We want exactly "1." or "1)" - not "10.", "11.", etc.
-    let text = p.cur_text();
-    text == "1." || text == "1)"
+    // Textual ordered marker (e.g. inside an inline list source span): the
+    // lexer keeps the digits + delimiter inside MD_TEXTUAL_LITERAL. Accept
+    // an exact `1.` / `1)` prefix optionally followed by whitespace or EOL.
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if let Some(rest) = text.strip_prefix("1.").or_else(|| text.strip_prefix("1)")) {
+            return rest.is_empty() || rest.starts_with([' ', '\t']);
+        }
+    }
+    false
 }
 
 /// Check for a bullet list item at any valid top-level indent (0-3 spaces).
@@ -1845,7 +2258,7 @@ fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRan
         let range = p.cur_range();
         let count = p.cur_text().len();
 
-        if count > 6 {
+        if count > MAX_ATX_HEADING_LEVEL {
             Some((range, count))
         } else {
             None
@@ -1868,7 +2281,7 @@ fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
         let hash_count = p.cur_text().len();
 
         // Too many hashes - not a valid heading (must be 1-6)
-        if hash_count > 6 {
+        if hash_count > MAX_ATX_HEADING_LEVEL {
             return false;
         }
 

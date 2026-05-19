@@ -10,6 +10,7 @@ use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguratio
 use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
+use biome_configuration::yaml::YamlConfiguration;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
@@ -35,13 +36,16 @@ use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
@@ -193,6 +197,13 @@ impl Settings {
         {
             if let Some(markdown) = configuration.markdown {
                 self.languages.markdown = markdown.into();
+            }
+        }
+
+        #[cfg(feature = "yaml")]
+        {
+            if let Some(yaml) = configuration.yaml {
+                self.languages.yaml = yaml.into();
             }
         }
 
@@ -577,6 +588,7 @@ pub struct OverrideFormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub trailing_newline: Option<TrailingNewline>,
 }
 
@@ -593,6 +605,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
             expand: conf.expand,
+            trailing_commas: conf.trailing_commas,
             trailing_newline: conf.trailing_newline,
         }
     }
@@ -686,6 +699,7 @@ pub struct LanguageListSettings {
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
     pub markdown: LanguageSettings<MarkdownLanguage>,
+    pub yaml: LanguageSettings<YamlLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -833,6 +847,17 @@ impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
     fn from(markdown: MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
+        }
+
+        language_setting
+    }
+}
+
+impl From<YamlConfiguration> for LanguageSettings<YamlLanguage> {
+    fn from(yaml: YamlConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = yaml.formatter {
             language_setting.formatter = formatter.into();
         }
 
@@ -1638,7 +1663,7 @@ impl OverrideSettingPattern {
         if let Some(quote_properties) = js_formatter.quote_properties {
             options.set_quote_properties(quote_properties);
         }
-        if let Some(trailing_commas) = js_formatter.trailing_commas {
+        if let Some(trailing_commas) = js_formatter.trailing_commas.or(formatter.trailing_commas) {
             options.set_trailing_commas(trailing_commas);
         }
         if let Some(semicolons) = js_formatter.semicolons {
@@ -1689,6 +1714,11 @@ impl OverrideSettingPattern {
         }
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
+        } else if let Some(trailing_commas) = formatter.trailing_commas {
+            options.set_trailing_commas(match trailing_commas {
+                TrailingCommas::All | TrailingCommas::Es5 => JsonTrailingCommas::All,
+                TrailingCommas::None => JsonTrailingCommas::None,
+            });
         }
         if let Some(expand_lists) = json_formatter.expand.or(formatter.expand) {
             options.set_expand(expand_lists);
@@ -1922,6 +1952,7 @@ pub fn to_override_settings(
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
                 expand: formatter.expand,
+                trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
             })
             .unwrap_or_default();

@@ -1,4 +1,4 @@
-use std::{borrow::Cow, cmp::Ordering, iter::zip};
+use std::{borrow::Cow, cmp::Ordering};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
@@ -10,7 +10,7 @@ use biome_diagnostics::{Applicability, category};
 use biome_js_syntax::{
     AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, AstNodeListExt, BatchMutationExt};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 use biome_string_case::StrLikeExtension;
 
@@ -82,54 +82,56 @@ declare_source_rule! {
 
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
-    type State = PropGroup;
-    type Signals = Box<[Self::State]>;
+    type State = SortedAttrList;
+    type Signals = Option<Self::State>;
     type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let props = ctx.query();
-        let mut current_prop_group = PropGroup::default();
-        let mut prop_groups = Vec::new();
+        let list = ctx.query();
         let options = ctx.options();
-        let sort_by = options.sort_order.unwrap_or_default();
-
-        let comparator = match sort_by {
+        let comparator = match options.sort_order.unwrap_or_default() {
             SortOrder::Natural => PropElement::ascii_nat_cmp,
             SortOrder::Lexicographic => PropElement::lexicographic_cmp,
         };
 
-        // Convert to boolean-based comparator for is_sorted_by
-        let boolean_comparator =
-            |a: &PropElement, b: &PropElement| comparator(a, b) != Ordering::Greater;
+        // Snapshot all attributes once. `sorted_slots[i]` is the original
+        // slot index of the attribute that should appear at position `i`.
+        // Non-attribute slots (spread, shorthand, metavariable) keep their
+        // identity mapping; only JsxAttribute groups get reordered.
+        let attrs: Vec<AnyJsxAttribute> = list.iter().collect();
+        let mut sorted_slots: Vec<usize> = (0..attrs.len()).collect();
+        let mut any_unsorted = false;
 
-        for prop in props {
-            match prop {
-                AnyJsxAttribute::JsxAttribute(attr) => {
-                    current_prop_group.props.push(PropElement { prop: attr });
+        // Identify groups of consecutive JsxAttributes split by spread/shorthand:
+        // a spread carries an opaque expression that may have side effects on
+        // the resulting prop set, so attributes on either side cannot be
+        // freely reordered across it.
+        let mut group_start: Option<usize> = None;
+        for (i, attr) in attrs.iter().enumerate() {
+            match attr {
+                AnyJsxAttribute::JsxAttribute(_) => {
+                    if group_start.is_none() {
+                        group_start = Some(i);
+                    }
                 }
-                // spread or shorthand attribute resets sort order: it carries
-                // an opaque expression that may have side effects on the
-                // resulting prop set, so attributes on either side cannot be
-                // freely reordered across it.
                 AnyJsxAttribute::JsxSpreadAttribute(_)
                 | AnyJsxAttribute::JsxShorthandAttribute(_) => {
-                    if !current_prop_group.is_empty()
-                        && !current_prop_group.is_sorted(boolean_comparator)
+                    if let Some(start) = group_start.take()
+                        && sort_group(&attrs, start, i, &comparator, &mut sorted_slots)
                     {
-                        prop_groups.push(current_prop_group);
-                        current_prop_group = PropGroup::default();
-                    } else {
-                        // Reuse the same buffer
-                        current_prop_group.clear();
+                        any_unsorted = true;
                     }
                 }
                 AnyJsxAttribute::JsMetavariable(_) => {}
             }
         }
-        if !current_prop_group.is_empty() && !current_prop_group.is_sorted(boolean_comparator) {
-            prop_groups.push(current_prop_group);
+        if let Some(start) = group_start
+            && sort_group(&attrs, start, attrs.len(), &comparator, &mut sorted_slots)
+        {
+            any_unsorted = true;
         }
-        prop_groups.into_boxed_slice()
+
+        any_unsorted.then_some(SortedAttrList { sorted_slots })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -151,20 +153,19 @@ impl Rule for UseSortedAttributes {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let list = ctx.query();
+        let attrs: Vec<AnyJsxAttribute> = list.iter().collect();
+
+        // Replace the entire list as a single mutation. This avoids slot-level
+        // conflicts with mutations propagated up from nested JSX elements
+        // whose own attributes are also being sorted in the same fix pass.
+        let new_list = list.clone().splice(
+            0..attrs.len(),
+            state.sorted_slots.iter().map(|&i| attrs[i].clone()),
+        );
+
         let mut mutation = ctx.root().begin();
-        let options = ctx.options();
-        let sort_by = options.sort_order.unwrap_or_default();
-
-        let comparator = match sort_by {
-            SortOrder::Natural => PropElement::ascii_nat_cmp,
-            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
-        };
-
-        for (PropElement { prop }, PropElement { prop: sorted_prop }) in
-            zip(state.props.iter(), state.get_sorted_props(comparator))
-        {
-            mutation.replace_node_discard_trivia(prop.clone(), sorted_prop);
-        }
+        mutation.replace_node_discard_trivia(list.clone(), new_list);
 
         Some(RuleAction::new(
             rule_action_category!(),
@@ -175,8 +176,57 @@ impl Rule for UseSortedAttributes {
     }
 }
 
+/// Sort the JsxAttribute slots in `attrs[start..end]` in place by writing the
+/// resulting slot order into `sorted_slots`. Returns `true` if the group was
+/// not already sorted (i.e. the rule should report a diagnostic).
+fn sort_group(
+    attrs: &[AnyJsxAttribute],
+    start: usize,
+    end: usize,
+    comparator: &impl Fn(&PropElement, &PropElement) -> Ordering,
+    sorted_slots: &mut [usize],
+) -> bool {
+    // Collect (slot_index, PropElement) only for JsxAttribute slots; non-attribute
+    // slots within the range (e.g. JsMetavariable) keep their identity mapping.
+    let group: Vec<(usize, PropElement)> = (start..end)
+        .filter_map(|i| match &attrs[i] {
+            AnyJsxAttribute::JsxAttribute(attr) => Some((
+                i,
+                PropElement {
+                    prop: attr.clone(),
+                },
+            )),
+            _ => None,
+        })
+        .collect();
+
+    if group.is_empty() {
+        return false;
+    }
+    if group
+        .windows(2)
+        .all(|w| comparator(&w[0].1, &w[1].1) != Ordering::Greater)
+    {
+        return false;
+    }
+
+    let mut sorted = group.clone();
+    sorted.sort_by(|a, b| comparator(&a.1, &b.1));
+    for (i, (orig_slot, _)) in group.iter().enumerate() {
+        sorted_slots[*orig_slot] = sorted[i].0;
+    }
+    true
+}
+
+#[derive(Clone)]
+pub struct SortedAttrList {
+    /// `sorted_slots[i]` is the original slot index of the attribute that
+    /// should appear at position `i` in the sorted list.
+    sorted_slots: Vec<usize>,
+}
+
 #[derive(PartialEq, Eq, Clone)]
-pub struct PropElement {
+struct PropElement {
     prop: JsxAttribute,
 }
 
@@ -205,36 +255,5 @@ impl PropElement {
         self_name
             .text_trimmed()
             .lexicographic_cmp(other_name.text_trimmed())
-    }
-}
-
-#[derive(Clone, Default)]
-pub struct PropGroup {
-    props: Vec<PropElement>,
-}
-
-impl PropGroup {
-    fn is_empty(&self) -> bool {
-        self.props.is_empty()
-    }
-
-    fn is_sorted<F>(&self, comparator: F) -> bool
-    where
-        F: Fn(&PropElement, &PropElement) -> bool,
-    {
-        self.props.is_sorted_by(comparator)
-    }
-
-    fn get_sorted_props<F>(&self, comparator: F) -> Vec<PropElement>
-    where
-        F: FnMut(&PropElement, &PropElement) -> Ordering,
-    {
-        let mut new_props = self.props.clone();
-        new_props.sort_by(comparator);
-        new_props
-    }
-
-    fn clear(&mut self) {
-        self.props.clear();
     }
 }

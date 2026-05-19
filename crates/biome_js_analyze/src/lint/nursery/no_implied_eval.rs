@@ -195,7 +195,8 @@ fn is_eval_like_function(
     model: &biome_js_semantic::SemanticModel,
 ) -> Option<bool> {
     let unwrapped = callee.clone().omit_parentheses();
-    let (reference, name) = global_identifier(&unwrapped)?;
+    let (reference, name) =
+        global_identifier(&unwrapped.as_any_global_identifier_expression()?)?;
 
     Some(model.binding(&reference).is_none() && EVAL_LIKE_FUNCTIONS.contains(&name.text()))
 }
@@ -219,7 +220,11 @@ fn is_global_function_constructor(
     expression: &AnyJsExpression,
     model: &biome_js_semantic::SemanticModel,
 ) -> bool {
-    let Some((reference, name)) = global_identifier(&expression.clone()) else {
+    let Some((reference, name)) = expression
+        .clone()
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    else {
         return false;
     };
 

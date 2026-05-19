@@ -232,7 +232,7 @@ CssRoot {
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: ScssInterpolatedIdentifier {
+                                    name: ScssInterpolatedDashedIdentifier {
                                         items: ScssInterpolatedIdentifierPartList [
                                             CssIdentifier {
                                                 value_token: IDENT@132..143 "--theme-" [Newline("\n"), Whitespace("  ")] [],
@@ -696,7 +696,7 @@ CssRoot {
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
-                                                name: ScssInterpolatedIdentifier {
+                                                name: ScssInterpolatedDashedIdentifier {
                                                     items: ScssInterpolatedIdentifierPartList [
                                                         CssIdentifier {
                                                             value_token: IDENT@542..555 "--theme-" [Newline("\n"), Whitespace("    ")] [],
@@ -873,7 +873,7 @@ CssRoot {
             5: CSS_DECLARATION_WITH_SEMICOLON@132..157
               0: CSS_DECLARATION@132..156
                 0: CSS_GENERIC_PROPERTY@132..156
-                  0: SCSS_INTERPOLATED_IDENTIFIER@132..151
+                  0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@132..151
                     0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@132..151
                       0: CSS_IDENTIFIER@132..143
                         0: IDENT@132..143 "--theme-" [Newline("\n"), Whitespace("  ")] []
@@ -1175,7 +1175,7 @@ CssRoot {
                   4: CSS_DECLARATION_WITH_SEMICOLON@542..576
                     0: CSS_DECLARATION@542..575
                       0: CSS_GENERIC_PROPERTY@542..575
-                        0: SCSS_INTERPOLATED_IDENTIFIER@542..569
+                        0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@542..569
                           0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@542..569
                             0: CSS_IDENTIFIER@542..555
                               0: IDENT@542..555 "--theme-" [Newline("\n"), Whitespace("    ")] []

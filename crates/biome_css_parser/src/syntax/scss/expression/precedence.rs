@@ -1,6 +1,7 @@
 use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
+use crate::syntax::scss::is_at_scss_interpolated_dashed_identifier;
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION,
@@ -10,7 +11,8 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
-use super::primary::parse_scss_primary_expression;
+use super::ScssExpressionOptions;
+use super::operand::parse_scss_expression_operand;
 
 pub(super) const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![
     T![*],
@@ -40,34 +42,32 @@ pub(crate) const SCSS_UNARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> =
 ///
 /// Docs: https://sass-lang.com/documentation/operators
 #[inline]
-pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> ParsedSyntax {
-    let mut left = match parse_scss_unary_expression(p) {
+pub(super) fn parse_scss_binary_expression(
+    p: &mut CssParser,
+    min_prec: u8,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
+    let mut left = match parse_scss_unary_expression(p, options) {
         Present(left) => left,
         Absent => return Absent,
     };
 
-    loop {
-        let Some(prec) = scss_binary_precedence(p) else {
-            break;
-        };
-
+    while let Some(prec) = scss_binary_precedence(p) {
         if prec < min_prec {
             break;
         }
 
         let m = left.precede(p);
         p.bump_ts(SCSS_BINARY_OPERATOR_TOKEN_SET);
-
-        parse_scss_binary_expression(p, prec + 1).or_add_diagnostic(p, expected_component_value);
-
+        parse_scss_binary_expression(p, prec + 1, options)
+            .or_add_diagnostic(p, expected_component_value);
         left = m.complete(p, SCSS_BINARY_EXPRESSION);
     }
 
     Present(left)
 }
 
-/// Parses chained unary operators (`-`, `+`, `not`) before the primary
-/// expression.
+/// Parses chained unary operators (`-`, `+`, `not`) before an operand.
 ///
 /// Example:
 /// ```scss
@@ -76,38 +76,33 @@ pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> P
 ///
 /// Docs: https://sass-lang.com/documentation/operators
 #[inline]
-fn parse_scss_unary_expression(p: &mut CssParser) -> ParsedSyntax {
+fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions) -> ParsedSyntax {
     if is_at_scss_unary_operator(p) {
         let m = p.start();
         p.bump_ts(SCSS_UNARY_OPERATOR_TOKEN_SET);
-        parse_scss_unary_expression(p).or_add_diagnostic(p, expected_component_value);
+        parse_scss_unary_expression(p, options).or_add_diagnostic(p, expected_component_value);
         return Present(m.complete(p, SCSS_UNARY_EXPRESSION));
     }
 
-    parse_scss_primary_expression(p)
+    parse_scss_expression_operand(p, options)
 }
 
-/// Re-lexes signed numeric tokens in SCSS expression context.
-///
-/// If the current token is `CSS_NUMBER_LITERAL` or any dimension starting with `+` or `-`,
-/// this mutates parser state via `CssParser::re_lex(CssReLexContext::ScssExpression)`.
 #[inline]
-fn re_lex_signed_numeric_as_scss_operator(p: &mut CssParser) {
-    if !(p.at(CSS_NUMBER_LITERAL) || is_at_any_dimension(p)) {
-        return;
+fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+    // `var(--#{$name})` starts with `-`, but the pair belongs to one
+    // custom-property identifier, not chained unary operators.
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        return false;
     }
 
-    let text = p.cur_text();
-    if matches!(text.as_bytes().first(), Some(b'+' | b'-')) {
-        p.re_lex(CssReLexContext::ScssExpression);
-    }
+    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }
 
 /// Returns the precedence level for the current SCSS binary operator token.
 ///
 /// Docs: https://sass-lang.com/documentation/operators/#order-of-operations
 #[inline]
-fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
+pub(super) fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
     re_lex_signed_numeric_as_scss_operator(p);
 
     if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
@@ -125,7 +120,25 @@ fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
     })
 }
 
+/// Re-lexes signed numeric tokens that Sass treats as binary operators.
+///
+/// `1 - 2` already has a `-` token. Re-lex `1-2`, but keep `1 -2` as a list.
 #[inline]
-fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
-    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
+fn re_lex_signed_numeric_as_scss_operator(p: &mut CssParser) {
+    if !(p.at(CSS_NUMBER_LITERAL) || is_at_any_dimension(p)) {
+        return;
+    }
+
+    if should_re_lex_signed_numeric(p.cur_text(), p) {
+        p.re_lex(CssReLexContext::ScssExpression);
+    }
+}
+
+#[inline]
+fn should_re_lex_signed_numeric(text: &str, p: &CssParser) -> bool {
+    match text.as_bytes().first().copied() {
+        Some(b'+') => true,
+        Some(b'-') => !p.has_preceding_whitespace() && !p.has_preceding_line_break(),
+        _ => false,
+    }
 }

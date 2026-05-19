@@ -23,8 +23,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@1..4 "top" [] [],
                 minus_token: DASH@4..5 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@5..7 "4" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@5..7 "4" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -36,8 +36,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@8..10 "mb" [] [],
                 minus_token: DASH@10..11 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@11..13 "2" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@11..13 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -54,8 +54,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@20..22 "mt" [] [],
                 minus_token: DASH@22..23 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@23..24 "2" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@23..24 "2" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -78,8 +78,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@1..7
         0: TW_BASE@1..4 "top" [] []
         1: DASH@4..5 "-" [] []
-        2: TW_NAMED_VALUE@5..7
-          0: TW_VALUE@5..7 "4" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@5..7
+          0: TW_NUMBER@5..7 "4" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     1: TW_FULL_CANDIDATE@7..13
@@ -88,8 +88,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@8..13
         0: TW_BASE@8..10 "mb" [] []
         1: DASH@10..11 "-" [] []
-        2: TW_NAMED_VALUE@11..13
-          0: TW_VALUE@11..13 "2" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@11..13
+          0: TW_NUMBER@11..13 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     2: TW_FULL_CANDIDATE@13..24
@@ -101,8 +101,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@20..24
         0: TW_BASE@20..22 "mt" [] []
         1: DASH@22..23 "-" [] []
-        2: TW_NAMED_VALUE@23..24
-          0: TW_VALUE@23..24 "2" [] []
+        2: TW_NUMBER_VALUE@23..24
+          0: TW_NUMBER@23..24 "2" [] []
         3: (empty)
       3: (empty)
   2: EOF@24..25 "" [Newline("\n")] []

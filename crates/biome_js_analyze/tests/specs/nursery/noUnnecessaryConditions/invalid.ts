@@ -294,3 +294,6 @@ function switchMixed(value: 'a' | 'b') {
     case 'z': return 3;     // unreachable
   }
 }
+
+const date = new Date();
+if (date) console.log(date);

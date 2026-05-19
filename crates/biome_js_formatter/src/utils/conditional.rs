@@ -573,7 +573,7 @@ enum ConditionalLayout {
     },
 }
 
-/// A [JsConditionalExpression] that itself or any of its parent's [JsConditionalExpression] have a a [JsxTagExpression]
+/// A [JsConditionalExpression] that itself or any of its parent's [JsConditionalExpression] have a [JsxTagExpression]
 /// as its [`test`](JsConditionalExpression::test), [`consequent`](JsConditionalExpression::consequent) or [`alternate`](JsConditionalExpression::alternate).
 ///
 /// Parenthesizes the `consequent` and `alternate` if it the group breaks except if the expressions are

@@ -113,32 +113,29 @@ impl Rule for UseAltText {
                     }
                 }
             }
-            "img" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "img"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
                 }
-            }
-            "area" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "area"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((
                         ValidatedElement::Area,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
-            "input" => {
+            "input"
                 if has_type_image_attribute(element)
                     && !has_alt
                     && !has_aria_label
                     && !has_aria_labelledby
                     && !aria_hidden
-                {
+                => {
                     return Some((
                         ValidatedElement::Input,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
             _ => {}
         }
 

@@ -1,6 +1,7 @@
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector,
-    CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression,
+    AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule, CssRelativeSelector,
+    CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -65,6 +66,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_NESTED_QUALIFIED_RULE
                 || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_SCOPE_AT_RULE
                 || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
@@ -134,8 +136,14 @@ impl SemanticEventExtractor {
                             };
 
                             let property = match name {
-                                AnyCssDeclarationName::CssDashedIdentifier(name) => {
-                                    CssProperty::from(name)
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::CssDashedIdentifier(name),
+                                ) => CssProperty::from(name),
+                                AnyCssDeclarationName::AnyCssDashedIdentifier(
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
+                                )
+                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                    return;
                                 }
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
@@ -145,9 +153,6 @@ impl SemanticEventExtractor {
                                         return;
                                     };
                                     CssProperty::from(ident)
-                                }
-                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
-                                    return;
                                 }
                             };
 
@@ -278,6 +283,7 @@ impl SemanticEventExtractor {
                 | CSS_NESTED_QUALIFIED_RULE
                 | CSS_CONTAINER_AT_RULE
                 | CSS_MEDIA_AT_RULE
+                | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
         ) {

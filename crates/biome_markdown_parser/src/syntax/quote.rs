@@ -42,8 +42,8 @@ use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
 use crate::syntax::{
-    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_paragraph_like,
-    is_whitespace_only,
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
+    is_dash_only_thematic_break_text, is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
 };
 
 /// Check if we're at the start of a block quote (`>`).
@@ -164,7 +164,7 @@ fn is_thematic_break_candidate_text(text: &str) -> bool {
     for &b in text.as_bytes() {
         let dispatched = lookup_byte(b);
         // Skip whitespace (space, tab, etc.) via the shared lookup table.
-        if dispatched == WHS {
+        if dispatched == WHS || matches!(b, b'\n' | b'\r') {
             continue;
         }
         // Match thematic break characters via dispatch variants:
@@ -391,8 +391,17 @@ impl QuoteBlockList {
         // Treat content after '>' as column 0 for block parsing (fence detection).
         let prev_virtual = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        relex_after_quote_prefix_consumed(p);
 
         let parsed = parse_any_block_with_indent_code_policy(p, true);
+        let parsed = if let Present(ref marker) = parsed
+            && marker.kind(p) == MD_LINK_REFERENCE_DEFINITION
+            && quote_link_reference_before_dash_thematic_break(p, self.depth)
+        {
+            Present(parse_empty_paragraph(p))
+        } else {
+            parsed
+        };
 
         p.state_mut().virtual_line_start = prev_virtual;
 
@@ -404,6 +413,21 @@ impl QuoteBlockList {
 
         parsed
     }
+}
+
+fn quote_link_reference_before_dash_thematic_break(p: &mut MarkdownParser, depth: usize) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+        if !consume_quote_prefix(p, depth) {
+            return false;
+        }
+        relex_after_quote_prefix_consumed(p);
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break_text(p.cur_text())
+    })
 }
 
 impl ParseNodeList for QuoteBlockList {
@@ -548,17 +572,32 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
 }
 
 pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
-    let mut column = 0usize;
-
-    for c in p.source_after_current().chars() {
+    // Tab expansion is relative to the absolute column position in the line:
+    // a tab at column 2 (e.g. just after `> `) only advances 2 columns to the
+    // next tab stop, not a full TAB_STOP_SPACES. Counting from column 0 here
+    // overstates the indent and misclassifies `> \t- nested` as code.
+    let rest = p.source_after_current();
+    // Fast path: no tabs means column-relative math is unnecessary.
+    if !rest
+        .as_bytes()
+        .iter()
+        .take_while(|b| matches!(b, b' ' | b'\t'))
+        .any(|b| *b == b'\t')
+    {
+        let spaces = rest.as_bytes().iter().take_while(|b| **b == b' ').count();
+        return spaces >= INDENT_CODE_BLOCK_SPACES;
+    }
+    let cur: usize = p.cur_range().start().into();
+    let start_col = p.cached_absolute_column_at(cur);
+    let mut column = start_col;
+    for c in rest.chars() {
         match c {
             ' ' => column += 1,
             '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
-
-    column >= INDENT_CODE_BLOCK_SPACES
+    column - start_col >= INDENT_CODE_BLOCK_SPACES
 }
 
 fn quote_tab_starts_nested_prefix(p: &mut MarkdownParser) -> bool {

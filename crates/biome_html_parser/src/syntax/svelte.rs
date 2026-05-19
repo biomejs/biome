@@ -5,8 +5,8 @@ use crate::syntax::parse_error::{
     expected_svelte_property, expected_text_expression, expected_valid_directive,
 };
 use crate::syntax::{
-    TextExpression, parse_attribute_initializer, parse_html_element, parse_single_text_expression,
-    parse_single_text_expression_content,
+    AttrInitializerContext, TextExpression, parse_attribute_initializer, parse_html_element,
+    parse_single_text_expression, parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -1152,7 +1152,7 @@ pub(crate) fn parse_svelte_directive(p: &mut HtmlParser) -> ParsedSyntax {
     p.re_lex(HtmlReLexContext::Svelte);
 
     match p.cur() {
-        T![bind] => parse_directive(p, T![bind], SVELTE_BIND_DIRECTIVE, HtmlLexContext::Svelte),
+        T![bind] => parse_bind_directive(p),
         T![transition] => parse_directive(
             p,
             T![transition],
@@ -1203,12 +1203,107 @@ fn parse_directive_value(p: &mut HtmlParser, context_after_colon: HtmlLexContext
     ModifiersList.parse_list(p);
 
     if p.at(T![=]) {
-        parse_attribute_initializer(p).ok();
+        parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
     } else {
         p.re_lex(HtmlReLexContext::InsideTag);
     }
 
     Present(m.complete(p, SVELTE_DIRECTIVE_VALUE))
+}
+
+fn parse_bind_directive(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![bind]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(T![bind], HtmlLexContext::Svelte);
+
+    parse_bind_directive_value(p).or_add_diagnostic(p, expected_valid_directive);
+
+    Present(m.complete(p, SVELTE_BIND_DIRECTIVE))
+}
+
+fn parse_bind_directive_value(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![:]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump_with_context(T![:], HtmlLexContext::Svelte);
+    if p.cur_text().is_empty() {
+        p.error(p.err_builder("The directive can't be empty.", p.cur_range()))
+    } else {
+        parse_svelte_binding_property(p).or_add_diagnostic(p, expected_name);
+    }
+
+    ModifiersList.parse_list(p);
+
+    if p.at(T![=]) {
+        parse_bind_initializer(p).ok();
+    } else {
+        p.re_lex(HtmlReLexContext::InsideTag);
+    }
+
+    Present(m.complete(p, SVELTE_DIRECTIVE_VALUE))
+}
+
+fn parse_bind_initializer(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![=]) {
+        return Absent;
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+
+    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+
+    if p.at(T!['{']) {
+        let expression = p.start();
+        p.bump_with_context(
+            T!['{'],
+            HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::Comma),
+        );
+
+        parse_bind_function_text_expression(p, HtmlLexContext::Svelte).ok();
+
+        if p.at(T![,]) {
+            p.bump_with_context(T![,], HtmlLexContext::single_expression());
+            parse_bind_function_text_expression(p, HtmlLexContext::Svelte).ok();
+
+            if p.at(T!['}']) {
+                p.bump_remap_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
+                expression.complete(p, SVELTE_BIND_FUNCTION_BINDING_EXPRESSION);
+                return Present(m.complete(p, SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE));
+            }
+        }
+
+        expression.abandon(p);
+    }
+
+    m.abandon(p);
+    p.rewind(checkpoint);
+    parse_attribute_initializer(p, AttrInitializerContext::Regular)
+}
+
+fn parse_bind_function_text_expression(
+    p: &mut HtmlParser,
+    context: HtmlLexContext,
+) -> ParsedSyntax {
+    if p.at_ts(token_set![T![<], T!['}'], T![,], EOF]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    if p.cur_text().is_empty() {
+        m.abandon(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        return Absent;
+    }
+
+    p.bump_remap_with_context(HTML_LITERAL, context);
+    Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
 
 /// Parses a general directive. `token` is the keyword to parse, and `node_kind` is the kind of the node to emit.
@@ -1266,7 +1361,7 @@ impl ParseNodeList for ModifiersList {
 
 // #region Check functions
 
-const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![if],
     T![else],
     T![each],

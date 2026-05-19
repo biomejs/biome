@@ -17,14 +17,19 @@ import V3 from "package";
 ```
 type-last-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import type T1 from "bun:package";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import type T2 from "node:package";
-    3 │ import type T3 from "package";
+  > 2 │ import type T2 from "node:package";
+  > 3 │ import type T3 from "package";
+  > 4 │ import V1 from "bun:package";
+  > 5 │ import V2 from "node:package";
+  > 6 │ import V3 from "package";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·type·T1·from·"bun:package";
     2   │ - import·type·T2·from·"node:package";

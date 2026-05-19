@@ -22,11 +22,11 @@ pub(crate) enum TextPrintMode {
     /// ``````
     Clean,
     /// It removes the token/node
-    _Remove,
-    /// Replace the token/node
-    _Replace,
+    Remove,
     /// It cleans the code by using a trimming strategy
     Trim(TrimMode),
+    /// Split prose into words and emit fill IR for line-width-aware wrapping.
+    Fill,
 }
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
@@ -78,8 +78,12 @@ impl TextPrintMode {
         matches!(self, Self::Clean)
     }
 
-    pub(crate) const fn trim_start() -> Self {
-        Self::Trim(TrimMode::Start)
+    pub(crate) const fn is_remove(&self) -> bool {
+        matches!(self, Self::Remove)
+    }
+
+    pub(crate) const fn is_fill(&self) -> bool {
+        matches!(self, Self::Fill)
     }
 
     pub(crate) const fn trim_all() -> Self {

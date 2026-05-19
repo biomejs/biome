@@ -67,14 +67,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@8..9 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@9..10 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdSetextHeader {
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@9..13 " Bar" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@10..13 "Bar" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
@@ -361,16 +361,16 @@ MdDocument {
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
         1: MD_BULLET@8..27
-          0: MD_LIST_MARKER_PREFIX@8..9
+          0: MD_LIST_MARKER_PREFIX@8..10
             0: MD_INDENT_TOKEN_LIST@8..8
             1: MINUS@8..9 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@9..9
-          1: MD_BLOCK_LIST@9..27
-            0: MD_SETEXT_HEADER@9..19
-              0: MD_INLINE_ITEM_LIST@9..16
-                0: MD_TEXTUAL@9..13
-                  0: MD_TEXTUAL_LITERAL@9..13 " Bar" [] []
+            2: MD_LIST_POST_MARKER_SPACE@9..10 " " [] []
+            3: MD_INDENT_TOKEN_LIST@10..10
+          1: MD_BLOCK_LIST@10..27
+            0: MD_SETEXT_HEADER@10..19
+              0: MD_INLINE_ITEM_LIST@10..16
+                0: MD_TEXTUAL@10..13
+                  0: MD_TEXTUAL_LITERAL@10..13 "Bar" [] []
                 1: MD_TEXTUAL@13..14
                   0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
                 2: MD_INDENT_TOKEN@14..15

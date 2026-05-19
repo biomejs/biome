@@ -22,6 +22,7 @@ pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
+pub mod yaml;
 
 #[cfg(feature = "cli")]
 use crate::analyzer::assist::assist_configuration;
@@ -137,7 +138,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<RootEnabled>,
 
-    /// A list of paths to other JSON files, used to extends the current configuration.
+    /// A list of paths to other JSON files, used to extend the current configuration.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
@@ -191,6 +192,15 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "markdown")]
     pub markdown: Option<MarkdownConfiguration>,
+
+    /// Specific configuration for the YAML language
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(crate::yaml::yaml_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "yaml")]
+    pub yaml: Option<crate::yaml::YamlConfiguration>,
 
     /// Specific configuration for the GraphQL language
     #[cfg_attr(feature = "cli", bpaf(external(graphql_configuration), optional))]

@@ -1,0 +1,92 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+&anchor key: value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [
+                                    YamlAnchorProperty {
+                                        value_token: ANCHOR_PROPERTY_LITERAL@0..8 "&anchor" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@8..11 "key" [] [],
+                                },
+                            },
+                            colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@13..13 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@13..18 "value" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@18..18 "" [] [],
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@18..19 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@19..19 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..19
+  0: YAML_DOCUMENT_LIST@0..19
+    0: YAML_DOCUMENT@0..19
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..19
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..19
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..18
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..18
+              0: YAML_FLOW_YAML_NODE@0..11
+                0: YAML_PROPERTY_LIST@0..8
+                  0: YAML_ANCHOR_PROPERTY@0..8
+                    0: ANCHOR_PROPERTY_LITERAL@0..8 "&anchor" [] [Whitespace(" ")]
+                1: YAML_PLAIN_SCALAR@8..11
+                  0: PLAIN_LITERAL@8..11 "key" [] []
+              1: COLON@11..13 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@13..18
+                0: FLOW_START@13..13 "" [] []
+                1: YAML_FLOW_YAML_NODE@13..18
+                  0: YAML_PROPERTY_LIST@13..13
+                  1: YAML_PLAIN_SCALAR@13..18
+                    0: PLAIN_LITERAL@13..18 "value" [] []
+                2: FLOW_END@18..18 "" [] []
+          2: MAPPING_END@18..19 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@19..19 "" [] []
+
+```

@@ -111,6 +111,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         AnyCssPseudoClass::CssPseudoClassIdentifier(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(_) => CLASS_SPECIFICITY,
+        AnyCssPseudoClass::ScssInterpolatedPseudoClassFunction(_) => CLASS_SPECIFICITY,
     }
 }
 

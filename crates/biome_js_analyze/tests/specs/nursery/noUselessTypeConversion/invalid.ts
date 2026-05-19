@@ -70,3 +70,6 @@ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
 function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
 function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
 function roStr(x: Readonly<{s: string}>) { return String(x.s); }
+
+const wrappedStringContainer = { value: "wrapped" as const };
+String(wrappedStringContainer.value);

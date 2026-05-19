@@ -875,31 +875,30 @@ impl Resolvable for TypeReference {
                                         .map(|member| {
                                             let was_optional = member.is_optional();
                                             let kind = match &member.kind {
-                                                TypeMemberKind::IndexSignature(key_ref) => {
-                                                    TypeMemberKind::IndexSignature(
-                                                        resolved
-                                                            .apply_module_id_to_reference(key_ref)
-                                                            .into_owned(),
-                                                    )
+                                                TypeMemberKind::IndexSignature(key_reference)
+                                                | TypeMemberKind::ConstAssertedIndexSignature(
+                                                    key_reference,
+                                                ) => {
+                                                    let resolved_index_signature_kind =
+                                                        TypeMemberKind::IndexSignature(
+                                                            resolved
+                                                                .apply_module_id_to_reference(
+                                                                    key_reference,
+                                                                )
+                                                                .into_owned(),
+                                                        );
+                                                    if member.kind.is_const_asserted() {
+                                                        resolved_index_signature_kind
+                                                            .with_const_asserted()
+                                                    } else {
+                                                        resolved_index_signature_kind
+                                                    }
                                                 }
                                                 other => {
                                                     if is_partial {
-                                                        match other {
-                                                            TypeMemberKind::Named(name) => {
-                                                                TypeMemberKind::NamedOptional(
-                                                                    name.clone(),
-                                                                )
-                                                            }
-                                                            _ => other.clone(),
-                                                        }
+                                                        other.clone().with_optional()
                                                     } else {
-                                                        // Required: make optional members non-optional
-                                                        match other {
-                                                            TypeMemberKind::NamedOptional(name) => {
-                                                                TypeMemberKind::Named(name.clone())
-                                                            }
-                                                            _ => other.clone(),
-                                                        }
+                                                        other.clone().without_optional()
                                                     }
                                                 }
                                             };
@@ -920,8 +919,9 @@ impl Resolvable for TypeReference {
                                     .into_iter()
                                     .map(|(mut member, was_optional)| {
                                         if is_partial && !was_optional {
-                                            let id = resolver.optional(member.ty.clone());
-                                            member.ty = resolver.reference_to_id(id);
+                                            let optional_type_id =
+                                                resolver.optional(member.ty.clone());
+                                            member.ty = resolver.reference_to_id(optional_type_id);
                                         } else if !is_partial && was_optional {
                                             strip_undefined_from_member(resolver, &mut member);
                                         }
@@ -954,12 +954,24 @@ impl Resolvable for TypeReference {
                                         .own_members()
                                         .map(|member| {
                                             let kind = match &member.kind {
-                                                TypeMemberKind::IndexSignature(key_ref) => {
-                                                    TypeMemberKind::IndexSignature(
-                                                        resolved
-                                                            .apply_module_id_to_reference(key_ref)
-                                                            .into_owned(),
-                                                    )
+                                                TypeMemberKind::IndexSignature(key_reference)
+                                                | TypeMemberKind::ConstAssertedIndexSignature(
+                                                    key_reference,
+                                                ) => {
+                                                    let resolved_index_signature_kind =
+                                                        TypeMemberKind::IndexSignature(
+                                                            resolved
+                                                                .apply_module_id_to_reference(
+                                                                    key_reference,
+                                                                )
+                                                                .into_owned(),
+                                                        );
+                                                    if member.kind.is_const_asserted() {
+                                                        resolved_index_signature_kind
+                                                            .with_const_asserted()
+                                                    } else {
+                                                        resolved_index_signature_kind
+                                                    }
                                                 }
                                                 other => other.clone(),
                                             };

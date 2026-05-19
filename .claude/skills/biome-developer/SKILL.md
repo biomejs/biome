@@ -117,9 +117,13 @@ let token = html_string.value_token().ok()?; // OK
 - Use `let` chains to collapse nested `if let` statements (cleaner and follows Rust idioms)
 - Run `just l` before committing to catch clippy warnings
 - Fix clippy suggestions unless there's a good reason not to
+- Always import types at the top of the file — never inline crate paths in type positions
+- Let the compiler infer types when it can — only add explicit type annotations when the compiler cannot infer them
 
 **DON'T:**
 - Do NOT ignore clippy warnings - they often catch real issues or suggest better patterns
+- Do NOT inline crate paths in type positions (e.g. `Vec<some_crate::module::Type>`) — add a `use` import instead
+- Do NOT annotate types that the compiler can already infer
 
 **Example - Collapsible If:**
 ```rust
@@ -136,6 +140,30 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 {
     // ... do something
 }
+```
+
+**Example - Import types, don't inline paths:**
+```rust
+// WRONG: Inlined crate path in type position
+enum Frame {
+    Visit(biome_css_semantic::model::RuleId),
+}
+
+// CORRECT: Import the type at the top of the file
+use biome_css_semantic::model::RuleId;
+
+enum Frame {
+    Visit(RuleId),
+}
+```
+
+**Example - Let the compiler infer types:**
+```rust
+// WRONG: Redundant type annotation — the compiler infers this from FxHashSet::default()
+let mut visited: FxHashSet<RuleId> = FxHashSet::default();
+
+// CORRECT: No annotation needed
+let mut visited = FxHashSet::default();
 ```
 
 ### Code Comments

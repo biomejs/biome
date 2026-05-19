@@ -29,7 +29,7 @@ export interface Configuration {
 	 */
 	css?: CssConfiguration;
 	/**
-	 * A list of paths to other JSON files, used to extends the current configuration.
+	 * A list of paths to other JSON files, used to extend the current configuration.
 	 */
 	extends?: Extends;
 	/**
@@ -1159,6 +1159,10 @@ has syntax errors
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+	 */
+	trailingCommas?: JsTrailingCommas;
+	/**
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
@@ -2043,6 +2047,11 @@ See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
+	* Require stringification to avoid values that only use the default object representation.
+See https://biomejs.dev/linter/rules/no-base-to-string 
+	 */
+	noBaseToString?: NoBaseToStringConfiguration;
+	/**
 	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
 See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document 
 	 */
@@ -2152,6 +2161,11 @@ See https://biomejs.dev/linter/rules/no-excessive-classes-per-file
 See https://biomejs.dev/linter/rules/no-excessive-lines-per-file 
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
+	/**
+	* Enforce a maximum depth that callbacks can be nested.
+See https://biomejs.dev/linter/rules/no-excessive-nested-callbacks 
+	 */
+	noExcessiveNestedCallbacks?: NoExcessiveNestedCallbacksConfiguration;
 	/**
 	* Limit the number of classes in a selector.
 See https://biomejs.dev/linter/rules/no-excessive-selector-classes 
@@ -2323,6 +2337,11 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
+	* Disallow string refs in React components.
+See https://biomejs.dev/linter/rules/no-react-string-refs 
+	 */
+	noReactStringRefs?: NoReactStringRefsConfiguration;
+	/**
 	* Checks if a default export exports the same symbol as a named export.
 See https://biomejs.dev/linter/rules/no-redundant-default-export 
 	 */
@@ -2408,6 +2427,11 @@ See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch
 	 */
 	noVueArrowFuncInWatch?: NoVueArrowFuncInWatchConfiguration;
 	/**
+	* Disallow importing Vue compiler macros.
+See https://biomejs.dev/linter/rules/no-vue-import-compiler-macros 
+	 */
+	noVueImportCompilerMacros?: NoVueImportCompilerMacrosConfiguration;
+	/**
 	* Disallow the use of Vue Options API.
 See https://biomejs.dev/linter/rules/no-vue-options-api 
 	 */
@@ -2422,6 +2446,11 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
+	/**
+	* Disallow deprecated number modifiers on Vue v-on directives.
+See https://biomejs.dev/linter/rules/no-vue-v-on-number-values 
+	 */
+	noVueVOnNumberValues?: NoVueVOnNumberValuesConfiguration;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2552,6 +2581,11 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
+	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
+See https://biomejs.dev/linter/rules/use-math-min-max 
+	 */
+	useMathMinMax?: UseMathMinMaxConfiguration;
+	/**
 	* Enforce using named capture groups in regular expression.
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
@@ -2622,6 +2656,21 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	* Enforce that test lifecycle hooks are declared in the order they execute.
+See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
+	 */
+	useTestHooksInOrder?: UseTestHooksInOrderConfiguration;
+	/**
+	* Enforce that lifecycle hooks appear before any test cases in the same block.
+See https://biomejs.dev/linter/rules/use-test-hooks-on-top 
+	 */
+	useTestHooksOnTop?: UseTestHooksOnTopConfiguration;
+	/**
+	* Enforce that class methods utilize this.
+See https://biomejs.dev/linter/rules/use-this-in-class-methods 
+	 */
+	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
+	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
@@ -2662,6 +2711,11 @@ See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
 	/**
+	* Enforces Promise syntax when using Vue nextTick.
+See https://biomejs.dev/linter/rules/use-vue-next-tick-promise 
+	 */
+	useVueNextTickPromise?: UseVueNextTickPromiseConfiguration;
+	/**
 	* Enforce that elements using v-for also specify a unique key.
 See https://biomejs.dev/linter/rules/use-vue-v-for-key 
 	 */
@@ -2691,6 +2745,11 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-else
 See https://biomejs.dev/linter/rules/use-vue-valid-v-else-if 
 	 */
 	useVueValidVElseIf?: UseVueValidVElseIfConfiguration;
+	/**
+	* Enforces valid v-for directives in Vue templates.
+See https://biomejs.dev/linter/rules/use-vue-valid-v-for 
+	 */
+	useVueValidVFor?: UseVueValidVForConfiguration;
 	/**
 	* Enforce valid v-html directives.
 See https://biomejs.dev/linter/rules/use-vue-valid-v-html 
@@ -4242,6 +4301,9 @@ export type UseYieldConfiguration =
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
+export type NoBaseToStringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBaseToStringOptions;
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
@@ -4308,6 +4370,9 @@ export type NoExcessiveClassesPerFileConfiguration =
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoExcessiveNestedCallbacksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestedCallbacksOptions;
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
@@ -4410,6 +4475,9 @@ export type NoReactNativeLiteralColorsConfiguration =
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
+export type NoReactStringRefsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactStringRefsOptions;
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
@@ -4461,6 +4529,9 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueArrowFuncInWatchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueArrowFuncInWatchOptions;
+export type NoVueImportCompilerMacrosConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueImportCompilerMacrosOptions;
 export type NoVueOptionsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueOptionsApiOptions;
@@ -4470,6 +4541,9 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
+export type NoVueVOnNumberValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVOnNumberValuesOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
@@ -4545,6 +4619,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseMathMinMaxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMathMinMaxOptions;
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
@@ -4587,6 +4664,15 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseTestHooksInOrderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTestHooksInOrderOptions;
+export type UseTestHooksOnTopConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTestHooksOnTopOptions;
+export type UseThisInClassMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseThisInClassMethodsOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -4611,6 +4697,9 @@ export type UseVueHyphenatedAttributesConfiguration =
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
+export type UseVueNextTickPromiseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueNextTickPromiseOptions;
 export type UseVueVForKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVForKeyOptions;
@@ -4629,6 +4718,9 @@ export type UseVueValidVElseConfiguration =
 export type UseVueValidVElseIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVElseIfOptions;
+export type UseVueValidVForConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVForOptions;
 export type UseVueValidVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVHtmlOptions;
@@ -5976,6 +6068,10 @@ export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
 }
+export interface RuleWithNoBaseToStringOptions {
+	level: RulePlainConfiguration;
+	options?: NoBaseToStringOptions;
+}
 export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
 	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
@@ -6065,6 +6161,10 @@ export interface RuleWithNoExcessiveClassesPerFileOptions {
 export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
+}
+export interface RuleWithNoExcessiveNestedCallbacksOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestedCallbacksOptions;
 }
 export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
@@ -6211,6 +6311,10 @@ export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
 }
+export interface RuleWithNoReactStringRefsOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactStringRefsOptions;
+}
 export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
@@ -6282,6 +6386,10 @@ export interface RuleWithNoVueArrowFuncInWatchOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueArrowFuncInWatchOptions;
 }
+export interface RuleWithNoVueImportCompilerMacrosOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueImportCompilerMacrosOptions;
+}
 export interface RuleWithNoVueOptionsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueOptionsApiOptions;
@@ -6293,6 +6401,10 @@ export interface RuleWithNoVueRefAsOperandOptions {
 export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
+}
+export interface RuleWithNoVueVOnNumberValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVOnNumberValuesOptions;
 }
 export interface RuleWithUseArraySomeOptions {
 	fix?: FixKind;
@@ -6401,6 +6513,11 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseMathMinMaxOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseMathMinMaxOptions;
+}
 export interface RuleWithUseNamedCaptureGroupOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedCaptureGroupOptions;
@@ -6465,6 +6582,18 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseTestHooksInOrderOptions {
+	level: RulePlainConfiguration;
+	options?: UseTestHooksInOrderOptions;
+}
+export interface RuleWithUseTestHooksOnTopOptions {
+	level: RulePlainConfiguration;
+	options?: UseTestHooksOnTopOptions;
+}
+export interface RuleWithUseThisInClassMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: UseThisInClassMethodsOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6502,6 +6631,10 @@ export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
 }
+export interface RuleWithUseVueNextTickPromiseOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueNextTickPromiseOptions;
+}
 export interface RuleWithUseVueVForKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVForKeyOptions;
@@ -6527,6 +6660,10 @@ export interface RuleWithUseVueValidVElseOptions {
 export interface RuleWithUseVueValidVElseIfOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVElseIfOptions;
+}
+export interface RuleWithUseVueValidVForOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVForOptions;
 }
 export interface RuleWithUseVueValidVHtmlOptions {
 	level: RulePlainConfiguration;
@@ -7750,6 +7887,9 @@ export interface NoAmbiguousAnchorTextOptions {
 	 */
 	words?: string[];
 }
+export interface NoBaseToStringOptions {
+	ignoredTypeNames?: string[];
+}
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
@@ -7800,6 +7940,12 @@ export interface NoExcessiveLinesPerFileOptions {
 	 * When this option is set to `true`, blank lines are not counted towards the maximum line limit.
 	 */
 	skipBlankLines?: boolean;
+}
+export interface NoExcessiveNestedCallbacksOptions {
+	/**
+	 * Maximum callback nesting depth allowed (default: 5)
+	 */
+	max?: number;
 }
 export interface NoExcessiveSelectorClassesOptions {
 	/**
@@ -7853,6 +7999,7 @@ export interface NoReactNativeRawTextOptions {
 	 */
 	skip?: string[];
 }
+export type NoReactStringRefsOptions = {};
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
@@ -7938,9 +8085,11 @@ Defaults to `false`.
 export type NoUselessReturnOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
+export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
+export type NoVueVOnNumberValuesOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -8010,7 +8159,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
-export type UseDestructuringOptions = {};
+export interface UseDestructuringOptions {
+	assignmentExpression?: DestructuringConfig;
+	variableDeclarator?: DestructuringConfig;
+}
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export type UseDomQuerySelectorOptions = {};
@@ -8057,6 +8209,7 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export interface UseNullishCoalescingOptions {
 	/**
@@ -8114,6 +8267,33 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseTestHooksInOrderOptions = {};
+export type UseTestHooksOnTopOptions = {};
+/**
+ * Options for the `useThisInClassMethods` rule.
+ */
+export interface UseThisInClassMethodsOptions {
+	/**
+	* Whether members of classes with an `implements` clause should be ignored.
+
+Defaults to `"none"`, which means implemented classes are checked like any other class.
+Use `"all"` to ignore every eligible member in such classes, or `"public-fields"`
+to ignore only public members in them. 
+	 */
+	ignoreClassesWithImplements?: IgnoreClassesWithImplements;
+	/**
+	* Method names that should be ignored by the rule.
+
+Defaults to `[]`. 
+	 */
+	ignoreMethods?: string[];
+	/**
+	* Whether methods marked with `override` should be ignored.
+
+Defaults to `false`. 
+	 */
+	ignoreOverrideMethods?: boolean;
+}
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -8155,12 +8335,14 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores?: string[];
 }
+export type UseVueNextTickPromiseOptions = {};
 export type UseVueVForKeyOptions = {};
 export type UseVueValidTemplateRootOptions = {};
 export type UseVueValidVBindOptions = {};
 export type UseVueValidVCloakOptions = {};
 export type UseVueValidVElseOptions = {};
 export type UseVueValidVElseIfOptions = {};
+export type UseVueValidVForOptions = {};
 export type UseVueValidVHtmlOptions = {};
 export type UseVueValidVIfOptions = {};
 export interface UseVueValidVOnOptions {
@@ -8618,7 +8800,15 @@ export type MethodSignatureStyle = "property" | "method";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export interface DestructuringConfig {
+	array?: boolean;
+	object?: boolean;
+}
 export type CheckInputType = "off" | "loose" | "strict";
+/**
+ * Controls how `useThisInClassMethods` treats classes that implement interfaces.
+ */
+export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -9003,6 +9193,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAmbiguousAnchorText"
+	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9026,6 +9217,7 @@ export type Category =
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
@@ -9040,8 +9232,8 @@ export type Category =
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
-	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noLoopFunc"
+	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
@@ -9059,9 +9251,10 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
-	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeDeepImports"
+	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
+	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
@@ -9081,9 +9274,11 @@ export type Category =
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
@@ -9096,8 +9291,8 @@ export type Category =
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useDisposables"
-	| "lint/nursery/useDomQuerySelector"
 	| "lint/nursery/useDomNodeTextContent"
+	| "lint/nursery/useDomQuerySelector"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"
@@ -9114,6 +9309,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNullishCoalescing"
@@ -9131,6 +9327,9 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useTestHooksInOrder"
+	| "lint/nursery/useTestHooksOnTop"
+	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9144,6 +9343,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
@@ -9596,7 +9796,8 @@ export type DocumentFileSource =
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource };
+	| { Markdown: MdFileSource }
+	| { Yaml: YamlFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -9634,6 +9835,7 @@ export interface GritFileSource {
 export interface MdFileSource {
 	variant: MarkdownVariant;
 }
+export type YamlFileSource = {};
 export type EmbeddingKind =
 	| "None"
 	| {
@@ -9668,6 +9870,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	  }
 	| {
 			Svelte: {
+				/**
+				 * Whether this is a `{@const name = value}` block.
+				 */
+				is_const_block: boolean;
 				/**
 				 * Whether this is the declaration of a function, usually declared in `#snippet`
 				 */
@@ -9750,7 +9956,7 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export interface FileExitsParams {
+export interface FileExistsParams {
 	filePath: BiomePath;
 }
 export interface PathIsIgnoredParams {
@@ -10144,7 +10350,7 @@ export interface Workspace {
 	openFile(params: OpenFileParams): Promise<OpenFileResult>;
 	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<null>;
-	fileExists(params: FileExitsParams): Promise<boolean>;
+	fileExists(params: FileExistsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
 	updateModuleGraph(params: UpdateModuleGraphParams): Promise<null>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;

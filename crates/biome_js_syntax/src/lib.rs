@@ -10,6 +10,7 @@ pub mod accessor_ext;
 pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
+pub mod cast_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
@@ -38,6 +39,7 @@ pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
     WalkEvent,
 };
+pub use cast_ext::*;
 pub use expr_ext::*;
 pub use file_source::*;
 pub use function_ext::*;

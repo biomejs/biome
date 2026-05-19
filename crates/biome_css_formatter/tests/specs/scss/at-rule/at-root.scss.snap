@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/at-root.scss
+info: scss/at-rule/at-root.scss
 ---
 
 # Input
@@ -27,6 +27,19 @@ display:block;
 }
 }
 
+@at-root .foo
+// .bar
+{
+
+}
+
+@at-root
+// .bar
+.foo
+{
+
+}
+
 ```
 
 
@@ -49,6 +62,15 @@ display:block;
 			display: block;
 		}
 	}
+}
+
+@at-root .foo
+// .bar
+{
+}
+
+@at-root // .bar
+.foo {
 }
 
 ```

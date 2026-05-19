@@ -5,7 +5,8 @@ use crate::prelude::*;
 use crate::shared::FmtAnySvelteBindingProperty;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnySvelteBindingProperty, SvelteDirectiveValue, SvelteDirectiveValueFields,
+    AnySvelteBindingProperty, AnySvelteDirectiveInitializerClause, SvelteDirectiveValue,
+    SvelteDirectiveValueFields,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -56,7 +57,10 @@ impl FormatSvelteDirectiveValue {
                 AnySvelteBindingProperty::SvelteName(name) => name.ident_token(),
             }?;
 
-            let Some(initializer) = initializer.clone() else {
+            let Some(AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(
+                initializer,
+            )) = initializer.clone()
+            else {
                 return Ok(false);
             };
             let Some(initializer_value) = initializer.value().ok().and_then(|v| v.string_value())

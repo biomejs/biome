@@ -135,7 +135,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         let count = self.rule_count();
-        if count != 0 {
+        if count > 0 {
             let formatter_covers_count = self
                 .unsupported
                 .iter()
@@ -154,8 +154,10 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
 
             let total_migratable_count = directly_covered_count + inspired_count + nursery_count;
             let total_covered_count = total_migratable_count + formatter_covers_count;
-            let total_covered_percent = total_covered_count * 100 / count;
-            let directly_covered_percent = directly_covered_count * 100 / count;
+            let total_covered_percent = (total_covered_count * 100).checked_div(count).unwrap_or(0);
+            let directly_covered_percent = (directly_covered_count * 100)
+                .checked_div(count)
+                .unwrap_or(0);
 
             fmt.write_markup(markup! { <Emphasis>{count}" ESLint rules found\n"</Emphasis> })?;
             if formatter_covers_count > 0 {
@@ -644,6 +646,39 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
+        eslint_eslint::Rule::ClassMethodsUseThis(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
+                    && let Some(rule_options) = rule_options.into_biome_options()
+                {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_this_in_class_methods =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options,
+                                },
+                            ));
+                    }
+                }
+            }
+        }
+        eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_excessive_nested_callbacks =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::NoConsole(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
@@ -777,6 +812,21 @@ fn migrate_eslint_rule(
                                 options: rule_options.into(),
                             },
                         ));
+                }
+            }
+        }
+        eslint_eslint::Rule::TypeScriptNoBaseToString(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_base_to_string = Some(biome_config::RuleConfiguration::WithOptions(
+                        biome_config::RuleWithOptions {
+                            level: severity.into(),
+                            options: rule_options.into(),
+                        },
+                    ));
                 }
             }
         }

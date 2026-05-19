@@ -429,11 +429,10 @@ fn handle_jsx_child(
                     ranges.push(open_node.range());
                 }
             }
-            AnyJsxChild::JsxSelfClosingElement(node) => {
-                if !has_key_attribute(&node.attributes()) {
+            AnyJsxChild::JsxSelfClosingElement(node)
+                if !has_key_attribute(&node.attributes()) => {
                     ranges.push(node.range());
                 }
-            }
             AnyJsxChild::JsxExpressionChild(node) => {
                 let expr = node.expression()?;
                 if let Some(child_ranges) =
@@ -442,11 +441,10 @@ fn handle_jsx_child(
                     ranges.extend(child_ranges);
                 }
             }
-            AnyJsxChild::JsxFragment(node) => {
-                if options.check_shorthand_fragments() {
+            AnyJsxChild::JsxFragment(node)
+                if options.check_shorthand_fragments() => {
                     ranges.push(node.range())
                 }
-            }
             _ => {}
         }
     }

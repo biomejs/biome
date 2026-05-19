@@ -1,0 +1,105 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+1) first
+   2) lazy
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@0..2 "1)" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@2..3 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@3..8 "first" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@8..9 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@11..12 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@12..14 "2)" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..19 " lazy" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@19..20 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@20..20 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..20
+  0: (empty)
+  1: MD_BLOCK_LIST@0..20
+    0: MD_ORDERED_LIST_ITEM@0..20
+      0: MD_BULLET_LIST@0..20
+        0: MD_BULLET@0..20
+          0: MD_LIST_MARKER_PREFIX@0..3
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MD_ORDERED_LIST_MARKER@0..2 "1)" [] []
+            2: MD_LIST_POST_MARKER_SPACE@2..3 " " [] []
+            3: MD_INDENT_TOKEN_LIST@3..3
+          1: MD_BLOCK_LIST@3..20
+            0: MD_PARAGRAPH@3..20
+              0: MD_INLINE_ITEM_LIST@3..20
+                0: MD_TEXTUAL@3..8
+                  0: MD_TEXTUAL_LITERAL@3..8 "first" [] []
+                1: MD_TEXTUAL@8..9
+                  0: MD_TEXTUAL_LITERAL@8..9 "\n" [] []
+                2: MD_INDENT_TOKEN@9..10
+                  0: MD_INDENT_CHAR@9..10 " " [] []
+                3: MD_INDENT_TOKEN@10..11
+                  0: MD_INDENT_CHAR@10..11 " " [] []
+                4: MD_INDENT_TOKEN@11..12
+                  0: MD_INDENT_CHAR@11..12 " " [] []
+                5: MD_TEXTUAL@12..14
+                  0: MD_TEXTUAL_LITERAL@12..14 "2)" [] []
+                6: MD_TEXTUAL@14..19
+                  0: MD_TEXTUAL_LITERAL@14..19 " lazy" [] []
+                7: MD_TEXTUAL@19..20
+                  0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
+              1: (empty)
+  2: EOF@20..20 "" [] []
+
+```

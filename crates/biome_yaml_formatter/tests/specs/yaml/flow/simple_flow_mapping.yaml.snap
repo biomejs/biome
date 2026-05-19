@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/simple_flow_mapping.yaml
+---
+
+# Input
+
+```yaml
+{a: b, "x": y, 'z': w}
+
+```
+
+
+# Formatted
+
+```yaml
+{a: b, "x": y, 'z': w}
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"{a: b, \"x\": y, 'z': w}\n" => 0..23

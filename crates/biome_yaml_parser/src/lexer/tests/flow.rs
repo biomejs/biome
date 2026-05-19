@@ -498,12 +498,11 @@ abc]"#,
         WHITESPACE:1,
         FLOW_START:0,
         L_BRACK:1,
+        NEWLINE:1,
+        PLAIN_LITERAL:3,
+        R_BRACK:1,
         FLOW_END:0,
         SEQUENCE_END:0,
-        NEWLINE:1,
-        FLOW_START:0,
-        PLAIN_LITERAL:4,
-        FLOW_END:0,
     );
 }
 
@@ -520,12 +519,10 @@ fn lex_flow_collection_closing_bracket_on_sequence_start() {
         FLOW_START:0,
         L_BRACK:1,
         PLAIN_LITERAL:3,
-        FLOW_END:0,
-        SEQUENCE_END:0,
         NEWLINE:1,
-        FLOW_START:0,
         R_BRACK:1,
         FLOW_END:0,
+        SEQUENCE_END:0,
     );
 }
 

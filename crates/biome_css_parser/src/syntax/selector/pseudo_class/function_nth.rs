@@ -1,8 +1,12 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number};
+use crate::syntax::parse_error::{
+    expected_any_pseudo_class_nth, expected_number, expected_selector,
+};
+use crate::syntax::scss::{is_at_scss_pseudo_class_nth, parse_scss_pseudo_class_nth};
 use crate::syntax::selector::{
-    SelectorList, eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
+    SELECTOR_FUNCTION_RECOVERY_SET, SelectorList, eat_or_recover_selector_function_close_token,
+    recover_selector_function_parameter,
 };
 use crate::syntax::{parse_number, parse_regular_identifier, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -42,20 +46,23 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
     parse_regular_identifier(p).ok();
     p.bump_with_context(T!['('], CssLexContext::PseudoNthSelector);
 
-    let kind = if is_at_pseudo_class_nth_selector(p) {
-        // SAFETY: we know that the next token is a nth parameter
-        let selector = parse_pseudo_class_nth_selector(p).unwrap();
-
-        if eat_or_recover_selector_function_close_token(p, selector, expected_any_pseudo_class_nth)
-        {
-            CSS_PSEUDO_CLASS_FUNCTION_NTH
-        } else {
+    let kind = match parse_pseudo_class_nth_selector(p) {
+        Present(selector) => {
+            if eat_or_recover_selector_function_close_token(
+                p,
+                selector,
+                expected_any_pseudo_class_nth,
+            ) {
+                CSS_PSEUDO_CLASS_FUNCTION_NTH
+            } else {
+                CSS_BOGUS_PSEUDO_CLASS
+            }
+        }
+        Absent => {
+            recover_selector_function_parameter(p, expected_any_pseudo_class_nth);
+            p.expect(T![')']);
             CSS_BOGUS_PSEUDO_CLASS
         }
-    } else {
-        recover_selector_function_parameter(p, expected_any_pseudo_class_nth);
-        p.expect(T![')']);
-        CSS_BOGUS_PSEUDO_CLASS
     };
 
     Present(m.complete(p, kind))
@@ -64,20 +71,40 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET: TokenSet<CssSyntaxKind> =
     token_set![T![odd], T![even]];
 
-const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-]];
+pub(crate) const PSEUDO_CLASS_NTH_SIGN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-]];
+
+const PSEUDO_CLASS_NTH_ARGUMENT_SET: TokenSet<CssSyntaxKind> =
+    PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET.union(token_set![
+        T![n],
+        CSS_DIMENSION_VALUE,
+        CSS_NUMBER_LITERAL
+    ]);
 
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET: TokenSet<CssSyntaxKind> =
-    PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET
-        .union(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET)
-        .union(token_set![T![n], CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL]);
+    PSEUDO_CLASS_NTH_ARGUMENT_SET.union(PSEUDO_CLASS_NTH_SIGN_SET);
 
+/// Checks nth argument starts such as `2n`, `+2n`, or `odd`.
+///
+/// This excludes a bare sign so `:#{$name}(+ .item)` can stay a relative
+/// selector argument.
 #[inline]
-fn is_at_pseudo_class_nth_selector(p: &mut CssParser) -> bool {
-    p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
+pub(crate) fn is_at_pseudo_class_nth_argument(p: &mut CssParser) -> bool {
+    let n = if p.at_ts(PSEUDO_CLASS_NTH_SIGN_SET) {
+        1
+    } else {
+        0
+    };
+
+    p.nth_at_ts(n, PSEUDO_CLASS_NTH_ARGUMENT_SET)
 }
 
 #[inline]
-fn parse_pseudo_class_nth_selector(p: &mut CssParser) -> ParsedSyntax {
+fn is_at_pseudo_class_nth_selector(p: &mut CssParser) -> bool {
+    is_at_scss_pseudo_class_nth(p) || p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_class_nth_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_pseudo_class_nth_selector(p) {
         return Absent;
     }
@@ -96,15 +123,16 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    if is_at_scss_pseudo_class_nth(p) {
+        return parse_scss_pseudo_class_nth(p);
+    }
+
     let m = p.start();
 
     let kind = if p.eat_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET) {
         CSS_PSEUDO_CLASS_NTH_IDENTIFIER
     } else {
-        p.eat_ts_with_context(
-            PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET,
-            CssLexContext::PseudoNthSelector,
-        );
+        p.eat_ts_with_context(PSEUDO_CLASS_NTH_SIGN_SET, CssLexContext::PseudoNthSelector);
 
         // `2n` will get lexed as a CSS_DIMENSION_VALUE first, and needs to be
         // re-cast to a CssNumber instead, like `2` would, then followed by the
@@ -116,11 +144,7 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
         match p.cur() {
             // Matches `2n` or `2n + 1`
             CSS_DIMENSION_VALUE => {
-                // Re-cast the value as a number literal and into a CssNumber
-                // to fit the Pseudo node.
-                let m = p.start();
-                p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
-                m.complete(p, CSS_NUMBER);
+                parse_pseudo_class_nth_dimension_value(p).ok();
 
                 if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
                     parse_nth_offset(p).ok();
@@ -152,15 +176,27 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+/// Parses the number part of `2n` and leaves `n` for the caller.
+#[inline]
+pub(crate) fn parse_pseudo_class_nth_dimension_value(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(CSS_DIMENSION_VALUE) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
+    Present(m.complete(p, CSS_NUMBER))
+}
+
 #[inline]
 fn parse_nth_offset(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET) {
+    if !p.at_ts(PSEUDO_CLASS_NTH_SIGN_SET) {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET);
+    p.bump_ts(PSEUDO_CLASS_NTH_SIGN_SET);
     parse_regular_number(p).or_add_diagnostic(p, expected_number);
 
     Present(m.complete(p, CSS_NTH_OFFSET))
@@ -176,9 +212,13 @@ fn parse_pseudo_class_of_nth_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(OF_KW);
 
+    if p.at(T![')']) {
+        p.error(expected_selector(p, p.cur_range()));
+    }
+
     SelectorList::default()
         .with_end_kind_ts(token_set!(T![')']))
-        .with_recovery_ts(token_set!(T![')'], T!['{']))
+        .with_recovery_ts(SELECTOR_FUNCTION_RECOVERY_SET)
         .parse_list(p);
 
     Present(m.complete(p, CSS_PSEUDO_CLASS_OF_NTH_SELECTOR))

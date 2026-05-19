@@ -1,38 +1,42 @@
 use crate::prelude::*;
-use crate::utils::scss_map::scss_map_context;
-use biome_css_syntax::{ScssListExpression, ScssListExpressionFields};
-use biome_formatter::{format_args, write};
+use crate::utils::scss_list_layout::ScssListLayout;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
+use biome_css_syntax::ScssListExpression;
+use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssListExpression;
 
 impl FormatNodeRule<ScssListExpression> for FormatScssListExpression {
+    fn fmt_node(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
+        self.fmt_node_with_scss_separator_comments(node, f)
+    }
+
     fn fmt_fields(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssListExpressionFields { elements } = node.as_fields();
+        ScssListLayout::new(node).fmt(f)
+    }
 
-        if scss_map_context(node).is_some_and(|context| context.is_outer_parenthesized_value_list) {
-            let group_id = f.group_id("scss_list_expression");
-            let comma = token(",");
-            let trailing_comma = if_group_breaks(&comma).with_group_id(Some(group_id));
+    fn fmt_leading_comments(
+        &self,
+        node: &ScssListExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        self.fmt_leading_scss_separator_comments(node, f)
+    }
 
-            // Format the list in `key: (a, b)`. The surrounding parentheses are
-            // handled by `FormatScssParenthesizedExpression`.
-            write!(
-                f,
-                [group(&indent(&format_args![
-                    soft_line_break(),
-                    elements.format(),
-                    trailing_comma
-                ]))
-                .with_group_id(Some(group_id))]
-            )
+    fn fmt_dangling_comments(
+        &self,
+        node: &ScssListExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        // Include-owned closing comments are printed inside the list layout so
+        // `@include mix((a, b, /* end */))` stays parse-safe.
+        if ScssListLayout::new(node).owns_dangling_comments(f) {
+            Ok(())
         } else {
             write!(
                 f,
-                [group(&indent(&format_args![
-                    soft_line_break(),
-                    elements.format()
-                ]))]
+                [format_dangling_comments(node.syntax()).with_soft_block_indent()]
             )
         }
     }

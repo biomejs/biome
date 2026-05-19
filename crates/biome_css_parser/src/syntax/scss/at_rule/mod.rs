@@ -11,6 +11,7 @@ mod function_at_rule;
 mod if_at_rule;
 mod import_at_rule;
 mod include_at_rule;
+mod keyframes;
 mod mixin_at_rule;
 mod module_clauses;
 mod parameter;
@@ -39,6 +40,7 @@ pub(crate) use function_at_rule::parse_scss_function_at_rule;
 pub(crate) use if_at_rule::parse_scss_if_at_rule;
 pub(crate) use import_at_rule::parse_scss_import_at_rule;
 pub(crate) use include_at_rule::parse_scss_include_at_rule;
+pub(crate) use keyframes::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
 pub(crate) use return_at_rule::parse_scss_return_at_rule;
 pub(crate) use use_at_rule::parse_scss_use_at_rule;
@@ -62,7 +64,23 @@ pub(super) fn parse_scss_expression_at_rule(
     p.bump(keyword);
     parse_scss_expression_until(p, SCSS_STATEMENT_AT_RULE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
-    p.expect(T![;]);
+    expect_scss_statement_at_rule_end(p);
 
     Present(m.complete(p, kind))
+}
+
+/// Accepts `;` or a closing block boundary for SCSS statement at-rules.
+///
+/// Examples:
+/// ```scss
+/// @mixin x { @content; }
+/// @mixin x { @content }
+/// ```
+#[inline]
+pub(super) fn expect_scss_statement_at_rule_end(p: &mut CssParser) {
+    if p.eat(T![;]) || p.at(T!['}']) {
+        return;
+    }
+
+    p.expect(T![;]);
 }

@@ -136,5 +136,10 @@
 
 /[z-]/;
 
+// https://github.com/biomejs/biome/issues/6201
+// The `\\` is an escaped backslash; the trailing `-` is a literal hyphen.
+// The rule must not treat the second `\` of the pair as an escape of `-`.
+/[\\-]/;
+
 // Edge case
 /[]/;

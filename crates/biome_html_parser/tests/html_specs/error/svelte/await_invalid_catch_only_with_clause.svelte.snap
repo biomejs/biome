@@ -32,9 +32,9 @@ HtmlRoot {
                 },
                 then_clause: missing (optional),
                 catch_clause: SvelteAwaitCatchClause {
-                    catch_token: CATCH_KW@16..21 "catch" [] [],
+                    catch_token: CATCH_KW@16..22 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@21..27 " error" [] [],
+                        html_literal_token: HTML_LITERAL@22..27 "error" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@27..28 "}" [] [],
@@ -71,9 +71,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@53..56 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@56..61 "catch" [] [],
+                    catch_token: CATCH_KW@56..62 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@61..74 " anotherError" [] [],
+                        html_literal_token: HTML_LITERAL@62..74 "anotherError" [] [],
                     },
                     r_curly_token: R_CURLY@74..75 "}" [] [],
                     children: HtmlElementList [
@@ -134,9 +134,9 @@ HtmlRoot {
           0: HTML_LITERAL@7..16 " promise " [] []
         3: (empty)
         4: SVELTE_AWAIT_CATCH_CLAUSE@16..27
-          0: CATCH_KW@16..21 "catch" [] []
-          1: HTML_TEXT_EXPRESSION@21..27
-            0: HTML_LITERAL@21..27 " error" [] []
+          0: CATCH_KW@16..22 "catch" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@22..27
+            0: HTML_LITERAL@22..27 "error" [] []
         5: R_CURLY@27..28 "}" [] []
         6: HTML_ELEMENT_LIST@28..53
           0: HTML_ELEMENT@28..53
@@ -161,9 +161,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@53..107
         0: SVELTE_AWAIT_CATCH_BLOCK@53..107
           0: SV_CURLY_COLON@53..56 "{:" [Newline("\n")] []
-          1: CATCH_KW@56..61 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@61..74
-            0: HTML_LITERAL@61..74 " anotherError" [] []
+          1: CATCH_KW@56..62 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@62..74
+            0: HTML_LITERAL@62..74 "anotherError" [] []
           3: R_CURLY@74..75 "}" [] []
           4: HTML_ELEMENT_LIST@75..107
             0: HTML_ELEMENT@75..107

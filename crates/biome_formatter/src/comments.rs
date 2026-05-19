@@ -72,7 +72,7 @@
 //!
 //! Because all children of the `continue` statement are tokens, it is only possible to make the comments leading, dangling, or trailing comments of the `continue` statement. But this results in a loss of information as the formatting code can no longer distinguish if a comment appeared before or after the label and, thus, has to format them the same way.
 //!
-//! This hasn't shown to be a significant limitation today but the infrastructure could be extended to support a `label` on [`SourceComment`] that allows to further categorise comments.
+//! This hasn't shown to be a significant limitation today but the infrastructure could be extended to support a `label` on [`SourceComment`] that allows you to further categorise comments.
 //!
 
 mod builder;
@@ -805,7 +805,7 @@ pub struct Comments<L: Language> {
     /// }
     /// ```
     ///
-    /// Using an `Rc` here allows to cheaply clone [Comments] for these use cases.
+    /// Using an `Rc` here allows you to cheaply clone [Comments] for these use cases.
     data: Rc<CommentsData<L>>,
 }
 

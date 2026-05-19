@@ -262,7 +262,7 @@ CssRoot {
                             l_paren_token: L_PAREN@197..198 "(" [] [],
                             condition: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: ScssInterpolatedIdentifier {
+                                    name: ScssInterpolatedDashedIdentifier {
                                         items: ScssInterpolatedIdentifierPartList [
                                             CssIdentifier {
                                                 value_token: IDENT@198..206 "--theme-" [] [],
@@ -788,7 +788,7 @@ CssRoot {
                                             l_paren_token: L_PAREN@574..575 "(" [] [],
                                             declaration: CssDeclaration {
                                                 property: CssGenericProperty {
-                                                    name: ScssInterpolatedIdentifier {
+                                                    name: ScssInterpolatedDashedIdentifier {
                                                         items: ScssInterpolatedIdentifierPartList [
                                                             CssIdentifier {
                                                                 value_token: IDENT@575..583 "--theme-" [] [],
@@ -953,7 +953,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@704..705 "(" [] [],
                                     declaration: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: ScssInterpolatedIdentifier {
+                                            name: ScssInterpolatedDashedIdentifier {
                                                 items: ScssInterpolatedIdentifierPartList [
                                                     CssIdentifier {
                                                         value_token: IDENT@705..713 "--theme-" [] [],
@@ -1241,7 +1241,7 @@ CssRoot {
               1: L_PAREN@197..198 "(" [] []
               2: CSS_DECLARATION@198..219
                 0: CSS_GENERIC_PROPERTY@198..219
-                  0: SCSS_INTERPOLATED_IDENTIFIER@198..214
+                  0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@198..214
                     0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@198..214
                       0: CSS_IDENTIFIER@198..206
                         0: IDENT@198..206 "--theme-" [] []
@@ -1583,7 +1583,7 @@ CssRoot {
                       0: L_PAREN@574..575 "(" [] []
                       1: CSS_DECLARATION@575..596
                         0: CSS_GENERIC_PROPERTY@575..596
-                          0: SCSS_INTERPOLATED_IDENTIFIER@575..591
+                          0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@575..591
                             0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@575..591
                               0: CSS_IDENTIFIER@575..583
                                 0: IDENT@575..583 "--theme-" [] []
@@ -1688,7 +1688,7 @@ CssRoot {
                   0: L_PAREN@704..705 "(" [] []
                   1: CSS_DECLARATION@705..726
                     0: CSS_GENERIC_PROPERTY@705..726
-                      0: SCSS_INTERPOLATED_IDENTIFIER@705..721
+                      0: SCSS_INTERPOLATED_DASHED_IDENTIFIER@705..721
                         0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@705..721
                           0: CSS_IDENTIFIER@705..713
                             0: IDENT@705..713 "--theme-" [] []

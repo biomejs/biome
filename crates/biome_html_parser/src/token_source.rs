@@ -39,6 +39,11 @@ pub(crate) enum HtmlLexContext {
     InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
+    /// Lexes the binding and operator portions of a Vue `v-for` value.
+    VueVForValue,
+    /// Lexes the iterable expression after a Vue `v-for` `in` or `of` operator.
+    /// The stored syntax kind is the quote that terminates the attribute value.
+    VueVForExpression(HtmlSyntaxKind),
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
@@ -99,6 +104,8 @@ pub(crate) enum TextExpressionKind {
 pub(crate) enum RestrictedExpressionStopAt {
     /// Stops at 'as' keyword or ',' (for Svelte #each blocks)
     AsOrComma,
+    /// Stops at `,`
+    Comma,
     /// Stops at `)`
     ClosingParen,
     /// Stops at `then` or `catch` keywords
@@ -108,7 +115,7 @@ pub(crate) enum RestrictedExpressionStopAt {
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma => byte == b',',
+            Self::AsOrComma | Self::Comma => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -117,6 +124,7 @@ impl RestrictedExpressionStopAt {
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
             Self::AsOrComma => keyword == AS_KW,
+            Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,
         }

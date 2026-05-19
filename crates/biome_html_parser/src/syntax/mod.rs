@@ -13,13 +13,12 @@ use crate::syntax::astro::{
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
-    parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
-    parse_svelte_spread_or_expression,
+    SVELTE_KEYWORDS, is_at_svelte_directive_start, parse_attach_attribute, parse_svelte_at_block,
+    parse_svelte_directive, parse_svelte_hash_block, parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
-    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
-    parse_vue_v_slot_shorthand_directive,
+    VUE_KEYWORDS, parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
+    parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
@@ -313,11 +312,19 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 ElementList.parse_list(p);
                 if let Some(mut closing) =
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
-                    && !closing.text(p).contains(opening_tag_name.as_str())
                 {
-                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
-                    closing.change_to_bogus(p);
-                    continue;
+                    if is_void_closing_tag(p, &closing) {
+                        closing.change_to_bogus(p);
+                        continue;
+                    }
+
+                    if !closing.text(p).contains(opening_tag_name.as_str()) {
+                        p.error(
+                            expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
+                        );
+                        closing.change_to_bogus(p);
+                        continue;
+                    }
                 }
                 break;
             }
@@ -335,13 +342,10 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
     p.bump_with_context(T![/], inside_tag_context(p));
-    let should_be_self_closing = VOID_ELEMENTS
+    let is_void_element = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
         && !is_possible_component(p, p.cur_text());
-    if should_be_self_closing {
-        p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
-    }
     let _name = parse_any_tag_name(p);
 
     // There shouldn't be any attributes in a closing tag.
@@ -350,7 +354,29 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.bump_remap_with_context(HTML_BOGUS, HtmlLexContext::InsideTag);
     }
     p.expect(T![>]);
-    Present(m.complete(p, HTML_CLOSING_ELEMENT))
+    let closing = m.complete(p, HTML_CLOSING_ELEMENT);
+
+    if is_void_element {
+        p.error(void_element_should_not_have_closing_tag(p, closing.range(p)).into_diagnostic(p));
+    }
+
+    Present(closing)
+}
+
+fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
+    let text = closing.text(p);
+    let Some(name) = text
+        .strip_prefix("</")
+        .and_then(|text| text.strip_suffix('>'))
+        .map(|text| text.trim())
+    else {
+        return false;
+    };
+
+    VOID_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(name))
+        && !is_possible_component(p, name)
 }
 
 #[inline]
@@ -378,9 +404,9 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.bump_remap(HTML_LITERAL);
             Present(m.complete(p, HTML_CONTENT))
         }
-        // At this position, we shouldn't have svelte keyword, so we relex everything
-        // as text
-        _ if is_at_svelte_keyword(p) => {
+        // At this position, keywords are plain text unless a more specific parser
+        // handled them first.
+        _ if is_at_keyword(p) => {
             let m = p.start();
             p.re_lex(HtmlReLexContext::HtmlText);
             p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
@@ -535,7 +561,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p).ok();
+                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
@@ -616,11 +642,23 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
-fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute_initializer(
+    p: &mut HtmlParser,
+    context: AttrInitializerContext,
+) -> ParsedSyntax {
     if !p.at(T![=]) {
         return Absent;
     }
     let m = p.start();
+
+    // For v-for, we need to switch to VueVForValue context immediately
+    // and parse the v-for value directly (not as an HtmlString first)
+    if context == AttrInitializerContext::VueVFor {
+        p.bump_with_context(T![=], HtmlLexContext::VueVForValue);
+        parse_vue_v_for_value(p).or_add_diagnostic(p, expected_vue_v_for_value);
+        return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
+    }
+
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
@@ -665,6 +703,13 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AttrInitializerContext {
+    #[default]
+    Regular,
+    VueVFor,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
@@ -799,9 +844,17 @@ impl TextExpression {
 }
 
 fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
-    if p.at(EOF) || p.at(T![<]) || p.at(T!['}']) || p.cur_text().trim().is_empty() {
+    if p.at(EOF) || p.at(T![<]) || p.at(T!['}']) {
         return Absent;
     }
+    if p.cur_text().is_empty() {
+        p.re_lex(HtmlReLexContext::Svelte);
+        return Absent;
+    }
+    if p.cur_text().trim().is_empty() {
+        return Absent;
+    }
+
     let m = p.start();
 
     p.bump_remap(HTML_LITERAL);
@@ -823,6 +876,10 @@ impl TextExpression {
                         HTML_LITERAL,
                         HtmlLexContext::TextExpression(self.kind),
                     );
+                } else if p.cur_text().is_empty() {
+                    m.abandon(p);
+                    p.re_lex(HtmlReLexContext::Svelte);
+                    return Absent;
                 } else if !p.at(T!['}']) {
                     p.bump_remap(HTML_LITERAL);
                 } else {
@@ -846,12 +903,12 @@ impl TextExpression {
     }
 }
 
-#[inline]
-fn is_at_keyword(p: &mut HtmlParser) -> bool {
-    is_at_svelte_keyword(p) || is_at_html_keyword(p)
-}
+const ALL_POSSIBLE_KEYWORDS: TokenSet<HtmlSyntaxKind> =
+    HTML_KEYWORDS.union(SVELTE_KEYWORDS).union(VUE_KEYWORDS);
+
+const HTML_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![html], T![doctype]);
 
 #[inline]
-fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
-    matches!(p.cur(), T![html] | T![doctype])
+fn is_at_keyword(p: &mut HtmlParser) -> bool {
+    p.at_ts(ALL_POSSIBLE_KEYWORDS)
 }

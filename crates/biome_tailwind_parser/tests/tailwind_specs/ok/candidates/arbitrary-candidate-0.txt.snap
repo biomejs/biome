@@ -24,12 +24,16 @@ TwRoot {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
                 property_token: TW_PROPERTY@1..6 "color" [] [],
                 colon_token: COLON@6..7 ":" [] [],
-                value_token: TW_VALUE@7..10 "red" [] [],
+                value: CssGenericComponentValueList [
+                    CssIdentifier {
+                        ident_token: IDENT@7..10 "red" [] [],
+                    },
+                ],
                 r_brack_token: R_BRACKET@10..11 "]" [] [],
                 modifier: TwModifier {
                     slash_token: SLASH@11..12 "/" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@12..14 "50" [] [],
+                    value: TwNumberValue {
+                        value_token: TW_NUMBER@12..14 "50" [] [],
                     },
                 },
             },
@@ -53,12 +57,14 @@ TwRoot {
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..6 "color" [] []
         2: COLON@6..7 ":" [] []
-        3: TW_VALUE@7..10 "red" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@7..10
+          0: CSS_IDENTIFIER@7..10
+            0: IDENT@7..10 "red" [] []
         4: R_BRACKET@10..11 "]" [] []
         5: TW_MODIFIER@11..14
           0: SLASH@11..12 "/" [] []
-          1: TW_NAMED_VALUE@12..14
-            0: TW_VALUE@12..14 "50" [] []
+          1: TW_NUMBER_VALUE@12..14
+            0: TW_NUMBER@12..14 "50" [] []
       3: (empty)
   2: EOF@14..15 "" [Newline("\n")] []
 

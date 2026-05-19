@@ -21,7 +21,7 @@ use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumen
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
-    FileExitsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
+    FileExistsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
@@ -508,6 +508,13 @@ impl WorkspaceServer {
         } else {
             Default::default()
         };
+        if let Some(html_file_source) = source.to_html_file_source()
+            && html_file_source.is_vue()
+            && let Some(Ok(any_parse)) = &syntax
+        {
+            let html_root: HtmlRoot = any_parse.tree();
+            builder.visit_html_root(&html_root);
+        }
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
 
@@ -1371,7 +1378,7 @@ impl Workspace for WorkspaceServer {
         Ok(OpenFileResult { diagnostics })
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         Ok(self
             .documents
             .pin()

@@ -6,7 +6,7 @@ mod prelude;
 mod verbatim;
 mod yaml;
 
-pub(crate) use crate::context::YamlFormatContext;
+pub use crate::context::{YamlFormatContext, YamlFormatOptions};
 
 use biome_deserialize::TextRange;
 use biome_formatter::comments::Comments;
@@ -24,7 +24,6 @@ use biome_yaml_syntax::{YamlLanguage, YamlSyntaxNode, YamlSyntaxToken};
 use std::iter::FusedIterator;
 
 use crate::comments::YamlCommentStyle;
-use crate::context::YamlFormatOptions;
 use crate::cst::FormatYamlSyntaxNode;
 use crate::verbatim::{format_bogus_node, format_suppressed_node};
 

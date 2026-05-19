@@ -109,7 +109,7 @@ impl Rule for NoVar {
         // When a `var` is initialized and re-assigned `maybe_const` is `None`.
         // In this case we fall back to `let`.
         // Otherwise, we check if the `var` can be "fixed" to a `const`.
-        let replacing_token_kind = if maybe_const.filter(|x| x.can_fix).is_some() {
+        let replacing_token_kind = if maybe_const.as_ref().is_some_and(|x| x.can_fix) {
             JsSyntaxKind::CONST_KW
         } else {
             JsSyntaxKind::LET_KW

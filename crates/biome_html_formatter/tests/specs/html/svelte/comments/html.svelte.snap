@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/html.svelte
+---
+
+# Input
+
+```svelte
+<article>
+	<!-- 1 -->
+	{@html content}
+	<!-- 2 -->
+</article>
+<!-- 3 -->
+{@html "<div>"}content{@html "</div>"}
+<!-- 4 -->
+
+```
+
+
+# Formatted
+
+```svelte
+<article>
+	<!-- 1 -->
+	{@html content}
+	<!-- 2 -->
+</article>
+<!-- 3 -->
+{@html "<div>"}content{@html "</div>"}
+<!-- 4 -->
+```

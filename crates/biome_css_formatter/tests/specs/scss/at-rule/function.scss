@@ -7,3 +7,7 @@ $rest...
 @return
 $value * $ratio;
 }
+
+@function --highlight  ( ) {
+result:var(--highlight,#{$highlight});
+}

@@ -245,6 +245,43 @@ fn with_linter_configuration() {
     ));
 }
 
+#[test]
+#[serial]
+fn with_linter_domain_configuration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Utf8Path::new("biome.json").to_path_buf(),
+        r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false
+    },
+    "domains": {
+      "qwik": "all"
+    }
+  }
+}"#,
+    );
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--linter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_linter_domain_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
 /// Runs the `rage` command mocking out the log directory.
 fn run_rage(
     fs: MemoryFileSystem,

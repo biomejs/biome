@@ -13,22 +13,27 @@ Bar
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,4 +1,2 @@
--Foo
-+## Foo
- Bar
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,3 +1,2 @@
+ ## Foo
 -
-----
-```
+ Bar
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1 +1,5 @@
+-["## Foo", empty_line, "Bar", hard_line_break]
+\ No newline at end of file
++[
++  "## Foo
++Bar",
++  hard_line_break
++]
+\ No newline at end of file
 
-```md
-## Foo
-Bar
 ```

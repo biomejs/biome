@@ -2974,19 +2974,6 @@ light: #eaf0c6
   
   i Remove body
   
-3945.scss:84:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `;` but instead found `}`
-  
-    82 │ @function em($pixels, $context: $browser-context) {
-    83 │   @return #{ $pixels / $context }em
-  > 84 │ }
-       │ ^
-    85 │ 
-    86 │ .navigation {
-  
-  i Remove }
-  
 3945.scss:98:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.

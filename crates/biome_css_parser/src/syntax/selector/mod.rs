@@ -19,6 +19,10 @@ use crate::syntax::scss::{
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
+pub(crate) use crate::syntax::selector::pseudo_class::{
+    PSEUDO_CLASS_NTH_SIGN_SET, PseudoValueList, is_at_pseudo_class_nth_argument,
+    is_at_pseudo_value, parse_pseudo_class_nth_dimension_value, parse_pseudo_class_nth_selector,
+};
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_identifier, is_nth_at_identifier,
@@ -515,7 +519,7 @@ pub(crate) fn parse_universal_selector(p: &mut CssParser, namespace: ParsedSynta
 /// representing an HTML element type.
 #[inline]
 fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSyntax {
-    if !is_at_type_selector_identifier(p) {
+    if !is_at_selector_identifier(p) {
         return Absent;
     }
 
@@ -524,14 +528,12 @@ fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSynt
     Present(m.complete(p, CSS_TYPE_SELECTOR))
 }
 
-/// Returns `true` when the current token can start the identifier portion of a
-/// type selector.
+/// Returns `true` when the current token can start a selector identifier.
 ///
-/// SCSS needs the interpolated-identifier branch here because selectors such as
-/// `#{$tag}` and `ns|#{$tag}` are still parsed as `CssTypeSelector`; only the
-/// `ident` field changes from `CssIdentifier` to `ScssInterpolatedIdentifier`.
+/// SCSS uses this for selector names such as `#{$tag}` and `foo-#{$name}`;
+/// callers still own the surrounding selector node.
 #[inline]
-fn is_at_type_selector_identifier(p: &mut CssParser) -> bool {
+fn is_at_selector_identifier(p: &mut CssParser) -> bool {
     is_at_identifier(p) || is_at_scss_interpolated_identifier(p)
 }
 
@@ -577,7 +579,8 @@ pub(crate) fn parse_selector_custom_identifier_fragment(p: &mut CssParser) -> Pa
     parse_custom_identifier_with_keywords(p, context, true)
 }
 
-const SELECTOR_FUNCTION_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![')'], T!['{']];
+pub(crate) const SELECTOR_FUNCTION_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![')'], T!['{']];
 
 #[inline]
 pub(crate) fn eat_or_recover_selector_function_close_token<'a, E, D>(

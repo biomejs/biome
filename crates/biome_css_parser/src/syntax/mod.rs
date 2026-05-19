@@ -21,9 +21,10 @@ use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
-    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_variable,
-    is_at_scss_variable_declaration, parse_scss_function,
+    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
+    is_at_scss_interpolated_string, is_at_scss_module_member_access,
+    is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
+    parse_scss_function, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
     parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
     parse_scss_variable_declaration,
@@ -32,7 +33,8 @@ use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
 use crate::syntax::value::function::{
-    is_at_any_css_function, parse_any_function_with_context, parse_tailwind_value_theme_reference,
+    is_at_any_function_with_context, parse_any_function_with_context,
+    parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
@@ -349,7 +351,7 @@ pub(crate) fn is_at_any_value_with_context(
     context: ValueParsingContext,
 ) -> bool {
     (context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p))
-        || is_at_any_css_function(p)
+        || is_at_any_function_with_context(p, context)
         || is_at_any_non_function_css_value(p)
 }
 
@@ -409,10 +411,20 @@ pub(crate) enum ScssCapability {
     Full,
 }
 
+/// Controls how `ident (` is interpreted by shared value parsing.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum FunctionCallContext {
+    /// CSS value recovery may parse separated calls like `color: rgba (...)`.
+    LooseRecovery,
+    /// Sass expressions only parse source-tight calls like `@include foo(fn(...))`.
+    SourceTight,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) struct ValueParsingContext {
     mode: ValueParsingMode,
     scss_feature_supported: bool,
+    function_call_context: FunctionCallContext,
 }
 
 impl ValueParsingContext {
@@ -421,7 +433,18 @@ impl ValueParsingContext {
         Self {
             mode,
             scss_feature_supported: CssSyntaxFeatures::Scss.is_supported(p),
+            function_call_context: FunctionCallContext::LooseRecovery,
         }
+    }
+
+    /// Changes how shared value parsing treats `ident (` function heads.
+    #[inline]
+    pub(crate) const fn with_function_call_context(
+        mut self,
+        function_call_context: FunctionCallContext,
+    ) -> Self {
+        self.function_call_context = function_call_context;
+        self
     }
 
     /// Returns the current SCSS capability level for shared value parsing.
@@ -471,6 +494,12 @@ impl ValueParsingContext {
     pub(crate) const fn is_full_scss_parsing_allowed(self) -> bool {
         matches!(self.scss_capability(), ScssCapability::Full)
     }
+
+    /// Returns how shared value parsing treats `ident (` function heads.
+    #[inline]
+    pub(crate) const fn function_call_context(self) -> FunctionCallContext {
+        self.function_call_context
+    }
 }
 
 /// Parses any value while explicitly controlling whether SCSS-only branches are allowed.
@@ -486,7 +515,7 @@ pub(crate) fn parse_any_value_with_context(
 ) -> ParsedSyntax {
     if context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p) {
         parse_any_exclusive_scss_value(p)
-    } else if is_at_any_css_function(p) {
+    } else if is_at_any_function_with_context(p, context) {
         // CSS functions stay on this branch. SCSS-only function heads
         // (`namespace.fn(...)`, interpolation-led heads, etc.) are claimed above
         // so CSS mode still rejects them while SCSS mode parses them as functions.
@@ -497,7 +526,18 @@ pub(crate) fn parse_any_value_with_context(
 }
 
 #[inline]
+fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_ratio(p) {
+        parse_ratio(p)
+    } else {
+        parse_any_non_function_css_value_atom(p)
+    }
+}
+
+#[inline]
 fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
+    // `module.$name(` must fall through to module-member parsing so it can
+    // recover as a call with the `$` member diagnostic.
     if is_at_scss_function(p) && !p.nth_at(2, T![$]) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
@@ -515,6 +555,8 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             .map(|marker| {
                 add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
             })
+    } else if is_at_scss_interpolated_dashed_identifier(p) {
+        parse_scss_interpolated_dashed_identifier(p)
     } else if is_at_scss_interpolated_function_or_value(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -530,8 +572,13 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Parses one non-function CSS value atom without claiming `number / number`
+/// as a ratio.
+///
+/// This split lets SCSS expression parsing own numeric heads directly while
+/// the regular CSS wrapper still preserves `number / number` as `CSS_RATIO`.
 #[inline]
-fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_non_function_css_value_atom(p: &mut CssParser) -> ParsedSyntax {
     if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
             CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
@@ -550,8 +597,6 @@ fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
         parse_string(p)
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p)
-    } else if is_at_ratio(p) {
-        parse_ratio(p)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_color(p) {
@@ -666,7 +711,12 @@ pub(crate) fn parse_custom_identifier_with_keywords(
 
 #[inline]
 pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--")
+    is_nth_at_dashed_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_dashed_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_identifier(p, n) && p.nth_text(n).is_some_and(|text| text.starts_with("--"))
 }
 
 /// Dashed identifiers are any identifiers that start with two dashes (`--`).

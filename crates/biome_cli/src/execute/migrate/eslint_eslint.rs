@@ -535,6 +535,16 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "class-methods-use-this" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ClassMethodsUseThis(conf));
+                            }
+                        }
+                        "max-nested-callbacks" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxNestedCallbacks(conf));
+                            }
+                        }
                         "no-console" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
@@ -581,6 +591,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoShadow(conf));
                             }
                         }
+                        "@typescript-eslint/no-base-to-string" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptNoBaseToString(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
@@ -613,6 +628,108 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     fn from(val: NoConsoleOptions) -> Self {
         Self {
             allow: (!val.allow.is_empty()).then_some(val.allow),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct MaxNestedCallbacksOptions {
+    max: Option<u8>,
+}
+
+impl MaxNestedCallbacksOptions {
+    const ESLINT_DEFAULT_MAX: u8 = 10;
+}
+
+impl Deserializable for MaxNestedCallbacksOptions {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxNestedCallbacksObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxNestedCallbacksObjectOptions {
+    max: Option<u8>,
+    maximum: Option<u8>,
+}
+
+impl From<MaxNestedCallbacksObjectOptions> for MaxNestedCallbacksOptions {
+    fn from(value: MaxNestedCallbacksObjectOptions) -> Self {
+        Self {
+            max: value.max.or(value.maximum),
+        }
+    }
+}
+
+impl From<MaxNestedCallbacksOptions>
+    for biome_rule_options::no_excessive_nested_callbacks::NoExcessiveNestedCallbacksOptions
+{
+    fn from(value: MaxNestedCallbacksOptions) -> Self {
+        Self {
+            max: Some(
+                value
+                    .max
+                    .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct ClassMethodsUseThisOptions {
+    #[deserializable(rename = "exceptMethods")]
+    ignore_methods: Box<[Box<str>]>,
+    #[deserializable(rename = "enforceForClassFields")]
+    enforce_for_class_fields: Option<bool>,
+    #[deserializable(rename = "ignoreOverrideMethods")]
+    ignore_override_methods: Option<bool>,
+    #[deserializable(rename = "ignoreClassesWithImplements")]
+    ignore_classes_with_implements: Option<EslintIgnoreClassesWithImplements>,
+}
+impl ClassMethodsUseThisOptions {
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::use_this_in_class_methods::UseThisInClassMethodsOptions> {
+        let options = biome_rule_options::use_this_in_class_methods::UseThisInClassMethodsOptions {
+            ignore_methods: (!self.ignore_methods.is_empty()).then_some(self.ignore_methods),
+            ignore_override_methods: self.ignore_override_methods,
+            ignore_classes_with_implements: self.ignore_classes_with_implements.map(Into::into),
+        };
+
+        let _ = self.enforce_for_class_fields;
+
+        (options.ignore_methods.is_some()
+            || options.ignore_override_methods.is_some()
+            || options.ignore_classes_with_implements.is_some())
+        .then_some(options)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum EslintIgnoreClassesWithImplements {
+    #[deserializable(rename = "all")]
+    All,
+    #[deserializable(rename = "public-fields")]
+    PublicFields,
+}
+impl From<EslintIgnoreClassesWithImplements>
+    for biome_rule_options::use_this_in_class_methods::IgnoreClassesWithImplements
+{
+    fn from(value: EslintIgnoreClassesWithImplements) -> Self {
+        match value {
+            EslintIgnoreClassesWithImplements::All => Self::All,
+            EslintIgnoreClassesWithImplements::PublicFields => Self::PublicFields,
         }
     }
 }
@@ -662,6 +779,8 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
+    MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
@@ -672,6 +791,7 @@ pub(crate) enum Rule {
     TypeScriptExplicitMemberAccessibility(
         RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
     ),
+    TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
@@ -681,6 +801,8 @@ impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Self::Any(name, _) => name.clone(),
+            Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
+            Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
@@ -691,6 +813,9 @@ impl Rule {
             }
             Self::TypeScriptExplicitMemberAccessibility(_) => {
                 Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
+            }
+            Self::TypeScriptNoBaseToString(_) => {
+                Cow::Borrowed("@typescript-eslint/no-base-to-string")
             }
             Self::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")

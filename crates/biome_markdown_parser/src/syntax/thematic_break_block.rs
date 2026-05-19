@@ -32,7 +32,7 @@ pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
                 return false;
             }
             p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-            return p.at(MD_THEMATIC_BREAK_LITERAL);
+            return p.at(MD_THEMATIC_BREAK_LITERAL) || is_thematic_break_pattern(p);
         }
 
         // Special case: we may not be at line start if a list marker was consumed
@@ -61,13 +61,13 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     if p.at(MD_TEXTUAL_LITERAL)
         && p.cur_text()
             .chars()
-            .all(|c| c == ' ' || c == '\t' || c == '*' || c == '-' || c == '_')
+            .all(|c| matches!(c, ' ' | '\t' | '\n' | '\r' | '*' | '-' | '_'))
     {
         let mut break_char = None;
         let mut break_count = 0usize;
 
         for c in p.cur_text().chars() {
-            if c == ' ' || c == '\t' {
+            if matches!(c, ' ' | '\t' | '\n' | '\r') {
                 continue;
             }
             if let Some(existing) = break_char {
@@ -148,7 +148,10 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     }
 
     // Valid thematic break if 3+ characters followed by end of line
-    count >= THEMATIC_BREAK_MIN_CHARS && (p.at(NEWLINE) || p.at(T![EOF]))
+    count >= THEMATIC_BREAK_MIN_CHARS
+        && (p.at(NEWLINE)
+            || p.at(T![EOF])
+            || (p.at(MD_TEXTUAL_LITERAL) && matches!(p.cur_text(), "\n" | "\r\n" | "\r")))
 }
 
 pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax {

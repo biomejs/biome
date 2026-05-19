@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useDestructuring": {
+          "level": "error",
+          "options": {
+            "variableDeclarator": {
+              "array": true,
+              "object": true
+            },
+            "assignmentExpression": {
+              "array": true,
+              "object": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -176,8 +176,7 @@ fn has_multiline_content(
     members_first_token.map_or_else(
         || {
             closing_token
-                .map(|token| token.has_leading_newline())
-                .unwrap_or(false)
+                .is_ok_and(|token| token.has_leading_newline())
         },
         |token| token.has_leading_newline(),
     )

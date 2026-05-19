@@ -17,7 +17,7 @@
 			"anyOf": [{ "$ref": "#/$defs/CssConfiguration" }, { "type": "null" }]
 		},
 		"extends": {
-			"description": "A list of paths to other JSON files, used to extends the current configuration.",
+			"description": "A list of paths to other JSON files, used to extend the current configuration.",
 			"anyOf": [{ "$ref": "#/$defs/Extends" }, { "type": "null" }]
 		},
 		"files": {
@@ -1547,6 +1547,14 @@
 				}
 			]
 		},
+		"DestructuringConfig": {
+			"type": "object",
+			"properties": {
+				"array": { "type": ["boolean", "null"] },
+				"object": { "type": ["boolean", "null"] }
+			},
+			"additionalProperties": false
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -2086,6 +2094,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"IgnoreClassesWithImplements": {
+			"description": "Controls how `useThisInClassMethods` treats classes that implement interfaces.",
+			"oneOf": [
+				{
+					"description": "Check members in classes that implement interfaces the same way as any other class.",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Ignore every eligible instance member in classes that implement at least one interface.",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Ignore only public eligible members in classes that implement at least one interface.\n\nProtected and private members in those classes are still checked.",
+					"type": "string",
+					"const": "public-fields"
+				}
+			]
 		},
 		"ImportGroup": {
 			"anyOf": [
@@ -2784,6 +2812,22 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBaseToStringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBaseToStringOptions" }
+			]
+		},
+		"NoBaseToStringOptions": {
+			"type": "object",
+			"properties": {
+				"ignoredTypeNames": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3683,6 +3727,25 @@
 				"skipIifes": {
 					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoExcessiveNestedCallbacksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveNestedCallbacksOptions" }
+			]
+		},
+		"NoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"max": {
+					"description": "Maximum callback nesting depth allowed (default: 5)",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
 				}
 			},
 			"additionalProperties": false
@@ -4811,6 +4874,16 @@
 			]
 		},
 		"NoReactSpecificPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactStringRefsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactStringRefsOptions" }
+			]
+		},
+		"NoReactStringRefsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5960,6 +6033,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueImportCompilerMacrosConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueImportCompilerMacrosOptions" }
+			]
+		},
+		"NoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6020,6 +6103,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVOnNumberValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVOnNumberValuesOptions" }
+			]
+		},
+		"NoVueVOnNumberValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6049,6 +6142,13 @@
 					"description": "Disallow ambiguous anchor descriptions.\nSee https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAmbiguousAnchorTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noBaseToString": {
+					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBaseToStringConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6205,6 +6305,13 @@
 					"description": "Restrict the number of lines in a file.\nSee https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoExcessiveLinesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveNestedCallbacks": {
+					"description": "Enforce a maximum depth that callbacks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestedCallbacksConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6446,6 +6553,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactStringRefs": {
+					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactStringRefsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -6565,6 +6679,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueImportCompilerMacros": {
+					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueImportCompilerMacrosConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueOptionsApi": {
 					"description": "Disallow the use of Vue Options API.\nSee https://biomejs.dev/linter/rules/no-vue-options-api",
 					"anyOf": [
@@ -6583,6 +6704,13 @@
 					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVOnNumberValues": {
+					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6765,6 +6893,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useMathMinMax": {
+					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedCaptureGroup": {
 					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
 					"anyOf": [
@@ -6865,6 +7000,27 @@
 						{ "type": "null" }
 					]
 				},
+				"useTestHooksInOrder": {
+					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksInOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTestHooksOnTop": {
+					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThisInClassMethods": {
+					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
@@ -6923,6 +7079,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueNextTickPromise": {
+					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueNextTickPromiseConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueVForKey": {
 					"description": "Enforce that elements using v-for also specify a unique key.\nSee https://biomejs.dev/linter/rules/use-vue-v-for-key",
 					"anyOf": [
@@ -6962,6 +7125,13 @@
 					"description": "Enforce valid v-else-if directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-else-if",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVFor": {
+					"description": "Enforces valid v-for directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7128,6 +7298,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingCommas": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
+					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
 				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
@@ -7717,6 +7891,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBarrelFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBaseToStringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBaseToStringOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -8459,6 +8642,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveLinesPerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveNestedCallbacksOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9489,6 +9681,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoReactStringRefsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactStringRefsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoRedeclareOptions": {
 			"type": "object",
 			"properties": {
@@ -10450,6 +10651,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueImportCompilerMacrosOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueOptionsApiOptions": {
 			"type": "object",
 			"properties": {
@@ -10500,6 +10710,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueVIfWithVForOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVOnNumberValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVOnNumberValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11406,6 +11625,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseMathMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseMathMinMaxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMaxParamsOptions": {
 			"type": "object",
 			"properties": {
@@ -11853,6 +12082,33 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTestHooksInOrderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTestHooksInOrderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTestHooksOnTopOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTestHooksOnTopOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseThisInClassMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseThisInClassMethodsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseThrowNewErrorOptions": {
 			"type": "object",
 			"properties": {
@@ -12064,6 +12320,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueNextTickPromiseOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueNextTickPromiseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueVForKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -12116,6 +12381,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVElseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVForOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVForOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14285,6 +14559,20 @@
 		},
 		"UseDestructuringOptions": {
 			"type": "object",
+			"properties": {
+				"assignmentExpression": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				},
+				"variableDeclarator": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseDisposablesConfiguration": {
@@ -14889,6 +15177,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseMathMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseMathMinMaxOptions" }
+			]
+		},
+		"UseMathMinMaxOptions": { "type": "object", "additionalProperties": false },
 		"UseMaxParamsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15464,6 +15759,55 @@
 			]
 		},
 		"UseTemplateOptions": { "type": "object", "additionalProperties": false },
+		"UseTestHooksInOrderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTestHooksInOrderOptions" }
+			]
+		},
+		"UseTestHooksInOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTestHooksOnTopConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTestHooksOnTopOptions" }
+			]
+		},
+		"UseTestHooksOnTopOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseThisInClassMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseThisInClassMethodsOptions" }
+			]
+		},
+		"UseThisInClassMethodsOptions": {
+			"description": "Options for the `useThisInClassMethods` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreClassesWithImplements": {
+					"description": "Whether members of classes with an `implements` clause should be ignored.\n\nDefaults to `\"none\"`, which means implemented classes are checked like any other class.\nUse `\"all\"` to ignore every eligible member in such classes, or `\"public-fields\"`\nto ignore only public members in them.",
+					"anyOf": [
+						{ "$ref": "#/$defs/IgnoreClassesWithImplements" },
+						{ "type": "null" }
+					]
+				},
+				"ignoreMethods": {
+					"description": "Method names that should be ignored by the rule.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreOverrideMethods": {
+					"description": "Whether methods marked with `override` should be ignored.\n\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseThrowNewErrorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15766,6 +16110,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueNextTickPromiseConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueNextTickPromiseOptions" }
+			]
+		},
+		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueVForKeyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15820,6 +16174,16 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVElseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVForConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVForOptions" }
+			]
+		},
+		"UseVueValidVForOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

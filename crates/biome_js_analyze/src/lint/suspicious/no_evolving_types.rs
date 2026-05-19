@@ -85,19 +85,17 @@ impl Rule for NoEvolvingTypes {
                 let initializer = variable.initializer()?;
                 let expression = initializer.expression().ok()?;
                 match expression {
-                    AnyJsExpression::AnyJsLiteralExpression(literal_expr) => {
+                    AnyJsExpression::AnyJsLiteralExpression(literal_expr)
                         if literal_expr.as_js_null_literal_expression().is_some()
                             && !is_type_annotated
-                        {
+                        => {
                             return Some(variable);
                         }
-                    }
-                    AnyJsExpression::JsArrayExpression(array_expr) => {
+                    AnyJsExpression::JsArrayExpression(array_expr)
                         if array_expr.elements().into_iter().next().is_none() && !is_type_annotated
-                        {
+                        => {
                             return Some(variable);
                         }
-                    }
                     _ => {}
                 };
             }
