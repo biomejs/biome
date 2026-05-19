@@ -96,13 +96,6 @@ insta               = { workspace = true }
 js_embeds    = ["lang_graphql"]
 js_plugin    = ["biome_plugin_loader/js_plugin", "plugins"]
 lang_graphql = [
-  "biome_configuration/lang_graphql",
-  "dep:biome_graphql_analyze",
-  "dep:biome_graphql_formatter",
-  "dep:biome_graphql_parser",
-  "dep:biome_graphql_syntax"
-]
-lang_graphql = [
   "dep:biome_graphql_analyze",
   "dep:biome_graphql_formatter",
   "dep:biome_graphql_parser",
