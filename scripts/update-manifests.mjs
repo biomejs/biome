@@ -10,6 +10,7 @@ const MANIFEST_PATH = resolve(BIOME_LIB_PATH, "package.json");
 
 const PLATFORMS = ["win32-%s", "darwin-%s", "linux-%s", "linux-%s-musl"];
 const ARCHITECTURES = ["x64", "arm64"];
+const LINUX_ONLY_ARCHITECTURES = ["loong64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 
 const rootManifest = JSON.parse(
@@ -21,6 +22,10 @@ for (const platform of PLATFORMS) {
 		updateOptionalDependencies(platform, arch);
 	}
 }
+
+for (const arch of LINUX_ONLY_ARCHITECTURES)
+	updateOptionalDependencies("linux-%s", arch);
+
 
 for (const target of WASM_TARGETS) {
 	updateWasmPackage(target);
