@@ -1,7 +1,7 @@
 // Sample values used by the codegen probe matrix.
 
 import type { ThemeNamespaceVariant } from "./theme-namespaces.js";
-import type { CssDataType } from "./value-types.js";
+import type { CssDataType, NamedValueType } from "./value-types.js";
 
 // One CSS-valid value per theme namespace, injected into a probe
 // `@theme` block so each namespace exposes a UNIQUE token. The exact
@@ -39,7 +39,7 @@ export function probeToken(variant: ThemeNamespaceVariant): string {
 // brackets). Tailwind v4 only accepts these three predicate kinds in
 // named form; other CSS value types must be written as arbitrary
 // values (`[length:1rem]` etc.).
-export const NAMED_PREDICATE_PROBES: { type: CssDataType; value: string }[] = [
+export const NAMED_PREDICATE_PROBES: { type: NamedValueType; value: string }[] = [
 	{ type: "Number", value: "7" },
 	{ type: "Percentage", value: "25%" },
 	{ type: "Ratio", value: "1/2" },

@@ -12,8 +12,8 @@
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, Negative::*, ThemeNamespace,
-    UtilityEntry,
+    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
+    ThemeNamespace, UtilityEntry,
 };
 
 pub static PROPERTY_INDEX: phf::Map<&'static str, u16> = phf_map! {
@@ -1238,8 +1238,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 1,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 4, 1),
-            NamedBranch::Typed(CssDataType::Number, 4, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 4, 1),
+            NamedBranch::Typed(NamedValueType::Number, 4, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 4, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(4, 1),
@@ -1250,8 +1250,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 3,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 5, 1),
-            NamedBranch::Typed(CssDataType::Number, 5, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 5, 1),
+            NamedBranch::Typed(NamedValueType::Number, 5, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 5, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(5, 1),
@@ -1262,8 +1262,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 5,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 6, 1),
-            NamedBranch::Typed(CssDataType::Number, 6, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 6, 1),
+            NamedBranch::Typed(NamedValueType::Number, 6, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 6, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(6, 1),
@@ -1274,8 +1274,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 7,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
-            NamedBranch::Typed(CssDataType::Number, 7, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 7, 1),
+            NamedBranch::Typed(NamedValueType::Number, 7, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 7, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(7, 1),
@@ -1286,8 +1286,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 9,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
-            NamedBranch::Typed(CssDataType::Number, 8, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 8, 1),
+            NamedBranch::Typed(NamedValueType::Number, 8, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 8, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(8, 1),
@@ -1298,8 +1298,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 11,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 9, 1),
-            NamedBranch::Typed(CssDataType::Number, 9, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 9, 1),
+            NamedBranch::Typed(NamedValueType::Number, 9, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 9, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(9, 1),
@@ -1310,8 +1310,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 13,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 10, 1),
-            NamedBranch::Typed(CssDataType::Number, 10, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 10, 1),
+            NamedBranch::Typed(NamedValueType::Number, 10, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 10, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(10, 1),
@@ -1322,8 +1322,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 15,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 11, 1),
-            NamedBranch::Typed(CssDataType::Number, 11, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 11, 1),
+            NamedBranch::Typed(NamedValueType::Number, 11, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 11, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(11, 1),
@@ -1334,8 +1334,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 17,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 12, 1),
-            NamedBranch::Typed(CssDataType::Number, 12, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 12, 1),
+            NamedBranch::Typed(NamedValueType::Number, 12, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 12, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(12, 1),
@@ -1346,8 +1346,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 19,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 13, 1),
-            NamedBranch::Typed(CssDataType::Number, 13, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 13, 1),
+            NamedBranch::Typed(NamedValueType::Number, 13, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 13, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(13, 1),
@@ -1358,8 +1358,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 21,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 14, 1),
-            NamedBranch::Typed(CssDataType::Number, 14, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 14, 1),
+            NamedBranch::Typed(NamedValueType::Number, 14, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 14, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(14, 1),
@@ -1370,7 +1370,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 23,
         named_branches: &[
             NamedBranch::Keyword(0, 16, 1),
-            NamedBranch::Typed(CssDataType::Number, 16, 1),
+            NamedBranch::Typed(NamedValueType::Number, 16, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(16, 1),
@@ -1378,7 +1378,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 22,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 16, 1),
+                NamedBranch::Typed(NamedValueType::Number, 16, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(16, 1),
@@ -1389,7 +1389,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 25,
         named_branches: &[
             NamedBranch::Keyword(1, 17, 1),
-            NamedBranch::Typed(CssDataType::Number, 17, 1),
+            NamedBranch::Typed(NamedValueType::Number, 17, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(17, 1),
@@ -1397,7 +1397,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 24,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 17, 1),
+                NamedBranch::Typed(NamedValueType::Number, 17, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(17, 1),
@@ -1408,7 +1408,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 27,
         named_branches: &[
             NamedBranch::Keyword(0, 18, 1),
-            NamedBranch::Typed(CssDataType::Number, 18, 1),
+            NamedBranch::Typed(NamedValueType::Number, 18, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(18, 1),
@@ -1416,7 +1416,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 26,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 18, 1),
+                NamedBranch::Typed(NamedValueType::Number, 18, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(18, 1),
@@ -1427,7 +1427,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 28,
         named_branches: &[
             NamedBranch::Keyword(2, 18, 1),
-            NamedBranch::Typed(CssDataType::Number, 18, 1),
+            NamedBranch::Typed(NamedValueType::Number, 18, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(18, 1),
@@ -1438,7 +1438,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 30,
         named_branches: &[
             NamedBranch::Keyword(0, 19, 1),
-            NamedBranch::Typed(CssDataType::Number, 19, 1),
+            NamedBranch::Typed(NamedValueType::Number, 19, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(19, 1),
@@ -1446,7 +1446,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 29,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 19, 1),
+                NamedBranch::Typed(NamedValueType::Number, 19, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(19, 1),
@@ -1457,7 +1457,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 32,
         named_branches: &[
             NamedBranch::Keyword(0, 20, 1),
-            NamedBranch::Typed(CssDataType::Number, 20, 1),
+            NamedBranch::Typed(NamedValueType::Number, 20, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(20, 1),
@@ -1465,7 +1465,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 31,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 20, 1),
+                NamedBranch::Typed(NamedValueType::Number, 20, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(20, 1),
@@ -1476,7 +1476,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 34,
         named_branches: &[
             NamedBranch::Keyword(0, 21, 1),
-            NamedBranch::Typed(CssDataType::Number, 21, 1),
+            NamedBranch::Typed(NamedValueType::Number, 21, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(21, 1),
@@ -1484,7 +1484,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 33,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 21, 1),
+                NamedBranch::Typed(NamedValueType::Number, 21, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(21, 1),
@@ -1495,7 +1495,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 35,
         named_branches: &[
             NamedBranch::Keyword(2, 21, 1),
-            NamedBranch::Typed(CssDataType::Number, 21, 1),
+            NamedBranch::Typed(NamedValueType::Number, 21, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(21, 1),
@@ -1506,7 +1506,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 37,
         named_branches: &[
             NamedBranch::Keyword(0, 22, 1),
-            NamedBranch::Typed(CssDataType::Number, 22, 1),
+            NamedBranch::Typed(NamedValueType::Number, 22, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(22, 1),
@@ -1514,7 +1514,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 36,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 22, 1),
+                NamedBranch::Typed(NamedValueType::Number, 22, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(22, 1),
@@ -1525,7 +1525,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 39,
         named_branches: &[
             NamedBranch::Keyword(0, 23, 1),
-            NamedBranch::Typed(CssDataType::Number, 23, 1),
+            NamedBranch::Typed(NamedValueType::Number, 23, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(23, 1),
@@ -1533,7 +1533,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 38,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 23, 1),
+                NamedBranch::Typed(NamedValueType::Number, 23, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(23, 1),
@@ -1544,7 +1544,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 41,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 27, 1),
-            NamedBranch::Typed(CssDataType::Number, 27, 1),
+            NamedBranch::Typed(NamedValueType::Number, 27, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(27, 1),
@@ -1555,7 +1555,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 43,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 28, 1),
-            NamedBranch::Typed(CssDataType::Number, 28, 1),
+            NamedBranch::Typed(NamedValueType::Number, 28, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(28, 1),
@@ -1566,7 +1566,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 45,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 29, 1),
-            NamedBranch::Typed(CssDataType::Number, 29, 1),
+            NamedBranch::Typed(NamedValueType::Number, 29, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(29, 1),
@@ -1577,7 +1577,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 47,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 30, 1),
-            NamedBranch::Typed(CssDataType::Number, 30, 1),
+            NamedBranch::Typed(NamedValueType::Number, 30, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(30, 1),
@@ -1588,7 +1588,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 49,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 31, 1),
-            NamedBranch::Typed(CssDataType::Number, 31, 1),
+            NamedBranch::Typed(NamedValueType::Number, 31, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(31, 1),
@@ -1599,7 +1599,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 51,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 32, 1),
-            NamedBranch::Typed(CssDataType::Number, 32, 1),
+            NamedBranch::Typed(NamedValueType::Number, 32, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(32, 1),
@@ -1610,7 +1610,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 53,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 33, 1),
-            NamedBranch::Typed(CssDataType::Number, 33, 1),
+            NamedBranch::Typed(NamedValueType::Number, 33, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(33, 1),
@@ -1621,7 +1621,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 55,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 34, 1),
-            NamedBranch::Typed(CssDataType::Number, 34, 1),
+            NamedBranch::Typed(NamedValueType::Number, 34, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(34, 1),
@@ -1632,7 +1632,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 57,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 35, 1),
-            NamedBranch::Typed(CssDataType::Number, 35, 1),
+            NamedBranch::Typed(NamedValueType::Number, 35, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(35, 1),
@@ -1643,7 +1643,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 59,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 36, 1),
-            NamedBranch::Typed(CssDataType::Number, 36, 1),
+            NamedBranch::Typed(NamedValueType::Number, 36, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(36, 1),
@@ -1654,7 +1654,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 61,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 37, 1),
-            NamedBranch::Typed(CssDataType::Number, 37, 1),
+            NamedBranch::Typed(NamedValueType::Number, 37, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(37, 1),
@@ -1665,7 +1665,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 62,
         named_branches: &[
             NamedBranch::Keyword(3, 139, 4),
-            NamedBranch::Typed(CssDataType::Number, 139, 4),
+            NamedBranch::Typed(NamedValueType::Number, 139, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(139, 4),
@@ -1676,8 +1676,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 63,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1689,8 +1689,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1700,8 +1700,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "flex" => FunctionalEntry {
         registration_idx: 65,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 48, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 48, 1),
+            NamedBranch::Typed(NamedValueType::Number, 48, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 48, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(48, 1),
@@ -1713,7 +1713,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(4, 41, 1),
             NamedBranch::Theme(ThemeNamespace::Aspect, 41, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 41, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 41, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(41, 1),
@@ -1732,8 +1732,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 68,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 45, 2),
-            NamedBranch::Typed(CssDataType::Number, 45, 2),
-            NamedBranch::Typed(CssDataType::Ratio, 45, 2),
+            NamedBranch::Typed(NamedValueType::Number, 45, 2),
+            NamedBranch::Typed(NamedValueType::Ratio, 45, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(45, 2),
@@ -1745,8 +1745,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 45, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 45, 1),
-            NamedBranch::Typed(CssDataType::Number, 45, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 45, 1),
+            NamedBranch::Typed(NamedValueType::Number, 45, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 45, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(45, 1),
@@ -1758,8 +1758,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 47, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 47, 1),
-            NamedBranch::Typed(CssDataType::Number, 47, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 47, 1),
+            NamedBranch::Typed(NamedValueType::Number, 47, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 47, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(47, 1),
@@ -1772,8 +1772,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             NamedBranch::Keyword(5, 46, 1),
             NamedBranch::Theme(ThemeNamespace::Spacing, 46, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 46, 1),
-            NamedBranch::Typed(CssDataType::Number, 46, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 46, 1),
+            NamedBranch::Typed(NamedValueType::Number, 46, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 46, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(46, 1),
@@ -1784,8 +1784,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 72,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 42, 1),
-            NamedBranch::Typed(CssDataType::Number, 42, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 42, 1),
+            NamedBranch::Typed(NamedValueType::Number, 42, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 42, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(42, 1),
@@ -1796,8 +1796,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 73,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 44, 1),
-            NamedBranch::Typed(CssDataType::Number, 44, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 44, 1),
+            NamedBranch::Typed(NamedValueType::Number, 44, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 44, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(44, 1),
@@ -1808,8 +1808,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 74,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 43, 1),
-            NamedBranch::Typed(CssDataType::Number, 43, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 43, 1),
+            NamedBranch::Typed(NamedValueType::Number, 43, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 43, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(43, 1),
@@ -1821,8 +1821,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1834,8 +1834,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1846,8 +1846,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 77,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1858,8 +1858,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 78,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+            NamedBranch::Typed(NamedValueType::Number, 354, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 354, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 1),
@@ -1869,7 +1869,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "shrink" => FunctionalEntry {
         registration_idx: 79,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 49, 1),
+            NamedBranch::Typed(NamedValueType::Number, 49, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(49, 1),
@@ -1879,7 +1879,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grow" => FunctionalEntry {
         registration_idx: 80,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 50, 1),
+            NamedBranch::Typed(NamedValueType::Number, 50, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(50, 1),
@@ -1891,8 +1891,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 51, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 51, 1),
-            NamedBranch::Typed(CssDataType::Number, 51, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 51, 1),
+            NamedBranch::Typed(NamedValueType::Number, 51, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 51, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(51, 1),
@@ -1903,7 +1903,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 82,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 3),
-            NamedBranch::Typed(CssDataType::Number, 354, 3),
+            NamedBranch::Typed(NamedValueType::Number, 354, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 3),
@@ -1914,7 +1914,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 83,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
-            NamedBranch::Typed(CssDataType::Number, 354, 2),
+            NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -1925,7 +1925,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 84,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
-            NamedBranch::Typed(CssDataType::Number, 354, 2),
+            NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -1967,8 +1967,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 89,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 58, 3),
-            NamedBranch::Typed(CssDataType::Number, 58, 3),
-            NamedBranch::Typed(CssDataType::Ratio, 58, 3),
+            NamedBranch::Typed(NamedValueType::Number, 58, 3),
+            NamedBranch::Typed(NamedValueType::Ratio, 58, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(58, 3),
@@ -1979,8 +1979,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 91,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 58, 2),
-            NamedBranch::Typed(CssDataType::Number, 58, 2),
-            NamedBranch::Typed(CssDataType::Ratio, 58, 2),
+            NamedBranch::Typed(NamedValueType::Number, 58, 2),
+            NamedBranch::Typed(NamedValueType::Ratio, 58, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(58, 2),
@@ -1991,8 +1991,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 93,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 59, 2),
-            NamedBranch::Typed(CssDataType::Number, 59, 2),
-            NamedBranch::Typed(CssDataType::Ratio, 59, 2),
+            NamedBranch::Typed(NamedValueType::Number, 59, 2),
+            NamedBranch::Typed(NamedValueType::Ratio, 59, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(59, 2),
@@ -2003,7 +2003,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 95,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 60, 2),
-            NamedBranch::Typed(CssDataType::Number, 60, 2),
+            NamedBranch::Typed(NamedValueType::Number, 60, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(60, 2),
@@ -2013,7 +2013,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scale" => FunctionalEntry {
         registration_idx: 97,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 62, 4),
+            NamedBranch::Typed(NamedValueType::Number, 62, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(61, 1),
@@ -2023,7 +2023,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scale-x" => FunctionalEntry {
         registration_idx: 99,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 62, 2),
+            NamedBranch::Typed(NamedValueType::Number, 62, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(62, 2),
@@ -2033,7 +2033,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scale-y" => FunctionalEntry {
         registration_idx: 101,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 63, 2),
+            NamedBranch::Typed(NamedValueType::Number, 63, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(63, 2),
@@ -2043,7 +2043,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scale-z" => FunctionalEntry {
         registration_idx: 103,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 64, 2),
+            NamedBranch::Typed(NamedValueType::Number, 64, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(64, 2),
@@ -2053,7 +2053,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "rotate" => FunctionalEntry {
         registration_idx: 105,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 65, 1),
+            NamedBranch::Typed(NamedValueType::Number, 65, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(65, 1),
@@ -2063,7 +2063,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "rotate-x" => FunctionalEntry {
         registration_idx: 107,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 66, 2),
+            NamedBranch::Typed(NamedValueType::Number, 66, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(66, 2),
@@ -2073,7 +2073,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "rotate-y" => FunctionalEntry {
         registration_idx: 109,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 67, 2),
+            NamedBranch::Typed(NamedValueType::Number, 67, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(67, 2),
@@ -2083,7 +2083,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "rotate-z" => FunctionalEntry {
         registration_idx: 111,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 68, 2),
+            NamedBranch::Typed(NamedValueType::Number, 68, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(68, 2),
@@ -2093,7 +2093,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "skew" => FunctionalEntry {
         registration_idx: 113,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 69, 3),
+            NamedBranch::Typed(NamedValueType::Number, 69, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(69, 3),
@@ -2103,7 +2103,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "skew-x" => FunctionalEntry {
         registration_idx: 115,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 69, 2),
+            NamedBranch::Typed(NamedValueType::Number, 69, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(69, 2),
@@ -2113,7 +2113,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "skew-y" => FunctionalEntry {
         registration_idx: 117,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 70, 2),
+            NamedBranch::Typed(NamedValueType::Number, 70, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(70, 2),
@@ -2140,7 +2140,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 121,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 83, 1),
-            NamedBranch::Typed(CssDataType::Number, 83, 1),
+            NamedBranch::Typed(NamedValueType::Number, 83, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(83, 1),
@@ -2151,7 +2151,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 123,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 84, 1),
-            NamedBranch::Typed(CssDataType::Number, 84, 1),
+            NamedBranch::Typed(NamedValueType::Number, 84, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(84, 1),
@@ -2162,7 +2162,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 125,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 85, 1),
-            NamedBranch::Typed(CssDataType::Number, 85, 1),
+            NamedBranch::Typed(NamedValueType::Number, 85, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(85, 1),
@@ -2173,7 +2173,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 127,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 86, 1),
-            NamedBranch::Typed(CssDataType::Number, 86, 1),
+            NamedBranch::Typed(NamedValueType::Number, 86, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(86, 1),
@@ -2184,7 +2184,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 129,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 87, 1),
-            NamedBranch::Typed(CssDataType::Number, 87, 1),
+            NamedBranch::Typed(NamedValueType::Number, 87, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(87, 1),
@@ -2195,7 +2195,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 131,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 88, 1),
-            NamedBranch::Typed(CssDataType::Number, 88, 1),
+            NamedBranch::Typed(NamedValueType::Number, 88, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(88, 1),
@@ -2206,7 +2206,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 133,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 89, 1),
-            NamedBranch::Typed(CssDataType::Number, 89, 1),
+            NamedBranch::Typed(NamedValueType::Number, 89, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(89, 1),
@@ -2217,7 +2217,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 135,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 90, 1),
-            NamedBranch::Typed(CssDataType::Number, 90, 1),
+            NamedBranch::Typed(NamedValueType::Number, 90, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(90, 1),
@@ -2228,7 +2228,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 137,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 91, 1),
-            NamedBranch::Typed(CssDataType::Number, 91, 1),
+            NamedBranch::Typed(NamedValueType::Number, 91, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(91, 1),
@@ -2239,7 +2239,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 139,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 92, 1),
-            NamedBranch::Typed(CssDataType::Number, 92, 1),
+            NamedBranch::Typed(NamedValueType::Number, 92, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(92, 1),
@@ -2250,7 +2250,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 141,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 93, 1),
-            NamedBranch::Typed(CssDataType::Number, 93, 1),
+            NamedBranch::Typed(NamedValueType::Number, 93, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(93, 1),
@@ -2261,7 +2261,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 142,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 94, 1),
-            NamedBranch::Typed(CssDataType::Number, 94, 1),
+            NamedBranch::Typed(NamedValueType::Number, 94, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(94, 1),
@@ -2272,7 +2272,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 143,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 95, 1),
-            NamedBranch::Typed(CssDataType::Number, 95, 1),
+            NamedBranch::Typed(NamedValueType::Number, 95, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(95, 1),
@@ -2283,7 +2283,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 144,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 96, 1),
-            NamedBranch::Typed(CssDataType::Number, 96, 1),
+            NamedBranch::Typed(NamedValueType::Number, 96, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(96, 1),
@@ -2294,7 +2294,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 145,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 97, 1),
-            NamedBranch::Typed(CssDataType::Number, 97, 1),
+            NamedBranch::Typed(NamedValueType::Number, 97, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(97, 1),
@@ -2305,7 +2305,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 146,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 98, 1),
-            NamedBranch::Typed(CssDataType::Number, 98, 1),
+            NamedBranch::Typed(NamedValueType::Number, 98, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(98, 1),
@@ -2316,7 +2316,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 147,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 99, 1),
-            NamedBranch::Typed(CssDataType::Number, 99, 1),
+            NamedBranch::Typed(NamedValueType::Number, 99, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(99, 1),
@@ -2327,7 +2327,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 148,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 100, 1),
-            NamedBranch::Typed(CssDataType::Number, 100, 1),
+            NamedBranch::Typed(NamedValueType::Number, 100, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(100, 1),
@@ -2338,7 +2338,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 149,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 101, 1),
-            NamedBranch::Typed(CssDataType::Number, 101, 1),
+            NamedBranch::Typed(NamedValueType::Number, 101, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(101, 1),
@@ -2349,7 +2349,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 150,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 102, 1),
-            NamedBranch::Typed(CssDataType::Number, 102, 1),
+            NamedBranch::Typed(NamedValueType::Number, 102, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(102, 1),
@@ -2360,7 +2360,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 151,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 103, 1),
-            NamedBranch::Typed(CssDataType::Number, 103, 1),
+            NamedBranch::Typed(NamedValueType::Number, 103, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(103, 1),
@@ -2371,7 +2371,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 152,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 104, 1),
-            NamedBranch::Typed(CssDataType::Number, 104, 1),
+            NamedBranch::Typed(NamedValueType::Number, 104, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(104, 1),
@@ -2403,7 +2403,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(0, 109, 1),
             NamedBranch::Theme(ThemeNamespace::Container, 109, 1),
-            NamedBranch::Typed(CssDataType::Number, 109, 1),
+            NamedBranch::Typed(NamedValueType::Number, 109, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(109, 1),
@@ -2434,7 +2434,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 158,
         named_branches: &[
             NamedBranch::Keyword(9, 116, 1),
-            NamedBranch::Typed(CssDataType::Number, 116, 1),
+            NamedBranch::Typed(NamedValueType::Number, 116, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(116, 1),
@@ -2445,7 +2445,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 159,
         named_branches: &[
             NamedBranch::Keyword(9, 117, 1),
-            NamedBranch::Typed(CssDataType::Number, 117, 1),
+            NamedBranch::Typed(NamedValueType::Number, 117, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(117, 1),
@@ -2456,7 +2456,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 160,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 126, 1),
-            NamedBranch::Typed(CssDataType::Number, 126, 1),
+            NamedBranch::Typed(NamedValueType::Number, 126, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(126, 1),
@@ -2467,7 +2467,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 161,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 127, 1),
-            NamedBranch::Typed(CssDataType::Number, 127, 1),
+            NamedBranch::Typed(NamedValueType::Number, 127, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(127, 1),
@@ -2478,7 +2478,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 162,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 128, 1),
-            NamedBranch::Typed(CssDataType::Number, 128, 1),
+            NamedBranch::Typed(NamedValueType::Number, 128, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(128, 1),
@@ -2489,7 +2489,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 164,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 129, 3),
-            NamedBranch::Typed(CssDataType::Number, 129, 3),
+            NamedBranch::Typed(NamedValueType::Number, 129, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(129, 3),
@@ -2500,7 +2500,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 166,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 130, 3),
-            NamedBranch::Typed(CssDataType::Number, 130, 3),
+            NamedBranch::Typed(NamedValueType::Number, 130, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(130, 3),
@@ -2710,7 +2710,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 183, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 183, 1),
-            NamedBranch::Typed(CssDataType::Number, 172, 2),
+            NamedBranch::Typed(NamedValueType::Number, 172, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 172, 2),
@@ -2724,7 +2724,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 184, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 184, 1),
-            NamedBranch::Typed(CssDataType::Number, 173, 2),
+            NamedBranch::Typed(NamedValueType::Number, 173, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 173, 2),
@@ -2738,7 +2738,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 185, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 185, 1),
-            NamedBranch::Typed(CssDataType::Number, 174, 2),
+            NamedBranch::Typed(NamedValueType::Number, 174, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 174, 2),
@@ -2752,7 +2752,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 186, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 186, 1),
-            NamedBranch::Typed(CssDataType::Number, 175, 2),
+            NamedBranch::Typed(NamedValueType::Number, 175, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 175, 2),
@@ -2766,7 +2766,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 187, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 187, 1),
-            NamedBranch::Typed(CssDataType::Number, 176, 2),
+            NamedBranch::Typed(NamedValueType::Number, 176, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 176, 2),
@@ -2780,7 +2780,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 188, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 188, 1),
-            NamedBranch::Typed(CssDataType::Number, 177, 2),
+            NamedBranch::Typed(NamedValueType::Number, 177, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 177, 2),
@@ -2794,7 +2794,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 189, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 189, 1),
-            NamedBranch::Typed(CssDataType::Number, 178, 2),
+            NamedBranch::Typed(NamedValueType::Number, 178, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 178, 2),
@@ -2808,7 +2808,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 190, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 190, 1),
-            NamedBranch::Typed(CssDataType::Number, 179, 2),
+            NamedBranch::Typed(NamedValueType::Number, 179, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 179, 2),
@@ -2822,7 +2822,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 191, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 191, 1),
-            NamedBranch::Typed(CssDataType::Number, 180, 2),
+            NamedBranch::Typed(NamedValueType::Number, 180, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 180, 2),
@@ -2836,7 +2836,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 192, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 192, 1),
-            NamedBranch::Typed(CssDataType::Number, 181, 2),
+            NamedBranch::Typed(NamedValueType::Number, 181, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 181, 2),
@@ -2850,7 +2850,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 193, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 193, 1),
-            NamedBranch::Typed(CssDataType::Number, 182, 2),
+            NamedBranch::Typed(NamedValueType::Number, 182, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 182, 2),
@@ -2862,7 +2862,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "divide-x" => FunctionalEntry {
         registration_idx: 196,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 354, 4),
+            NamedBranch::Typed(NamedValueType::Number, 354, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 4),
@@ -2872,7 +2872,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "divide-y" => FunctionalEntry {
         registration_idx: 197,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 133, 5),
+            NamedBranch::Typed(NamedValueType::Number, 133, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(133, 5),
@@ -2899,8 +2899,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 201,
         named_branches: &[
             NamedBranch::Keyword(12, 196, 3),
-            NamedBranch::Typed(CssDataType::Number, 196, 3),
-            NamedBranch::Typed(CssDataType::Ratio, 196, 3),
+            NamedBranch::Typed(NamedValueType::Number, 196, 3),
+            NamedBranch::Typed(NamedValueType::Ratio, 196, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(196, 2),
@@ -2908,8 +2908,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 200,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 196, 3),
-                NamedBranch::Typed(CssDataType::Ratio, 196, 3),
+                NamedBranch::Typed(NamedValueType::Number, 196, 3),
+                NamedBranch::Typed(NamedValueType::Ratio, 196, 3),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Typed(CssDataType::Angle, 196, 2),
@@ -2919,8 +2919,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "bg-conic" => FunctionalEntry {
         registration_idx: 203,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 196, 2),
-            NamedBranch::Typed(CssDataType::Ratio, 196, 2),
+            NamedBranch::Typed(NamedValueType::Number, 196, 2),
+            NamedBranch::Typed(NamedValueType::Ratio, 196, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(196, 2),
@@ -2958,7 +2958,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 199, 2),
             NamedBranch::Theme(ThemeNamespace::Color, 199, 2),
-            NamedBranch::Typed(CssDataType::Percentage, 200, 1),
+            NamedBranch::Typed(NamedValueType::Percentage, 200, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 200, 1),
@@ -2972,7 +2972,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 201, 3),
             NamedBranch::Theme(ThemeNamespace::Color, 201, 3),
-            NamedBranch::Typed(CssDataType::Percentage, 202, 1),
+            NamedBranch::Typed(NamedValueType::Percentage, 202, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 202, 1),
@@ -2986,7 +2986,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 203, 2),
             NamedBranch::Theme(ThemeNamespace::Color, 203, 2),
-            NamedBranch::Typed(CssDataType::Percentage, 204, 1),
+            NamedBranch::Typed(NamedValueType::Percentage, 204, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 204, 1),
@@ -3028,8 +3028,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
-            NamedBranch::Typed(CssDataType::Number, 205, 7),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+            NamedBranch::Typed(NamedValueType::Number, 205, 7),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 7),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 7),
@@ -3041,8 +3041,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
-            NamedBranch::Typed(CssDataType::Number, 205, 7),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+            NamedBranch::Typed(NamedValueType::Number, 205, 7),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 7),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 7),
@@ -3054,8 +3054,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
-            NamedBranch::Typed(CssDataType::Number, 205, 7),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+            NamedBranch::Typed(NamedValueType::Number, 205, 7),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 7),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 7),
@@ -3067,8 +3067,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 7),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
-            NamedBranch::Typed(CssDataType::Number, 205, 7),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+            NamedBranch::Typed(NamedValueType::Number, 205, 7),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 7),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 7),
@@ -3080,8 +3080,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3093,8 +3093,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3106,8 +3106,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3119,8 +3119,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3132,8 +3132,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3145,8 +3145,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3158,8 +3158,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3171,8 +3171,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3182,7 +3182,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mask-linear" => FunctionalEntry {
         registration_idx: 225,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 205, 4),
+            NamedBranch::Typed(NamedValueType::Number, 205, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 4),
@@ -3194,8 +3194,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3207,8 +3207,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3236,8 +3236,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3249,8 +3249,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3260,7 +3260,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mask-conic" => FunctionalEntry {
         registration_idx: 233,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 205, 4),
+            NamedBranch::Typed(NamedValueType::Number, 205, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 4),
@@ -3272,8 +3272,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3285,8 +3285,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 205, 5),
             NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
-            NamedBranch::Typed(CssDataType::Number, 205, 5),
-            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+            NamedBranch::Typed(NamedValueType::Number, 205, 5),
+            NamedBranch::Typed(NamedValueType::Percentage, 205, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(205, 5),
@@ -3309,8 +3309,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 262, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 262, 1),
-            NamedBranch::Typed(CssDataType::Number, 263, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 263, 1),
+            NamedBranch::Typed(NamedValueType::Number, 263, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 263, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 263, 1),
@@ -3334,7 +3334,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 239,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 266, 1),
-            NamedBranch::Typed(CssDataType::Number, 266, 1),
+            NamedBranch::Typed(NamedValueType::Number, 266, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(266, 1),
@@ -3345,7 +3345,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 240,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 267, 1),
-            NamedBranch::Typed(CssDataType::Number, 267, 1),
+            NamedBranch::Typed(NamedValueType::Number, 267, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(267, 1),
@@ -3356,7 +3356,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 241,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 268, 1),
-            NamedBranch::Typed(CssDataType::Number, 268, 1),
+            NamedBranch::Typed(NamedValueType::Number, 268, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(268, 1),
@@ -3367,7 +3367,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 242,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 269, 1),
-            NamedBranch::Typed(CssDataType::Number, 269, 1),
+            NamedBranch::Typed(NamedValueType::Number, 269, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(269, 1),
@@ -3378,7 +3378,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 243,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 270, 1),
-            NamedBranch::Typed(CssDataType::Number, 270, 1),
+            NamedBranch::Typed(NamedValueType::Number, 270, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(270, 1),
@@ -3389,7 +3389,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 244,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 271, 1),
-            NamedBranch::Typed(CssDataType::Number, 271, 1),
+            NamedBranch::Typed(NamedValueType::Number, 271, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(271, 1),
@@ -3400,7 +3400,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 245,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 272, 1),
-            NamedBranch::Typed(CssDataType::Number, 272, 1),
+            NamedBranch::Typed(NamedValueType::Number, 272, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(272, 1),
@@ -3411,7 +3411,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 246,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 273, 1),
-            NamedBranch::Typed(CssDataType::Number, 273, 1),
+            NamedBranch::Typed(NamedValueType::Number, 273, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(273, 1),
@@ -3422,7 +3422,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 247,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 274, 1),
-            NamedBranch::Typed(CssDataType::Number, 274, 1),
+            NamedBranch::Typed(NamedValueType::Number, 274, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(274, 1),
@@ -3433,7 +3433,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 248,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 275, 1),
-            NamedBranch::Typed(CssDataType::Number, 275, 1),
+            NamedBranch::Typed(NamedValueType::Number, 275, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(275, 1),
@@ -3444,7 +3444,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 249,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 276, 1),
-            NamedBranch::Typed(CssDataType::Number, 276, 1),
+            NamedBranch::Typed(NamedValueType::Number, 276, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(276, 1),
@@ -3455,7 +3455,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 251,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 278, 1),
-            NamedBranch::Typed(CssDataType::Number, 278, 1),
+            NamedBranch::Typed(NamedValueType::Number, 278, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(278, 1),
@@ -3528,7 +3528,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 298, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 298, 1),
-            NamedBranch::Typed(CssDataType::Number, 300, 1),
+            NamedBranch::Typed(NamedValueType::Number, 300, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 300, 1),
@@ -3589,7 +3589,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "brightness" => FunctionalEntry {
         registration_idx: 263,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 326, 2),
+            NamedBranch::Typed(NamedValueType::Number, 326, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(326, 2),
@@ -3599,7 +3599,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-brightness" => FunctionalEntry {
         registration_idx: 264,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 336, 3),
+            NamedBranch::Typed(NamedValueType::Number, 336, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(336, 3),
@@ -3609,7 +3609,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "contrast" => FunctionalEntry {
         registration_idx: 265,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 327, 2),
+            NamedBranch::Typed(NamedValueType::Number, 327, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(327, 2),
@@ -3619,7 +3619,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-contrast" => FunctionalEntry {
         registration_idx: 266,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 337, 3),
+            NamedBranch::Typed(NamedValueType::Number, 337, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(337, 3),
@@ -3629,7 +3629,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grayscale" => FunctionalEntry {
         registration_idx: 267,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 329, 2),
+            NamedBranch::Typed(NamedValueType::Number, 329, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(329, 2),
@@ -3639,7 +3639,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-grayscale" => FunctionalEntry {
         registration_idx: 268,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 338, 3),
+            NamedBranch::Typed(NamedValueType::Number, 338, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(338, 3),
@@ -3649,7 +3649,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "hue-rotate" => FunctionalEntry {
         registration_idx: 270,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 330, 2),
+            NamedBranch::Typed(NamedValueType::Number, 330, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(330, 2),
@@ -3659,7 +3659,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-hue-rotate" => FunctionalEntry {
         registration_idx: 272,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 339, 3),
+            NamedBranch::Typed(NamedValueType::Number, 339, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(339, 3),
@@ -3669,7 +3669,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "invert" => FunctionalEntry {
         registration_idx: 273,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 331, 2),
+            NamedBranch::Typed(NamedValueType::Number, 331, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(331, 2),
@@ -3679,7 +3679,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-invert" => FunctionalEntry {
         registration_idx: 274,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 340, 3),
+            NamedBranch::Typed(NamedValueType::Number, 340, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(340, 3),
@@ -3689,7 +3689,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "saturate" => FunctionalEntry {
         registration_idx: 275,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 332, 2),
+            NamedBranch::Typed(NamedValueType::Number, 332, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(332, 2),
@@ -3699,7 +3699,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-saturate" => FunctionalEntry {
         registration_idx: 276,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 342, 3),
+            NamedBranch::Typed(NamedValueType::Number, 342, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(342, 3),
@@ -3709,7 +3709,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "sepia" => FunctionalEntry {
         registration_idx: 277,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 333, 2),
+            NamedBranch::Typed(NamedValueType::Number, 333, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(333, 2),
@@ -3719,7 +3719,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-sepia" => FunctionalEntry {
         registration_idx: 278,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 343, 3),
+            NamedBranch::Typed(NamedValueType::Number, 343, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(343, 3),
@@ -3742,7 +3742,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "backdrop-opacity" => FunctionalEntry {
         registration_idx: 280,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 341, 3),
+            NamedBranch::Typed(NamedValueType::Number, 341, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(341, 3),
@@ -3763,7 +3763,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "delay" => FunctionalEntry {
         registration_idx: 282,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 347, 1),
+            NamedBranch::Typed(NamedValueType::Number, 347, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(347, 1),
@@ -3773,7 +3773,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "duration" => FunctionalEntry {
         registration_idx: 283,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 354, 2),
+            NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -3822,7 +3822,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             NamedBranch::Keyword(3, 354, 2),
             NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
             NamedBranch::Theme(ThemeNamespace::Leading, 354, 2),
-            NamedBranch::Typed(CssDataType::Number, 354, 2),
+            NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(354, 2),
@@ -3844,7 +3844,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 324, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 324, 1),
-            NamedBranch::Typed(CssDataType::Number, 354, 2),
+            NamedBranch::Typed(NamedValueType::Number, 354, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 354, 2),
@@ -3857,7 +3857,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "outline-offset" => FunctionalEntry {
         registration_idx: 293,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 323, 1),
+            NamedBranch::Typed(NamedValueType::Number, 323, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(323, 1),
@@ -3867,7 +3867,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "opacity" => FunctionalEntry {
         registration_idx: 294,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 307, 1),
+            NamedBranch::Typed(NamedValueType::Number, 307, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(307, 1),
@@ -3878,7 +3878,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 296,
         named_branches: &[
             NamedBranch::Keyword(0, 301, 1),
-            NamedBranch::Typed(CssDataType::Number, 301, 1),
+            NamedBranch::Typed(NamedValueType::Number, 301, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(301, 1),
@@ -3886,7 +3886,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: Some(Distinct {
             registration_idx: 295,
             named_branches: &[
-                NamedBranch::Typed(CssDataType::Number, 301, 1),
+                NamedBranch::Typed(NamedValueType::Number, 301, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(301, 1),
@@ -3956,7 +3956,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 314, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 314, 1),
-            NamedBranch::Typed(CssDataType::Number, 313, 2),
+            NamedBranch::Typed(NamedValueType::Number, 313, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 313, 2),
@@ -3969,7 +3969,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 318, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 318, 1),
-            NamedBranch::Typed(CssDataType::Number, 317, 2),
+            NamedBranch::Typed(NamedValueType::Number, 317, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 317, 2),
@@ -3982,7 +3982,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, 320, 1),
             NamedBranch::Theme(ThemeNamespace::Color, 320, 1),
-            NamedBranch::Typed(CssDataType::Number, 319, 2),
+            NamedBranch::Typed(NamedValueType::Number, 319, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, 319, 2),
@@ -4001,7 +4001,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "flex-shrink" => FunctionalEntry {
         registration_idx: 305,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 49, 1),
+            NamedBranch::Typed(NamedValueType::Number, 49, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(49, 1),
@@ -4011,7 +4011,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "flex-grow" => FunctionalEntry {
         registration_idx: 306,
         named_branches: &[
-            NamedBranch::Typed(CssDataType::Number, 50, 1),
+            NamedBranch::Typed(NamedValueType::Number, 50, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(50, 1),
@@ -4022,8 +4022,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 308,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
-            NamedBranch::Typed(CssDataType::Number, 7, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 7, 1),
+            NamedBranch::Typed(NamedValueType::Number, 7, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 7, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(7, 1),
@@ -4034,8 +4034,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         registration_idx: 310,
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
-            NamedBranch::Typed(CssDataType::Number, 8, 1),
-            NamedBranch::Typed(CssDataType::Ratio, 8, 1),
+            NamedBranch::Typed(NamedValueType::Number, 8, 1),
+            NamedBranch::Typed(NamedValueType::Ratio, 8, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(8, 1),

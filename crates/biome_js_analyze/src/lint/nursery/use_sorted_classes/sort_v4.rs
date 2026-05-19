@@ -9,8 +9,13 @@ use biome_tailwind_syntax::{
 use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
 };
-use super::tailwind_preset_v4_types::{ArbitraryBranch, CssDataType, NamedBranch, Negative};
+use super::tailwind_preset_v4_types::{
+    ArbitraryBranch, NamedBranch, NamedValueType, Negative,
+};
 use super::value_match::value_matches_type;
+
+#[cfg(test)]
+use super::tailwind_preset_v4_types::CssDataType;
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
@@ -233,7 +238,7 @@ enum NamedValueKind<'a> {
 fn entry_has_ratio_branch(branches: &[NamedBranch]) -> bool {
     branches
         .iter()
-        .any(|b| matches!(b, NamedBranch::Typed(CssDataType::Ratio, _, _)))
+        .any(|b| matches!(b, NamedBranch::Typed(NamedValueType::Ratio, _, _)))
 }
 
 /// `n/m` Tailwind fraction shorthand: the value is a bare number, the
@@ -288,9 +293,9 @@ fn resolve_named_branch(
             NamedBranch::Typed(value_type, p, c) => {
                 let matched = matches!(
                     (value_type, kind),
-                    (CssDataType::Number, NamedValueKind::Number(_))
-                        | (CssDataType::Percentage, NamedValueKind::Percentage)
-                        | (CssDataType::Ratio, NamedValueKind::Ratio)
+                    (NamedValueType::Number, NamedValueKind::Number(_))
+                        | (NamedValueType::Percentage, NamedValueKind::Percentage)
+                        | (NamedValueType::Ratio, NamedValueKind::Ratio)
                 );
                 if !matched {
                     continue;
@@ -404,8 +409,8 @@ mod tests {
         // Two NamedBranch::Typed(Number) branches with different property_idx;
         // first one to match wins.
         let branches = &[
-            NamedBranch::Typed(CssDataType::Number, 10, 1),
-            NamedBranch::Typed(CssDataType::Number, 20, 1),
+            NamedBranch::Typed(NamedValueType::Number, 10, 1),
+            NamedBranch::Typed(NamedValueType::Number, 20, 1),
         ];
         assert_eq!(
             resolve_named_branch(branches, &NamedValueKind::Number("5"), 99),
@@ -459,7 +464,7 @@ mod tests {
 
     #[test]
     fn resolve_named_branch_passes_registration_idx_through() {
-        let branches = &[NamedBranch::Typed(CssDataType::Number, 1, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Number, 1, 1)];
         assert_eq!(
             resolve_named_branch(branches, &NamedValueKind::Number("0"), 42),
             Some(known(1, 1, 42))
@@ -470,7 +475,7 @@ mod tests {
     fn resolve_named_branch_returns_none_when_kind_does_not_match_value_type() {
         // A NamedValue text like "abc" never satisfies NamedBranch::Typed(Number)
         // because dispatch is by parser node kind, not text scanning.
-        let branches = &[NamedBranch::Typed(CssDataType::Number, 1, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Number, 1, 1)];
         assert_eq!(
             resolve_named_branch(branches, &NamedValueKind::Named("abc"), 0),
             None
@@ -479,7 +484,7 @@ mod tests {
 
     #[test]
     fn resolve_named_branch_ratio_matches_ratio_typed_branch() {
-        let branches = &[NamedBranch::Typed(CssDataType::Ratio, 7, 1)];
+        let branches = &[NamedBranch::Typed(NamedValueType::Ratio, 7, 1)];
         assert_eq!(
             resolve_named_branch(branches, &NamedValueKind::Ratio, 11),
             Some(known(7, 1, 11))
@@ -489,8 +494,8 @@ mod tests {
     #[test]
     fn resolve_named_branch_percentage_only_matches_percentage_typed_branch() {
         let branches = &[
-            NamedBranch::Typed(CssDataType::Number, 1, 1),
-            NamedBranch::Typed(CssDataType::Percentage, 2, 1),
+            NamedBranch::Typed(NamedValueType::Number, 1, 1),
+            NamedBranch::Typed(NamedValueType::Percentage, 2, 1),
         ];
         assert_eq!(
             resolve_named_branch(branches, &NamedValueKind::Percentage, 0),

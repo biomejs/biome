@@ -1,10 +1,10 @@
 // Render the auto-generated Rust file `tailwind_preset_v4.rs`.
 //
 // Codegen scope is intentionally narrow — only the long phf maps,
-// sets, and arrays are emitted. Structural types (`CssDataType`,
-// `ThemeNamespace`, `NamedBranch`, `ArbitraryBranch`, `Negative`,
-// `UtilityEntry`, `FunctionalEntry`) live in the hand-written sibling
-// `tailwind_preset_v4_types.rs` and are imported here.
+// sets, and arrays are emitted. Structural types (`NamedValueType`,
+// `CssDataType`, `ThemeNamespace`, `NamedBranch`, `ArbitraryBranch`,
+// `Negative`, `UtilityEntry`, `FunctionalEntry`) live in the hand-written
+// sibling `tailwind_preset_v4_types.rs` and are imported here.
 
 import type {
 	ArbitraryBranch,
@@ -31,8 +31,8 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, Negative::*, ThemeNamespace,
-    UtilityEntry,
+    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
+    ThemeNamespace, UtilityEntry,
 };
 `;
 
@@ -242,7 +242,7 @@ function formatNamedBranch(
 			return `NamedBranch::Keyword(${pool}, ${idx}, ${b.property_count})`;
 		}
 		case "Typed":
-			return `NamedBranch::Typed(CssDataType::${b.value_type}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${idx}, ${b.property_count})`;
 	}
 }
 

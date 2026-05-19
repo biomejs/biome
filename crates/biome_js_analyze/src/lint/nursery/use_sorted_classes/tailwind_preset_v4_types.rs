@@ -11,10 +11,19 @@ use super::tailwind_preset_v4::{
     THEME_KEYS_SPACING, THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
 };
 
-// CSS data types (from infer-data-type.ts).
-// Bare value matching is dispatched by the consumer on parser node kind
-// (TwNumberValue / TwPercentageValue / TwModifier+number); bracketed
-// arbitrary values use AST predicates — see sort_v4::resolve_arbitrary_branch.
+// Named-path typed value categories. Matching is dispatched by the consumer
+// on parser node kind (TwNumberValue / TwPercentageValue / TwModifier+number),
+// not by CSS data-type predicates.
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(u8)]
+pub enum NamedValueType {
+    Number,
+    Percentage,
+    Ratio,
+}
+
+// CSS data types (from infer-data-type.ts). Bracketed arbitrary values use
+// AST predicates — see sort_v4::resolve_arbitrary_branch.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum CssDataType {
@@ -108,7 +117,7 @@ pub struct UtilityEntry {
 pub enum NamedBranch {
     Theme(ThemeNamespace, u16, u8),
     Keyword(u16, u16, u8),
-    Typed(CssDataType, u16, u8),
+    Typed(NamedValueType, u16, u8),
 }
 
 // Arbitrary-path dispatch branches inside a functional utility's compileFn.

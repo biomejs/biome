@@ -42,7 +42,7 @@ import {
 	THEME_NAMESPACES,
 	type ThemeNamespaceVariant,
 } from "./theme-namespaces.js";
-import type { CssDataType } from "./value-types.js";
+import type { CssDataType, NamedValueType } from "./value-types.js";
 
 export type StaticUtility = {
 	name: string;
@@ -67,7 +67,7 @@ export type NamedBranch =
 	  }
 	| {
 			kind: "Typed";
-			value_type: CssDataType;
+			value_type: NamedValueType;
 			sort_property: string;
 			property_count: number;
 	  };
@@ -242,7 +242,7 @@ function extractStatic(
 
 type ProbeSlot =
 	| { basename: string; kind: "ns"; variant: ThemeNamespaceVariant }
-	| { basename: string; kind: "named-typed"; type: CssDataType }
+	| { basename: string; kind: "named-typed"; type: NamedValueType }
 	| { basename: string; kind: "nonsense" }
 	| { basename: string; kind: "arbitrary-typed"; type: CssDataType };
 
