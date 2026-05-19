@@ -44,6 +44,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -72,6 +73,7 @@ pub struct Settings {
     /// Assist settings
     pub assist: AssistSettings,
     /// Plugin settings.
+    #[cfg(feature = "plugins")]
     pub plugins: Plugins,
     /// overrides
     pub override_settings: OverrideSettings,
@@ -208,8 +210,11 @@ impl Settings {
         }
 
         // plugin settings
-        if let Some(plugins) = configuration.plugins {
-            self.plugins = plugins;
+        #[cfg(feature = "plugins")]
+        {
+            if let Some(plugins) = configuration.plugins {
+                self.plugins = plugins;
+            }
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -312,7 +317,8 @@ impl Settings {
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
-    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
+    #[cfg(feature = "plugins")]
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, biome_plugin_loader::Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
@@ -325,7 +331,8 @@ impl Settings {
     }
 
     /// Return all plugins configured in setting
-    pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
+    #[cfg(feature = "plugins")]
+    pub fn as_all_plugins(&self) -> Cow<'_, biome_plugin_loader::Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         let all_override_plugins = self
@@ -1643,6 +1650,7 @@ pub struct OverrideSettingPattern {
     /// Files specific settings
     pub files: OverrideFilesSettings,
     /// Additional plugins to be applied
+    #[cfg(feature = "plugins")]
     pub plugins: Plugins,
 }
 
@@ -1991,7 +1999,6 @@ pub fn to_override_settings(
                 actions: assist.actions,
             })
             .unwrap_or_default();
-        let plugins = pattern.plugins.unwrap_or_default();
 
         let files = pattern
             .files
@@ -2032,7 +2039,8 @@ pub fn to_override_settings(
             assist,
             languages,
             files,
-            plugins,
+            #[cfg(feature = "plugins")]
+            plugins: pattern.plugins.unwrap_or_default(),
         };
 
         override_settings.patterns.push(pattern_setting);

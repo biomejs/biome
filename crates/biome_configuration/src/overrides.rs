@@ -13,6 +13,7 @@ use biome_formatter::{
     LineEnding, LineWidth, TrailingNewline,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -73,7 +74,8 @@ pub struct OverridePattern {
     pub files: Option<OverrideFilesConfiguration>,
 
     /// Specific configuration for additional plugins
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "plugins")]
+    #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<Plugins>,
 }
 
