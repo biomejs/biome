@@ -15970,6 +15970,12 @@
 		},
 		"UseSortedInterfaceMembersOptions": {
 			"type": "object",
+			"properties": {
+				"partitionByNewLine": {
+					"description": "When enabled, members separated by a blank line are kept in their own\nsection and sorted only within that section. This preserves logical\ngroupings the author intentionally introduced with empty lines.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {

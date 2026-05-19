@@ -5581,7 +5581,14 @@ export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
 export type UseSortedEnumMembersOptions = {};
-export type UseSortedInterfaceMembersOptions = {};
+export interface UseSortedInterfaceMembersOptions {
+	/**
+	* When enabled, members separated by a blank line are kept in their own
+section and sorted only within that section. This preserves logical
+groupings the author intentionally introduced with empty lines. 
+	 */
+	partitionByNewLine?: boolean;
+}
 export interface UseSortedKeysOptions {
 	/**
 	* When enabled, groups object keys by their value's nesting depth before sorting.
