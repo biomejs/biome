@@ -7,10 +7,9 @@
 //! global type first.
 
 use biome_rowan::{AstNode, AstNodeList};
-use biome_string_case::StrLikeExtension;
 use biome_tailwind_syntax::{
     AnyCssDimension, AnyCssFunction, AnyCssGenericComponentValue, AnyCssValue,
-    CssGenericComponentValueList,
+    CssFunction, CssGenericComponentValueList,
 };
 
 use super::tailwind_preset_v4_types::ValueType;
@@ -271,27 +270,22 @@ fn single_value(list: &CssGenericComponentValueList) -> Option<AnyCssValue> {
     }
 }
 
-fn value_text(value: &AnyCssValue) -> String {
-    value.syntax().text_trimmed().to_string()
-}
-
-fn ident_text(value: &AnyCssValue) -> Option<String> {
+fn identifier_matches(value: &AnyCssValue, mut predicate: impl FnMut(&str) -> bool) -> bool {
     match value {
-        AnyCssValue::CssIdentifier(ident) => {
-            Some(ident.ident_token().ok()?.text_trimmed().to_string())
-        }
-        AnyCssValue::CssDashedIdentifier(ident) => {
-            Some(ident.ident_token().ok()?.text_trimmed().to_string())
-        }
-        _ => None,
+        AnyCssValue::CssIdentifier(ident) => ident
+            .ident_token()
+            .ok()
+            .is_some_and(|token| predicate(token.text_trimmed())),
+        AnyCssValue::CssDashedIdentifier(ident) => ident
+            .ident_token()
+            .ok()
+            .is_some_and(|token| predicate(token.text_trimmed())),
+        _ => false,
     }
 }
 
 fn is_identifier_one_of(value: &AnyCssValue, accepted: &[&str]) -> bool {
-    let Some(text) = ident_text(value) else {
-        return false;
-    };
-    accepted.iter().any(|accepted| text == *accepted)
+    identifier_matches(value, |text| accepted.contains(&text))
 }
 
 fn starts_with_var_function(list: &CssGenericComponentValueList) -> bool {
@@ -301,40 +295,46 @@ fn starts_with_var_function(list: &CssGenericComponentValueList) -> bool {
     })
 }
 
-fn function_name(value: &AnyCssValue) -> Option<String> {
-    let function = value.as_any_css_function()?;
+fn css_function_name_matches(
+    function: &CssFunction,
+    mut predicate: impl FnMut(&str) -> bool,
+) -> bool {
+    function
+        .name()
+        .ok()
+        .and_then(|name| name.ident_token().ok())
+        .is_some_and(|token| predicate(token.text_trimmed()))
+}
+
+fn any_css_function_name_matches(
+    function: &AnyCssFunction,
+    mut predicate: impl FnMut(&str) -> bool,
+) -> bool {
     match function {
-        AnyCssFunction::CssFunction(function) => Some(
-            function
-                .name()
-                .ok()?
-                .ident_token()
-                .ok()?
-                .text_trimmed()
-                .to_string(),
-        ),
-        AnyCssFunction::CssUrlFunction(_) => Some("url".to_string()),
+        AnyCssFunction::CssFunction(function) => css_function_name_matches(function, predicate),
+        AnyCssFunction::CssUrlFunction(_) => predicate("url"),
     }
 }
 
-fn function_name_is(value: &AnyCssValue, name: &str) -> bool {
-    function_name(value).is_some_and(|function_name| function_name == name)
-}
-
-fn function_name_in(value: &AnyCssValue, names: &[&str]) -> bool {
-    let Some(function_name) = function_name(value) else {
+fn function_name_matches(value: &AnyCssValue, predicate: impl FnMut(&str) -> bool) -> bool {
+    let Some(function) = value.as_any_css_function() else {
         return false;
     };
-    names.iter().any(|name| function_name == *name)
+    any_css_function_name_matches(function, predicate)
+}
+
+fn function_name_is(value: &AnyCssValue, name: &str) -> bool {
+    function_name_matches(value, |function_name| {
+        function_name.eq_ignore_ascii_case(name)
+    })
 }
 
 fn function_name_in_case_insensitive(value: &AnyCssValue, names: &[&str]) -> bool {
-    let Some(function_name) = function_name(value) else {
-        return false;
-    };
-    names
-        .iter()
-        .any(|name| function_name.eq_ignore_ascii_case(name))
+    function_name_matches(value, |function_name| {
+        names
+            .iter()
+            .any(|name| function_name.eq_ignore_ascii_case(name))
+    })
 }
 
 fn is_var_function(value: &AnyCssValue) -> bool {
@@ -342,11 +342,25 @@ fn is_var_function(value: &AnyCssValue) -> bool {
 }
 
 fn has_math_fn(value: &AnyCssValue) -> bool {
-    let text = value_text(value);
-    text.contains('(')
-        && MATH_FUNCTIONS
-            .iter()
-            .any(|name| text.contains(&format!("{name}(")))
+    if let AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function)) = value
+        && css_function_name_matches(function, |function_name| {
+            MATH_FUNCTIONS
+                .iter()
+                .any(|name| function_name.eq_ignore_ascii_case(name))
+        })
+    {
+        return true;
+    }
+
+    value.syntax().descendants().any(|node| {
+        CssFunction::cast_ref(&node).is_some_and(|function| {
+            css_function_name_matches(&function, |function_name| {
+                MATH_FUNCTIONS
+                    .iter()
+                    .any(|name| function_name.eq_ignore_ascii_case(name))
+            })
+        })
+    })
 }
 
 fn unary_argument(value: &AnyCssValue) -> Option<AnyCssValue> {
@@ -362,25 +376,21 @@ fn unary_argument(value: &AnyCssValue) -> Option<AnyCssValue> {
     unary.argument().ok()
 }
 
-fn dimension_unit(value: &AnyCssValue) -> Option<String> {
-    let AnyCssValue::AnyCssDimension(dimension) = value else {
-        return None;
-    };
-    match dimension {
-        AnyCssDimension::CssRegularDimension(dimension) => {
-            Some(dimension.unit_token().ok()?.text_trimmed().to_string())
-        }
-        AnyCssDimension::CssUnknownDimension(dimension) => {
-            Some(dimension.unit_token().ok()?.text_trimmed().to_string())
-        }
-    }
-}
-
 fn is_dimension_with_unit(value: &AnyCssValue, units: &[&str]) -> bool {
-    let Some(unit) = dimension_unit(value) else {
+    let AnyCssValue::AnyCssDimension(dimension) = value else {
         return false;
     };
-    units.iter().any(|accepted| unit == *accepted)
+
+    let unit_token = match dimension {
+        AnyCssDimension::CssRegularDimension(dimension) => dimension.unit_token(),
+        AnyCssDimension::CssUnknownDimension(dimension) => dimension.unit_token(),
+    };
+    let Ok(unit_token) = unit_token else {
+        return false;
+    };
+    let unit = unit_token.text_trimmed();
+
+    units.contains(&unit)
 }
 
 fn is_signed_dimension_with_unit(value: &AnyCssValue, units: &[&str]) -> bool {
@@ -422,11 +432,27 @@ fn is_positive_integer(value: &AnyCssValue) -> bool {
         return false;
     };
     let text = token.text_trimmed();
-    let Ok(parsed) = text.parse::<u64>() else {
+    if !is_canonical_positive_integer_text(text) {
+        return false;
+    }
+
+    text.parse::<u64>().is_ok()
+}
+
+fn is_canonical_positive_integer_text(text: &str) -> bool {
+    if text == "0" {
+        return true;
+    }
+
+    let mut bytes = text.bytes();
+    let Some(first) = bytes.next() else {
         return false;
     };
+    if !matches!(first, b'1'..=b'9') {
+        return false;
+    }
 
-    parsed.to_string() == text
+    bytes.all(|byte| byte.is_ascii_digit())
 }
 
 fn is_ratio(value: &AnyCssValue) -> bool {
@@ -440,12 +466,11 @@ fn is_color(value: &AnyCssValue) -> bool {
     if function_name_in_case_insensitive(value, COLOR_FUNCTIONS) {
         return true;
     }
-    let Some(text) = ident_text(value) else {
-        return false;
-    };
-    let text = text.to_ascii_lowercase_cow();
-
-    NAMED_COLORS.contains(&text.as_ref())
+    identifier_matches(value, |text| {
+        NAMED_COLORS
+            .iter()
+            .any(|color| text.eq_ignore_ascii_case(color))
+    })
 }
 
 fn is_url(value: &AnyCssValue) -> bool {
@@ -453,7 +478,7 @@ fn is_url(value: &AnyCssValue) -> bool {
 }
 
 fn is_gradient_function(value: &AnyCssValue) -> bool {
-    function_name_in(
+    function_name_in_case_insensitive(
         value,
         &[
             "linear-gradient",
@@ -467,7 +492,7 @@ fn is_gradient_function(value: &AnyCssValue) -> bool {
 }
 
 fn is_image_function(value: &AnyCssValue) -> bool {
-    function_name_in(value, &["element", "image", "cross-fade", "image-set"])
+    function_name_in_case_insensitive(value, &["element", "image", "cross-fade", "image-set"])
 }
 
 fn split_by_comma(list: &CssGenericComponentValueList) -> Option<Vec<Vec<AnyCssValue>>> {
@@ -609,9 +634,14 @@ mod tests {
     use biome_tailwind_parser::parse_tailwind;
     use biome_tailwind_syntax::{AnyTwCandidate, AnyTwValue, CssGenericComponentValueList};
 
-    fn parse_value(text: &str) -> CssGenericComponentValueList {
-        let source = format!("x-[{text}]");
-        let parsed = parse_tailwind(&source);
+    macro_rules! parse_value {
+        ($text:literal) => {
+            parse_arbitrary_value(concat!("x-[", $text, "]"))
+        };
+    }
+
+    fn parse_arbitrary_value(source: &str) -> CssGenericComponentValueList {
+        let parsed = parse_tailwind(source);
         let full = parsed.tree().candidates().iter().next().unwrap();
         let full = full.as_tw_full_candidate().unwrap();
         let candidate = full.candidate().unwrap();
@@ -629,38 +659,42 @@ mod tests {
 
     #[test]
     fn length_matches_dimensions_and_math_functions() {
-        assert!(value_matches_type(&parse_value("10px"), ValueType::Length));
+        assert!(value_matches_type(&parse_value!("10px"), ValueType::Length));
         assert!(value_matches_type(
-            &parse_value("calc(100%-1rem)"),
+            &parse_value!("calc(100%-1rem)"),
             ValueType::Length
         ));
-        assert!(!value_matches_type(&parse_value("45deg"), ValueType::Length));
+        assert!(value_matches_type(
+            &parse_value!("CALC(100%-1rem)"),
+            ValueType::Length
+        ));
+        assert!(!value_matches_type(&parse_value!("45deg"), ValueType::Length));
     }
 
     #[test]
     fn angle_matches_only_angle_dimensions() {
-        assert!(value_matches_type(&parse_value("45deg"), ValueType::Angle));
-        assert!(value_matches_type(&parse_value("0.5turn"), ValueType::Angle));
+        assert!(value_matches_type(&parse_value!("45deg"), ValueType::Angle));
+        assert!(value_matches_type(&parse_value!("0.5turn"), ValueType::Angle));
         assert!(!value_matches_type(
-            &parse_value("calc(45deg+5deg)"),
+            &parse_value!("calc(45deg+5deg)"),
             ValueType::Angle
         ));
     }
 
     #[test]
     fn percentage_number_integer_and_ratio_match_expected_shapes() {
-        assert!(value_matches_type(&parse_value("50%"), ValueType::Percentage));
+        assert!(value_matches_type(&parse_value!("50%"), ValueType::Percentage));
         assert!(value_matches_type(
-            &parse_value("calc(50%+1px)"),
+            &parse_value!("calc(50%+1px)"),
             ValueType::Percentage
         ));
-        assert!(value_matches_type(&parse_value("-3.5"), ValueType::Number));
-        assert!(value_matches_type(&parse_value("3"), ValueType::Integer));
-        assert!(!value_matches_type(&parse_value("3.5"), ValueType::Integer));
-        assert!(!value_matches_type(&parse_value("-3"), ValueType::Integer));
-        assert!(value_matches_type(&parse_value("16/9"), ValueType::Ratio));
+        assert!(value_matches_type(&parse_value!("-3.5"), ValueType::Number));
+        assert!(value_matches_type(&parse_value!("3"), ValueType::Integer));
+        assert!(!value_matches_type(&parse_value!("3.5"), ValueType::Integer));
+        assert!(!value_matches_type(&parse_value!("-3"), ValueType::Integer));
+        assert!(value_matches_type(&parse_value!("16/9"), ValueType::Ratio));
         assert!(value_matches_type(
-            &parse_value("calc(16/9)"),
+            &parse_value!("calc(16/9)"),
             ValueType::Ratio
         ));
     }
@@ -671,46 +705,54 @@ mod tests {
 
     #[test]
     fn color_matches_hash_functions_and_named_colors() {
-        assert!(value_matches_type(&parse_value("#abc"), ValueType::Color));
+        assert!(value_matches_type(&parse_value!("#abc"), ValueType::Color));
         assert!(value_matches_type(
-            &parse_value("rgb(0,0,0)"),
+            &parse_value!("rgb(0,0,0)"),
             ValueType::Color
         ));
         assert!(value_matches_type(
-            &parse_value("color-mix(in_oklab,red,blue)"),
+            &parse_value!("color-mix(in_oklab,red,blue)"),
             ValueType::Color
         ));
-        assert!(value_matches_type(&parse_value("rebeccapurple"), ValueType::Color));
+        assert!(value_matches_type(&parse_value!("rebeccapurple"), ValueType::Color));
         assert!(value_matches_type(
-            &parse_value("currentColor"),
+            &parse_value!("currentColor"),
             ValueType::Color
         ));
-        assert!(!value_matches_type(&parse_value("10px"), ValueType::Color));
+        assert!(!value_matches_type(&parse_value!("10px"), ValueType::Color));
     }
 
     #[test]
     fn url_and_image_match_expected_functions() {
         assert!(value_matches_type(
-            &parse_value("url('/a.png')"),
+            &parse_value!("url('/a.png')"),
             ValueType::Url
         ));
         assert!(value_matches_type(
-            &parse_value("url('/a.png')"),
+            &parse_value!("URL('/a.png')"),
+            ValueType::Url
+        ));
+        assert!(value_matches_type(
+            &parse_value!("url('/a.png')"),
             ValueType::Image
         ));
         assert!(value_matches_type(
-            &parse_value("linear-gradient(red,blue)"),
+            &parse_value!("linear-gradient(red,blue)"),
             ValueType::Image
         ));
         assert!(value_matches_type(
-            &parse_value("image-set(url(a.png)_1x,url(b.png)_2x)"),
+            &parse_value!("LINEAR-GRADIENT(red,blue)"),
+            ValueType::Image
+        ));
+        assert!(value_matches_type(
+            &parse_value!("image-set(url(a.png)_1x,url(b.png)_2x)"),
             ValueType::Image
         ));
         assert!(!value_matches_type(
-            &parse_value("linear-gradient(red,blue)"),
+            &parse_value!("linear-gradient(red,blue)"),
             ValueType::Url
         ));
-        assert!(!value_matches_type(&parse_value("red"), ValueType::Image));
+        assert!(!value_matches_type(&parse_value!("red"), ValueType::Image));
     }
 
     // endregion: color / image
@@ -719,27 +761,27 @@ mod tests {
 
     #[test]
     fn line_width_matches_single_or_multi_width_values() {
-        assert!(value_matches_type(&parse_value("thin"), ValueType::LineWidth));
-        assert!(value_matches_type(&parse_value("2px"), ValueType::LineWidth));
+        assert!(value_matches_type(&parse_value!("thin"), ValueType::LineWidth));
+        assert!(value_matches_type(&parse_value!("2px"), ValueType::LineWidth));
         assert!(value_matches_type(
-            &parse_value("1px 2px"),
+            &parse_value!("1px 2px"),
             ValueType::LineWidth
         ));
-        assert!(!value_matches_type(&parse_value("solid"), ValueType::LineWidth));
+        assert!(!value_matches_type(&parse_value!("solid"), ValueType::LineWidth));
     }
 
     #[test]
     fn font_size_keywords_match_their_specific_value_types() {
         assert!(value_matches_type(
-            &parse_value("xx-small"),
+            &parse_value!("xx-small"),
             ValueType::AbsoluteSize
         ));
         assert!(value_matches_type(
-            &parse_value("larger"),
+            &parse_value!("larger"),
             ValueType::RelativeSize
         ));
         assert!(!value_matches_type(
-            &parse_value("small"),
+            &parse_value!("small"),
             ValueType::RelativeSize
         ));
     }
@@ -750,57 +792,57 @@ mod tests {
 
     #[test]
     fn position_matches_keywords_lengths_percentages_and_vars() {
-        assert!(value_matches_type(&parse_value("top"), ValueType::Position));
+        assert!(value_matches_type(&parse_value!("top"), ValueType::Position));
         assert!(value_matches_type(
-            &parse_value("top left"),
+            &parse_value!("top left"),
             ValueType::Position
         ));
         assert!(value_matches_type(
-            &parse_value("50% 10px"),
+            &parse_value!("50% 10px"),
             ValueType::Position
         ));
         assert!(value_matches_type(
-            &parse_value("top var(--pos)"),
+            &parse_value!("top var(--pos)"),
             ValueType::Position
         ));
         assert!(!value_matches_type(
-            &parse_value("var(--pos)"),
+            &parse_value!("var(--pos)"),
             ValueType::Position
         ));
         assert!(!value_matches_type(
-            &parse_value("var(--pos) top"),
+            &parse_value!("var(--pos) top"),
             ValueType::Position
         ));
-        assert!(!value_matches_type(&parse_value("foo"), ValueType::Position));
+        assert!(!value_matches_type(&parse_value!("foo"), ValueType::Position));
     }
 
     #[test]
     fn background_size_matches_css_background_size_shapes() {
-        assert!(value_matches_type(&parse_value("cover"), ValueType::BgSize));
-        assert!(value_matches_type(&parse_value("auto"), ValueType::BgSize));
+        assert!(value_matches_type(&parse_value!("cover"), ValueType::BgSize));
+        assert!(value_matches_type(&parse_value!("auto"), ValueType::BgSize));
         assert!(value_matches_type(
-            &parse_value("200px 100%"),
+            &parse_value!("200px 100%"),
             ValueType::BgSize
         ));
         assert!(value_matches_type(
-            &parse_value("200px_100%"),
+            &parse_value!("200px_100%"),
             ValueType::BgSize
         ));
         assert!(value_matches_type(
-            &parse_value("cover,contain"),
+            &parse_value!("cover,contain"),
             ValueType::BgSize
         ));
         assert!(!value_matches_type(
-            &parse_value("200px 100% 50%"),
+            &parse_value!("200px 100% 50%"),
             ValueType::BgSize
         ));
     }
 
     #[test]
     fn vector_matches_exactly_three_numbers() {
-        assert!(value_matches_type(&parse_value("1 2 3"), ValueType::Vector));
-        assert!(!value_matches_type(&parse_value("1 2"), ValueType::Vector));
-        assert!(!value_matches_type(&parse_value("1px 2 3"), ValueType::Vector));
+        assert!(value_matches_type(&parse_value!("1 2 3"), ValueType::Vector));
+        assert!(!value_matches_type(&parse_value!("1 2"), ValueType::Vector));
+        assert!(!value_matches_type(&parse_value!("1px 2 3"), ValueType::Vector));
     }
 
     // endregion: multi-value
