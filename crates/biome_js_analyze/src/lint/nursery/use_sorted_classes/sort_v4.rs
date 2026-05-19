@@ -141,25 +141,28 @@ impl SortKey {
                     return Self::Unknown;
                 };
 
+                if let AnyTwValue::TwArbitraryValue(arb) = &value {
+                    // TODO: functional modifiers (`bg-[#fff]/50`, `text-lg/8`).
+                    if f.modifier().is_some() {
+                        return Self::Unknown;
+                    }
+
+                    let kind = ValueKind::Arbitrary(arb.value());
+                    return resolve_branch(branches, &kind, registration_idx)
+                        .unwrap_or(Self::Unknown);
+                }
+
                 let has_fraction_modifier = match f.modifier() {
                     None => false,
                     Some(m) if is_fraction_modifier(&value, &m, branches) => true,
                     Some(_) => return Self::Unknown,
                 };
 
-                if let (AnyTwValue::TwArbitraryValue(arb), false) =
-                    (&value, has_fraction_modifier)
-                {
-                    let kind = ValueKind::Arbitrary(arb.value());
-                    return resolve_branch(branches, &kind, registration_idx)
-                        .unwrap_or(Self::Unknown);
-                }
-
                 let value_token = match &value {
                     AnyTwValue::TwNamedValue(n) => n.value_token(),
                     AnyTwValue::TwNumberValue(n) => n.value_token(),
                     AnyTwValue::TwPercentageValue(p) => p.value_token(),
-                    AnyTwValue::TwArbitraryValue(_) => return Self::Unknown,
+                    AnyTwValue::TwArbitraryValue(_) => unreachable!(),
                     // TODO: CSS variable values (`bg-(--my-color)`).
                     AnyTwValue::TwCssVariableValue(_) => return Self::Unknown,
                     // TODO: data-attribute values inside utility (rare).
