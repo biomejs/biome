@@ -27,16 +27,6 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
-// Some preset items are intentionally unused while the v4 sort algorithm is
-// still being implemented incrementally:
-// - \`PROPERTY_ORDER\` is the ordered table emitted from the Tailwind property
-//   order source.
-// - \`PROPERTY_INDEX\` is the O(1) lookup table emitted from the same source and
-//   used when classifying arbitrary CSS (\`[mask:none]\`), which is a TODO.
-// - \`Branch::ArbitraryTyped\` and \`Branch::Arbitrary\` payload fields fire only for
-//   bracketed arbitrary values (\`p-[10px]\`), which is a TODO.
-#![expect(dead_code, reason = "intentionally unused while sort algorithm is being implemented; see TODO comment above")]
-
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
@@ -54,15 +44,6 @@ function camelToSnake(s: string): string {
 
 function camelToScreamingSnake(s: string): string {
 	return camelToSnake(s).toUpperCase();
-}
-
-function renderPropertyOrder(props: string[]): string {
-	const items = props.map((p) => `    ${rustString(p)},`).join("\n");
-	return `// CSS property sort order.
-pub static PROPERTY_ORDER: [&str; ${props.length}] = [
-${items}
-];
-`;
 }
 
 function renderPropertyIndex(props: string[]): string {
@@ -264,7 +245,6 @@ export function renderRust(input: {
 
 	return [
 		HEADER,
-		renderPropertyOrder(input.propertyOrder),
 		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
 		renderStaticUtilities(input.utilities, propIdx, propCount),
