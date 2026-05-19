@@ -117,13 +117,13 @@ struct FormatScssKeywordArgumentChildValue<'a> {
 impl Format<CssFormatContext> for FormatScssKeywordArgumentChildValue<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         if self.should_expand {
-            let value = format_with(|f| write!(f, [self.value.format()]));
-            let expanded_value = group(&value).should_expand(true);
-
             if self.should_indent_self_breaking {
-                write!(f, [indent(&expanded_value)])
+                write!(
+                    f,
+                    [indent(&group(&self.value.format()).should_expand(true))]
+                )
             } else {
-                write!(f, [expanded_value])
+                write!(f, [group(&self.value.format()).should_expand(true)])
             }
         } else if self.should_indent_self_breaking {
             write!(f, [indent(&format_args![self.value.format()])])
