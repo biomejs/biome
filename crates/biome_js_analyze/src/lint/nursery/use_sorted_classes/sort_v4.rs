@@ -141,8 +141,45 @@ impl SortKey {
                     return Self::Unknown;
                 };
 
-                resolve_functional_value(&value, f.modifier(), branches, registration_idx)
-                    .unwrap_or(Self::Unknown)
+                let has_fraction_modifier = match f.modifier() {
+                    None => false,
+                    Some(m) if is_fraction_modifier(&value, &m, branches) => true,
+                    Some(_) => return Self::Unknown,
+                };
+
+                if let (AnyTwValue::TwArbitraryValue(arb), false) =
+                    (&value, has_fraction_modifier)
+                {
+                    let kind = ValueKind::Arbitrary(arb.value());
+                    return resolve_branch(branches, &kind, registration_idx)
+                        .unwrap_or(Self::Unknown);
+                }
+
+                let value_token = match &value {
+                    AnyTwValue::TwNamedValue(n) => n.value_token(),
+                    AnyTwValue::TwNumberValue(n) => n.value_token(),
+                    AnyTwValue::TwPercentageValue(p) => p.value_token(),
+                    AnyTwValue::TwArbitraryValue(_) => return Self::Unknown,
+                    // TODO: CSS variable values (`bg-(--my-color)`).
+                    AnyTwValue::TwCssVariableValue(_) => return Self::Unknown,
+                    // TODO: data-attribute values inside utility (rare).
+                    AnyTwValue::TwDataAttribute(_) => return Self::Unknown,
+                    AnyTwValue::TwBogusValue(_) => return Self::Unknown,
+                };
+                let Ok(value_token) = value_token else {
+                    return Self::Unknown;
+                };
+                let value_text = value_token.text_trimmed();
+
+                let kind = match (&value, has_fraction_modifier) {
+                    (AnyTwValue::TwNamedValue(_), false) => ValueKind::Named(value_text),
+                    (AnyTwValue::TwNumberValue(_), false) => ValueKind::Number(value_text),
+                    (AnyTwValue::TwNumberValue(_), true) => ValueKind::Ratio,
+                    (AnyTwValue::TwPercentageValue(_), false) => ValueKind::Percentage,
+                    _ => return Self::Unknown,
+                };
+
+                resolve_branch(branches, &kind, registration_idx).unwrap_or(Self::Unknown)
             }
         }
     }
@@ -205,56 +242,6 @@ fn is_fraction_modifier(value: &AnyTwValue, modifier: &AnyTwModifier, branches: 
     matches!(value, AnyTwValue::TwNumberValue(_))
         && matches!(m.value(), Ok(AnyTwValue::TwNumberValue(_)))
         && entry_has_ratio_branch(branches)
-}
-
-fn resolve_functional_value(
-    value: &AnyTwValue,
-    modifier: Option<AnyTwModifier>,
-    branches: &[Branch],
-    registration_idx: u16,
-) -> Option<SortKey> {
-    if let AnyTwValue::TwArbitraryValue(arb) = value {
-        if modifier.is_some() {
-            return None;
-        }
-        let kind = ValueKind::Arbitrary(arb.value());
-        return resolve_branch(branches, &kind, registration_idx);
-    }
-
-    // Only `n/m` fraction modifiers resolve here; see `is_fraction_modifier`.
-    // Color opacity, line-height, gradient interpolation, ... need modifier
-    // metadata and stay out of this PR.
-    let has_fraction_modifier = match modifier.as_ref() {
-        None => false,
-        Some(m) if is_fraction_modifier(value, m, branches) => true,
-        Some(_) => return None,
-    };
-
-    let value_token = match value {
-        AnyTwValue::TwNamedValue(n) => n.value_token(),
-        AnyTwValue::TwNumberValue(n) => n.value_token(),
-        AnyTwValue::TwPercentageValue(p) => p.value_token(),
-        AnyTwValue::TwArbitraryValue(_) => return None,
-        // TODO: CSS variable values (`bg-(--my-color)`).
-        AnyTwValue::TwCssVariableValue(_) => return None,
-        // TODO: data-attribute values inside utility (rare).
-        AnyTwValue::TwDataAttribute(_) => return None,
-        AnyTwValue::TwBogusValue(_) => return None,
-    };
-    let Ok(value_token) = value_token else {
-        return None;
-    };
-    let value_text = value_token.text_trimmed();
-
-    let kind = match (value, has_fraction_modifier) {
-        (AnyTwValue::TwNamedValue(_), false) => ValueKind::Named(value_text),
-        (AnyTwValue::TwNumberValue(_), false) => ValueKind::Number(value_text),
-        (AnyTwValue::TwNumberValue(_), true) => ValueKind::Ratio,
-        (AnyTwValue::TwPercentageValue(_), false) => ValueKind::Percentage,
-        _ => return None,
-    };
-
-    resolve_branch(branches, &kind, registration_idx)
 }
 
 /// Walk a basename's branch list and return the first matching branch as
