@@ -6760,6 +6760,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentImportPaths": {
+					"description": "Enforce consistent import paths by preferring aliases for distant modules and relative paths for nearby modules.\nSee https://biomejs.dev/linter/rules/use-consistent-import-paths",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentImportPathsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentMethodSignatures": {
 					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
@@ -11004,6 +11011,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentImportPathsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentImportPathsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -14391,6 +14408,16 @@
 			"description": "The GraphQL description style to enforce.",
 			"type": "string",
 			"enum": ["block", "inline"]
+		},
+		"UseConsistentImportPathsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentImportPathsOptions" }
+			]
+		},
+		"UseConsistentImportPathsOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [

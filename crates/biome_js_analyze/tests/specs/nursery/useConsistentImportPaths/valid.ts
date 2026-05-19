@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+
+import { featureValue } from "./src/feature/value.ts";
+import { nestedValue } from "./src/feature/nested/value.ts";
+import { externalThing } from "pkg";
+
+void featureValue;
+void nestedValue;
+void externalThing;
+
+import("./src/shared/button.ts");
+require("./src/shared/button.ts");

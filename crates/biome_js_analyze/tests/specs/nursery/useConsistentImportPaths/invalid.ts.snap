@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+export { featureValue } from "@/feature/value.ts";
+export { importedValue } from "#internal/imported.ts";
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:30 lint/nursery/useConsistentImportPaths  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use a relative import path for nearby modules.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ export { featureValue } from "@/feature/value.ts";
+      │                              ^^^^^^^^^^^^^^^^^^^^
+    4 │ export { importedValue } from "#internal/imported.ts";
+    5 │ 
+  
+  i Nearby imports are easier to read when they stay relative to the current file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a nearby relative import path.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   
+    3   │ - export·{·featureValue·}·from·"@/feature/value.ts";
+      3 │ + export·{·featureValue·}·from·"./src/feature/value.ts";
+    4 4 │   export { importedValue } from "#internal/imported.ts";
+    5 5 │   
+  
+
+```

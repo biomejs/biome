@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: package-fallback.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+import { importedValue } from "../internal/imported.ts";
+
+void importedValue;
+
+```
+
+# Diagnostics
+```
+package-fallback.ts:3:31 lint/nursery/useConsistentImportPaths  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the configured import alias instead of a parent-relative import path.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ import { importedValue } from "../internal/imported.ts";
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ void importedValue;
+  
+  i Aliases keep distant imports shorter and make module boundaries easier to scan.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the configured import alias.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   
+    3   │ - import·{·importedValue·}·from·"../internal/imported.ts";
+      3 │ + import·{·importedValue·}·from·"#internal/imported.ts";
+    4 4 │   
+    5 5 │   void importedValue;
+  
+
+```
