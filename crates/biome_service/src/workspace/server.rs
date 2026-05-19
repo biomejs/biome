@@ -34,7 +34,6 @@ use crate::workspace::{
     UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
-use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
@@ -56,7 +55,9 @@ use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
@@ -87,6 +88,7 @@ pub struct WorkspaceServer {
     module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
+    #[cfg(feature = "plugins")]
     plugin_caches: Arc<HashMap<Utf8PathBuf, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
@@ -151,6 +153,7 @@ impl WorkspaceServer {
             projects: Default::default(),
             project_layout: Default::default(),
             module_graph: Default::default(),
+            #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: boxcar::Vec::default(),
@@ -807,6 +810,7 @@ impl WorkspaceServer {
         Ok(parsed)
     }
 
+    #[cfg(feature = "plugins")]
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
@@ -831,11 +835,12 @@ impl WorkspaceServer {
         diagnostics
     }
 
+    #[cfg(feature = "plugins")]
     fn get_analyzer_plugins_for_project(
         &self,
         path: &Utf8Path,
         plugins: &Plugins,
-    ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
+    ) -> Result<biome_analyze::AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
             None => Ok(Vec::new()),
@@ -1263,25 +1268,27 @@ impl Workspace for WorkspaceServer {
                 .collect(),
         )?;
 
-        let plugin_diagnostics = self.load_plugins(
-            &workspace_directory.clone().unwrap_or_default(),
-            &settings.as_all_plugins(),
-        );
+        #[cfg(feature = "plugins")]
+        {
+            let plugin_diagnostics = self.load_plugins(
+                &workspace_directory.clone().unwrap_or_default(),
+                &settings.as_all_plugins(),
+            );
 
-        let has_errors = plugin_diagnostics
-            .iter()
-            .any(|d| d.severity() >= Severity::Error);
+            let has_errors = plugin_diagnostics
+                .iter()
+                .any(|d| d.severity() >= Severity::Error);
 
-        if has_errors {
-            return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+            if has_errors {
+                return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+            }
+            diagnostics.extend(
+                plugin_diagnostics
+                    .into_iter()
+                    .map(Into::into)
+                    .collect::<Vec<_>>(),
+            );
         }
-
-        diagnostics.extend(
-            plugin_diagnostics
-                .into_iter()
-                .map(Into::into)
-                .collect::<Vec<_>>(),
-        );
 
         if !is_root {
             self.projects.set_nested_settings(
@@ -1358,7 +1365,10 @@ impl Workspace for WorkspaceServer {
 
         self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
-        self.plugin_caches.pin().remove(&project_path);
+        #[cfg(feature = "plugins")]
+        {
+            self.plugin_caches.pin().remove(&project_path);
+        }
 
         Ok(())
     }
@@ -1817,14 +1827,19 @@ impl Workspace for WorkspaceServer {
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
-            let plugins = if categories.is_lint() {
-                self.get_analyzer_plugins_for_project(
-                    settings.source_path().unwrap_or_default().as_path(),
-                    &settings.get_plugins_for_path(&path),
-                )
-                .map_err(WorkspaceError::plugin_errors)?
-            } else {
-                Vec::new()
+            let plugins = cfg_select! {
+                feature = "plugins" => {
+                    if categories.is_lint() {
+                        self.get_analyzer_plugins_for_project(
+                            settings.source_path().unwrap_or_default().as_path(),
+                            &settings.get_plugins_for_path(&path),
+                        )
+                        .map_err(WorkspaceError::plugin_errors)?
+                    } else {
+                        Vec::new()
+                    }
+                },
+                _ => Vec::new()
             };
             let settings = self.settings_handle(&settings, inline_config);
             let results = lint(LintParams {
@@ -1972,14 +1987,19 @@ impl Workspace for WorkspaceServer {
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
         {
-            let plugins = if categories.is_lint() {
-                self.get_analyzer_plugins_for_project(
-                    settings.source_path().unwrap_or_default().as_path(),
-                    &settings.get_plugins_for_path(&path),
-                )
-                .map_err(WorkspaceError::plugin_errors)?
-            } else {
-                Vec::new()
+            let plugins = cfg_select! {
+                feature = "plugins" => {
+                    if categories.is_lint() {
+                        self.get_analyzer_plugins_for_project(
+                            settings.source_path().unwrap_or_default().as_path(),
+                            &settings.get_plugins_for_path(&path),
+                        )
+                        .map_err(WorkspaceError::plugin_errors)?
+                    } else {
+                        Vec::new()
+                    }
+                },
+                _ => Vec::new()
             };
             let handle = self.settings_handle(&settings, inline_config);
             let mut final_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
@@ -2301,19 +2321,22 @@ impl Workspace for WorkspaceServer {
 
         let (mut parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
-
-        let plugins = self
-            .get_analyzer_plugins_for_project(
-                settings.source_path().unwrap_or_default().as_path(),
-                &settings.get_plugins_for_path(&path),
-            )
-            .map_err(WorkspaceError::plugin_errors)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let plugins = if rule_categories.contains(RuleCategory::Lint) {
-            plugins
-        } else {
-            Vec::new()
+
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if rule_categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.source_path().unwrap_or_default().as_path(),
+                        &settings.get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
         };
 
         let mut errors = 0;

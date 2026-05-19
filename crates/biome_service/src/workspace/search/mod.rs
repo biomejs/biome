@@ -74,6 +74,6 @@ impl SearchQuery for NoopQueryProvider {
         _: &SettingsWithEditor,
         _: PatternId,
     ) -> Result<Vec<TextRange>, WorkspaceError> {
-        Ok(vec![])
+        Err(WorkspaceError::feature_not_enabled())
     }
 }

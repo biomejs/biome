@@ -57,7 +57,7 @@ biome_markdown_syntax    = { workspace = true, optional = true }
 biome_module_graph       = { workspace = true, features = ["serde"] }
 biome_package            = { workspace = true }
 biome_parser             = { workspace = true }
-biome_plugin_loader      = { workspace = true }
+biome_plugin_loader      = { workspace = true, optional = true }
 biome_project_layout     = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
@@ -94,12 +94,13 @@ insta               = { workspace = true }
 [features]
 # JavaScript embeds
 js_embeds    = ["lang_graphql"]
-js_plugin    = ["biome_plugin_loader/js_plugin"]
+js_plugin    = ["biome_plugin_loader/js_plugin", "plugins"]
 lang_graphql = [
+  "biome_configuration/lang_graphql",
   "dep:biome_graphql_analyze",
   "dep:biome_graphql_formatter",
   "dep:biome_graphql_parser",
-  "dep:biome_graphql_syntax",
+  "dep:biome_graphql_syntax"
 ]
 lang_grit    = [
   "dep:biome_grit_formatter",
@@ -119,6 +120,7 @@ lang_yaml    = [
   "dep:biome_yaml_parser",
   "dep:biome_yaml_syntax"
 ]
+plugins      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
 schema       = [
   "biome_configuration/schema",
   "biome_css_syntax/schema",

@@ -16,6 +16,7 @@ use biome_fs::{BiomePath, FileSystemDiagnostic};
 #[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -63,6 +64,7 @@ pub enum WorkspaceError {
     NotFound(NotFound),
 
     /// One or more errors occurred during plugin loading.
+    #[cfg(feature = "plugins")]
     PluginErrors(PluginErrors),
 
     /// The formatter encountered an error while formatting the file.
@@ -147,6 +149,7 @@ impl WorkspaceError {
         })
     }
 
+    #[cfg(feature = "plugins")]
     pub fn plugin_errors(diagnostics: Vec<PluginDiagnostic>) -> Self {
         Self::PluginErrors(PluginErrors { diagnostics })
     }
@@ -640,11 +643,13 @@ pub struct NoIgnoreFileFound {
 )]
 pub struct DisabledVcs {}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg(feature = "plugins")]
+#[cfg_attr(feature = "plugins", derive(Debug, Serialize, Deserialize))]
 pub struct PluginErrors {
-    diagnostics: Vec<PluginDiagnostic>,
+    diagnostics: Vec<biome_plugin_loader::PluginDiagnostic>,
 }
 
+#[cfg(feature = "plugins")]
 impl Diagnostic for PluginErrors {
     fn category(&self) -> Option<&'static Category> {
         Some(category!("plugin"))

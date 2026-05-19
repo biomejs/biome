@@ -59,10 +59,6 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
 		},
-		"plugins": {
-			"description": "List of plugins to load.",
-			"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
-		},
 		"root": {
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -427,25 +423,6 @@
 			"type": "boolean"
 		},
 		"BracketSpacing": { "type": "boolean" },
-		"CheckInputType": {
-			"oneOf": [
-				{
-					"description": "Don't check the input type",
-					"type": "string",
-					"const": "off"
-				},
-				{
-					"description": "Check the input type (case-insensitive)",
-					"type": "string",
-					"const": "loose"
-				},
-				{
-					"description": "Check the input type (case-sensitive)",
-					"type": "string",
-					"const": "strict"
-				}
-			]
-		},
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1259,13 +1236,6 @@
 					"description": "Enforce correct dependency usage within React hooks.\nSee https://biomejs.dev/linter/rules/use-exhaustive-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveDependenciesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGraphqlNamedOperations": {
-					"description": "Enforce specifying the name of GraphQL operations.\nSee https://biomejs.dev/linter/rules/use-graphql-named-operations",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseGraphqlNamedOperationsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3261,16 +3231,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoDuplicateArgumentNamesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateArgumentNamesOptions" }
-			]
-		},
-		"NoDuplicateArgumentNamesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoDuplicateAtImportRulesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3363,16 +3323,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoDuplicateEnumValueNamesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateEnumValueNamesOptions" }
-			]
-		},
-		"NoDuplicateEnumValueNamesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoDuplicateEnumValuesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3383,26 +3333,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoDuplicateFieldDefinitionNamesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateFieldDefinitionNamesOptions" }
-			]
-		},
-		"NoDuplicateFieldDefinitionNamesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDuplicateFieldsConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateFieldsOptions" }
-			]
-		},
-		"NoDuplicateFieldsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoDuplicateFontNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3410,26 +3340,6 @@
 			]
 		},
 		"NoDuplicateFontNamesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDuplicateGraphqlOperationNameConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateGraphqlOperationNameOptions" }
-			]
-		},
-		"NoDuplicateGraphqlOperationNameOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDuplicateInputFieldNamesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateInputFieldNamesOptions" }
-			]
-		},
-		"NoDuplicateInputFieldNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3500,16 +3410,6 @@
 			]
 		},
 		"NoDuplicateTestHooksOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDuplicateVariableNamesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDuplicateVariableNamesOptions" }
-			]
-		},
-		"NoDuplicateVariableNamesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5028,23 +4928,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoRootTypeConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoRootTypeOptions" }
-			]
-		},
-		"NoRootTypeOptions": {
-			"type": "object",
-			"properties": {
-				"disallow": {
-					"description": "A list of disallowed root types (e.g. \"mutation\" and/or \"subscription\").\nThe values of the list are case-insensitive.",
-					"type": "array",
-					"items": { "type": "string" }
-				}
-			},
-			"additionalProperties": false
-		},
 		"NoScriptUrlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6210,24 +6093,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateArgumentNames": {
-					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateArgumentNamesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateAttributes": {
 					"description": "Disallow duplication of attributes.\nSee https://biomejs.dev/linter/rules/no-duplicate-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateAttributesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateEnumValueNames": {
-					"description": "Require all enum value names to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-enum-value-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateEnumValueNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6238,38 +6107,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateFieldDefinitionNames": {
-					"description": "Require all fields of a type to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateFieldDefinitionNamesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateGraphqlOperationName": {
-					"description": "Enforce unique operation names across a GraphQL document.\nSee https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateGraphqlOperationNameConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateInputFieldNames": {
-					"description": "Require fields within an input object to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-input-field-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateInputFieldNamesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateSelectors": {
 					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateSelectorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateVariableNames": {
-					"description": "Require all variable definitions to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-variable-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateVariableNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6574,13 +6415,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noRootType": {
-					"description": "Disallow the usage of specified root types.\nSee https://biomejs.dev/linter/rules/no-root-type",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoRootTypeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noScriptUrl": {
 					"description": "Disallow javascript: URLs in HTML.\nSee https://biomejs.dev/linter/rules/no-script-url",
 					"anyOf": [
@@ -6753,13 +6587,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentGraphqlDescriptions": {
-					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentMethodSignatures": {
 					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
@@ -6869,27 +6696,6 @@
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseInlineScriptIdConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useInputName": {
-					"description": "Require mutation argument to be always called \"input\".\nSee https://biomejs.dev/linter/rules/use-input-name",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseInputNameConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useLoneAnonymousOperation": {
-					"description": "Disallow anonymous operations when more than one operation specified in document.\nSee https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseLoneAnonymousOperationConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useLoneExecutableDefinition": {
-					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7390,10 +7196,6 @@
 						{ "$ref": "#/$defs/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
-				},
-				"plugins": {
-					"description": "Specific configuration for additional plugins",
-					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7552,11 +7354,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
-		"Plugins": {
-			"type": "array",
-			"items": { "$ref": "#/$defs/PluginConfiguration" }
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -8282,15 +8079,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoDuplicateArgumentNamesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateArgumentNamesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoDuplicateAtImportRulesOptions": {
 			"type": "object",
 			"properties": {
@@ -8354,15 +8142,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoDuplicateEnumValueNamesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateEnumValueNamesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoDuplicateEnumValuesOptions": {
 			"type": "object",
 			"properties": {
@@ -8372,47 +8151,11 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoDuplicateFieldDefinitionNamesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateFieldDefinitionNamesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDuplicateFieldsOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateFieldsOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoDuplicateFontNamesOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateFontNamesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDuplicateGraphqlOperationNameOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateGraphqlOperationNameOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDuplicateInputFieldNamesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateInputFieldNamesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -8478,15 +8221,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateTestHooksOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDuplicateVariableNamesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDuplicateVariableNamesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9792,15 +9526,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoRootTypeOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoRootTypeOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoScriptUrlOptions": {
 			"type": "object",
 			"properties": {
@@ -10995,15 +10720,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseConsistentGraphqlDescriptionsOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseConsistentGraphqlDescriptionsOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -11097,24 +10813,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseDefaultSwitchClauseOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseDeprecatedDateOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseDeprecatedDateOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseDeprecatedReasonOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseDeprecatedReasonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11374,25 +11072,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseGraphqlNamedOperationsOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseGraphqlNamedOperationsOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseGraphqlNamingConventionOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseGraphqlNamingConventionOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseGroupedAccessorPairsOptions": {
 			"type": "object",
 			"properties": {
@@ -11513,15 +11192,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseInputNameOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseInputNameOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseIsArrayOptions": {
 			"type": "object",
 			"properties": {
@@ -11603,24 +11273,6 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseLiteralKeysOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseLoneAnonymousOperationOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseLoneAnonymousOperationOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseLoneExecutableDefinitionOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseLoneExecutableDefinitionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13066,13 +12718,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useDeprecatedReason": {
-					"description": "Require specifying the reason argument when using @deprecated directive.\nSee https://biomejs.dev/linter/rules/use-deprecated-reason",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseDeprecatedReasonConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useEnumInitializers": {
 					"description": "Require that each enum member value be explicitly initialized.\nSee https://biomejs.dev/linter/rules/use-enum-initializers",
 					"anyOf": [
@@ -13126,13 +12771,6 @@
 					"description": "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.\nSee https://biomejs.dev/linter/rules/use-fragment-syntax",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseFragmentSyntaxConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGraphqlNamingConvention": {
-					"description": "Validates that all enum values are capitalized.\nSee https://biomejs.dev/linter/rules/use-graphql-naming-convention",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseGraphqlNamingConventionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13483,13 +13121,6 @@
 					"description": "Disallow duplicate conditions in if-else-if chains.\nSee https://biomejs.dev/linter/rules/no-duplicate-else-if",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateElseIfConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateFields": {
-					"description": "No duplicated fields in GraphQL operations.\nSee https://biomejs.dev/linter/rules/no-duplicate-fields",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateFieldsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13933,13 +13564,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useDeprecatedDate": {
-					"description": "Require the @deprecated directive to specify a deletion date.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseDeprecatedDateConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useErrorMessage": {
 					"description": "Enforce passing a message value when creating a built-in error.\nSee https://biomejs.dev/linter/rules/use-error-message",
 					"anyOf": [
@@ -14367,31 +13991,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseConsistentGraphqlDescriptionsConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseConsistentGraphqlDescriptionsOptions" }
-			]
-		},
-		"UseConsistentGraphqlDescriptionsOptions": {
-			"type": "object",
-			"properties": {
-				"style": {
-					"description": "The description style to enforce. Defaults to \"block\"",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsStyle" },
-						{ "type": "null" }
-					],
-					"default": null
-				}
-			},
-			"additionalProperties": false
-		},
-		"UseConsistentGraphqlDescriptionsStyle": {
-			"description": "The GraphQL description style to enforce.",
-			"type": "string",
-			"enum": ["block", "inline"]
-		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -14527,27 +14126,6 @@
 			"additionalProperties": false
 		},
 		"UseDefaultSwitchClauseOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseDeprecatedDateConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseDeprecatedDateOptions" }
-			]
-		},
-		"UseDeprecatedDateOptions": {
-			"type": "object",
-			"properties": { "argumentName": { "type": ["string", "null"] } },
-			"additionalProperties": false
-		},
-		"UseDeprecatedReasonConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseDeprecatedReasonOptions" }
-			]
-		},
-		"UseDeprecatedReasonOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -14874,26 +14452,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseGraphqlNamedOperationsConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseGraphqlNamedOperationsOptions" }
-			]
-		},
-		"UseGraphqlNamedOperationsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseGraphqlNamingConventionConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseGraphqlNamingConventionOptions" }
-			]
-		},
-		"UseGraphqlNamingConventionOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"UseGroupedAccessorPairsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15045,22 +14603,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseInputNameConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseInputNameOptions" }
-			]
-		},
-		"UseInputNameOptions": {
-			"type": "object",
-			"properties": {
-				"checkInputType": {
-					"description": "Check that the input type name follows the convention <mutationName>Input",
-					"anyOf": [{ "$ref": "#/$defs/CheckInputType" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"UseIsArrayConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15154,26 +14696,6 @@
 			]
 		},
 		"UseLiteralKeysOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseLoneAnonymousOperationConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseLoneAnonymousOperationOptions" }
-			]
-		},
-		"UseLoneAnonymousOperationOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseLoneExecutableDefinitionConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseLoneExecutableDefinitionOptions" }
-			]
-		},
-		"UseLoneExecutableDefinitionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -4,6 +4,7 @@ use biome_analyze::{
     GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
@@ -81,6 +82,7 @@ impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Lint) {
@@ -181,6 +183,7 @@ impl RegistryVisitor<CssLanguage> for AssistActionsVisitor {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {

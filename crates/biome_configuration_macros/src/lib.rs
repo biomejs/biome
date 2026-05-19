@@ -44,6 +44,7 @@ fn collect_lint_rules() -> LintRulesVisitor {
     biome_js_analyze::visit_registry(&mut lint_visitor);
     biome_json_analyze::visit_registry(&mut lint_visitor);
     biome_css_analyze::visit_registry(&mut lint_visitor);
+    #[cfg(feature = "lang_graphql")]
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_html_analyze::visit_registry(&mut lint_visitor);
 
@@ -77,6 +78,7 @@ fn collect_assist_rules() -> AssistActionsVisitor {
     biome_js_analyze::visit_registry(&mut assist_visitor);
     biome_json_analyze::visit_registry(&mut assist_visitor);
     biome_css_analyze::visit_registry(&mut assist_visitor);
+    #[cfg(feature = "lang_graphql")]
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
     biome_html_analyze::visit_registry(&mut assist_visitor);
 

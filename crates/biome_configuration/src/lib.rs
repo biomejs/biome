@@ -223,8 +223,9 @@ pub struct Configuration {
     pub overrides: Option<Overrides>,
 
     /// List of plugins to load.
+    #[cfg(feature = "plugins")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<biome_plugin_loader::Plugins>,
 
     /// Specific configuration for assists
