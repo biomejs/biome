@@ -16,7 +16,7 @@ impl EmbedDetectorsRegistry {
     pub const fn detectors(host: HostLanguage) -> &'static [EmbedDetector] {
         match host {
             HostLanguage::Html => &HTML_DETECTORS,
-            HostLanguage::JavaScript => &JS_DETECTORS,
+            HostLanguage::JavaScript => JS_DETECTORS,
             HostLanguage::Markdown => &[], // Future: MARKDOWN_DETECTORS
         }
     }
