@@ -140,16 +140,13 @@ impl FormatScssMapPairLayout<'_> {
                 }
             });
             let empty_separator = format_once(|_| Ok(()));
-            let key = format_with(|f| write!(f, [dedent(&format_args![self.key.format()])]));
-            let colon = format_with(|f| write!(f, [self.colon_token.format()]));
-            let value = format_with(|f| write!(f, [self.value.format()]));
             let mut fill = f.fill();
 
-            fill.entry(&separator, &key);
+            fill.entry(&separator, &dedent(&self.key.format()));
             // `fill` alternates item/separator/item; `:` is an item glued to
             // the key with an empty separator, e.g. `("a", "b"): value`.
-            fill.entry(&empty_separator, &colon);
-            fill.entry(&value_separator, &value);
+            fill.entry(&empty_separator, &self.colon_token.format());
+            fill.entry(&value_separator, &self.value.format());
 
             fill.finish()
         })
@@ -167,11 +164,11 @@ fn should_group_leading_block_comments_with_pair(
 
     if leading_comments.is_empty()
         || !leading_comments.iter().all(|comment| {
-        matches!(
+            matches!(
                 comment.kind(),
                 CommentKind::Block | CommentKind::InlineBlock
             ) && comment.lines_after() <= 1
-    })
+        })
     {
         return false;
     }
