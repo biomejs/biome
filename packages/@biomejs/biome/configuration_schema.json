@@ -6631,7 +6631,7 @@
 					]
 				},
 				"noUnnecessaryConditions": {
-					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+					"description": "Disallow conditions that always evaluate to the same value.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
 						{ "type": "null" }
