@@ -53,6 +53,7 @@
 
 mod client;
 pub(crate) mod document;
+pub mod search;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};
@@ -61,7 +62,6 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_module_graph::SerializedModuleInfo;
 use biome_resolver::FsWithResolverProxy;
@@ -99,6 +99,9 @@ use schemars::{Schema, SchemaGenerator};
 
 use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+#[cfg(feature = "lang_grit")]
+pub use search::grit::GritSearchQuery;
+pub use search::{NoopQueryProvider, SearchLanguage, SearchQuery};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -1327,7 +1330,7 @@ impl RageEntry {
 #[serde(rename_all = "camelCase")]
 pub struct ParsePatternParams {
     pub pattern: String,
-    pub default_language: GritTargetLanguage,
+    pub default_language: SearchLanguage,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1730,7 +1733,19 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    Box::new(WorkspaceServer::new(fs, watcher_tx, service_tx, threads))
+    let search_provider = cfg_select! {
+        feature = "lang_grit" => {
+            crate::workspace::search::grit::GritSearchQuery::default()
+        }
+        _ => NoopQueryProvider {}
+    };
+    Box::new(WorkspaceServer::new(
+        fs,
+        watcher_tx,
+        service_tx,
+        Arc::new(search_provider),
+        threads,
+    ))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]

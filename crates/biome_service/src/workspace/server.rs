@@ -26,7 +26,7 @@ use crate::workspace::{
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
     IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
-    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
+    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PullActionsParams,
     PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
     PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
     RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
@@ -48,7 +48,6 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
-use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
@@ -68,7 +67,6 @@ use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
@@ -97,8 +95,7 @@ pub struct WorkspaceServer {
     /// Stores the document sources used across the workspace
     file_sources: boxcar::Vec<DocumentFileSource>,
 
-    /// Stores patterns to search for.
-    patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
+    search_provider: Arc<dyn SearchQuery>,
 
     /// Node cache for faster parsing of modified documents.
     ///
@@ -144,6 +141,7 @@ impl WorkspaceServer {
         fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceNotification>,
+        search_provider: Arc<dyn SearchQuery>,
         threads: Option<usize>,
     ) -> Self {
         init_thread_pool(threads);
@@ -156,7 +154,7 @@ impl WorkspaceServer {
             plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: boxcar::Vec::default(),
-            patterns: Default::default(),
+            search_provider,
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
             fs,
@@ -2475,12 +2473,10 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ParsePatternParams,
     ) -> Result<ParsePatternResult, WorkspaceError> {
-        let options =
-            CompilePatternOptions::default().with_default_language(params.default_language);
-        let pattern = compile_pattern_with_options(&params.pattern, options)?;
+        let pattern_id = self
+            .search_provider
+            .parse_pattern(params.pattern.as_ref(), params.default_language)?;
 
-        let pattern_id = make_search_pattern_id();
-        self.patterns.pin().insert(pattern_id.clone(), pattern);
         Ok(ParsePatternResult { pattern_id })
     }
 
@@ -2496,11 +2492,6 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let patterns = self.patterns.pin();
-        let query = patterns
-            .get(&pattern)
-            .ok_or_else(WorkspaceError::invalid_pattern)?;
-
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let search = capabilities
@@ -2516,13 +2507,21 @@ impl Workspace for WorkspaceServer {
         let document_file_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings = self.settings_handle(&settings, None);
-        let matches = search(&path, &document_file_source, parse, query, &settings)?;
+        let provider = self.search_provider.clone();
+        let matches = search(
+            &path,
+            &document_file_source,
+            parse,
+            provider.as_ref(),
+            &settings,
+            pattern,
+        )?;
 
         Ok(SearchResults { path, matches })
     }
 
     fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError> {
-        self.patterns.pin().remove(&params.pattern);
+        self.search_provider.drop_pattern(params.pattern);
         Ok(())
     }
 
@@ -2846,14 +2845,6 @@ fn init_thread_pool(threads: Option<usize>) {
 
 #[cfg(target_family = "wasm")]
 fn init_thread_pool(_threads: Option<usize>) {}
-
-/// Generates a pattern ID that we can use as "handle" for referencing
-/// previously parsed search queries.
-fn make_search_pattern_id() -> PatternId {
-    static COUNTER: AtomicUsize = AtomicUsize::new(1);
-    let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
-    format!("p{counter}").into()
-}
 
 #[cfg(test)]
 #[path = "server.tests.rs"]

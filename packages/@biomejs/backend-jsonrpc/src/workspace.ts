@@ -10322,10 +10322,10 @@ export interface RenameResult {
 	range: TextRange;
 }
 export interface ParsePatternParams {
-	defaultLanguage: GritTargetLanguage;
+	defaultLanguage: SearchLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = "CSS" | "JavaScript" | "JSON";
+export type SearchLanguage = "css" | "js" | "json";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }
