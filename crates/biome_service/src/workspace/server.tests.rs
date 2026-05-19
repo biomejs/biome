@@ -239,6 +239,7 @@ function Foo({cond}) {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
@@ -356,6 +357,7 @@ function Foo({cond}) {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
@@ -648,6 +650,7 @@ const Bar = styled(Component)`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -716,6 +719,7 @@ styled.div`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -785,6 +789,7 @@ const PortfolioIcon = styled.div`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 formatter: Some(FormatterConfiguration {
@@ -959,6 +964,7 @@ const Container = styled.div`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -1083,6 +1089,7 @@ const Baz = graphql`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -1169,6 +1176,7 @@ const highlight = foo`some tagged template` // unknown tagged template
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -1235,6 +1243,7 @@ graphql(`
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -1291,6 +1300,7 @@ fn issue_9484_propagate_expand_after_embed() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {
@@ -1357,6 +1367,7 @@ const Table = () => {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: None,
             configuration: Configuration {
                 javascript: Some(JsConfiguration {

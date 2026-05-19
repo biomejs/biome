@@ -12,7 +12,9 @@ use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::{JsonLinterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
-use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
+use biome_configuration::{
+    Configuration, CssConfiguration, FilesConfiguration, JsonConfiguration, LinterConfiguration,
+};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
@@ -163,6 +165,30 @@ impl TraversalCommand for LintCommandPayload {
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         None
+    }
+
+    fn invocation_configuration(&self) -> Option<Configuration> {
+        let mut linter = self.linter_configuration.clone();
+        if let Some(linter) = linter.as_mut() {
+            linter.rules = None;
+        }
+
+        if linter.is_none() && self.json_parser.is_none() && self.css_parser.is_none() {
+            None
+        } else {
+            Some(Configuration {
+                linter,
+                json: self.json_parser.clone().map(|parser| JsonConfiguration {
+                    parser: Some(parser),
+                    ..Default::default()
+                }),
+                css: self.css_parser.clone().map(|parser| CssConfiguration {
+                    parser: Some(parser),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        }
     }
 
     fn get_execution(

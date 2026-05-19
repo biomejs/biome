@@ -1171,6 +1171,7 @@ impl Session {
                 .map(Utf8PathBuf::as_path)
                 .map(BiomePath::from),
             configuration,
+            invocation_configuration: None,
             extended_configurations: Default::default(),
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
