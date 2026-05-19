@@ -5,9 +5,10 @@ use crate::utils::comment_trivia::{
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_include_keyword_value::has_top_level_include_keyword_parenthesized_value;
 use biome_css_syntax::{
-    ScssKeywordArgument, ScssKeywordArgumentFields, is_in_scss_include_arguments,
+    AnyScssExpression, ScssKeywordArgument, ScssKeywordArgumentFields, is_in_scss_include_arguments,
 };
 use biome_formatter::{format_args, write};
+use biome_rowan::SyntaxResult;
 
 /// Layout for `$arg: value` keyword arguments.
 pub(crate) struct ScssKeywordArgumentLayout<'a> {
@@ -61,7 +62,7 @@ impl<'a> ScssKeywordArgumentLayout<'a> {
                 group(&format_args![
                     colon_token.format(),
                     FormatScssKeywordArgumentValue {
-                        value: &value.format(),
+                        value: &value,
                         is_self_breaking,
                         should_expand,
                         should_indent_self_breaking,
@@ -78,7 +79,7 @@ impl<'a> ScssKeywordArgumentLayout<'a> {
 /// Self-breaking values such as `$arg: (a, b)` and `$arg: 2 * (a)`
 /// stay after the colon, while scalar values may break after it.
 struct FormatScssKeywordArgumentValue<'a> {
-    value: &'a dyn Format<CssFormatContext>,
+    value: &'a SyntaxResult<AnyScssExpression>,
     is_self_breaking: bool,
     should_expand: bool,
     should_indent_self_breaking: bool,
@@ -108,7 +109,7 @@ impl Format<CssFormatContext> for FormatScssKeywordArgumentValue<'_> {
 /// Include comments can force `$arg: (a, b)` to expand while keeping the value
 /// owned by the keyword argument.
 struct FormatScssKeywordArgumentChildValue<'a> {
-    value: &'a dyn Format<CssFormatContext>,
+    value: &'a SyntaxResult<AnyScssExpression>,
     should_expand: bool,
     should_indent_self_breaking: bool,
 }
@@ -116,7 +117,7 @@ struct FormatScssKeywordArgumentChildValue<'a> {
 impl Format<CssFormatContext> for FormatScssKeywordArgumentChildValue<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         if self.should_expand {
-            let value = format_with(|f| write!(f, [self.value]));
+            let value = format_with(|f| write!(f, [self.value.format()]));
             let expanded_value = group(&value).should_expand(true);
 
             if self.should_indent_self_breaking {
@@ -125,9 +126,9 @@ impl Format<CssFormatContext> for FormatScssKeywordArgumentChildValue<'_> {
                 write!(f, [expanded_value])
             }
         } else if self.should_indent_self_breaking {
-            write!(f, [indent(&format_args![self.value])])
+            write!(f, [indent(&format_args![self.value.format()])])
         } else {
-            write!(f, [self.value])
+            write!(f, [self.value.format()])
         }
     }
 }
