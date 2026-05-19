@@ -1,5 +1,6 @@
 pub mod astro;
 pub(crate) mod css;
+#[cfg(feature = "lang_graphql")]
 pub(crate) mod graphql;
 #[cfg(feature = "lang_grit")]
 pub(crate) mod grit;
@@ -7,11 +8,13 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
+#[cfg(feature = "lang_md")]
 pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
-mod yaml;
+#[cfg(feature = "lang_yaml")]
+pub(crate) mod yaml;
 
 use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
@@ -19,11 +22,11 @@ use self::{
 };
 use crate::WorkspaceError;
 pub use crate::file_handlers::astro::AstroFileHandler;
+#[cfg(feature = "lang_graphql")]
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::file_handlers::yaml::YamlFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
@@ -46,7 +49,9 @@ use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
@@ -57,19 +62,16 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_markdown_syntax::MdFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
-use biome_yaml_syntax::YamlFileSource;
 use camino::Utf8Path;
 use either::Either;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -84,12 +86,15 @@ pub enum DocumentFileSource {
     Js(JsFileSource),
     Json(JsonFileSource),
     Css(CssFileSource),
+    #[cfg(feature = "lang_graphql")]
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     #[cfg(feature = "lang_grit")]
     Grit(biome_grit_syntax::file_source::GritFileSource),
-    Markdown(MdFileSource),
-    Yaml(YamlFileSource),
+    #[cfg(feature = "lang_md")]
+    Markdown(biome_markdown_syntax::MdFileSource),
+    #[cfg(feature = "lang_yaml")]
+    Yaml(biome_yaml_syntax::YamlFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -113,7 +118,7 @@ impl From<CssFileSource> for DocumentFileSource {
         Self::Css(value)
     }
 }
-
+#[cfg(feature = "lang_graphql")]
 impl From<GraphqlFileSource> for DocumentFileSource {
     fn from(value: GraphqlFileSource) -> Self {
         Self::Graphql(value)
@@ -133,14 +138,16 @@ impl From<biome_grit_syntax::file_source::GritFileSource> for DocumentFileSource
     }
 }
 
-impl From<MdFileSource> for DocumentFileSource {
-    fn from(value: MdFileSource) -> Self {
+#[cfg(feature = "lang_md")]
+impl From<biome_markdown_syntax::MdFileSource> for DocumentFileSource {
+    fn from(value: biome_markdown_syntax::MdFileSource) -> Self {
         Self::Markdown(value)
     }
 }
 
-impl From<YamlFileSource> for DocumentFileSource {
-    fn from(value: YamlFileSource) -> Self {
+#[cfg(feature = "lang_yaml")]
+impl From<biome_yaml_syntax::YamlFileSource> for DocumentFileSource {
+    fn from(value: biome_yaml_syntax::YamlFileSource) -> Self {
         Self::Yaml(value)
     }
 }
@@ -178,17 +185,18 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
-        #[cfg(feature = "markdown")]
-        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
+        #[cfg(feature = "lang_md")]
+        if let Ok(file_source) = biome_markdown_syntax::MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
-        #[cfg(feature = "yaml")]
-        if let Ok(file_source) = YamlFileSource::try_from_well_known(path) {
+        #[cfg(feature = "lang_yaml")]
+        if let Ok(file_source) = biome_yaml_syntax::YamlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -228,6 +236,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -237,12 +246,13 @@ impl DocumentFileSource {
         {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "markdown")]
-        if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
+        #[cfg(feature = "lang_md")]
+        if let Ok(file_source) = biome_markdown_syntax::MdFileSource::try_from_extension(extension)
+        {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "yaml")]
-        if let Ok(file_source) = YamlFileSource::try_from_extension(extension) {
+        #[cfg(feature = "lang_yaml")]
+        if let Ok(file_source) = biome_yaml_syntax::YamlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownExtension)
@@ -264,6 +274,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -276,13 +287,17 @@ impl DocumentFileSource {
         {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "markdown")]
-        if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
+        #[cfg(feature = "lang_md")]
+        if let Ok(file_source) =
+            biome_markdown_syntax::MdFileSource::try_from_language_id(language_id)
+        {
             return Ok(file_source.into());
         }
 
-        #[cfg(feature = "yaml")]
-        if let Ok(file_source) = YamlFileSource::try_from_language_id(language_id) {
+        #[cfg(feature = "lang_yaml")]
+        if let Ok(file_source) =
+            biome_yaml_syntax::YamlFileSource::try_from_language_id(language_id)
+        {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -395,6 +410,7 @@ impl DocumentFileSource {
         }
     }
 
+    #[cfg(feature = "lang_graphql")]
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
             Self::Graphql(graphql) => Some(*graphql),
@@ -423,7 +439,8 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn to_markdown_file_source(&self) -> Option<MdFileSource> {
+    #[cfg(feature = "lang_md")]
+    pub fn to_markdown_file_source(&self) -> Option<biome_markdown_syntax::MdFileSource> {
         match self {
             Self::Markdown(markdown) => Some(*markdown),
             _ => None,
@@ -436,13 +453,13 @@ impl DocumentFileSource {
         match file_source {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
-            Self::Js(_)
-            | Self::Css(_)
-            | Self::Graphql(_)
-            | Self::Json(_)
-            | Self::Html(_)
-            | Self::Markdown(_)
-            | Self::Yaml(_) => true,
+            #[cfg(feature = "lang_md")]
+            Self::Markdown(_) => true,
+            #[cfg(feature = "lang_yaml")]
+            Self::Yaml(_) => true,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
+            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -454,13 +471,13 @@ impl DocumentFileSource {
         match file_source {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
-            Self::Js(_)
-            | Self::Css(_)
-            | Self::Graphql(_)
-            | Self::Json(_)
-            | Self::Html(_)
-            | Self::Markdown(_)
-            | Self::Yaml(_) => true,
+            #[cfg(feature = "lang_md")]
+            Self::Markdown(_) => true,
+            #[cfg(feature = "lang_yaml")]
+            Self::Yaml(_) => true,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
+            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -472,14 +489,14 @@ impl DocumentFileSource {
         match file_source {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
+            #[cfg(feature = "lang_md")]
+            Self::Markdown(_) => false, // it will, but not yet
+            #[cfg(feature = "lang_yaml")]
+            Self::Yaml(_) => false,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
             Self::Html(_) | Self::Js(_) => true,
-            Self::Css(_)
-            | Self::Graphql(_)
-            | Self::Json(_)
-            | Self::Markdown(_)
-            | Self::Ignore
-            | Self::Unknown
-            | Self::Yaml(_) => false,
+            Self::Css(_) | Self::Json(_) | Self::Ignore | Self::Unknown => false,
         }
     }
 }
@@ -509,12 +526,15 @@ impl std::fmt::Display for DocumentFileSource {
                 }
             }
             Self::Css(_) => write!(fmt, "CSS"),
+            #[cfg(feature = "lang_graphql")]
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => write!(fmt, "Grit"),
+            #[cfg(feature = "lang_md")]
             Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
+            #[cfg(feature = "lang_yaml")]
             Self::Yaml(_) => write!(fmt, "YAML"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
@@ -1275,12 +1295,15 @@ pub(crate) struct Features {
     vue: VueFileHandler,
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
+    #[cfg(feature = "lang_graphql")]
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     #[cfg(feature = "lang_grit")]
     grit: grit::GritFileHandler,
-    markdown: MarkdownFileHandler,
-    yaml: YamlFileHandler,
+    #[cfg(feature = "lang_md")]
+    markdown: md::MarkdownFileHandler,
+    #[cfg(feature = "lang_yaml")]
+    yaml: yaml::YamlFileHandler,
     ignore: IgnoreFileHandler,
 }
 
@@ -1293,13 +1316,16 @@ impl Features {
             astro: AstroFileHandler {},
             svelte: SvelteFileHandler {},
             vue: VueFileHandler {},
+            #[cfg(feature = "lang_graphql")]
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             #[cfg(feature = "lang_grit")]
             grit: grit::GritFileHandler {},
-            markdown: MarkdownFileHandler {},
+            #[cfg(feature = "lang_md")]
+            markdown: md::MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
-            yaml: YamlFileHandler {},
+            #[cfg(feature = "lang_yaml")]
+            yaml: yaml::YamlFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -1325,11 +1351,14 @@ impl Features {
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
+            #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            #[cfg(feature = "lang_md")]
             DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            #[cfg(feature = "lang_yaml")]
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
@@ -1512,6 +1541,7 @@ impl RegistryVisitor<CssLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1860,6 +1890,7 @@ impl RegistryVisitor<CssLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -2067,6 +2098,7 @@ impl RegistryVisitor<CssLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -2184,6 +2216,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut syntax);
         biome_css_analyze::visit_registry(&mut syntax);
         biome_json_analyze::visit_registry(&mut syntax);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut syntax);
         biome_html_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
@@ -2233,6 +2266,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut lint);
         biome_css_analyze::visit_registry(&mut lint);
         biome_json_analyze::visit_registry(&mut lint);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut lint);
         biome_html_analyze::visit_registry(&mut lint);
         let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
@@ -2244,6 +2278,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut assist);
         biome_css_analyze::visit_registry(&mut assist);
         biome_json_analyze::visit_registry(&mut assist);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut assist);
         biome_html_analyze::visit_registry(&mut assist);
         let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =

@@ -46,7 +46,10 @@ use biome_formatter::{
     IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
+// TODO: js_embeds feature when ready
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
@@ -730,6 +733,7 @@ fn parse_js_matched_embed(
             Some((snippet, file_source))
         }
 
+        #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
             let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
             let parse = parse_graphql_with_offset_and_cache(
@@ -1416,6 +1420,7 @@ fn format_embedded(
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
             }
+            #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => {
                 let graphql_options =
                     settings.format_options::<GraphqlLanguage>(biome_path, &node.source);

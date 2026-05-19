@@ -1037,7 +1037,7 @@ fn parse_matched_embed(
                 js_file_source: None,
             })
         }
-
+        #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
             // GraphQL embeds are only used by the JS handler, not HTML
             None

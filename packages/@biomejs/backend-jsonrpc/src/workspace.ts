@@ -9793,11 +9793,8 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource }
-	| { Yaml: YamlFileSource };
+	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -9823,19 +9820,12 @@ For example, if inside a styled`` literal, a top-level declaration is allowed.
 	language: CssFileLanguage;
 	variant: CssVariant;
 }
-export interface GraphqlFileSource {
-	variant: GraphqlVariant;
-}
 export interface HtmlFileSource {
 	variant: HtmlVariant;
 }
 export interface GritFileSource {
 	variant: GritVariant;
 }
-export interface MdFileSource {
-	variant: MarkdownVariant;
-}
-export type YamlFileSource = {};
 export type EmbeddingKind =
 	| "None"
 	| {
@@ -9925,17 +9915,12 @@ the latest Recommendation level standards.
 It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard" | "cssModules" | "tailwindCss";
-/**
- * The style of GraphQL contained in the file.
- */
-export type GraphqlVariant = "standard";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
-export type MarkdownVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";

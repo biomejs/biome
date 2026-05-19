@@ -43,5 +43,8 @@ similar              = { workspace = true }
 ureq                 = { workspace = true }
 url                  = { workspace = true }
 
+[features]
+lang_graphql = ["biome_service/lang_graphql"]
+
 [lints]
 workspace = true

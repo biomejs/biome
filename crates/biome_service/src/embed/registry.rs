@@ -16,7 +16,7 @@ impl EmbedDetectorsRegistry {
     pub const fn detectors(host: HostLanguage) -> &'static [EmbedDetector] {
         match host {
             HostLanguage::Html => &HTML_DETECTORS,
-            HostLanguage::JavaScript => &JS_DETECTORS,
+            HostLanguage::JavaScript => JS_DETECTORS,
             HostLanguage::Markdown => &[], // Future: MARKDOWN_DETECTORS
         }
     }
@@ -183,7 +183,7 @@ fn resolve_directive_language(
     Some(GuestLanguage::JsModule)
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+static JS_DETECTORS: &[EmbedDetector] = &[
     // css`` → CSS
     EmbedDetector::TemplateTag {
         tag: "css",
@@ -195,16 +195,19 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
         target: EmbedTarget::Static(GuestLanguage::Css),
     },
     // gql`` → GraphQL
+    #[cfg(feature = "lang_graphql")]
     EmbedDetector::TemplateTag {
         tag: "gql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
     },
     // graphql`` → GraphQL
+    #[cfg(feature = "lang_graphql")]
     EmbedDetector::TemplateTag {
         tag: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
     },
     // graphql()`` → GraphQL
+    #[cfg(feature = "lang_graphql")]
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
