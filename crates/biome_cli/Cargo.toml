@@ -49,7 +49,7 @@ biome_migrate            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
-biome_service            = { workspace = true, features = ["lang_grit"] }
+biome_service            = { workspace = true, features = ["lang_graphql", "lang_grit"] }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }

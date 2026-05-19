@@ -13,10 +13,10 @@ use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsU
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, JsConfiguration,
-    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, JsConfiguration, JsonConfiguration,
+    LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
+    OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist,
+    push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -27,7 +27,7 @@ use biome_formatter::{
     LineEnding, LineWidth, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_graphql_formatter::context::GraphqlFormatOptions;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
 #[cfg(feature = "lang_grit")]
 use biome_grit_formatter::context::GritFormatOptions;
@@ -183,6 +183,7 @@ impl Settings {
             self.languages.css = css.into()
         }
         // graphql settings
+        #[cfg(feature = "lang_graphql")]
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into()
         }
@@ -694,6 +695,7 @@ pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
     pub css: LanguageSettings<CssLanguage>,
+    #[cfg(feature = "lang_graphql")]
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     #[cfg(feature = "lang_grit")]
@@ -783,8 +785,9 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     }
 }
 
-impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
-    fn from(graphql: GraphqlConfiguration) -> Self {
+#[cfg(feature = "lang_graphql")]
+impl From<biome_configuration::GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
+    fn from(graphql: biome_configuration::GraphqlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = graphql.formatter {
@@ -1542,10 +1545,11 @@ impl OverrideSettings {
     }
 
     /// Scans and aggregates all the overrides into a single [GraphqlFormatOptions]
+    #[cfg(feature = "lang_graphql")]
     pub fn apply_override_graphql_format_options(
         &self,
         path: &Utf8Path,
-        options: &mut GraphqlFormatOptions,
+        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
     ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1578,6 +1582,7 @@ impl OverrideSettings {
                         biome_css_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_graphql")]
                     push_to_analyzer_rules(
                         rules,
                         biome_graphql_analyze::METADATA.deref(),
@@ -1606,6 +1611,7 @@ impl OverrideSettings {
                         biome_css_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_graphql")]
                     push_to_analyzer_assist(
                         actions,
                         biome_graphql_analyze::METADATA.deref(),
@@ -1772,7 +1778,11 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
+    #[cfg(feature = "lang_graphql")]
+    fn apply_overrides_to_graphql_format_options(
+        &self,
+        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
+    ) {
         let graphql_formatter = &self.languages.graphql.formatter;
         let formatter = &self.formatter;
 
@@ -1994,7 +2004,6 @@ pub fn to_override_settings(
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
-        let graphql = pattern.graphql.take().unwrap_or_default();
         let html = pattern.html.take().unwrap_or_default();
 
         languages.javascript =
@@ -2002,8 +2011,12 @@ pub fn to_override_settings(
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
-        languages.graphql =
-            to_graphql_language_settings(graphql, &current_settings.languages.graphql);
+        #[cfg(feature = "lang_graphql")]
+        {
+            let graphql = pattern.graphql.take().unwrap_or_default();
+            languages.graphql =
+                to_graphql_language_settings(graphql, &current_settings.languages.graphql);
+        }
 
         #[cfg(feature = "lang_grit")]
         {
@@ -2108,8 +2121,9 @@ fn to_css_language_settings(
     language_setting
 }
 
+#[cfg(feature = "lang_graphql")]
 fn to_graphql_language_settings(
-    mut conf: GraphqlConfiguration,
+    mut conf: biome_configuration::GraphqlConfiguration,
     _parent_settings: &LanguageSettings<GraphqlLanguage>,
 ) -> LanguageSettings<GraphqlLanguage> {
     let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();

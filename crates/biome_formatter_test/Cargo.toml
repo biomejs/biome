@@ -1,40 +1,40 @@
 [package]
-name = "biome_formatter_test"
-version = "0.0.0"
-authors.workspace = true
-edition.workspace = true
-description = "Biome's formatter test shared infrastructure"
-homepage.workspace = true
+name                 = "biome_formatter_test"
+version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's formatter test shared infrastructure"
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
-publish = false
+publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 biome_configuration = { workspace = true }
-biome_console = { workspace = true }
-biome_deserialize = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_formatter = { workspace = true }
-biome_fs = { workspace = true }
-biome_parser = { workspace = true }
-biome_rowan = { workspace = true, features = ["countme"] }
-biome_service = { workspace = true }
-camino = { workspace = true }
-insta = { workspace = true, features = ["glob"] }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
-similar = { workspace = true }
-similar-asserts = { workspace = true }
+biome_console       = { workspace = true }
+biome_deserialize   = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_formatter     = { workspace = true }
+biome_fs            = { workspace = true }
+biome_parser        = { workspace = true }
+biome_rowan         = { workspace = true, features = ["countme"] }
+biome_service       = { workspace = true }
+camino              = { workspace = true }
+insta               = { workspace = true, features = ["glob"] }
+serde               = { workspace = true, features = ["derive"] }
+serde_json          = { workspace = true }
+similar             = { workspace = true }
+similar-asserts     = { workspace = true }
 
 [dev-dependencies]
 
+[features]
+lang_md   = ["biome_service/lang_md"]
+lang_yaml = ["biome_service/lang_yaml"]
+
 [lints]
 workspace = true
-
-[features]
-lang_md = ["biome_service/lang_md"]
-lang_yaml = ["biome_service/lang_yaml"]

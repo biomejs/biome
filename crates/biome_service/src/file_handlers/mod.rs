@@ -1,5 +1,6 @@
 pub mod astro;
 pub(crate) mod css;
+#[cfg(feature = "lang_graphql")]
 pub(crate) mod graphql;
 #[cfg(feature = "lang_grit")]
 pub(crate) mod grit;
@@ -21,6 +22,7 @@ use self::{
 };
 use crate::WorkspaceError;
 pub use crate::file_handlers::astro::AstroFileHandler;
+#[cfg(feature = "lang_graphql")]
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
@@ -47,7 +49,9 @@ use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
@@ -82,6 +86,7 @@ pub enum DocumentFileSource {
     Js(JsFileSource),
     Json(JsonFileSource),
     Css(CssFileSource),
+    #[cfg(feature = "lang_graphql")]
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     #[cfg(feature = "lang_grit")]
@@ -113,7 +118,7 @@ impl From<CssFileSource> for DocumentFileSource {
         Self::Css(value)
     }
 }
-
+#[cfg(feature = "lang_graphql")]
 impl From<GraphqlFileSource> for DocumentFileSource {
     fn from(value: GraphqlFileSource) -> Self {
         Self::Graphql(value)
@@ -180,6 +185,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
@@ -230,6 +236,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -267,6 +274,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
+        #[cfg(feature = "lang_graphql")]
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -402,6 +410,7 @@ impl DocumentFileSource {
         }
     }
 
+    #[cfg(feature = "lang_graphql")]
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
             Self::Graphql(graphql) => Some(*graphql),
@@ -448,7 +457,9 @@ impl DocumentFileSource {
             Self::Markdown(_) => true,
             #[cfg(feature = "lang_yaml")]
             Self::Yaml(_) => true,
-            Self::Js(_) | Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) => true,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
+            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -464,7 +475,9 @@ impl DocumentFileSource {
             Self::Markdown(_) => true,
             #[cfg(feature = "lang_yaml")]
             Self::Yaml(_) => true,
-            Self::Js(_) | Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) => true,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
+            Self::Js(_) | Self::Css(_) | Self::Json(_) | Self::Html(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -480,8 +493,10 @@ impl DocumentFileSource {
             Self::Markdown(_) => false, // it will, but not yet
             #[cfg(feature = "lang_yaml")]
             Self::Yaml(_) => false,
+            #[cfg(feature = "lang_graphql")]
+            Self::Graphql(_) => true,
             Self::Html(_) | Self::Js(_) => true,
-            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Ignore | Self::Unknown => false,
+            Self::Css(_) | Self::Json(_) | Self::Ignore | Self::Unknown => false,
         }
     }
 }
@@ -511,6 +526,7 @@ impl std::fmt::Display for DocumentFileSource {
                 }
             }
             Self::Css(_) => write!(fmt, "CSS"),
+            #[cfg(feature = "lang_graphql")]
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
             #[cfg(feature = "lang_grit")]
@@ -1279,6 +1295,7 @@ pub(crate) struct Features {
     vue: VueFileHandler,
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
+    #[cfg(feature = "lang_graphql")]
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     #[cfg(feature = "lang_grit")]
@@ -1299,6 +1316,7 @@ impl Features {
             astro: AstroFileHandler {},
             svelte: SvelteFileHandler {},
             vue: VueFileHandler {},
+            #[cfg(feature = "lang_graphql")]
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             #[cfg(feature = "lang_grit")]
@@ -1333,6 +1351,7 @@ impl Features {
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
+            #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             #[cfg(feature = "lang_grit")]
@@ -1522,6 +1541,7 @@ impl RegistryVisitor<CssLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1870,6 +1890,7 @@ impl RegistryVisitor<CssLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -2077,6 +2098,7 @@ impl RegistryVisitor<CssLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -2194,6 +2216,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut syntax);
         biome_css_analyze::visit_registry(&mut syntax);
         biome_json_analyze::visit_registry(&mut syntax);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut syntax);
         biome_html_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
@@ -2243,6 +2266,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut lint);
         biome_css_analyze::visit_registry(&mut lint);
         biome_json_analyze::visit_registry(&mut lint);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut lint);
         biome_html_analyze::visit_registry(&mut lint);
         let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
@@ -2254,6 +2278,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_js_analyze::visit_registry(&mut assist);
         biome_css_analyze::visit_registry(&mut assist);
         biome_json_analyze::visit_registry(&mut assist);
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut assist);
         biome_html_analyze::visit_registry(&mut assist);
         let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =
