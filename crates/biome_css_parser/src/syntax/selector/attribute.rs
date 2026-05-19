@@ -82,6 +82,8 @@ fn parse_attribute_name_identifier(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_interpolated_attribute_identifier(p) {
+        // `[lang=#{$locale}]` keeps `lang` as CssIdentifier; only
+        // `[data-#{$name}=x]` needs an interpolated attribute name.
         parse_scss_interpolated_identifier(p)
     } else {
         parse_regular_identifier(p)

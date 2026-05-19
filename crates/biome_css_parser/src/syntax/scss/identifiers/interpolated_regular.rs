@@ -10,6 +10,28 @@ use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPO
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
+/// Parses SCSS-interpolated name slots.
+///
+/// Bare interpolation like `#{$feature}` becomes an interpolated identifier
+/// because callers expect a name node.
+///
+/// Examples:
+/// ```scss
+/// @media (#{$feature}: block) {}
+/// [data-#{$name}] {}
+/// .a { value: foo#{1 + 1}(arg); }
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/interpolation
+#[inline]
+pub(crate) fn parse_scss_interpolated_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_interpolated_identifier(p) {
+        parse_scss_interpolated_identifier(p)
+    } else {
+        parse_regular_identifier(p)
+    }
+}
+
 /// Parses identifier-shaped SCSS syntax that may contain interpolation parts.
 ///
 /// This is different from [`parse_scss_regular_interpolation`],
@@ -48,8 +70,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
     Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
-/// Parses an interpolation-led SCSS value as an interpolated identifier only
-/// when adjacent identifier fragments follow immediately.
+/// Parses SCSS interpolation or adjacent identifier fragments in value slots.
 ///
 /// Standalone interpolation like `#{$name}` remains a `ScssInterpolation`,
 /// while adjacent forms such as `#{$name}-suffix` become a
@@ -63,7 +84,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
-pub(crate) fn parse_scss_identifier_or_interpolation(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_interpolation_or_identifier(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_interpolated_identifier(p) {
         return Absent;
     }

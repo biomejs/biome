@@ -549,7 +549,7 @@ CssRoot {
                         CssMediaConditionQuery {
                             condition: CssMediaFeatureInParens {
                                 l_paren_token: L_PAREN@325..326 "(" [] [],
-                                feature: CssQueryFeatureRange {
+                                feature: CssQueryFeatureReverseRange {
                                     left: ScssInterpolatedIdentifier {
                                         items: ScssInterpolatedIdentifierPartList [
                                             ScssInterpolation {
@@ -1292,7 +1292,7 @@ CssRoot {
             0: CSS_MEDIA_CONDITION_QUERY@325..346
               0: CSS_MEDIA_FEATURE_IN_PARENS@325..346
                 0: L_PAREN@325..326 "(" [] []
-                1: CSS_QUERY_FEATURE_RANGE@326..344
+                1: CSS_QUERY_FEATURE_REVERSE_RANGE@326..344
                   0: SCSS_INTERPOLATED_IDENTIFIER@326..336
                     0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@326..336
                       0: SCSS_INTERPOLATION@326..333
