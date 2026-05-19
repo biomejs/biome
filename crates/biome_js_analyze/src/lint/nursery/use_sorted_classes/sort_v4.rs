@@ -142,11 +142,6 @@ impl SortKey {
                 };
 
                 if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                    // TODO: functional modifiers (`bg-[#fff]/50`, `text-lg/8`).
-                    if f.modifier().is_some() {
-                        return Self::Unknown;
-                    }
-
                     let kind = ValueKind::Arbitrary(arb.value());
                     return resolve_branch(branches, &kind, registration_idx)
                         .unwrap_or(Self::Unknown);
@@ -497,6 +492,14 @@ mod tests {
     #[test]
     fn arbitrary_candidate_with_modifier_sorts_by_inner_property() {
         assert_eq!(sort("flex [color:red]/50"), "flex [color:red]/50");
+    }
+
+    #[test]
+    fn functional_arbitrary_modifier_does_not_change_sort_key() {
+        assert_eq!(
+            sort("ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50"),
+            "flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50"
+        );
     }
 
     #[test]

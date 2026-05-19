@@ -123,6 +123,15 @@ sorted: text-lg/8 flex
 input:  flex w-1/foo
 sorted: w-1/foo flex
 ---
+input:  ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50
+sorted: flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50
+---
+input:  text-[#fff]/50 text-[20px]/8 flex
+sorted: flex text-[20px]/8 text-[#fff]/50
+---
+input:  flex [mask-type:luminance]/50 [color:red]/50
+sorted: flex [mask-type:luminance]/50 [color:red]/50
+---
 input:  to-purple-500 from-blue-500 via-pink-500
 sorted: from-blue-500 via-pink-500 to-purple-500
 ---

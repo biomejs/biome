@@ -80,6 +80,15 @@
 	"flex text-lg/8",             // line-height modifier — Unknown (TODO: line-height)
 	"flex w-1/foo",               // value=Number, modifier=Named(non-numeric) → Unknown
 
+	// ─── arbitrary value modifiers ─────────────────────────────────
+	// Modifiers do not contribute to the sort key for arbitrary values;
+	// the base utility and arbitrary value still determine the property
+	// bucket.
+
+	"ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50",
+	"text-[#fff]/50 text-[20px]/8 flex",
+	"flex [mask-type:luminance]/50 [color:red]/50",
+
 	// ─── gradients ──────────────────────────────────────────────────
 	// from/via/to are registered in order; sort must preserve that
 	// bucket order when interleaved with other utilities or shuffled
