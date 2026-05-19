@@ -35,19 +35,21 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             colon_token,
             value,
         } = node.as_fields();
-
-        let is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
+        let is_key_self_breaking = key.as_ref().is_ok_and(is_self_breaking_value);
+        let is_value_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
+        let key = key.format();
+        let colon = colon_token.format();
+        let value = value.format();
 
         write!(
             f,
-            [group(&format_args![
-                key.format(),
-                colon_token.format(),
-                FormatScssMapExpressionPairValue {
-                    value: &value.format(),
-                    is_self_breaking,
-                }
-            ])]
+            [FormatScssMapPairLayout {
+                key: &key,
+                colon: &colon,
+                value: &value,
+                is_key_self_breaking,
+                is_value_self_breaking,
+            }]
         )
     }
 
@@ -91,28 +93,64 @@ impl ScssMapPairLeadingCommentLayout {
     }
 }
 
-/// Formats the value in `key: value`.
+/// Formats `key: value` with Prettier's map-pair wrapping.
 ///
-/// Self-breaking values such as `key: (a, b)` stay after the colon; scalar
-/// values may break as `key:\n  value`.
-struct FormatScssMapExpressionPairValue<'a> {
+/// A broken key can still keep a short scalar value after `:`, e.g.
+/// `("long", "key"): value`. Parenthesized values stay after `:`, e.g.
+/// `key: (value)`.
+struct FormatScssMapPairLayout<'a> {
+    key: &'a dyn Format<CssFormatContext>,
+    colon: &'a dyn Format<CssFormatContext>,
     value: &'a dyn Format<CssFormatContext>,
-    is_self_breaking: bool,
+    is_key_self_breaking: bool,
+    is_value_self_breaking: bool,
 }
 
-impl Format<CssFormatContext> for FormatScssMapExpressionPairValue<'_> {
+impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.is_self_breaking {
-            write!(f, [space(), self.value])
-        } else {
-            write!(
+        if self.is_value_self_breaking && !self.is_key_self_breaking {
+            return write!(
                 f,
-                [indent(&format_args![
-                    soft_line_break_or_space(),
+                [group(&format_args![
+                    self.key,
+                    self.colon,
+                    space(),
                     self.value
                 ])]
-            )
+            );
         }
+
+        write!(f, [group(&indent(&self.format_breakable_pair()))])
+    }
+}
+
+impl FormatScssMapPairLayout<'_> {
+    /// Formats a pair whose key or scalar value may break.
+    ///
+    /// Example: `("long", "key"): value`.
+    fn format_breakable_pair(&self) -> impl Format<CssFormatContext> + '_ {
+        format_with(|f| {
+            let separator = soft_line_break_or_space();
+            let value_separator = format_with(|f| {
+                if self.is_value_self_breaking {
+                    write!(f, [space()])
+                } else {
+                    write!(f, [soft_line_break_or_space()])
+                }
+            });
+            let empty_separator = format_once(|_| Ok(()));
+            let key = format_with(|f| write!(f, [self.key]));
+            let key = dedent(&key);
+            let mut fill = f.fill();
+
+            fill.entry(&separator, &key);
+            // `fill` alternates item/separator/item; `:` is an item glued to
+            // the key with an empty separator, e.g. `("a", "b"): value`.
+            fill.entry(&empty_separator, self.colon);
+            fill.entry(&value_separator, self.value);
+
+            fill.finish()
+        })
     }
 }
 
