@@ -504,5 +504,34 @@ mod tests {
         assert_eq!(SortKey::from_candidate(&full), known(display_idx, 1, 0));
     }
 
+    #[test]
+    fn sort_routes_arbitrary_typed_background_values_to_their_css_properties() {
+        assert_eq!(
+            sort("bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]"),
+            "bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]"
+        );
+    }
+
+    #[test]
+    fn sort_routes_arbitrary_typed_border_width_before_color() {
+        assert_eq!(sort("border-[#f00] border-[2px]"), "border-[2px] border-[#f00]");
+    }
+
+    #[test]
+    fn sort_routes_arbitrary_typed_text_size_before_color() {
+        assert_eq!(
+            sort("text-[#fff] text-[larger] text-[20px]"),
+            "text-[larger] text-[20px] text-[#fff]"
+        );
+    }
+
+    #[test]
+    fn sort_handles_realistic_arbitrary_value_mix() {
+        assert_eq!(
+            sort("ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex"),
+            "flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]"
+        );
+    }
+
     // endregion: sort_class_list edge cases
 }
