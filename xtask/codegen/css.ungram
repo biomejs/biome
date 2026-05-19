@@ -2004,14 +2004,19 @@ CssValueAtRuleGenericValue = SyntaxElement*
 /// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
 /// supported by the parser, ensuring that the stylesheet can still be processed without errors.
 CssUnknownBlockAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	block: AnyCssDeclarationOrRuleBlock
 
 CssUnknownValueAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	';'
+
+AnyCssUnknownAtRuleName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+	| ScssInterpolation
 
 CssUnknownAtRuleComponentList = SyntaxElement*
 

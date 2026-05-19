@@ -3380,7 +3380,7 @@ impl CssUnknownAttrUnit {
     }
 }
 impl CssUnknownBlockAtRule {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssUnknownAtRuleName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3422,7 +3422,7 @@ impl CssUnknownSyntaxTypeName {
     }
 }
 impl CssUnknownValueAtRule {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssUnknownAtRuleName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

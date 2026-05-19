@@ -5,3 +5,7 @@
 @fake base;
 @fake components;
 @fake utilities;
+
+@fake fn({ width: 300px }) query {
+	color: red;
+}

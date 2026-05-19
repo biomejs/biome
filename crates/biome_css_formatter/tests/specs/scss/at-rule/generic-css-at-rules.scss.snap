@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/generic-css-at-rules.scss
+---
+
+# Input
+
+```scss
+@#{$rule-name}   #{$value};
+
+@unknown   #{meta.inspect($value)}{color:red}
+
+@unknown fn({ width: 300px })   #{$query}{color:red}
+
+```
+
+
+# Formatted
+
+```scss
+@#{$rule-name} #{$value};
+
+@unknown #{meta.inspect($value)} {
+	color: red;
+}
+
+@unknown fn({ width: 300px })   #{$query} {
+	color: red;
+}
+
+```

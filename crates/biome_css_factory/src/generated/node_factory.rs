@@ -2902,7 +2902,7 @@ pub fn css_unknown_attr_unit(unit_token: SyntaxToken) -> CssUnknownAttrUnit {
     ))
 }
 pub fn css_unknown_block_at_rule(
-    name: CssIdentifier,
+    name: AnyCssUnknownAtRuleName,
     components: CssUnknownAtRuleComponentList,
     block: AnyCssDeclarationOrRuleBlock,
 ) -> CssUnknownBlockAtRule {
@@ -2934,7 +2934,7 @@ pub fn css_unknown_syntax_type_name(name_token: SyntaxToken) -> CssUnknownSyntax
     ))
 }
 pub fn css_unknown_value_at_rule(
-    name: CssIdentifier,
+    name: AnyCssUnknownAtRuleName,
     components: CssUnknownAtRuleComponentList,
     semicolon_token: SyntaxToken,
 ) -> CssUnknownValueAtRule {

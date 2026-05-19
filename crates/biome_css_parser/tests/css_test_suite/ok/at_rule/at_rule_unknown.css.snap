@@ -14,6 +14,10 @@ expression: snapshot
 @fake components;
 @fake utilities;
 
+@fake fn({ width: 300px }) query {
+	color: red;
+}
+
 ```
 
 
@@ -112,17 +116,62 @@ CssRoot {
                 semicolon_token: SEMICOLON@106..107 ";" [] [],
             },
         },
+        CssAtRule {
+            at_token: AT@107..110 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@110..115 "fake" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@115..117 "fn" [] [],
+                        L_PAREN@117..118 "(" [] [],
+                        L_CURLY@118..120 "{" [] [Whitespace(" ")],
+                        IDENT@120..125 "width" [] [],
+                        COLON@125..127 ":" [] [Whitespace(" ")],
+                        CSS_DIMENSION_VALUE@127..130 "300" [] [],
+                        PX_KW@130..133 "px" [] [Whitespace(" ")],
+                        R_CURLY@133..134 "}" [] [],
+                        R_PAREN@134..136 ")" [] [Whitespace(" ")],
+                        IDENT@136..142 "query" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@142..143 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@143..150 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@150..152 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@152..155 "red" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@155..156 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@156..158 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@107..108 "" [Newline("\n")] [],
+    eof_token: EOF@158..159 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..108
+0: CSS_ROOT@0..159
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..107
+  1: CSS_ROOT_ITEM_LIST@0..158
     0: CSS_QUALIFIED_RULE@0..59
       0: CSS_SELECTOR_LIST@0..11
         0: CSS_COMPOUND_SELECTOR@0..11
@@ -180,6 +229,37 @@ CssRoot {
         1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@97..106
           0: IDENT@97..106 "utilities" [] []
         2: SEMICOLON@106..107 ";" [] []
-  2: EOF@107..108 "" [Newline("\n")] []
+    4: CSS_AT_RULE@107..158
+      0: AT@107..110 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@110..158
+        0: CSS_IDENTIFIER@110..115
+          0: IDENT@110..115 "fake" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@115..142
+          0: IDENT@115..117 "fn" [] []
+          1: L_PAREN@117..118 "(" [] []
+          2: L_CURLY@118..120 "{" [] [Whitespace(" ")]
+          3: IDENT@120..125 "width" [] []
+          4: COLON@125..127 ":" [] [Whitespace(" ")]
+          5: CSS_DIMENSION_VALUE@127..130 "300" [] []
+          6: PX_KW@130..133 "px" [] [Whitespace(" ")]
+          7: R_CURLY@133..134 "}" [] []
+          8: R_PAREN@134..136 ")" [] [Whitespace(" ")]
+          9: IDENT@136..142 "query" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@142..158
+          0: L_CURLY@142..143 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@143..156
+            0: CSS_DECLARATION_WITH_SEMICOLON@143..156
+              0: CSS_DECLARATION@143..155
+                0: CSS_GENERIC_PROPERTY@143..155
+                  0: CSS_IDENTIFIER@143..150
+                    0: IDENT@143..150 "color" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@150..152 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@152..155
+                    0: CSS_IDENTIFIER@152..155
+                      0: IDENT@152..155 "red" [] []
+                1: (empty)
+              1: SEMICOLON@155..156 ";" [] []
+          2: R_CURLY@156..158 "}" [Newline("\n")] []
+  2: EOF@158..159 "" [Newline("\n")] []
 
 ```

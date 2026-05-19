@@ -8510,7 +8510,7 @@ impl CssUnknownBlockAtRule {
             block: self.block(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssUnknownAtRuleName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
@@ -8530,7 +8530,7 @@ impl Serialize for CssUnknownBlockAtRule {
 }
 #[derive(Serialize)]
 pub struct CssUnknownBlockAtRuleFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssUnknownAtRuleName>,
     pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
@@ -8630,7 +8630,7 @@ impl CssUnknownValueAtRule {
             semicolon_token: self.semicolon_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssUnknownAtRuleName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
@@ -8650,7 +8650,7 @@ impl Serialize for CssUnknownValueAtRule {
 }
 #[derive(Serialize)]
 pub struct CssUnknownValueAtRuleFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssUnknownAtRuleName>,
     pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -16271,6 +16271,32 @@ impl AnyCssUnicodeValue {
     pub fn as_css_unicode_range_wildcard(&self) -> Option<&CssUnicodeRangeWildcard> {
         match &self {
             Self::CssUnicodeRangeWildcard(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssUnknownAtRuleName {
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssInterpolation(ScssInterpolation),
+}
+impl AnyCssUnknownAtRuleName {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -41984,6 +42010,82 @@ impl From<AnyCssUnicodeValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssUnknownAtRuleName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssUnknownAtRuleName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl From<ScssInterpolation> for AnyCssUnknownAtRuleName {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl AstNode for AnyCssUnknownAtRuleName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssInterpolation::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_INTERPOLATION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssUnknownAtRuleName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssUnknownAtRuleName> for SyntaxNode {
+    fn from(n: AnyCssUnknownAtRuleName) -> Self {
+        match n {
+            AnyCssUnknownAtRuleName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssUnknownAtRuleName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyCssUnknownAtRuleName::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssUnknownAtRuleName> for SyntaxElement {
+    fn from(n: AnyCssUnknownAtRuleName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusUrlModifier> for AnyCssUrlModifier {
     fn from(node: CssBogusUrlModifier) -> Self {
         Self::CssBogusUrlModifier(node)
@@ -44937,6 +45039,11 @@ impl std::fmt::Display for AnyCssType {
     }
 }
 impl std::fmt::Display for AnyCssUnicodeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssUnknownAtRuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
