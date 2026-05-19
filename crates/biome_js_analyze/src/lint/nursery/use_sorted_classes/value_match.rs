@@ -1,6 +1,6 @@
-//! AST predicates for Tailwind v4 ArbitraryTyped value classification.
+//! AST predicates for Tailwind v4 typed arbitrary value classification.
 //!
-//! Each ValueType predicate receives a `CssGenericComponentValueList` and
+//! Each CssDataType predicate receives a `CssGenericComponentValueList` and
 //! returns whether the parsed arbitrary value satisfies that type. The caller
 //! walks utility branches in preset order, mirroring Tailwind's
 //! `infer-data-type.ts` priority model without collapsing the value to one
@@ -12,7 +12,7 @@ use biome_tailwind_syntax::{
     CssFunction, CssGenericComponentValueList,
 };
 
-use super::tailwind_preset_v4_types::ValueType;
+use super::tailwind_preset_v4_types::CssDataType;
 
 const LENGTH_UNITS: &[&str] = &[
     "cm", "mm", "Q", "in", "pc", "pt", "px", "em", "ex", "ch", "rem", "lh", "rlh", "vw",
@@ -214,17 +214,17 @@ const NAMED_COLORS: &[&str] = &[
     "accentcolortext",
 ];
 
-pub fn value_matches_type(list: &CssGenericComponentValueList, vt: ValueType) -> bool {
+pub fn value_matches_type(list: &CssGenericComponentValueList, vt: CssDataType) -> bool {
     if starts_with_var_function(list) {
         return false;
     }
 
     match vt {
-        ValueType::Position => return is_position(list),
-        ValueType::BgSize => return is_bg_size(list),
-        ValueType::LineWidth => return is_line_width(list),
-        ValueType::Image => return is_image(list),
-        ValueType::Vector => return is_vector(list),
+        CssDataType::Position => return is_position(list),
+        CssDataType::BgSize => return is_bg_size(list),
+        CssDataType::LineWidth => return is_line_width(list),
+        CssDataType::Image => return is_image(list),
+        CssDataType::Vector => return is_vector(list),
         _ => {}
     }
 
@@ -233,27 +233,27 @@ pub fn value_matches_type(list: &CssGenericComponentValueList, vt: ValueType) ->
     };
 
     match vt {
-        ValueType::Color => is_color(&value),
-        ValueType::Length => is_length(&value),
-        ValueType::Percentage => is_percentage(&value),
-        ValueType::Number => is_number(&value),
-        ValueType::Integer => is_positive_integer(&value),
-        ValueType::Ratio => is_ratio(&value),
-        ValueType::Angle => is_angle(&value),
-        ValueType::Url => is_url(&value),
-        ValueType::AbsoluteSize => is_identifier_one_of(
+        CssDataType::Color => is_color(&value),
+        CssDataType::Length => is_length(&value),
+        CssDataType::Percentage => is_percentage(&value),
+        CssDataType::Number => is_number(&value),
+        CssDataType::Integer => is_positive_integer(&value),
+        CssDataType::Ratio => is_ratio(&value),
+        CssDataType::Angle => is_angle(&value),
+        CssDataType::Url => is_url(&value),
+        CssDataType::AbsoluteSize => is_identifier_one_of(
             &value,
             &[
                 "xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large",
                 "xxx-large",
             ],
         ),
-        ValueType::RelativeSize => is_identifier_one_of(&value, &["larger", "smaller"]),
-        ValueType::Position
-        | ValueType::BgSize
-        | ValueType::LineWidth
-        | ValueType::Image
-        | ValueType::Vector => unreachable!(),
+        CssDataType::RelativeSize => is_identifier_one_of(&value, &["larger", "smaller"]),
+        CssDataType::Position
+        | CssDataType::BgSize
+        | CssDataType::LineWidth
+        | CssDataType::Image
+        | CssDataType::Vector => unreachable!(),
     }
 }
 
@@ -659,43 +659,43 @@ mod tests {
 
     #[test]
     fn length_matches_dimensions_and_math_functions() {
-        assert!(value_matches_type(&parse_value!("10px"), ValueType::Length));
+        assert!(value_matches_type(&parse_value!("10px"), CssDataType::Length));
         assert!(value_matches_type(
             &parse_value!("calc(100%-1rem)"),
-            ValueType::Length
+            CssDataType::Length
         ));
         assert!(value_matches_type(
             &parse_value!("CALC(100%-1rem)"),
-            ValueType::Length
+            CssDataType::Length
         ));
-        assert!(!value_matches_type(&parse_value!("45deg"), ValueType::Length));
+        assert!(!value_matches_type(&parse_value!("45deg"), CssDataType::Length));
     }
 
     #[test]
     fn angle_matches_only_angle_dimensions() {
-        assert!(value_matches_type(&parse_value!("45deg"), ValueType::Angle));
-        assert!(value_matches_type(&parse_value!("0.5turn"), ValueType::Angle));
+        assert!(value_matches_type(&parse_value!("45deg"), CssDataType::Angle));
+        assert!(value_matches_type(&parse_value!("0.5turn"), CssDataType::Angle));
         assert!(!value_matches_type(
             &parse_value!("calc(45deg+5deg)"),
-            ValueType::Angle
+            CssDataType::Angle
         ));
     }
 
     #[test]
     fn percentage_number_integer_and_ratio_match_expected_shapes() {
-        assert!(value_matches_type(&parse_value!("50%"), ValueType::Percentage));
+        assert!(value_matches_type(&parse_value!("50%"), CssDataType::Percentage));
         assert!(value_matches_type(
             &parse_value!("calc(50%+1px)"),
-            ValueType::Percentage
+            CssDataType::Percentage
         ));
-        assert!(value_matches_type(&parse_value!("-3.5"), ValueType::Number));
-        assert!(value_matches_type(&parse_value!("3"), ValueType::Integer));
-        assert!(!value_matches_type(&parse_value!("3.5"), ValueType::Integer));
-        assert!(!value_matches_type(&parse_value!("-3"), ValueType::Integer));
-        assert!(value_matches_type(&parse_value!("16/9"), ValueType::Ratio));
+        assert!(value_matches_type(&parse_value!("-3.5"), CssDataType::Number));
+        assert!(value_matches_type(&parse_value!("3"), CssDataType::Integer));
+        assert!(!value_matches_type(&parse_value!("3.5"), CssDataType::Integer));
+        assert!(!value_matches_type(&parse_value!("-3"), CssDataType::Integer));
+        assert!(value_matches_type(&parse_value!("16/9"), CssDataType::Ratio));
         assert!(value_matches_type(
             &parse_value!("calc(16/9)"),
-            ValueType::Ratio
+            CssDataType::Ratio
         ));
     }
 
@@ -705,54 +705,54 @@ mod tests {
 
     #[test]
     fn color_matches_hash_functions_and_named_colors() {
-        assert!(value_matches_type(&parse_value!("#abc"), ValueType::Color));
+        assert!(value_matches_type(&parse_value!("#abc"), CssDataType::Color));
         assert!(value_matches_type(
             &parse_value!("rgb(0,0,0)"),
-            ValueType::Color
+            CssDataType::Color
         ));
         assert!(value_matches_type(
             &parse_value!("color-mix(in_oklab,red,blue)"),
-            ValueType::Color
+            CssDataType::Color
         ));
-        assert!(value_matches_type(&parse_value!("rebeccapurple"), ValueType::Color));
+        assert!(value_matches_type(&parse_value!("rebeccapurple"), CssDataType::Color));
         assert!(value_matches_type(
             &parse_value!("currentColor"),
-            ValueType::Color
+            CssDataType::Color
         ));
-        assert!(!value_matches_type(&parse_value!("10px"), ValueType::Color));
+        assert!(!value_matches_type(&parse_value!("10px"), CssDataType::Color));
     }
 
     #[test]
     fn url_and_image_match_expected_functions() {
         assert!(value_matches_type(
             &parse_value!("url('/a.png')"),
-            ValueType::Url
+            CssDataType::Url
         ));
         assert!(value_matches_type(
             &parse_value!("URL('/a.png')"),
-            ValueType::Url
+            CssDataType::Url
         ));
         assert!(value_matches_type(
             &parse_value!("url('/a.png')"),
-            ValueType::Image
+            CssDataType::Image
         ));
         assert!(value_matches_type(
             &parse_value!("linear-gradient(red,blue)"),
-            ValueType::Image
+            CssDataType::Image
         ));
         assert!(value_matches_type(
             &parse_value!("LINEAR-GRADIENT(red,blue)"),
-            ValueType::Image
+            CssDataType::Image
         ));
         assert!(value_matches_type(
             &parse_value!("image-set(url(a.png)_1x,url(b.png)_2x)"),
-            ValueType::Image
+            CssDataType::Image
         ));
         assert!(!value_matches_type(
             &parse_value!("linear-gradient(red,blue)"),
-            ValueType::Url
+            CssDataType::Url
         ));
-        assert!(!value_matches_type(&parse_value!("red"), ValueType::Image));
+        assert!(!value_matches_type(&parse_value!("red"), CssDataType::Image));
     }
 
     // endregion: color / image
@@ -761,28 +761,28 @@ mod tests {
 
     #[test]
     fn line_width_matches_single_or_multi_width_values() {
-        assert!(value_matches_type(&parse_value!("thin"), ValueType::LineWidth));
-        assert!(value_matches_type(&parse_value!("2px"), ValueType::LineWidth));
+        assert!(value_matches_type(&parse_value!("thin"), CssDataType::LineWidth));
+        assert!(value_matches_type(&parse_value!("2px"), CssDataType::LineWidth));
         assert!(value_matches_type(
             &parse_value!("1px 2px"),
-            ValueType::LineWidth
+            CssDataType::LineWidth
         ));
-        assert!(!value_matches_type(&parse_value!("solid"), ValueType::LineWidth));
+        assert!(!value_matches_type(&parse_value!("solid"), CssDataType::LineWidth));
     }
 
     #[test]
     fn font_size_keywords_match_their_specific_value_types() {
         assert!(value_matches_type(
             &parse_value!("xx-small"),
-            ValueType::AbsoluteSize
+            CssDataType::AbsoluteSize
         ));
         assert!(value_matches_type(
             &parse_value!("larger"),
-            ValueType::RelativeSize
+            CssDataType::RelativeSize
         ));
         assert!(!value_matches_type(
             &parse_value!("small"),
-            ValueType::RelativeSize
+            CssDataType::RelativeSize
         ));
     }
 
@@ -792,57 +792,57 @@ mod tests {
 
     #[test]
     fn position_matches_keywords_lengths_percentages_and_vars() {
-        assert!(value_matches_type(&parse_value!("top"), ValueType::Position));
+        assert!(value_matches_type(&parse_value!("top"), CssDataType::Position));
         assert!(value_matches_type(
             &parse_value!("top left"),
-            ValueType::Position
+            CssDataType::Position
         ));
         assert!(value_matches_type(
             &parse_value!("50% 10px"),
-            ValueType::Position
+            CssDataType::Position
         ));
         assert!(value_matches_type(
             &parse_value!("top var(--pos)"),
-            ValueType::Position
+            CssDataType::Position
         ));
         assert!(!value_matches_type(
             &parse_value!("var(--pos)"),
-            ValueType::Position
+            CssDataType::Position
         ));
         assert!(!value_matches_type(
             &parse_value!("var(--pos) top"),
-            ValueType::Position
+            CssDataType::Position
         ));
-        assert!(!value_matches_type(&parse_value!("foo"), ValueType::Position));
+        assert!(!value_matches_type(&parse_value!("foo"), CssDataType::Position));
     }
 
     #[test]
     fn background_size_matches_css_background_size_shapes() {
-        assert!(value_matches_type(&parse_value!("cover"), ValueType::BgSize));
-        assert!(value_matches_type(&parse_value!("auto"), ValueType::BgSize));
+        assert!(value_matches_type(&parse_value!("cover"), CssDataType::BgSize));
+        assert!(value_matches_type(&parse_value!("auto"), CssDataType::BgSize));
         assert!(value_matches_type(
             &parse_value!("200px 100%"),
-            ValueType::BgSize
+            CssDataType::BgSize
         ));
         assert!(value_matches_type(
             &parse_value!("200px_100%"),
-            ValueType::BgSize
+            CssDataType::BgSize
         ));
         assert!(value_matches_type(
             &parse_value!("cover,contain"),
-            ValueType::BgSize
+            CssDataType::BgSize
         ));
         assert!(!value_matches_type(
             &parse_value!("200px 100% 50%"),
-            ValueType::BgSize
+            CssDataType::BgSize
         ));
     }
 
     #[test]
     fn vector_matches_exactly_three_numbers() {
-        assert!(value_matches_type(&parse_value!("1 2 3"), ValueType::Vector));
-        assert!(!value_matches_type(&parse_value!("1 2"), ValueType::Vector));
-        assert!(!value_matches_type(&parse_value!("1px 2 3"), ValueType::Vector));
+        assert!(value_matches_type(&parse_value!("1 2 3"), CssDataType::Vector));
+        assert!(!value_matches_type(&parse_value!("1 2"), CssDataType::Vector));
+        assert!(!value_matches_type(&parse_value!("1px 2 3"), CssDataType::Vector));
     }
 
     // endregion: multi-value

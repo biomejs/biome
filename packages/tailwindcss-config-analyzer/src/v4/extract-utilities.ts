@@ -8,24 +8,24 @@
 //      `--text-*` and `--breakpoint-*`.
 //   2. Named-path probes:
 //        a. (basename × namespace): `<basename>-<namespace-token>` →
-//           emit `Named` if compiles.
+//           emit `NamedBranch::Theme` if compiles.
 //        b. (basename × Number/Percentage/Ratio sample): `<basename>-7`,
-//           `<basename>-25%`, `<basename>-1/2` → emit `NamedTyped`.
+//           `<basename>-25%`, `<basename>-1/2` → emit `NamedBranch::Typed`.
 //   3. Arbitrary-path probes:
 //        a. Nonsense `<basename>-[abcxyz]` — establishes the utility's
 //           type-blind fallback property, if any.
-//        b. (basename × every ValueType, with explicit dataType marker)
-//           `<basename>-[<marker>:<sample>]` — emit `ArbitraryTyped` only when
-//           the resulting (property, count) differs from the nonsense
-//           fallback. Equal results are absorbed by the `Arbitrary`
+//        b. (basename × every CssDataType, with explicit dataType marker)
+//           `<basename>-[<marker>:<sample>]` — emit `ArbitraryBranch::Typed`
+//           only when the resulting (property, count) differs from the nonsense
+//           fallback. Equal results are absorbed by the `ArbitraryBranch::Fallback`
 //           entry.
 //        c. If the utility produced a nonsense result, emit one
-//           `Arbitrary` entry carrying that fallback property.
+//           `ArbitraryBranch::Fallback` entry carrying that fallback property.
 //   4. Iterate `getClassList()` for hardcoded keywords on functional
 //      utilities. Classes not in `keys('static')`, not numeric, not
 //      theme-keyed, and not a probe token are keyword variants baked
 //      into the compileFn (e.g. `origin-top`, `accent-current`). Group
-//      by (basename, prop, count) and emit `NamedKeyword` branches.
+//      by (basename, prop, count) and emit `NamedBranch::Keyword` branches.
 //   5. Static utilities (`keys('static')`) get a flat per-name table.
 
 import { __unstable__loadDesignSystem } from "tailwindcss";
@@ -42,7 +42,7 @@ import {
 	THEME_NAMESPACES,
 	type ThemeNamespaceVariant,
 } from "./theme-namespaces.js";
-import type { ValueType } from "./value-types.js";
+import type { CssDataType } from "./value-types.js";
 
 export type StaticUtility = {
 	name: string;
@@ -52,47 +52,58 @@ export type StaticUtility = {
 	negative_registration_idx: number | null;
 };
 
-export type Branch =
+export type NamedBranch =
 	| {
-			kind: "Named";
+			kind: "Theme";
 			namespace: ThemeNamespaceVariant;
 			sort_property: string;
 			property_count: number;
 	  }
 	| {
-			kind: "NamedKeyword";
+			kind: "Keyword";
 			keywords: string[];
 			sort_property: string;
 			property_count: number;
 	  }
 	| {
-			kind: "NamedTyped";
-			value_type: ValueType;
-			sort_property: string;
-			property_count: number;
-	  }
-	| {
-			kind: "ArbitraryTyped";
-			value_type: ValueType;
-			sort_property: string;
-			property_count: number;
-	  }
-	| {
-			kind: "Arbitrary";
+			kind: "Typed";
+			value_type: CssDataType;
 			sort_property: string;
 			property_count: number;
 	  };
 
+export type ArbitraryBranch =
+	| {
+			kind: "Typed";
+			value_type: CssDataType;
+			sort_property: string;
+			property_count: number;
+	  }
+	| {
+			kind: "Fallback";
+			sort_property: string;
+			property_count: number;
+	  };
+
+export type FunctionalBranches = {
+	namedBranches: NamedBranch[];
+	arbitraryBranches: ArbitraryBranch[];
+};
+
 export type FunctionalUtility = {
 	basename: string;
 	registration_idx: number;
-	branches: Branch[];
+	namedBranches: NamedBranch[];
+	arbitraryBranches: ArbitraryBranch[];
 	negative: Negative | null;
 };
 
 export type Negative =
 	| { kind: "SameBranches"; registration_idx: number }
-	| { kind: "Distinct"; registration_idx: number; branches: Branch[] };
+	| ({
+			kind: "Distinct";
+			registration_idx: number;
+	  } & FunctionalBranches);
 
 export type ExtractedUtilities = {
 	static: StaticUtility[];
@@ -134,19 +145,21 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 		probeTokens,
 	});
 
-	type RawNegative = { registration_idx: number; branches: Branch[] };
+	type RawNegative = { registration_idx: number } & FunctionalBranches;
 	const positives = new Map<string, FunctionalUtility>();
 	const negatives = new Map<string, RawNegative>();
 	for (let i = 0; i < functionalKeys.length; i++) {
 		const key = functionalKeys[i];
-		const branches = dedupeBranches(branchesByBasename.get(key) ?? []);
+		const branches = dedupeFunctionalBranches(
+			branchesByBasename.get(key) ?? emptyFunctionalBranches(),
+		);
 		if (key.startsWith("-")) {
-			negatives.set(key.slice(1), { registration_idx: i, branches });
+			negatives.set(key.slice(1), { registration_idx: i, ...branches });
 		} else {
 			positives.set(key, {
 				basename: key,
 				registration_idx: i,
-				branches,
+				...branches,
 				negative: null,
 			});
 		}
@@ -158,12 +171,13 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 				`Negative basename '-${basename}' has no positive counterpart`,
 			);
 		}
-		positive.negative = sameBranches(positive.branches, neg.branches)
+		positive.negative = sameBranches(positive, neg)
 			? { kind: "SameBranches", registration_idx: neg.registration_idx }
 			: {
 					kind: "Distinct",
 					registration_idx: neg.registration_idx,
-					branches: neg.branches,
+					namedBranches: neg.namedBranches,
+					arbitraryBranches: neg.arbitraryBranches,
 				};
 	}
 	// Preserve the original Tailwind registration order of positive entries.
@@ -228,14 +242,21 @@ function extractStatic(
 
 type ProbeSlot =
 	| { basename: string; kind: "ns"; variant: ThemeNamespaceVariant }
-	| { basename: string; kind: "named-typed"; type: ValueType }
+	| { basename: string; kind: "named-typed"; type: CssDataType }
 	| { basename: string; kind: "nonsense" }
-	| { basename: string; kind: "ArbitraryTyped"; type: ValueType };
+	| { basename: string; kind: "arbitrary-typed"; type: CssDataType };
+
+function emptyFunctionalBranches(): FunctionalBranches {
+	return {
+		namedBranches: [],
+		arbitraryBranches: [],
+	};
+}
 
 function extractFunctionalBranches(
 	ds: Awaited<ReturnType<typeof __unstable__loadDesignSystem>>,
 	functionalKeys: string[],
-): Map<string, Branch[]> {
+): Map<string, FunctionalBranches> {
 	const probeClasses: string[] = [];
 	const probeMeta: ProbeSlot[] = [];
 	for (const basename of functionalKeys) {
@@ -251,7 +272,7 @@ function extractFunctionalBranches(
 		probeMeta.push({ basename, kind: "nonsense" });
 		for (const p of ARBITRARY_PROBES) {
 			probeClasses.push(`${basename}-[${p.marker}:${p.value}]`);
-			probeMeta.push({ basename, kind: "ArbitraryTyped", type: p.type });
+			probeMeta.push({ basename, kind: "arbitrary-typed", type: p.type });
 		}
 	}
 	const probeCss = ds.candidatesToCss(probeClasses);
@@ -282,16 +303,16 @@ function extractFunctionalBranches(
 		results.set(meta.basename, map);
 	}
 
-	const branchesByBasename = new Map<string, Branch[]>();
+	const branchesByBasename = new Map<string, FunctionalBranches>();
 	for (const basename of functionalKeys) {
-		const branches: Branch[] = [];
+		const branches = emptyFunctionalBranches();
 		const map = results.get(basename) ?? new Map<string, ProbeResult>();
 
 		for (const { variant } of THEME_NAMESPACES) {
 			const r = map.get(`ns:${variant}`);
 			if (!r) continue;
-			branches.push({
-				kind: "Named",
+			branches.namedBranches.push({
+				kind: "Theme",
 				namespace: variant,
 				sort_property: r.sort_property,
 				property_count: r.property_count,
@@ -301,8 +322,8 @@ function extractFunctionalBranches(
 		for (const p of NAMED_PREDICATE_PROBES) {
 			const r = map.get(`nt:${p.type}`);
 			if (!r) continue;
-			branches.push({
-				kind: "NamedTyped",
+			branches.namedBranches.push({
+				kind: "Typed",
 				value_type: p.type,
 				sort_property: r.sort_property,
 				property_count: r.property_count,
@@ -311,8 +332,8 @@ function extractFunctionalBranches(
 
 		const nonsense = map.get("nonsense") ?? null;
 		if (nonsense) {
-			branches.push({
-				kind: "Arbitrary",
+			branches.arbitraryBranches.push({
+				kind: "Fallback",
 				sort_property: nonsense.sort_property,
 				property_count: nonsense.property_count,
 			});
@@ -327,8 +348,8 @@ function extractFunctionalBranches(
 			) {
 				continue;
 			}
-			branches.push({
-				kind: "ArbitraryTyped",
+			branches.arbitraryBranches.push({
+				kind: "Typed",
 				value_type: p.type,
 				sort_property: r.sort_property,
 				property_count: r.property_count,
@@ -343,7 +364,7 @@ function extractFunctionalBranches(
 function addKeywordBranches(
 	ds: Awaited<ReturnType<typeof __unstable__loadDesignSystem>>,
 	ctx: {
-		branchesByBasename: Map<string, Branch[]>;
+		branchesByBasename: Map<string, FunctionalBranches>;
 		staticKeySet: Set<string>;
 		allThemeKeys: Set<string>;
 		probeTokens: Set<string>;
@@ -387,60 +408,103 @@ function addKeywordBranches(
 		group.keywords.add(value);
 	}
 	for (const group of groups.values()) {
-		const list = ctx.branchesByBasename.get(group.basename) ?? [];
-		list.push({
-			kind: "NamedKeyword",
+		const branches =
+			ctx.branchesByBasename.get(group.basename) ?? emptyFunctionalBranches();
+		branches.namedBranches.push({
+			kind: "Keyword",
 			keywords: [...group.keywords].sort(),
 			sort_property: group.sort_property,
 			property_count: group.property_count,
 		});
-		ctx.branchesByBasename.set(group.basename, list);
+		ctx.branchesByBasename.set(group.basename, branches);
 	}
 }
 
 // Branch resolve precedence — most specific match first. Stable sort
-// keeps relative order within the same kind (e.g. multiple `ArbitraryTyped`
-// entries stay in ValueType-catalog order from the probe matrix).
-const BRANCH_KIND_ORDER: Record<Branch["kind"], number> = {
-	NamedKeyword: 0,
-	Named: 1,
-	NamedTyped: 2,
-	ArbitraryTyped: 3,
-	Arbitrary: 4,
+// keeps relative order within the same kind (e.g. multiple arbitrary `Typed`
+// entries stay in CssDataType-catalog order from the probe matrix).
+const NAMED_BRANCH_KIND_ORDER: Record<NamedBranch["kind"], number> = {
+	Keyword: 0,
+	Theme: 1,
+	Typed: 2,
 };
 
-function sameBranches(a: Branch[], b: Branch[]): boolean {
+const ARBITRARY_BRANCH_KIND_ORDER: Record<ArbitraryBranch["kind"], number> = {
+	Typed: 0,
+	Fallback: 1,
+};
+
+function sameBranches(a: FunctionalBranches, b: FunctionalBranches): boolean {
+	return (
+		sameBranchList(a.namedBranches, b.namedBranches, namedBranchKey) &&
+		sameBranchList(
+			a.arbitraryBranches,
+			b.arbitraryBranches,
+			arbitraryBranchKey,
+		)
+	);
+}
+
+function sameBranchList<T>(
+	a: T[],
+	b: T[],
+	key: (branch: T) => string,
+): boolean {
 	if (a.length !== b.length) return false;
 	for (let i = 0; i < a.length; i++) {
-		if (branchKey(a[i]) !== branchKey(b[i])) return false;
+		if (key(a[i]) !== key(b[i])) return false;
 	}
 	return true;
 }
 
-function branchKey(b: Branch): string {
+function namedBranchKey(b: NamedBranch): string {
 	switch (b.kind) {
-		case "Named":
+		case "Theme":
 			return `N|${b.namespace}|${b.sort_property}|${b.property_count}`;
-		case "NamedKeyword":
+		case "Keyword":
 			return `K|${b.keywords.join(",")}|${b.sort_property}|${b.property_count}`;
-		case "NamedTyped":
+		case "Typed":
 			return `NT|${b.value_type}|${b.sort_property}|${b.property_count}`;
-		case "ArbitraryTyped":
-			return `T|${b.value_type}|${b.sort_property}|${b.property_count}`;
-		case "Arbitrary":
+	}
+}
+
+function arbitraryBranchKey(b: ArbitraryBranch): string {
+	switch (b.kind) {
+		case "Typed":
+			return `AT|${b.value_type}|${b.sort_property}|${b.property_count}`;
+		case "Fallback":
 			return `A|${b.sort_property}|${b.property_count}`;
 	}
 }
 
-function dedupeBranches(branches: Branch[]): Branch[] {
+function dedupeFunctionalBranches(branches: FunctionalBranches): FunctionalBranches {
+	return {
+		namedBranches: dedupeBranchList(
+			branches.namedBranches,
+			namedBranchKey,
+			NAMED_BRANCH_KIND_ORDER,
+		),
+		arbitraryBranches: dedupeBranchList(
+			branches.arbitraryBranches,
+			arbitraryBranchKey,
+			ARBITRARY_BRANCH_KIND_ORDER,
+		),
+	};
+}
+
+function dedupeBranchList<K extends string, T extends { kind: K }>(
+	branches: T[],
+	key: (branch: T) => string,
+	kindOrder: Record<K, number>,
+): T[] {
 	const seen = new Set<string>();
-	const out: Branch[] = [];
+	const out: T[] = [];
 	for (const b of branches) {
-		const key = branchKey(b);
-		if (seen.has(key)) continue;
-		seen.add(key);
+		const branchKey = key(b);
+		if (seen.has(branchKey)) continue;
+		seen.add(branchKey);
 		out.push(b);
 	}
-	out.sort((a, b) => BRANCH_KIND_ORDER[a.kind] - BRANCH_KIND_ORDER[b.kind]);
+	out.sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind]);
 	return out;
 }

@@ -12,7 +12,8 @@
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    Branch::*, FunctionalEntry, Negative::*, ThemeNamespace, UtilityEntry, ValueType,
+    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, Negative::*, ThemeNamespace,
+    UtilityEntry,
 };
 
 pub static PROPERTY_INDEX: phf::Map<&'static str, u16> = phf_map! {
@@ -1235,2327 +1236,2809 @@ pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_map! {
     "inset" => FunctionalEntry {
         registration_idx: 1,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 4, 1),
-            NamedTyped(ValueType::Number, 4, 1),
-            NamedTyped(ValueType::Ratio, 4, 1),
-            Arbitrary(4, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 4, 1),
+            NamedBranch::Typed(CssDataType::Number, 4, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 4, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(4, 1),
         ],
         negative: Some(SameBranches { registration_idx: 0 }),
     },
     "inset-x" => FunctionalEntry {
         registration_idx: 3,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 5, 1),
-            NamedTyped(ValueType::Number, 5, 1),
-            NamedTyped(ValueType::Ratio, 5, 1),
-            Arbitrary(5, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 5, 1),
+            NamedBranch::Typed(CssDataType::Number, 5, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 5, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(5, 1),
         ],
         negative: Some(SameBranches { registration_idx: 2 }),
     },
     "inset-y" => FunctionalEntry {
         registration_idx: 5,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 6, 1),
-            NamedTyped(ValueType::Number, 6, 1),
-            NamedTyped(ValueType::Ratio, 6, 1),
-            Arbitrary(6, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 6, 1),
+            NamedBranch::Typed(CssDataType::Number, 6, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 6, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(6, 1),
         ],
         negative: Some(SameBranches { registration_idx: 4 }),
     },
     "inset-s" => FunctionalEntry {
         registration_idx: 7,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 7, 1),
-            NamedTyped(ValueType::Number, 7, 1),
-            NamedTyped(ValueType::Ratio, 7, 1),
-            Arbitrary(7, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
+            NamedBranch::Typed(CssDataType::Number, 7, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 7, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(7, 1),
         ],
         negative: Some(SameBranches { registration_idx: 6 }),
     },
     "inset-e" => FunctionalEntry {
         registration_idx: 9,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 8, 1),
-            NamedTyped(ValueType::Number, 8, 1),
-            NamedTyped(ValueType::Ratio, 8, 1),
-            Arbitrary(8, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
+            NamedBranch::Typed(CssDataType::Number, 8, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 8, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(8, 1),
         ],
         negative: Some(SameBranches { registration_idx: 8 }),
     },
     "inset-bs" => FunctionalEntry {
         registration_idx: 11,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 9, 1),
-            NamedTyped(ValueType::Number, 9, 1),
-            NamedTyped(ValueType::Ratio, 9, 1),
-            Arbitrary(9, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 9, 1),
+            NamedBranch::Typed(CssDataType::Number, 9, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 9, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(9, 1),
         ],
         negative: Some(SameBranches { registration_idx: 10 }),
     },
     "inset-be" => FunctionalEntry {
         registration_idx: 13,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 10, 1),
-            NamedTyped(ValueType::Number, 10, 1),
-            NamedTyped(ValueType::Ratio, 10, 1),
-            Arbitrary(10, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 10, 1),
+            NamedBranch::Typed(CssDataType::Number, 10, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 10, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(10, 1),
         ],
         negative: Some(SameBranches { registration_idx: 12 }),
     },
     "top" => FunctionalEntry {
         registration_idx: 15,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 11, 1),
-            NamedTyped(ValueType::Number, 11, 1),
-            NamedTyped(ValueType::Ratio, 11, 1),
-            Arbitrary(11, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 11, 1),
+            NamedBranch::Typed(CssDataType::Number, 11, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 11, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(11, 1),
         ],
         negative: Some(SameBranches { registration_idx: 14 }),
     },
     "right" => FunctionalEntry {
         registration_idx: 17,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 12, 1),
-            NamedTyped(ValueType::Number, 12, 1),
-            NamedTyped(ValueType::Ratio, 12, 1),
-            Arbitrary(12, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 12, 1),
+            NamedBranch::Typed(CssDataType::Number, 12, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 12, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(12, 1),
         ],
         negative: Some(SameBranches { registration_idx: 16 }),
     },
     "bottom" => FunctionalEntry {
         registration_idx: 19,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 13, 1),
-            NamedTyped(ValueType::Number, 13, 1),
-            NamedTyped(ValueType::Ratio, 13, 1),
-            Arbitrary(13, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 13, 1),
+            NamedBranch::Typed(CssDataType::Number, 13, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 13, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(13, 1),
         ],
         negative: Some(SameBranches { registration_idx: 18 }),
     },
     "left" => FunctionalEntry {
         registration_idx: 21,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 14, 1),
-            NamedTyped(ValueType::Number, 14, 1),
-            NamedTyped(ValueType::Ratio, 14, 1),
-            Arbitrary(14, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 14, 1),
+            NamedBranch::Typed(CssDataType::Number, 14, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 14, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(14, 1),
         ],
         negative: Some(SameBranches { registration_idx: 20 }),
     },
     "z" => FunctionalEntry {
         registration_idx: 23,
-        branches: &[
-            NamedKeyword(0, 16, 1),
-            NamedTyped(ValueType::Number, 16, 1),
-            Arbitrary(16, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 16, 1),
+            NamedBranch::Typed(CssDataType::Number, 16, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(16, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 22,
-            branches: &[
-                NamedTyped(ValueType::Number, 16, 1),
-                Arbitrary(16, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 16, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(16, 1),
             ],
         }),
     },
     "order" => FunctionalEntry {
         registration_idx: 25,
-        branches: &[
-            NamedKeyword(1, 17, 1),
-            NamedTyped(ValueType::Number, 17, 1),
-            Arbitrary(17, 1),
+        named_branches: &[
+            NamedBranch::Keyword(1, 17, 1),
+            NamedBranch::Typed(CssDataType::Number, 17, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(17, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 24,
-            branches: &[
-                NamedTyped(ValueType::Number, 17, 1),
-                Arbitrary(17, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 17, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(17, 1),
             ],
         }),
     },
     "col" => FunctionalEntry {
         registration_idx: 27,
-        branches: &[
-            NamedKeyword(0, 18, 1),
-            NamedTyped(ValueType::Number, 18, 1),
-            Arbitrary(18, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 18, 1),
+            NamedBranch::Typed(CssDataType::Number, 18, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(18, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 26,
-            branches: &[
-                NamedTyped(ValueType::Number, 18, 1),
-                Arbitrary(18, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 18, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(18, 1),
             ],
         }),
     },
     "col-span" => FunctionalEntry {
         registration_idx: 28,
-        branches: &[
-            NamedKeyword(2, 18, 1),
-            NamedTyped(ValueType::Number, 18, 1),
-            Arbitrary(18, 1),
+        named_branches: &[
+            NamedBranch::Keyword(2, 18, 1),
+            NamedBranch::Typed(CssDataType::Number, 18, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(18, 1),
         ],
         negative: None,
     },
     "col-start" => FunctionalEntry {
         registration_idx: 30,
-        branches: &[
-            NamedKeyword(0, 19, 1),
-            NamedTyped(ValueType::Number, 19, 1),
-            Arbitrary(19, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 19, 1),
+            NamedBranch::Typed(CssDataType::Number, 19, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(19, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 29,
-            branches: &[
-                NamedTyped(ValueType::Number, 19, 1),
-                Arbitrary(19, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 19, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(19, 1),
             ],
         }),
     },
     "col-end" => FunctionalEntry {
         registration_idx: 32,
-        branches: &[
-            NamedKeyword(0, 20, 1),
-            NamedTyped(ValueType::Number, 20, 1),
-            Arbitrary(20, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 20, 1),
+            NamedBranch::Typed(CssDataType::Number, 20, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(20, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 31,
-            branches: &[
-                NamedTyped(ValueType::Number, 20, 1),
-                Arbitrary(20, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 20, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(20, 1),
             ],
         }),
     },
     "row" => FunctionalEntry {
         registration_idx: 34,
-        branches: &[
-            NamedKeyword(0, 21, 1),
-            NamedTyped(ValueType::Number, 21, 1),
-            Arbitrary(21, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 21, 1),
+            NamedBranch::Typed(CssDataType::Number, 21, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(21, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 33,
-            branches: &[
-                NamedTyped(ValueType::Number, 21, 1),
-                Arbitrary(21, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 21, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(21, 1),
             ],
         }),
     },
     "row-span" => FunctionalEntry {
         registration_idx: 35,
-        branches: &[
-            NamedKeyword(2, 21, 1),
-            NamedTyped(ValueType::Number, 21, 1),
-            Arbitrary(21, 1),
+        named_branches: &[
+            NamedBranch::Keyword(2, 21, 1),
+            NamedBranch::Typed(CssDataType::Number, 21, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(21, 1),
         ],
         negative: None,
     },
     "row-start" => FunctionalEntry {
         registration_idx: 37,
-        branches: &[
-            NamedKeyword(0, 22, 1),
-            NamedTyped(ValueType::Number, 22, 1),
-            Arbitrary(22, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 22, 1),
+            NamedBranch::Typed(CssDataType::Number, 22, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(22, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 36,
-            branches: &[
-                NamedTyped(ValueType::Number, 22, 1),
-                Arbitrary(22, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 22, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(22, 1),
             ],
         }),
     },
     "row-end" => FunctionalEntry {
         registration_idx: 39,
-        branches: &[
-            NamedKeyword(0, 23, 1),
-            NamedTyped(ValueType::Number, 23, 1),
-            Arbitrary(23, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 23, 1),
+            NamedBranch::Typed(CssDataType::Number, 23, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(23, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 38,
-            branches: &[
-                NamedTyped(ValueType::Number, 23, 1),
-                Arbitrary(23, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 23, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(23, 1),
             ],
         }),
     },
     "m" => FunctionalEntry {
         registration_idx: 41,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 27, 1),
-            NamedTyped(ValueType::Number, 27, 1),
-            Arbitrary(27, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 27, 1),
+            NamedBranch::Typed(CssDataType::Number, 27, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(27, 1),
         ],
         negative: Some(SameBranches { registration_idx: 40 }),
     },
     "mx" => FunctionalEntry {
         registration_idx: 43,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 28, 1),
-            NamedTyped(ValueType::Number, 28, 1),
-            Arbitrary(28, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 28, 1),
+            NamedBranch::Typed(CssDataType::Number, 28, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(28, 1),
         ],
         negative: Some(SameBranches { registration_idx: 42 }),
     },
     "my" => FunctionalEntry {
         registration_idx: 45,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 29, 1),
-            NamedTyped(ValueType::Number, 29, 1),
-            Arbitrary(29, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 29, 1),
+            NamedBranch::Typed(CssDataType::Number, 29, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(29, 1),
         ],
         negative: Some(SameBranches { registration_idx: 44 }),
     },
     "ms" => FunctionalEntry {
         registration_idx: 47,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 30, 1),
-            NamedTyped(ValueType::Number, 30, 1),
-            Arbitrary(30, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 30, 1),
+            NamedBranch::Typed(CssDataType::Number, 30, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(30, 1),
         ],
         negative: Some(SameBranches { registration_idx: 46 }),
     },
     "me" => FunctionalEntry {
         registration_idx: 49,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 31, 1),
-            NamedTyped(ValueType::Number, 31, 1),
-            Arbitrary(31, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 31, 1),
+            NamedBranch::Typed(CssDataType::Number, 31, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(31, 1),
         ],
         negative: Some(SameBranches { registration_idx: 48 }),
     },
     "mbs" => FunctionalEntry {
         registration_idx: 51,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 32, 1),
-            NamedTyped(ValueType::Number, 32, 1),
-            Arbitrary(32, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 32, 1),
+            NamedBranch::Typed(CssDataType::Number, 32, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(32, 1),
         ],
         negative: Some(SameBranches { registration_idx: 50 }),
     },
     "mbe" => FunctionalEntry {
         registration_idx: 53,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 33, 1),
-            NamedTyped(ValueType::Number, 33, 1),
-            Arbitrary(33, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 33, 1),
+            NamedBranch::Typed(CssDataType::Number, 33, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(33, 1),
         ],
         negative: Some(SameBranches { registration_idx: 52 }),
     },
     "mt" => FunctionalEntry {
         registration_idx: 55,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 34, 1),
-            NamedTyped(ValueType::Number, 34, 1),
-            Arbitrary(34, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 34, 1),
+            NamedBranch::Typed(CssDataType::Number, 34, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(34, 1),
         ],
         negative: Some(SameBranches { registration_idx: 54 }),
     },
     "mr" => FunctionalEntry {
         registration_idx: 57,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 35, 1),
-            NamedTyped(ValueType::Number, 35, 1),
-            Arbitrary(35, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 35, 1),
+            NamedBranch::Typed(CssDataType::Number, 35, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(35, 1),
         ],
         negative: Some(SameBranches { registration_idx: 56 }),
     },
     "mb" => FunctionalEntry {
         registration_idx: 59,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 36, 1),
-            NamedTyped(ValueType::Number, 36, 1),
-            Arbitrary(36, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 36, 1),
+            NamedBranch::Typed(CssDataType::Number, 36, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(36, 1),
         ],
         negative: Some(SameBranches { registration_idx: 58 }),
     },
     "ml" => FunctionalEntry {
         registration_idx: 61,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 37, 1),
-            NamedTyped(ValueType::Number, 37, 1),
-            Arbitrary(37, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 37, 1),
+            NamedBranch::Typed(CssDataType::Number, 37, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(37, 1),
         ],
         negative: Some(SameBranches { registration_idx: 60 }),
     },
     "line-clamp" => FunctionalEntry {
         registration_idx: 62,
-        branches: &[
-            NamedKeyword(3, 139, 4),
-            NamedTyped(ValueType::Number, 139, 4),
-            Arbitrary(139, 4),
+        named_branches: &[
+            NamedBranch::Keyword(3, 139, 4),
+            NamedBranch::Typed(CssDataType::Number, 139, 4),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(139, 4),
         ],
         negative: None,
     },
     "block" => FunctionalEntry {
         registration_idx: 63,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "inline" => FunctionalEntry {
         registration_idx: 64,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            Named(ThemeNamespace::Container, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "flex" => FunctionalEntry {
         registration_idx: 65,
-        branches: &[
-            NamedTyped(ValueType::Number, 48, 1),
-            NamedTyped(ValueType::Ratio, 48, 1),
-            Arbitrary(48, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 48, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 48, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(48, 1),
         ],
         negative: None,
     },
     "aspect" => FunctionalEntry {
         registration_idx: 66,
-        branches: &[
-            NamedKeyword(4, 41, 1),
-            Named(ThemeNamespace::Aspect, 41, 1),
-            NamedTyped(ValueType::Ratio, 41, 1),
-            Arbitrary(41, 1),
+        named_branches: &[
+            NamedBranch::Keyword(4, 41, 1),
+            NamedBranch::Theme(ThemeNamespace::Aspect, 41, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 41, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(41, 1),
         ],
         negative: None,
     },
     "max-w-screen" => FunctionalEntry {
         registration_idx: 67,
-        branches: &[
-            Named(ThemeNamespace::Breakpoint, 46, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Breakpoint, 46, 1),
         ],
+        arbitrary_branches: &[],
         negative: None,
     },
     "size" => FunctionalEntry {
         registration_idx: 68,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 45, 2),
-            NamedTyped(ValueType::Number, 45, 2),
-            NamedTyped(ValueType::Ratio, 45, 2),
-            Arbitrary(45, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 45, 2),
+            NamedBranch::Typed(CssDataType::Number, 45, 2),
+            NamedBranch::Typed(CssDataType::Ratio, 45, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(45, 2),
         ],
         negative: None,
     },
     "w" => FunctionalEntry {
         registration_idx: 69,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 45, 1),
-            Named(ThemeNamespace::Container, 45, 1),
-            NamedTyped(ValueType::Number, 45, 1),
-            NamedTyped(ValueType::Ratio, 45, 1),
-            Arbitrary(45, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 45, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 45, 1),
+            NamedBranch::Typed(CssDataType::Number, 45, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 45, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(45, 1),
         ],
         negative: None,
     },
     "min-w" => FunctionalEntry {
         registration_idx: 70,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 47, 1),
-            Named(ThemeNamespace::Container, 47, 1),
-            NamedTyped(ValueType::Number, 47, 1),
-            NamedTyped(ValueType::Ratio, 47, 1),
-            Arbitrary(47, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 47, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 47, 1),
+            NamedBranch::Typed(CssDataType::Number, 47, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 47, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(47, 1),
         ],
         negative: None,
     },
     "max-w" => FunctionalEntry {
         registration_idx: 71,
-        branches: &[
-            NamedKeyword(5, 46, 1),
-            Named(ThemeNamespace::Spacing, 46, 1),
-            Named(ThemeNamespace::Container, 46, 1),
-            NamedTyped(ValueType::Number, 46, 1),
-            NamedTyped(ValueType::Ratio, 46, 1),
-            Arbitrary(46, 1),
+        named_branches: &[
+            NamedBranch::Keyword(5, 46, 1),
+            NamedBranch::Theme(ThemeNamespace::Spacing, 46, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 46, 1),
+            NamedBranch::Typed(CssDataType::Number, 46, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 46, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(46, 1),
         ],
         negative: None,
     },
     "h" => FunctionalEntry {
         registration_idx: 72,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 42, 1),
-            NamedTyped(ValueType::Number, 42, 1),
-            NamedTyped(ValueType::Ratio, 42, 1),
-            Arbitrary(42, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 42, 1),
+            NamedBranch::Typed(CssDataType::Number, 42, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 42, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(42, 1),
         ],
         negative: None,
     },
     "min-h" => FunctionalEntry {
         registration_idx: 73,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 44, 1),
-            NamedTyped(ValueType::Number, 44, 1),
-            NamedTyped(ValueType::Ratio, 44, 1),
-            Arbitrary(44, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 44, 1),
+            NamedBranch::Typed(CssDataType::Number, 44, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 44, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(44, 1),
         ],
         negative: None,
     },
     "max-h" => FunctionalEntry {
         registration_idx: 74,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 43, 1),
-            NamedTyped(ValueType::Number, 43, 1),
-            NamedTyped(ValueType::Ratio, 43, 1),
-            Arbitrary(43, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 43, 1),
+            NamedBranch::Typed(CssDataType::Number, 43, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 43, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(43, 1),
         ],
         negative: None,
     },
     "min-inline" => FunctionalEntry {
         registration_idx: 75,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            Named(ThemeNamespace::Container, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "max-inline" => FunctionalEntry {
         registration_idx: 76,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            Named(ThemeNamespace::Container, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "min-block" => FunctionalEntry {
         registration_idx: 77,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "max-block" => FunctionalEntry {
         registration_idx: 78,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 1),
-            NamedTyped(ValueType::Number, 354, 1),
-            NamedTyped(ValueType::Ratio, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "shrink" => FunctionalEntry {
         registration_idx: 79,
-        branches: &[
-            NamedTyped(ValueType::Number, 49, 1),
-            Arbitrary(49, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 49, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(49, 1),
         ],
         negative: None,
     },
     "grow" => FunctionalEntry {
         registration_idx: 80,
-        branches: &[
-            NamedTyped(ValueType::Number, 50, 1),
-            Arbitrary(50, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 50, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(50, 1),
         ],
         negative: None,
     },
     "basis" => FunctionalEntry {
         registration_idx: 81,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 51, 1),
-            Named(ThemeNamespace::Container, 51, 1),
-            NamedTyped(ValueType::Number, 51, 1),
-            NamedTyped(ValueType::Ratio, 51, 1),
-            Arbitrary(51, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 51, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 51, 1),
+            NamedBranch::Typed(CssDataType::Number, 51, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 51, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(51, 1),
         ],
         negative: None,
     },
     "border-spacing" => FunctionalEntry {
         registration_idx: 82,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 3),
-            NamedTyped(ValueType::Number, 354, 3),
-            Arbitrary(354, 3),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 3),
+            NamedBranch::Typed(CssDataType::Number, 354, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 3),
         ],
         negative: None,
     },
     "border-spacing-x" => FunctionalEntry {
         registration_idx: 83,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 2),
-            NamedTyped(ValueType::Number, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
+            NamedBranch::Typed(CssDataType::Number, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "border-spacing-y" => FunctionalEntry {
         registration_idx: 84,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 354, 2),
-            NamedTyped(ValueType::Number, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
+            NamedBranch::Typed(CssDataType::Number, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "origin" => FunctionalEntry {
         registration_idx: 85,
-        branches: &[
-            NamedKeyword(6, 56, 1),
-            Arbitrary(56, 1),
+        named_branches: &[
+            NamedBranch::Keyword(6, 56, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(56, 1),
         ],
         negative: None,
     },
     "perspective-origin" => FunctionalEntry {
         registration_idx: 86,
-        branches: &[
-            NamedKeyword(6, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Keyword(6, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "perspective" => FunctionalEntry {
         registration_idx: 87,
-        branches: &[
-            NamedKeyword(3, 354, 1),
-            Named(ThemeNamespace::Perspective, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Keyword(3, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::Perspective, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "translate" => FunctionalEntry {
         registration_idx: 89,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 58, 3),
-            NamedTyped(ValueType::Number, 58, 3),
-            NamedTyped(ValueType::Ratio, 58, 3),
-            Arbitrary(58, 3),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 58, 3),
+            NamedBranch::Typed(CssDataType::Number, 58, 3),
+            NamedBranch::Typed(CssDataType::Ratio, 58, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(58, 3),
         ],
         negative: Some(SameBranches { registration_idx: 88 }),
     },
     "translate-x" => FunctionalEntry {
         registration_idx: 91,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 58, 2),
-            NamedTyped(ValueType::Number, 58, 2),
-            NamedTyped(ValueType::Ratio, 58, 2),
-            Arbitrary(58, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 58, 2),
+            NamedBranch::Typed(CssDataType::Number, 58, 2),
+            NamedBranch::Typed(CssDataType::Ratio, 58, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(58, 2),
         ],
         negative: Some(SameBranches { registration_idx: 90 }),
     },
     "translate-y" => FunctionalEntry {
         registration_idx: 93,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 59, 2),
-            NamedTyped(ValueType::Number, 59, 2),
-            NamedTyped(ValueType::Ratio, 59, 2),
-            Arbitrary(59, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 59, 2),
+            NamedBranch::Typed(CssDataType::Number, 59, 2),
+            NamedBranch::Typed(CssDataType::Ratio, 59, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(59, 2),
         ],
         negative: Some(SameBranches { registration_idx: 92 }),
     },
     "translate-z" => FunctionalEntry {
         registration_idx: 95,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 60, 2),
-            NamedTyped(ValueType::Number, 60, 2),
-            Arbitrary(60, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 60, 2),
+            NamedBranch::Typed(CssDataType::Number, 60, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(60, 2),
         ],
         negative: Some(SameBranches { registration_idx: 94 }),
     },
     "scale" => FunctionalEntry {
         registration_idx: 97,
-        branches: &[
-            NamedTyped(ValueType::Number, 62, 4),
-            Arbitrary(61, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 62, 4),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(61, 1),
         ],
         negative: Some(SameBranches { registration_idx: 96 }),
     },
     "scale-x" => FunctionalEntry {
         registration_idx: 99,
-        branches: &[
-            NamedTyped(ValueType::Number, 62, 2),
-            Arbitrary(62, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 62, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(62, 2),
         ],
         negative: Some(SameBranches { registration_idx: 98 }),
     },
     "scale-y" => FunctionalEntry {
         registration_idx: 101,
-        branches: &[
-            NamedTyped(ValueType::Number, 63, 2),
-            Arbitrary(63, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 63, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(63, 2),
         ],
         negative: Some(SameBranches { registration_idx: 100 }),
     },
     "scale-z" => FunctionalEntry {
         registration_idx: 103,
-        branches: &[
-            NamedTyped(ValueType::Number, 64, 2),
-            Arbitrary(64, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 64, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(64, 2),
         ],
         negative: Some(SameBranches { registration_idx: 102 }),
     },
     "rotate" => FunctionalEntry {
         registration_idx: 105,
-        branches: &[
-            NamedTyped(ValueType::Number, 65, 1),
-            Arbitrary(65, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 65, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(65, 1),
         ],
         negative: Some(SameBranches { registration_idx: 104 }),
     },
     "rotate-x" => FunctionalEntry {
         registration_idx: 107,
-        branches: &[
-            NamedTyped(ValueType::Number, 66, 2),
-            Arbitrary(66, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 66, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(66, 2),
         ],
         negative: Some(SameBranches { registration_idx: 106 }),
     },
     "rotate-y" => FunctionalEntry {
         registration_idx: 109,
-        branches: &[
-            NamedTyped(ValueType::Number, 67, 2),
-            Arbitrary(67, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 67, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(67, 2),
         ],
         negative: Some(SameBranches { registration_idx: 108 }),
     },
     "rotate-z" => FunctionalEntry {
         registration_idx: 111,
-        branches: &[
-            NamedTyped(ValueType::Number, 68, 2),
-            Arbitrary(68, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 68, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(68, 2),
         ],
         negative: Some(SameBranches { registration_idx: 110 }),
     },
     "skew" => FunctionalEntry {
         registration_idx: 113,
-        branches: &[
-            NamedTyped(ValueType::Number, 69, 3),
-            Arbitrary(69, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 69, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(69, 3),
         ],
         negative: Some(SameBranches { registration_idx: 112 }),
     },
     "skew-x" => FunctionalEntry {
         registration_idx: 115,
-        branches: &[
-            NamedTyped(ValueType::Number, 69, 2),
-            Arbitrary(69, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 69, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(69, 2),
         ],
         negative: Some(SameBranches { registration_idx: 114 }),
     },
     "skew-y" => FunctionalEntry {
         registration_idx: 117,
-        branches: &[
-            NamedTyped(ValueType::Number, 70, 2),
-            Arbitrary(70, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 70, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(70, 2),
         ],
         negative: Some(SameBranches { registration_idx: 116 }),
     },
     "transform" => FunctionalEntry {
         registration_idx: 118,
-        branches: &[
-            Arbitrary(71, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(71, 1),
         ],
         negative: None,
     },
     "cursor" => FunctionalEntry {
         registration_idx: 119,
-        branches: &[
-            Arbitrary(73, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(73, 1),
         ],
         negative: None,
     },
     "scroll-m" => FunctionalEntry {
         registration_idx: 121,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 83, 1),
-            NamedTyped(ValueType::Number, 83, 1),
-            Arbitrary(83, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 83, 1),
+            NamedBranch::Typed(CssDataType::Number, 83, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(83, 1),
         ],
         negative: Some(SameBranches { registration_idx: 120 }),
     },
     "scroll-mx" => FunctionalEntry {
         registration_idx: 123,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 84, 1),
-            NamedTyped(ValueType::Number, 84, 1),
-            Arbitrary(84, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 84, 1),
+            NamedBranch::Typed(CssDataType::Number, 84, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(84, 1),
         ],
         negative: Some(SameBranches { registration_idx: 122 }),
     },
     "scroll-my" => FunctionalEntry {
         registration_idx: 125,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 85, 1),
-            NamedTyped(ValueType::Number, 85, 1),
-            Arbitrary(85, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 85, 1),
+            NamedBranch::Typed(CssDataType::Number, 85, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(85, 1),
         ],
         negative: Some(SameBranches { registration_idx: 124 }),
     },
     "scroll-ms" => FunctionalEntry {
         registration_idx: 127,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 86, 1),
-            NamedTyped(ValueType::Number, 86, 1),
-            Arbitrary(86, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 86, 1),
+            NamedBranch::Typed(CssDataType::Number, 86, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(86, 1),
         ],
         negative: Some(SameBranches { registration_idx: 126 }),
     },
     "scroll-me" => FunctionalEntry {
         registration_idx: 129,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 87, 1),
-            NamedTyped(ValueType::Number, 87, 1),
-            Arbitrary(87, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 87, 1),
+            NamedBranch::Typed(CssDataType::Number, 87, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(87, 1),
         ],
         negative: Some(SameBranches { registration_idx: 128 }),
     },
     "scroll-mbs" => FunctionalEntry {
         registration_idx: 131,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 88, 1),
-            NamedTyped(ValueType::Number, 88, 1),
-            Arbitrary(88, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 88, 1),
+            NamedBranch::Typed(CssDataType::Number, 88, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(88, 1),
         ],
         negative: Some(SameBranches { registration_idx: 130 }),
     },
     "scroll-mbe" => FunctionalEntry {
         registration_idx: 133,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 89, 1),
-            NamedTyped(ValueType::Number, 89, 1),
-            Arbitrary(89, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 89, 1),
+            NamedBranch::Typed(CssDataType::Number, 89, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(89, 1),
         ],
         negative: Some(SameBranches { registration_idx: 132 }),
     },
     "scroll-mt" => FunctionalEntry {
         registration_idx: 135,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 90, 1),
-            NamedTyped(ValueType::Number, 90, 1),
-            Arbitrary(90, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 90, 1),
+            NamedBranch::Typed(CssDataType::Number, 90, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(90, 1),
         ],
         negative: Some(SameBranches { registration_idx: 134 }),
     },
     "scroll-mr" => FunctionalEntry {
         registration_idx: 137,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 91, 1),
-            NamedTyped(ValueType::Number, 91, 1),
-            Arbitrary(91, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 91, 1),
+            NamedBranch::Typed(CssDataType::Number, 91, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(91, 1),
         ],
         negative: Some(SameBranches { registration_idx: 136 }),
     },
     "scroll-mb" => FunctionalEntry {
         registration_idx: 139,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 92, 1),
-            NamedTyped(ValueType::Number, 92, 1),
-            Arbitrary(92, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 92, 1),
+            NamedBranch::Typed(CssDataType::Number, 92, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(92, 1),
         ],
         negative: Some(SameBranches { registration_idx: 138 }),
     },
     "scroll-ml" => FunctionalEntry {
         registration_idx: 141,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 93, 1),
-            NamedTyped(ValueType::Number, 93, 1),
-            Arbitrary(93, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 93, 1),
+            NamedBranch::Typed(CssDataType::Number, 93, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(93, 1),
         ],
         negative: Some(SameBranches { registration_idx: 140 }),
     },
     "scroll-p" => FunctionalEntry {
         registration_idx: 142,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 94, 1),
-            NamedTyped(ValueType::Number, 94, 1),
-            Arbitrary(94, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 94, 1),
+            NamedBranch::Typed(CssDataType::Number, 94, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(94, 1),
         ],
         negative: None,
     },
     "scroll-px" => FunctionalEntry {
         registration_idx: 143,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 95, 1),
-            NamedTyped(ValueType::Number, 95, 1),
-            Arbitrary(95, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 95, 1),
+            NamedBranch::Typed(CssDataType::Number, 95, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(95, 1),
         ],
         negative: None,
     },
     "scroll-py" => FunctionalEntry {
         registration_idx: 144,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 96, 1),
-            NamedTyped(ValueType::Number, 96, 1),
-            Arbitrary(96, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 96, 1),
+            NamedBranch::Typed(CssDataType::Number, 96, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(96, 1),
         ],
         negative: None,
     },
     "scroll-ps" => FunctionalEntry {
         registration_idx: 145,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 97, 1),
-            NamedTyped(ValueType::Number, 97, 1),
-            Arbitrary(97, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 97, 1),
+            NamedBranch::Typed(CssDataType::Number, 97, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(97, 1),
         ],
         negative: None,
     },
     "scroll-pe" => FunctionalEntry {
         registration_idx: 146,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 98, 1),
-            NamedTyped(ValueType::Number, 98, 1),
-            Arbitrary(98, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 98, 1),
+            NamedBranch::Typed(CssDataType::Number, 98, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(98, 1),
         ],
         negative: None,
     },
     "scroll-pbs" => FunctionalEntry {
         registration_idx: 147,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 99, 1),
-            NamedTyped(ValueType::Number, 99, 1),
-            Arbitrary(99, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 99, 1),
+            NamedBranch::Typed(CssDataType::Number, 99, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(99, 1),
         ],
         negative: None,
     },
     "scroll-pbe" => FunctionalEntry {
         registration_idx: 148,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 100, 1),
-            NamedTyped(ValueType::Number, 100, 1),
-            Arbitrary(100, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 100, 1),
+            NamedBranch::Typed(CssDataType::Number, 100, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(100, 1),
         ],
         negative: None,
     },
     "scroll-pt" => FunctionalEntry {
         registration_idx: 149,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 101, 1),
-            NamedTyped(ValueType::Number, 101, 1),
-            Arbitrary(101, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 101, 1),
+            NamedBranch::Typed(CssDataType::Number, 101, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(101, 1),
         ],
         negative: None,
     },
     "scroll-pr" => FunctionalEntry {
         registration_idx: 150,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 102, 1),
-            NamedTyped(ValueType::Number, 102, 1),
-            Arbitrary(102, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 102, 1),
+            NamedBranch::Typed(CssDataType::Number, 102, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(102, 1),
         ],
         negative: None,
     },
     "scroll-pb" => FunctionalEntry {
         registration_idx: 151,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 103, 1),
-            NamedTyped(ValueType::Number, 103, 1),
-            Arbitrary(103, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 103, 1),
+            NamedBranch::Typed(CssDataType::Number, 103, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(103, 1),
         ],
         negative: None,
     },
     "scroll-pl" => FunctionalEntry {
         registration_idx: 152,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 104, 1),
-            NamedTyped(ValueType::Number, 104, 1),
-            Arbitrary(104, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 104, 1),
+            NamedBranch::Typed(CssDataType::Number, 104, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(104, 1),
         ],
         negative: None,
     },
     "list" => FunctionalEntry {
         registration_idx: 153,
-        branches: &[
-            NamedKeyword(7, 106, 1),
-            Arbitrary(106, 1),
+        named_branches: &[
+            NamedBranch::Keyword(7, 106, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(106, 1),
         ],
         negative: None,
     },
     "list-image" => FunctionalEntry {
         registration_idx: 154,
-        branches: &[
-            NamedKeyword(3, 107, 1),
-            Arbitrary(107, 1),
+        named_branches: &[
+            NamedBranch::Keyword(3, 107, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(107, 1),
         ],
         negative: None,
     },
     "columns" => FunctionalEntry {
         registration_idx: 155,
-        branches: &[
-            NamedKeyword(0, 109, 1),
-            Named(ThemeNamespace::Container, 109, 1),
-            NamedTyped(ValueType::Number, 109, 1),
-            Arbitrary(109, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 109, 1),
+            NamedBranch::Theme(ThemeNamespace::Container, 109, 1),
+            NamedBranch::Typed(CssDataType::Number, 109, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(109, 1),
         ],
         negative: None,
     },
     "auto-cols" => FunctionalEntry {
         registration_idx: 156,
-        branches: &[
-            NamedKeyword(8, 113, 1),
-            Arbitrary(113, 1),
+        named_branches: &[
+            NamedBranch::Keyword(8, 113, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(113, 1),
         ],
         negative: None,
     },
     "auto-rows" => FunctionalEntry {
         registration_idx: 157,
-        branches: &[
-            NamedKeyword(8, 115, 1),
-            Arbitrary(115, 1),
+        named_branches: &[
+            NamedBranch::Keyword(8, 115, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(115, 1),
         ],
         negative: None,
     },
     "grid-cols" => FunctionalEntry {
         registration_idx: 158,
-        branches: &[
-            NamedKeyword(9, 116, 1),
-            NamedTyped(ValueType::Number, 116, 1),
-            Arbitrary(116, 1),
+        named_branches: &[
+            NamedBranch::Keyword(9, 116, 1),
+            NamedBranch::Typed(CssDataType::Number, 116, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(116, 1),
         ],
         negative: None,
     },
     "grid-rows" => FunctionalEntry {
         registration_idx: 159,
-        branches: &[
-            NamedKeyword(9, 117, 1),
-            NamedTyped(ValueType::Number, 117, 1),
-            Arbitrary(117, 1),
+        named_branches: &[
+            NamedBranch::Keyword(9, 117, 1),
+            NamedBranch::Typed(CssDataType::Number, 117, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(117, 1),
         ],
         negative: None,
     },
     "gap" => FunctionalEntry {
         registration_idx: 160,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 126, 1),
-            NamedTyped(ValueType::Number, 126, 1),
-            Arbitrary(126, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 126, 1),
+            NamedBranch::Typed(CssDataType::Number, 126, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(126, 1),
         ],
         negative: None,
     },
     "gap-x" => FunctionalEntry {
         registration_idx: 161,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 127, 1),
-            NamedTyped(ValueType::Number, 127, 1),
-            Arbitrary(127, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 127, 1),
+            NamedBranch::Typed(CssDataType::Number, 127, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(127, 1),
         ],
         negative: None,
     },
     "gap-y" => FunctionalEntry {
         registration_idx: 162,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 128, 1),
-            NamedTyped(ValueType::Number, 128, 1),
-            Arbitrary(128, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 128, 1),
+            NamedBranch::Typed(CssDataType::Number, 128, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(128, 1),
         ],
         negative: None,
     },
     "space-x" => FunctionalEntry {
         registration_idx: 164,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 129, 3),
-            NamedTyped(ValueType::Number, 129, 3),
-            Arbitrary(129, 3),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 129, 3),
+            NamedBranch::Typed(CssDataType::Number, 129, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(129, 3),
         ],
         negative: Some(SameBranches { registration_idx: 163 }),
     },
     "space-y" => FunctionalEntry {
         registration_idx: 166,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 130, 3),
-            NamedTyped(ValueType::Number, 130, 3),
-            Arbitrary(130, 3),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 130, 3),
+            NamedBranch::Typed(CssDataType::Number, 130, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(130, 3),
         ],
         negative: Some(SameBranches { registration_idx: 165 }),
     },
     "accent" => FunctionalEntry {
         registration_idx: 167,
-        branches: &[
-            NamedKeyword(10, 305, 1),
-            Named(ThemeNamespace::Color, 305, 1),
-            Arbitrary(305, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 305, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 305, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(305, 1),
         ],
         negative: None,
     },
     "caret" => FunctionalEntry {
         registration_idx: 168,
-        branches: &[
-            NamedKeyword(10, 304, 1),
-            Named(ThemeNamespace::Color, 304, 1),
-            Arbitrary(304, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 304, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 304, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(304, 1),
         ],
         negative: None,
     },
     "divide" => FunctionalEntry {
         registration_idx: 169,
-        branches: &[
-            NamedKeyword(10, 183, 1),
-            Named(ThemeNamespace::Color, 183, 1),
-            Arbitrary(183, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 183, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 183, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(183, 1),
         ],
         negative: None,
     },
     "rounded" => FunctionalEntry {
         registration_idx: 170,
-        branches: &[
-            NamedKeyword(11, 146, 1),
-            Named(ThemeNamespace::Radius, 146, 1),
-            Arbitrary(146, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 146, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 146, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(146, 1),
         ],
         negative: None,
     },
     "rounded-s" => FunctionalEntry {
         registration_idx: 171,
-        branches: &[
-            NamedKeyword(11, 153, 2),
-            Named(ThemeNamespace::Radius, 153, 2),
-            Arbitrary(153, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 153, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 153, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(153, 2),
         ],
         negative: None,
     },
     "rounded-e" => FunctionalEntry {
         registration_idx: 172,
-        branches: &[
-            NamedKeyword(11, 154, 2),
-            Named(ThemeNamespace::Radius, 154, 2),
-            Arbitrary(154, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 154, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 154, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(154, 2),
         ],
         negative: None,
     },
     "rounded-t" => FunctionalEntry {
         registration_idx: 173,
-        branches: &[
-            NamedKeyword(11, 157, 2),
-            Named(ThemeNamespace::Radius, 157, 2),
-            Arbitrary(157, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 157, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 157, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(157, 2),
         ],
         negative: None,
     },
     "rounded-r" => FunctionalEntry {
         registration_idx: 174,
-        branches: &[
-            NamedKeyword(11, 158, 2),
-            Named(ThemeNamespace::Radius, 158, 2),
-            Arbitrary(158, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 158, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 158, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(158, 2),
         ],
         negative: None,
     },
     "rounded-b" => FunctionalEntry {
         registration_idx: 175,
-        branches: &[
-            NamedKeyword(11, 159, 2),
-            Named(ThemeNamespace::Radius, 159, 2),
-            Arbitrary(159, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 159, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 159, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(159, 2),
         ],
         negative: None,
     },
     "rounded-l" => FunctionalEntry {
         registration_idx: 176,
-        branches: &[
-            NamedKeyword(11, 157, 2),
-            Named(ThemeNamespace::Radius, 157, 2),
-            Arbitrary(157, 2),
+        named_branches: &[
+            NamedBranch::Keyword(11, 157, 2),
+            NamedBranch::Theme(ThemeNamespace::Radius, 157, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(157, 2),
         ],
         negative: None,
     },
     "rounded-ss" => FunctionalEntry {
         registration_idx: 177,
-        branches: &[
-            NamedKeyword(11, 153, 1),
-            Named(ThemeNamespace::Radius, 153, 1),
-            Arbitrary(153, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 153, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 153, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(153, 1),
         ],
         negative: None,
     },
     "rounded-se" => FunctionalEntry {
         registration_idx: 178,
-        branches: &[
-            NamedKeyword(11, 154, 1),
-            Named(ThemeNamespace::Radius, 154, 1),
-            Arbitrary(154, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 154, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 154, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(154, 1),
         ],
         negative: None,
     },
     "rounded-ee" => FunctionalEntry {
         registration_idx: 179,
-        branches: &[
-            NamedKeyword(11, 155, 1),
-            Named(ThemeNamespace::Radius, 155, 1),
-            Arbitrary(155, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 155, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 155, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(155, 1),
         ],
         negative: None,
     },
     "rounded-es" => FunctionalEntry {
         registration_idx: 180,
-        branches: &[
-            NamedKeyword(11, 156, 1),
-            Named(ThemeNamespace::Radius, 156, 1),
-            Arbitrary(156, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 156, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 156, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(156, 1),
         ],
         negative: None,
     },
     "rounded-tl" => FunctionalEntry {
         registration_idx: 181,
-        branches: &[
-            NamedKeyword(11, 157, 1),
-            Named(ThemeNamespace::Radius, 157, 1),
-            Arbitrary(157, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 157, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 157, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(157, 1),
         ],
         negative: None,
     },
     "rounded-tr" => FunctionalEntry {
         registration_idx: 182,
-        branches: &[
-            NamedKeyword(11, 158, 1),
-            Named(ThemeNamespace::Radius, 158, 1),
-            Arbitrary(158, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 158, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 158, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(158, 1),
         ],
         negative: None,
     },
     "rounded-br" => FunctionalEntry {
         registration_idx: 183,
-        branches: &[
-            NamedKeyword(11, 159, 1),
-            Named(ThemeNamespace::Radius, 159, 1),
-            Arbitrary(159, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 159, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 159, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(159, 1),
         ],
         negative: None,
     },
     "rounded-bl" => FunctionalEntry {
         registration_idx: 184,
-        branches: &[
-            NamedKeyword(11, 160, 1),
-            Named(ThemeNamespace::Radius, 160, 1),
-            Arbitrary(160, 1),
+        named_branches: &[
+            NamedBranch::Keyword(11, 160, 1),
+            NamedBranch::Theme(ThemeNamespace::Radius, 160, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(160, 1),
         ],
         negative: None,
     },
     "border" => FunctionalEntry {
         registration_idx: 185,
-        branches: &[
-            NamedKeyword(10, 183, 1),
-            Named(ThemeNamespace::Color, 183, 1),
-            NamedTyped(ValueType::Number, 172, 2),
-            ArbitraryTyped(ValueType::Length, 172, 2),
-            ArbitraryTyped(ValueType::LineWidth, 172, 2),
-            Arbitrary(183, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 183, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 183, 1),
+            NamedBranch::Typed(CssDataType::Number, 172, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 172, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 172, 2),
+            ArbitraryBranch::Fallback(183, 1),
         ],
         negative: None,
     },
     "border-x" => FunctionalEntry {
         registration_idx: 186,
-        branches: &[
-            NamedKeyword(10, 184, 1),
-            Named(ThemeNamespace::Color, 184, 1),
-            NamedTyped(ValueType::Number, 173, 2),
-            ArbitraryTyped(ValueType::Length, 173, 2),
-            ArbitraryTyped(ValueType::LineWidth, 173, 2),
-            Arbitrary(184, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 184, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 184, 1),
+            NamedBranch::Typed(CssDataType::Number, 173, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 173, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 173, 2),
+            ArbitraryBranch::Fallback(184, 1),
         ],
         negative: None,
     },
     "border-y" => FunctionalEntry {
         registration_idx: 187,
-        branches: &[
-            NamedKeyword(10, 185, 1),
-            Named(ThemeNamespace::Color, 185, 1),
-            NamedTyped(ValueType::Number, 174, 2),
-            ArbitraryTyped(ValueType::Length, 174, 2),
-            ArbitraryTyped(ValueType::LineWidth, 174, 2),
-            Arbitrary(185, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 185, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 185, 1),
+            NamedBranch::Typed(CssDataType::Number, 174, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 174, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 174, 2),
+            ArbitraryBranch::Fallback(185, 1),
         ],
         negative: None,
     },
     "border-s" => FunctionalEntry {
         registration_idx: 188,
-        branches: &[
-            NamedKeyword(10, 186, 1),
-            Named(ThemeNamespace::Color, 186, 1),
-            NamedTyped(ValueType::Number, 175, 2),
-            ArbitraryTyped(ValueType::Length, 175, 2),
-            ArbitraryTyped(ValueType::LineWidth, 175, 2),
-            Arbitrary(186, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 186, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 186, 1),
+            NamedBranch::Typed(CssDataType::Number, 175, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 175, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 175, 2),
+            ArbitraryBranch::Fallback(186, 1),
         ],
         negative: None,
     },
     "border-e" => FunctionalEntry {
         registration_idx: 189,
-        branches: &[
-            NamedKeyword(10, 187, 1),
-            Named(ThemeNamespace::Color, 187, 1),
-            NamedTyped(ValueType::Number, 176, 2),
-            ArbitraryTyped(ValueType::Length, 176, 2),
-            ArbitraryTyped(ValueType::LineWidth, 176, 2),
-            Arbitrary(187, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 187, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 187, 1),
+            NamedBranch::Typed(CssDataType::Number, 176, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 176, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 176, 2),
+            ArbitraryBranch::Fallback(187, 1),
         ],
         negative: None,
     },
     "border-bs" => FunctionalEntry {
         registration_idx: 190,
-        branches: &[
-            NamedKeyword(10, 188, 1),
-            Named(ThemeNamespace::Color, 188, 1),
-            NamedTyped(ValueType::Number, 177, 2),
-            ArbitraryTyped(ValueType::Length, 177, 2),
-            ArbitraryTyped(ValueType::LineWidth, 177, 2),
-            Arbitrary(188, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 188, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 188, 1),
+            NamedBranch::Typed(CssDataType::Number, 177, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 177, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 177, 2),
+            ArbitraryBranch::Fallback(188, 1),
         ],
         negative: None,
     },
     "border-be" => FunctionalEntry {
         registration_idx: 191,
-        branches: &[
-            NamedKeyword(10, 189, 1),
-            Named(ThemeNamespace::Color, 189, 1),
-            NamedTyped(ValueType::Number, 178, 2),
-            ArbitraryTyped(ValueType::Length, 178, 2),
-            ArbitraryTyped(ValueType::LineWidth, 178, 2),
-            Arbitrary(189, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 189, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 189, 1),
+            NamedBranch::Typed(CssDataType::Number, 178, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 178, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 178, 2),
+            ArbitraryBranch::Fallback(189, 1),
         ],
         negative: None,
     },
     "border-t" => FunctionalEntry {
         registration_idx: 192,
-        branches: &[
-            NamedKeyword(10, 190, 1),
-            Named(ThemeNamespace::Color, 190, 1),
-            NamedTyped(ValueType::Number, 179, 2),
-            ArbitraryTyped(ValueType::Length, 179, 2),
-            ArbitraryTyped(ValueType::LineWidth, 179, 2),
-            Arbitrary(190, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 190, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 190, 1),
+            NamedBranch::Typed(CssDataType::Number, 179, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 179, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 179, 2),
+            ArbitraryBranch::Fallback(190, 1),
         ],
         negative: None,
     },
     "border-r" => FunctionalEntry {
         registration_idx: 193,
-        branches: &[
-            NamedKeyword(10, 191, 1),
-            Named(ThemeNamespace::Color, 191, 1),
-            NamedTyped(ValueType::Number, 180, 2),
-            ArbitraryTyped(ValueType::Length, 180, 2),
-            ArbitraryTyped(ValueType::LineWidth, 180, 2),
-            Arbitrary(191, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 191, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 191, 1),
+            NamedBranch::Typed(CssDataType::Number, 180, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 180, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 180, 2),
+            ArbitraryBranch::Fallback(191, 1),
         ],
         negative: None,
     },
     "border-b" => FunctionalEntry {
         registration_idx: 194,
-        branches: &[
-            NamedKeyword(10, 192, 1),
-            Named(ThemeNamespace::Color, 192, 1),
-            NamedTyped(ValueType::Number, 181, 2),
-            ArbitraryTyped(ValueType::Length, 181, 2),
-            ArbitraryTyped(ValueType::LineWidth, 181, 2),
-            Arbitrary(192, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 192, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 192, 1),
+            NamedBranch::Typed(CssDataType::Number, 181, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 181, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 181, 2),
+            ArbitraryBranch::Fallback(192, 1),
         ],
         negative: None,
     },
     "border-l" => FunctionalEntry {
         registration_idx: 195,
-        branches: &[
-            NamedKeyword(10, 193, 1),
-            Named(ThemeNamespace::Color, 193, 1),
-            NamedTyped(ValueType::Number, 182, 2),
-            ArbitraryTyped(ValueType::Length, 182, 2),
-            ArbitraryTyped(ValueType::LineWidth, 182, 2),
-            Arbitrary(193, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 193, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 193, 1),
+            NamedBranch::Typed(CssDataType::Number, 182, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 182, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 182, 2),
+            ArbitraryBranch::Fallback(193, 1),
         ],
         negative: None,
     },
     "divide-x" => FunctionalEntry {
         registration_idx: 196,
-        branches: &[
-            NamedTyped(ValueType::Number, 354, 4),
-            Arbitrary(354, 4),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 354, 4),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 4),
         ],
         negative: None,
     },
     "divide-y" => FunctionalEntry {
         registration_idx: 197,
-        branches: &[
-            NamedTyped(ValueType::Number, 133, 5),
-            Arbitrary(133, 5),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 133, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(133, 5),
         ],
         negative: None,
     },
     "bg-size" => FunctionalEntry {
         registration_idx: 198,
-        branches: &[
-            Arbitrary(247, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(247, 1),
         ],
         negative: None,
     },
     "bg-position" => FunctionalEntry {
         registration_idx: 199,
-        branches: &[
-            Arbitrary(250, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(250, 1),
         ],
         negative: None,
     },
     "bg-linear" => FunctionalEntry {
         registration_idx: 201,
-        branches: &[
-            NamedKeyword(12, 196, 3),
-            NamedTyped(ValueType::Number, 196, 3),
-            NamedTyped(ValueType::Ratio, 196, 3),
-            Arbitrary(196, 2),
+        named_branches: &[
+            NamedBranch::Keyword(12, 196, 3),
+            NamedBranch::Typed(CssDataType::Number, 196, 3),
+            NamedBranch::Typed(CssDataType::Ratio, 196, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(196, 2),
         ],
         negative: Some(Distinct {
             registration_idx: 200,
-            branches: &[
-                NamedTyped(ValueType::Number, 196, 3),
-                NamedTyped(ValueType::Ratio, 196, 3),
-                ArbitraryTyped(ValueType::Angle, 196, 2),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 196, 3),
+                NamedBranch::Typed(CssDataType::Ratio, 196, 3),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Typed(CssDataType::Angle, 196, 2),
             ],
         }),
     },
     "bg-conic" => FunctionalEntry {
         registration_idx: 203,
-        branches: &[
-            NamedTyped(ValueType::Number, 196, 2),
-            NamedTyped(ValueType::Ratio, 196, 2),
-            Arbitrary(196, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 196, 2),
+            NamedBranch::Typed(CssDataType::Ratio, 196, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(196, 2),
         ],
         negative: Some(SameBranches { registration_idx: 202 }),
     },
     "bg-radial" => FunctionalEntry {
         registration_idx: 204,
-        branches: &[
-            Arbitrary(196, 2),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(196, 2),
         ],
         negative: None,
     },
     "bg" => FunctionalEntry {
         registration_idx: 205,
-        branches: &[
-            NamedKeyword(10, 194, 1),
-            Named(ThemeNamespace::Color, 194, 1),
-            Named(ThemeNamespace::BackgroundImage, 195, 1),
-            ArbitraryTyped(ValueType::Length, 247, 1),
-            ArbitraryTyped(ValueType::Percentage, 250, 1),
-            ArbitraryTyped(ValueType::Url, 195, 1),
-            ArbitraryTyped(ValueType::Position, 250, 1),
-            ArbitraryTyped(ValueType::BgSize, 247, 1),
-            ArbitraryTyped(ValueType::Image, 195, 1),
-            Arbitrary(194, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 194, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 194, 1),
+            NamedBranch::Theme(ThemeNamespace::BackgroundImage, 195, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 247, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 250, 1),
+            ArbitraryBranch::Typed(CssDataType::Url, 195, 1),
+            ArbitraryBranch::Typed(CssDataType::Position, 250, 1),
+            ArbitraryBranch::Typed(CssDataType::BgSize, 247, 1),
+            ArbitraryBranch::Typed(CssDataType::Image, 195, 1),
+            ArbitraryBranch::Fallback(194, 1),
         ],
         negative: None,
     },
     "from" => FunctionalEntry {
         registration_idx: 206,
-        branches: &[
-            NamedKeyword(10, 199, 2),
-            Named(ThemeNamespace::Color, 199, 2),
-            NamedTyped(ValueType::Percentage, 200, 1),
-            ArbitraryTyped(ValueType::Length, 200, 1),
-            ArbitraryTyped(ValueType::Percentage, 200, 1),
-            Arbitrary(199, 2),
+        named_branches: &[
+            NamedBranch::Keyword(10, 199, 2),
+            NamedBranch::Theme(ThemeNamespace::Color, 199, 2),
+            NamedBranch::Typed(CssDataType::Percentage, 200, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 200, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 200, 1),
+            ArbitraryBranch::Fallback(199, 2),
         ],
         negative: None,
     },
     "via" => FunctionalEntry {
         registration_idx: 207,
-        branches: &[
-            NamedKeyword(10, 201, 3),
-            Named(ThemeNamespace::Color, 201, 3),
-            NamedTyped(ValueType::Percentage, 202, 1),
-            ArbitraryTyped(ValueType::Length, 202, 1),
-            ArbitraryTyped(ValueType::Percentage, 202, 1),
-            Arbitrary(201, 3),
+        named_branches: &[
+            NamedBranch::Keyword(10, 201, 3),
+            NamedBranch::Theme(ThemeNamespace::Color, 201, 3),
+            NamedBranch::Typed(CssDataType::Percentage, 202, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 202, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 202, 1),
+            ArbitraryBranch::Fallback(201, 3),
         ],
         negative: None,
     },
     "to" => FunctionalEntry {
         registration_idx: 208,
-        branches: &[
-            NamedKeyword(10, 203, 2),
-            Named(ThemeNamespace::Color, 203, 2),
-            NamedTyped(ValueType::Percentage, 204, 1),
-            ArbitraryTyped(ValueType::Length, 204, 1),
-            ArbitraryTyped(ValueType::Percentage, 204, 1),
-            Arbitrary(203, 2),
+        named_branches: &[
+            NamedBranch::Keyword(10, 203, 2),
+            NamedBranch::Theme(ThemeNamespace::Color, 203, 2),
+            NamedBranch::Typed(CssDataType::Percentage, 204, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 204, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 204, 1),
+            ArbitraryBranch::Fallback(203, 2),
         ],
         negative: None,
     },
     "mask" => FunctionalEntry {
         registration_idx: 209,
-        branches: &[
-            ArbitraryTyped(ValueType::Length, 256, 1),
-            ArbitraryTyped(ValueType::Percentage, 258, 1),
-            ArbitraryTyped(ValueType::Position, 258, 1),
-            ArbitraryTyped(ValueType::BgSize, 256, 1),
-            Arbitrary(205, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 256, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 258, 1),
+            ArbitraryBranch::Typed(CssDataType::Position, 258, 1),
+            ArbitraryBranch::Typed(CssDataType::BgSize, 256, 1),
+            ArbitraryBranch::Fallback(205, 1),
         ],
         negative: None,
     },
     "mask-size" => FunctionalEntry {
         registration_idx: 210,
-        branches: &[
-            Arbitrary(256, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(256, 1),
         ],
         negative: None,
     },
     "mask-position" => FunctionalEntry {
         registration_idx: 211,
-        branches: &[
-            Arbitrary(258, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(258, 1),
         ],
         negative: None,
     },
     "mask-x-from" => FunctionalEntry {
         registration_idx: 212,
-        branches: &[
-            NamedKeyword(10, 205, 7),
-            Named(ThemeNamespace::Color, 205, 7),
-            NamedTyped(ValueType::Number, 205, 7),
-            NamedTyped(ValueType::Percentage, 205, 7),
-            Arbitrary(205, 7),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 7),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
+            NamedBranch::Typed(CssDataType::Number, 205, 7),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 7),
         ],
         negative: None,
     },
     "mask-x-to" => FunctionalEntry {
         registration_idx: 213,
-        branches: &[
-            NamedKeyword(10, 205, 7),
-            Named(ThemeNamespace::Color, 205, 7),
-            NamedTyped(ValueType::Number, 205, 7),
-            NamedTyped(ValueType::Percentage, 205, 7),
-            Arbitrary(205, 7),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 7),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
+            NamedBranch::Typed(CssDataType::Number, 205, 7),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 7),
         ],
         negative: None,
     },
     "mask-y-from" => FunctionalEntry {
         registration_idx: 214,
-        branches: &[
-            NamedKeyword(10, 205, 7),
-            Named(ThemeNamespace::Color, 205, 7),
-            NamedTyped(ValueType::Number, 205, 7),
-            NamedTyped(ValueType::Percentage, 205, 7),
-            Arbitrary(205, 7),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 7),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
+            NamedBranch::Typed(CssDataType::Number, 205, 7),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 7),
         ],
         negative: None,
     },
     "mask-y-to" => FunctionalEntry {
         registration_idx: 215,
-        branches: &[
-            NamedKeyword(10, 205, 7),
-            Named(ThemeNamespace::Color, 205, 7),
-            NamedTyped(ValueType::Number, 205, 7),
-            NamedTyped(ValueType::Percentage, 205, 7),
-            Arbitrary(205, 7),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 7),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 7),
+            NamedBranch::Typed(CssDataType::Number, 205, 7),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 7),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 7),
         ],
         negative: None,
     },
     "mask-t-from" => FunctionalEntry {
         registration_idx: 216,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-t-to" => FunctionalEntry {
         registration_idx: 217,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-r-from" => FunctionalEntry {
         registration_idx: 218,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-r-to" => FunctionalEntry {
         registration_idx: 219,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-b-from" => FunctionalEntry {
         registration_idx: 220,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-b-to" => FunctionalEntry {
         registration_idx: 221,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-l-from" => FunctionalEntry {
         registration_idx: 222,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-l-to" => FunctionalEntry {
         registration_idx: 223,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-linear" => FunctionalEntry {
         registration_idx: 225,
-        branches: &[
-            NamedTyped(ValueType::Number, 205, 4),
-            Arbitrary(205, 4),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 205, 4),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 4),
         ],
         negative: Some(SameBranches { registration_idx: 224 }),
     },
     "mask-linear-from" => FunctionalEntry {
         registration_idx: 226,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-linear-to" => FunctionalEntry {
         registration_idx: 227,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-radial-at" => FunctionalEntry {
         registration_idx: 228,
-        branches: &[
-            Arbitrary(235, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(235, 1),
         ],
         negative: None,
     },
     "mask-radial" => FunctionalEntry {
         registration_idx: 229,
-        branches: &[
-            Arbitrary(205, 4),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 4),
         ],
         negative: None,
     },
     "mask-radial-from" => FunctionalEntry {
         registration_idx: 230,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-radial-to" => FunctionalEntry {
         registration_idx: 231,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-conic" => FunctionalEntry {
         registration_idx: 233,
-        branches: &[
-            NamedTyped(ValueType::Number, 205, 4),
-            Arbitrary(205, 4),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 205, 4),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 4),
         ],
         negative: Some(SameBranches { registration_idx: 232 }),
     },
     "mask-conic-from" => FunctionalEntry {
         registration_idx: 234,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "mask-conic-to" => FunctionalEntry {
         registration_idx: 235,
-        branches: &[
-            NamedKeyword(10, 205, 5),
-            Named(ThemeNamespace::Color, 205, 5),
-            NamedTyped(ValueType::Number, 205, 5),
-            NamedTyped(ValueType::Percentage, 205, 5),
-            Arbitrary(205, 5),
+        named_branches: &[
+            NamedBranch::Keyword(10, 205, 5),
+            NamedBranch::Theme(ThemeNamespace::Color, 205, 5),
+            NamedBranch::Typed(CssDataType::Number, 205, 5),
+            NamedBranch::Typed(CssDataType::Percentage, 205, 5),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(205, 5),
         ],
         negative: None,
     },
     "fill" => FunctionalEntry {
         registration_idx: 236,
-        branches: &[
-            NamedKeyword(10, 261, 1),
-            Named(ThemeNamespace::Color, 261, 1),
-            Arbitrary(261, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 261, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 261, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(261, 1),
         ],
         negative: None,
     },
     "stroke" => FunctionalEntry {
         registration_idx: 237,
-        branches: &[
-            NamedKeyword(10, 262, 1),
-            Named(ThemeNamespace::Color, 262, 1),
-            NamedTyped(ValueType::Number, 263, 1),
-            NamedTyped(ValueType::Ratio, 263, 1),
-            ArbitraryTyped(ValueType::Length, 263, 1),
-            ArbitraryTyped(ValueType::Percentage, 263, 1),
-            ArbitraryTyped(ValueType::Number, 263, 1),
-            Arbitrary(262, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 262, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 262, 1),
+            NamedBranch::Typed(CssDataType::Number, 263, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 263, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 263, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 263, 1),
+            ArbitraryBranch::Typed(CssDataType::Number, 263, 1),
+            ArbitraryBranch::Fallback(262, 1),
         ],
         negative: None,
     },
     "object" => FunctionalEntry {
         registration_idx: 238,
-        branches: &[
-            NamedKeyword(6, 265, 1),
-            Arbitrary(265, 1),
+        named_branches: &[
+            NamedBranch::Keyword(6, 265, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(265, 1),
         ],
         negative: None,
     },
     "p" => FunctionalEntry {
         registration_idx: 239,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 266, 1),
-            NamedTyped(ValueType::Number, 266, 1),
-            Arbitrary(266, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 266, 1),
+            NamedBranch::Typed(CssDataType::Number, 266, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(266, 1),
         ],
         negative: None,
     },
     "px" => FunctionalEntry {
         registration_idx: 240,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 267, 1),
-            NamedTyped(ValueType::Number, 267, 1),
-            Arbitrary(267, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 267, 1),
+            NamedBranch::Typed(CssDataType::Number, 267, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(267, 1),
         ],
         negative: None,
     },
     "py" => FunctionalEntry {
         registration_idx: 241,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 268, 1),
-            NamedTyped(ValueType::Number, 268, 1),
-            Arbitrary(268, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 268, 1),
+            NamedBranch::Typed(CssDataType::Number, 268, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(268, 1),
         ],
         negative: None,
     },
     "ps" => FunctionalEntry {
         registration_idx: 242,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 269, 1),
-            NamedTyped(ValueType::Number, 269, 1),
-            Arbitrary(269, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 269, 1),
+            NamedBranch::Typed(CssDataType::Number, 269, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(269, 1),
         ],
         negative: None,
     },
     "pe" => FunctionalEntry {
         registration_idx: 243,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 270, 1),
-            NamedTyped(ValueType::Number, 270, 1),
-            Arbitrary(270, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 270, 1),
+            NamedBranch::Typed(CssDataType::Number, 270, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(270, 1),
         ],
         negative: None,
     },
     "pbs" => FunctionalEntry {
         registration_idx: 244,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 271, 1),
-            NamedTyped(ValueType::Number, 271, 1),
-            Arbitrary(271, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 271, 1),
+            NamedBranch::Typed(CssDataType::Number, 271, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(271, 1),
         ],
         negative: None,
     },
     "pbe" => FunctionalEntry {
         registration_idx: 245,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 272, 1),
-            NamedTyped(ValueType::Number, 272, 1),
-            Arbitrary(272, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 272, 1),
+            NamedBranch::Typed(CssDataType::Number, 272, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(272, 1),
         ],
         negative: None,
     },
     "pt" => FunctionalEntry {
         registration_idx: 246,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 273, 1),
-            NamedTyped(ValueType::Number, 273, 1),
-            Arbitrary(273, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 273, 1),
+            NamedBranch::Typed(CssDataType::Number, 273, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(273, 1),
         ],
         negative: None,
     },
     "pr" => FunctionalEntry {
         registration_idx: 247,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 274, 1),
-            NamedTyped(ValueType::Number, 274, 1),
-            Arbitrary(274, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 274, 1),
+            NamedBranch::Typed(CssDataType::Number, 274, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(274, 1),
         ],
         negative: None,
     },
     "pb" => FunctionalEntry {
         registration_idx: 248,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 275, 1),
-            NamedTyped(ValueType::Number, 275, 1),
-            Arbitrary(275, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 275, 1),
+            NamedBranch::Typed(CssDataType::Number, 275, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(275, 1),
         ],
         negative: None,
     },
     "pl" => FunctionalEntry {
         registration_idx: 249,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 276, 1),
-            NamedTyped(ValueType::Number, 276, 1),
-            Arbitrary(276, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 276, 1),
+            NamedBranch::Typed(CssDataType::Number, 276, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(276, 1),
         ],
         negative: None,
     },
     "indent" => FunctionalEntry {
         registration_idx: 251,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 278, 1),
-            NamedTyped(ValueType::Number, 278, 1),
-            Arbitrary(278, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 278, 1),
+            NamedBranch::Typed(CssDataType::Number, 278, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(278, 1),
         ],
         negative: Some(SameBranches { registration_idx: 250 }),
     },
     "align" => FunctionalEntry {
         registration_idx: 252,
-        branches: &[
-            Arbitrary(279, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(279, 1),
         ],
         negative: None,
     },
     "font" => FunctionalEntry {
         registration_idx: 253,
-        branches: &[
-            Named(ThemeNamespace::Font, 280, 1),
-            Named(ThemeNamespace::FontWeight, 354, 2),
-            ArbitraryTyped(ValueType::Color, 354, 2),
-            ArbitraryTyped(ValueType::Length, 354, 2),
-            ArbitraryTyped(ValueType::Percentage, 354, 2),
-            ArbitraryTyped(ValueType::Number, 354, 2),
-            ArbitraryTyped(ValueType::Integer, 354, 2),
-            ArbitraryTyped(ValueType::Ratio, 354, 2),
-            ArbitraryTyped(ValueType::Angle, 354, 2),
-            ArbitraryTyped(ValueType::Url, 354, 2),
-            ArbitraryTyped(ValueType::Position, 354, 2),
-            ArbitraryTyped(ValueType::BgSize, 354, 2),
-            ArbitraryTyped(ValueType::LineWidth, 354, 2),
-            ArbitraryTyped(ValueType::Image, 354, 2),
-            ArbitraryTyped(ValueType::AbsoluteSize, 354, 2),
-            ArbitraryTyped(ValueType::RelativeSize, 354, 2),
-            ArbitraryTyped(ValueType::Vector, 354, 2),
-            Arbitrary(280, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Font, 280, 1),
+            NamedBranch::Theme(ThemeNamespace::FontWeight, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Length, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Number, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Integer, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Ratio, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Angle, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Url, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Position, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::BgSize, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::LineWidth, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Image, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::AbsoluteSize, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::RelativeSize, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Vector, 354, 2),
+            ArbitraryBranch::Fallback(280, 1),
         ],
         negative: None,
     },
     "font-features" => FunctionalEntry {
         registration_idx: 254,
-        branches: &[
-            Arbitrary(281, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(281, 1),
         ],
         negative: None,
     },
     "font-stretch" => FunctionalEntry {
         registration_idx: 255,
-        branches: &[
-            Arbitrary(295, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(295, 1),
         ],
         negative: None,
     },
     "placeholder" => FunctionalEntry {
         registration_idx: 256,
-        branches: &[
-            NamedKeyword(10, 292, 1),
-            Named(ThemeNamespace::Color, 292, 1),
-            Arbitrary(292, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 292, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 292, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(292, 1),
         ],
         negative: None,
     },
     "decoration" => FunctionalEntry {
         registration_idx: 257,
-        branches: &[
-            NamedKeyword(10, 298, 1),
-            Named(ThemeNamespace::Color, 298, 1),
-            NamedTyped(ValueType::Number, 300, 1),
-            ArbitraryTyped(ValueType::Length, 300, 1),
-            ArbitraryTyped(ValueType::Percentage, 300, 1),
-            Arbitrary(298, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 298, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 298, 1),
+            NamedBranch::Typed(CssDataType::Number, 300, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 300, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 300, 1),
+            ArbitraryBranch::Fallback(298, 1),
         ],
         negative: None,
     },
     "animate" => FunctionalEntry {
         registration_idx: 258,
-        branches: &[
-            NamedKeyword(3, 72, 1),
-            Named(ThemeNamespace::Animate, 72, 1),
-            Arbitrary(72, 1),
+        named_branches: &[
+            NamedBranch::Keyword(3, 72, 1),
+            NamedBranch::Theme(ThemeNamespace::Animate, 72, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(72, 1),
         ],
         negative: None,
     },
     "filter" => FunctionalEntry {
         registration_idx: 259,
-        branches: &[
-            Arbitrary(334, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(334, 1),
         ],
         negative: None,
     },
     "backdrop-filter" => FunctionalEntry {
         registration_idx: 260,
-        branches: &[
-            Arbitrary(354, 2),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "blur" => FunctionalEntry {
         registration_idx: 261,
-        branches: &[
-            NamedKeyword(3, 325, 2),
-            Named(ThemeNamespace::Blur, 325, 2),
-            Arbitrary(325, 2),
+        named_branches: &[
+            NamedBranch::Keyword(3, 325, 2),
+            NamedBranch::Theme(ThemeNamespace::Blur, 325, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(325, 2),
         ],
         negative: None,
     },
     "backdrop-blur" => FunctionalEntry {
         registration_idx: 262,
-        branches: &[
-            NamedKeyword(3, 335, 3),
-            Named(ThemeNamespace::Blur, 335, 3),
-            Arbitrary(335, 3),
+        named_branches: &[
+            NamedBranch::Keyword(3, 335, 3),
+            NamedBranch::Theme(ThemeNamespace::Blur, 335, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(335, 3),
         ],
         negative: None,
     },
     "brightness" => FunctionalEntry {
         registration_idx: 263,
-        branches: &[
-            NamedTyped(ValueType::Number, 326, 2),
-            Arbitrary(326, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 326, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(326, 2),
         ],
         negative: None,
     },
     "backdrop-brightness" => FunctionalEntry {
         registration_idx: 264,
-        branches: &[
-            NamedTyped(ValueType::Number, 336, 3),
-            Arbitrary(336, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 336, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(336, 3),
         ],
         negative: None,
     },
     "contrast" => FunctionalEntry {
         registration_idx: 265,
-        branches: &[
-            NamedTyped(ValueType::Number, 327, 2),
-            Arbitrary(327, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 327, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(327, 2),
         ],
         negative: None,
     },
     "backdrop-contrast" => FunctionalEntry {
         registration_idx: 266,
-        branches: &[
-            NamedTyped(ValueType::Number, 337, 3),
-            Arbitrary(337, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 337, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(337, 3),
         ],
         negative: None,
     },
     "grayscale" => FunctionalEntry {
         registration_idx: 267,
-        branches: &[
-            NamedTyped(ValueType::Number, 329, 2),
-            Arbitrary(329, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 329, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(329, 2),
         ],
         negative: None,
     },
     "backdrop-grayscale" => FunctionalEntry {
         registration_idx: 268,
-        branches: &[
-            NamedTyped(ValueType::Number, 338, 3),
-            Arbitrary(338, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 338, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(338, 3),
         ],
         negative: None,
     },
     "hue-rotate" => FunctionalEntry {
         registration_idx: 270,
-        branches: &[
-            NamedTyped(ValueType::Number, 330, 2),
-            Arbitrary(330, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 330, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(330, 2),
         ],
         negative: Some(SameBranches { registration_idx: 269 }),
     },
     "backdrop-hue-rotate" => FunctionalEntry {
         registration_idx: 272,
-        branches: &[
-            NamedTyped(ValueType::Number, 339, 3),
-            Arbitrary(339, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 339, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(339, 3),
         ],
         negative: Some(SameBranches { registration_idx: 271 }),
     },
     "invert" => FunctionalEntry {
         registration_idx: 273,
-        branches: &[
-            NamedTyped(ValueType::Number, 331, 2),
-            Arbitrary(331, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 331, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(331, 2),
         ],
         negative: None,
     },
     "backdrop-invert" => FunctionalEntry {
         registration_idx: 274,
-        branches: &[
-            NamedTyped(ValueType::Number, 340, 3),
-            Arbitrary(340, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 340, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(340, 3),
         ],
         negative: None,
     },
     "saturate" => FunctionalEntry {
         registration_idx: 275,
-        branches: &[
-            NamedTyped(ValueType::Number, 332, 2),
-            Arbitrary(332, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 332, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(332, 2),
         ],
         negative: None,
     },
     "backdrop-saturate" => FunctionalEntry {
         registration_idx: 276,
-        branches: &[
-            NamedTyped(ValueType::Number, 342, 3),
-            Arbitrary(342, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 342, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(342, 3),
         ],
         negative: None,
     },
     "sepia" => FunctionalEntry {
         registration_idx: 277,
-        branches: &[
-            NamedTyped(ValueType::Number, 333, 2),
-            Arbitrary(333, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 333, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(333, 2),
         ],
         negative: None,
     },
     "backdrop-sepia" => FunctionalEntry {
         registration_idx: 278,
-        branches: &[
-            NamedTyped(ValueType::Number, 343, 3),
-            Arbitrary(343, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 343, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(343, 3),
         ],
         negative: None,
     },
     "drop-shadow" => FunctionalEntry {
         registration_idx: 279,
-        branches: &[
-            NamedKeyword(10, 354, 2),
-            Named(ThemeNamespace::Color, 354, 2),
-            Named(ThemeNamespace::DropShadow, 354, 3),
-            ArbitraryTyped(ValueType::Color, 354, 2),
-            Arbitrary(354, 3),
+        named_branches: &[
+            NamedBranch::Keyword(10, 354, 2),
+            NamedBranch::Theme(ThemeNamespace::Color, 354, 2),
+            NamedBranch::Theme(ThemeNamespace::DropShadow, 354, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, 354, 2),
+            ArbitraryBranch::Fallback(354, 3),
         ],
         negative: None,
     },
     "backdrop-opacity" => FunctionalEntry {
         registration_idx: 280,
-        branches: &[
-            NamedTyped(ValueType::Number, 341, 3),
-            Arbitrary(341, 3),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 341, 3),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(341, 3),
         ],
         negative: None,
     },
     "transition" => FunctionalEntry {
         registration_idx: 281,
-        branches: &[
-            NamedKeyword(13, 345, 3),
-            NamedKeyword(3, 345, 1),
-            Arbitrary(345, 3),
+        named_branches: &[
+            NamedBranch::Keyword(13, 345, 3),
+            NamedBranch::Keyword(3, 345, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(345, 3),
         ],
         negative: None,
     },
     "delay" => FunctionalEntry {
         registration_idx: 282,
-        branches: &[
-            NamedTyped(ValueType::Number, 347, 1),
-            Arbitrary(347, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 347, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(347, 1),
         ],
         negative: None,
     },
     "duration" => FunctionalEntry {
         registration_idx: 283,
-        branches: &[
-            NamedTyped(ValueType::Number, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "ease" => FunctionalEntry {
         registration_idx: 284,
-        branches: &[
-            NamedKeyword(14, 354, 1),
-            NamedKeyword(15, 354, 2),
-            Named(ThemeNamespace::Ease, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Keyword(14, 354, 1),
+            NamedBranch::Keyword(15, 354, 2),
+            NamedBranch::Theme(ThemeNamespace::Ease, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "will-change" => FunctionalEntry {
         registration_idx: 285,
-        branches: &[
-            Arbitrary(350, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(350, 1),
         ],
         negative: None,
     },
     "content" => FunctionalEntry {
         registration_idx: 286,
-        branches: &[
-            Arbitrary(354, 2),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "contain" => FunctionalEntry {
         registration_idx: 287,
-        branches: &[
-            Arbitrary(351, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(351, 1),
         ],
         negative: None,
     },
     "leading" => FunctionalEntry {
         registration_idx: 288,
-        branches: &[
-            NamedKeyword(3, 354, 2),
-            Named(ThemeNamespace::Spacing, 354, 2),
-            Named(ThemeNamespace::Leading, 354, 2),
-            NamedTyped(ValueType::Number, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Keyword(3, 354, 2),
+            NamedBranch::Theme(ThemeNamespace::Spacing, 354, 2),
+            NamedBranch::Theme(ThemeNamespace::Leading, 354, 2),
+            NamedBranch::Typed(CssDataType::Number, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: None,
     },
     "tracking" => FunctionalEntry {
         registration_idx: 290,
-        branches: &[
-            Named(ThemeNamespace::Tracking, 354, 2),
-            Arbitrary(354, 2),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Tracking, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(354, 2),
         ],
         negative: Some(SameBranches { registration_idx: 289 }),
     },
     "outline" => FunctionalEntry {
         registration_idx: 291,
-        branches: &[
-            NamedKeyword(10, 324, 1),
-            Named(ThemeNamespace::Color, 324, 1),
-            NamedTyped(ValueType::Number, 354, 2),
-            ArbitraryTyped(ValueType::Length, 354, 2),
-            ArbitraryTyped(ValueType::Percentage, 354, 2),
-            ArbitraryTyped(ValueType::Number, 354, 2),
-            Arbitrary(324, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 324, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 324, 1),
+            NamedBranch::Typed(CssDataType::Number, 354, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 354, 2),
+            ArbitraryBranch::Typed(CssDataType::Number, 354, 2),
+            ArbitraryBranch::Fallback(324, 1),
         ],
         negative: None,
     },
     "outline-offset" => FunctionalEntry {
         registration_idx: 293,
-        branches: &[
-            NamedTyped(ValueType::Number, 323, 1),
-            Arbitrary(323, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 323, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(323, 1),
         ],
         negative: Some(SameBranches { registration_idx: 292 }),
     },
     "opacity" => FunctionalEntry {
         registration_idx: 294,
-        branches: &[
-            NamedTyped(ValueType::Number, 307, 1),
-            Arbitrary(307, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 307, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(307, 1),
         ],
         negative: None,
     },
     "underline-offset" => FunctionalEntry {
         registration_idx: 296,
-        branches: &[
-            NamedKeyword(0, 301, 1),
-            NamedTyped(ValueType::Number, 301, 1),
-            Arbitrary(301, 1),
+        named_branches: &[
+            NamedBranch::Keyword(0, 301, 1),
+            NamedBranch::Typed(CssDataType::Number, 301, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(301, 1),
         ],
         negative: Some(Distinct {
             registration_idx: 295,
-            branches: &[
-                NamedTyped(ValueType::Number, 301, 1),
-                Arbitrary(301, 1),
+            named_branches: &[
+                NamedBranch::Typed(CssDataType::Number, 301, 1),
+            ],
+            arbitrary_branches: &[
+                ArbitraryBranch::Fallback(301, 1),
             ],
         }),
     },
     "text" => FunctionalEntry {
         registration_idx: 297,
-        branches: &[
-            NamedKeyword(10, 292, 1),
-            Named(ThemeNamespace::Color, 292, 1),
-            Named(ThemeNamespace::Text, 282, 1),
-            ArbitraryTyped(ValueType::Length, 282, 1),
-            ArbitraryTyped(ValueType::Percentage, 282, 1),
-            ArbitraryTyped(ValueType::AbsoluteSize, 282, 1),
-            ArbitraryTyped(ValueType::RelativeSize, 282, 1),
-            Arbitrary(292, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 292, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 292, 1),
+            NamedBranch::Theme(ThemeNamespace::Text, 282, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 282, 1),
+            ArbitraryBranch::Typed(CssDataType::Percentage, 282, 1),
+            ArbitraryBranch::Typed(CssDataType::AbsoluteSize, 282, 1),
+            ArbitraryBranch::Typed(CssDataType::RelativeSize, 282, 1),
+            ArbitraryBranch::Fallback(292, 1),
         ],
         negative: None,
     },
     "text-shadow" => FunctionalEntry {
         registration_idx: 298,
-        branches: &[
-            NamedKeyword(10, 354, 1),
-            NamedKeyword(3, 354, 1),
-            Named(ThemeNamespace::Color, 354, 1),
-            Named(ThemeNamespace::TextShadow, 354, 1),
-            ArbitraryTyped(ValueType::Color, 354, 1),
-            Arbitrary(354, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 354, 1),
+            NamedBranch::Keyword(3, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 354, 1),
+            NamedBranch::Theme(ThemeNamespace::TextShadow, 354, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, 354, 1),
+            ArbitraryBranch::Fallback(354, 1),
         ],
         negative: None,
     },
     "shadow" => FunctionalEntry {
         registration_idx: 299,
-        branches: &[
-            NamedKeyword(10, 312, 1),
-            NamedKeyword(3, 311, 2),
-            Named(ThemeNamespace::Color, 312, 1),
-            Named(ThemeNamespace::Shadow, 311, 2),
-            ArbitraryTyped(ValueType::Color, 312, 1),
-            Arbitrary(311, 2),
+        named_branches: &[
+            NamedBranch::Keyword(10, 312, 1),
+            NamedBranch::Keyword(3, 311, 2),
+            NamedBranch::Theme(ThemeNamespace::Color, 312, 1),
+            NamedBranch::Theme(ThemeNamespace::Shadow, 311, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, 312, 1),
+            ArbitraryBranch::Fallback(311, 2),
         ],
         negative: None,
     },
     "inset-shadow" => FunctionalEntry {
         registration_idx: 300,
-        branches: &[
-            NamedKeyword(10, 316, 1),
-            NamedKeyword(3, 315, 2),
-            Named(ThemeNamespace::Color, 316, 1),
-            Named(ThemeNamespace::InsetShadow, 315, 2),
-            ArbitraryTyped(ValueType::Color, 316, 1),
-            Arbitrary(315, 2),
+        named_branches: &[
+            NamedBranch::Keyword(10, 316, 1),
+            NamedBranch::Keyword(3, 315, 2),
+            NamedBranch::Theme(ThemeNamespace::Color, 316, 1),
+            NamedBranch::Theme(ThemeNamespace::InsetShadow, 315, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Color, 316, 1),
+            ArbitraryBranch::Fallback(315, 2),
         ],
         negative: None,
     },
     "ring" => FunctionalEntry {
         registration_idx: 301,
-        branches: &[
-            NamedKeyword(10, 314, 1),
-            Named(ThemeNamespace::Color, 314, 1),
-            NamedTyped(ValueType::Number, 313, 2),
-            ArbitraryTyped(ValueType::Length, 313, 2),
-            Arbitrary(314, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 314, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 314, 1),
+            NamedBranch::Typed(CssDataType::Number, 313, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 313, 2),
+            ArbitraryBranch::Fallback(314, 1),
         ],
         negative: None,
     },
     "inset-ring" => FunctionalEntry {
         registration_idx: 302,
-        branches: &[
-            NamedKeyword(10, 318, 1),
-            Named(ThemeNamespace::Color, 318, 1),
-            NamedTyped(ValueType::Number, 317, 2),
-            ArbitraryTyped(ValueType::Length, 317, 2),
-            Arbitrary(318, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 318, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 318, 1),
+            NamedBranch::Typed(CssDataType::Number, 317, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 317, 2),
+            ArbitraryBranch::Fallback(318, 1),
         ],
         negative: None,
     },
     "ring-offset" => FunctionalEntry {
         registration_idx: 303,
-        branches: &[
-            NamedKeyword(10, 320, 1),
-            Named(ThemeNamespace::Color, 320, 1),
-            NamedTyped(ValueType::Number, 319, 2),
-            ArbitraryTyped(ValueType::Length, 319, 2),
-            Arbitrary(320, 1),
+        named_branches: &[
+            NamedBranch::Keyword(10, 320, 1),
+            NamedBranch::Theme(ThemeNamespace::Color, 320, 1),
+            NamedBranch::Typed(CssDataType::Number, 319, 2),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Typed(CssDataType::Length, 319, 2),
+            ArbitraryBranch::Fallback(320, 1),
         ],
         negative: None,
     },
     "@container" => FunctionalEntry {
         registration_idx: 304,
-        branches: &[
-            Arbitrary(0, 1),
+        named_branches: &[],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(0, 1),
         ],
         negative: None,
     },
     "flex-shrink" => FunctionalEntry {
         registration_idx: 305,
-        branches: &[
-            NamedTyped(ValueType::Number, 49, 1),
-            Arbitrary(49, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 49, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(49, 1),
         ],
         negative: None,
     },
     "flex-grow" => FunctionalEntry {
         registration_idx: 306,
-        branches: &[
-            NamedTyped(ValueType::Number, 50, 1),
-            Arbitrary(50, 1),
+        named_branches: &[
+            NamedBranch::Typed(CssDataType::Number, 50, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(50, 1),
         ],
         negative: None,
     },
     "start" => FunctionalEntry {
         registration_idx: 308,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 7, 1),
-            NamedTyped(ValueType::Number, 7, 1),
-            NamedTyped(ValueType::Ratio, 7, 1),
-            Arbitrary(7, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 7, 1),
+            NamedBranch::Typed(CssDataType::Number, 7, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 7, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(7, 1),
         ],
         negative: Some(SameBranches { registration_idx: 307 }),
     },
     "end" => FunctionalEntry {
         registration_idx: 310,
-        branches: &[
-            Named(ThemeNamespace::Spacing, 8, 1),
-            NamedTyped(ValueType::Number, 8, 1),
-            NamedTyped(ValueType::Ratio, 8, 1),
-            Arbitrary(8, 1),
+        named_branches: &[
+            NamedBranch::Theme(ThemeNamespace::Spacing, 8, 1),
+            NamedBranch::Typed(CssDataType::Number, 8, 1),
+            NamedBranch::Typed(CssDataType::Ratio, 8, 1),
+        ],
+        arbitrary_branches: &[
+            ArbitraryBranch::Fallback(8, 1),
         ],
         negative: Some(SameBranches { registration_idx: 309 }),
     },

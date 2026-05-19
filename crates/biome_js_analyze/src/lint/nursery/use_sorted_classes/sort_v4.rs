@@ -9,7 +9,7 @@ use biome_tailwind_syntax::{
 use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, STATIC_UTILITIES,
 };
-use super::tailwind_preset_v4_types::{Branch, Negative, ValueType};
+use super::tailwind_preset_v4_types::{ArbitraryBranch, CssDataType, NamedBranch, Negative};
 use super::value_match::value_matches_type;
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
@@ -122,19 +122,26 @@ impl SortKey {
                     return Self::Unknown;
                 };
 
-                let (registration_idx, branches) = if is_negative {
+                let (registration_idx, named_branches, arbitrary_branches) = if is_negative {
                     match entry.negative {
                         None => return Self::Unknown,
-                        Some(Negative::SameBranches { registration_idx }) => {
-                            (registration_idx, entry.branches)
-                        }
+                        Some(Negative::SameBranches { registration_idx }) => (
+                            registration_idx,
+                            entry.named_branches,
+                            entry.arbitrary_branches,
+                        ),
                         Some(Negative::Distinct {
                             registration_idx,
-                            branches,
-                        }) => (registration_idx, branches),
+                            named_branches,
+                            arbitrary_branches,
+                        }) => (registration_idx, named_branches, arbitrary_branches),
                     }
                 } else {
-                    (entry.registration_idx, entry.branches)
+                    (
+                        entry.registration_idx,
+                        entry.named_branches,
+                        entry.arbitrary_branches,
+                    )
                 };
 
                 let Ok(value) = f.value() else {
@@ -142,14 +149,13 @@ impl SortKey {
                 };
 
                 if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                    let kind = ValueKind::Arbitrary(arb.value());
-                    return resolve_branch(branches, &kind, registration_idx)
+                    return resolve_arbitrary_branch(arbitrary_branches, &arb.value(), registration_idx)
                         .unwrap_or(Self::Unknown);
                 }
 
                 let has_fraction_modifier = match f.modifier() {
                     None => false,
-                    Some(m) if is_fraction_modifier(&value, &m, branches) => true,
+                    Some(m) if is_fraction_modifier(&value, &m, named_branches) => true,
                     Some(_) => return Self::Unknown,
                 };
 
@@ -170,14 +176,14 @@ impl SortKey {
                 let value_text = value_token.text_trimmed();
 
                 let kind = match (&value, has_fraction_modifier) {
-                    (AnyTwValue::TwNamedValue(_), false) => ValueKind::Named(value_text),
-                    (AnyTwValue::TwNumberValue(_), false) => ValueKind::Number(value_text),
-                    (AnyTwValue::TwNumberValue(_), true) => ValueKind::Ratio,
-                    (AnyTwValue::TwPercentageValue(_), false) => ValueKind::Percentage,
+                    (AnyTwValue::TwNamedValue(_), false) => NamedValueKind::Named(value_text),
+                    (AnyTwValue::TwNumberValue(_), false) => NamedValueKind::Number(value_text),
+                    (AnyTwValue::TwNumberValue(_), true) => NamedValueKind::Ratio,
+                    (AnyTwValue::TwPercentageValue(_), false) => NamedValueKind::Percentage,
                     _ => return Self::Unknown,
                 };
 
-                resolve_branch(branches, &kind, registration_idx).unwrap_or(Self::Unknown)
+                resolve_named_branch(named_branches, &kind, registration_idx).unwrap_or(Self::Unknown)
             }
         }
     }
@@ -211,29 +217,32 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
     }
 }
 
-/// Classified value for `resolve_branch`. Dispatching by parser node
-/// kind keeps `NamedTyped(Number)` from matching `red-500` and
-/// `NamedTyped(Ratio)` from firing without an `n/m` modifier.
-enum ValueKind<'a> {
+/// Classified value for `resolve_named_branch`. Dispatching by parser
+/// node kind keeps `NamedBranch::Typed(Number)` from matching `red-500`
+/// and `NamedBranch::Typed(Ratio)` from firing without an `n/m` modifier.
+enum NamedValueKind<'a> {
     Named(&'a str),
     Number(&'a str),
     Percentage,
     Ratio,
-    Arbitrary(CssGenericComponentValueList),
 }
 
-/// Does this utility's branch list declare a `NamedTyped(Ratio)` slot?
+/// Does this utility's branch list declare a `NamedBranch::Typed(Ratio)` slot?
 /// Used as the gate for fraction-aliased modifiers (`w-1/2` ↔ `w-[50%]`) —
 /// mirrors Tailwind's `supportsFractions` flag
-fn entry_has_ratio_branch(branches: &[Branch]) -> bool {
+fn entry_has_ratio_branch(branches: &[NamedBranch]) -> bool {
     branches
         .iter()
-        .any(|b| matches!(b, Branch::NamedTyped(ValueType::Ratio, _, _)))
+        .any(|b| matches!(b, NamedBranch::Typed(CssDataType::Ratio, _, _)))
 }
 
 /// `n/m` Tailwind fraction shorthand: the value is a bare number, the
 /// modifier is a bare number, and the utility actually accepts fractions.
-fn is_fraction_modifier(value: &AnyTwValue, modifier: &AnyTwModifier, branches: &[Branch]) -> bool {
+fn is_fraction_modifier(
+    value: &AnyTwValue,
+    modifier: &AnyTwModifier,
+    branches: &[NamedBranch],
+) -> bool {
     let AnyTwModifier::TwModifier(m) = modifier else {
         return false;
     };
@@ -242,13 +251,13 @@ fn is_fraction_modifier(value: &AnyTwValue, modifier: &AnyTwModifier, branches: 
         && entry_has_ratio_branch(branches)
 }
 
-/// Walk a basename's branch list and return the first matching branch as
-/// a complete `SortKey::Known`. Branch order in the preset already
-/// reflects the resolution precedence we want
-/// (NamedKeyword → Named → NamedTyped → ArbitraryTyped → Arbitrary).
-fn resolve_branch(
-    branches: &[Branch],
-    kind: &ValueKind<'_>,
+/// Walk a basename's named branch list and return the first matching
+/// branch as a complete `SortKey::Known`. Branch order in the preset
+/// already reflects the resolution precedence we want
+/// (Keyword → Theme → Typed).
+fn resolve_named_branch(
+    branches: &[NamedBranch],
+    kind: &NamedValueKind<'_>,
     registration_idx: u16,
 ) -> Option<SortKey> {
     for &branch in branches {
@@ -256,10 +265,10 @@ fn resolve_branch(
             // Theme-namespace lookup (`text-lg` ↔ `--text-lg`). Both Named
             // and Number kinds query it — users can register numeric
             // theme keys like `--spacing-12`.
-            Branch::Named(namespace, p, c) => {
+            NamedBranch::Theme(namespace, p, c) => {
                 let text = match kind {
-                    ValueKind::Named(v) | ValueKind::Number(v) => *v,
-                    ValueKind::Percentage | ValueKind::Ratio | ValueKind::Arbitrary(_) => continue,
+                    NamedValueKind::Named(v) | NamedValueKind::Number(v) => *v,
+                    NamedValueKind::Percentage | NamedValueKind::Ratio => continue,
                 };
                 if !namespace.keys().contains(text) {
                     continue;
@@ -267,8 +276,8 @@ fn resolve_branch(
                 (p, c)
             }
             // Hard-coded keyword pool (`origin-top`, `accent-current`).
-            Branch::NamedKeyword(pool_idx, p, c) => {
-                let ValueKind::Named(text) = kind else {
+            NamedBranch::Keyword(pool_idx, p, c) => {
+                let NamedValueKind::Named(text) = kind else {
                     continue;
                 };
                 if !KEYWORD_POOL[usize::from(pool_idx)].contains(text) {
@@ -276,33 +285,45 @@ fn resolve_branch(
                 }
                 (p, c)
             }
-            Branch::NamedTyped(value_type, p, c) => {
+            NamedBranch::Typed(value_type, p, c) => {
                 let matched = matches!(
                     (value_type, kind),
-                    (ValueType::Number, ValueKind::Number(_))
-                        | (ValueType::Percentage, ValueKind::Percentage)
-                        | (ValueType::Ratio, ValueKind::Ratio)
+                    (CssDataType::Number, NamedValueKind::Number(_))
+                        | (CssDataType::Percentage, NamedValueKind::Percentage)
+                        | (CssDataType::Ratio, NamedValueKind::Ratio)
                 );
                 if !matched {
                     continue;
                 }
                 (p, c)
             }
-            Branch::ArbitraryTyped(b_vt, p, c) => {
-                let ValueKind::Arbitrary(list) = kind else {
-                    continue;
-                };
-                if !value_matches_type(list, b_vt) {
+        };
+        return Some(SortKey::Known {
+            property_idx,
+            property_count,
+            registration_idx,
+        });
+    }
+    None
+}
+
+/// Walk a basename's arbitrary branch list and return the first matching
+/// branch as a complete `SortKey::Known`. Typed branches precede the
+/// type-blind fallback in generated preset order.
+fn resolve_arbitrary_branch(
+    branches: &[ArbitraryBranch],
+    list: &CssGenericComponentValueList,
+    registration_idx: u16,
+) -> Option<SortKey> {
+    for &branch in branches {
+        let (property_idx, property_count) = match branch {
+            ArbitraryBranch::Typed(value_type, p, c) => {
+                if !value_matches_type(list, value_type) {
                     continue;
                 }
                 (p, c)
             }
-            Branch::Arbitrary(p, c) => {
-                let ValueKind::Arbitrary(_) = kind else {
-                    continue;
-                };
-                (p, c)
-            }
+            ArbitraryBranch::Fallback(p, c) => (p, c),
         };
         return Some(SortKey::Known {
             property_idx,
@@ -376,38 +397,27 @@ mod tests {
 
     // endregion: compare
 
-    // region: resolve_branch
+    // region: branch resolution
 
     #[test]
-    fn resolve_branch_returns_first_matching_branch() {
-        // Two NamedTyped(Number) branches with different property_idx;
+    fn resolve_named_branch_returns_first_matching_branch() {
+        // Two NamedBranch::Typed(Number) branches with different property_idx;
         // first one to match wins.
         let branches = &[
-            Branch::NamedTyped(ValueType::Number, 10, 1),
-            Branch::NamedTyped(ValueType::Number, 20, 1),
+            NamedBranch::Typed(CssDataType::Number, 10, 1),
+            NamedBranch::Typed(CssDataType::Number, 20, 1),
         ];
         assert_eq!(
-            resolve_branch(branches, &ValueKind::Number("5"), 99),
+            resolve_named_branch(branches, &NamedValueKind::Number("5"), 99),
             Some(known(10, 1, 99))
         );
     }
 
     #[test]
-    fn resolve_branch_skips_arbitrary_typed_for_bare_value() {
-        // Only the bracketed code-path activates ArbitraryTyped / Arbitrary;
-        // bare values fall through.
+    fn resolve_arbitrary_branch_skips_typed_when_matcher_returns_false_then_falls_back() {
         let branches = &[
-            Branch::ArbitraryTyped(ValueType::Number, 10, 1),
-            Branch::Arbitrary(20, 1),
-        ];
-        assert_eq!(resolve_branch(branches, &ValueKind::Number("5"), 99), None);
-    }
-
-    #[test]
-    fn resolve_branch_skips_arbitrary_typed_when_matcher_returns_false_then_falls_back() {
-        let branches = &[
-            Branch::ArbitraryTyped(ValueType::Number, 10, 1),
-            Branch::Arbitrary(20, 1),
+            ArbitraryBranch::Typed(CssDataType::Number, 10, 1),
+            ArbitraryBranch::Fallback(20, 1),
         ];
         let full = parse_tailwind("p-[10px]").tree().candidates().iter().next().unwrap();
         let full = full.as_tw_full_candidate().unwrap();
@@ -418,49 +428,77 @@ mod tests {
         let AnyTwValue::TwArbitraryValue(arbitrary) = functional.value().unwrap() else {
             panic!("expected arbitrary value")
         };
-        let kind = ValueKind::Arbitrary(arbitrary.value());
-        assert_eq!(resolve_branch(branches, &kind, 99), Some(known(20, 1, 99)));
+        assert_eq!(
+            resolve_arbitrary_branch(branches, &arbitrary.value(), 99),
+            Some(known(20, 1, 99))
+        );
     }
 
     #[test]
-    fn resolve_branch_passes_registration_idx_through() {
-        let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
+    fn resolve_arbitrary_branch_skips_named_branches_by_construction() {
+        let full = parse_tailwind("p-[10px]")
+            .tree()
+            .candidates()
+            .iter()
+            .next()
+            .unwrap();
+        let full = full.as_tw_full_candidate().unwrap();
+        let candidate = full.candidate().unwrap();
+        let AnyTwCandidate::TwFunctionalCandidate(functional) = candidate else {
+            panic!("expected functional candidate")
+        };
+        let AnyTwValue::TwArbitraryValue(arbitrary) = functional.value().unwrap() else {
+            panic!("expected arbitrary value")
+        };
+        let branches = &[ArbitraryBranch::Fallback(20, 1)];
         assert_eq!(
-            resolve_branch(branches, &ValueKind::Number("0"), 42),
+            resolve_arbitrary_branch(branches, &arbitrary.value(), 99),
+            Some(known(20, 1, 99))
+        );
+    }
+
+    #[test]
+    fn resolve_named_branch_passes_registration_idx_through() {
+        let branches = &[NamedBranch::Typed(CssDataType::Number, 1, 1)];
+        assert_eq!(
+            resolve_named_branch(branches, &NamedValueKind::Number("0"), 42),
             Some(known(1, 1, 42))
         );
     }
 
     #[test]
-    fn resolve_branch_returns_none_when_kind_does_not_match_value_type() {
-        // A NamedValue text like "abc" never satisfies NamedTyped(Number)
+    fn resolve_named_branch_returns_none_when_kind_does_not_match_value_type() {
+        // A NamedValue text like "abc" never satisfies NamedBranch::Typed(Number)
         // because dispatch is by parser node kind, not text scanning.
-        let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
-        assert_eq!(resolve_branch(branches, &ValueKind::Named("abc"), 0), None);
+        let branches = &[NamedBranch::Typed(CssDataType::Number, 1, 1)];
+        assert_eq!(
+            resolve_named_branch(branches, &NamedValueKind::Named("abc"), 0),
+            None
+        );
     }
 
     #[test]
-    fn resolve_branch_ratio_matches_ratio_typed_branch() {
-        let branches = &[Branch::NamedTyped(ValueType::Ratio, 7, 1)];
+    fn resolve_named_branch_ratio_matches_ratio_typed_branch() {
+        let branches = &[NamedBranch::Typed(CssDataType::Ratio, 7, 1)];
         assert_eq!(
-            resolve_branch(branches, &ValueKind::Ratio, 11),
+            resolve_named_branch(branches, &NamedValueKind::Ratio, 11),
             Some(known(7, 1, 11))
         );
     }
 
     #[test]
-    fn resolve_branch_percentage_only_matches_percentage_typed_branch() {
+    fn resolve_named_branch_percentage_only_matches_percentage_typed_branch() {
         let branches = &[
-            Branch::NamedTyped(ValueType::Number, 1, 1),
-            Branch::NamedTyped(ValueType::Percentage, 2, 1),
+            NamedBranch::Typed(CssDataType::Number, 1, 1),
+            NamedBranch::Typed(CssDataType::Percentage, 2, 1),
         ];
         assert_eq!(
-            resolve_branch(branches, &ValueKind::Percentage, 0),
+            resolve_named_branch(branches, &NamedValueKind::Percentage, 0),
             Some(known(2, 1, 0))
         );
     }
 
-    // endregion: resolve_branch
+    // endregion: branch resolution
 
     // region: sort_class_list edge cases
 

@@ -11,13 +11,13 @@ use super::tailwind_preset_v4::{
     THEME_KEYS_SPACING, THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
 };
 
-// CSS value types (from infer-data-type.ts).
+// CSS data types (from infer-data-type.ts).
 // Bare value matching is dispatched by the consumer on parser node kind
 // (TwNumberValue / TwPercentageValue / TwModifier+number); bracketed
-// arbitrary values use AST predicates — see sort_v4::resolve_branch.
+// arbitrary values use AST predicates — see sort_v4::resolve_arbitrary_branch.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
-pub enum ValueType {
+pub enum CssDataType {
     Color,
     Length,
     Percentage,
@@ -96,36 +96,40 @@ pub struct UtilityEntry {
     pub negative_registration_idx: Option<u16>,
 }
 
-// One dispatch branch inside a functional utility's compileFn.
+// Named-path dispatch branches inside a functional utility's compileFn.
 //
-// - Named:           named-path theme-namespace lookup
-//                    (`text-lg` ↔ `--text-lg`).
-// - NamedKeyword:    named-path hardcoded keyword set baked into the
-//                    compileFn (`origin-top`, `accent-current`).
-//                    First field is an index into `KEYWORD_POOL`.
-// - NamedTyped:      named-path predicate match for bare value patterns
-//                    (`p-4` Number, `from-25%` Percentage, `w-1/2` Ratio).
-// - ArbitraryTyped:  arbitrary-path predicate match used for utilities
-//                    whose property differs by CSS value type
-//                    (`from-[#fff]` → `--tw-gradient-from`,
-//                    `from-[10px]` → `--tw-gradient-from-position`).
-// - Arbitrary:       arbitrary-path fallback used when the utility emits
-//                    the same property regardless of value type
-//                    (`p-[10px]`, `p-[#fff]` → `padding`).
-//                    Resolved after every `ArbitraryTyped` branch.
+// - Theme:    theme-namespace lookup (`text-lg` ↔ `--text-lg`).
+// - Keyword:  hardcoded keyword set baked into the compileFn
+//             (`origin-top`, `accent-current`). First field is an index
+//             into `KEYWORD_POOL`.
+// - Typed:    predicate match for bare value patterns (`p-4` Number,
+//             `from-25%` Percentage, `w-1/2` Ratio).
 #[derive(Copy, Clone)]
-pub enum Branch {
-    Named(ThemeNamespace, u16, u8),
-    NamedKeyword(u16, u16, u8),
-    NamedTyped(ValueType, u16, u8),
-    ArbitraryTyped(ValueType, u16, u8),
-    Arbitrary(u16, u8),
+pub enum NamedBranch {
+    Theme(ThemeNamespace, u16, u8),
+    Keyword(u16, u16, u8),
+    Typed(CssDataType, u16, u8),
+}
+
+// Arbitrary-path dispatch branches inside a functional utility's compileFn.
+//
+// - Typed:     predicate match used for utilities whose property differs by
+//              CSS data type (`from-[#fff]` → `--tw-gradient-from`,
+//              `from-[10px]` → `--tw-gradient-from-position`).
+// - Fallback:  type-blind fallback used when the utility emits the same
+//              property regardless of CSS data type (`p-[10px]`, `p-[#fff]`
+//              → `padding`). Resolved after every `Typed` branch.
+#[derive(Copy, Clone)]
+pub enum ArbitraryBranch {
+    Typed(CssDataType, u16, u8),
+    Fallback(u16, u8),
 }
 
 #[derive(Copy, Clone)]
 pub struct FunctionalEntry {
     pub registration_idx: u16,
-    pub branches: &'static [Branch],
+    pub named_branches: &'static [NamedBranch],
+    pub arbitrary_branches: &'static [ArbitraryBranch],
     pub negative: Option<Negative>,
 }
 
@@ -136,6 +140,7 @@ pub enum Negative {
     },
     Distinct {
         registration_idx: u16,
-        branches: &'static [Branch],
+        named_branches: &'static [NamedBranch],
+        arbitrary_branches: &'static [ArbitraryBranch],
     },
 }
