@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 240
-info: css/scss/declaration/operator-adjacent-interpolation.scss
+info: scss/declaration/operator-adjacent-interpolation.scss
 ---
 
 # Input
@@ -13,6 +12,8 @@ $b:20;
 $expr-1:10 +#{$a};
 $expr-2:#{$a}* #{$b};
 $expr-3:10*#{10};
+$expr-4:#{$a}/#{$b}/#{$c};
+$expr-5:-#{$a}/#{$b};
 
 foo{
   plus:10+#{10};
@@ -31,16 +32,18 @@ foo{
 $a: 10;
 $b: 20;
 
-$expr-1: 10 + #{$a};
-$expr-2: #{$a} * #{$b};
-$expr-3: 10 * #{10};
+$expr-1: 10 +#{$a};
+$expr-2: #{$a}* #{$b};
+$expr-3: 10 *#{10};
+$expr-4: #{$a}/#{$b}/#{$c};
+$expr-5: -#{$a}/#{$b};
 
 foo {
-	plus: 10 + #{10};
+	plus: 10 +#{10};
 	minus: 10 - #{10};
-	slash: 10 / #{10};
-	eq: 10 == #{10};
-	ne: 10 != #{10};
+	slash: 10 /#{10};
+	eq: 10==#{10};
+	ne: 10!=#{10};
 }
 
 ```

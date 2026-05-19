@@ -102,6 +102,12 @@ lang_graphql = [
   "dep:biome_graphql_parser",
   "dep:biome_graphql_syntax"
 ]
+lang_graphql = [
+  "dep:biome_graphql_analyze",
+  "dep:biome_graphql_formatter",
+  "dep:biome_graphql_parser",
+  "dep:biome_graphql_syntax",
+]
 lang_grit    = [
   "dep:biome_grit_formatter",
   "dep:biome_grit_parser",
