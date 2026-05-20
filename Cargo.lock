@@ -1273,7 +1273,10 @@ name = "biome_line_index"
 version = "0.1.0"
 dependencies = [
  "biome_text_size",
+ "codspeed-criterion-compat",
+ "mimalloc",
  "rustc-hash 2.1.2",
+ "tikv-jemallocator",
 ]
 
 [[package]]
