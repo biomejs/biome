@@ -12,7 +12,7 @@ use super::tailwind_preset_v4::{
 use super::tailwind_preset_v4_types::{
     ArbitraryBranch, NamedBranch, NamedValueType, Negative,
 };
-use super::value_match::value_matches_type;
+use super::arbitrary_value_match::value_matches_type;
 
 #[cfg(test)]
 use super::tailwind_preset_v4_types::CssDataType;
