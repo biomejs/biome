@@ -23,16 +23,16 @@ info: markdown/spec/example-268.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,8 @@
+@@ -1,7 +1,7 @@
 -- foo
 +-   foo
  
 -  notcode
-+    notcode
-+
-+-   foo
- 
+-
 -- foo
++    notcode
++-   foo
++    
  
 -  code
 +    code
@@ -44,9 +44,8 @@ info: markdown/spec/example-268.md
 -   foo
 
     notcode
-
 -   foo
-
+    
 
     code
 ```

@@ -22,40 +22,39 @@ info: markdown/list/combined-lists.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -2,10 +2,12 @@
- 
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,6 +1,8 @@
+ - hello1
  - hello2
- 
 +
  - hello3
- 
  - hello4
- 
 +
  - hello5
- 
  - hello6
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -4,13 +4,13 @@
+   hard_line_break,
+   "- ",
+   align(2, ["hello2"]),
+-  hard_line_break,
++  empty_line,
+   "- ",
+   align(2, ["hello3"]),
+   hard_line_break,
+   "- ",
+   align(2, ["hello4"]),
+-  hard_line_break,
++  empty_line,
+   "- ",
+   align(2, ["hello5"]),
+   hard_line_break,
 
-```md
-- hello1
-
-- hello2
-
-
-- hello3
-
-- hello4
-
-
-- hello5
-
-- hello6
 ```

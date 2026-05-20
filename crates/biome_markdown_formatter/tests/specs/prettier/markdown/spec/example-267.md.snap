@@ -16,27 +16,29 @@ info: markdown/spec/example-267.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,5 +1,6 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,5 @@
  - foo
  - bar
- 
 +
  - baz
  - bim
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -4,7 +4,7 @@
+   hard_line_break,
+   "- ",
+   align(2, ["bar"]),
+-  hard_line_break,
++  empty_line,
+   "- ",
+   align(2, ["baz"]),
+   hard_line_break,
 
-```md
-- foo
-- bar
-
-
-- baz
-- bim
 ```

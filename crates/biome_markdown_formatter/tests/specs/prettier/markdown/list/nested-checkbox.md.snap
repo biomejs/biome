@@ -26,34 +26,25 @@ info: markdown/list/nested-checkbox.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,11 @@
- - parent list item parent list item parent list item parent list item parent list item parent list item
--  - child list item child list item child list item child list item child list item child list item
+@@ -2,7 +2,6 @@
+   - child list item child list item child list item child list item child list item child list item
  
-+     - child list item child list item child list item child list item child list item child list item
-+
    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
- 
+-
  - [x] parent task list item parent task list item parent task list item parent task list item
--  - [x] child task list item child task list item child task list item child task list item
+   - [x] child task list item child task list item child task list item child task list item
  
-+     - [x] child task list item child task list item child task list item child task list item
-+
-   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```
 
 # Output
 
 ```md
 - parent list item parent list item parent list item parent list item parent list item parent list item
-
-     - child list item child list item child list item child list item child list item child list item
+  - child list item child list item child list item child list item child list item child list item
 
   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
-
 - [x] parent task list item parent task list item parent task list item parent task list item
-
-     - [x] child task list item child task list item child task list item child task list item
+  - [x] child task list item child task list item child task list item child task list item
 
   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```
@@ -61,9 +52,9 @@ info: markdown/list/nested-checkbox.md
 # Lines exceeding max width of 80 characters
 ```
     1: - parent list item parent list item parent list item parent list item parent list item parent list item
-    3:      - child list item child list item child list item child list item child list item child list item
-    5:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
-    7: - [x] parent task list item parent task list item parent task list item parent task list item
-    9:      - [x] child task list item child task list item child task list item child task list item
-   11:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+    2:   - child list item child list item child list item child list item child list item child list item
+    4:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+    5: - [x] parent task list item parent task list item parent task list item parent task list item
+    6:   - [x] child task list item child task list item child task list item child task list item
+    8:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```

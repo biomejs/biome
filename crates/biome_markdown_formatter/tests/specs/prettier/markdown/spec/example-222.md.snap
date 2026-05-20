@@ -39,22 +39,30 @@ info: markdown/spec/example-222.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,6 +4,7 @@
- 
+@@ -1,22 +1,17 @@
  - foo
  
-+
    bar
+-
+ - foo
++  
  
+   bar
+-
  - ```
-@@ -14,6 +15,7 @@
+   foo
+-
+-
+   bar
    ```
  
  - baz
-+
    - ```
      foo
- 
+-
+-
+     bar
+     ```
 ```
 
 # Output
@@ -63,25 +71,18 @@ info: markdown/spec/example-222.md
 - foo
 
   bar
-
 - foo
-
+  
 
   bar
-
 - ```
   foo
-
-
   bar
   ```
 
 - baz
-
   - ```
     foo
-
-
     bar
     ```
 ```

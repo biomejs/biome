@@ -4,13 +4,24 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "-   With leading text\n- With leading text\n";
+    let source = r#"+ item with __bold__ and *italic*
+
+- item with __bold__ and *italic*
+
+* item with `code`
+
+* - - -
+
+* - - -
+
+__bold__
+"#;
     let parse = parse_markdown(source);
 
     // Print CST
     eprintln!("{:#?}", parse.syntax());
     // print red tree
-    eprintln!("{:#?}", parse.tree());
+    // eprintln!("{:#?}", parse.tree());
 
     let options = MdFormatOptions::default();
     let result = biome_formatter::format_node(
@@ -23,17 +34,20 @@ fn quick_test() {
     let first_ir = formatted.document();
     let output = formatted.print().unwrap();
     eprintln!("Formatted:\n{}", output.as_code());
+    eprintln!("IR:\n{}", first_ir.to_string());
 
     // Idempotency
     // Now re-parse the formatted output and show its CST
     let reparse = parse_markdown(output.as_code());
     eprintln!("\n--- Re-parsed CST ---");
-    eprintln!("{:#?}", reparse.tree());
+    eprintln!("{:#?}", reparse.syntax());
 
     let result2 =
         biome_formatter::format_node(&reparse.syntax(), MdFormatLanguage::new(options), false);
     let output2 = result2.unwrap();
     let second_ir = output2.document();
+    eprintln!("Re-IR:\n{}", second_ir.to_string());
+
     similar_asserts::assert_eq!(
         output2.print().unwrap().as_code(),
         output.as_code(),

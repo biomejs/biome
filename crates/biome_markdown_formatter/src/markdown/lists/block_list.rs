@@ -1,7 +1,8 @@
+use crate::bullet_list::FmtAnyList;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
-use crate::shared::TextPrintMode;
+use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBlockList, MdBullet};
@@ -18,10 +19,15 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
     fn fmt(&self, node: &MdBlockList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let mut joiner = f.join();
 
-        let inside_list = node
+        let text_context = if node
             .syntax()
             .parent()
-            .is_some_and(|n| MdBullet::can_cast(n.kind()));
+            .is_some_and(|n| MdBullet::can_cast(n.kind()))
+        {
+            TextContext::List
+        } else {
+            TextContext::Neutral
+        };
 
         if !self.trim {
             let mut prev_content = PrevContentBlock::None;
@@ -33,7 +39,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         prev_content = PrevContentBlock::Paragraph;
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
                             trim_mode: self.paragraph_print_mode,
-                            inside_list,
+                            text_context,
                         }));
                     }
 
@@ -74,7 +80,12 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     _ => {
                         prev_content = PrevContentBlock::Other;
-                        joiner.entry(&node.format());
+                        if let Some(list_item) = node.as_any_list_item() {
+                            joiner
+                                .entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
+                        } else {
+                            joiner.entry(&node.format());
+                        }
                     }
                 }
             }
@@ -82,56 +93,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             return joiner.finish();
         }
 
-        let mut iter = node.iter();
-
-        // Count trailing newlines using next_back
-        let mut trailing_count = 0;
-        while iter.next_back().is_some_and(|block| block.is_newline()) {
-            trailing_count += 1;
-        }
-
-        // we don't need the iter anymore
-        drop(iter);
-
-        // Single forward pass in document order
-        let mut still_leading = true;
-        let mut prev_was_header = false;
-        let content_count = node.len() - trailing_count;
-        let mut iter = node.iter().enumerate().peekable();
-        while let Some((index, node)) = iter.next() {
-            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
-                let is_leading = still_leading;
-                let is_trailing = index >= content_count;
-                if prev_was_header && !is_leading && !is_trailing {
-                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: true,
-                    }));
-                    while iter.peek().is_some_and(|(_, next)| next.is_newline()) {
-                        if let Some((
-                            _,
-                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
-                        )) = iter.next()
-                        {
-                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
-                                should_remove: true,
-                            }));
-                        }
-                    }
-                    joiner.entry(&empty_line());
-                } else {
-                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: is_leading || is_trailing,
-                    }));
-                }
-                prev_was_header = false;
-            } else {
-                still_leading = false;
-                prev_was_header = node.is_any_header();
-                joiner.entry(&node.format());
-            }
-        }
-
-        joiner.finish()
+        DefaultBlockListFormatter { node: node.clone() }.fmt(f)
     }
 }
 
@@ -158,5 +120,80 @@ impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
         self.paragraph_print_mode = options.paragraph_print_mode;
         self.trim = options.trim;
         self
+    }
+}
+
+pub(crate) struct DefaultBlockListFormatter {
+    node: MdBlockList,
+}
+
+impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        f.context().comments().is_suppressed(self.node.syntax());
+
+        let mut joiner = f.join();
+
+        let mut iter = self.node.iter();
+
+        // Count trailing newlines using next_back
+        let mut trailing_count = 0;
+        while iter.next_back().is_some_and(|block| block.is_newline()) {
+            trailing_count += 1;
+        }
+
+        // we don't need the iter anymore
+        drop(iter);
+
+        // Single forward pass in document order
+        let mut still_leading = true;
+        let mut prev_was_header = false;
+        let content_count = self.node.len() - trailing_count;
+        let mut iter = self.node.iter().enumerate().peekable();
+        while let Some((index, node)) = iter.next() {
+            dbg!(node.syntax().kind());
+            if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
+                let is_leading = still_leading;
+                let is_trailing = index >= content_count;
+                let next_is_bull_item = iter.peek().is_some_and(|(_, next)| next.is_list());
+
+                if prev_was_header && !is_leading && !is_trailing {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: true,
+                    }));
+                    while iter.peek().is_some_and(|(_, next)| next.is_newline()) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true,
+                            }));
+                        }
+                    }
+                    if prev_was_header {
+                        joiner.entry(&empty_line());
+                    }
+                } else {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: is_leading || is_trailing || next_is_bull_item,
+                    }));
+                    if next_is_bull_item {
+                        joiner.entry(&empty_line());
+                    }
+                }
+                prev_was_header = false;
+            } else {
+                still_leading = false;
+                prev_was_header = node.is_any_header();
+                if let Some(list_item) = node.as_any_list_item() {
+                    joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
+                } else {
+                    joiner.entry(&node.format());
+                }
+            }
+        }
+
+        joiner.finish()
     }
 }
