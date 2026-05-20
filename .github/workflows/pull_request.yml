@@ -47,8 +47,6 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run cargo check
-        run: cargo check --workspace --all-targets --all-features --release
       - name: Run clippy
         run: cargo lint
 
