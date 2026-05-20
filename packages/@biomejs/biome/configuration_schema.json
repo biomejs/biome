@@ -6126,6 +6126,30 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NormalizationForm": {
+			"oneOf": [
+				{
+					"description": "Canonical Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFC"
+				},
+				{
+					"description": "Canonical Decomposition",
+					"type": "string",
+					"const": "NFD"
+				},
+				{
+					"description": "Compatibility Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFKC"
+				},
+				{
+					"description": "Compatibility Decomposition",
+					"type": "string",
+					"const": "NFKD"
+				}
+			]
+		},
 		"NormalizedGlob": {
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
 			"type": "string"
@@ -6760,6 +6784,13 @@
 					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentObjectKeys": {
+					"description": "Enforce JSON keys with consistent Unicode representation.\nSee https://biomejs.dev/linter/rules/use-consistent-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11020,6 +11051,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentObjectKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentTestItOptions": {
 			"type": "object",
 			"properties": {
@@ -14430,6 +14471,21 @@
 						{ "$ref": "#/$defs/ObjectPropertySyntax" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentObjectKeysOptions" }
+			]
+		},
+		"UseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"form": {
+					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

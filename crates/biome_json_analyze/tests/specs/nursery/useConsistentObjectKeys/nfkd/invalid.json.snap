@@ -1,0 +1,67 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "\uFB00": "latin ligature ff",
+  "\u00BD": "vulgar fraction one half"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+  > 2 │   "\uFB00": "latin ligature ff",
+      │   ^^^^^^^^
+    3 │   "\u00BD": "vulgar fraction one half"
+    4 │ }
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2   │ - ··"\uFB00":·"latin·ligature·ff",
+      2 │ + ··"ff":·"latin·ligature·ff",
+    3 3 │     "\u00BD": "vulgar fraction one half"
+    4 4 │   }
+  
+
+```
+
+```
+invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+    2 │   "\uFB00": "latin ligature ff",
+  > 3 │   "\u00BD": "vulgar fraction one half"
+      │   ^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2 2 │     "\uFB00": "latin ligature ff",
+    3   │ - ··"\u00BD":·"vulgar·fraction·one·half"
+      3 │ + ··"1⁄2":·"vulgar·fraction·one·half"
+    4 4 │   }
+    5 5 │   
+  
+
+```

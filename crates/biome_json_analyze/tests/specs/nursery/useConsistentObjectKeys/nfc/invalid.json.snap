@@ -1,0 +1,67 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "caf\u0065\u0301": "decomposed e + combining acute",
+  "A\u030A": "decomposed A + ring above"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+  > 2 │   "caf\u0065\u0301": "decomposed e + combining acute",
+      │   ^^^^^^^^^^^^^^^^^
+    3 │   "A\u030A": "decomposed A + ring above"
+    4 │ }
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2   │ - ··"caf\u0065\u0301":·"decomposed·e·+·combining·acute",
+      2 │ + ··"café":·"decomposed·e·+·combining·acute",
+    3 3 │     "A\u030A": "decomposed A + ring above"
+    4 4 │   }
+  
+
+```
+
+```
+invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+    2 │   "caf\u0065\u0301": "decomposed e + combining acute",
+  > 3 │   "A\u030A": "decomposed A + ring above"
+      │   ^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2 2 │     "caf\u0065\u0301": "decomposed e + combining acute",
+    3   │ - ··"A\u030A":·"decomposed·A·+·ring·above"
+      3 │ + ··"Å":·"decomposed·A·+·ring·above"
+    4 4 │   }
+    5 5 │   
+  
+
+```

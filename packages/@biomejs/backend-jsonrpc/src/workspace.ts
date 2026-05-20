@@ -2481,6 +2481,11 @@ See https://biomejs.dev/linter/rules/use-consistent-method-signatures
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
 	/**
+	* Enforce JSON keys with consistent Unicode representation.
+See https://biomejs.dev/linter/rules/use-consistent-object-keys 
+	 */
+	useConsistentObjectKeys?: UseConsistentObjectKeysConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -4555,6 +4560,9 @@ export type UseConsistentGraphqlDescriptionsConfiguration =
 export type UseConsistentMethodSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentMethodSignaturesOptions;
+export type UseConsistentObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentObjectKeysOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -6426,6 +6434,11 @@ export interface RuleWithUseConsistentMethodSignaturesOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
+export interface RuleWithUseConsistentObjectKeysOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentObjectKeysOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8134,6 +8147,9 @@ Default: "property"
 	 */
 	style?: MethodSignatureStyle;
 }
+export interface UseConsistentObjectKeysOptions {
+	form?: NormalizationForm;
+}
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -8786,6 +8802,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
+export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 /**
  * The function to use for tests
  */
@@ -9256,6 +9273,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
