@@ -1,9 +1,10 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_html_syntax::{HtmlDoubleTextExpression, HtmlDoubleTextExpressionFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlDoubleTextExpression;
+
 impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression {
     fn fmt_fields(
         &self,
@@ -18,13 +19,11 @@ impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression
 
         write!(
             f,
-            [
+            [group(&format_args![
                 l_double_curly_token.format(),
-                space(),
-                expression.format(),
-                space(),
+                soft_space_or_block_indent(&expression.format()),
                 r_double_curly_token.format(),
-            ]
+            ])]
         )
     }
 }

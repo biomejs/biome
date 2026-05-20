@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/issue-10330/without-surrounding-whitespace.vue
+---
+
+# Input
+
+```vue
+<template>
+<div>
+<span>
+<div>
+<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+	$t("nav.my-rooms")
+}}</v-btn>
+</div>
+</span>
+</div>
+</template>
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "indentStyle": "space"
+  }
+}
+```
+
+# Formatted
+
+```vue
+<template>
+  <div>
+    <span>
+      <div>
+        <v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+          $t("nav.my-rooms")
+        }}</v-btn>
+      </div>
+    </span>
+  </div>
+</template>
+
+```
