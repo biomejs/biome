@@ -34,7 +34,7 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
 
         if value_count == 1 {
             let should_break_before_in =
-                binding_count > 0 && has_single_map_value_with_source_blank_lines(&values);
+                binding_count > 0 && has_single_map_with_blank_lines(&values);
             let should_indent_after_bindings = should_break_before_in && binding_count > 1;
             let gap_before_in = format_with(|f| {
                 if binding_count == 0 || should_break_before_in {
@@ -43,7 +43,7 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
                     write!(f, [space()])
                 }
             });
-            let in_and_values = format_with(|f| {
+            let in_clause = format_with(|f| {
                 write!(
                     f,
                     [
@@ -56,9 +56,9 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
             });
             let header_tail = format_with(|f| {
                 if should_indent_after_bindings {
-                    write!(f, [indent(&in_and_values)])
+                    write!(f, [indent(&in_clause)])
                 } else {
-                    write!(f, [&in_and_values])
+                    write!(f, [&in_clause])
                 }
             });
 
@@ -79,7 +79,7 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
 /// Detects a single map value whose pairs had blank lines in source.
 ///
 /// Example: `@each $k, $v in (a: b,\n\nc: d)`.
-fn has_single_map_value_with_source_blank_lines(values: &ScssEachValueList) -> bool {
+fn has_single_map_with_blank_lines(values: &ScssEachValueList) -> bool {
     let mut value_elements = values.elements();
     let Some(value) = value_elements.next() else {
         return false;
@@ -94,7 +94,7 @@ fn has_single_map_value_with_source_blank_lines(values: &ScssEachValueList) -> b
             matches!(
                 item,
                 AnyScssExpressionItem::ScssMapExpression(map)
-                    if has_source_blank_line_between_map_pairs(&map)
+                    if has_blank_line_between_pairs(&map)
             )
         })
     })
@@ -103,7 +103,7 @@ fn has_single_map_value_with_source_blank_lines(values: &ScssEachValueList) -> b
 /// Returns `true` when a map keeps a blank line between pairs.
 ///
 /// Example: `(a: b,\n\nc: d)`.
-fn has_source_blank_line_between_map_pairs(node: &ScssMapExpression) -> bool {
+fn has_blank_line_between_pairs(node: &ScssMapExpression) -> bool {
     node.pairs().elements().skip(1).any(|element| {
         element
             .node()
