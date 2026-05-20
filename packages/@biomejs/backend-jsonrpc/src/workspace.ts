@@ -2202,6 +2202,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Prevent comments from being inserted as JSX text nodes.
+See https://biomejs.dev/linter/rules/no-jsx-leaked-comment 
+	 */
+	noJsxLeakedComment?: NoJsxLeakedCommentConfiguration;
+	/**
 	* Flags text nodes with a trailing $ before a JSX expression.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
 	 */
@@ -4390,6 +4395,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxLeakedCommentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLeakedCommentOptions;
 export type NoJsxLeakedDollarConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLeakedDollarOptions;
@@ -6194,6 +6202,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxLeakedCommentOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsxLeakedCommentOptions;
+}
 export interface RuleWithNoJsxLeakedDollarOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7959,6 +7971,7 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxLeakedCommentOptions = {};
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
@@ -9218,6 +9231,7 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxLeakedComment"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"

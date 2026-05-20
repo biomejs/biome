@@ -705,6 +705,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noJsxLeakedComment",
+        TypeId::of::<biome_rule_options::no_jsx_leaked_comment::NoJsxLeakedCommentOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noJsxLeakedDollar",
         TypeId::of::<biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions>(),
     ));
