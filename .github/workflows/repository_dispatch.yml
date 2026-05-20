@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 env:
   BIOME_WEBSITE_REPO: biomejs/website
@@ -22,10 +21,14 @@ jobs:
   build-wasm:
     name: Build @biomejs/wasm-web
     runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
+        with:
+          persist-credentials: false
       - name: Warm up wasm cache
         id: cache-restore
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
