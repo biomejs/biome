@@ -1,0 +1,38 @@
+# Build base images for Depot CI flows
+
+name: Build Images
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+      - next
+    paths:
+      - '.depot/workflows/build-images.yml'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - '.depot/workflows/build-images.yml'
+env:
+  RUST_LOG: info
+jobs:
+  bench:
+    name:
+    runs-on: depot-ubuntu-24.04-arm
+    steps:
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: depot/snapshot-action@v1
+        with:
+          image: l74wrh0kdk.registry.depot.dev/bench:latest
