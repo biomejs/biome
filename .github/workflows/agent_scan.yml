@@ -1,0 +1,25 @@
+name: AgentScan
+
+on:
+  pull_request_target:
+    types: [ opened, reopened ]
+  issues:
+    types: [ opened ]
+
+permissions: { }
+
+jobs:
+  agentscan:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: AgentScan
+        uses: MatteoGabriele/agentscan-action@f41545309db947a68e22ed2643f182e754f4d41a # v1.8.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
