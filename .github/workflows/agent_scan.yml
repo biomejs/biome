@@ -2,9 +2,9 @@ name: AgentScan
 
 on:
   pull_request_target:
-    types: [ opened, reopened ]
+    types: [ opened, reopened, synchronize, edited ]
   issues:
-    types: [ opened ]
+    types: [ opened, reopened, edited ]
 
 permissions: { }
 
