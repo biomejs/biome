@@ -5604,6 +5604,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeValuesOptions" }
+			]
+		},
+		"NoUnsafeValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUntrustedLicensesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6644,6 +6654,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeValues": {
+					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-unsafe-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10244,6 +10261,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
