@@ -1750,8 +1750,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
-            self.disabled_rules.extend(rules.as_disabled_rules());
         }
+        // Always respect overrides that disable rules, even when --only is active.
+        // Without this, --suppress with --only would add suppression comments to
+        // files where the rule is disabled by an override.
+        self.disabled_rules.extend(rules.as_disabled_rules());
         let fixable_rules = self
             .enabled_rules
             .iter()
@@ -2039,8 +2042,11 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
-            self.disabled_rules.extend(rules.as_disabled_rules());
         }
+        // Always respect overrides that disable rules, even when --only is active.
+        // Without this, --suppress with --only would add suppression comments to
+        // files where the rule is disabled by an override.
+        self.disabled_rules.extend(rules.as_disabled_rules());
         let fixable_rules = self
             .enabled_rules
             .iter()
