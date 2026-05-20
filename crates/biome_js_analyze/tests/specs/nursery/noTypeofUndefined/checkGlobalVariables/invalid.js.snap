@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+typeof undefinedVariableIdentifier === "undefined";
+typeof Array !== "undefined";
+
+function parse() {
+	switch (typeof value === 'undefined') {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noTypeofUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ typeof undefinedVariableIdentifier === "undefined";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ typeof Array !== "undefined";
+    4 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i This can be a potentially missing global. typeof is runtime-safe there, so review the change carefully before rewriting it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noTypeofUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    1 │ /* should generate diagnostics */
+    2 │ typeof undefinedVariableIdentifier === "undefined";
+  > 3 │ typeof Array !== "undefined";
+      │ ^^^^^^^^^^^^
+    4 │ 
+    5 │ function parse() {
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i This can be a potentially missing global. typeof is runtime-safe there, so review the change carefully before rewriting it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:10 lint/nursery/noTypeofUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    5 │ function parse() {
+  > 6 │ 	switch (typeof value === 'undefined') {}
+      │ 	        ^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i This can be a potentially missing global. typeof is runtime-safe there, so review the change carefully before rewriting it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
