@@ -2362,6 +2362,11 @@ See https://biomejs.dev/linter/rules/no-sync-scripts
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
 	/**
+	* Disallow arbitrary values in Tailwind CSS utility classes.
+See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
+	 */
+	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
 	* Disallow ternary operators.
 See https://biomejs.dev/linter/rules/no-ternary 
 	 */
@@ -4486,6 +4491,9 @@ export type NoShadowConfiguration =
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
+export type NoTailwindArbitraryValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindArbitraryValueOptions;
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
@@ -6329,6 +6337,10 @@ export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
 }
+export interface RuleWithNoTailwindArbitraryValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindArbitraryValueOptions;
+}
 export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
@@ -8021,6 +8033,21 @@ Defaults to `true`.
 	ignoreTypeValueShadow?: boolean;
 }
 export type NoSyncScriptsOptions = {};
+/**
+	* Options for the `noTailwindArbitraryValue` rule.
+
+Controls which attributes and utility functions are checked for arbitrary values. 
+	 */
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Additional attributes that will be checked.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be checked.
+	 */
+	functions?: string[];
+}
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
@@ -9251,6 +9278,7 @@ export type Category =
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
+	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
