@@ -277,7 +277,10 @@ pub(crate) trait CommandRunner {
         } = configured_workspace;
 
         if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
-            let biome_path = BiomePath::new(stdin.as_path());
+            // Biome path must starts_with(the project directory), which will have been
+            // joined to workdir. Otherwise we won't find nested settings.
+            let working_dir = fs.working_directory().unwrap_or_default();
+            let biome_path = BiomePath::new(working_dir.join(stdin.as_path()));
             if biome_path.extension().is_none() {
                 console.error(markup! {
                     {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}

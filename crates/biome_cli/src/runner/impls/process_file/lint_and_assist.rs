@@ -208,6 +208,10 @@ impl ProcessFile for LintAssistProcessFile {
 
         if file_features.is_ignored() {
             console.append(markup! {{content}});
+            // Write error last because files may generally be long
+            console.error(markup! {
+                <Warn>"The content was not fixed because the path `"{biome_path.as_str()}"` is ignored."</Warn>
+            });
             return Ok(());
         }
 

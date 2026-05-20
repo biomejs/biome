@@ -34,6 +34,7 @@
       "!**/undefined",
       "!**/benchmark/target",
       "!**/benches",
+      "!!**/e2e-tests",
       "!!**/target",
       "!!.cargo"
     ]
