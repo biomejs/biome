@@ -352,14 +352,16 @@ Available options:
                               `off`, then the severity level of the rule is set to `error` if it is
                               a recommended rule or `warn` otherwise.
                               Example:
-                              ```shell biome ci --only=correctness/noUnusedVariables
-                              --only=suspicious --only=test ```
+                              ```shell
+                              biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
+                              ```
         --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
                               and actions, or domain by setting the severity level of the rules to
                               `off`. This option takes precedence over `--only`.
                               Example:
-                              ```shell biome ci --skip=correctness/noUnusedVariables
-                              --skip=suspicious --skip=project ```
+                              ```shell
+                              biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+                              ```
     -h, --help                Prints help information
 
 ```
