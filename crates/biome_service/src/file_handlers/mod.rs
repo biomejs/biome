@@ -253,7 +253,6 @@ impl DocumentFileSource {
         }
         #[cfg(feature = "lang_yaml")]
         if let Ok(file_source) = biome_yaml_syntax::YamlFileSource::try_from_extension(extension) {
-            dbg!("try_from_extension:", &file_source);
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownExtension)
@@ -1333,7 +1332,6 @@ impl Features {
 
     /// Returns the [Capabilities] associated with a document source.
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
-        dbg!(language_hint);
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
