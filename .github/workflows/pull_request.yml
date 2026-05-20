@@ -47,6 +47,8 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run cargo check
+        run: cargo check --workspace --all-targets --all-features --release
       - name: Run clippy
         run: cargo lint
 
@@ -65,7 +67,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Detect unused dependencies using udeps
-        run: cargo +nightly udeps --all-targets
+        run: cargo +nightly udeps --all-targets --all-features
 
   deny:
     name: Cargo Deny
@@ -98,7 +100,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
-        run: cargo test --workspace --features=js_plugin
+        run: cargo test --workspace --all-features
 
   e2e-tests:
     name: End-to-end tests

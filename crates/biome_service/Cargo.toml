@@ -109,13 +109,13 @@ lang_grit    = [
   "dep:biome_grit_syntax",
 ]
 lang_md      = [
-  "biome_configuration/markdown",
+  "biome_configuration/lang_md",
   "dep:biome_markdown_formatter",
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
 lang_yaml    = [
-  "biome_configuration/yaml",
+  "biome_configuration/lang_yaml",
   "dep:biome_yaml_formatter",
   "dep:biome_yaml_parser",
   "dep:biome_yaml_syntax"

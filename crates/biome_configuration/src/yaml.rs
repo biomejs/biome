@@ -31,17 +31,17 @@ pub type YamlParseInterpolation = Bool<false>;
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct YamlFormatterConfiguration {
     /// Control the formatter for Yaml (and its super languages) files.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<YamlFormatterEnabled>,
 
     /// The size of the indentation applied to Yaml files. Defaults to 2.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// What's the max width of a line applied to Yaml files. Defaults to 80.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
@@ -55,12 +55,12 @@ pub struct YamlFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
     /// The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
-    #[cfg_attr(all(feature = "cli", feature = "yaml"), bpaf(hide))]
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 }

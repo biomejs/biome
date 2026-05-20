@@ -1,6 +1,7 @@
 [workspace]
-resolver = "2"
-members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
+resolver        = "2"
+members         = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
+default-members = ["crates/*"]
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]

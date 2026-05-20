@@ -3,10 +3,7 @@ use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::{
-    CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
-    Rules,
-};
+use crate::{CssConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration, Rules};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
@@ -46,8 +43,12 @@ pub struct OverridePattern {
     pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the Graphql language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub graphql: Option<GraphqlConfiguration>,
+    #[cfg(feature = "lang_graphql")]
+    #[cfg_attr(
+        feature = "lang_graphql",
+        serde(skip_serializing_if = "Option::is_none")
+    )]
+    pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
     /// Specific configuration for the GritQL language
     #[serde(skip_serializing_if = "Option::is_none")]

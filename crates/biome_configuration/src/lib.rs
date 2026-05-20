@@ -13,15 +13,18 @@ pub mod editorconfig;
 mod extends;
 pub mod formatter;
 pub mod generated;
+#[cfg(feature = "lang_graphql")]
 pub mod graphql;
 pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
+#[cfg(feature = "lang_md")]
 pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
+#[cfg(feature = "lang_yaml")]
 pub mod yaml;
 
 #[cfg(feature = "cli")]
@@ -40,8 +43,9 @@ pub use crate::grit::GritConfiguration;
 pub use crate::grit::grit_configuration;
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+#[cfg(feature = "lang_md")]
 pub use crate::markdown::MarkdownConfiguration;
-#[cfg(feature = "cli")]
+#[cfg(all(feature = "cli", feature = "lang_md"))]
 pub use crate::markdown::markdown_configuration;
 use crate::max_size::MaxSize;
 use crate::vcs::VcsConfiguration;
@@ -72,9 +76,6 @@ pub use css::css_configuration;
 pub use formatter::FormatterConfiguration;
 #[cfg(feature = "cli")]
 pub use formatter::formatter_configuration;
-pub use graphql::GraphqlConfiguration;
-#[cfg(feature = "cli")]
-pub use graphql::graphql_configuration;
 pub use html::HtmlConfiguration;
 #[cfg(feature = "cli")]
 pub use html::html_configuration;
@@ -190,7 +191,7 @@ pub struct Configuration {
         bpaf(external(markdown_configuration), optional, hide)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "markdown")]
+    #[cfg(feature = "lang_md")]
     pub markdown: Option<MarkdownConfiguration>,
 
     /// Specific configuration for the YAML language
@@ -199,13 +200,20 @@ pub struct Configuration {
         bpaf(external(crate::yaml::yaml_configuration), optional, hide)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "lang_yaml")]
     pub yaml: Option<crate::yaml::YamlConfiguration>,
 
     /// Specific configuration for the GraphQL language
-    #[cfg_attr(feature = "cli", bpaf(external(graphql_configuration), optional))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub graphql: Option<GraphqlConfiguration>,
+    #[cfg(feature = "lang_graphql")]
+    #[cfg_attr(
+        all(feature = "cli", feature = "lang_graphql"),
+        bpaf(external(crate::graphql::graphql_configuration), optional)
+    )]
+    #[cfg_attr(
+        all(feature = "lang_graphql"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
+    pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
     /// Specific configuration for the GraphQL language
     #[cfg_attr(feature = "cli", bpaf(external(grit_configuration), optional))]
