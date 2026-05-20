@@ -1,0 +1,23 @@
+/* should generate diagnostics */
+
+/* */
+.invalid1 {
+	display: flex;
+}
+
+/* */
+/* */
+.invalid2 {
+	display: flex;
+}
+
+.invalid3 {
+	display: flex; /* */
+}
+
+/*
+
+*/
+.invalid4 {
+	display: flex;
+}

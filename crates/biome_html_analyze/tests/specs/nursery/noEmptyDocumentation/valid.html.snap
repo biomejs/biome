@@ -1,0 +1,23 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<!-- Valid -->
+<div>valid</div>
+
+<!-- Valid -->
+<!-- Valid -->
+<div>valid</div>
+
+<!--
+Valid
+-->
+<div>valid</div>
+
+<div>valid</div> <!-- Valid -->
+
+```

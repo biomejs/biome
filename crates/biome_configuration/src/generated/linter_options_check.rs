@@ -425,6 +425,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noEmptyCharacterClassInRegex", TypeId::of::<biome_rule_options::no_empty_character_class_in_regex::NoEmptyCharacterClassInRegexOptions>()));
     result.push((
+        "nursery",
+        "noEmptyDocumentation",
+        TypeId::of::<biome_rule_options::no_empty_documentation::NoEmptyDocumentationOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noEmptyInterface",
         TypeId::of::<biome_rule_options::no_empty_interface::NoEmptyInterfaceOptions>(),

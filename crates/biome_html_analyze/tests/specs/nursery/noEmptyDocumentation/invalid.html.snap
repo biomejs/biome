@@ -1,0 +1,120 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- -->
+<div>invalid</div>
+
+<!-- -->
+<!-- -->
+<div>invalid</div>
+
+<!--
+
+-->
+<div>invalid</div>
+
+<div>invalid</div> <!-- -->
+
+```
+
+# Diagnostics
+```
+invalid.html:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <!-- -->
+      │ ^^^^^^^^
+    4 │ <div>invalid</div>
+    5 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:6:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    4 │ <div>invalid</div>
+    5 │ 
+  > 6 │ <!-- -->
+      │ ^^^^^^^^
+    7 │ <!-- -->
+    8 │ <div>invalid</div>
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:7:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    6 │ <!-- -->
+  > 7 │ <!-- -->
+      │ ^^^^^^^^
+    8 │ <div>invalid</div>
+    9 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:10:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     8 │ <div>invalid</div>
+     9 │ 
+  > 10 │ <!--
+       │ ^^^^
+  > 11 │ 
+  > 12 │ -->
+       │ ^^^
+    13 │ <div>invalid</div>
+    14 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:15:20 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    13 │ <div>invalid</div>
+    14 │ 
+  > 15 │ <div>invalid</div> <!-- -->
+       │                    ^^^^^^^^
+    16 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
