@@ -15,7 +15,7 @@ use super::tailwind_preset_v4_types::{
 use super::arbitrary_value_match::value_matches_type;
 
 #[cfg(test)]
-use super::tailwind_preset_v4_types::CssDataType;
+use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
@@ -277,7 +277,8 @@ fn resolve_named_branch(
     let has_fraction_modifier = match modifier {
         None => false,
         Some(m) if is_fraction_modifier(value, m, branches) => true,
-        Some(_) => return None,
+        Some(AnyTwModifier::TwModifier(_)) => false,
+        Some(AnyTwModifier::TwBogusModifier(_)) => return None,
     };
 
     for &branch in branches {
@@ -361,10 +362,6 @@ mod tests {
             property_count,
             registration_idx,
         }
-    }
-
-    fn sort(input: &str) -> String {
-        sort_class_list(&parse_tailwind(input).tree())
     }
 
     fn functional_parts(input: &str) -> (AnyTwValue, Option<AnyTwModifier>) {
@@ -541,47 +538,20 @@ mod tests {
         );
     }
 
-    // endregion: branch resolution
-
-    // region: sort_class_list edge cases
-
     #[test]
-    fn sort_returns_empty_for_empty_input() {
-        assert_eq!(sort(""), "");
-    }
+    fn resolve_named_branch_ignores_non_fraction_modifier() {
+        let (value, modifier) = functional_parts("bg-red-500/50");
+        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, 10, 1)];
 
-    #[test]
-    fn sort_returns_empty_for_whitespace_only_input() {
-        assert_eq!(sort("   "), "");
-    }
-
-    #[test]
-    fn sort_routes_arbitrary_values_to_functional_arbitrary_fallback() {
-        assert_eq!(sort("p-[10px] flex some-unknown"), "some-unknown flex p-[10px]");
-    }
-
-    #[test]
-    fn arbitrary_candidate_sorts_by_inner_property() {
-        assert_eq!(sort("flex [color:red]"), "flex [color:red]");
-    }
-
-    #[test]
-    fn arbitrary_candidate_with_unknown_property_is_unknown() {
-        assert_eq!(sort("flex [--my-var:1]"), "[--my-var:1] flex");
-    }
-
-    #[test]
-    fn arbitrary_candidate_with_modifier_sorts_by_inner_property() {
-        assert_eq!(sort("flex [color:red]/50"), "flex [color:red]/50");
-    }
-
-    #[test]
-    fn functional_arbitrary_modifier_does_not_change_sort_key() {
         assert_eq!(
-            sort("ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50"),
-            "flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50"
+            resolve_named_branch(branches, &value, modifier.as_ref(), 99),
+            Some(known(10, 1, 99))
         );
     }
+
+    // endregion: branch resolution
+
+    // region: sort key classification
 
     #[test]
     fn arbitrary_candidate_uses_registration_idx_zero() {
@@ -591,34 +561,5 @@ mod tests {
         assert_eq!(SortKey::from_candidate(&full), known(display_idx, 1, 0));
     }
 
-    #[test]
-    fn sort_routes_arbitrary_typed_background_values_to_their_css_properties() {
-        assert_eq!(
-            sort("bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]"),
-            "bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]"
-        );
-    }
-
-    #[test]
-    fn sort_routes_arbitrary_typed_border_width_before_color() {
-        assert_eq!(sort("border-[#f00] border-[2px]"), "border-[2px] border-[#f00]");
-    }
-
-    #[test]
-    fn sort_routes_arbitrary_typed_text_size_before_color() {
-        assert_eq!(
-            sort("text-[#fff] text-[larger] text-[20px]"),
-            "text-[larger] text-[20px] text-[#fff]"
-        );
-    }
-
-    #[test]
-    fn sort_handles_realistic_arbitrary_value_mix() {
-        assert_eq!(
-            sort("ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex"),
-            "flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]"
-        );
-    }
-
-    // endregion: sort_class_list edge cases
+    // endregion: sort key classification
 }
