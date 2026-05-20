@@ -1947,6 +1947,11 @@ See https://biomejs.dev/linter/rules/use-exhaustive-dependencies
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
 	/**
+	* Enforce specifying the name of GraphQL operations.
+See https://biomejs.dev/linter/rules/use-graphql-named-operations 
+	 */
+	useGraphqlNamedOperations?: UseGraphqlNamedOperationsConfiguration;
+	/**
 	* Enforce that all React hooks are being called from the Top Level component functions.
 See https://biomejs.dev/linter/rules/use-hook-at-top-level 
 	 */
@@ -2077,20 +2082,50 @@ See https://biomejs.dev/linter/rules/no-drizzle-update-without-where
 	 */
 	noDrizzleUpdateWithoutWhere?: NoDrizzleUpdateWithoutWhereConfiguration;
 	/**
+	* Require all argument names for fields & directives to be unique.
+See https://biomejs.dev/linter/rules/no-duplicate-argument-names 
+	 */
+	noDuplicateArgumentNames?: NoDuplicateArgumentNamesConfiguration;
+	/**
 	* Disallow duplication of attributes.
 See https://biomejs.dev/linter/rules/no-duplicate-attributes 
 	 */
 	noDuplicateAttributes?: NoDuplicateAttributesConfiguration;
+	/**
+	* Require all enum value names to be unique.
+See https://biomejs.dev/linter/rules/no-duplicate-enum-value-names 
+	 */
+	noDuplicateEnumValueNames?: NoDuplicateEnumValueNamesConfiguration;
 	/**
 	* Disallow duplicate enum member values.
 See https://biomejs.dev/linter/rules/no-duplicate-enum-values 
 	 */
 	noDuplicateEnumValues?: NoDuplicateEnumValuesConfiguration;
 	/**
+	* Require all fields of a type to be unique.
+See https://biomejs.dev/linter/rules/no-duplicate-field-definition-names 
+	 */
+	noDuplicateFieldDefinitionNames?: NoDuplicateFieldDefinitionNamesConfiguration;
+	/**
+	* Enforce unique operation names across a GraphQL document.
+See https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name 
+	 */
+	noDuplicateGraphqlOperationName?: NoDuplicateGraphqlOperationNameConfiguration;
+	/**
+	* Require fields within an input object to be unique.
+See https://biomejs.dev/linter/rules/no-duplicate-input-field-names 
+	 */
+	noDuplicateInputFieldNames?: NoDuplicateInputFieldNamesConfiguration;
+	/**
 	* Disallow duplicate selectors.
 See https://biomejs.dev/linter/rules/no-duplicate-selectors 
 	 */
 	noDuplicateSelectors?: NoDuplicateSelectorsConfiguration;
+	/**
+	* Require all variable definitions to be unique.
+See https://biomejs.dev/linter/rules/no-duplicate-variable-names 
+	 */
+	noDuplicateVariableNames?: NoDuplicateVariableNamesConfiguration;
 	/**
 	* Disallow JSX prop spreading the same identifier multiple times.
 See https://biomejs.dev/linter/rules/no-duplicated-spread-props 
@@ -2307,6 +2342,11 @@ See https://biomejs.dev/linter/rules/no-return-assign
 	 */
 	noReturnAssign?: NoReturnAssignConfiguration;
 	/**
+	* Disallow the usage of specified root types.
+See https://biomejs.dev/linter/rules/no-root-type 
+	 */
+	noRootType?: NoRootTypeConfiguration;
+	/**
 	* Disallow javascript: URLs in HTML.
 See https://biomejs.dev/linter/rules/no-script-url 
 	 */
@@ -2431,6 +2471,11 @@ See https://biomejs.dev/linter/rules/use-consistent-enum-value-type
 	 */
 	useConsistentEnumValueType?: UseConsistentEnumValueTypeConfiguration;
 	/**
+	* Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
+See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions 
+	 */
+	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
+	/**
 	* Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
 See https://biomejs.dev/linter/rules/use-consistent-method-signatures 
 	 */
@@ -2510,6 +2555,21 @@ See https://biomejs.dev/linter/rules/use-imports-first
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
 	useInlineScriptId?: UseInlineScriptIdConfiguration;
+	/**
+	* Require mutation argument to be always called "input".
+See https://biomejs.dev/linter/rules/use-input-name 
+	 */
+	useInputName?: UseInputNameConfiguration;
+	/**
+	* Disallow anonymous operations when more than one operation specified in document.
+See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
+	 */
+	useLoneAnonymousOperation?: UseLoneAnonymousOperationConfiguration;
+	/**
+	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
+See https://biomejs.dev/linter/rules/use-lone-executable-definition 
+	 */
+	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
@@ -3048,6 +3108,11 @@ See https://biomejs.dev/linter/rules/use-default-switch-clause
 	 */
 	useDefaultSwitchClause?: UseDefaultSwitchClauseConfiguration;
 	/**
+	* Require specifying the reason argument when using @deprecated directive.
+See https://biomejs.dev/linter/rules/use-deprecated-reason 
+	 */
+	useDeprecatedReason?: UseDeprecatedReasonConfiguration;
+	/**
 	* Require that each enum member value be explicitly initialized.
 See https://biomejs.dev/linter/rules/use-enum-initializers 
 	 */
@@ -3087,6 +3152,11 @@ See https://biomejs.dev/linter/rules/use-for-of
 See https://biomejs.dev/linter/rules/use-fragment-syntax 
 	 */
 	useFragmentSyntax?: UseFragmentSyntaxConfiguration;
+	/**
+	* Validates that all enum values are capitalized.
+See https://biomejs.dev/linter/rules/use-graphql-naming-convention 
+	 */
+	useGraphqlNamingConvention?: UseGraphqlNamingConventionConfiguration;
 	/**
 	* Enforce that getters and setters for the same property are adjacent in class and object definitions.
 See https://biomejs.dev/linter/rules/use-grouped-accessor-pairs 
@@ -3337,6 +3407,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-dependencies
 See https://biomejs.dev/linter/rules/no-duplicate-else-if 
 	 */
 	noDuplicateElseIf?: NoDuplicateElseIfConfiguration;
+	/**
+	* No duplicated fields in GraphQL operations.
+See https://biomejs.dev/linter/rules/no-duplicate-fields 
+	 */
+	noDuplicateFields?: NoDuplicateFieldsConfiguration;
 	/**
 	* Disallow duplicate names within font families.
 See https://biomejs.dev/linter/rules/no-duplicate-font-names 
@@ -3651,6 +3726,11 @@ See https://biomejs.dev/linter/rules/use-biome-ignore-folder
 See https://biomejs.dev/linter/rules/use-default-switch-clause-last 
 	 */
 	useDefaultSwitchClauseLast?: UseDefaultSwitchClauseLastConfiguration;
+	/**
+	* Require the @deprecated directive to specify a deletion date.
+See https://biomejs.dev/linter/rules/use-deprecated-date 
+	 */
+	useDeprecatedDate?: UseDeprecatedDateConfiguration;
 	/**
 	* Enforce passing a message value when creating a built-in error.
 See https://biomejs.dev/linter/rules/use-error-message 
@@ -4160,6 +4240,9 @@ export type NoVueSetupPropsReactivityLossConfiguration =
 export type UseExhaustiveDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveDependenciesOptions;
+export type UseGraphqlNamedOperationsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGraphqlNamedOperationsOptions;
 export type UseHookAtTopLevelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseHookAtTopLevelOptions;
@@ -4235,15 +4318,33 @@ export type NoDrizzleDeleteWithoutWhereConfiguration =
 export type NoDrizzleUpdateWithoutWhereConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDrizzleUpdateWithoutWhereOptions;
+export type NoDuplicateArgumentNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateArgumentNamesOptions;
 export type NoDuplicateAttributesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateAttributesOptions;
+export type NoDuplicateEnumValueNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateEnumValueNamesOptions;
 export type NoDuplicateEnumValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateEnumValuesOptions;
+export type NoDuplicateFieldDefinitionNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateFieldDefinitionNamesOptions;
+export type NoDuplicateGraphqlOperationNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateGraphqlOperationNameOptions;
+export type NoDuplicateInputFieldNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateInputFieldNamesOptions;
 export type NoDuplicateSelectorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateSelectorsOptions;
+export type NoDuplicateVariableNamesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateVariableNamesOptions;
 export type NoDuplicatedSpreadPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicatedSpreadPropsOptions;
@@ -4373,6 +4474,9 @@ export type NoRedundantDefaultExportConfiguration =
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
+export type NoRootTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRootTypeOptions;
 export type NoScriptUrlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoScriptUrlOptions;
@@ -4445,6 +4549,9 @@ export type UseBaselineConfiguration =
 export type UseConsistentEnumValueTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentEnumValueTypeOptions;
+export type UseConsistentGraphqlDescriptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentGraphqlDescriptionsOptions;
 export type UseConsistentMethodSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentMethodSignaturesOptions;
@@ -4493,6 +4600,15 @@ export type UseImportsFirstConfiguration =
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
+export type UseInputNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseInputNameOptions;
+export type UseLoneAnonymousOperationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneAnonymousOperationOptions;
+export type UseLoneExecutableDefinitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLoneExecutableDefinitionOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -4799,6 +4915,9 @@ export type UseDefaultParameterLastConfiguration =
 export type UseDefaultSwitchClauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDefaultSwitchClauseOptions;
+export type UseDeprecatedReasonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDeprecatedReasonOptions;
 export type UseEnumInitializersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseEnumInitializersOptions;
@@ -4823,6 +4942,9 @@ export type UseForOfConfiguration =
 export type UseFragmentSyntaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFragmentSyntaxOptions;
+export type UseGraphqlNamingConventionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGraphqlNamingConventionOptions;
 export type UseGroupedAccessorPairsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGroupedAccessorPairsOptions;
@@ -4970,6 +5092,9 @@ export type NoDuplicateDependenciesConfiguration =
 export type NoDuplicateElseIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateElseIfOptions;
+export type NoDuplicateFieldsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateFieldsOptions;
 export type NoDuplicateFontNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateFontNamesOptions;
@@ -5154,6 +5279,9 @@ export type UseBiomeIgnoreFolderConfiguration =
 export type UseDefaultSwitchClauseLastConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDefaultSwitchClauseLastOptions;
+export type UseDeprecatedDateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDeprecatedDateOptions;
 export type UseErrorMessageConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseErrorMessageOptions;
@@ -5855,6 +5983,11 @@ export interface RuleWithUseExhaustiveDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveDependenciesOptions;
 }
+export interface RuleWithUseGraphqlNamedOperationsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseGraphqlNamedOperationsOptions;
+}
 export interface RuleWithUseHookAtTopLevelOptions {
 	level: RulePlainConfiguration;
 	options?: UseHookAtTopLevelOptions;
@@ -5962,17 +6095,41 @@ export interface RuleWithNoDrizzleUpdateWithoutWhereOptions {
 	level: RulePlainConfiguration;
 	options?: NoDrizzleUpdateWithoutWhereOptions;
 }
+export interface RuleWithNoDuplicateArgumentNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateArgumentNamesOptions;
+}
 export interface RuleWithNoDuplicateAttributesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateAttributesOptions;
+}
+export interface RuleWithNoDuplicateEnumValueNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateEnumValueNamesOptions;
 }
 export interface RuleWithNoDuplicateEnumValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateEnumValuesOptions;
 }
+export interface RuleWithNoDuplicateFieldDefinitionNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateFieldDefinitionNamesOptions;
+}
+export interface RuleWithNoDuplicateGraphqlOperationNameOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateGraphqlOperationNameOptions;
+}
+export interface RuleWithNoDuplicateInputFieldNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateInputFieldNamesOptions;
+}
 export interface RuleWithNoDuplicateSelectorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateSelectorsOptions;
+}
+export interface RuleWithNoDuplicateVariableNamesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateVariableNamesOptions;
 }
 export interface RuleWithNoDuplicatedSpreadPropsOptions {
 	level: RulePlainConfiguration;
@@ -6156,6 +6313,10 @@ export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
 }
+export interface RuleWithNoRootTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoRootTypeOptions;
+}
 export interface RuleWithNoScriptUrlOptions {
 	level: RulePlainConfiguration;
 	options?: NoScriptUrlOptions;
@@ -6256,6 +6417,10 @@ export interface RuleWithUseConsistentEnumValueTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentEnumValueTypeOptions;
 }
+export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseConsistentGraphqlDescriptionsOptions;
+}
 export interface RuleWithUseConsistentMethodSignaturesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6325,6 +6490,18 @@ export interface RuleWithUseImportsFirstOptions {
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
+}
+export interface RuleWithUseInputNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseInputNameOptions;
+}
+export interface RuleWithUseLoneAnonymousOperationOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneAnonymousOperationOptions;
+}
+export interface RuleWithUseLoneExecutableDefinitionOptions {
+	level: RulePlainConfiguration;
+	options?: UseLoneExecutableDefinitionOptions;
 }
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
@@ -6780,6 +6957,10 @@ export interface RuleWithUseDefaultSwitchClauseOptions {
 	level: RulePlainConfiguration;
 	options?: UseDefaultSwitchClauseOptions;
 }
+export interface RuleWithUseDeprecatedReasonOptions {
+	level: RulePlainConfiguration;
+	options?: UseDeprecatedReasonOptions;
+}
 export interface RuleWithUseEnumInitializersOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6816,6 +6997,10 @@ export interface RuleWithUseFragmentSyntaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseFragmentSyntaxOptions;
+}
+export interface RuleWithUseGraphqlNamingConventionOptions {
+	level: RulePlainConfiguration;
+	options?: UseGraphqlNamingConventionOptions;
 }
 export interface RuleWithUseGroupedAccessorPairsOptions {
 	level: RulePlainConfiguration;
@@ -7037,6 +7222,10 @@ export interface RuleWithNoDuplicateDependenciesOptions {
 export interface RuleWithNoDuplicateElseIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateElseIfOptions;
+}
+export interface RuleWithNoDuplicateFieldsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateFieldsOptions;
 }
 export interface RuleWithNoDuplicateFontNamesOptions {
 	level: RulePlainConfiguration;
@@ -7305,6 +7494,10 @@ export interface RuleWithUseBiomeIgnoreFolderOptions {
 export interface RuleWithUseDefaultSwitchClauseLastOptions {
 	level: RulePlainConfiguration;
 	options?: UseDefaultSwitchClauseLastOptions;
+}
+export interface RuleWithUseDeprecatedDateOptions {
+	level: RulePlainConfiguration;
+	options?: UseDeprecatedDateOptions;
 }
 export interface RuleWithUseErrorMessageOptions {
 	level: RulePlainConfiguration;
@@ -7634,6 +7827,7 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	reportUnnecessaryDependencies?: boolean;
 }
+export type UseGraphqlNamedOperationsOptions = {};
 export interface UseHookAtTopLevelOptions {
 	/**
 	* List of function names that should not be treated as hooks.
@@ -7709,9 +7903,15 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 	 */
 	drizzleObjectName?: string[];
 }
+export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
+export type NoDuplicateEnumValueNamesOptions = {};
 export type NoDuplicateEnumValuesOptions = {};
+export type NoDuplicateFieldDefinitionNamesOptions = {};
+export type NoDuplicateGraphqlOperationNameOptions = {};
+export type NoDuplicateInputFieldNamesOptions = {};
 export type NoDuplicateSelectorsOptions = {};
+export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
 export type NoEqualsToNullOptions = {};
@@ -7792,6 +7992,13 @@ export interface NoReactNativeRawTextOptions {
 export type NoReactStringRefsOptions = {};
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
+export interface NoRootTypeOptions {
+	/**
+	* A list of disallowed root types (e.g. "mutation" and/or "subscription").
+The values of the list are case-insensitive. 
+	 */
+	disallow?: string[];
+}
 export type NoScriptUrlOptions = {};
 export interface NoShadowOptions {
 	/**
@@ -7910,6 +8117,12 @@ export interface UseBaselineOptions {
 	available?: AvailabilityTarget;
 }
 export type UseConsistentEnumValueTypeOptions = {};
+export interface UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The description style to enforce. Defaults to "block"
+	 */
+	style?: UseConsistentGraphqlDescriptionsStyle;
+}
 /**
  * Options type for `useConsistentMethodSignatures`.
  */
@@ -7978,6 +8191,14 @@ export type UseGlobalThisOptions = {};
 export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
+export interface UseInputNameOptions {
+	/**
+	 * Check that the input type name follows the convention <mutationName>Input
+	 */
+	checkInputType?: CheckInputType;
+}
+export type UseLoneAnonymousOperationOptions = {};
+export type UseLoneExecutableDefinitionOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export interface UseNullishCoalescingOptions {
@@ -8271,6 +8492,7 @@ export interface UseConsistentTypeDefinitionsOptions {
 export type UseConstOptions = {};
 export type UseDefaultParameterLastOptions = {};
 export type UseDefaultSwitchClauseOptions = {};
+export type UseDeprecatedReasonOptions = {};
 export type UseEnumInitializersOptions = {};
 export type UseExplicitLengthCheckOptions = {};
 export type UseExponentiationOperatorOptions = {};
@@ -8297,6 +8519,7 @@ This does not affect other [Case].
 }
 export type UseForOfOptions = {};
 export type UseFragmentSyntaxOptions = {};
+export type UseGraphqlNamingConventionOptions = {};
 export type UseGroupedAccessorPairsOptions = {};
 export interface UseImportTypeOptions {
 	/**
@@ -8407,6 +8630,7 @@ export type NoDuplicateClassMembersOptions = {};
 export type NoDuplicateCustomPropertiesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
 export type NoDuplicateElseIfOptions = {};
+export type NoDuplicateFieldsOptions = {};
 export type NoDuplicateFontNamesOptions = {};
 export type NoDuplicateJsxPropsOptions = {};
 export type NoDuplicateObjectKeysOptions = {};
@@ -8492,6 +8716,9 @@ export type UseAdjacentOverloadSignaturesOptions = {};
 export type UseAwaitOptions = {};
 export type UseBiomeIgnoreFolderOptions = {};
 export type UseDefaultSwitchClauseLastOptions = {};
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
+}
 export type UseErrorMessageOptions = {};
 export type UseGetterReturnOptions = {};
 export type UseGoogleFontDisplayOptions = {};
@@ -8554,6 +8781,10 @@ export type Regex = string;
   that year (i.e. became newly available after that year). 
 	 */
 export type AvailabilityTarget = AvailabilityNamed | number;
+/**
+ * The GraphQL description style to enforce.
+ */
+export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
 /**
  * The function to use for tests
@@ -8563,6 +8794,7 @@ export interface DestructuringConfig {
 	array?: boolean;
 	object?: boolean;
 }
+export type CheckInputType = "off" | "loose" | "strict";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
  */

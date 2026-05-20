@@ -62,7 +62,8 @@ mimalloc = { workspace = true }
 [features]
 cli          = ["dep:bpaf"]
 lang_graphql = ["biome_configuration_macros/lang_graphql"]
-markdown     = []
+lang_md      = []
+lang_yaml    = []
 plugins      = ["dep:biome_plugin_loader"]
 schema       = [
   "biome_analyze/schema",
@@ -75,9 +76,9 @@ schema       = [
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
   "dep:schemars",
+  "lang_graphql"
 ]
 test-utils   = []
-yaml         = []
 
 [lints]
 workspace = true

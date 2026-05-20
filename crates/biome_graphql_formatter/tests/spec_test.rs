@@ -1,5 +1,5 @@
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
-use biome_configuration::{Configuration, GraphqlConfiguration};
+use biome_configuration::{Configuration, graphql::GraphqlConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use camino::Utf8Path;
 

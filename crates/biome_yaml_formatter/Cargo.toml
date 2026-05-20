@@ -28,12 +28,12 @@ schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
-biome_configuration  = { path = "../biome_configuration/", features = ["yaml"] }
+biome_configuration  = { path = "../biome_configuration/", features = ["lang_yaml"] }
 biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
+biome_service        = { path = "../biome_service", features = ["lang_yaml"] }
 biome_yaml_parser    = { path = "../biome_yaml_parser" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }

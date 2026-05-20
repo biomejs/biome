@@ -793,8 +793,10 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
 }
 
 #[cfg(feature = "lang_graphql")]
-impl From<biome_configuration::GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
-    fn from(graphql: biome_configuration::GraphqlConfiguration) -> Self {
+impl From<biome_configuration::graphql::GraphqlConfiguration>
+    for LanguageSettings<GraphqlLanguage>
+{
+    fn from(graphql: biome_configuration::graphql::GraphqlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = graphql.formatter {
@@ -2131,7 +2133,7 @@ fn to_css_language_settings(
 
 #[cfg(feature = "lang_graphql")]
 fn to_graphql_language_settings(
-    mut conf: biome_configuration::GraphqlConfiguration,
+    mut conf: biome_configuration::graphql::GraphqlConfiguration,
     _parent_settings: &LanguageSettings<GraphqlLanguage>,
 ) -> LanguageSettings<GraphqlLanguage> {
     let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
