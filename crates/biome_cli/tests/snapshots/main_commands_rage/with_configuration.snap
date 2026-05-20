@@ -47,6 +47,10 @@ Biome Configuration:
   VCS enabled:                  false
   HTML full support enabled:    unset
 
+Files:
+  Ignore Unknown:               unset
+  Includes:                     unset
+
 Server:
   Version:                      0.0.0
   Name:                         biome_lsp

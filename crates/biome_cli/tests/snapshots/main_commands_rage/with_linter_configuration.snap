@@ -108,6 +108,10 @@ Linter:
     complexity/useSimpleNumberKeys
     suspicious/noCommentText
 
+Files:
+  Ignore Unknown:               unset
+  Includes:                     unset
+
 Server:
   Version:                      0.0.0
   Name:                         biome_lsp

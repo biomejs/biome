@@ -370,6 +370,19 @@ impl Display for RageConfiguration<'_> {
                             {RageConfigurationLintRules("Enabled rules", enabled_rules)}
                         ).fmt(fmt)?;
                     }
+
+                    let files_configuration = configuration.get_files_configuration();
+                    let includes = files_configuration.includes.as_ref().map(|list| {
+                        list.iter()
+                            .map(|glob| glob.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    });
+                    markup! (
+                            {Section("Files")}
+                            {KeyValuePair::new("Ignore Unknown", markup!({DisplayOption(files_configuration.ignore_unknown)}))}
+                            {KeyValuePair::new("Includes", markup!({DisplayOption(includes)}))}
+                        ).fmt(fmt)?;
                 }
             }
             Err(err) => markup! (
