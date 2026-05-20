@@ -81,8 +81,6 @@
 	"flex w-1/foo",               // non-fraction modifier — base number sort key
 
 	// ─── sort_class_list edge cases ────────────────────────────────
-	// Class-list behavior lives in fixtures; sort_v4.rs unit tests stay
-	// focused on internal branch/key helpers.
 
 	"p-[10px] flex some-unknown",
 	"flex [color:red]",
