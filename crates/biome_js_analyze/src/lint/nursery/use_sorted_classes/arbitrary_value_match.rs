@@ -285,7 +285,11 @@ fn identifier_matches(value: &AnyCssValue, mut predicate: impl FnMut(&str) -> bo
 }
 
 fn is_identifier_one_of(value: &AnyCssValue, accepted: &[&str]) -> bool {
-    identifier_matches(value, |text| accepted.contains(&text))
+    identifier_matches(value, |text| {
+        accepted
+            .iter()
+            .any(|keyword| text.eq_ignore_ascii_case(keyword))
+    })
 }
 
 fn starts_with_var_function(list: &CssGenericComponentValueList) -> bool {
@@ -762,6 +766,7 @@ mod tests {
     #[test]
     fn line_width_matches_single_or_multi_width_values() {
         assert!(value_matches_type(&parse_value!("thin"), CssDataType::LineWidth));
+        assert!(value_matches_type(&parse_value!("THIN"), CssDataType::LineWidth));
         assert!(value_matches_type(&parse_value!("2px"), CssDataType::LineWidth));
         assert!(value_matches_type(
             &parse_value!("1px 2px"),
@@ -777,7 +782,15 @@ mod tests {
             CssDataType::AbsoluteSize
         ));
         assert!(value_matches_type(
+            &parse_value!("XX-SMALL"),
+            CssDataType::AbsoluteSize
+        ));
+        assert!(value_matches_type(
             &parse_value!("larger"),
+            CssDataType::RelativeSize
+        ));
+        assert!(value_matches_type(
+            &parse_value!("LARGER"),
             CssDataType::RelativeSize
         ));
         assert!(!value_matches_type(
@@ -793,6 +806,7 @@ mod tests {
     #[test]
     fn position_matches_keywords_lengths_percentages_and_vars() {
         assert!(value_matches_type(&parse_value!("top"), CssDataType::Position));
+        assert!(value_matches_type(&parse_value!("TOP"), CssDataType::Position));
         assert!(value_matches_type(
             &parse_value!("top left"),
             CssDataType::Position
@@ -819,7 +833,9 @@ mod tests {
     #[test]
     fn background_size_matches_css_background_size_shapes() {
         assert!(value_matches_type(&parse_value!("cover"), CssDataType::BgSize));
+        assert!(value_matches_type(&parse_value!("COVER"), CssDataType::BgSize));
         assert!(value_matches_type(&parse_value!("auto"), CssDataType::BgSize));
+        assert!(value_matches_type(&parse_value!("AUTO"), CssDataType::BgSize));
         assert!(value_matches_type(
             &parse_value!("200px 100%"),
             CssDataType::BgSize

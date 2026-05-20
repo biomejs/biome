@@ -91,6 +91,7 @@
 	"bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]",
 	"border-[#f00] border-[2px]",
 	"text-[#fff] text-[larger] text-[20px]",
+	"bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex",
 	"ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex",
 
 	// ─── arbitrary value modifiers ─────────────────────────────────

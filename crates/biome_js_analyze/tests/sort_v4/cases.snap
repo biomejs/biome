@@ -144,6 +144,9 @@ sorted: border-[2px] border-[#f00]
 input:  text-[#fff] text-[larger] text-[20px]
 sorted: text-[larger] text-[20px] text-[#fff]
 ---
+input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
+sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
+---
 input:  ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex
 sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]
 ---
