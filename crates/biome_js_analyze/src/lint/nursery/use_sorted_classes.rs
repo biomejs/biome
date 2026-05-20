@@ -7,6 +7,7 @@ pub mod sort_v4;
 mod tailwind_preset;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
+mod arbitrary_value_match;
 
 use self::{
     presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
