@@ -28,6 +28,7 @@ gen-all:
   just gen-configuration
   just gen-migrate
   just gen-bindings
+  just gen-global-types
   just format
 
 # Generates TypeScript types and JSON schema of the configuration
@@ -70,6 +71,12 @@ gen-migrate:
 # Generates the initial files for all formatter crates
 gen-formatter *args='':
   cargo run -p xtask_codegen -- formatter {{args}}
+
+gen-global-types:
+  cargo run -p xtask_codegen --features global_types -- global-types
+
+gen-global-types-verify:
+  cargo run -p xtask_codegen --features global_types -- global-types --verify
 
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']

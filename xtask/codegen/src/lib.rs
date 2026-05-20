@@ -5,6 +5,8 @@ mod css_kinds_src;
 mod formatter;
 mod generate_analyzer;
 pub mod generate_analyzer_rule_options;
+#[cfg(feature = "global_types")]
+pub mod generate_global_types;
 mod generate_grit_mappings;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
@@ -85,6 +87,27 @@ pub fn to_capitalized(s: &str) -> String {
     }
 }
 
+/// Arguments for the `global-types` subcommand.
+#[cfg(feature = "global_types")]
+#[derive(Debug, Clone, Bpaf)]
+pub struct GlobalTypesArgs {
+    /// Only verify that the generated file is up-to-date; do not write.
+    #[bpaf(long("verify"), switch)]
+    pub verify: bool,
+
+    /// TypeScript git tag to fetch (e.g. "v6.0.3"). Must be paired with --ts-sha.
+    #[bpaf(long("ts-tag"), argument("TAG"), optional)]
+    pub ts_tag: Option<String>,
+
+    /// Git commit SHA the TypeScript tag must resolve to. Must be paired with --ts-tag.
+    #[bpaf(long("ts-sha"), argument("SHA"), optional)]
+    pub ts_sha: Option<String>,
+
+    /// Run without network access; use only a locally cached archive.
+    #[bpaf(long("offline"), switch)]
+    pub offline: bool,
+}
+
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options)]
 pub enum TaskCommand {
@@ -111,6 +134,10 @@ pub enum TaskCommand {
     /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
     #[bpaf(command)]
     Bindings,
+    /// Generates the built-in global type declarations from the TypeScript standard library.
+    #[cfg(feature = "global_types")]
+    #[bpaf(command, long("global-types"))]
+    GlobalTypes(#[bpaf(external(global_types_args))] GlobalTypesArgs),
     /// It updates the file that contains licenses
     #[bpaf(command)]
     License,
