@@ -17,7 +17,13 @@ declare_lint_rule! {
     /// ## Options
     ///
     /// Use the `drizzleObjectName` option to specify the variable names that represent Drizzle
-    /// ORM instances.
+    /// ORM instances. The option supports both simple identifiers (e.g., `db`) and member
+    /// expressions (e.g., `context.db`).
+    ///
+    /// Configuring `"db"` will match any expression that ends with `.db`:
+    /// - `db.delete()` ✓
+    /// - `context.db.delete()` ✓
+    /// - `nested.context.db.delete()` ✓
     ///
     /// ```json,options
     /// {
