@@ -2382,7 +2382,7 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 	 */
 	noUnknownAttribute?: NoUnknownAttributeConfiguration;
 	/**
-	* Disallow unnecessary type-based conditions that can be statically determined as redundant.
+	* Disallow conditions that always evaluate to the same value.
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
