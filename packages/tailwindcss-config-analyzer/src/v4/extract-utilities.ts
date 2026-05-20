@@ -437,11 +437,7 @@ const ARBITRARY_BRANCH_KIND_ORDER: Record<ArbitraryBranch["kind"], number> = {
 function sameBranches(a: FunctionalBranches, b: FunctionalBranches): boolean {
 	return (
 		sameBranchList(a.namedBranches, b.namedBranches, namedBranchKey) &&
-		sameBranchList(
-			a.arbitraryBranches,
-			b.arbitraryBranches,
-			arbitraryBranchKey,
-		)
+		sameBranchList(a.arbitraryBranches, b.arbitraryBranches, arbitraryBranchKey)
 	);
 }
 
@@ -477,7 +473,9 @@ function arbitraryBranchKey(b: ArbitraryBranch): string {
 	}
 }
 
-function dedupeFunctionalBranches(branches: FunctionalBranches): FunctionalBranches {
+function dedupeFunctionalBranches(
+	branches: FunctionalBranches,
+): FunctionalBranches {
 	return {
 		namedBranches: dedupeBranchList(
 			branches.namedBranches,

@@ -39,11 +39,12 @@ export function probeToken(variant: ThemeNamespaceVariant): string {
 // brackets). Tailwind v4 only accepts these three predicate kinds in
 // named form; other CSS value types must be written as arbitrary
 // values (`[length:1rem]` etc.).
-export const NAMED_PREDICATE_PROBES: { type: NamedValueType; value: string }[] = [
-	{ type: "Number", value: "7" },
-	{ type: "Percentage", value: "25%" },
-	{ type: "Ratio", value: "1/2" },
-];
+export const NAMED_PREDICATE_PROBES: { type: NamedValueType; value: string }[] =
+	[
+		{ type: "Number", value: "7" },
+		{ type: "Percentage", value: "25%" },
+		{ type: "Ratio", value: "1/2" },
+	];
 
 // Per-CssDataType samples used for the arbitrary-path probe. The
 // explicit `[<dataType-marker>:<value>]` syntax forces dispatch

@@ -121,7 +121,8 @@ function renderNamedBranchList(
 ): string {
 	return branches
 		.map(
-			(b) => `${indent}${formatNamedBranch(b, propIdx, propCount, keywordIdx)},`,
+			(b) =>
+				`${indent}${formatNamedBranch(b, propIdx, propCount, keywordIdx)},`,
 		)
 		.join("\n");
 }
@@ -212,7 +213,11 @@ ${entries.join("\n")}
 `;
 }
 
-function renderBranchSlice(indent: string, field: string, items: string): string {
+function renderBranchSlice(
+	indent: string,
+	field: string,
+	items: string,
+): string {
 	if (items.length === 0) {
 		return `${indent}${field}: &[],`;
 	}
