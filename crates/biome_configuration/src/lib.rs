@@ -37,6 +37,7 @@ pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 use crate::extends::Extends;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
+#[cfg(feature = "lang_graphql")]
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::GritConfiguration;
 #[cfg(feature = "cli")]
@@ -444,6 +445,7 @@ impl Configuration {
             .unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_graphql")]
     pub fn get_graphql_formatter_configuration(&self) -> GraphqlFormatterConfiguration {
         self.graphql
             .as_ref()
@@ -452,6 +454,7 @@ impl Configuration {
             .unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_graphql")]
     pub fn get_graphql_linter_configuration(&self) -> GraphqlLinterConfiguration {
         self.graphql
             .as_ref()
