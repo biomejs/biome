@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::scss::{
     is_at_scss_interpolated_identifier, is_at_scss_interpolated_string,
-    parse_scss_identifier_or_interpolation, parse_scss_interpolated_string,
+    parse_scss_interpolated_string, parse_scss_interpolation_or_identifier,
 };
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
@@ -102,7 +102,7 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
     } else if is_at_string(p) {
         parse_string(p)
     } else if is_at_scss_interpolated_identifier(p) {
-        parse_scss_identifier_or_interpolation(p)
+        parse_scss_interpolation_or_identifier(p)
     } else {
         parse_regular_identifier(p)
     }

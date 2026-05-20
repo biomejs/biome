@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_at_scss_namespaced_variable, is_at_scss_variable,
-    is_nth_at_scss_interpolation, parse_scss_identifier_or_interpolation,
+    is_nth_at_scss_interpolation, parse_scss_interpolation_or_identifier,
     parse_scss_namespaced_variable, parse_scss_regular_interpolation, parse_scss_variable,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
@@ -71,7 +71,7 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
         return Absent;
     }
 
-    let head = match parse_scss_identifier_or_interpolation(p) {
+    let head = match parse_scss_interpolation_or_identifier(p) {
         Present(head) => head,
         Absent => return Absent,
     };

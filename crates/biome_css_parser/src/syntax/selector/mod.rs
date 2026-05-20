@@ -13,8 +13,7 @@ use crate::syntax::parse_error::{
 use crate::syntax::scss::{
     is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
     is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
-    parse_scss_selector_custom_interpolated_identifier,
-    parse_scss_selector_interpolated_identifier,
+    parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::nested_selector::NestedSelectorList;
@@ -545,7 +544,7 @@ fn is_at_selector_identifier(p: &mut CssParser) -> bool {
 #[inline]
 fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_selector_interpolated_identifier(p)
+        parse_scss_selector_identifier(p)
     } else {
         parse_selector_identifier_fragment(p)
     }
@@ -563,7 +562,7 @@ pub(crate) fn parse_selector_identifier_fragment(p: &mut CssParser) -> ParsedSyn
 #[inline]
 pub(crate) fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_selector_custom_interpolated_identifier(p)
+        parse_scss_selector_custom_identifier(p)
     } else {
         parse_selector_custom_identifier_fragment(p)
     }
