@@ -1349,6 +1349,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUselessCall",
+        TypeId::of::<biome_rule_options::no_useless_call::NoUselessCallOptions>(),
+    ));
+    result.push((
         "complexity",
         "noUselessCatch",
         TypeId::of::<biome_rule_options::no_useless_catch::NoUselessCatchOptions>(),
