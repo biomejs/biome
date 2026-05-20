@@ -43,7 +43,7 @@ $map: (
 --- Prettier
 +++ Biome
 @@ -8,14 +8,16 @@
-
+ 
    /* comment */
    key4: (
 -      key: value,
@@ -59,9 +59,9 @@ $map: (
 +    key: value,
 +  ),
  );
-
+ 
  $map: (/* comment */);
-
+ 
 -$map: (// comment);
 +$map: (
 +  // comment

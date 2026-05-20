@@ -30,11 +30,8 @@ $icons: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,10 +3,9 @@
-     left: 253,
-     top: 73,
-   ),
--
+@@ -6,7 +6,7 @@
+ 
    /* Should preserve empty lines */
    cal-week-group: (
 -      left: 1,
@@ -54,6 +51,7 @@ $icons: (
     left: 253,
     top: 73,
   ),
+
   /* Should preserve empty lines */
   cal-week-group: (
     left: 1,

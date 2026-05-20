@@ -89,8 +89,9 @@ impl<'a> ScssListLayout<'a> {
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let should_force_trailing_comma = self.should_force_include_trailing_comma(elements, f);
-        let trailing_comma = Self::include_trailing_comma(should_force_trailing_comma);
-        let closing_comments = self.include_closing_comments();
+        let trailing_comma =
+            format_with(|f| Self::write_include_trailing_comma(should_force_trailing_comma, f));
+        let closing_comments = format_with(|f| self.write_include_closing_comments(f));
         let should_expand = self.should_expand_include_list(elements, f);
 
         if is_scss_map_outer_parenthesized_value_list(self.node)
@@ -123,27 +124,19 @@ impl<'a> ScssListLayout<'a> {
     /// Formats the comma after an include argument list.
     ///
     /// Example: `@include mix($arg: (a))` prints the keyword list comma.
-    fn include_trailing_comma(should_force: bool) -> impl Format<CssFormatContext> {
-        format_with(move |f| {
-            if should_force {
-                write!(f, [token(",")])
-            } else {
-                write!(f, [if_group_breaks(&token(","))])
-            }
-        })
+    fn write_include_trailing_comma(should_force: bool, f: &mut CssFormatter) -> FormatResult<()> {
+        if should_force {
+            write!(f, [token(",")])
+        } else {
+            write!(f, [if_group_breaks(&token(","))])
+        }
     }
 
     /// Formats include-owned comments before the closing `)`.
     ///
     /// Example: `@include mix((a, b) /* end */)`.
-    fn include_closing_comments(&self) -> impl Format<CssFormatContext> + '_ {
-        format_with(|f| {
-            write_include_closing_comments(
-                self.node.syntax(),
-                ClosingCommentSpacing::SoftLineBreak,
-                f,
-            )
-        })
+    fn write_include_closing_comments(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        write_include_closing_comments(self.node.syntax(), ClosingCommentSpacing::SoftLineBreak, f)
     }
 
     /// Forces a comma when include parens or comments own the list shape.
