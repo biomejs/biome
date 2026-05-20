@@ -1,0 +1,271 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+import { useEffect } from 'react';
+
+function Invalid1() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => { });
+		observer.observe(document.body);
+	}, []);
+
+	return <div />;
+}
+
+function Invalid2() {
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!ref.current) return;
+		const ro = new ResizeObserver(() => console.log('resize'));
+		ro.observe(ref.current);
+	}, []);
+
+	return <div ref={ref} />;
+}
+
+function Invalid3() {
+	useEffect(() => {
+		new ResizeObserver(() => {});
+	}, []);
+
+	return <div />;
+}
+
+function Invalid4() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => {});
+		observer.observe(document.body);
+		observer.observe(document.querySelector('.selector')!);
+		return () => {
+			observer.unobserve(document.body);
+		}
+	}, []);
+
+	return <div />;
+}
+
+function Invalid5() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => {}) as ResizeObserver;
+		observer.observe(document.body);
+	}, []);
+
+	return <div />;
+}
+
+function Invalid6() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => {});
+		for (const element of document.querySelectorAll('.selector')) {
+			observer.observe(element);
+		}
+		return () => {
+			for (const element of document.querySelectorAll('.selector')) {
+				observer.unobserve(element);
+			}
+		}
+	}, []);
+
+	return <div />;
+}
+
+function Invalid7() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => {});
+		Array.from(document.querySelectorAll('.selector')).forEach(element => {
+			observer.observe(element);
+		});
+		return () => {
+			Array.from(document.querySelectorAll('.selector')).forEach(element => {
+				observer.unobserve(element);
+			});
+		}
+	}, []);
+
+	return <div />;
+}
+
+function Invalid8() {
+	useEffect(() => {
+		const observer = new ResizeObserver(() => {});
+		(observer.observe as any)(document.body);
+	}, []);
+
+	return <div />;
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:6:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A ResizeObserver created in an effect must be disconnected or fully unobserved in the cleanup function.
+  
+    4 │ function Invalid1() {
+    5 │ 	useEffect(() => {
+  > 6 │ 		const observer = new ResizeObserver(() => { });
+      │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 		observer.observe(document.body);
+    8 │ 	}, []);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:18:14 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A ResizeObserver created in an effect must be disconnected or fully unobserved in the cleanup function.
+  
+    16 │ 	useEffect(() => {
+    17 │ 		if (!ref.current) return;
+  > 18 │ 		const ro = new ResizeObserver(() => console.log('resize'));
+       │ 		           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 		ro.observe(ref.current);
+    20 │ 	}, []);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:27:3 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Assign this ResizeObserver instance to a variable so it can be cleaned up in the effect cleanup function.
+  
+    25 │ function Invalid3() {
+    26 │ 	useEffect(() => {
+  > 27 │ 		new ResizeObserver(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	}, []);
+    29 │ 
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:35:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A ResizeObserver created in an effect must be disconnected or fully unobserved in the cleanup function.
+  
+    33 │ function Invalid4() {
+    34 │ 	useEffect(() => {
+  > 35 │ 		const observer = new ResizeObserver(() => {});
+       │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 		observer.observe(document.body);
+    37 │ 		observer.observe(document.querySelector('.selector')!);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:48:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A ResizeObserver created in an effect must be disconnected or fully unobserved in the cleanup function.
+  
+    46 │ function Invalid5() {
+    47 │ 	useEffect(() => {
+  > 48 │ 		const observer = new ResizeObserver(() => {}) as ResizeObserver;
+       │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 		observer.observe(document.body);
+    50 │ 	}, []);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:57:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Dynamically observed elements should be cleaned up with disconnect() in the cleanup function.
+  
+    55 │ function Invalid6() {
+    56 │ 	useEffect(() => {
+  > 57 │ 		const observer = new ResizeObserver(() => {});
+       │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ 		for (const element of document.querySelectorAll('.selector')) {
+    59 │ 			observer.observe(element);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:73:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Dynamically observed elements should be cleaned up with disconnect() in the cleanup function.
+  
+    71 │ function Invalid7() {
+    72 │ 	useEffect(() => {
+  > 73 │ 		const observer = new ResizeObserver(() => {});
+       │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 		Array.from(document.querySelectorAll('.selector')).forEach(element => {
+    75 │ 			observer.observe(element);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:89:20 lint/nursery/noReactLeakedResizeObserver ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A ResizeObserver created in an effect must be disconnected or fully unobserved in the cleanup function.
+  
+    87 │ function Invalid8() {
+    88 │ 	useEffect(() => {
+  > 89 │ 		const observer = new ResizeObserver(() => {});
+       │ 		                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 		(observer.observe as any)(document.body);
+    91 │ 	}, []);
+  
+  i Not clearing the observer can cause memory leaks and trigger duplicate observations on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls disconnect on the observer object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

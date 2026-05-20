@@ -2312,6 +2312,31 @@ See https://biomejs.dev/linter/rules/no-proto
 	 */
 	noProto?: NoProtoConfiguration;
 	/**
+	* Disallow forgetting to remove event listeners within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-event-listener 
+	 */
+	noReactLeakedEventListener?: NoReactLeakedEventListenerConfiguration;
+	/**
+	* Disallow forgetting to disconnect IntersectionObserver within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-intersection-observer 
+	 */
+	noReactLeakedIntersectionObserver?: NoReactLeakedIntersectionObserverConfiguration;
+	/**
+	* Disallow forgetting to clear setInterval within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-interval 
+	 */
+	noReactLeakedInterval?: NoReactLeakedIntervalConfiguration;
+	/**
+	* Disallow forgetting to disconnect ResizeObserver within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-resize-observer 
+	 */
+	noReactLeakedResizeObserver?: NoReactLeakedResizeObserverConfiguration;
+	/**
+	* Disallow forgetting to clear setTimeout within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-timeout 
+	 */
+	noReactLeakedTimeout?: NoReactLeakedTimeoutConfiguration;
+	/**
 	* Disallow deep imports from the react-native package.
 See https://biomejs.dev/linter/rules/no-react-native-deep-imports 
 	 */
@@ -4456,6 +4481,21 @@ export type NoPlaywrightWaitForTimeoutConfiguration =
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
+export type NoReactLeakedEventListenerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedEventListenerOptions;
+export type NoReactLeakedIntersectionObserverConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedIntersectionObserverOptions;
+export type NoReactLeakedIntervalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedIntervalOptions;
+export type NoReactLeakedResizeObserverConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedResizeObserverOptions;
+export type NoReactLeakedTimeoutConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedTimeoutOptions;
 export type NoReactNativeDeepImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeDeepImportsOptions;
@@ -6289,6 +6329,26 @@ export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
 }
+export interface RuleWithNoReactLeakedEventListenerOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedEventListenerOptions;
+}
+export interface RuleWithNoReactLeakedIntersectionObserverOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedIntersectionObserverOptions;
+}
+export interface RuleWithNoReactLeakedIntervalOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedIntervalOptions;
+}
+export interface RuleWithNoReactLeakedResizeObserverOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedResizeObserverOptions;
+}
+export interface RuleWithNoReactLeakedTimeoutOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedTimeoutOptions;
+}
 export interface RuleWithNoReactNativeDeepImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeDeepImportsOptions;
@@ -7981,6 +8041,11 @@ export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
+export type NoReactLeakedEventListenerOptions = {};
+export type NoReactLeakedIntersectionObserverOptions = {};
+export type NoReactLeakedIntervalOptions = {};
+export type NoReactLeakedResizeObserverOptions = {};
+export type NoReactLeakedTimeoutOptions = {};
 export type NoReactNativeDeepImportsOptions = {};
 export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
@@ -9241,6 +9306,11 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
+	| "lint/nursery/noReactLeakedEventListener"
+	| "lint/nursery/noReactLeakedIntersectionObserver"
+	| "lint/nursery/noReactLeakedInterval"
+	| "lint/nursery/noReactLeakedResizeObserver"
+	| "lint/nursery/noReactLeakedTimeout"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"

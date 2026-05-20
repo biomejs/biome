@@ -1,0 +1,70 @@
+/* should not generate diagnostics */
+import { useEffect, useRef } from "react";
+
+function Valid1() {
+  useEffect(() => {
+    const intervalId = setInterval(() => {}, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+}
+
+function Valid2() {
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {}, 1000);
+    return () => window.clearInterval(intervalId);
+  }, []);
+}
+
+function Valid3() {
+  useEffect(() => {
+    const intervalId = global.setInterval(() => {}, 1000);
+    return () => global.clearInterval(intervalId);
+  }, []);
+}
+
+function Valid4() {
+  useEffect(() => {
+    const intervalId = globalThis.setInterval(() => {}, 1000);
+    return () => globalThis.clearInterval(intervalId);
+  }, []);
+}
+
+function Valid5() {
+  useEffect(() => {
+    const intervalId = setInterval(() => {}, 1000);
+    return () => globalThis.clearInterval(intervalId);
+  }, []);
+}
+
+function Valid6() {
+  useEffect(() => {
+    const intervalId = globalThis.setInterval(() => {}, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+}
+
+function Valid7() {
+  const intervalIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    intervalIdRef.current = setInterval(() => {}, 1000);
+    return () => {
+      if (intervalIdRef.current !== null) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
+  }, []);
+}
+
+function Valid8() {
+  useEffect(() => {
+    const intervalId = setInterval(() => {}, 1000) as number;
+    return () => clearInterval(intervalId as number);
+  }, []);
+}
+
+function Valid9() {
+  useEffect(() => {
+    const intervalId = setInterval(() => {}, 1000) as number;
+    return () => clearInterval(intervalId);
+  }, []);
+}

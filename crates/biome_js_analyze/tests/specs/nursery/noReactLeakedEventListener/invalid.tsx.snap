@@ -1,0 +1,885 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+import { useEffect } from "react";
+
+function Invalid1() {
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+  }, []);
+}
+
+function Invalid2() {
+  useEffect(() => {
+    const handleResize1 = () => {};
+    const handleResize2 = () => {};
+    window.addEventListener("resize", handleResize1);
+    return () => {
+      window.removeEventListener("resize", handleResize2);
+    };
+  }, []);
+}
+
+function Invalid3() {
+  useEffect(() => {
+    window.addEventListener("resize", () => {});
+    return () => {
+      window.removeEventListener("resize", () => {});
+    };
+  }, []);
+}
+
+function Invalid4() {
+  useEffect(() => {
+    window.addEventListener("resize", () => {}, { once: true });
+    return () => {
+      window.removeEventListener("resize", () => {});
+    };
+  }, []);
+}
+
+function Invalid5() {
+  useEffect(() => {
+    const handleResize1 = () => {};
+    window.addEventListener("resize", handleResize1, { once: true });
+  }, []);
+}
+
+function Invalid6() {
+  useEffect(() => {
+    window.addEventListener("resize", () => {}, { once: true });
+
+    return () => {
+      window.removeEventListener("resize", () => {}, { once: true });
+    };
+  }, []);
+}
+
+function Invalid7() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, false);
+    return () => {
+      window.removeEventListener("resize", handleResize, true);
+    };
+  }, []);
+}
+
+function Invalid8() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, true);
+    return () => {
+      window.removeEventListener("resize", handleResize, false);
+    };
+  }, []);
+}
+
+function Invalid9() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize, true);
+    };
+  }, []);
+}
+
+function Invalid10() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: true });
+    };
+  }, []);
+}
+
+function Invalid11() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, true);
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: false });
+    };
+  }, []);
+}
+
+function Invalid12() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize, false);
+    };
+  }, []);
+}
+
+function Invalid13() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Invalid14() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: false });
+    };
+  }, []);
+}
+
+function Invalid15() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    window.addEventListener("resize", handleResize, { capture: false });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: false });
+    };
+  }, []);
+}
+
+function Invalid16() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    window.addEventListener("resize", handleResize, { capture: false });
+    window.addEventListener("resize", handleResize, { capture: false });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: false });
+    };
+  }, []);
+}
+
+function Invalid17() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, options);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Invalid18() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: options.capture });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Invalid19() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    events.forEach((evt) => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(evt, handleActivity);
+      });
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid20() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity1 = () => {};
+  const handleActivity2 = () => {};
+
+  useEffect(() => {
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity1);
+    });
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, handleActivity2);
+      });
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid21() {
+  const events1 = ["mousemove", "mousedown", "keydown"];
+  const events2 = ["keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    events1.forEach((event) => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    return () => {
+      events2.forEach((event) => {
+        window.removeEventListener(event, handleActivity);
+      });
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid22() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    for (const evt of events) {
+      window.addEventListener(event, handleActivity);
+    }
+
+    return () => {
+      for (const event of events) {
+        window.removeEventListener(evt, handleActivity);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid23() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity1 = () => {};
+  const handleActivity2 = () => {};
+
+  useEffect(() => {
+    for (const event of events) {
+      window.addEventListener(event, handleActivity1);
+    }
+
+    return () => {
+      for (const evt of events) {
+        window.removeEventListener(evt, handleActivity2);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid24() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity1 = () => {};
+  const handleActivity2 = () => {};
+
+  useEffect(() => {
+    for (const event of events) {
+      window.addEventListener(event, handleActivity1);
+    }
+
+    return () => {
+      for (const [event] of events) {
+        window.removeEventListener(event, handleActivity2);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid25() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity1 = () => {};
+  const handleActivity2 = () => {};
+
+  useEffect(() => {
+    for (const event of events) {
+      window.addEventListener(event, handleActivity1);
+    }
+
+    return () => {
+      for (const {event} of events) {
+        window.removeEventListener(event, handleActivity2);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Invalid26() {
+  useEffect(() => {
+    (window.addEventListener as any)("resize", handleResize);
+  }, []);
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:6:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    4 │ function Invalid1() {
+    5 │   useEffect(() => {
+  > 6 │     window.addEventListener("resize", handleResize);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   }, []);
+    8 │ }
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:14:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    12 │     const handleResize1 = () => {};
+    13 │     const handleResize2 = () => {};
+  > 14 │     window.addEventListener("resize", handleResize1);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │     return () => {
+    16 │       window.removeEventListener("resize", handleResize2);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:23:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    21 │ function Invalid3() {
+    22 │   useEffect(() => {
+  > 23 │     window.addEventListener("resize", () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │     return () => {
+    25 │       window.removeEventListener("resize", () => {});
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:32:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    30 │ function Invalid4() {
+    31 │   useEffect(() => {
+  > 32 │     window.addEventListener("resize", () => {}, { once: true });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │     return () => {
+    34 │       window.removeEventListener("resize", () => {});
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:42:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    40 │   useEffect(() => {
+    41 │     const handleResize1 = () => {};
+  > 42 │     window.addEventListener("resize", handleResize1, { once: true });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │   }, []);
+    44 │ }
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:48:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    46 │ function Invalid6() {
+    47 │   useEffect(() => {
+  > 48 │     window.addEventListener("resize", () => {}, { once: true });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │     return () => {
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:59:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    57 │   useEffect(() => {
+    58 │     const handleResize = () => {};
+  > 59 │     window.addEventListener("resize", handleResize, false);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │     return () => {
+    61 │       window.removeEventListener("resize", handleResize, true);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:69:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    67 │   useEffect(() => {
+    68 │     const handleResize = () => {};
+  > 69 │     window.addEventListener("resize", handleResize, true);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │     return () => {
+    71 │       window.removeEventListener("resize", handleResize, false);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:79:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    77 │   useEffect(() => {
+    78 │     const handleResize = () => {};
+  > 79 │     window.addEventListener("resize", handleResize);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │     return () => {
+    81 │       window.removeEventListener("resize", handleResize, true);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:89:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    87 │   useEffect(() => {
+    88 │     const handleResize = () => {};
+  > 89 │     window.addEventListener("resize", handleResize);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │     return () => {
+    91 │       window.removeEventListener("resize", handleResize, { capture: true });
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:99:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+     97 │   useEffect(() => {
+     98 │     const handleResize = () => {};
+   > 99 │     window.addEventListener("resize", handleResize, true);
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │     return () => {
+    101 │       window.removeEventListener("resize", handleResize, { capture: false });
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:109:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    107 │   useEffect(() => {
+    108 │     const handleResize = () => {};
+  > 109 │     window.addEventListener("resize", handleResize, { capture: true });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │     return () => {
+    111 │       window.removeEventListener("resize", handleResize, false);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:119:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    117 │   useEffect(() => {
+    118 │     const handleResize = () => {};
+  > 119 │     window.addEventListener("resize", handleResize, { capture: true });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    120 │     return () => {
+    121 │       window.removeEventListener("resize", handleResize);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:129:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    127 │   useEffect(() => {
+    128 │     const handleResize = () => {};
+  > 129 │     window.addEventListener("resize", handleResize, { capture: true });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    130 │     return () => {
+    131 │       window.removeEventListener("resize", handleResize, { capture: false });
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:139:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    137 │   useEffect(() => {
+    138 │     const handleResize = () => {};
+  > 139 │     window.addEventListener("resize", handleResize, { capture: true });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    140 │     window.addEventListener("resize", handleResize, { capture: false });
+    141 │     return () => {
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:150:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    148 │   useEffect(() => {
+    149 │     const handleResize = () => {};
+  > 150 │     window.addEventListener("resize", handleResize, { capture: true });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    151 │     window.addEventListener("resize", handleResize, { capture: false });
+    152 │     window.addEventListener("resize", handleResize, { capture: false });
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:163:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    161 │     const options = { capture: true };
+    162 │     const handleResize = () => {};
+  > 163 │     window.addEventListener("resize", handleResize, options);
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │     return () => {
+    165 │       window.removeEventListener("resize", handleResize);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:174:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    172 │     const options = { capture: true };
+    173 │     const handleResize = () => {};
+  > 174 │     window.addEventListener("resize", handleResize, { capture: options.capture });
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    175 │     return () => {
+    176 │       window.removeEventListener("resize", handleResize);
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:188:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    186 │   useEffect(() => {
+    187 │     events.forEach((evt) => {
+  > 188 │       window.addEventListener(event, handleActivity);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    189 │     });
+    190 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:209:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    207 │   useEffect(() => {
+    208 │     events.forEach((event) => {
+  > 209 │       window.addEventListener(event, handleActivity1);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    210 │     });
+    211 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:230:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    228 │   useEffect(() => {
+    229 │     events1.forEach((event) => {
+  > 230 │       window.addEventListener(event, handleActivity);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    231 │     });
+    232 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:250:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    248 │   useEffect(() => {
+    249 │     for (const evt of events) {
+  > 250 │       window.addEventListener(event, handleActivity);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    251 │     }
+    252 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:271:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    269 │   useEffect(() => {
+    270 │     for (const event of events) {
+  > 271 │       window.addEventListener(event, handleActivity1);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    272 │     }
+    273 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:292:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    290 │   useEffect(() => {
+    291 │     for (const event of events) {
+  > 292 │       window.addEventListener(event, handleActivity1);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    293 │     }
+    294 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:313:7 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    311 │   useEffect(() => {
+    312 │     for (const event of events) {
+  > 313 │       window.addEventListener(event, handleActivity1);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    314 │     }
+    315 │ 
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:328:5 lint/nursery/noReactLeakedEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An addEventListener in an effect should have a corresponding removeEventListener in cleanup.
+  
+    326 │ function Invalid26() {
+    327 │   useEffect(() => {
+  > 328 │     (window.addEventListener as any)("resize", handleResize);
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    329 │   }, []);
+    330 │ }
+  
+  i Not removing the listener can cause memory leaks and duplicate event handling after the component re-renders.
+  
+  i Return a cleanup function from the effect that calls removeEventListener with the same event type and listener.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
