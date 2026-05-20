@@ -6,3 +6,10 @@ const boolExpr5 = true;
 const boolExpr6 = false;
 const r6 = !!boolExpr1 || !!boolExpr2;
 !!x;
+
+// Right-side boolean literals should not be simplified
+// because JS logical operators return operand values, not booleans
+const r7 = account?.test || false;
+const r8 = boolExp || true;
+const r9 = x && true;
+const r10 = x && false;
