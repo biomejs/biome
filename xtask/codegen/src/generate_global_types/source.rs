@@ -124,6 +124,10 @@ const ACQUIRE_LOCK_POLL_INTERVAL_MS: u64 = 100;
 /// File stored inside an acquire-lock directory with the owner PID and token.
 const ACQUIRE_LOCK_OWNER_FILE: &str = "owner";
 
+/// Grace period before a missing/corrupt `owner` file marks a lock as an
+/// orphan. Sized to outlast any normal create-then-write window.
+const ACQUIRE_LOCK_ORPHAN_GRACE: Duration = Duration::from_secs(5);
+
 /// Lowercase nibble table used by the streaming hex encoder.
 const HEX_NIBBLES: &[u8; 16] = b"0123456789abcdef";
 
@@ -831,30 +835,53 @@ fn remove_acquire_lock_path(path: &Path) -> anyhow::Result<()> {
     }
 }
 
-/// Removes the lock if the recorded owner PID is no longer alive (or if the
-/// lock is a legacy file). Returns whether the slot was reclaimed.
+/// Removes the lock if the owner PID is dead, the lock is a legacy file, or
+/// the owner file is missing/corrupt past [`ACQUIRE_LOCK_ORPHAN_GRACE`].
+/// Returns whether the slot was reclaimed.
 fn remove_stale_acquire_lock_if_owner_dead(path: &Path) -> anyhow::Result<bool> {
     if path.is_file() {
         remove_acquire_lock_path(path)?;
         return Ok(true);
     }
 
-    let Ok(owner) = read_acquire_lock_owner(path) else {
-        return Ok(false);
-    };
-    let Some(pid) = owner
-        .split_once(':')
-        .and_then(|(pid, _)| pid.parse::<u32>().ok())
-    else {
-        return Ok(false);
-    };
+    let pid = read_acquire_lock_owner(path).ok().and_then(|owner| {
+        owner
+            .split_once(':')
+            .and_then(|(pid, _)| pid.parse::<u32>().ok())
+    });
 
-    if acquire_lock_owner_is_alive(pid) {
-        return Ok(false);
+    if let Some(pid) = pid {
+        if acquire_lock_owner_is_alive(pid) {
+            return Ok(false);
+        }
+        remove_acquire_lock_path(path)?;
+        return Ok(true);
     }
 
-    remove_acquire_lock_path(path)?;
-    Ok(true)
+    if acquire_lock_dir_aged_past_grace(path)? {
+        remove_acquire_lock_path(path)?;
+        return Ok(true);
+    }
+
+    Ok(false)
+}
+
+/// True when the lock directory's mtime is past [`ACQUIRE_LOCK_ORPHAN_GRACE`]
+/// or the directory is gone.
+fn acquire_lock_dir_aged_past_grace(path: &Path) -> anyhow::Result<bool> {
+    let metadata = match fs::metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(true),
+        Err(error) => {
+            return Err(error)
+                .with_context(|| format!("failed to stat acquire lock {}", path.display()));
+        }
+    };
+    let mtime = metadata
+        .modified()
+        .with_context(|| format!("failed to read mtime for acquire lock {}", path.display()))?;
+    let age = SystemTime::now().duration_since(mtime).unwrap_or_default();
+    Ok(age >= ACQUIRE_LOCK_ORPHAN_GRACE)
 }
 
 /// Reads the owner token from the lock directory's `owner` file, or from the
