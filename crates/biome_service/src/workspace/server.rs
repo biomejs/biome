@@ -30,12 +30,12 @@ use crate::workspace::{
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
     GoToDefinitionParams, GoToDefinitionResult, IgnoreKind, OpenFileParams, OpenFileResult,
     OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
-    PathIsIgnoredParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams, RenameResult, ScanKind,
-    ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo,
-    ServiceNotification, Settings, SupportsFeatureParams, UpdateModuleGraphParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    PathIsIgnoredParams, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RageEntry,
+    RageParams, RageResult, RenameParams, RenameResult, ScanKind, ScanProjectParams,
+    ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo, ServiceNotification,
+    Settings, SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams,
+    UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
 use biome_configuration::bool::Bool;
@@ -60,9 +60,9 @@ use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
-use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
+use biome_plugin_loader::Plugins;
 #[cfg(feature = "plugins")]
-use biome_plugin_loader::{PluginConfiguration, Plugins};
+use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{NodeCache, SendNode};

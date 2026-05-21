@@ -87,7 +87,6 @@ use std::{
 use tokio::sync::watch;
 use tracing::debug;
 
-use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -95,11 +94,10 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
-use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
+use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
 pub use search::grit::GritSearchQuery;

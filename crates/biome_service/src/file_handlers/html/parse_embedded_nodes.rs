@@ -19,9 +19,10 @@ use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
-    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlRoot, HtmlSingleTextExpression,
-    HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective,
-    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
+    HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
+    SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
@@ -557,7 +558,7 @@ fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<Embe
 
     match initializer {
         AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(initializer) => {
-            build_attribute_expression_candidate(&initializer)
+            build_attribute_expression_candidate(&initializer, false)
                 .into_iter()
                 .collect()
         }
@@ -587,7 +588,18 @@ fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<Embe
 fn build_text_expression_directive_candidate(
     expression: &HtmlTextExpression,
 ) -> Option<EmbedCandidate> {
-    build_attribute_expression_candidate(initializer, false)
+    let content_token = expression.html_literal_token().ok()?;
+
+    Some(EmbedCandidate::Directive {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
+        },
+        is_event_handler: false,
+        is_class_attribute: false,
+    })
 }
 
 /// Build an `EmbedCandidate::Directive` from an initializer clause containing

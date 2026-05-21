@@ -31,9 +31,9 @@ use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
-    GetSyntaxTreeResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
-    RenameResult, SearchQuery,DefinitionReference, GoToDefinitionResult
+    AnyEmbeddedSnippet, CodeAction, DefinitionReference, DocumentServices, FixAction, FixFileMode,
+    FixFileResult, GetSyntaxTreeResult, GoToDefinitionResult, PatternId, PullActionsResult,
+    PullDiagnosticsAndActionsResult, RenameResult, SearchQuery,
 };
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
@@ -1466,10 +1466,15 @@ impl Features {
             DocumentFileSource::Js(_) => self.js.capabilities(),
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
+            #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
+            #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            #[cfg(feature = "lang_md")]
             DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            #[cfg(feature = "lang_yaml")]
+            DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }

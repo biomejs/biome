@@ -19,7 +19,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         } = node.as_fields();
 
         let should_insert_space = f.options().delimiter_spacing().value();
-
+        let name = name?;
         write!(
             f,
             [
