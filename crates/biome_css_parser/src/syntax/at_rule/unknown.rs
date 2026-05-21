@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, parse_scss_identifier_or_interpolation,
+    is_at_scss_interpolation, parse_scss_interpolation_or_identifier,
     parse_scss_regular_interpolation,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_identifier, parse_regular_identifier};
@@ -54,7 +54,7 @@ pub(crate) fn parse_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn parse_unknown_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_identifier_or_interpolation(p)
+        parse_scss_interpolation_or_identifier(p)
     } else {
         parse_regular_identifier(p)
     }

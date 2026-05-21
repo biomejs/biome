@@ -14,9 +14,9 @@ pub(crate) use at_rule::{
     parse_scss_content_at_rule, parse_scss_debug_at_rule, parse_scss_each_at_rule,
     parse_scss_error_at_rule, parse_scss_extend_at_rule, parse_scss_for_at_rule,
     parse_scss_forward_at_rule, parse_scss_function_at_rule, parse_scss_if_at_rule,
-    parse_scss_import_at_rule, parse_scss_include_at_rule, parse_scss_keyframes_selector,
-    parse_scss_mixin_at_rule, parse_scss_return_at_rule, parse_scss_use_at_rule,
-    parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    parse_scss_import_at_rule, parse_scss_include_at_rule, parse_scss_interpolated_query_feature,
+    parse_scss_keyframes_selector, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
+    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
     is_at_scss_nesting_declaration, is_at_scss_variable_declaration, is_at_scss_variable_modifier,
@@ -38,11 +38,11 @@ pub(crate) use identifiers::{
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
     is_at_scss_module_member_access, is_at_scss_namespaced_variable, is_at_scss_variable,
     is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_module_member_access, parse_scss_identifier_or_interpolation,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_identifier,
-    parse_scss_module_member_access, parse_scss_namespaced_variable,
-    parse_scss_selector_custom_interpolated_identifier,
-    parse_scss_selector_interpolated_identifier, parse_scss_variable,
+    is_nth_at_scss_module_member_access, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_name,
+    parse_scss_interpolation_or_identifier, parse_scss_module_member_access,
+    parse_scss_namespaced_variable, parse_scss_selector_custom_identifier,
+    parse_scss_selector_identifier, parse_scss_variable,
 };
 pub(crate) use parse_error::{
     expected_scss_expression, expected_scss_variable_modifier, scss_ellipsis_not_allowed,
