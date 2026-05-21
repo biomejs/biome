@@ -49,26 +49,28 @@ fn write_closing_comments(
 ) -> FormatResult<()> {
     let has_line_closing_comment = has_line_closing_comment(node, f);
 
+    write_space_before_closing_comment(spacing, has_line_closing_comment, f)?;
+
     write!(
         f,
         [
-            format_space_before_closing_comment(spacing, has_line_closing_comment),
             format_dangling_comments(node),
             has_line_closing_comment.then_some(hard_line_break())
         ]
     )
 }
 
-fn format_space_before_closing_comment(
+fn write_space_before_closing_comment(
     spacing: ClosingCommentSpacing,
     has_line_closing_comment: bool,
-) -> impl Format<CssFormatContext> {
-    format_with(move |f| match spacing {
+    f: &mut CssFormatter,
+) -> FormatResult<()> {
+    match spacing {
         ClosingCommentSpacing::Adaptive if !has_line_closing_comment => write!(f, [space()]),
         ClosingCommentSpacing::Adaptive | ClosingCommentSpacing::SoftLineBreak => {
             write!(f, [soft_line_break_or_space()])
         }
-    })
+    }
 }
 
 fn has_line_closing_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {

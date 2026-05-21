@@ -113,7 +113,9 @@ impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
             );
         }
 
-        write!(f, [group(&indent(&self.format_breakable_pair()))])
+        let breakable_pair = format_with(|f| self.write_breakable_pair(f));
+
+        write!(f, [group(&indent(&breakable_pair))])
     }
 }
 
@@ -129,27 +131,25 @@ impl FormatScssMapPairLayout<'_> {
     /// Formats a pair whose key or scalar value may break.
     ///
     /// Example: `("long", "key"): value`.
-    fn format_breakable_pair(&self) -> impl Format<CssFormatContext> + '_ {
-        format_with(|f| {
-            let separator = soft_line_break_or_space();
-            let value_separator = format_with(|f| {
-                if self.is_value_self_breaking() {
-                    write!(f, [space()])
-                } else {
-                    write!(f, [soft_line_break_or_space()])
-                }
-            });
-            let empty_separator = format_once(|_| Ok(()));
-            let mut fill = f.fill();
+    fn write_breakable_pair(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let separator = soft_line_break_or_space();
+        let value_separator = format_with(|f| {
+            if self.is_value_self_breaking() {
+                write!(f, [space()])
+            } else {
+                write!(f, [soft_line_break_or_space()])
+            }
+        });
+        let empty_separator = format_once(|_| Ok(()));
+        let mut fill = f.fill();
 
-            fill.entry(&separator, &dedent(&self.key.format()));
-            // `fill` alternates item/separator/item; `:` is an item glued to
-            // the key with an empty separator, e.g. `("a", "b"): value`.
-            fill.entry(&empty_separator, &self.colon_token.format());
-            fill.entry(&value_separator, &self.value.format());
+        fill.entry(&separator, &dedent(&self.key.format()));
+        // `fill` alternates item/separator/item; `:` is an item glued to
+        // the key with an empty separator, e.g. `("a", "b"): value`.
+        fill.entry(&empty_separator, &self.colon_token.format());
+        fill.entry(&value_separator, &self.value.format());
 
-            fill.finish()
-        })
+        fill.finish()
     }
 }
 

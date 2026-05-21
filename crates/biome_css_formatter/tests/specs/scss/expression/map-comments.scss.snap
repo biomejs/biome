@@ -21,11 +21,13 @@ $emptyLineCommentMap:(// comment
 $leadingBlockCommentMap:(
 /* comment */
 key1:value,
+
 key2:value
 );
 $leadingBlockCommentsMap:(
 /* comment */ /* comment */
 key2:value,
+
 key3:value
 );
 $leadingBlockCommentNestedMap:(
@@ -68,10 +70,12 @@ $emptyLineCommentMap: (
 );
 $leadingBlockCommentMap: (
 	/* comment */ key1: value,
+
 	key2: value,
 );
 $leadingBlockCommentsMap: (
 	/* comment */ /* comment */ key2: value,
+
 	key3: value,
 );
 $leadingBlockCommentNestedMap: (
