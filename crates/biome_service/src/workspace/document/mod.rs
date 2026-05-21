@@ -270,6 +270,7 @@ impl Document {
             .iter()
             .map(|node| FormatEmbedNode {
                 range: node.content_range(),
+                element_range: node.element_range(),
                 source: get_file_source(node.file_source_index()),
                 node: node.parse().clone(),
             })
