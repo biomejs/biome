@@ -15,7 +15,7 @@ use biome_rule_options::use_consistent_object_definitions::{
 };
 
 declare_lint_rule! {
-    /// Require the consistent declaration of object literals. Defaults to explicit definitions.
+    /// Require the consistent declaration of object literals.
     ///
     /// ECMAScript 6 provides two ways to define an object literal: `{foo: foo}` and `{foo}`.
     /// The two styles are functionally equivalent.
