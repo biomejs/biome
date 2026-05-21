@@ -1,0 +1,168 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+[title="x" #{$mod] {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                L_BRACK@0..1 "[" [] [],
+                                CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@1..6 "title" [] [],
+                                    },
+                                },
+                                CssBogus {
+                                    items: [
+                                        EQ@6..7 "=" [] [],
+                                        CssAttributeMatcherValue {
+                                            name: CssString {
+                                                value_token: CSS_STRING_LITERAL@7..11 "\"x\"" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        CssBogusSupportsCondition {
+                                            items: [
+                                                CssBogus {
+                                                    items: [
+                                                        CssBogus {
+                                                            items: [
+                                                                HASH@11..12 "#" [] [],
+                                                                L_CURLY@12..13 "{" [] [],
+                                                                CssBogus {
+                                                                    items: [
+                                                                        CssBogus {
+                                                                            items: [
+                                                                                ScssVariable {
+                                                                                    dollar_token: DOLLAR@13..14 "$" [] [],
+                                                                                    name: CssIdentifier {
+                                                                                        value_token: IDENT@14..17 "mod" [] [],
+                                                                                    },
+                                                                                },
+                                                                                CssBogusPropertyValue {
+                                                                                    items: [
+                                                                                        R_BRACK@17..19 "]" [] [Whitespace(" ")],
+                                                                                        L_CURLY@19..20 "{" [] [],
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                R_CURLY@20..21 "}" [] [],
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [],
+            },
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..22
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..21
+    0: CSS_QUALIFIED_RULE@0..21
+      0: CSS_SELECTOR_LIST@0..21
+        0: CSS_COMPOUND_SELECTOR@0..21
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..21
+            0: CSS_BOGUS_SUB_SELECTOR@0..21
+              0: L_BRACK@0..1 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@1..6
+                0: (empty)
+                1: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "title" [] []
+              2: CSS_BOGUS@6..21
+                0: EQ@6..7 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@7..11
+                  0: CSS_STRING@7..11
+                    0: CSS_STRING_LITERAL@7..11 "\"x\"" [] [Whitespace(" ")]
+                2: CSS_BOGUS_SUPPORTS_CONDITION@11..21
+                  0: CSS_BOGUS@11..21
+                    0: CSS_BOGUS@11..21
+                      0: HASH@11..12 "#" [] []
+                      1: L_CURLY@12..13 "{" [] []
+                      2: CSS_BOGUS@13..20
+                        0: CSS_BOGUS@13..20
+                          0: SCSS_VARIABLE@13..17
+                            0: DOLLAR@13..14 "$" [] []
+                            1: CSS_IDENTIFIER@14..17
+                              0: IDENT@14..17 "mod" [] []
+                          1: CSS_BOGUS_PROPERTY_VALUE@17..20
+                            0: R_BRACK@17..19 "]" [] [Whitespace(" ")]
+                            1: L_CURLY@19..20 "{" [] []
+                      3: R_CURLY@20..21 "}" [] []
+      1: CSS_BOGUS_BLOCK@21..21
+  2: EOF@21..22 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolated-attribute-modifier-invalid.scss:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '] {'.
+  
+  > 1 │ [title="x" #{$mod] {}
+      │                  ^^^
+    2 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ [title="x" #{$mod] {}
+      │                  ^^^
+    2 │ 
+  
+interpolated-attribute-modifier-invalid.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead the file ends
+  
+    1 │ [title="x" #{$mod] {}
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ [title="x" #{$mod] {}
+  > 2 │ 
+      │ 
+  
+```

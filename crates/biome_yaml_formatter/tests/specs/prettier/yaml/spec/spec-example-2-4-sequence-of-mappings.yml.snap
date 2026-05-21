@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-2-4-sequence-of-mappings.yml
 ---
+
 # Input
 
 ```yml
@@ -37,7 +38,6 @@ info: yaml/spec/spec-example-2-4-sequence-of-mappings.yml
 +  name: Sammy Sosa
 +  hr:   63
 +  avg:  0.288
-\ No newline at end of file
 ```
 
 # Output
@@ -50,4 +50,5 @@ info: yaml/spec/spec-example-2-4-sequence-of-mappings.yml
 -
   name: Sammy Sosa
   hr:   63
-  avg:  0.288```
+  avg:  0.288
+```

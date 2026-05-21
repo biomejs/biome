@@ -1,0 +1,21 @@
+@keyframes loader {
+  from {
+    opacity: 0;
+  }
+
+  #{50% - $loader-icon-duration} {
+    opacity: 1;
+  }
+
+  #{$i}% {
+    opacity: 0.75;
+  }
+
+  50%, #{75% - $loader-icon-duration}, to {
+    opacity: 0.5;
+  }
+
+  entry 100% {
+    opacity: 1;
+  }
+}

@@ -141,7 +141,7 @@ fn basic_modifier() {
         DASH:1,
         TW_VALUE:7,
         SLASH:1,
-        TW_VALUE:2,
+        TW_NUMBER:2,
     );
 }
 
@@ -153,7 +153,7 @@ fn basic_modifier_important() {
         DASH:1,
         TW_VALUE:7,
         SLASH:1,
-        TW_VALUE:2,
+        TW_NUMBER:2,
         BANG:1,
     );
 }

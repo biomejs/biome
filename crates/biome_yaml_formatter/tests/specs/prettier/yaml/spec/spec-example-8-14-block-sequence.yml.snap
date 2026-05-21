@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-8-14-block-sequence.yml
 ---
+
 # Input
 
 ```yml
@@ -22,7 +23,6 @@ block sequence:
    - one
 -  - two: three
 +  - two : three
-\ No newline at end of file
 ```
 
 # Output
@@ -30,4 +30,5 @@ block sequence:
 ```yml
 block sequence:
   - one
-  - two : three```
+  - two : three
+```

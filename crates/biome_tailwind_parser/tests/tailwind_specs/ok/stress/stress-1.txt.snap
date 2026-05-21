@@ -143,8 +143,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@103..106 "gap" [] [],
                 minus_token: DASH@106..107 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@107..109 "2" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@107..109 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -174,8 +174,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@125..132 "opacity" [] [],
                 minus_token: DASH@132..133 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@133..136 "50" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@133..136 "50" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -310,8 +310,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@103..109
         0: TW_BASE@103..106 "gap" [] []
         1: DASH@106..107 "-" [] []
-        2: TW_NAMED_VALUE@107..109
-          0: TW_VALUE@107..109 "2" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@107..109
+          0: TW_NUMBER@107..109 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     7: TW_FULL_CANDIDATE@109..136
@@ -332,8 +332,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@125..136
         0: TW_BASE@125..132 "opacity" [] []
         1: DASH@132..133 "-" [] []
-        2: TW_NAMED_VALUE@133..136
-          0: TW_VALUE@133..136 "50" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@133..136
+          0: TW_NUMBER@133..136 "50" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     8: TW_FULL_CANDIDATE@136..173

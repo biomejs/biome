@@ -96,11 +96,11 @@ impl CssAttributeMatcher {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_modifier_token(self, element: Option<SyntaxToken>) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
-        )
+    pub fn with_modifier(self, element: Option<AnyCssAttributeModifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl CssAttributeMatcherValue {
@@ -111,6 +111,14 @@ impl CssAttributeMatcherValue {
         )
     }
 }
+impl CssAttributeModifier {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssAttributeName {
     pub fn with_namespace(self, element: Option<CssNamespace>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
@@ -118,7 +126,7 @@ impl CssAttributeName {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAttributeName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2440,7 +2448,7 @@ impl CssPseudoClassFunctionValueList {
     }
 }
 impl CssPseudoClassIdentifier {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssSelectorIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -2616,7 +2624,7 @@ impl CssPseudoElementFunctionSelector {
     }
 }
 impl CssPseudoElementIdentifier {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssSelectorIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3372,7 +3380,7 @@ impl CssUnknownAttrUnit {
     }
 }
 impl CssUnknownBlockAtRule {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssUnknownAtRuleName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3414,7 +3422,7 @@ impl CssUnknownSyntaxTypeName {
     }
 }
 impl CssUnknownValueAtRule {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssUnknownAtRuleName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3704,10 +3712,10 @@ impl ScssContentAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -3724,10 +3732,10 @@ impl ScssDebugAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -3804,10 +3812,10 @@ impl ScssErrorAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -4086,16 +4094,44 @@ impl ScssIncludeAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: Option<CssDeclarationOrRuleBlock>) -> Self {
+    pub fn with_using_clause(self, element: Option<ScssIncludeUsingClause>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_block(self, element: Option<CssDeclarationOrRuleBlock>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
     pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
+        )
+    }
+}
+impl ScssIncludeUsingClause {
+    pub fn with_using_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_parameters(self, element: ScssParameterList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedDashedIdentifier {
+    pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4117,6 +4153,112 @@ impl ScssInterpolatedIdentifierHyphen {
 }
 impl ScssInterpolatedNthValue {
     pub fn with_items(self, element: ScssInterpolatedNthValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoClassFunction {
+    pub fn with_name(self, element: ScssInterpolatedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_arguments(
+        self,
+        element: Option<AnyScssInterpolatedPseudoClassFunctionArguments>,
+    ) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoClassNthArguments {
+    pub fn with_selector(self, element: CssPseudoClassNthSelector) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    pub fn with_selectors(self, element: CssRelativeSelectorList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoClassSelectorArguments {
+    pub fn with_selectors(self, element: CssSelectorList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoClassValueArguments {
+    pub fn with_values(self, element: CssPseudoValueList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoElementFunction {
+    pub fn with_name(self, element: ScssInterpolatedIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_arguments(
+        self,
+        element: Option<AnyScssInterpolatedPseudoElementFunctionArguments>,
+    ) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoElementSelectorArguments {
+    pub fn with_selectors(self, element: CssSelectorList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssInterpolatedPseudoElementValueArguments {
+    pub fn with_values(self, element: CssPseudoValueList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -4174,6 +4316,20 @@ impl ScssInterpolation {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssKeyframesSelector {
+    pub fn with_selector(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_percent_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -4453,6 +4609,36 @@ impl ScssParameterList {
         )
     }
 }
+impl ScssParentSelector {
+    pub fn with_amp_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_suffix(self, element: ScssParentSelectorSuffix) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssParentSelectorSuffix {
+    pub fn with_items(self, element: ScssParentSelectorSuffixPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssParentSelectorSuffixHyphen {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssParentSelectorValue {
     pub fn with_amp_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4534,10 +4720,10 @@ impl ScssReturnAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -4704,10 +4890,10 @@ impl ScssWarnAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
 }

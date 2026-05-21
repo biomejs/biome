@@ -69,10 +69,6 @@ export interface Configuration {
 	 */
 	overrides?: Overrides;
 	/**
-	 * List of plugins to load.
-	 */
-	plugins?: Plugins;
-	/**
 	* Indicates whether this configuration file is at the root of a Biome
 project. By default, this is `true`. 
 	 */
@@ -374,7 +370,6 @@ match these patterns.
 	rules?: Rules;
 }
 export type Overrides = OverridePattern[];
-export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
 /**
  * Set of properties to integrate Biome with a VCS software.
@@ -1066,26 +1061,7 @@ match these patterns.
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
-	/**
-	 * Specific configuration for additional plugins
-	 */
-	plugins?: Plugins;
 }
-/**
-	* Configuration for a single plugin entry.
-
-Can be either a plain path string or an object with path and options:
-
-```json
-{
-  "plugins": [
-    "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] }
-  ]
-}
-``` 
-	 */
-export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
 /**
  * A preset configuration for enabling a set of rules.
@@ -1302,6 +1278,10 @@ has syntax errors
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+	 */
+	trailingCommas?: JsTrailingCommas;
+	/**
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
@@ -1329,20 +1309,6 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
-}
-/**
- * Plugin path with additional options.
- */
-export interface PluginWithOptions {
-	/**
-	* A list of glob patterns. The plugin will only run on files matching
-these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions. 
-	 */
-	includes?: NormalizedGlob[];
-	/**
-	 * The path to the plugin.
-	 */
-	path: string;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -8429,7 +8395,10 @@ Default: `"it"`
 	 */
 	withinDescribe?: TestFunctionKind;
 }
-export type UseDestructuringOptions = {};
+export interface UseDestructuringOptions {
+	assignmentExpression?: DestructuringConfig;
+	variableDeclarator?: DestructuringConfig;
+}
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
 export type UseDomQuerySelectorOptions = {};
@@ -9114,6 +9083,10 @@ export type MethodSignatureStyle = "property" | "method";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export interface DestructuringConfig {
+	array?: boolean;
+	object?: boolean;
+}
 export type CheckInputType = "off" | "loose" | "strict";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
@@ -10128,10 +10101,8 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource };
+	| { Grit: GritFileSource };
 export type EditorFeatures = EditorFeature[];
 export interface JsFileSource {
 	/**
@@ -10158,17 +10129,11 @@ For example, if inside a styled`` literal, a top-level declaration is allowed.
 	language: CssFileLanguage;
 	variant: CssVariant;
 }
-export interface GraphqlFileSource {
-	variant: GraphqlVariant;
-}
 export interface HtmlFileSource {
 	variant: HtmlVariant;
 }
 export interface GritFileSource {
 	variant: GritVariant;
-}
-export interface MdFileSource {
-	variant: MarkdownVariant;
 }
 export type EditorFeature = "gotoDefinition";
 export type EmbeddingKind =
@@ -10265,17 +10230,12 @@ the latest Recommendation level standards.
 It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard" | "cssModules" | "tailwindCss";
-/**
- * The style of GraphQL contained in the file.
- */
-export type GraphqlVariant = "standard";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
-export type MarkdownVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
 	| "None"
@@ -10309,7 +10269,7 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export interface FileExitsParams {
+export interface FileExistsParams {
 	filePath: BiomePath;
 }
 export interface PathIsIgnoredParams {
@@ -10694,10 +10654,10 @@ export interface RenameResult {
 	range: TextRange;
 }
 export interface ParsePatternParams {
-	defaultLanguage: GritTargetLanguage;
+	defaultLanguage: SearchLanguage;
 	pattern: string;
 }
-export type GritTargetLanguage = "CSS" | "JavaScript" | "JSON";
+export type SearchLanguage = "css" | "js" | "json";
 export interface ParsePatternResult {
 	patternId: PatternId;
 }
@@ -10722,7 +10682,7 @@ export interface Workspace {
 	openFile(params: OpenFileParams): Promise<OpenFileResult>;
 	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<null>;
-	fileExists(params: FileExitsParams): Promise<boolean>;
+	fileExists(params: FileExistsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
 	updateModuleGraph(params: UpdateModuleGraphParams): Promise<null>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;

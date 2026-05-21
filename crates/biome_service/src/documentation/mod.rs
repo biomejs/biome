@@ -5,6 +5,7 @@ use biome_analyze::{
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Padding, markup};
 use biome_css_syntax::CssLanguage;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
@@ -53,6 +54,7 @@ impl RulesVisitor {
             rules_metadata: BTreeMap::new(),
         };
 
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut visitor);
         biome_html_analyze::visit_registry(&mut visitor);
         biome_css_analyze::visit_registry(&mut visitor);
@@ -113,6 +115,7 @@ impl RegistryVisitor<CssLanguage> for RulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where

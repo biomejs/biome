@@ -59,10 +59,6 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
 		},
-		"plugins": {
-			"description": "List of plugins to load.",
-			"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
-		},
 		"root": {
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -1570,6 +1566,14 @@
 					"minItems": 1
 				}
 			]
+		},
+		"DestructuringConfig": {
+			"type": "object",
+			"properties": {
+				"array": { "type": ["boolean", "null"] },
+				"object": { "type": ["boolean", "null"] }
+			},
+			"additionalProperties": false
 		},
 		"Expand": {
 			"oneOf": [
@@ -7491,6 +7495,10 @@
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
+				"trailingCommas": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
+					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
+				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
@@ -7578,10 +7586,6 @@
 						{ "$ref": "#/$defs/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
-				},
-				"plugins": {
-					"description": "Specific configuration for additional plugins",
-					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7744,34 +7748,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
-			"anyOf": [
-				{ "description": "A plain path to the plugin.", "type": "string" },
-				{
-					"description": "A path with additional options.",
-					"$ref": "#/$defs/PluginWithOptions"
-				}
-			]
-		},
-		"PluginWithOptions": {
-			"description": "Plugin path with additional options.",
-			"type": "object",
-			"properties": {
-				"includes": {
-					"description": "A list of glob patterns. The plugin will only run on files matching\nthese patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/$defs/NormalizedGlob" }
-				},
-				"path": { "description": "The path to the plugin.", "type": "string" }
-			},
-			"additionalProperties": false,
-			"required": ["path"]
-		},
-		"Plugins": {
-			"type": "array",
-			"items": { "$ref": "#/$defs/PluginConfiguration" }
 		},
 		"PresetConfig": {
 			"description": "A preset configuration for enabling a set of rules.",
@@ -14876,6 +14852,20 @@
 		},
 		"UseDestructuringOptions": {
 			"type": "object",
+			"properties": {
+				"assignmentExpression": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				},
+				"variableDeclarator": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseDisposablesConfiguration": {

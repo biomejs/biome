@@ -11,7 +11,8 @@ use self::scan_cursor::{
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
-    CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    CssFileSource, CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange,
+    TextSize, scan_css_number,
 };
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
@@ -434,19 +435,19 @@ impl<'src> CssLexer<'src> {
             QOT => self.consume_string_literal(current),
             SLH => self.consume_slash(),
 
-            DIG | ZER => self.consume_number(current),
+            DIG | ZER => self.consume_number(),
 
-            MIN => self.consume_min(current),
+            MIN => self.consume_min(),
 
             PLS => {
                 if self.is_number_start() {
-                    self.consume_number(current)
+                    self.consume_number()
                 } else {
                     self.consume_byte(T![+])
                 }
             }
 
-            PRD => self.consume_prd(current),
+            PRD => self.consume_prd(),
 
             LSS => self.consume_lss(),
 
@@ -896,60 +897,18 @@ impl<'src> CssLexer<'src> {
     }
 
     /// Lexes a CSS number literal
-    fn consume_number(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_number(&mut self) -> CssSyntaxKind {
         debug_assert!(self.is_number_start());
 
-        if matches!(current, b'+' | b'-') {
-            self.advance(1);
-        }
-
-        // While the next input code point is a digit, consume it.
-        self.consume_number_sequence();
-
-        // According to the spec if the next 2 input code points are U+002E FULL STOP (.) followed by a digit we need to consume them.
-        // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
-        // If the next input code points are U+002E FULL STOP (.)...
-        if matches!(self.current_byte(), Some(b'.')) {
-            // In SCSS, leave the dot for the ellipsis token (e.g., `10...` or `$args...`).
-            let is_scss_ellipsis =
-                self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.');
-
-            if !is_scss_ellipsis {
-                // Consume the dot.
-                self.advance(1);
-
-                // If U+002E FULL STOP (.) is followed by a digit, consume the number sequence.
-                if self
-                    .current_byte()
-                    .is_some_and(|byte| byte.is_ascii_digit())
-                {
-                    self.consume_number_sequence();
-                }
-            }
-        }
-
-        // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or
-        // U+0065 LATIN SMALL LETTER E (e), optionally followed by U+002D HYPHEN-MINUS
-        // (-) or U+002B PLUS SIGN (+), followed by a digit, then:
-        if matches!(self.current_byte(), Some(b'e' | b'E')) {
-            match (self.peek_byte(), self.byte_at(2)) {
-                (Some(b'-' | b'+'), Some(byte)) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(3);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                (Some(byte), _) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(2);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                _ => {}
-            }
-        }
+        let start = self.position();
+        let Some(end) = scan_css_number(
+            self.source(),
+            start,
+            CssNumberScanOptions::default().with_scss_ellipsis_boundary(self.is_scss()),
+        ) else {
+            return self.consume_unexpected_character();
+        };
+        self.advance(end - start);
 
         // A Number immediately followed by an identifier is considered a single
         // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
@@ -969,13 +928,6 @@ impl<'src> CssLexer<'src> {
             CSS_DIMENSION_VALUE
         } else {
             CSS_NUMBER_LITERAL
-        }
-    }
-
-    fn consume_number_sequence(&mut self) {
-        // While the next input code point is a digit, consume it.
-        while let Some(b'0'..=b'9') = self.current_byte() {
-            self.advance(1);
         }
     }
 
@@ -1068,6 +1020,7 @@ impl<'src> CssLexer<'src> {
             b"forward" => FORWARD_KW,
             b"hide" => HIDE_KW,
             b"include" => INCLUDE_KW,
+            b"using" => USING_KW,
             b"mixin" => MIXIN_KW,
             b"optional" => OPTIONAL_KW,
             b"while" => WHILE_KW,
@@ -1467,14 +1420,14 @@ impl<'src> CssLexer<'src> {
     }
 
     #[inline]
-    fn consume_prd(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_prd(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'.');
 
         if self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.') {
             self.advance(2);
             self.consume_byte(T![...])
         } else if self.is_number_start() {
-            self.consume_number(current)
+            self.consume_number()
         } else {
             self.consume_byte(T![.])
         }
@@ -1511,11 +1464,11 @@ impl<'src> CssLexer<'src> {
     }
 
     #[inline]
-    fn consume_min(&mut self, current: u8) -> CssSyntaxKind {
+    fn consume_min(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'-');
 
         if self.is_number_start() {
-            return self.consume_number(current);
+            return self.consume_number();
         }
 
         // GREATER-THAN SIGN (->), consume them and return a CDC.
@@ -1556,23 +1509,12 @@ impl<'src> CssLexer<'src> {
 
     /// Check if the lexer starts a number.
     fn is_number_start(&self) -> bool {
-        match self.current_byte() {
-            Some(b'+' | b'-') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
-                // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).is_some_and(|byte| byte.is_ascii_digit()) => true,
-                _ => false,
-            },
-            Some(b'.') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                _ => false,
-            },
-            Some(byte) => byte.is_ascii_digit(),
-            _ => false,
-        }
+        scan_css_number(
+            self.source(),
+            self.position(),
+            CssNumberScanOptions::default(),
+        )
+        .is_some()
     }
 
     /// Check if the lexer starts an identifier.

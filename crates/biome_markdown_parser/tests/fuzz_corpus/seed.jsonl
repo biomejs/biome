@@ -125,3 +125,18 @@
 {"markdown":">💡 Biomeは、[Prettierのオプションに対する考え方](https://prettier.io/docs/en/option-philosophy)と同様のアプローチを採用しています。\n","html":"<blockquote>\n<p>💡 Biomeは、<a href=\"https://prettier.io/docs/en/option-philosophy\">Prettierのオプションに対する考え方</a>と同様のアプローチを採用しています。</p>\n</blockquote>\n"}
 {"markdown":"- item\n\n  <details>\n  <summary>Info</summary>\n  content\n  </details>\n","html":"<ul>\n<li>\n<p>item</p>\n<details>\n<summary>Info</summary>\ncontent\n</details>\n</li>\n</ul>\n"}
 {"markdown":"Allowed: <div class=\"a\"\n>ok</div> tag.\n","html":"<p>Allowed: &lt;div class=&quot;a&quot;</p>\n<blockquote>\n<p>ok</div> tag.</p>\n</blockquote>\n"}
+{"markdown":"> \t- nested\n","html":"<blockquote>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":">\t- nested\n","html":"<blockquote>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- nested\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> a\n10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"- item\n\n\t```\n\tcode body\n\t```\n","html":"<ul>\n<li>\n<p>item</p>\n<pre><code>code body\n</code></pre>\n</li>\n</ul>\n"}
+{"markdown":"[bar]: /url\n10. item\nnested\n","html":"<p>10. item\nnested</p>\n"}
+{"markdown":"[bar]: /url\n\tcode line\n","html":"<p>code line</p>\n"}
+{"markdown":"> a\nb\n10. item\n","html":"<blockquote>\n<p>a\nb</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":">\t\tfoo\n","html":"<blockquote>\n<pre><code>  foo\n</code></pre>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- a\n> \t- b\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- nested\n> outer\n> \t- nested\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>nested\nouter</li>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"10. item\n    \tnested text\n---\n","html":"<ol start=\"10\">\n<li>item\nnested text</li>\n</ol>\n<hr />\n"}
+{"markdown":"[ref]: /url\n1. item\n","html":"<ol>\n<li>item</li>\n</ol>\n"}
+{"markdown":"> a\n  2. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"2\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"> a\n  10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}

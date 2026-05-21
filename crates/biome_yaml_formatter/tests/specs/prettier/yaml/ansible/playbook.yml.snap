@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/ansible/playbook.yml
 ---
+
 # Input
 
 ```yml
@@ -40,7 +41,7 @@ info: yaml/ansible/playbook.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,22 +5,22 @@
+@@ -5,20 +5,20 @@
      max_clients: 200
    remote_user: root
    tasks:
@@ -75,10 +76,6 @@ info: yaml/ansible/playbook.yml
    handlers:
      - name: restart apache
        service:
-         name: httpd
--        state: restarted
-+        state: restarted
-\ No newline at end of file
 ```
 
 # Output
@@ -109,7 +106,8 @@ info: yaml/ansible/playbook.yml
     - name: restart apache
       service:
         name: httpd
-        state: restarted```
+        state: restarted
+```
 
 # Errors
 ```

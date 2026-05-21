@@ -29,7 +29,6 @@ info: yaml/spec/various-location-of-anchors-in-flow-sequence.yml
 + { &e e: f },
 + &g { g: h }
 +]
-\ No newline at end of file
 ```
 
 # Output
@@ -40,4 +39,5 @@ info: yaml/spec/various-location-of-anchors-in-flow-sequence.yml
  &c c: d,
  { &e e: f },
  &g { g: h }
-]```
+]
+```

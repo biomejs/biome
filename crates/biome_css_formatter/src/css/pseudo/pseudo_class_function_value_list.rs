@@ -19,11 +19,11 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         } = node.as_fields();
 
         let should_insert_space = f.options().delimiter_spacing().value();
-
+        let name = name?;
         write!(
             f,
             [
-                name.format()?
+                name.format()
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),

@@ -25,7 +25,6 @@ plain key: in-line value
  "quoted key":
 -  - entry
 +- entry
-\ No newline at end of file
 ```
 
 # Output
@@ -34,4 +33,5 @@ plain key: in-line value
 plain key: in-line value
 : # Both empty
 "quoted key":
-- entry```
+- entry
+```

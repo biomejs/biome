@@ -1,0 +1,237 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 206
+expression: snapshot
+---
+
+## Input
+
+```css
+$missing-rhs: 10 +;
+$missing-operator-interpolation: 10 + #{$value;
+$missing-fragment-interpolation: 10#{px;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..12 "missing-rhs" [] [],
+                },
+            },
+            colon_token: COLON@12..14 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssBinaryExpression {
+                        left: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@14..17 "10" [] [Whitespace(" ")],
+                        },
+                        operator: PLUS@17..18 "+" [] [],
+                        right: missing (required),
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@18..19 ";" [] [],
+        },
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@19..21 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@21..51 "missing-operator-interpolation" [] [],
+                },
+            },
+            colon_token: COLON@51..53 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssBinaryExpression {
+                        left: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@53..56 "10" [] [Whitespace(" ")],
+                        },
+                        operator: PLUS@56..58 "+" [] [Whitespace(" ")],
+                        right: ScssInterpolation {
+                            hash_token: HASH@58..59 "#" [] [],
+                            l_curly_token: L_CURLY@59..60 "{" [] [],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@60..61 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@61..66 "value" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                            r_curly_token: missing (required),
+                        },
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@66..67 ";" [] [],
+        },
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@67..69 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@69..99 "missing-fragment-interpolation" [] [],
+                },
+            },
+            colon_token: COLON@99..101 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolatedValue {
+                        items: ScssInterpolatedValuePartList [
+                            CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@101..103 "10" [] [],
+                            },
+                            ScssInterpolation {
+                                hash_token: HASH@103..104 "#" [] [],
+                                l_curly_token: L_CURLY@104..105 "{" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@105..107 "px" [] [],
+                                        },
+                                    ],
+                                },
+                                r_curly_token: missing (required),
+                            },
+                        ],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@107..108 ";" [] [],
+        },
+    ],
+    eof_token: EOF@108..109 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..109
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..108
+    0: SCSS_VARIABLE_DECLARATION@0..19
+      0: SCSS_VARIABLE@0..12
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..12
+          0: IDENT@1..12 "missing-rhs" [] []
+      1: COLON@12..14 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@14..18
+        0: SCSS_EXPRESSION_ITEM_LIST@14..18
+          0: SCSS_BINARY_EXPRESSION@14..18
+            0: CSS_NUMBER@14..17
+              0: CSS_NUMBER_LITERAL@14..17 "10" [] [Whitespace(" ")]
+            1: PLUS@17..18 "+" [] []
+            2: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@18..18
+      4: SEMICOLON@18..19 ";" [] []
+    1: SCSS_VARIABLE_DECLARATION@19..67
+      0: SCSS_VARIABLE@19..51
+        0: DOLLAR@19..21 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@21..51
+          0: IDENT@21..51 "missing-operator-interpolation" [] []
+      1: COLON@51..53 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@53..66
+        0: SCSS_EXPRESSION_ITEM_LIST@53..66
+          0: SCSS_BINARY_EXPRESSION@53..66
+            0: CSS_NUMBER@53..56
+              0: CSS_NUMBER_LITERAL@53..56 "10" [] [Whitespace(" ")]
+            1: PLUS@56..58 "+" [] [Whitespace(" ")]
+            2: SCSS_INTERPOLATION@58..66
+              0: HASH@58..59 "#" [] []
+              1: L_CURLY@59..60 "{" [] []
+              2: SCSS_EXPRESSION@60..66
+                0: SCSS_EXPRESSION_ITEM_LIST@60..66
+                  0: SCSS_VARIABLE@60..66
+                    0: DOLLAR@60..61 "$" [] []
+                    1: CSS_IDENTIFIER@61..66
+                      0: IDENT@61..66 "value" [] []
+              3: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@66..66
+      4: SEMICOLON@66..67 ";" [] []
+    2: SCSS_VARIABLE_DECLARATION@67..108
+      0: SCSS_VARIABLE@67..99
+        0: DOLLAR@67..69 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@69..99
+          0: IDENT@69..99 "missing-fragment-interpolation" [] []
+      1: COLON@99..101 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@101..107
+        0: SCSS_EXPRESSION_ITEM_LIST@101..107
+          0: SCSS_INTERPOLATED_VALUE@101..107
+            0: SCSS_INTERPOLATED_VALUE_PART_LIST@101..107
+              0: CSS_NUMBER@101..103
+                0: CSS_NUMBER_LITERAL@101..103 "10" [] []
+              1: SCSS_INTERPOLATION@103..107
+                0: HASH@103..104 "#" [] []
+                1: L_CURLY@104..105 "{" [] []
+                2: SCSS_EXPRESSION@105..107
+                  0: SCSS_EXPRESSION_ITEM_LIST@105..107
+                    0: CSS_IDENTIFIER@105..107
+                      0: IDENT@105..107 "px" [] []
+                3: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@107..107
+      4: SEMICOLON@107..108 ";" [] []
+  2: EOF@108..109 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+sassscript-interpolation-completion.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ $missing-rhs: 10 +;
+      │                   ^
+    2 │ $missing-operator-interpolation: 10 + #{$value;
+    3 │ $missing-fragment-interpolation: 10#{px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+sassscript-interpolation-completion.scss:2:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `;`
+  
+    1 │ $missing-rhs: 10 +;
+  > 2 │ $missing-operator-interpolation: 10 + #{$value;
+      │                                               ^
+    3 │ $missing-fragment-interpolation: 10#{px;
+    4 │ 
+  
+  i Remove ;
+  
+sassscript-interpolation-completion.scss:3:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `;`
+  
+    1 │ $missing-rhs: 10 +;
+    2 │ $missing-operator-interpolation: 10 + #{$value;
+  > 3 │ $missing-fragment-interpolation: 10#{px;
+      │                                        ^
+    4 │ 
+  
+  i Remove ;
+  
+```

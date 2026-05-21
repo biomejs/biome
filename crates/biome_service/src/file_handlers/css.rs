@@ -3,7 +3,7 @@ mod go_to;
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
-    ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    ProcessFixAll, ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -16,10 +16,11 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::FixFileMode;
 use crate::workspace::{
-    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PatternId,
+    PullActionsResult,
 };
+use crate::workspace::{FixFileMode, SearchQuery};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
@@ -913,6 +914,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         },
         params.embeds_initial_indent,
     )
+}
+
+fn search(
+    path: &BiomePath,
+    document: &DocumentFileSource,
+    parsed: AnyParse,
+    provider: &dyn SearchQuery,
+    settings: &SettingsWithEditor,
+    pattern_id: PatternId,
+) -> Result<Vec<TextRange>, WorkspaceError> {
+    provider.search(path, document, parsed, settings, pattern_id)
 }
 
 #[cfg(test)]

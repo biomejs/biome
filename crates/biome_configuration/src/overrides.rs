@@ -3,15 +3,14 @@ use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::{
-    CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
-    Rules,
-};
+use crate::{CssConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration, Rules};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -44,8 +43,12 @@ pub struct OverridePattern {
     pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the Graphql language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub graphql: Option<GraphqlConfiguration>,
+    #[cfg(feature = "lang_graphql")]
+    #[cfg_attr(
+        feature = "lang_graphql",
+        serde(skip_serializing_if = "Option::is_none")
+    )]
+    pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
     /// Specific configuration for the GritQL language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -72,7 +75,8 @@ pub struct OverridePattern {
     pub files: Option<OverrideFilesConfiguration>,
 
     /// Specific configuration for additional plugins
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "plugins")]
+    #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<Plugins>,
 }
 
@@ -200,6 +204,14 @@ pub struct OverrideFormatterConfiguration {
         bpaf(long("object-wrap"), argument("auto|always|never"))
     )]
     pub expand: Option<Expand>,
+
+    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-commas"), argument("all|es5|none"))
+    )]
+    pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

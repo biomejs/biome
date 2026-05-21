@@ -188,12 +188,13 @@ impl Rule for NoUnusedFunctionParameters {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let binding = ctx.query();
+        let binding_name = binding.name_token().ok()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 binding.range(),
                 markup! {
-                    "This "<Emphasis>"parameter"</Emphasis>" is unused."
+                    "This "<Emphasis>"parameter"</Emphasis>" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
                 },
             )
             .note(markup! {

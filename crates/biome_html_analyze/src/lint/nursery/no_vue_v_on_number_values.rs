@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueVOnNumberValues {
-        version: "next",
+        version: "2.4.15",
         name: "noVueVOnNumberValues",
         language: "html",
         recommended: true,

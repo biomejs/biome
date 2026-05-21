@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
+info: scss/declaration/ambiguous-selector-vs-nesting.scss
 ---
 
 # Input
@@ -39,7 +39,7 @@ info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
 	#{$name}:hover {
 		color: green;
 	}
-	a: #{$pseudo} {
+	a:#{$pseudo} {
 		color: teal;
 	}
 	font-#{$weight}:bold {

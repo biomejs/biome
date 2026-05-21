@@ -70,7 +70,7 @@ declare_lint_rule! {
         version: "2.4.13",
         name: "noReactNativeRawText",
         language: "jsx",
-        sources: &[RuleSource::EslintReactNative("no-raw-text").same()],
+        sources: &[RuleSource::EslintReactNativeIntellicode("no-raw-text").same()],
         domains: &[RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,

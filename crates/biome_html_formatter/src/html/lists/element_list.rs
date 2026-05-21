@@ -181,8 +181,13 @@
 //! + This will get condensed into a single line because its just text.
 //! ```
 
+#[cfg(debug_assertions)]
+use crate::utils::children::DisplayHtmlChildSequence;
 use crate::{
-    html::auxiliary::element::{FormatHtmlElement, FormatHtmlElementOptions},
+    html::auxiliary::{
+        element::{FormatHtmlElement, FormatHtmlElementOptions},
+        self_closing_element::{FormatHtmlSelfClosingElement, FormatHtmlSelfClosingElementOptions},
+    },
     prelude::*,
     utils::{
         children::{HtmlChild, HtmlChildrenIterator, html_split_children},
@@ -190,11 +195,13 @@ use crate::{
         metadata::get_element_css_display,
     },
 };
+#[cfg(debug_assertions)]
+use biome_console::{ColorMode, ConsoleExt, EnvConsole, markup};
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElement,
-    HtmlElementList, HtmlRoot, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,
+    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
 
@@ -370,15 +377,32 @@ impl FormatHtmlElementList {
         let children = html_split_children(
             list.iter(),
             list.parent::<HtmlElement>()
+                .and_then(|p| p.opening_element().ok())
+                .and_then(|opening| opening.r_angle_token().ok())
+                .as_ref(),
+            list.parent::<HtmlElement>()
                 .and_then(|p| p.closing_element().ok())
                 .as_ref(),
             f,
         )?;
 
+        #[cfg(debug_assertions)]
+        if std::env::var("DEBUG_HTML_FORMATTER_CHILDREN").is_ok() {
+            EnvConsole::new(ColorMode::Auto).error(markup! {
+                {DisplayHtmlChildSequence::new(&children)}
+            });
+        }
+
         let children_meta = self.children_meta(&children);
 
         // Trim trailing new lines from children
         let mut children = children;
+        let has_leading_newline = children
+            .first()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
+        let had_trailing_newline = children
+            .last()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
         if !self.is_container_whitespace_sensitive {
             while matches!(
                 children.last(),
@@ -436,6 +460,14 @@ impl FormatHtmlElementList {
                 force_multiline = true;
             }
 
+            if self.is_container_whitespace_sensitive
+                && has_leading_newline
+                && had_trailing_newline
+                && has_single_interpolation_child(&children)
+            {
+                force_multiline = true;
+            }
+
             if force_multiline {
                 write!(f, [expand_parent()])?;
             }
@@ -469,13 +501,21 @@ impl FormatHtmlElementList {
                 if self.is_container_whitespace_sensitive && child.is_any_whitespace() {
                     if is_first_child {
                         // Leading whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         is_first_child = false;
                         last = Some(child);
                         continue;
                     } else if is_last_child {
                         // Trailing whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         last = Some(child);
                         continue;
                     }
@@ -572,6 +612,15 @@ impl FormatHtmlElementList {
                     // HTML comment
                     HtmlChild::Comment(comment) => {
                         write!(f, [comment])?;
+
+                        let next = children_iter.peek();
+                        if let Some(HtmlChild::NonText(next_non_text)) = next {
+                            // when a comment is followed by a block element, we need to add a line break.
+                            let next_css_display = get_element_css_display(next_non_text);
+                            if !next_css_display.is_externally_whitespace_sensitive(f) {
+                                write!(f, [hard_line_break()])?;
+                            }
+                        }
                     }
 
                     // Whitespace between children
@@ -628,6 +677,8 @@ impl FormatHtmlElementList {
                             && !self.is_container_whitespace_sensitive
                         {
                             // If the container is not whitespace sensitive, we trim trailing whitespace
+                        } else if is_first_child && !self.is_container_whitespace_sensitive {
+                            // if the container is not whitespace sensitive, we trim leading whitespace
                         } else {
                             write!(f, [space()])?;
                         }
@@ -949,6 +1000,22 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
 }
 
+fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {
+    let mut meaningful_children = children.iter().filter(|child| !child.is_any_whitespace());
+
+    let Some(HtmlChild::NonText(AnyHtmlElement::AnyHtmlContent(
+        AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+            | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+        ),
+    ))) = meaningful_children.next()
+    else {
+        return false;
+    };
+
+    meaningful_children.next().is_none()
+}
+
 fn format_partial_closing_tag(
     f: &mut Formatter<HtmlFormatContext>,
     closing_tag: &HtmlClosingElement,
@@ -988,12 +1055,23 @@ fn format_element_with_borrowing(
                 &FormatHtmlElement::default().with_options(FormatHtmlElementOptions {
                     closing_r_angle_borrowed,
                     borrowed_sibling_r_angle: borrowed_sibling_r_angle.clone(),
+                    comments_as_children: true,
                 }),
                 html_element,
                 f,
             )
+        } else if let AnyHtmlElement::HtmlSelfClosingElement(self_closing_element) = element {
+            FormatNodeRule::fmt(
+                &FormatHtmlSelfClosingElement::default().with_options(
+                    FormatHtmlSelfClosingElementOptions {
+                        comments_as_children: true,
+                    },
+                ),
+                self_closing_element,
+                f,
+            )
         } else {
-            // For other element types (self-closing, etc.), use default formatting
+            // For other element types, use default formatting.
             write!(f, [element.format()])
         }
     })

@@ -32,7 +32,6 @@ mapping: !!map
  mapping: !!map
 -  foo: bar
 + foo: bar
-\ No newline at end of file
 ```
 
 # Output
@@ -43,7 +42,8 @@ sequence: !!seq
 - !!seq
  - nested
 mapping: !!map
- foo: bar```
+ foo: bar
+```
 
 # Errors
 ```

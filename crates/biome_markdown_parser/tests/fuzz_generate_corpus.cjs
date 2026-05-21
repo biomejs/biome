@@ -217,6 +217,127 @@ function genBlockquoteWithContinuation() {
   return result;
 }
 
+// #region Tab-indentation combinators — class of issues surfaced by PR 10333
+
+function genTabIndentedSiblings() {
+  // Sibling list items where children use tab indent instead of spaces.
+  // Tabs expand to next multiple of 4 → 1 tab after "- " is 2 spaces of content.
+  const marker = pick(["-", "*", "+"]);
+  return marker + " parent\n\tchild one\n\tchild two\n";
+}
+
+function genTabNestedList() {
+  const outer = pick(["-", "*", "+"]);
+  const inner = pick(["-", "*", "+"]);
+  return outer + " outer\n\t" + inner + " nested\n\t" + inner + " sibling\n";
+}
+
+function genMixedTabSpaceIndent() {
+  // Sibling indented partly by tabs, partly by spaces.
+  const marker = pick(["-", "*", "+"]);
+  const variants = [
+    marker + " item\n  \tcontinuation\n",
+    marker + " item\n\t  continuation\n",
+    marker + " item\n   \tcontinuation\n",
+    marker + " item\n\tcontinuation one\n  continuation two\n",
+  ];
+  return pick(variants);
+}
+
+function genTabInBlockquote() {
+  return pick([
+    "> first\n>\tindented\n",
+    ">\tcontent\n>\tmore\n",
+    "> outer\n> \t- nested\n",
+  ]);
+}
+
+function genTabFencedCodeInList() {
+  const fence = "```";
+  return "- item\n\n\t" + fence + "\n\tcode body\n\t" + fence + "\n";
+}
+
+function genOrderedTabSiblings() {
+  return pick([
+    "1.\tfirst\n\tcontinuation\n2.\tsecond\n",
+    "10. item\n    \tnested text\n",
+    "1) one\n\tlazy\n",
+  ]);
+}
+
+function genTabIndentedCode() {
+  // A tab alone is enough for an indented code block (4 columns).
+  return pick([
+    "\tcode line\n",
+    "\tcode\n\tmore code\n",
+    "paragraph\n\tnot code, just continuation\n",
+  ]);
+}
+
+function genTabAfterListMarker() {
+  // Marker followed by tab rather than space — CommonMark spec.
+  const marker = pick(["-", "*", "+"]);
+  return pick([
+    marker + "\titem\n" + marker + "\tsibling\n",
+    "1.\titem\n2.\tsibling\n",
+  ]);
+}
+
+function genDeepTabNesting() {
+  return "- a\n\t- b\n\t\t- c\n\t\t\t- d\n";
+}
+
+function genTabBlankContinuation() {
+  // Tab-only "blank" lines inside list items.
+  const marker = pick(["-", "*", "+"]);
+  return marker + " first\n\t\n\tsecond paragraph\n";
+}
+
+// #endregion
+
+// #region Content-column-aware nested list combinators — class of
+// issues surfaced by PR 10347 (sublist marker at exactly the outer
+// item's content column, pure spaces, no blank-line separator).
+
+function contentColumnFor(markerText, trailing) {
+  return markerText.length + trailing.length;
+}
+
+function genOrderedSublistAtContentColumn() {
+  const ordered = pick(["1.", "1)", "2.", "10.", "99."]);
+  const postSpace = pick([" ", "  "]);
+  const contentCol = contentColumnFor(ordered, postSpace);
+  const innerIndent = " ".repeat(contentCol);
+  const innerMarker = pick(["-", "*", "+", "1.", "2)"]);
+  const blankBefore = maybe(0.3) ? "\n" : "";
+  return `${ordered}${postSpace}outer\n${blankBefore}${innerIndent}${innerMarker} nested\n`;
+}
+
+function genNestedSublistBoundary() {
+  const outerMarker = pick(["-", "*", "+", "1.", "10."]);
+  const postSpace = " ";
+  const contentCol = contentColumnFor(outerMarker, postSpace);
+  const offset = pick([-1, 0, 1]);
+  const indentWidth = Math.max(0, contentCol + offset);
+  const innerIndent = " ".repeat(indentWidth);
+  const innerMarker = pick(["-", "*", "+", "1.", "2)"]);
+  return `${outerMarker}${postSpace}outer\n${innerIndent}${innerMarker} nested\n`;
+}
+
+function genQuotedSublistAtContentColumn() {
+  const ordered = pick(["1.", "2.", "10."]);
+  const postSpace = pick([" ", "  "]);
+  const contentCol = contentColumnFor(ordered, postSpace);
+  const innerIndent = " ".repeat(contentCol);
+  // Mix bullet and ordered (both 1. and non-1) inners so the whitespace-
+  // tolerant ordered-marker logic in syntax::list and syntax::mod is
+  // exercised inside a blockquote prefix.
+  const innerMarker = pick(["-", "*", "+", "1.", "1)", "2.", "2)", "10."]);
+  return `> ${ordered}${postSpace}quoted\n> ${innerIndent}${innerMarker} sub\n`;
+}
+
+// #endregion
+
 // #endregion
 
 // #region Document generator
@@ -242,6 +363,23 @@ const blockGenerators = [
   { fn: genLinkDefWithTrailing, weight: 2 },
   { fn: genListWithBlankLines, weight: 2 },
   { fn: genBlockquoteWithContinuation, weight: 2 },
+  // Tab-indentation combinators — class of issues surfaced by PR 10333.
+  { fn: genTabIndentedSiblings, weight: 4 },
+  { fn: genTabNestedList, weight: 4 },
+  { fn: genMixedTabSpaceIndent, weight: 4 },
+  { fn: genTabInBlockquote, weight: 3 },
+  { fn: genTabFencedCodeInList, weight: 3 },
+  { fn: genOrderedTabSiblings, weight: 3 },
+  { fn: genTabIndentedCode, weight: 2 },
+  { fn: genTabAfterListMarker, weight: 3 },
+  { fn: genDeepTabNesting, weight: 2 },
+  { fn: genTabBlankContinuation, weight: 3 },
+  // Content-column-aware nested list combinators — class surfaced by
+  // PR 10347 (sublist marker at exactly the outer item's content
+  // column, pure spaces, no blank-line separator).
+  { fn: genOrderedSublistAtContentColumn, weight: 4 },
+  { fn: genNestedSublistBoundary, weight: 4 },
+  { fn: genQuotedSublistAtContentColumn, weight: 3 },
 ];
 
 const totalWeight = blockGenerators.reduce((sum, g) => sum + g.weight, 0);

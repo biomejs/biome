@@ -34,7 +34,7 @@ biome_module_graph    = { workspace = true }
 biome_project_layout  = { workspace = true }
 biome_rowan           = { workspace = true }
 biome_ruledoc_utils   = { workspace = true }
-biome_service         = { workspace = true }
+biome_service         = { workspace = true, features = ["lang_graphql", "lang_grit", "lang_md", "lang_yaml"] }
 camino                = { workspace = true }
 pulldown-cmark        = "0.13.3"
 

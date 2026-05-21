@@ -11,7 +11,7 @@ use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, RageEntry, RageParams, RageResult, ServiceNotification,
+    CloseProjectParams, GritSearchQuery, RageEntry, RageParams, RageResult, ServiceNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -671,6 +671,7 @@ impl ServerFactory {
                 Arc::new(OsFileSystem::default()),
                 instruction_tx,
                 service_tx,
+                Arc::new(biome_service::workspace::GritSearchQuery::default()),
                 None,
             )),
             sessions: Sessions::default(),
@@ -687,7 +688,13 @@ impl ServerFactory {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None)),
+            workspace: Arc::new(WorkspaceServer::new(
+                fs,
+                watcher_tx,
+                service_tx,
+                Arc::new(GritSearchQuery::default()),
+                None,
+            )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,

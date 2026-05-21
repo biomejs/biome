@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-7-10-plain-characters.yml
 ---
+
 # Input
 
 ```yml
@@ -26,11 +27,7 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,11 @@
--# Outside flow collection:
- - ::vector
- - ": - ()"
- - Up, up, and away!
+@@ -5,4 +5,8 @@
  - -123
  - http://example.com/foo#bar
  # Inside flow collection:
@@ -39,13 +36,13 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 +  ": - ()",
 +  "Up, up and away!",
 +  -123,
-+  http://example.com/foo
-\ No newline at end of file
++  http://example.com/foo#bar ]
 ```
 
 # Output
 
 ```yml
+# Outside flow collection:
 - ::vector
 - ": - ()"
 - Up, up, and away!
@@ -56,19 +53,19 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
   ": - ()",
   "Up, up and away!",
   -123,
-  http://example.com/foo```
+  http://example.com/foo#bar ]
+```
 
 # Errors
 ```
-spec-example-7-10-plain-characters.yml:12:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+spec-example-7-10-plain-characters.yml:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected `]`
+  × Insufficient indentation in flow collection
   
-    10 │   "Up, up and away!",
     11 │   -123,
-  > 12 │   http://example.com/foo#bar ]
-       │                               
-    13 │ 
+    12 │   http://example.com/foo#bar ]
+  > 13 │ 
+       │ 
   
 
 ```

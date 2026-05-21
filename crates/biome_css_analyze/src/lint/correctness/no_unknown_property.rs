@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssDeclarationName, CssContainerAtRule, CssFunctionAtRule,
-    CssGenericProperty, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
+    AnyCssAtRule, AnyCssDashedIdentifier, AnyCssDeclarationName, CssContainerAtRule,
+    CssFunctionAtRule, CssGenericProperty, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
     CssStartingStyleAtRule, CssSupportsAtRule, TwApplyAtRule,
 };
 use biome_diagnostics::Severity;
@@ -189,7 +189,12 @@ fn declaration_name_value_token(
     name: &AnyCssDeclarationName,
 ) -> Option<biome_css_syntax::CssSyntaxToken> {
     match name {
-        AnyCssDeclarationName::CssDashedIdentifier(name) => name.value_token().ok(),
+        AnyCssDeclarationName::AnyCssDashedIdentifier(
+            AnyCssDashedIdentifier::CssDashedIdentifier(name),
+        ) => name.value_token().ok(),
+        AnyCssDeclarationName::AnyCssDashedIdentifier(
+            AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
+        ) => None,
         AnyCssDeclarationName::CssIdentifier(name) => name.value_token().ok(),
         AnyCssDeclarationName::TwValueThemeReference(name) => {
             name.reference().ok()?.value_token().ok()

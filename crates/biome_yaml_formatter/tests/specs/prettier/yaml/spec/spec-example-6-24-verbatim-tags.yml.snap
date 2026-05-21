@@ -21,11 +21,11 @@ info: yaml/spec/spec-example-6-24-verbatim-tags.yml
 -!<tag:yaml.org,2002:str> foo: !<!bar> baz
 +!<tag:yaml.org,2002:str> foo :
 +  !<!bar> baz
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
 !<tag:yaml.org,2002:str> foo :
-  !<!bar> baz```
+  !<!bar> baz
+```

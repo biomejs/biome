@@ -25,24 +25,21 @@ $longListKey: (
 	(
 		"list",
 		"long long long long long long long long long long long long long list",
-	):
-		"hello world",
+	): "hello world",
 );
 $longMapKey: (
 	(
 		"key": "value",
 		"long long long long long long long long long long long long long map":
 			"value",
-	):
-		"hello world",
+	): "hello world",
 );
 $nestedMapInKey: (
 	fn(
 		(
 			a: b,
 		)
-	):
-		c,
+	): c,
 );
 $longPairs: (
 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
@@ -55,8 +52,8 @@ $longPairs: (
 
 # Lines exceeding max width of 80 characters
 ```
-   28: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
-   29: 		very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
-   30: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
-   31: 		very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   25: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+   26: 		very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   27: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+   28: 		very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
 ```

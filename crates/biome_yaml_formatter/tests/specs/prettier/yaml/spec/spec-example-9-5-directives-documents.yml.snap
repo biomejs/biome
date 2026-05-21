@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-9-5-directives-documents.yml
 ---
+
 # Input
 
 ```yml
@@ -34,7 +35,6 @@ info: yaml/spec/spec-example-9-5-directives-documents.yml
  ---
  # Empty
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -47,7 +47,8 @@ info: yaml/spec/spec-example-9-5-directives-documents.yml
 %YAML1.2
 ---
 # Empty
-...```
+...
+```
 
 # Errors
 ```

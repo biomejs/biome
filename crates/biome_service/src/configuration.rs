@@ -18,7 +18,9 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_analyze::METADATA as html_lint_metadata;
 use biome_html_syntax::HtmlLanguage;
@@ -109,16 +111,19 @@ impl LoadedConfiguration {
                 // Normalize plugin paths relative to the configuration file directory so
                 // merged configurations (e.g. nested configs extending from root) can
                 // still load plugins defined in other configuration files.
-                let config_dir = configuration_file_path
-                    .parent()
-                    .unwrap_or(external_resolution_base_path.as_path());
-                if let Some(plugins) = partial_configuration.plugins.as_mut() {
-                    plugins.normalize_relative_paths(config_dir);
-                }
-                if let Some(overrides) = partial_configuration.overrides.as_mut() {
-                    for pattern in overrides.0.iter_mut() {
-                        if let Some(plugins) = pattern.plugins.as_mut() {
-                            plugins.normalize_relative_paths(config_dir);
+                #[cfg(feature = "plugins")]
+                {
+                    let config_dir = configuration_file_path
+                        .parent()
+                        .unwrap_or(external_resolution_base_path.as_path());
+                    if let Some(plugins) = partial_configuration.plugins.as_mut() {
+                        plugins.normalize_relative_paths(config_dir);
+                    }
+                    if let Some(overrides) = partial_configuration.overrides.as_mut() {
+                        for pattern in overrides.0.iter_mut() {
+                            if let Some(plugins) = pattern.plugins.as_mut() {
+                                plugins.normalize_relative_paths(config_dir);
+                            }
                         }
                     }
                 }
@@ -522,6 +527,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_graphql")]
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
@@ -529,6 +535,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_graphql")]
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
@@ -839,6 +846,7 @@ impl<'a> ProjectScanComputer<'a> {
             }
         }
 
+        #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut self);
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
@@ -913,7 +921,7 @@ impl RegistryVisitor<CssLanguage> for ProjectScanComputer<'_> {
         self.check_rule::<R, CssLanguage>();
     }
 }
-
+#[cfg(feature = "lang_graphql")]
 impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     fn record_rule<R>(&mut self)
     where

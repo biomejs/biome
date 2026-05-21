@@ -44,9 +44,9 @@ padding:
 # Formatted
 
 ```scss
-@if $type == ocean {
+@if $type==ocean {
 	color: red;
-} @else if $type == matador {
+} @else if $type ==matador {
 	color: blue;
 } @else {
 	color: green;

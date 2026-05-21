@@ -97,6 +97,7 @@ pub enum TailwindSyntaxKind {
     FR_KW,
     TW_BASE,
     TW_VALUE,
+    TW_NUMBER,
     TW_SELECTOR,
     TW_PROPERTY,
     CSS_STRING_LITERAL,
@@ -119,6 +120,8 @@ pub enum TailwindSyntaxKind {
     TW_STATIC_VARIANT,
     TW_FUNCTIONAL_VARIANT,
     TW_NAMED_VALUE,
+    TW_NUMBER_VALUE,
+    TW_PERCENTAGE_VALUE,
     TW_ARBITRARY_VALUE,
     TW_CSS_VARIABLE_VALUE,
     TW_MODIFIER,
@@ -180,6 +183,7 @@ impl TailwindSyntaxKind {
             self,
             TW_BASE
                 | TW_VALUE
+                | TW_NUMBER
                 | TW_SELECTOR
                 | TW_PROPERTY
                 | CSS_STRING_LITERAL

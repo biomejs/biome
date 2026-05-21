@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/flow-sequence/short-value.yml
 ---
+
 # Input
 
 ```yml
@@ -18,10 +19,10 @@ info: yaml/flow-sequence/short-value.yml
 @@ -1 +1 @@
 -[: 1, : 2, : 3]
 +[: 1,: 2,: 3]
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
-[: 1,: 2,: 3]```
+[: 1,: 2,: 3]
+```

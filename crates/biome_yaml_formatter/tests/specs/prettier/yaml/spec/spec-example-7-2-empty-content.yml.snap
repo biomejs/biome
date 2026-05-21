@@ -25,7 +25,6 @@ info: yaml/spec/spec-example-7-2-empty-content.yml
 +  foo : !!str,
 +  !!str : bar,
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -34,4 +33,5 @@ info: yaml/spec/spec-example-7-2-empty-content.yml
 {
   foo : !!str,
   !!str : bar,
-}```
+}
+```

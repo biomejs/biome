@@ -400,14 +400,16 @@ Available options:
                               `off`, then the severity level of the rule is set to `error` if it is
                               a recommended rule or `warn` otherwise.
                               Example:
-                              ```shell biome check --only=correctness/noUnusedVariables
-                              --only=suspicious --only=test ```
+                              ```shell
+                              biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+                              ```
         --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
                               and actions, or domain by setting the severity level of the rules to
                               `off`. This option takes precedence over `--only`.
                               Example:
-                              ```shell biome check --skip=correctness/noUnusedVariables
-                              --skip=suspicious --skip=project ```
+                              ```shell
+                              biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+                              ```
         --watch               Enables the watch mode to re-run the check automatically when any
                               non-excluded file in the workspace has changed.
     -h, --help                Prints help information

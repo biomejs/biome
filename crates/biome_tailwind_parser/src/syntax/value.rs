@@ -18,6 +18,9 @@ pub(crate) fn parse_value(p: &mut TailwindParser) -> ParsedSyntax {
     if p.at(T![data]) {
         return parse_data_attribute(p);
     }
+    if p.at(TW_NUMBER) {
+        return parse_numeric_value(p);
+    }
     parse_named_value(p)
 }
 
@@ -31,6 +34,20 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_NAMED_VALUE))
+}
+
+/// Parses a numeric value which can be either a number or a percentage (a number followed by a % sign).
+fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(TW_NUMBER) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(TW_NUMBER);
+    if p.eat(T![%]) {
+        return Present(m.complete(p, TW_PERCENTAGE_VALUE));
+    }
+
+    Present(m.complete(p, TW_NUMBER_VALUE))
 }
 
 fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {

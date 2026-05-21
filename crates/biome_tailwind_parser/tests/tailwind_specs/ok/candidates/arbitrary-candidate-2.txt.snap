@@ -50,8 +50,8 @@ TwRoot {
                 r_brack_token: R_BRACKET@37..38 "]" [] [],
                 modifier: TwModifier {
                     slash_token: SLASH@38..39 "/" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@39..41 "10" [] [],
+                    value: TwNumberValue {
+                        value_token: TW_NUMBER@39..41 "10" [] [],
                     },
                 },
             },
@@ -92,8 +92,8 @@ TwRoot {
         4: R_BRACKET@37..38 "]" [] []
         5: TW_MODIFIER@38..41
           0: SLASH@38..39 "/" [] []
-          1: TW_NAMED_VALUE@39..41
-            0: TW_VALUE@39..41 "10" [] []
+          1: TW_NUMBER_VALUE@39..41
+            0: TW_NUMBER@39..41 "10" [] []
       3: (empty)
   2: EOF@41..42 "" [Newline("\n")] []
 
