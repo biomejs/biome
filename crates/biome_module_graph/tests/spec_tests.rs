@@ -26,10 +26,10 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath,
-    collect_available_classes_for_js_file, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_html_classes,
+    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath, SymbolName,
+    collect_available_classes_for_js_file, find_js_exported_symbol,
+    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
+    transitive_importers_of, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -2542,18 +2542,16 @@ fn test_aliased_named_reexport_is_found_by_alias() {
 
     // `barrel.ts` must expose `renamedSymbol` as an own export (resolved from
     // the re-export chain to a binding in `source.ts`).
-    let barrel = db
-        .js_module_info_for_path(Utf8Path::new("/src/barrel.ts"))
-        .unwrap();
+    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
 
-    let found = barrel.find_js_exported_symbol(&db, "renamedSymbol");
+    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "renamedSymbol"));
     assert!(
         found.is_some(),
         "`renamedSymbol` must be found via the aliased re-export chain; got None"
     );
 
     // `originalName` must NOT be visible under the barrel's public API.
-    let not_found = barrel.find_js_exported_symbol(&db, "originalName");
+    let not_found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "originalName"));
     assert!(
         not_found.is_none(),
         "`originalName` must not be directly exported from the barrel"
@@ -2597,14 +2595,15 @@ fn test_namespace_reexport_is_own_export() {
 
     let db = build_js_db(&fs, &project_layout, &added_paths, true);
 
-    let barrel = db
-        .js_module_info_for_path(Utf8Path::new("/src/barrel.ts"))
-        .unwrap();
+    let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
+
+    let js_barrel = barrel.kind(&db);
+    let js_barrel = js_barrel.as_js_module_info().unwrap();
 
     // `MyNs` must be stored as an own export (namespace), not as a forwarding
     // re-export. Only then will `find_js_exported_symbol` return `Some`.
     assert_eq!(
-        barrel.exports.get(&Text::new_static("MyNs")),
+        js_barrel.exports.get(&Text::new_static("MyNs")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
             export_range: Some(TextRange::new(TextSize::from(0), TextSize::from(36))),
             import: JsImport {
@@ -2617,7 +2616,7 @@ fn test_namespace_reexport_is_own_export() {
     );
 
     // Confirm `find_js_exported_symbol` returns `Some` as the lint rule sees it.
-    let found = barrel.find_js_exported_symbol(&db, "MyNs");
+    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "MyNs"));
     assert!(
         found.is_some(),
         "`MyNs` must be found by find_js_exported_symbol"
@@ -3328,16 +3327,17 @@ fn test_export_equals_namespace_without_type_inference() {
     let db = build_js_db(&fs, &project_layout, &added_paths, false);
 
     let react_module = db
-        .js_module_info_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
+        .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
         .expect("react module must exist");
 
-    let use_state = react_module.find_js_exported_symbol(&db, "useState");
+    let use_state = find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useState"));
     assert!(
         use_state.is_some(),
         "`useState` must be visible as a named export from `@types/react` even without type inference"
     );
 
-    let use_callback = react_module.find_js_exported_symbol(&db, "useCallback");
+    let use_callback =
+        find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useCallback"));
     assert!(
         use_callback.is_some(),
         "`useCallback` must be visible as a named export from `@types/react` even without type inference"

@@ -163,7 +163,7 @@ impl Rule for NoPrivateImports {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let self_path = ctx.file_path();
-        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.js_module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
@@ -179,7 +179,7 @@ impl Rule for NoPrivateImports {
             return Vec::new();
         };
 
-        let Some(target_info) = ctx.module_info_for_path(target_path) else {
+        let Some(target_info) = ctx.js_module_info_for_path(target_path) else {
             return Vec::new();
         };
 

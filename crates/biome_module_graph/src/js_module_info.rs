@@ -80,18 +80,6 @@ impl JsModuleInfo {
         self.diagnostics.as_slice()
     }
 
-    /// Finds an exported symbol by `name`, following re-exports through the db.
-    #[inline]
-    pub fn find_js_exported_symbol(&self, db: &dyn ModuleDb, name: &str) -> Option<JsOwnExport> {
-        crate::module_graph::find_exported_symbol(db, self, name)
-    }
-
-    /// Finds the default exported symbol.
-    #[inline]
-    pub fn find_js_default_export_symbol(&self, db: &dyn ModuleDb) -> Option<JsOwnExport> {
-        crate::module_graph::find_exported_symbol(db, self, "default")
-    }
-
     /// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
     #[inline]
     pub fn find_jsdoc_for_exported_symbol(

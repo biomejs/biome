@@ -438,59 +438,6 @@ pub fn build_import_tree_for_html(
     Some(root)
 }
 
-/// Follows re-exports across modules to find the original definition of a symbol.
-pub fn find_exported_symbol(
-    db: &dyn ModuleDb,
-    module: &JsModuleInfo,
-    symbol_name: &str,
-) -> Option<JsOwnExport> {
-    let mut seen_paths = std::collections::BTreeSet::new();
-    let mut stack = vec![(module.clone(), symbol_name.to_string())];
-
-    while let Some((module, symbol_name)) = stack.pop() {
-        match &module.exports.get(symbol_name.as_str()) {
-            Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-                return Some(own_export.clone());
-            }
-            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-                match &reexport.import.symbol {
-                    ImportSymbol::All => break,
-                    ImportSymbol::Named(source_name) => {
-                        let lookup = source_name.text().to_string();
-                        match reexport.import.resolved_path.as_deref() {
-                            Ok(path) if seen_paths.insert(path.to_path_buf()) => {
-                                if let Some(module) = db.js_module_info_for_path(path) {
-                                    stack.push((module, lookup));
-                                }
-                            }
-                            _ => break,
-                        }
-                    }
-                    ImportSymbol::Default => {
-                        if let Ok(path) = reexport.import.resolved_path.as_deref()
-                            && let Some(module) = db.js_module_info_for_path(path)
-                        {
-                            stack.push((module, symbol_name));
-                        }
-                    }
-                }
-            }
-            None => {
-                for reexport in module.blanket_reexports.iter() {
-                    if let Ok(path) = reexport.import.resolved_path.as_deref()
-                        && seen_paths.insert(path.to_path_buf())
-                        && let Some(module) = db.js_module_info_for_path(path)
-                    {
-                        stack.push((module, symbol_name.clone()));
-                    }
-                }
-            }
-        }
-    }
-
-    None
-}
-
 pub fn find_jsdoc_for_exported_symbol(
     db: &dyn ModuleDb,
     module: &JsModuleInfo,

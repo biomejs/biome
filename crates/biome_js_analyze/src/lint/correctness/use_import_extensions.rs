@@ -165,7 +165,7 @@ impl Rule for UseImportExtensions {
     type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.module_info_for_path(ctx.file_path())?;
+        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();

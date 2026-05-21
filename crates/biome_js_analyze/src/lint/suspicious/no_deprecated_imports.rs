@@ -76,7 +76,7 @@ impl Rule for NoDeprecatedImports {
     type Options = NoDeprecatedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.js_module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 

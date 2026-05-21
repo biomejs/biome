@@ -1,6 +1,17 @@
+//! This module represents the database queries used by the module graph.
+//!
+//! The queries are defined in terms of `ModuleInfo` inputs.
+//!
+//! The queries are tracked so that Salsa can invalidate them when the inputs
+//! change.
+//!
+//! The queries are also interned, so that Salsa can reuse the same computation
+//! when the inputs are the same.
+
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{CssModuleInfo, CssTraversalStep, JsModuleInfo, ModuleDb};
+use crate::{CssModuleInfo, CssTraversalStep, JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
+use biome_js_type_info::ImportSymbol;
 use camino::Utf8PathBuf;
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
@@ -354,4 +365,68 @@ pub fn collect_available_classes_for_js_file(
     }
 
     (available_classes, traversal_path)
+}
+
+#[salsa::interned]
+pub struct SymbolName {
+    #[returns(ref)]
+    name: String,
+}
+
+/// Finds the default exported symbol.
+#[salsa::tracked]
+pub fn find_js_exported_symbol<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    symbol_name: SymbolName<'db>,
+) -> Option<JsOwnExport> {
+    let ModuleInfoKind::Js(module) = module.kind(db) else {
+        return None;
+    };
+
+    let mut seen_paths = std::collections::BTreeSet::new();
+    let mut stack = vec![(module.clone(), symbol_name)];
+
+    while let Some((module, symbol_name)) = stack.pop() {
+        match &module.exports.get(symbol_name.name(db).as_str()) {
+            Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
+                return Some(own_export.clone());
+            }
+            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                match &reexport.import.symbol {
+                    ImportSymbol::All => break,
+                    ImportSymbol::Named(source_name) => {
+                        let lookup = source_name.text().to_string();
+                        match reexport.import.resolved_path.as_deref() {
+                            Ok(path) if seen_paths.insert(path.to_path_buf()) => {
+                                if let Some(module) = db.js_module_info_for_path(path) {
+                                    stack.push((module, SymbolName::new(db, lookup.clone())));
+                                }
+                            }
+                            _ => break,
+                        }
+                    }
+                    ImportSymbol::Default => {
+                        if let Ok(path) = reexport.import.resolved_path.as_deref()
+                            && let Some(module) = db.js_module_info_for_path(path)
+                        {
+                            stack.push((module, symbol_name));
+                        }
+                    }
+                }
+            }
+            None => {
+                for reexport in module.blanket_reexports.iter() {
+                    if let Ok(path) = reexport.import.resolved_path.as_deref()
+                        && seen_paths.insert(path.to_path_buf())
+                        && let Some(module) = db.js_module_info_for_path(path)
+                    {
+                        stack.push((module, symbol_name));
+                    }
+                }
+            }
+        }
+    }
+
+    None
 }

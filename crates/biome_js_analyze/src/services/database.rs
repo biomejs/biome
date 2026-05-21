@@ -2,7 +2,7 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
-use biome_module_graph::{JsModuleInfo, ModuleDb, ProjectDatabase};
+use biome_module_graph::{JsModuleInfo, ModuleDb, ModuleInfo, ProjectDatabase};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
@@ -22,8 +22,12 @@ impl DbService {
         &self.0
     }
 
-    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
+    pub fn js_module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
         self.0.js_module_info_for_path(path)
+    }
+
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.0.module_for_path(path)
     }
 
     pub fn project_layout(&self) -> &ProjectLayout {

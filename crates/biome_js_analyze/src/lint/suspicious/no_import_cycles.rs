@@ -165,7 +165,7 @@ impl Rule for NoImportCycles {
     type Options = NoImportCyclesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.module_info_for_path(ctx.file_path())?;
+        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
         let node = ctx.query();
 
         let JsImportPath {
@@ -185,7 +185,7 @@ impl Rule for NoImportCycles {
             return None;
         }
 
-        let imports = ctx.module_info_for_path(resolved_path_path)?;
+        let imports = ctx.js_module_info_for_path(resolved_path_path)?;
 
         find_cycle(ctx, resolved_path, imports)
     }
@@ -289,7 +289,7 @@ fn find_cycle(
                 return Some(paths);
             }
 
-            if let Some(next_module_info) = ctx.module_info_for_path(path) {
+            if let Some(next_module_info) = ctx.js_module_info_for_path(path) {
                 stack.push((resolved_path.clone(), module_info));
                 module_info = next_module_info;
                 continue 'outer;

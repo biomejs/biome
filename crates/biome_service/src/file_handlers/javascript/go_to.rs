@@ -7,7 +7,9 @@ use biome_js_syntax::{
     AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
-use biome_module_graph::{JsOwnExport, ModuleDb, ModuleInfoKind};
+use biome_module_graph::{
+    JsOwnExport, ModuleDb, ModuleInfoKind, SymbolName, find_js_exported_symbol,
+};
 use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
 use camino::Utf8Path;
 use std::ops::Add;
@@ -214,12 +216,18 @@ fn resolve_import_definition(
                 return None;
             }
 
-            let target_module = module_db.js_module_info_for_path(target_path)?;
+            let target_module = module_db.module_for_path(target_path)?;
 
-            match target_module
-                .find_js_exported_symbol(module_db, local_name)
-                .or(target_module.find_js_default_export_symbol(module_db))
-            {
+            match find_js_exported_symbol(
+                module_db,
+                target_module,
+                SymbolName::new(module_db, local_name),
+            )
+            .or(find_js_exported_symbol(
+                module_db,
+                target_module,
+                SymbolName::new(module_db, "default"),
+            )) {
                 None => {
                     result.store(
                         BiomePath::new(target_path),
@@ -247,8 +255,12 @@ fn resolve_import_definition(
             }
 
             // Check if we need to resolve from a JS file
-            if let Some(module) = module_db.js_module_info_for_path(target_path) {
-                match module.find_js_exported_symbol(module_db, local_name) {
+            if let Some(module) = module_db.module_for_path(target_path) {
+                match find_js_exported_symbol(
+                    module_db,
+                    module,
+                    SymbolName::new(module_db, local_name),
+                ) {
                     None => {
                         result.store(
                             BiomePath::new(target_path),
