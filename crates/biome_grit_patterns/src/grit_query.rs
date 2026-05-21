@@ -50,6 +50,9 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
 
+    /// Cached syntax kinds targeted by the compiled pattern.
+    anchor_kinds: Vec<GritTargetSyntaxKind>,
+
     /// Definitions for named patterns, predicates and functions.
     pub definitions: Definitions,
 
@@ -126,11 +129,10 @@ impl GritQuery {
 
     /// Returns the syntax kinds that this query's pattern targets.
     ///
-    /// Extracts kinds from the inner CodeSnippet or AstNode patterns
-    /// by navigating the compiled pattern tree. Returns an empty vec
-    /// if the pattern structure can't be analyzed.
-    pub fn anchor_kinds(&self) -> Vec<GritTargetSyntaxKind> {
-        extract_anchor_kinds(&self.pattern)
+    /// Returns an empty slice if the pattern structure can't be statically
+    /// analyzed.
+    pub fn anchor_kinds(&self) -> &[GritTargetSyntaxKind] {
+        &self.anchor_kinds
     }
 
     /// Optimized execution that replaces the Contains full-tree walk
@@ -153,6 +155,22 @@ impl GritQuery {
         }
 
         let mut logs: AnalysisLogs = Vec::new().into();
+        let tree = self.language.get_parser().from_cached_parse_result(
+            &file.parse,
+            Some(file.path.as_std_path()),
+            &mut logs,
+        );
+        let Some(tree) = tree else {
+            return self.execute(file);
+        };
+
+        // Collect anchor-kind nodes from the independent tree.
+        // Use slice::contains — anchor_kinds is tiny (1-3 items), faster than hashing.
+        let root = tree.root_node();
+        let anchor_nodes: Vec<_> = root
+            .descendants()
+            .filter(|node| anchor_kinds.contains(&node.kind()))
+            .collect();
 
         // Set up context and state (same as execute).
         let file_owners = FileOwners::new();
@@ -347,6 +365,8 @@ impl GritQuery {
             None,
         )?;
 
+        let anchor_kinds = extract_anchor_kinds(&pattern);
+
         let name = source_path
             .and_then(Utf8Path::file_stem)
             .map(|stem| stem.to_string());
@@ -355,6 +375,7 @@ impl GritQuery {
 
         Ok(Self {
             pattern,
+            anchor_kinds,
             definitions,
             name,
             built_ins,

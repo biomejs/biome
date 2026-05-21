@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+:foo-#{$name} {}
+:foo-#{$name}-bar {}
+:#{$name}-foo {}
+:foo-#{$name}(bar) {}
+:#{$name}-foo(bar) {}
+:#{$name}(bar) {}

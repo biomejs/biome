@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-2-8-play-by-play-feed-from-a-game.yml
 ---
+
 # Input
 
 ```yml
@@ -34,7 +35,6 @@ action: grand slam
  player: Sammy Sosa
  action: grand slam
 +...
-\ No newline at end of file
 ```
 
 # Output
@@ -49,4 +49,5 @@ action: strike (miss)
 time: 20:03:47
 player: Sammy Sosa
 action: grand slam
-...```
+...
+```

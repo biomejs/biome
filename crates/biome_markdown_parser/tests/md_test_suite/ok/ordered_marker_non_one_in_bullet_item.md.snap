@@ -1,0 +1,105 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- outer
+   2) nested
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..7 "outer" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@10..11 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@11..13 "2)" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@13..20 " nested" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..21
+  0: (empty)
+  1: MD_BLOCK_LIST@0..21
+    0: MD_BULLET_LIST_ITEM@0..21
+      0: MD_BULLET_LIST@0..21
+        0: MD_BULLET@0..21
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..21
+            0: MD_PARAGRAPH@2..21
+              0: MD_INLINE_ITEM_LIST@2..21
+                0: MD_TEXTUAL@2..7
+                  0: MD_TEXTUAL_LITERAL@2..7 "outer" [] []
+                1: MD_TEXTUAL@7..8
+                  0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
+                2: MD_INDENT_TOKEN@8..9
+                  0: MD_INDENT_CHAR@8..9 " " [] []
+                3: MD_INDENT_TOKEN@9..10
+                  0: MD_INDENT_CHAR@9..10 " " [] []
+                4: MD_TEXTUAL@10..11
+                  0: MD_TEXTUAL_LITERAL@10..11 " " [] []
+                5: MD_TEXTUAL@11..13
+                  0: MD_TEXTUAL_LITERAL@11..13 "2)" [] []
+                6: MD_TEXTUAL@13..20
+                  0: MD_TEXTUAL_LITERAL@13..20 " nested" [] []
+                7: MD_TEXTUAL@20..21
+                  0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
+              1: (empty)
+  2: EOF@21..21 "" [] []
+
+```

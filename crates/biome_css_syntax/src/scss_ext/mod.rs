@@ -4,9 +4,11 @@ mod map;
 mod variable_modifier;
 
 pub use expression::{
-    is_in_scss_control_condition_sequence, scss_keyword_argument_from_css_expression,
-    scss_keyword_argument_from_expression, scss_keyword_argument_from_syntax,
-    single_expression_item, unwrap_single_expression_item,
+    is_in_scss_control_condition_sequence, is_in_scss_parenthesized_expression,
+    is_scss_comparison_operator, is_scss_expression_ending_with_interpolation,
+    is_scss_expression_starting_with_interpolation, is_scss_parenthesized_expression,
+    scss_keyword_argument_from_css_expression, scss_keyword_argument_from_expression,
+    scss_keyword_argument_from_syntax, single_expression_item, unwrap_single_expression_item,
 };
 pub use include::{is_in_scss_include_arguments, scss_include_keyword_argument_owner};
 pub use map::{

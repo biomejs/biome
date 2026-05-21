@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/various-trailing-tabs.yml
 ---
+
 # Input
 
 ```yml
@@ -26,8 +27,7 @@ c: d	#X
 +a: b	
 +seq:	
 + - a	
-+c: d	
-\ No newline at end of file
++c: d	#X
 ```
 
 # Output
@@ -36,4 +36,5 @@ c: d	#X
 a: b	
 seq:	
  - a	
-c: d	```
+c: d	#X
+```

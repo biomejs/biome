@@ -202,7 +202,6 @@ dependencies = [
  "biome_glob",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
- "biome_grit_patterns",
  "biome_html_analyze",
  "biome_html_formatter",
  "biome_html_syntax",
@@ -225,7 +224,6 @@ dependencies = [
  "bpaf",
  "camino",
  "crossbeam",
- "dashmap 6.1.0",
  "directories",
  "insta",
  "libc",
@@ -874,6 +872,7 @@ name = "biome_html_formatter"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
+ "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics_categories",
@@ -969,6 +968,8 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
  "bitvec",
@@ -979,6 +980,7 @@ dependencies = [
  "globset",
  "insta",
  "mimalloc",
+ "phf 0.13.1",
  "regex",
  "roaring",
  "rustc-hash 2.1.2",
@@ -1695,7 +1697,6 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
- "biome_markdown_factory",
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
@@ -1711,6 +1712,7 @@ dependencies = [
  "biome_text_edit",
  "biome_unicode_table",
  "biome_yaml_formatter",
+ "biome_yaml_parser",
  "biome_yaml_syntax",
  "boxcar",
  "bpaf",
@@ -1901,6 +1903,7 @@ dependencies = [
 name = "biome_yaml_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_configuration",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1916,6 +1919,7 @@ dependencies = [
  "countme",
  "schemars",
  "serde",
+ "similar-asserts",
  "tests_macros",
 ]
 
@@ -2006,7 +2010,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cow-utils",
- "dashmap 6.1.0",
+ "dashmap 6.2.1",
  "dynify",
  "fast-float2",
  "float16",
@@ -2128,9 +2132,9 @@ checksum = "36f64beae40a84da1b4b26ff2761a5b895c12adc41dc25aaee1c4f2bbfe97a6e"
 
 [[package]]
 name = "bpaf"
-version = "0.9.25"
+version = "0.9.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b8d4b90317451025bfa1f7d359a5fa698a5f745927ff27696429b7fbd7c0c48"
+checksum = "0b86829876e7e200161a5aa6ea688d46c32d64d70ee3100127790dde84688d6e"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -2139,9 +2143,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf_derive"
-version = "0.5.23"
+version = "0.5.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "549ca9c364fdc06f9f36d1356980193d930abc80db848193c2dd4d0e9a83de1b"
+checksum = "2f7e98cee839b19076cb3ce1afdb62bb182e04ff5f71f70188827002fae91094"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2670,9 +2674,9 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "6.1.0"
+version = "6.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
+checksum = "e6361d5c062261c78a176addb82d4c821ae42bed6089de0e12603cd25de2059c"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -2930,13 +2934,12 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "filetime"
-version = "0.2.27"
+version = "0.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f98844151eee8917efc50bd9e8318cb963ae8b297431495d3f758616ea5c57db"
+checksum = "5c287a33c7f0a620c38e641e7f60827713987b3c0f26e8ddc9462cc69cf75759"
 dependencies = [
  "cfg-if",
  "libc",
- "libredox",
 ]
 
 [[package]]
@@ -4012,7 +4015,6 @@ checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
  "bitflags 2.9.3",
  "libc",
- "redox_syscall",
 ]
 
 [[package]]
@@ -4864,9 +4866,9 @@ checksum = "0c8d0fd677905edcbeedbf2edb6494d676f0e98d54d5cf9bda0b061cb8fb8aba"
 
 [[package]]
 name = "rayon"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
+checksum = "fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d"
 dependencies = [
  "either",
  "rayon-core",
@@ -5993,7 +5995,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f0e711655c89181a6bc6a2cc348131fcd9680085f5b06b6af13427a393a6e72"
 dependencies = [
  "bytes",
- "dashmap 6.1.0",
+ "dashmap 6.2.1",
  "futures",
  "httparse",
  "ls-types",

@@ -50,7 +50,6 @@ top7:
 +  six
 +top7:
 +  &val7 seven
-\ No newline at end of file
 ```
 
 # Output
@@ -72,7 +71,8 @@ top5:
 top6: &val6
   six
 top7:
-  &val7 seven```
+  &val7 seven
+```
 
 # Errors
 ```

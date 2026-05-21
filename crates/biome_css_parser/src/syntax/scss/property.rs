@@ -4,7 +4,11 @@ use biome_parser::SyntaxFeature;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 
-use super::{is_nth_at_scss_interpolation, parse_scss_interpolated_identifier};
+use super::{
+    is_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolated_dashed_identifier,
+    is_nth_at_scss_interpolation, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_identifier,
+};
 
 /// Detects an interpolation-bearing SCSS property name.
 ///
@@ -18,6 +22,7 @@ use super::{is_nth_at_scss_interpolation, parse_scss_interpolated_identifier};
 /// ```scss
 /// #{$name}: 1px;
 /// margin-#{$side}: 1px;
+/// --#{$prop}: 10px;
 /// ```
 #[inline]
 pub(crate) fn is_at_scss_interpolated_property(p: &mut CssParser) -> bool {
@@ -27,10 +32,14 @@ pub(crate) fn is_at_scss_interpolated_property(p: &mut CssParser) -> bool {
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolated_property(p: &mut CssParser, n: usize) -> bool {
     CssSyntaxFeatures::Scss.is_supported(p)
-        //`#{$name}: 1px;`
-        && (is_nth_at_scss_interpolation(p, n)
-            //`margin-#{$side}: 1px;`
-            || (is_nth_at_identifier(p, n) && is_nth_at_scss_interpolation(p, n + 1)))
+        && (
+            // `--#{$prop}: 10px;`
+            is_nth_at_scss_interpolated_dashed_identifier(p, n)
+            // `#{$name}: 1px;`
+            || is_nth_at_scss_interpolation(p, n)
+            // `margin-#{$side}: 1px;`
+            || (is_nth_at_identifier(p, n) && is_nth_at_scss_interpolation(p, n + 1))
+        )
 }
 
 #[inline]
@@ -39,5 +48,9 @@ pub(crate) fn parse_scss_interpolated_property_name(p: &mut CssParser) -> Parsed
         return Absent;
     }
 
-    parse_scss_interpolated_identifier(p)
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        parse_scss_interpolated_dashed_identifier(p)
+    } else {
+        parse_scss_interpolated_identifier(p)
+    }
 }

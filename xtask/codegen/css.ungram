@@ -142,9 +142,40 @@ CssCompoundSelector =
 // &&&&&&&.class {}
 // ^^^^^^^
 // }
-CssNestedSelectorList = CssNestedSelector*
+CssNestedSelectorList = AnyCssNestedSelector*
+
+AnyCssNestedSelector =
+	CssNestedSelector
+	| ScssParentSelector
+
 CssNestedSelector =
 	'&'
+
+// .button {
+//   &--active {}
+//   ^^^^^^^^^
+//   &-100\.200 {}
+//   ^^^^^^^^^^
+//   &#{$state} {}
+//   ^^^^^^^^^^
+// }
+ScssParentSelector =
+	'&'
+	suffix: ScssParentSelectorSuffix
+
+ScssParentSelectorSuffix =
+	items: ScssParentSelectorSuffixPartList
+
+ScssParentSelectorSuffixPartList = AnyScssParentSelectorSuffixPart*
+
+AnyScssParentSelectorSuffixPart =
+	CssIdentifier
+	| CssNumber
+	| ScssInterpolation
+	| ScssParentSelectorSuffixHyphen
+
+ScssParentSelectorSuffixHyphen =
+	'-'
 
 CssSubSelectorList = AnyCssSubSelector*
 
@@ -225,17 +256,28 @@ CssAttributeSelector =
 
 CssAttributeName =
 	namespace: CssNamespace?
-	name: CssIdentifier
+	name: AnyCssAttributeName
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
 CssAttributeMatcher =
 	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
 	value: CssAttributeMatcherValue
-	modifier: ('i' | 's')?
+	modifier: AnyCssAttributeModifier?
+
+AnyCssAttributeModifier =
+	CssAttributeModifier
+	| ScssInterpolatedIdentifier
+
+AnyCssAttributeName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+CssAttributeModifier =
+	value: ('i' | 's')
 
 CssAttributeMatcherValue =
- name: AnyCssAttributeMatcherValue
+	name: AnyCssAttributeMatcherValue
 
 AnyCssAttributeMatcherValue =
 	CssString
@@ -261,10 +303,11 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionNth
 	| CssPseudoClassFunctionCustomIdentifierList
 	| CssPseudoClassFunctionCustomIdentifier
+	| ScssInterpolatedPseudoClassFunction
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
@@ -339,7 +382,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: CssIdentifier
+	name: CssIdentifier
 	'('
 	values: CssPseudoValueList
 	')'
@@ -352,6 +395,8 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 //       ^^  ^^
 AnyCssPseudoValue =
 	CssIdentifier
+	| ScssInterpolation
+	| ScssInterpolatedIdentifier
 	| CssString
 	| ScssInterpolatedString
 
@@ -461,6 +506,40 @@ CssPseudoClassFunctionCustomIdentifierList =
 	items: CssCustomIdentifierCommaSeparatedList
 	')'
 
+// :foo-#{$name}(.item, 2n + #{$offset}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoClassFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoClassFunctionArguments =
+	ScssInterpolatedPseudoClassRelativeSelectorArguments
+	| ScssInterpolatedPseudoClassSelectorArguments
+	| ScssInterpolatedPseudoClassNthArguments
+	| ScssInterpolatedPseudoClassValueArguments
+
+// :#{$name}(> img) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassRelativeSelectorArguments =
+	selectors: CssRelativeSelectorList
+
+// :#{$name}(.item) {}
+//            ^^^^^
+ScssInterpolatedPseudoClassSelectorArguments =
+	selectors: CssSelectorList
+
+// :#{$name}(2n + #{$offset}) {}
+//            ^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassNthArguments =
+	selector: CssPseudoClassNthSelector
+
+// :#{$name}(en, #{$locale}) {}
+//            ^^^^^^^^^^^^^^
+ScssInterpolatedPseudoClassValueArguments =
+	values: CssPseudoValueList
+
 // a::after {}
 //  ^^^^^^^^
 // video::cue(b) {}
@@ -476,12 +555,13 @@ AnyCssPseudoElement =
 	| CssPseudoElementFunctionSelector
 	| CssPseudoElementFunctionCustomIdentifier
 	| CssPseudoElementFunction
+	| ScssInterpolatedPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
 CssPseudoElementIdentifier =
-	name: CssIdentifier
+	name: AnyCssSelectorIdentifier
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -506,6 +586,28 @@ CssPseudoElementFunction =
 	'('
 	items: CssPseudoElementFunctionParameterList
 	')'
+
+// ::foo-#{$name}(.item, #{$arg}) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssInterpolatedPseudoElementFunction =
+	name: ScssInterpolatedIdentifier
+	'('
+	arguments: AnyScssInterpolatedPseudoElementFunctionArguments?
+	')'
+
+AnyScssInterpolatedPseudoElementFunctionArguments =
+	ScssInterpolatedPseudoElementSelectorArguments
+	| ScssInterpolatedPseudoElementValueArguments
+
+// ::#{$name}(.item) {}
+//             ^^^^^
+ScssInterpolatedPseudoElementSelectorArguments =
+	selectors: CssSelectorList
+
+// ::#{$name}(#{$part}) {}
+//             ^^^^^^^^
+ScssInterpolatedPseudoElementValueArguments =
+	values: CssPseudoValueList
 
 CssPseudoElementFunctionParameterList = CssIdentifier*
 
@@ -682,7 +784,11 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDashedIdentifier =
+	CssDashedIdentifier
+	| ScssInterpolatedDashedIdentifier
+
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -1229,6 +1335,7 @@ AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
 	| CssKeyframesRangeSelector
+	| ScssKeyframesSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1250,6 +1357,12 @@ CssKeyframesPercentageSelector =
 CssKeyframesRangeSelector =
 	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
 	percentage: CssPercentage
+
+// @keyframes loader { #{50% - $duration} {} #{$i}% {} }
+//                     ^^^^^^^^^^^^^^^^^^    ^^^^^^
+ScssKeyframesSelector =
+	selector: ScssInterpolation
+	'%'?
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -1891,14 +2004,19 @@ CssValueAtRuleGenericValue = SyntaxElement*
 /// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
 /// supported by the parser, ensuring that the stylesheet can still be processed without errors.
 CssUnknownBlockAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	block: AnyCssDeclarationOrRuleBlock
 
 CssUnknownValueAtRule =
-	name: CssIdentifier
+	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
 	';'
+
+AnyCssUnknownAtRuleName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+	| ScssInterpolation
 
 CssUnknownAtRuleComponentList = SyntaxElement*
 
@@ -1977,7 +2095,7 @@ CssReturnsStatement =
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
-	| CssDashedIdentifier
+	| AnyCssDashedIdentifier
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
@@ -2849,6 +2967,7 @@ ScssIncludeAtRule =
 	'include'
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
+	using_clause: ScssIncludeUsingClause?
 	block: CssDeclarationOrRuleBlock?
 	';'?
 
@@ -2862,6 +2981,12 @@ ScssIncludeArgumentList =
 	'('
 	items: CssParameterList
 	')'
+
+// using ($value, $fallback)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIncludeUsingClause =
+	'using'
+	parameters: ScssParameterList
 
 // ($radius: 4px, $args...)
 // ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2898,6 +3023,11 @@ ScssPlaceholderSelector =
 	name: AnyCssSelectorCustomIdentifier
 
 ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+// Parser-owned invariant: starts as a custom-property name, either
+// `--#{$prop}` or `--theme-#{$slot}`.
+ScssInterpolatedDashedIdentifier =
 	items: ScssInterpolatedIdentifierPartList
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
@@ -2958,38 +3088,48 @@ ScssWhileAtRule =
 // ^^^^^^^^^
 // @content($value);
 // ^^^^^^^^^^^^^^^^^
+// @content }
+// ^^^^^^^^
 ScssContentAtRule =
 	'content'
 	arguments: ScssIncludeArgumentList?
-	';'
+	';'?
 
 // @return $width * 2;
 // ^^^^^^^^^^^^^^^^^^^
+// @return $width * 2 }
+// ^^^^^^^^^^^^^^^^^^
 ScssReturnAtRule =
 	'return'
 	value: ScssExpression
-	';'
+	';'?
 
 // @debug $width * 2;
 // ^^^^^^^^^^^^^^^^^^
+// @debug $width * 2 }
+// ^^^^^^^^^^^^^^^^^
 ScssDebugAtRule =
 	'debug'
 	value: ScssExpression
-	';'
+	';'?
 
 // @warn "deprecated";
 // ^^^^^^^^^^^^^^^^^^^
+// @warn "deprecated" }
+// ^^^^^^^^^^^^^^^^^^
 ScssWarnAtRule =
 	'warn'
 	value: ScssExpression
-	';'
+	';'?
 
 // @error "Invalid state.";
 // ^^^^^^^^^^^^^^^^^^^^^^^^
+// @error "Invalid state." }
+// ^^^^^^^^^^^^^^^^^^^^^^^
 ScssErrorAtRule =
 	'error'
 	value: ScssExpression
-	';'
+	';'?
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^

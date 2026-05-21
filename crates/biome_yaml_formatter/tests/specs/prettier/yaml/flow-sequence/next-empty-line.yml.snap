@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/flow-sequence/next-empty-line.yml
 ---
+
 # Input
 
 ```yml
@@ -26,10 +27,8 @@ c: 123
 +aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123, 
  
 -  c: 123,
--]
 +c: 123
-+]
-\ No newline at end of file
+ ]
 ```
 
 # Output
@@ -39,7 +38,8 @@ c: 123
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 123, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: 123, 
 
 c: 123
-]```
+]
+```
 
 # Lines exceeding max width of 80 characters
 ```

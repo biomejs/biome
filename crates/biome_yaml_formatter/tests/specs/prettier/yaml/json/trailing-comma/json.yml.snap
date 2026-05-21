@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/json/trailing-comma/json.yml
 ---
+
 # Input
 
 ```yml
@@ -74,13 +75,11 @@ info: yaml/json/trailing-comma/json.yml
 +    "object-fits-within-print-width", "",
 +    "TEST", "comma NOT here"
    ],
--]
 +  [
 +    "object-does-not-fit-within-print-width", "------",
 +    "TEST", "comma NOT here — but object's now a string due to '>'"
 +  ]
-+]
-\ No newline at end of file
+ ]
 ```
 
 # Output
@@ -111,4 +110,5 @@ info: yaml/json/trailing-comma/json.yml
     "object-does-not-fit-within-print-width", "------",
     "TEST", "comma NOT here — but object's now a string due to '>'"
   ]
-]```
+]
+```

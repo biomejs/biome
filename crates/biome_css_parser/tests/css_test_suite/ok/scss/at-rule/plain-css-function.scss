@@ -1,0 +1,9 @@
+$highlight: #ddf;
+
+@function --highlight() {
+  result: var(--highlight, #{$highlight});
+}
+
+@function double($value) {
+  @return $value * 2;
+}

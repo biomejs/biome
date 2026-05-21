@@ -1,0 +1,9 @@
+@mixin placeholder{&::placeholder{@content}}
+
+@function em($pixels,$context:$browser-context){@return #{$pixels / $context}em}
+
+@mixin debug-boundary{@debug 1}
+
+@mixin warn-boundary{@warn "deprecated"}
+
+@mixin error-boundary{@error "Invalid state."}

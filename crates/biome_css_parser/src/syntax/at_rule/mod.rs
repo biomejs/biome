@@ -72,7 +72,6 @@ use crate::syntax::at_rule::view_transition::{
     parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
 };
 
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use crate::syntax::scss::{
     parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
@@ -82,6 +81,7 @@ use crate::syntax::scss::{
     parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
+use crate::syntax::{CssSyntaxFeatures, is_nth_at_dashed_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 
@@ -132,6 +132,12 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_face] => parse_font_face_at_rule(p),
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
+        T![function]
+            if CssSyntaxFeatures::Scss.is_supported(p) && is_nth_at_dashed_identifier(p, 1) =>
+        {
+            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
+            parse_function_at_rule(p)
+        }
         T![function] => {
             if CssSyntaxFeatures::Scss.is_supported(p) {
                 parse_scss_function_at_rule(p)

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/spec-example-2-18-multi-line-flow-scalars.yml
 ---
+
 # Input
 
 ```yml
@@ -20,16 +21,13 @@ quoted: "So does this
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,6 @@
+@@ -1,4 +1,5 @@
 -plain: This unquoted scalar
 +plain:
 +  This unquoted scalar
    spans many lines.
  
  quoted: "So does this
--  quoted scalar.\n"
-+  quoted scalar.\n"
-\ No newline at end of file
 ```
 
 # Output
@@ -40,4 +38,5 @@ plain:
   spans many lines.
 
 quoted: "So does this
-  quoted scalar.\n"```
+  quoted scalar.\n"
+```

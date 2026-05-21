@@ -327,7 +327,7 @@ a {
    prop1: #{($m) * (10)};
    prop2: #{$m * 10};
    prop3: #{-(-$m) * -(-10)};
-@@ -83,50 +83,51 @@
+@@ -83,23 +83,23 @@
    prop5: -1;
    prop6: word + 1; /* word1 */
    prop7: word - 1; /* word-1 */
@@ -352,21 +352,16 @@ a {
 -  prop22: 2 / @width 2 / @width 2 / @width 2 / @width;
 -  prop23: (@width / 2) (@width / 2) (@width / 2) (@width / 2);
 -  prop24: (2 / @width) (2 / @width) (2 / @width) (2 / @width);
--  prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
 +  prop21: @width/2 @width /2 @width/ 2 @width / 2;
 +  prop22: 2/@width 2 /@width 2/ @width 2 / @width;
 +  prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
 +  prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-+  prop25-1: #{$width} / #{$width} #{$width} / #{$width} #{$width} / #{$width}
+   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
      #{$width} / #{$width};
--  prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
-+  prop25-2: #{$width} * #{$width} #{$width} * #{$width} #{$width} * #{$width}
-     #{$width} * #{$width};
--  prop25-3: #{$width}+#{$width} #{$width} +#{$width} #{$width}+ #{$width}
-+  prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
+   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
+@@ -108,25 +108,25 @@
      #{$width} + #{$width};
--  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
-+  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
+   prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
      #{$width} - #{$width};
 -  prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
 -  prop27: 8px/2px 8px/1 1/2px 1/2;
@@ -376,11 +371,9 @@ a {
 -  prop29: (8px/2px) (8px/1) (1/2px) (1/2);
 +  prop29: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
    prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
--  prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
+   prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
 -  prop32: func(8px/2);
 -  prop33: 5px + 8px/2px;
-+  prop31: (#{$width} / 2px) (8px / #{$width}) (#{$width} / 2px)
-+    (8px / #{$width});
 +  prop32: func(8px / 2);
 +  prop33: 5px + 8px / 2px;
    prop34: func(+20px, +20px);
@@ -401,7 +394,7 @@ a {
    prop45: round(1.5) * 2 round(1.5) * 2 round(1.5) * 2 round(1.5) * 2;
    prop46: 2 * round(1.5) 2 * round(1.5) 2 * round(1.5) 2 * round(1.5);
    prop47: (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2);
-@@ -143,14 +144,14 @@
+@@ -143,14 +143,14 @@
    prop62: 2 + $width 2 + $width 2 + $width 2 + $width;
    prop63: ($width + 2) ($width + 2) ($width + 2) ($width + 2);
    prop64: (2 + $width) (2 + $width) (2 + $width) (2 + $width);
@@ -529,21 +522,20 @@ a {
   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-  prop25-1: #{$width} / #{$width} #{$width} / #{$width} #{$width} / #{$width}
+  prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
     #{$width} / #{$width};
-  prop25-2: #{$width} * #{$width} #{$width} * #{$width} #{$width} * #{$width}
+  prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
     #{$width} * #{$width};
-  prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
+  prop25-3: #{$width}+#{$width} #{$width} +#{$width} #{$width}+ #{$width}
     #{$width} + #{$width};
-  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
+  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
     #{$width} - #{$width};
   prop26: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop27: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop29: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
-  prop31: (#{$width} / 2px) (8px / #{$width}) (#{$width} / 2px)
-    (8px / #{$width});
+  prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
   prop32: func(8px / 2);
   prop33: 5px + 8px / 2px;
   prop34: func(+20px, +20px);
@@ -1010,7 +1002,7 @@ parens.scss:282:178 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-  192:   filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  193:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-  194:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  191:   filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  192:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+  193:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
 ```

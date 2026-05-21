@@ -30,14 +30,14 @@ biome_diagnostics        = { workspace = true, features = ["camino"] }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_fs                 = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true }
-biome_graphql_analyze    = { workspace = true }
-biome_graphql_formatter  = { workspace = true }
-biome_graphql_parser     = { workspace = true }
-biome_graphql_syntax     = { workspace = true }
-biome_grit_formatter     = { workspace = true }
-biome_grit_parser        = { workspace = true }
-biome_grit_patterns      = { workspace = true, features = ["serde"] }
-biome_grit_syntax        = { workspace = true }
+biome_graphql_analyze    = { workspace = true, optional = true }
+biome_graphql_formatter  = { workspace = true, optional = true }
+biome_graphql_parser     = { workspace = true, optional = true }
+biome_graphql_syntax     = { workspace = true, optional = true }
+biome_grit_formatter     = { workspace = true, optional = true }
+biome_grit_parser        = { workspace = true, optional = true }
+biome_grit_patterns      = { workspace = true, features = ["serde"], optional = true }
+biome_grit_syntax        = { workspace = true, optional = true }
 biome_html_analyze       = { workspace = true }
 biome_html_factory       = { workspace = true }
 biome_html_formatter     = { workspace = true, features = ["serde"] }
@@ -54,22 +54,22 @@ biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
-biome_markdown_factory   = { workspace = true }
-biome_markdown_formatter = { workspace = true }
-biome_markdown_parser    = { workspace = true }
-biome_markdown_syntax    = { workspace = true }
+biome_markdown_formatter = { workspace = true, optional = true }
+biome_markdown_parser    = { workspace = true, optional = true }
+biome_markdown_syntax    = { workspace = true, optional = true }
 biome_module_graph       = { workspace = true, features = ["serde"] }
 biome_package            = { workspace = true }
 biome_parser             = { workspace = true }
-biome_plugin_loader      = { workspace = true }
+biome_plugin_loader      = { workspace = true, optional = true }
 biome_project_layout     = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 biome_unicode_table      = { workspace = true }
-biome_yaml_formatter     = { workspace = true, features = ["serde"] }
-biome_yaml_syntax        = { workspace = true }
+biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
+biome_yaml_parser        = { workspace = true, optional = true }
+biome_yaml_syntax        = { workspace = true, optional = true }
 boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
@@ -97,9 +97,36 @@ biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]
-js_plugin = ["biome_plugin_loader/js_plugin"]
-markdown  = ["biome_configuration/markdown"]
-schema    = [
+# JavaScript embeds
+js_embeds    = ["lang_graphql"]
+js_plugin    = ["biome_plugin_loader/js_plugin", "plugins"]
+lang_graphql = [
+  "biome_configuration/lang_graphql",
+  "dep:biome_graphql_analyze",
+  "dep:biome_graphql_formatter",
+  "dep:biome_graphql_parser",
+  "dep:biome_graphql_syntax"
+]
+lang_grit    = [
+  "dep:biome_grit_formatter",
+  "dep:biome_grit_parser",
+  "dep:biome_grit_patterns",
+  "dep:biome_grit_syntax",
+]
+lang_md      = [
+  "biome_configuration/lang_md",
+  "dep:biome_markdown_formatter",
+  "dep:biome_markdown_parser",
+  "dep:biome_markdown_syntax"
+]
+lang_yaml    = [
+  "biome_configuration/lang_yaml",
+  "dep:biome_yaml_formatter",
+  "dep:biome_yaml_parser",
+  "dep:biome_yaml_syntax"
+]
+plugins      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
+schema       = [
   "biome_configuration/schema",
   "biome_css_syntax/schema",
   "biome_formatter/schema",
@@ -116,7 +143,9 @@ schema    = [
   "biome_module_graph/schema",
   "biome_text_edit/schema",
   "biome_yaml_formatter/schema",
+  "biome_yaml_syntax/schema",
   "dep:schemars",
+  "lang_grit",
 ]
 testing   = []
 

@@ -9,6 +9,7 @@ use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::scss::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier,
@@ -341,41 +342,83 @@ fn is_at_timeline_range_name(p: &mut CssParser) -> bool {
     p.at_ts(TIMELINE_RANGE_NAME_SET)
 }
 
+#[inline]
+fn is_at_keyframes_ident_selector(p: &mut CssParser) -> bool {
+    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET)
+}
+
 /// Checks if the current parser position is at a keyframes item selector.
 ///
 /// This function determines if the parser is currently positioned at the start of a keyframes item selector,
 /// which can be `from`, `to`, a percentage dimension, or a timeline-range-name followed by a percentage.
 fn is_at_keyframes_item_selector(p: &mut CssParser) -> bool {
-    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET)
+    is_at_keyframes_ident_selector(p)
         || is_at_percentage_dimension(p)
         || is_at_timeline_range_name(p)
+        || is_at_scss_keyframes_selector(p)
 }
 
 /// Parses a keyframes item selector in CSS.
 ///
 /// This function parses a keyframes item selector, which can be `from`, `to`,
 /// a percentage dimension, or a `<timeline-range-name> <percentage>` selector
-/// for scroll-driven animations.
+/// for scroll-driven animations. SCSS also accepts whole-selector interpolation
+/// such as `#{50% - $duration}`.
 #[inline]
 fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_keyframes_item_selector(p) {
         return Absent;
     }
 
+    if is_at_scss_keyframes_selector(p) {
+        parse_scss_keyframes_selector(p)
+    } else if is_at_timeline_range_name(p) {
+        parse_keyframes_range_selector(p)
+    } else if is_at_percentage_dimension(p) {
+        parse_keyframes_percentage_selector(p)
+    } else {
+        parse_keyframes_ident_selector(p)
+    }
+}
+
+/// Parses a timeline-range keyframe selector like `entry 100%`.
+#[inline]
+fn parse_keyframes_range_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_timeline_range_name(p) {
+        return Absent;
+    }
+
     let m = p.start();
 
-    let kind = if is_at_timeline_range_name(p) {
-        p.bump_ts(TIMELINE_RANGE_NAME_SET);
-        parse_percentage_dimension(p)
-            .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
-        CSS_KEYFRAMES_RANGE_SELECTOR
-    } else if is_at_percentage_dimension(p) {
-        parse_percentage_dimension(p).ok();
-        CSS_KEYFRAMES_PERCENTAGE_SELECTOR
-    } else {
-        p.bump_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET);
-        CSS_KEYFRAMES_IDENT_SELECTOR
-    };
+    p.bump_ts(TIMELINE_RANGE_NAME_SET);
+    parse_percentage_dimension(p)
+        .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
 
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_KEYFRAMES_RANGE_SELECTOR))
+}
+
+/// Parses a percentage keyframe selector like `50%`.
+#[inline]
+fn parse_keyframes_percentage_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_percentage_dimension(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_percentage_dimension(p).ok();
+
+    Present(m.complete(p, CSS_KEYFRAMES_PERCENTAGE_SELECTOR))
+}
+
+/// Parses a keyword keyframe selector like `from` or `to`.
+#[inline]
+fn parse_keyframes_ident_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_keyframes_ident_selector(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET);
+
+    Present(m.complete(p, CSS_KEYFRAMES_IDENT_SELECTOR))
 }

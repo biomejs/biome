@@ -54,9 +54,7 @@ block: > # lala
 + &node # lala
 + - x: y
  block: > # lala
--  abcde
-+  abcde
-\ No newline at end of file
+   abcde
 ```
 
 # Output
@@ -77,4 +75,5 @@ e:
  &node # lala
  - x: y
 block: > # lala
-  abcde```
+  abcde
+```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/flow-sequence/empty-line-collapse.yml
 ---
+
 # Input
 
 ```yml
@@ -22,7 +23,6 @@ bbb ]
 +[ aaa, 
 +
 +bbb ]
-\ No newline at end of file
 ```
 
 # Output
@@ -30,4 +30,5 @@ bbb ]
 ```yml
 [ aaa, 
 
-bbb ]```
+bbb ]
+```

@@ -1,1 +1,17 @@
-$value:(1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+$parenthesized:(1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-after:(1 >$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-before:(1> $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-tight-both:(1>$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-left-tight-both:(($short)>$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-equality-tight-after:(1 ==$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-greater-equal-tight-after:(1 >=$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$parenthesized-plus-tight-after:(1 +$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);
+
+$right-parenthesized:$short > ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var);

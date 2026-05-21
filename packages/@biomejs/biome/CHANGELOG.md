@@ -1,5 +1,131 @@
 # @biomejs/biome
 
+## 2.4.15
+
+### Patch Changes
+
+- [#9394](https://github.com/biomejs/biome/pull/9394) [`ba3480e`](https://github.com/biomejs/biome/commit/ba3480e62da6ac7f0f9d99126f1459a72306368b) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`useTestHooksInOrder`](https://biomejs.dev/linter/rules/use-test-hooks-in-order) in the `test` domain. The rule enforces that Jest/Vitest lifecycle hooks (`beforeAll`, `beforeEach`, `afterEach`, `afterAll`) are declared in the order they execute, making test setup and teardown easier to reason about.
+
+- [#10254](https://github.com/biomejs/biome/pull/10254) [`e0a54cc`](https://github.com/biomejs/biome/commit/e0a54ccc0a0c892fff2270ae772bcecf0d34e79a) Thanks [@dyc3](https://github.com/dyc3)! - Added a new nursery rule [`useVueNextTickPromise`](https://biomejs.dev/linter/rules/use-vue-next-tick-promise/), which enforces Promise syntax when using Vue `nextTick`.
+
+  For example, the following snippet triggers the rule:
+
+  ```js
+  import { nextTick } from "vue";
+
+  nextTick(() => {
+    updateDom();
+  });
+  ```
+
+- [#10219](https://github.com/biomejs/biome/pull/10219) [`64aee45`](https://github.com/biomejs/biome/commit/64aee454ac2db2ade31089c1438dd761c94a8d57) Thanks [@dyc3](https://github.com/dyc3)! - Added a new nursery rule [`noVueVOnNumberValues`](https://biomejs.dev/linter/rules/no-vue-v-on-number-values/), that disallows deprecated number modifiers on Vue `v-on` directives.
+
+  For example, the following snippet triggers the rule:
+
+  ```vue
+  <input @keyup.13="submit" />
+  ```
+
+- [#10195](https://github.com/biomejs/biome/pull/10195) [`7b8d4e1`](https://github.com/biomejs/biome/commit/7b8d4e161a225f14bc9e070e04cc8572ee988bb2) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useVueValidVFor`](https://biomejs.dev/linter/rules/use-vue-valid-v-for/), which validates Vue `v-for` directives and reports invalid aliases, missing component keys, and keys that do not use iteration variables.
+
+- [#10238](https://github.com/biomejs/biome/pull/10238) [`1110256`](https://github.com/biomejs/biome/commit/1110256c6d60500ebc05b9d2738fe77345c7ffd6) Thanks [@dyc3](https://github.com/dyc3)! - Added the recommended nursery rule [`noVueImportCompilerMacros`](https://biomejs.dev/linter/rules/no-vue-import-compiler-macros/), which disallows importing Vue compiler macros such as `defineProps` from `vue` because they are automatically available.
+
+- [#10201](https://github.com/biomejs/biome/pull/10201) [`1a08f89`](https://github.com/biomejs/biome/commit/1a08f89df55eafe1d8463696d1be53f8dea90a80) Thanks [@realknove](https://github.com/realknove)! - Fixed [#10193](https://github.com/biomejs/biome/issues/10193): `style/useReadonlyClassProperties` no longer reports class properties as readonly-able when they are assigned inside arrow callbacks nested in class property initializers.
+
+- [#9574](https://github.com/biomejs/biome/pull/9574) [`3bd2b6a`](https://github.com/biomejs/biome/commit/3bd2b6adf0be44eda922ad7610781dd2e387bdb6) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#9530](https://github.com/biomejs/biome/issues/9530). The diagnostics of [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) are now more detailed and more precise. They are also better at localizing where the issue is.
+
+- [#10205](https://github.com/biomejs/biome/pull/10205) [`a704a6c`](https://github.com/biomejs/biome/commit/a704a6c40392e71aad5127ab35c771486116937e) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#10185](https://github.com/biomejs/biome/issues/10185). [`organizeImports](https://biomejs.dev/assist/actions/organize-imports/) now errors when it encounters an unknown predefined group.
+
+  The following configuration is now reported as invalid because `:INEXISTENT:` is an unknown predefined group.
+
+  ```json
+  {
+    "assist": {
+      "actions": {
+        "source": {
+          "organizeImports": { "options": { "groups": [":INEXISTENT:"] } }
+        }
+      }
+    }
+  }
+  ```
+
+- [#10052](https://github.com/biomejs/biome/pull/10052) [`b565bed`](https://github.com/biomejs/biome/commit/b565bedf53bd241bfef57883439d6a60a19b43c5) Thanks [@minseong0324](https://github.com/minseong0324)! - Improved [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/): it now flags union annotations whose extra variants are never returned, and suggests the narrower type (e.g. `string | null` → `string`).
+
+  These functions are now reported because `null` and `number` are included in the return annotations but never returned:
+
+  ```ts
+  function getUser(): string | null {
+    return "hello";
+  } // null is never returned
+  function getCode(): string | number {
+    return "hello";
+  } // number is never returned
+  ```
+
+- [#10213](https://github.com/biomejs/biome/pull/10213) [`ac30057`](https://github.com/biomejs/biome/commit/ac30057415302e74003d428e96983433441e84dc) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9450](https://github.com/biomejs/biome/issues/9450): HTML and Vue element formatting now preserves child line breaks when an element contains another element child on its own line, instead of collapsing the child element onto the same line.
+
+- [#10275](https://github.com/biomejs/biome/pull/10275) [`9ee6c03`](https://github.com/biomejs/biome/commit/9ee6c03203581639b564b6c7f81b3e5a2febea58) Thanks [@solithcy](https://github.com/solithcy)! - Fixed [#10274](https://github.com/biomejs/biome/issues/10274): Svelte templates with missing expressions no longer parsed as `HtmlBogusElement`
+
+- [#10143](https://github.com/biomejs/biome/pull/10143) [`56798a7`](https://github.com/biomejs/biome/commit/56798a76b9e7f57caf070acd51734beb61904d9d) Thanks [@minseong0324](https://github.com/minseong0324)! - [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) now detects misleading return type annotations when object literal properties are initialized with `as const`.
+
+  This function is now reported because the return annotation widens a property initialized with `as const`:
+
+  ```ts
+  function f(): { value: string } {
+    return { value: "text" as const };
+  }
+  ```
+
+- [#10143](https://github.com/biomejs/biome/pull/10143) [`56798a7`](https://github.com/biomejs/biome/commit/56798a76b9e7f57caf070acd51734beb61904d9d) Thanks [@minseong0324](https://github.com/minseong0324)! - [`noUselessTypeConversion`](https://biomejs.dev/linter/rules/no-useless-type-conversion/) now detects redundant conversions on object literal properties initialized with `as const`.
+
+  This conversion is now reported because `message.value` is inferred as a string literal:
+
+  ```ts
+  const message = { value: "text" as const };
+  String(message.value);
+  ```
+
+- [#9807](https://github.com/biomejs/biome/pull/9807) [`0ae5840`](https://github.com/biomejs/biome/commit/0ae58406b4752f296adfccf94b1d2a042c4cddc7) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useThisInClassMethods`](https://biomejs.dev/linter/rules/use-this-in-class-methods/), based on ESLint's `class-methods-use-this`.
+
+  The rule now reports instance methods, getters, setters, and function-valued instance fields that do not use `this`, and `biome migrate eslint` preserves the supported `ignoreMethods`, `ignoreOverrideMethods`, and `ignoreClassesWithImplements` options.
+
+  **Invalid**:
+
+  ```js
+  class Foo {
+    bar() {
+      // does not use `this`, invalid
+      console.log("Hello Biome");
+    }
+  }
+  ```
+
+- [#10258](https://github.com/biomejs/biome/pull/10258) [`e7b18f7`](https://github.com/biomejs/biome/commit/e7b18f759d82291a3f280ea616b3028fa716cba5) Thanks [@ematipico](https://github.com/ematipico)! - Improved linter performance by narrowing the query nodes for several lint rules, reducing how often they are evaluated.
+
+- [#10273](https://github.com/biomejs/biome/pull/10273) [`04e22a1`](https://github.com/biomejs/biome/commit/04e22a10e7446178a80cf3c0c614dc512d894e9d) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10271](https://github.com/biomejs/biome/issues/10271): The HTML parser now correctly parses `of` as text content when in text contexts.
+
+- [#9838](https://github.com/biomejs/biome/pull/9838) [`83f7385`](https://github.com/biomejs/biome/commit/83f7385f14d68704510ea4c028cfa20317698fc0) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noBaseToString`](https://biomejs.dev/linter/rules/no-base-to-string/), which reports stringification sites that fall back to Object's default `"[object Object]"` formatting. The rule also supports the `ignoredTypeNames` option.
+
+- [#10143](https://github.com/biomejs/biome/pull/10143) [`56798a7`](https://github.com/biomejs/biome/commit/56798a76b9e7f57caf070acd51734beb61904d9d) Thanks [@minseong0324](https://github.com/minseong0324)! - [`useExhaustiveSwitchCases`](https://biomejs.dev/linter/rules/use-exhaustive-switch-cases/) now checks switch statements over object literal properties initialized with `as const`.
+
+  This switch is now reported because `status.kind` is inferred as the string literal `"ready"` but no case handles it:
+
+  ```ts
+  const status = { kind: "ready" as const };
+  switch (status.kind) {
+  }
+  ```
+
+- [#10143](https://github.com/biomejs/biome/pull/10143) [`56798a7`](https://github.com/biomejs/biome/commit/56798a76b9e7f57caf070acd51734beb61904d9d) Thanks [@minseong0324](https://github.com/minseong0324)! - [`useStringStartsEndsWith`](https://biomejs.dev/linter/rules/use-string-starts-ends-with/) now detects string index comparisons on object literal properties initialized with `as const`.
+
+  This comparison is now reported because `message.value` is inferred as a string literal:
+
+  ```ts
+  const message = { value: "hello" as const };
+  message.value[0] === "h";
+  ```
+
 ## 2.4.14
 
 ### Patch Changes

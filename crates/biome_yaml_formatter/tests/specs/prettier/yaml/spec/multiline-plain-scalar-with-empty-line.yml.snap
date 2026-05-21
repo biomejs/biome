@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/multiline-plain-scalar-with-empty-line.yml
 ---
+
 # Input
 
 ```yml
@@ -27,7 +28,6 @@ plain: a
  
 -  c
 + c
-\ No newline at end of file
 ```
 
 # Output
@@ -37,4 +37,5 @@ plain: a
 plain: a
  b
 
- c```
+ c
+```

@@ -1,5 +1,5 @@
 use super::{
-    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
+    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExistsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GoToDefinitionParams,
@@ -132,7 +132,7 @@ where
         self.request("biome/open_file", params)
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         self.request("biome/file_exists", params)
     }
 

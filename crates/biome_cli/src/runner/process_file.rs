@@ -10,7 +10,7 @@ use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesSupported, FileExitsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileExistsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
@@ -270,7 +270,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
             .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
 
-        if ctx.workspace().file_exists(FileExitsParams {
+        if ctx.workspace().file_exists(FileExistsParams {
             file_path: path.clone(),
         })? {
             Ok(Self { guard, path, file })

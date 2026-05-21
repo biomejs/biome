@@ -24,7 +24,6 @@ info: yaml/spec/spec-example-6-23-node-properties.yml
 +!!str &a1 "foo":
 +  !!str bar
 +&a2 baz : *a1
-\ No newline at end of file
 ```
 
 # Output
@@ -32,7 +31,8 @@ info: yaml/spec/spec-example-6-23-node-properties.yml
 ```yml
 !!str &a1 "foo":
   !!str bar
-&a2 baz : *a1```
+&a2 baz : *a1
+```
 
 # Errors
 ```

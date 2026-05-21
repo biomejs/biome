@@ -2,13 +2,35 @@ use crate::parser::CssParser;
 use crate::syntax::parse_regular_identifier;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
-    complete_scss_interpolated_identifier, is_at_identifier_continuation,
-    is_at_scss_interpolated_identifier,
+    is_at_identifier_continuation, is_at_scss_interpolated_identifier,
+    parse_scss_interpolated_identifier_parts,
 };
 use crate::syntax::scss::is_at_scss_interpolation;
-use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
+use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+
+/// Parses SCSS-interpolated name slots.
+///
+/// Bare interpolation like `#{$feature}` becomes an interpolated identifier
+/// because callers expect a name node.
+///
+/// Examples:
+/// ```scss
+/// @media (#{$feature}: block) {}
+/// [data-#{$name}] {}
+/// .a { value: foo#{1 + 1}(arg); }
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/interpolation
+#[inline]
+pub(crate) fn parse_scss_interpolated_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_interpolated_identifier(p) {
+        parse_scss_interpolated_identifier(p)
+    } else {
+        parse_regular_identifier(p)
+    }
+}
 
 /// Parses identifier-shaped SCSS syntax that may contain interpolation parts.
 ///
@@ -32,7 +54,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
         return Absent;
     }
 
-    let Present(first_fragment) = parse_regular_part(p) else {
+    let Present(first_fragment) = parse_regular_identifier_part(p) else {
         return Absent;
     };
 
@@ -42,15 +64,13 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
         return Present(first_fragment);
     }
 
-    Present(complete_scss_interpolated_identifier(
-        p,
-        first_fragment,
-        parse_regular_part,
-    ))
+    let parts =
+        parse_scss_interpolated_identifier_parts(p, first_fragment, parse_regular_identifier_part);
+
+    Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
 }
 
-/// Parses an interpolation-led SCSS value as an interpolated identifier only
-/// when adjacent identifier fragments follow immediately.
+/// Parses SCSS interpolation or adjacent identifier fragments in value slots.
 ///
 /// Standalone interpolation like `#{$name}` remains a `ScssInterpolation`,
 /// while adjacent forms such as `#{$name}-suffix` become a
@@ -64,7 +84,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
 ///
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
-pub(crate) fn parse_scss_identifier_or_interpolation(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_interpolation_or_identifier(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_interpolated_identifier(p) {
         return Absent;
     }
@@ -75,11 +95,13 @@ pub(crate) fn parse_scss_identifier_or_interpolation(p: &mut CssParser) -> Parse
         };
 
         if is_at_identifier_continuation(p) {
-            return Present(complete_scss_interpolated_identifier(
+            let parts = parse_scss_interpolated_identifier_parts(
                 p,
                 interpolation,
-                parse_regular_part,
-            ));
+                parse_regular_identifier_part,
+            );
+
+            return Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER));
         }
 
         return Present(interpolation);
@@ -89,7 +111,7 @@ pub(crate) fn parse_scss_identifier_or_interpolation(p: &mut CssParser) -> Parse
 }
 
 #[inline]
-fn parse_regular_part(p: &mut CssParser) -> ParsedSyntax {
+fn parse_regular_identifier_part(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
         parse_scss_regular_interpolation(p)
     } else {

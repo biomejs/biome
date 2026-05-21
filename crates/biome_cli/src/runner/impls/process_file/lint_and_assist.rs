@@ -143,12 +143,11 @@ impl ProcessFile for LintAssistProcessFile {
             let diagnostics: Vec<Error> = pull_diagnostics_result
                 .diagnostics
                 .into_iter()
-                .map(|d| {
+                .map(|mut d| {
                     if let Some(offset) = offset {
-                        d.with_offset(TextSize::from(offset))
-                    } else {
-                        d
+                        d.offset_by(TextSize::from(offset));
                     }
+                    d
                 })
                 .map(Error::from)
                 .collect();

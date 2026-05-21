@@ -330,6 +330,7 @@ impl<'src> YamlLexer<'src> {
     /// A yaml collection is a JSON-like data structure
     fn consume_flow_collection(&mut self) -> LinkedList<LexToken> {
         let mut current_depth: usize = 0;
+        let mut already_warned_insufficient_indent = false;
         let mut collection_tokens = LinkedList::new();
 
         // https://yaml.org/spec/1.2.2/#rule-c-ns-flow-map-json-key-entry
@@ -346,14 +347,23 @@ impl<'src> YamlLexer<'src> {
                 let start = self.current_coordinate;
                 let mut trivia = self.consume_trivia(false);
                 if self.breach_parent_scope() {
-                    // The lexed trivia is actually significant and signals the end of current
-                    // block scope
-                    self.current_coordinate = start;
-                    break;
-                } else {
-                    collection_tokens.append(&mut trivia);
-                    continue;
+                    if current_depth == 0 {
+                        self.current_coordinate = start;
+                        break;
+                    }
+                    // Per YAML 1.2.2 §6.5, flow collection content must be
+                    // indented past the surrounding block scope's indent.
+                    if !already_warned_insufficient_indent {
+                        self.diagnostics.push(ParseDiagnostic::new(
+                            "Insufficient indentation in flow collection",
+                            self.text_position()..self.text_position(),
+                        ));
+                        already_warned_insufficient_indent = true;
+                    }
                 }
+
+                collection_tokens.append(&mut trivia);
+                continue;
             }
             let token = match (current, self.peek_byte()) {
                 (c, _) if is_space(c) => self.consume_whitespace_token(),
@@ -401,7 +411,7 @@ impl<'src> YamlLexer<'src> {
                 _ => self.consume_unexpected_token(),
             };
             collection_tokens.push_back(token);
-            if self.breach_parent_scope() {
+            if self.breach_parent_scope() && current_depth == 0 {
                 break;
             }
             if current_depth == 0 {

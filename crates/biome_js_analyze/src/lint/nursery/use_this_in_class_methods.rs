@@ -154,7 +154,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub UseThisInClassMethods {
-        version: "next",
+        version: "2.4.15",
         name: "useThisInClassMethods",
         language: "js",
         sources: &[RuleSource::Eslint("class-methods-use-this").same()],

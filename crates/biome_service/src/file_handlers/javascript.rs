@@ -5,7 +5,7 @@ use super::{
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
     ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
-    ProcessLint, SearchCapabilities, UpdateSnippetsNodes, search,
+    ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -19,11 +19,12 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
-use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    DocumentFileSource, DocumentServices, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
+    DocumentFileSource, DocumentServices, EmbeddedSnippet, PatternId,
+    PullDiagnosticsAndActionsResult,
 };
+use crate::workspace::{FixFileMode, SearchQuery};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -49,7 +50,10 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
+// TODO: js_embeds feature when ready
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
@@ -745,6 +749,7 @@ fn parse_js_matched_embed(
             Some((snippet, file_source))
         }
 
+        #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
             let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
             let parse = parse_graphql_with_offset_and_cache(
@@ -1456,6 +1461,7 @@ fn format_embedded(
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
             }
+            #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => {
                 let graphql_options =
                     settings.format_options::<GraphqlLanguage>(biome_path, &node.source);
@@ -1637,4 +1643,15 @@ fn update_snippets(
     let root = mutation.commit();
 
     Ok(root.as_send().unwrap())
+}
+
+fn search(
+    path: &BiomePath,
+    document: &DocumentFileSource,
+    parsed: AnyParse,
+    provider: &dyn SearchQuery,
+    settings: &SettingsWithEditor,
+    pattern_id: PatternId,
+) -> Result<Vec<TextRange>, WorkspaceError> {
+    provider.search(path, document, parsed, settings, pattern_id)
 }

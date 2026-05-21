@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/prettier-ignore/document.yml
 ---
+
 # Input
 
 ```yml
@@ -21,8 +22,7 @@ aaaaa:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
--# prettier-ignore
+@@ -2,5 +2,6 @@
  ---
  aaaaa:
             bbbbb
@@ -31,15 +31,16 @@ aaaaa:
 +...
 +aaaaa:
 +           bbbbb
-\ No newline at end of file
 ```
 
 # Output
 
 ```yml
+# prettier-ignore
 ---
 aaaaa:
            bbbbb
 ...
 aaaaa:
-           bbbbb```
+           bbbbb
+```

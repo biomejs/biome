@@ -23,7 +23,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         write!(
             f,
             [
-                name.format()?
+                name.format()
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),

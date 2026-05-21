@@ -45,7 +45,7 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
             [
                 group(&format_args![
                     FormatScssIfConditionHeader {
-                        condition: &condition.format(),
+                        condition: &condition,
                         header_group_id,
                         should_split_after_if,
                         condition_layout,
@@ -74,7 +74,7 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
 /// Prettier breaks after `if` for `@else if $a == ...`, but keeps unary
 /// conditions such as `@else if not $a == ...` grouped after `not`.
 struct FormatScssIfConditionHeader<'a> {
-    condition: &'a dyn Format<CssFormatContext>,
+    condition: &'a ScssExpression,
     header_group_id: GroupId,
     should_split_after_if: bool,
     condition_layout: ScssControlConditionLayout,
@@ -87,19 +87,19 @@ impl Format<CssFormatContext> for FormatScssIfConditionHeader<'_> {
                 f,
                 [indent(&format_args![
                     soft_line_break_or_space(),
-                    self.condition
+                    self.condition.format()
                 ])]
             )
         } else if self.condition_layout.should_indent_condition() {
             write!(
                 f,
                 [indent_if_group_breaks(
-                    &format_args![self.condition],
+                    &format_args![self.condition.format()],
                     self.header_group_id
                 )]
             )
         } else {
-            write!(f, [self.condition])
+            write!(f, [self.condition.format()])
         }
     }
 }

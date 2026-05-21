@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/selector/interpolation.scss
+info: scss/selector/interpolation.scss
 ---
 
 # Input
@@ -30,6 +30,24 @@ ns|foo-#{$name},
 #{$type}.class,
 #{$type}:hover,
 #{$type}::after,
+:foo-#{$name},
+:foo-#{$name}-bar,
+:#{$name}-foo,
+::foo-#{$name},
+::foo-#{$name}-bar,
+::#{$name}-foo,
+:foo-#{$name}(bar),
+:#{$name}-foo(bar),
+:#{$name}(bar),
+:#{$name}(.item, [hidden]),
+:#{$name}(> img, + .item),
+:#{$name}(2n + #{$offset}),
+:#{$name}(en, #{$locale}),
+::foo-#{$name}(bar),
+::#{$name}-foo(bar),
+::#{$name}(bar),
+::#{$name}(.item, [hidden]),
+::#{$name}(#{$arg}),
 %#{$placeholder},
 %placeholder-#{$name}{
 color:red;
@@ -65,6 +83,24 @@ ns|foo-#{$name},
 #{$type}.class,
 #{$type}:hover,
 #{$type}::after,
+:foo-#{$name},
+:foo-#{$name}-bar,
+:#{$name}-foo,
+::foo-#{$name},
+::foo-#{$name}-bar,
+::#{$name}-foo,
+:foo-#{$name}(bar),
+:#{$name}-foo(bar),
+:#{$name}(bar),
+:#{$name}(.item, [hidden]),
+:#{$name}(> img, + .item),
+:#{$name}(2n + #{$offset}),
+:#{$name}(en, #{$locale}),
+::foo-#{$name}(bar),
+::#{$name}-foo(bar),
+::#{$name}(bar),
+::#{$name}(.item, [hidden]),
+::#{$name}(#{$arg}),
 %#{$placeholder},
 %placeholder-#{$name} {
 	color: red;

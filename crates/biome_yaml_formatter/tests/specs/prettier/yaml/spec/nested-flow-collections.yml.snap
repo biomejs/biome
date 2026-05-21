@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: yaml/spec/nested-flow-collections.yml
 ---
+
 # Input
 
 ```yml
@@ -32,7 +33,6 @@ info: yaml/spec/nested-flow-collections.yml
 +  }
 + ]
 +}
-\ No newline at end of file
 ```
 
 # Output
@@ -45,7 +45,8 @@ info: yaml/spec/nested-flow-collections.yml
    d: [e, f]
   }
  ]
-}```
+}
+```
 
 # Errors
 ```

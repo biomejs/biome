@@ -13,8 +13,10 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
+#[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -62,6 +64,7 @@ pub enum WorkspaceError {
     NotFound(NotFound),
 
     /// One or more errors occurred during plugin loading.
+    #[cfg(feature = "plugins")]
     PluginErrors(PluginErrors),
 
     /// The formatter encountered an error while formatting the file.
@@ -96,6 +99,9 @@ pub enum WorkspaceError {
 
     /// Go-to definition requires the linter or assist to be enabled.
     GoToDefinitionDisabled(GoToDefinitionDisabled),
+
+    /// Emitted when the rust gate feature isn't enabled
+    FeatureNotEnabled(FeatureNotEnabledDiagnostic),
 }
 
 impl WorkspaceError {
@@ -146,6 +152,7 @@ impl WorkspaceError {
         })
     }
 
+    #[cfg(feature = "plugins")]
     pub fn plugin_errors(diagnostics: Vec<PluginDiagnostic>) -> Self {
         Self::PluginErrors(PluginErrors { diagnostics })
     }
@@ -170,6 +177,10 @@ impl WorkspaceError {
             self,
             Self::Configuration(ConfigurationDiagnostic::EditorConfig(_))
         )
+    }
+
+    pub fn feature_not_enabled() -> Self {
+        Self::FeatureNotEnabled(FeatureNotEnabledDiagnostic {})
     }
 }
 
@@ -610,6 +621,7 @@ impl From<VcsDiagnostic> for WorkspaceError {
     }
 }
 
+#[cfg(feature = "lang_grit")]
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
         match value {
@@ -646,11 +658,13 @@ pub struct NoIgnoreFileFound {
 )]
 pub struct DisabledVcs {}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[cfg(feature = "plugins")]
+#[cfg_attr(feature = "plugins", derive(Debug, Serialize, Deserialize))]
 pub struct PluginErrors {
-    diagnostics: Vec<PluginDiagnostic>,
+    diagnostics: Vec<biome_plugin_loader::PluginDiagnostic>,
 }
 
+#[cfg(feature = "plugins")]
 impl Diagnostic for PluginErrors {
     fn category(&self) -> Option<&'static Category> {
         Some(category!("plugin"))
@@ -724,6 +738,15 @@ pub struct ConfigurationOutsideProject {
     pub config_path: String,
     pub working_directory: String,
 }
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project",
+    severity = Fatal,
+    message = "The rust feature isn't enabled",
+    tags(INTERNAL)
+)]
+pub struct FeatureNotEnabledDiagnostic;
 
 #[cfg(test)]
 mod test {

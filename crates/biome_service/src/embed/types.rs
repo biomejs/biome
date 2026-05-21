@@ -1,5 +1,6 @@
 use crate::workspace::DocumentFileSource;
 use biome_css_syntax::CssFileSource;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlFileSource;
 use biome_html_syntax::AnySvelteBlock;
 use biome_js_syntax::{JsFileSource, Language};
@@ -24,6 +25,7 @@ pub(crate) enum GuestLanguage {
     Ts,
     Tsx,
     Css,
+    #[cfg(feature = "lang_graphql")]
     GraphQL,
     Json,
 }
@@ -37,6 +39,7 @@ impl From<GuestLanguage> for DocumentFileSource {
             GuestLanguage::Ts => JsFileSource::ts().into(),
             GuestLanguage::Tsx => JsFileSource::tsx().into(),
             GuestLanguage::Css => CssFileSource::css().into(),
+            #[cfg(feature = "lang_graphql")]
             GuestLanguage::GraphQL => GraphqlFileSource::graphql().into(),
             GuestLanguage::Json => JsonFileSource::json().into(),
         }

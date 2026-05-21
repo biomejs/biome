@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/basics/broken-html.html
+---
+
+# Input
+
+```html
+<!-- 
+#7241, 
+reproduction:
+two different element,
+linebreak
+`<`
+extra space(s)
+-->
+<div><span>
+
+
+
+<                                           
+
+```
+
+
+# Errors
+```
+broken-html.html:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
+  
+  > 13 │ <···········································
+       │ ^
+    14 │ 
+  
+  i Replace this character with `&lt;` to escape it.
+  
+broken-html.html:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    13 │ <···········································
+  > 14 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+    13 │ <···········································
+  > 14 │ 
+       │ 
+  
+
+```
+
+# Error
+```text
+format: Can't format code because it contains syntax errors
+```

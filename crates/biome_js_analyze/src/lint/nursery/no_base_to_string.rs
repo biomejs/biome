@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// `${new CustomToString()}`;
     /// ```
     pub NoBaseToString {
-        version: "next",
+        version: "2.4.15",
         name: "noBaseToString",
         language: "js",
         recommended: false,

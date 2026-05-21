@@ -5,7 +5,8 @@ use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
     AnyScssExpression, AnyScssExpressionItem, ScssParenthesizedExpression,
     ScssParenthesizedExpressionFields, is_scss_map_outer_parenthesized_value,
-    scss_include_keyword_argument_owner, unwrap_single_expression_item,
+    is_scss_parenthesized_expression, scss_include_keyword_argument_owner,
+    unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
 
@@ -117,14 +118,10 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
 
     /// Detects the immediate parenthesized child in `((a))`.
     fn has_nested_parenthesized_item(&self) -> bool {
-        self.node.expression().ok().is_some_and(|expression| {
-            matches!(
-                expression,
-                AnyScssExpression::ScssParenthesizedExpression(_)
-            ) || unwrap_single_expression_item(&expression).is_some_and(|item| {
-                matches!(item, AnyScssExpressionItem::ScssParenthesizedExpression(_))
-            })
-        })
+        self.node
+            .expression()
+            .ok()
+            .is_some_and(|expression| is_scss_parenthesized_expression(&expression))
     }
 }
 

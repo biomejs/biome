@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/simple_flow_sequence.yaml
+---
+
+# Input
+
+```yaml
+[1, 'abc', "xyz", plain]
+
+```
+
+
+# Formatted
+
+```yaml
+[1, 'abc', "xyz", plain]
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"[1, 'abc', \"xyz\", plain]\n" => 0..25

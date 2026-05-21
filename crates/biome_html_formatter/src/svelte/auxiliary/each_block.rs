@@ -25,4 +25,13 @@ impl FormatNodeRule<SvelteEachBlock> for FormatSvelteEachBlock {
 
         write!(f, [closing_block.format()])
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteEachBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }
