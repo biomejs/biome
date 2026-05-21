@@ -563,6 +563,7 @@ pub fn find_css_class_definition<'db>(
 ) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
     let mut result = Vec::new();
     let mut visited_css = FxHashSet::default();
+    // 1. Check inline style classes in HTML-like files (carry content_offset)
     if let ModuleInfoKind::Html(html_info) = module.kind(db) {
         for class_def in &html_info.style_classes {
             if class_def.name.text() == class_name.name(db) {
@@ -575,9 +576,10 @@ pub fn find_css_class_definition<'db>(
         }
     }
 
+    // 2. Check CSS files reachable from HTML (linked stylesheets + script imports)
     for step in traverse_import_tree_for_html_classes(db, module) {
         if &step.css_path == module.path(db) {
-            continue;
+            continue; // Already checked inline styles above
         }
         let Some(module) = db.module_for_path(&step.css_path) else {
             continue;
@@ -587,6 +589,7 @@ pub fn find_css_class_definition<'db>(
         result.extend(this_result);
     }
 
+    // 3. Check CSS files imported by JS (e.g., `import './styles.css'` in JSX)
     for step in traverse_import_tree_for_classes(db, module) {
         let Some(module) = db.module_for_path(&step.css_path) else {
             continue;
@@ -614,7 +617,7 @@ fn search_css_class_transitive<'db>(
             continue;
         }
 
-        let ModuleInfoKind::Css(css_info) = css_module.kind(db) else {
+        let ModuleInfoKind::Css(css_info) = current.kind(db) else {
             continue;
         };
 
@@ -624,6 +627,7 @@ fn search_css_class_transitive<'db>(
             }
         }
 
+        // Follow @import edges
         for import in css_info.imports.values() {
             if let Some(imported_path) = import.resolved_path.as_path()
                 && let Some(module) = db.module_for_path(imported_path)

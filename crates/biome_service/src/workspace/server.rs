@@ -1408,6 +1408,8 @@ impl WorkspaceServer {
         update_kind: &UpdateKind,
         infer_types: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
+        dbg!("resolving moduele");
+
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 if let (Some(js_root), Some(services)) = (
@@ -1469,6 +1471,7 @@ impl WorkspaceServer {
                                 .collect()
                         })
                         .unwrap_or_default();
+
                     let (module_info, deps, diagnostics) = resolve_html_module(
                         html_root,
                         &embedded_content,
@@ -3044,6 +3047,8 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        dbg!("resolving moduele");
+
         let (parsed, services) = self.get_parse_and_services(params.path.as_path())?;
         let settings = self
             .projects
