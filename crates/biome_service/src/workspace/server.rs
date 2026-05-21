@@ -73,6 +73,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use salsa::Durability;
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -1505,11 +1506,11 @@ impl WorkspaceServer {
         let path_buf = path.to_path_buf();
 
         let existing = db.modules.pin().get(&path_buf).copied();
-        if let Some(md) = existing {
-            salsa::Setter::to(md.set_kind(&mut *db), kind);
+        if let Some(module_info) = existing {
+            salsa::Setter::to(module_info.set_kind(&mut *db), kind);
         } else {
-            let md = ModuleInfo::new(&*db, path_buf.clone(), kind);
-            db.modules.pin().insert(path_buf, md);
+            let module_info = ModuleInfo::new(&*db, path_buf.clone(), kind);
+            db.modules.pin().insert(path_buf, module_info);
         }
     }
 
