@@ -95,6 +95,19 @@ impl PredefinedGlobalRole {
     pub(crate) const fn is_sentinel_projection(self) -> bool {
         matches!(self, Self::Sentinel | Self::Primitive | Self::Helper)
     }
+
+    /// True when the role (`Sentinel` / `Primitive` / `Helper` / `HostManual`)
+    /// must never appear in `MIGRATED_PREDEFINED_IDS`.
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "consumed by migration guard test and future generated rows"
+        )
+    )]
+    pub(crate) const fn is_non_migratable(self) -> bool {
+        self.is_sentinel_projection() || matches!(self, Self::HostManual)
+    }
 }
 
 /// One row in the predefined global manifest.
@@ -490,6 +503,22 @@ mod tests {
             assert!(
                 !sentinel.contains(migrated),
                 "ID {} ({}) appears in both SENTINEL and MIGRATED predefined lists",
+                migrated.index(),
+                global_type_name(migrated.as_type_id()).unwrap_or("<unknown>"),
+            );
+        }
+    }
+
+    #[test]
+    fn non_migratable_roles_are_not_in_migrated_predefined_ids() {
+        for migrated in crate::codegen::global_types::MIGRATED_PREDEFINED_IDS {
+            let row = PREDEFINED_GLOBAL_ROWS
+                .iter()
+                .find(|row| row.id == *migrated)
+                .expect("migrated ID must exist in PREDEFINED_GLOBAL_ROWS");
+            assert!(
+                !row.role.is_non_migratable(),
+                "ID {} ({}) is non-migratable per its PredefinedGlobalRole but appears in MIGRATED_PREDEFINED_IDS",
                 migrated.index(),
                 global_type_name(migrated.as_type_id()).unwrap_or("<unknown>"),
             );
