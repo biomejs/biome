@@ -147,7 +147,7 @@ schema       = [
   "dep:schemars",
   "lang_grit",
 ]
-testing   = []
+testing      = []
 
 [lints]
 workspace = true
