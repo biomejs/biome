@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn migrated_predefined_ids_require_structural_diff_harness() {
-        let migrated = crate::codegen::global_types::MIGRATED_PREDEFINED_IDS;
+        let migrated = crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
         assert!(
             migrated.is_empty(),
             "Non-empty MIGRATED_PREDEFINED_IDS ({} entries) requires the structural diff comparator: \
@@ -499,7 +499,7 @@ mod tests {
     fn sentinel_and_migrated_ids_are_disjoint() {
         let sentinel: std::collections::HashSet<GlobalTypeId> =
             SENTINEL_PREDEFINED_IDS.iter().copied().collect();
-        for migrated in crate::codegen::global_types::MIGRATED_PREDEFINED_IDS {
+        for migrated in crate::generated::global_types::MIGRATED_PREDEFINED_IDS {
             assert!(
                 !sentinel.contains(migrated),
                 "ID {} ({}) appears in both SENTINEL and MIGRATED predefined lists",
@@ -511,7 +511,7 @@ mod tests {
 
     #[test]
     fn non_migratable_roles_are_not_in_migrated_predefined_ids() {
-        for migrated in crate::codegen::global_types::MIGRATED_PREDEFINED_IDS {
+        for migrated in crate::generated::global_types::MIGRATED_PREDEFINED_IDS {
             let row = PREDEFINED_GLOBAL_ROWS
                 .iter()
                 .find(|row| row.id == *migrated)
@@ -623,12 +623,12 @@ mod tests {
     fn migrated_predefined_ids_use_global_type_ids() {
         fn assert_global_type_ids(_: &[GlobalTypeId]) {}
 
-        assert_global_type_ids(crate::codegen::global_types::MIGRATED_PREDEFINED_IDS);
+        assert_global_type_ids(crate::generated::global_types::MIGRATED_PREDEFINED_IDS);
     }
 
     #[test]
     fn migrated_predefined_ids_sorted_unique_in_bounds() {
-        let ids = crate::codegen::global_types::MIGRATED_PREDEFINED_IDS;
+        let ids = crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
         for window in ids.windows(2) {
             assert!(
                 window[0].index() < window[1].index(),

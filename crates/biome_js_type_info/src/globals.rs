@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
-use crate::codegen::global_types::set_generated_global_type_data;
+use crate::generated::global_types::set_generated_global_type_data;
 
 pub use super::globals_ids::*;
 

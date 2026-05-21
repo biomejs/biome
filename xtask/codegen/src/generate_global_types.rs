@@ -137,7 +137,7 @@ pub struct CollectorSummary {
 }
 
 /// Acquires the pinned TypeScript checkout, parses `libEntries`, walks the
-/// reference closure, and emits `crates/biome_js_type_info/src/codegen/global_types.rs`.
+/// reference closure, and emits `crates/biome_js_type_info/src/generated/global_types.rs`.
 pub fn run(args: GlobalTypesArgs, mode: xtask_glue::Mode) -> anyhow::Result<()> {
     let workspace_root = xtask_glue::project_root();
     run_with_workspace_root(args, mode, &workspace_root)

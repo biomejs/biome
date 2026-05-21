@@ -1,6 +1,6 @@
 #![deny(clippy::use_self)]
 
-pub(crate) mod codegen;
+pub(crate) mod generated;
 mod conditionals;
 mod flattening;
 mod format_type_info;

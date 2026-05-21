@@ -134,7 +134,7 @@ const COLLECTOR_FIXTURES: [&str; COLLECTOR_FIXTURE_COUNT] = [
 
 static TEMP_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-const COMMITTED_CODEGEN_PATH: &str = "crates/biome_js_type_info/src/codegen/global_types.rs";
+const COMMITTED_CODEGEN_PATH: &str = "crates/biome_js_type_info/src/generated/global_types.rs";
 
 #[test]
 fn committed_codegen_module_has_expected_shape() -> Result<()> {

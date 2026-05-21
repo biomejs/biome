@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::codegen::global_types::MIGRATED_PREDEFINED_IDS;
+use crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
 use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeId, TypeStore};
 
 use super::{
