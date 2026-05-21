@@ -17,6 +17,10 @@ impl ProjectDatabase {
     pub fn insert_module(&self, path: Utf8PathBuf, module: ModuleInfo) {
         self.modules.pin().insert(path, module);
     }
+
+    pub fn remove_module(&self, path: &Utf8Path) {
+        self.modules.pin().remove(path);
+    }
 }
 
 #[salsa::db]

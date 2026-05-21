@@ -73,7 +73,6 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use salsa::Durability;
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -1409,8 +1408,6 @@ impl WorkspaceServer {
         update_kind: &UpdateKind,
         infer_types: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
-        dbg!("resolving moduele");
-
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 if let (Some(js_root), Some(services)) = (
@@ -1510,7 +1507,7 @@ impl WorkspaceServer {
             salsa::Setter::to(module_info.set_kind(&mut *db), kind);
         } else {
             let module_info = ModuleInfo::new(&*db, path_buf.clone(), kind);
-            db.modules.pin().insert(path_buf, module_info);
+            db.insert_module(path_buf, module_info);
         }
     }
 
@@ -1519,7 +1516,7 @@ impl WorkspaceServer {
         let Ok(db) = self.lock_db() else {
             return;
         };
-        db.modules.pin().remove(path);
+        db.remove_module(path)
     }
 
     /// Purges the path from the database
@@ -3048,8 +3045,6 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
-        dbg!("resolving moduele");
-
         let (parsed, services) = self.get_parse_and_services(params.path.as_path())?;
         let settings = self
             .projects
