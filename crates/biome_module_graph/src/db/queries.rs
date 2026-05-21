@@ -10,33 +10,14 @@
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{CssModuleInfo, CssTraversalStep, JsExport, JsModuleInfo, JsOwnExport, ModuleDb};
+use crate::{CssTraversalStep, ImportTreeNode, JsExport, JsOwnExport, ModuleDb};
+use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::ImportSymbol;
-use camino::Utf8PathBuf;
+use biome_jsdoc_comment::JsdocComment;
+use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
-
-/// Extracts the JS module info from a `ModuleInfo` input, if it is a JS module.
-///
-/// This is a tracked function: Salsa records that it reads `module.kind(db)`.
-/// When the kind changes (file re-parsed), downstream consumers are invalidated.
-#[salsa::tracked(no_eq)]
-pub fn js_module_info(db: &dyn ModuleDb, module: ModuleInfo) -> Option<JsModuleInfo> {
-    match module.kind(db) {
-        ModuleInfoKind::Js(info) => Some(info),
-        _ => None,
-    }
-}
-
-/// Extracts the CSS module info from a `ModuleInfo` input, if it is a CSS module.
-#[salsa::tracked(no_eq)]
-pub fn css_module_info(db: &dyn ModuleDb, module: ModuleInfo) -> Option<CssModuleInfo> {
-    match module.kind(db) {
-        ModuleInfoKind::Css(info) => Some(info),
-        _ => None,
-    }
-}
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.
 ///
@@ -44,7 +25,8 @@ pub fn css_module_info(db: &dyn ModuleDb, module: ModuleInfo) -> Option<CssModul
 /// imports. If any of those change, this recomputes.
 #[salsa::tracked(no_eq)]
 pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssClassStep> {
-    let Some(js_info) = js_module_info(db, module) else {
+    let module_kind = module.kind(db);
+    let Some(js_info) = module_kind.as_js_module_info() else {
         return Vec::new();
     };
 
@@ -52,7 +34,7 @@ pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssC
     for import_path in js_info.static_import_paths.values() {
         if let Some(path) = import_path.as_path()
             && let Some(target) = db.module_for_path(path)
-            && let Some(css_info) = css_module_info(db, target)
+            && let ModuleInfoKind::Css(css_info) = target.kind(db)
         {
             results.push(CssClassStep {
                 css_path: path.to_path_buf(),
@@ -368,6 +350,7 @@ pub fn collect_available_classes_for_js_file(
 }
 
 #[salsa::interned]
+/// Generic symbol used by queries to track a generic "symbol", which can represent everything (variable name, class name, etc.)
 pub struct SymbolName {
     #[returns(ref)]
     name: String,
@@ -429,4 +412,355 @@ pub fn find_js_exported_symbol<'db>(
     }
 
     None
+}
+
+/// Returns `true` if the given CSS `class_name` is referenced in any
+/// JS or HTML file that transitively imports `css_path`.
+#[salsa::tracked]
+pub fn is_class_referenced_by_importers<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    class_name: SymbolName<'db>,
+) -> bool {
+    let importers = transitive_importers_of(db, module);
+
+    for importer_path in &importers {
+        let Some(module) = db.module_for_path(importer_path) else {
+            continue;
+        };
+        if is_class_used_in_component_tree(db, module, class_name) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Checks if a class is used in a file or any of its imported components (transitively).
+#[salsa::tracked]
+fn is_class_used_in_component_tree<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    class_name: SymbolName<'db>,
+) -> bool {
+    let mut visited = FxHashSet::default();
+    let mut queue = VecDeque::new();
+    queue.push_back(module);
+
+    while let Some(module) = queue.pop_front() {
+        if !visited.insert(module) {
+            continue;
+        }
+
+        match module.kind(db) {
+            ModuleInfoKind::Js(js_info) => {
+                if js_info
+                    .referenced_classes
+                    .iter()
+                    .any(|r| r.matches(class_name.name(db).as_str()))
+                {
+                    return true;
+                }
+                for import_path in js_info
+                    .static_import_paths
+                    .values()
+                    .chain(js_info.dynamic_import_paths.values())
+                {
+                    if let Some(path) = import_path.as_path()
+                        && let Some(module) = db.module_for_path(path)
+                    {
+                        queue.push_back(module);
+                    }
+                }
+            }
+            ModuleInfoKind::Html(html_info) => {
+                if html_info
+                    .referenced_classes
+                    .iter()
+                    .any(|r| r.matches(class_name.name(db).as_str()))
+                {
+                    return true;
+                }
+            }
+            ModuleInfoKind::Css(_) => {}
+        }
+    }
+
+    false
+}
+
+/// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
+#[salsa::tracked]
+pub fn find_jsdoc_for_exported_symbol<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    symbol_name: SymbolName<'db>,
+) -> Option<JsdocComment> {
+    let ModuleInfoKind::Js(module) = module.kind(db) else {
+        return None;
+    };
+    let mut seen_paths = std::collections::BTreeSet::new();
+    let mut stack = vec![(module, symbol_name)];
+
+    while let Some((module, symbol_name)) = stack.pop() {
+        match &module.exports.get(symbol_name.name(db).as_str()) {
+            Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
+                return match own_export {
+                    JsOwnExport::Binding(binding_range) => module
+                        .semantic_model
+                        .as_binding_by_range(*binding_range)
+                        .and_then(|binding| binding.jsdoc().cloned()),
+                    JsOwnExport::Type(_) => None,
+                    JsOwnExport::Namespace(reexport) => reexport
+                        .export_range
+                        .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
+                };
+            }
+            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                match &reexport.import.symbol {
+                    ImportSymbol::All => break,
+                    ImportSymbol::Named(source_name) => {
+                        let lookup = source_name.text().to_string();
+                        match reexport.import.resolved_path.as_deref() {
+                            Ok(path) if seen_paths.insert(path.to_path_buf()) => {
+                                if let Some(module) = db.js_module_info_for_path(path) {
+                                    stack.push((module, SymbolName::new(db, lookup.clone())));
+                                }
+                            }
+                            _ => break,
+                        }
+                    }
+                    ImportSymbol::Default => {
+                        if let Ok(path) = reexport.import.resolved_path.as_deref()
+                            && let Some(module) = db.js_module_info_for_path(path)
+                        {
+                            stack.push((module, symbol_name));
+                        }
+                    }
+                }
+            }
+            None => {
+                for reexport in module.blanket_reexports.iter() {
+                    if let Ok(path) = reexport.import.resolved_path.as_deref()
+                        && seen_paths.insert(path.to_path_buf())
+                        && let Some(module) = db.js_module_info_for_path(path)
+                    {
+                        stack.push((module, symbol_name));
+                    }
+                }
+            }
+        }
+    }
+
+    None
+}
+
+/// Finds the CSS file and text range where a class is defined.
+#[salsa::tracked]
+pub fn find_css_class_definition<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    class_name: SymbolName<'db>,
+) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+    let mut result = Vec::new();
+    let mut visited_css = FxHashSet::default();
+    if let ModuleInfoKind::Html(html_info) = module.kind(db) {
+        for class_def in &html_info.style_classes {
+            if class_def.name.text() == class_name.name(db) {
+                result.push((
+                    module.path(db).to_path_buf(),
+                    class_def.range,
+                    class_def.content_offset,
+                ));
+            }
+        }
+    }
+
+    for step in traverse_import_tree_for_html_classes(db, module) {
+        if &step.css_path == module.path(db) {
+            continue;
+        }
+        let Some(module) = db.module_for_path(&step.css_path) else {
+            continue;
+        };
+
+        let this_result = search_css_class_transitive(db, module, class_name, &mut visited_css);
+        result.extend(this_result);
+    }
+
+    for step in traverse_import_tree_for_classes(db, module) {
+        let Some(module) = db.module_for_path(&step.css_path) else {
+            continue;
+        };
+        let this_result = search_css_class_transitive(db, module, class_name, &mut visited_css);
+
+        result.extend(this_result);
+    }
+
+    result
+}
+
+fn search_css_class_transitive<'db>(
+    db: &'db dyn ModuleDb,
+    css_module: ModuleInfo,
+    class_name: SymbolName<'db>,
+    visited: &mut FxHashSet<Utf8PathBuf>,
+) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+    let mut result = vec![];
+    let mut queue = VecDeque::new();
+    queue.push_back(css_module);
+
+    while let Some(current) = queue.pop_front() {
+        if !visited.insert(current.path(db).to_path_buf()) {
+            continue;
+        }
+
+        let ModuleInfoKind::Css(css_info) = css_module.kind(db) else {
+            continue;
+        };
+
+        for (range, token) in css_info.classes.iter() {
+            if token.text() == class_name.name(db) {
+                result.push((current.path(db).to_path_buf(), *range, None));
+            }
+        }
+
+        for import in css_info.imports.values() {
+            if let Some(imported_path) = import.resolved_path.as_path()
+                && let Some(module) = db.module_for_path(imported_path)
+            {
+                queue.push_back(module);
+            }
+        }
+    }
+
+    result
+}
+
+/// Builds a tree structure representing the import relationships for diagnostic display.
+#[salsa::tracked]
+pub fn build_import_tree_for_js(db: &dyn ModuleDb, module: ModuleInfo) -> Option<ImportTreeNode> {
+    let mut root = ImportTreeNode {
+        file_path: module.path(db).to_path_buf(),
+        css_imports: Vec::new(),
+        parent_components: Vec::new(),
+    };
+
+    if let Some(js_info) = module.kind(db).as_js_module_info() {
+        root.css_imports = js_info
+            .static_import_paths
+            .values()
+            .filter_map(|import_path| {
+                let path = import_path.as_path()?;
+                db.css_module_info_for_path(path)?;
+                Some(path.to_path_buf())
+            })
+            .collect();
+    } else {
+        return None;
+    }
+
+    let mut visited = FxHashSet::default();
+    visited.insert(module.path(db).to_path_buf());
+    root.parent_components = build_parent_nodes(db, module.path(db), &mut visited);
+
+    Some(root)
+}
+
+/// Builds a tree structure for an HTML file's import relationships (diagnostic display).
+#[salsa::tracked]
+pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Option<ImportTreeNode> {
+    let html_info = module.kind(db);
+    let html_info = html_info.as_html_module_info()?;
+
+    let css_imports: Vec<_> = html_info
+        .imported_stylesheets
+        .iter()
+        .chain(html_info.static_import_paths.values())
+        .filter_map(|stylesheet_path| {
+            let path = stylesheet_path.as_path()?;
+            db.css_module_info_for_path(path)?;
+            Some(path.to_path_buf())
+        })
+        .collect();
+
+    let mut root = ImportTreeNode {
+        file_path: module.path(db).to_path_buf(),
+        css_imports,
+        parent_components: Vec::new(),
+    };
+
+    let mut visited = FxHashSet::default();
+    visited.insert(module.path(db).to_path_buf());
+    root.parent_components = build_parent_nodes(db, module.path(db), &mut visited);
+
+    Some(root)
+}
+
+pub(crate) fn build_parent_nodes(
+    db: &dyn ModuleDb,
+    current_path: &Utf8Path,
+    visited: &mut FxHashSet<Utf8PathBuf>,
+) -> Vec<ImportTreeNode> {
+    let all_modules = db.all_modules();
+    let mut parents = Vec::new();
+
+    for (file_path, module_info) in &all_modules {
+        if visited.contains(file_path.as_path()) {
+            continue;
+        }
+
+        let imports_current = match module_info {
+            ModuleInfoKind::Js(js_info) => js_info
+                .static_import_paths
+                .values()
+                .chain(js_info.dynamic_import_paths.values())
+                .any(|p| p.as_path() == Some(current_path)),
+            ModuleInfoKind::Html(html_info) => html_info
+                .imported_stylesheets
+                .iter()
+                .chain(html_info.static_import_paths.values())
+                .chain(html_info.dynamic_import_paths.values())
+                .any(|p| p.as_path() == Some(current_path)),
+            ModuleInfoKind::Css(_) => false,
+        };
+
+        if imports_current {
+            let css_imports: Vec<Utf8PathBuf> = match module_info {
+                ModuleInfoKind::Js(js_info) => js_info
+                    .static_import_paths
+                    .values()
+                    .filter_map(|import_path| {
+                        let path = import_path.as_path()?;
+                        db.css_module_info_for_path(path)?;
+                        Some(path.to_path_buf())
+                    })
+                    .collect(),
+                ModuleInfoKind::Html(html_info) => html_info
+                    .imported_stylesheets
+                    .iter()
+                    .chain(html_info.static_import_paths.values())
+                    .chain(html_info.dynamic_import_paths.values())
+                    .filter_map(|stylesheet_path| {
+                        let path = stylesheet_path.as_path()?;
+                        db.css_module_info_for_path(path)?;
+                        Some(path.to_path_buf())
+                    })
+                    .collect(),
+                ModuleInfoKind::Css(_) => Vec::new(),
+            };
+
+            let mut branch_visited = visited.clone();
+            branch_visited.insert(file_path.clone());
+
+            let parent_components = build_parent_nodes(db, file_path, &mut branch_visited);
+
+            parents.push(ImportTreeNode {
+                file_path: file_path.clone(),
+                css_imports,
+                parent_components,
+            });
+        }
+    }
+
+    parents
 }

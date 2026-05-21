@@ -7,7 +7,9 @@ use biome_diagnostics::Severity;
 use biome_fs::BiomePath;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleDb};
+use biome_module_graph::{
+    JsImportPath, ModuleDb, ModuleInfo, SymbolName, find_jsdoc_for_exported_symbol,
+};
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -179,7 +181,7 @@ impl Rule for NoPrivateImports {
             return Vec::new();
         };
 
-        let Some(target_info) = ctx.js_module_info_for_path(target_path) else {
+        let Some(target_info) = ctx.module_info_for_path(target_path) else {
             return Vec::new();
         };
 
@@ -243,7 +245,7 @@ struct GetRestrictedImportOptions<'a> {
     target_path: &'a Utf8Path,
 
     /// Module info of the target module we're importing from.
-    target_info: JsModuleInfo,
+    target_info: ModuleInfo,
 
     /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,
@@ -288,12 +290,14 @@ fn get_restricted_import_visibility(
     import_name: &Text,
     options: &GetRestrictedImportOptions,
 ) -> Option<Visibility> {
-    let visibility = options
-        .target_info
-        .find_jsdoc_for_exported_symbol(options.module_db, import_name.text())
-        .as_ref()
-        .and_then(parse_visibility)
-        .unwrap_or(options.default_visibility);
+    let visibility = find_jsdoc_for_exported_symbol(
+        options.module_db,
+        options.target_info,
+        SymbolName::new(options.module_db, import_name.text()),
+    )
+    .as_ref()
+    .and_then(parse_visibility)
+    .unwrap_or(options.default_visibility);
 
     let is_restricted = match visibility {
         Visibility::Public => false,

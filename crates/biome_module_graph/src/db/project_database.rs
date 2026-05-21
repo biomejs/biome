@@ -1,5 +1,5 @@
-use super::inputs::ModuleDb;
 use crate::ModuleInfo;
+use crate::db::ModuleDb;
 use crate::module_graph::ModuleInfoKind;
 use biome_db::Db;
 use camino::{Utf8Path, Utf8PathBuf};

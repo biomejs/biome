@@ -2806,13 +2806,16 @@ export function Component() {
     let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
+    let styles_css = db
+        .module_for_path(Utf8Path::new("/src/styles.css"))
+        .unwrap();
 
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/styles.css"), "used"),
+        is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "used")),
         "'used' class should be referenced by Component.jsx"
     );
     assert!(
-        !is_class_referenced_by_importers(&db, Utf8Path::new("/src/styles.css"), "unused"),
+        !is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "unused")),
         "'unused' class should not be referenced by any importer"
     );
 }
@@ -2874,13 +2877,13 @@ export function App() {
 
     // The 'base' class is used by App.jsx, so it should be considered referenced.
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/base.css"), "base"),
+        is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "base")),
         "'base' class must be referenced transitively"
     );
 
     // The 'orphan' class is never used anywhere.
     assert!(
-        !is_class_referenced_by_importers(&db, Utf8Path::new("/src/base.css"), "orphan"),
+        !is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "orphan")),
         "'orphan' class must not be referenced"
     );
 }
@@ -2958,10 +2961,13 @@ export function App() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found as consumer of components.css (via app.css)
-    let module = db
+    let components_css = db
         .module_for_path(Utf8Path::new("/src/styles/components.css"))
         .unwrap();
-    let consumers = transitive_importers_of(&db, module);
+    let utils_css = db
+        .module_for_path(Utf8Path::new("/src/styles/utils.css"))
+        .unwrap();
+    let consumers = transitive_importers_of(&db, components_css);
     assert!(
         consumers
             .iter()
@@ -2971,16 +2977,12 @@ export function App() {
 
     // Classes used in App.tsx should be detected even from nested CSS
     assert!(
-        is_class_referenced_by_importers(
-            &db,
-            Utf8Path::new("/src/styles/components.css"),
-            "button"
-        ),
+        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button"),),
         "'button' class from components.css should be detected as used"
     );
 
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/styles/components.css"), "card"),
+        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
         "'card' class from components.css should be detected as used"
     );
 
@@ -2988,20 +2990,20 @@ export function App() {
     assert!(
         !is_class_referenced_by_importers(
             &db,
-            Utf8Path::new("/src/styles/components.css"),
-            "unused-component-class"
+            components_css,
+            SymbolName::new(&db, "unused-component-class"),
         ),
         "'unused-component-class' should be detected as unused"
     );
 
     // Utils classes should also work
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/styles/utils.css"), "flex"),
+        is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "flex")),
         "'flex' class from utils.css should be detected as used"
     );
 
     assert!(
-        !is_class_referenced_by_importers(&db, Utf8Path::new("/src/styles/utils.css"), "grid"),
+        !is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "grid")),
         "'grid' class from utils.css should be detected as unused"
     );
 }
@@ -3070,10 +3072,10 @@ export function Dashboard() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // Both entry points should be found as consumers
-    let module = db
+    let components_css = db
         .module_for_path(Utf8Path::new("/src/components.css"))
         .unwrap();
-    let consumers = transitive_importers_of(&db, module);
+    let consumers = transitive_importers_of(&db, components_css);
     assert_eq!(
         consumers.len(),
         2,
@@ -3094,19 +3096,19 @@ export function Dashboard() {
 
     // button used in App.tsx
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/components.css"), "button"),
+        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button")),
         "'button' should be detected as used"
     );
 
     // card used in Dashboard.tsx
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/components.css"), "card"),
+        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
         "'card' should be detected as used"
     );
 
     // modal not used anywhere
     assert!(
-        !is_class_referenced_by_importers(&db, Utf8Path::new("/src/components.css"), "modal"),
+        !is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "modal")),
         "'modal' should be detected as unused"
     );
 }
@@ -3165,8 +3167,8 @@ export function App() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found even for deeply nested base.css
-    let module = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
-    let consumers = transitive_importers_of(&db, module);
+    let base_css = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
+    let consumers = transitive_importers_of(&db, base_css);
     assert!(
         consumers
             .iter()
@@ -3176,13 +3178,13 @@ export function App() {
 
     // primary used in App.tsx
     assert!(
-        is_class_referenced_by_importers(&db, Utf8Path::new("/src/base.css"), "primary"),
+        is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "primary")),
         "'primary' from deeply nested base.css should be detected as used"
     );
 
     // secondary not used
     assert!(
-        !is_class_referenced_by_importers(&db, Utf8Path::new("/src/base.css"), "secondary"),
+        !is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "secondary")),
         "'secondary' should be detected as unused"
     );
 }

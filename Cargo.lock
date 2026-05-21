@@ -460,7 +460,6 @@ dependencies = [
 name = "biome_db"
 version = "0.0.1"
 dependencies = [
- "biome_rowan",
  "camino",
  "salsa",
 ]

@@ -1,4 +1,4 @@
-use crate::db::inputs::ModuleDb;
+use crate::db::ModuleDb;
 use crate::module_graph::ModuleInfoKind;
 use biome_console::markup;
 use biome_rowan::{TextRange, TokenText};
@@ -36,7 +36,7 @@ pub struct CssTraversalStep {
 /// Tree structure representing import relationships for diagnostic display.
 /// This captures the full hierarchical structure of how CSS files are discovered
 /// through the component import tree.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ImportTreeNode {
     /// The path of this file (JS/JSX/HTML component)
     pub file_path: Utf8PathBuf,

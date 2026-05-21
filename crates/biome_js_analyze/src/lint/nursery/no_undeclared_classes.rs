@@ -8,8 +8,9 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree, build_import_tree_for_html,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
+    build_import_tree_for_js, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
@@ -130,11 +131,11 @@ impl Rule for NoUndeclaredClasses {
                     .any(|c| c.text() == entry.name.as_ref())
             });
 
-            if !found_class {
+            if !found_class && let Some(module) = db.module_for_path(file_path) {
                 let import_tree = if is_html_like {
-                    build_import_tree_for_html(db, file_path)
+                    build_import_tree_for_html(db, module)
                 } else {
-                    build_import_tree(db, file_path)
+                    build_import_tree_for_js(db, module)
                 };
                 signals.push(UndeclaredClass {
                     range: entry.range,
@@ -304,8 +305,8 @@ fn run_without_semantic(
                 .any(|c| c.text() == entry.name.as_ref())
         });
 
-        if !found_class {
-            let import_tree = build_import_tree_for_html(db, file_path);
+        if !found_class && let Some(module) = db.module_for_path(file_path) {
+            let import_tree = build_import_tree_for_html(db, module);
             signals.push(UndeclaredClass {
                 range: entry.range,
                 name: entry.name.clone(),

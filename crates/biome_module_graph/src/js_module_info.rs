@@ -7,13 +7,11 @@ mod utils;
 mod visitor;
 
 use crate::css_module_info::CssClassReference;
-use crate::db::inputs::ModuleDb;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
 };
-use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
@@ -78,16 +76,6 @@ impl JsModuleInfo {
 
     pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
         self.diagnostics.as_slice()
-    }
-
-    /// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
-    #[inline]
-    pub fn find_jsdoc_for_exported_symbol(
-        &self,
-        db: &dyn ModuleDb,
-        name: &str,
-    ) -> Option<JsdocComment> {
-        crate::module_graph::find_jsdoc_for_exported_symbol(db, self, name)
     }
 
     /// Returns the module's global scope.

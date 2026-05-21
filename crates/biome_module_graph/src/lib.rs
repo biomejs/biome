@@ -16,7 +16,7 @@ pub use css_module_info::{
     CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssTraversalStep,
     ImportTreeDisplay, ImportTreeNode,
 };
-pub use db::inputs::ModuleDb;
+pub use db::ModuleDb;
 pub use db::project_database::ProjectDatabase;
 pub use db::queries::*;
 pub use diagnostics::ModuleDiagnostic;
@@ -27,8 +27,6 @@ pub use js_module_info::{
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
-    build_import_tree, build_import_tree_for_html, find_css_class_definition,
-    find_jsdoc_for_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module,
+    resolve_css_module, resolve_html_module, resolve_js_module,
 };
 pub use path_info_cache::PathInfoCache;

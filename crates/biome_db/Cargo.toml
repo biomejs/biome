@@ -12,9 +12,8 @@ categories.workspace = true
 publish              = false
 
 [dependencies]
-biome_rowan = { workspace = true }
-camino      = { workspace = true }
-salsa       = { workspace = true }
+camino = { workspace = true }
+salsa  = { workspace = true }
 
 [lints]
 workspace = true
