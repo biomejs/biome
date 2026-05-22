@@ -185,7 +185,7 @@ impl ProcessFile for FormatProcessFile {
         })?;
 
         if file_features.is_ignored() {
-            console.append(markup! {{content}});
+            console.append_raw(content);
             return Ok(());
         }
 
@@ -198,7 +198,7 @@ impl ProcessFile for FormatProcessFile {
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
-            console.append(markup! {{content}});
+            console.append_raw(content);
             return Ok(());
         };
         if file_features.supports_format() {
@@ -227,9 +227,7 @@ impl ProcessFile for FormatProcessFile {
             } else {
                 code
             };
-            console.append(markup! {
-                {output}
-            });
+            console.append_raw(&output);
             workspace
                 .close_file(CloseFileParams {
                     project_key,
@@ -237,9 +235,7 @@ impl ProcessFile for FormatProcessFile {
                 })
                 .map_err(|err| err.into())
         } else {
-            console.append(markup! {
-                {content}
-            });
+            console.append_raw(content);
             console.error(markup! {
                 <Warn>"The content was not formatted because the formatter is currently disabled."</Warn>
             });

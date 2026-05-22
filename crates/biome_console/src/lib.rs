@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+use markup::MarkupNodeBuf;
 use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
@@ -37,6 +38,15 @@ pub trait Console: Send + Sync + RefUnwindSafe {
     /// Prints a message (formatted using [markup!]) to the console.
     fn print(&mut self, level: LogLevel, args: Markup);
 
+    /// Prints unformatted content to the console.
+    ///
+    /// This bypasses markup rendering and should only be used for source code
+    /// or other byte-sensitive output.
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        use crate as biome_console;
+        self.print(level, markup! {{content}});
+    }
+
     /// It reads from a source, and if this source contains something, it's converted into a [String]
     fn read(&mut self) -> Option<String>;
 
@@ -63,6 +73,9 @@ pub trait ConsoleExt: Console {
     ///
     /// It doesn't add any line
     fn append(&mut self, args: Markup);
+
+    /// Prints unformatted content with level [LogLevel::Log].
+    fn append_raw(&mut self, content: &str);
 }
 
 impl<T: Console + ?Sized> ConsoleExt for T {
@@ -76,6 +89,10 @@ impl<T: Console + ?Sized> ConsoleExt for T {
 
     fn append(&mut self, args: Markup) {
         self.print(LogLevel::Log, args);
+    }
+
+    fn append_raw(&mut self, content: &str) {
+        self.print_raw(LogLevel::Log, content);
     }
 }
 
@@ -174,6 +191,15 @@ impl Console for EnvConsole {
         write!(out, "").unwrap();
     }
 
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        let mut out = match level {
+            LogLevel::Error => self.err.lock(),
+            LogLevel::Log => self.out.lock(),
+        };
+
+        out.write_all(content.as_bytes()).unwrap();
+    }
+
     fn read(&mut self) -> Option<String> {
         // Here we check if stdin is redirected. If not, we bail.
         //
@@ -226,6 +252,17 @@ impl Console for BufferConsole {
             content: args.to_owned(),
         });
     }
+
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        self.out_buffer.push(Message {
+            level,
+            content: MarkupBuf(vec![MarkupNodeBuf {
+                elements: Vec::new(),
+                content: content.to_string(),
+            }]),
+        });
+    }
+
     fn read(&mut self) -> Option<String> {
         if self.in_buffer.is_empty() {
             None
@@ -256,6 +293,16 @@ impl Console for FileBufferConsole {
         self.out.push(Message {
             level,
             content: args.to_owned(),
+        });
+    }
+
+    fn print_raw(&mut self, level: LogLevel, content: &str) {
+        self.out.push(Message {
+            level,
+            content: MarkupBuf(vec![MarkupNodeBuf {
+                elements: Vec::new(),
+                content: content.to_string(),
+            }]),
         });
     }
 
