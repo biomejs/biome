@@ -6,7 +6,7 @@ use crate::utils::scss_include_comments::{
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
+    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage, ScssAtRootAtRule,
     ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
     ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
     ScssMapExpressionPair, T, TextLen, TextSize, is_in_scss_include_arguments,
@@ -324,7 +324,6 @@ fn handle_function_comment(
 fn handle_generic_property_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    // Check if the comment is inside a CSS generic property (e.g., color: value)
     let Some(generic_property) = comment
         .enclosing_node()
         .ancestors()
@@ -339,46 +338,73 @@ fn handle_generic_property_comment(
 
     let comment_piece = comment.piece();
 
-    // Check if the comment is in the name's trailing trivia (before colon)
-    // Example: `color /* comment */: value`
+    if is_between_property_colon_and_value(&generic_property, comment_piece.text_range().start()) {
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
+    }
+
     if let Some(name_token) = name.syntax().last_token() {
         for piece in name_token.trailing_trivia().pieces() {
-            if piece.is_comments() && piece.text() == comment_piece.text() {
-                // Our placement is slightly better than Prettier because it adds some spacing
-                return CommentPlacement::trailing(name.into_syntax(), comment);
+            if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
+                // `color/* comment */: red` keeps the comment between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
         }
     }
 
     if let (Some(preceding), Some(following)) = (comment.preceding_node(), comment.following_node())
+        && preceding == name.syntax()
+        && following
+            .parent()
+            .and_then(CssGenericComponentValueList::cast)
+            .is_some()
     {
-        // If preceding is the property name and following is in the value list
-        if preceding == name.syntax()
-            && following
-                .parent()
-                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
-        {
-            // Place comment as dangling on the property so it can be formatted inline
-            // between the colon and values
-            return CommentPlacement::trailing(generic_property.into_syntax(), comment);
-        }
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
     }
 
     CommentPlacement::Default(comment)
+}
+
+fn is_between_property_colon_and_value(
+    property: &CssGenericProperty,
+    comment_start: TextSize,
+) -> bool {
+    // `color: /* comment */ red` belongs to the property colon boundary.
+    let Ok(colon) = property.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = property
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
 }
 
 fn handle_declaration_name_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
     match comment.preceding_node() {
-        Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            if following_node
+        Some(preceding_node) if AnyCssDeclarationName::can_cast(preceding_node.kind()) => {
+            if let Some(generic_property) =
+                preceding_node.parent().and_then(CssGenericProperty::cast)
+            {
+                // `color // comment\n: red` keeps the comment between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
+            }
+
+            if preceding_node
                 .parent()
-                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
+                .and_then(CssGenericComponentValueList::cast)
+                .is_some()
             {
                 CommentPlacement::Default(comment)
             } else {
-                CommentPlacement::leading(following_node.clone(), comment)
+                CommentPlacement::leading(preceding_node.clone(), comment)
             }
         }
         _ => CommentPlacement::Default(comment),

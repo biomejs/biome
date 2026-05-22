@@ -84,28 +84,17 @@ value;
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,16 +1,16 @@
- selector {
--  prop: // comment
--    value;
-+  // comment
-+  prop: value;
- 
--  prop: /* block */ value;
-+  /* block */ prop: value;
- 
-   prop: value;
- }
- 
- // #5603
+@@ -11,8 +11,8 @@
  .grid {
--  grid-template-areas: //
--    "header header header" //
-+  //
-+  grid-template-areas: "header header header" //
-     "sidebar content content" //
-     "footer footer footer";
+   grid-template-areas: //
+     "header header header" //
+-    "sidebar content content" //
+-    "footer footer footer";
++      "sidebar content content" //
++      "footer footer footer";
  
+   grid-template-areas: "header header header" //
+     "sidebar content content" //
 @@ -20,8 +20,7 @@
  }
  
@@ -116,73 +105,37 @@ value;
    "Noto Sans TC",
    "Noto Sans SC",
    "Noto Sans JP",
-@@ -41,27 +40,32 @@
- 
+@@ -42,8 +41,8 @@
  // #7109
  .test {
--  background:
+   background:
 -        /////// foo
 -        // bar
--    radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
 +  /////// foo
 +  // bar
-+
-+  background: radial-gradient(
-+    circle farthest-corner at 5% 10%,
-+    #000000,
-+    transparent 50%
-+  );
+     radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
  }
  
- // TODO: make these pretty
- selector {
--  prop:
--/* block */ value;
-+  /* block */
-+  prop: value;
- 
--  prop // inline
--: value;
-+  // inline
-+  prop: value;
- 
--  prop/* block */: value;
-+  prop /* block */: value;
- 
--  prop/* block */
--: value;
-+  /* block */
-+  prop: value;
- 
--  prop/* before */: // after
--    value;
-+  // after
-+  prop /* before */: value;
- 
--  prop/* before */: /* after*/ value;
-+  /* after*/
-+  prop /* before */: value;
- }
 ```
 
 # Output
 
 ```scss
 selector {
-  // comment
-  prop: value;
+  prop: // comment
+    value;
 
-  /* block */ prop: value;
+  prop: /* block */ value;
 
   prop: value;
 }
 
 // #5603
 .grid {
-  //
-  grid-template-areas: "header header header" //
-    "sidebar content content" //
-    "footer footer footer";
+  grid-template-areas: //
+    "header header header" //
+      "sidebar content content" //
+      "footer footer footer";
 
   grid-template-areas: "header header header" //
     "sidebar content content" //
@@ -210,33 +163,28 @@ $font-family-rich: // custom
 
 // #7109
 .test {
+  background:
   /////// foo
   // bar
-
-  background: radial-gradient(
-    circle farthest-corner at 5% 10%,
-    #000000,
-    transparent 50%
-  );
+    radial-gradient(circle farthest-corner at 5% 10%, #000000, transparent 50%);
 }
 
 // TODO: make these pretty
 selector {
-  /* block */
-  prop: value;
+  prop:
+/* block */ value;
 
-  // inline
-  prop: value;
+  prop // inline
+: value;
 
-  prop /* block */: value;
+  prop/* block */: value;
 
-  /* block */
-  prop: value;
+  prop/* block */
+: value;
 
-  // after
-  prop /* before */: value;
+  prop/* before */: // after
+    value;
 
-  /* after*/
-  prop /* before */: value;
+  prop/* before */: /* after*/ value;
 }
 ```
