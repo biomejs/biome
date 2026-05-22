@@ -1,24 +1,77 @@
-# HACKED: https://www.stepsecurity.io/blog/actions-cool-issues-helper-github-action-compromised-all-tags-point-to-imposter-commit-that-exfiltrates-ci-cd-credentials
-#name: Close issues
-#
-#on:
-#  schedule:
-#    - cron: "0 0 * * *"
-#
-#
-#permissions:
-#  issues: write
-#
-#jobs:
-#  close-issues:
-#    if: github.repository == 'biomejs/biome'
-#    runs-on: depot-ubuntu-24.04-arm-small
-#    steps:
-#      - name: Close issue without reproduction
-#        uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0 # v3.8.0
-#        with:
-#          actions: "close-issues"
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          labels: "S-Needs repro"
-#          inactive-day: 3
-#          body: "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
+name: Close issues
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  close-issues:
+    if: github.repository == 'biomejs/biome'
+    runs-on: depot-ubuntu-24.04-arm-small
+    steps:
+      - name: Close issues without reproduction
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+          script: |
+            const daysInactive = 3;
+            // Convert days to milliseconds: days * hours * minutes * seconds * ms
+            const cutoff = new Date(Date.now() - daysInactive * 24 * 60 * 60 * 1000);
+            const label = 'S-Needs repro';
+            const closeComment =
+              'This issue has been automatically closed because it has been ' +
+              'inactive for more than 3 days and it does not have a minimal reproduction.';
+
+            let page = 1;
+            const perPage = 100;
+
+            while (true) {
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: label,
+                state: 'open',
+                sort: 'updated',
+                direction: 'asc',
+                per_page: perPage,
+                page,
+              });
+
+              if (issues.length === 0) {
+                break;
+              }
+
+              for (const issue of issues) {
+                if (issue.pull_request) {
+                  continue;
+                }
+
+                const updatedAt = new Date(issue.updated_at);
+                if (updatedAt >= cutoff) {
+                  continue;
+                }
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: closeComment,
+                });
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'not_planned',
+                });
+
+                core.info(`Closed issue #${issue.number} (last updated: ${issue.updated_at})`);
+              }
+
+              if (issues.length < perPage) {
+                break;
+              }
+
+              page++;
+            }
