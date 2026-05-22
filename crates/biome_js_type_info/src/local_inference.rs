@@ -2861,7 +2861,11 @@ fn type_from_function_body(
         .map(|return_statement| {
             return_statement.argument().map_or(
                 TypeData::Reference(GLOBAL_UNDEFINED_ID.into()),
-                |argument| resolver.resolve_expression(scope_id, &argument).into_owned(),
+                |argument| {
+                    resolver
+                        .resolve_expression(scope_id, &argument)
+                        .into_owned()
+                },
             )
         })
         .collect();
