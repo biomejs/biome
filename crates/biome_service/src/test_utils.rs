@@ -40,7 +40,7 @@ pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_recei
         watcher_tx,
         service_tx,
         Arc::new(NoopQueryProvider {}),
-        None
+        None,
     );
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {

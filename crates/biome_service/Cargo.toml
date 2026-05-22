@@ -33,8 +33,8 @@ biome_fs                 = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true }
 biome_graphql_analyze    = { workspace = true, optional = true }
 biome_graphql_formatter  = { workspace = true, optional = true }
-biome_graphql_parser     = { workspace = true, optional =true }
-biome_graphql_syntax     = { workspace = true, optional =true }
+biome_graphql_parser     = { workspace = true, optional = true }
+biome_graphql_syntax     = { workspace = true, optional = true }
 biome_grit_formatter     = { workspace = true, optional = true }
 biome_grit_parser        = { workspace = true, optional = true }
 biome_grit_patterns      = { workspace = true, features = ["serde"], optional = true }
@@ -55,7 +55,7 @@ biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
-biome_markdown_formatter   = { workspace = true , optional = true }
+biome_markdown_formatter = { workspace = true, optional = true }
 biome_markdown_parser    = { workspace = true, optional = true }
 biome_markdown_syntax    = { workspace = true, optional = true }
 biome_module_graph       = { workspace = true, features = ["serde"] }
@@ -70,7 +70,7 @@ biome_text_edit          = { workspace = true }
 biome_unicode_table      = { workspace = true }
 biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
 biome_yaml_parser        = { workspace = true, optional = true }
-biome_yaml_syntax        = { workspace = true, optional =true }
+biome_yaml_syntax        = { workspace = true, optional = true }
 boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
@@ -128,7 +128,7 @@ lang_yaml    = [
   "dep:biome_yaml_syntax"
 ]
 plugins      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
-schema    = [
+schema       = [
   "biome_configuration/schema",
   "biome_css_syntax/schema",
   "biome_formatter/schema",
@@ -144,11 +144,12 @@ schema    = [
   "biome_markdown_syntax/schema",
   "biome_module_graph/schema",
   "biome_text_edit/schema",
-  "biome_yaml_formatter/schema","biome_yaml_syntax/schema",
+  "biome_yaml_formatter/schema",
+  "biome_yaml_syntax/schema",
   "dep:schemars",
   "lang_grit",
 ]
-testing   = []
+testing      = []
 
 [lints]
 workspace = true
