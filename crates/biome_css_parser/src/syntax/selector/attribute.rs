@@ -26,8 +26,12 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['[']);
-    // we have diagnostic inside `parse_attribute_name` method
-    parse_attribute_name(p).ok();
+    let name = parse_attribute_name(p);
+    if name.is_absent() && (is_at_attribute_matcher(p) || p.at(T![']'])) {
+        // `[=#{$value}]` and `[]`: `=` or `]` proves the attribute selector
+        // has a missing required name, not just a broader selector recovery.
+        name.or_add_diagnostic(p, expected_identifier);
+    }
 
     // `parse_attribute_matcher` method is invoked with `ok()`,
     // which turns an `Err` into an `Ok` variant, because attribute matcher in a CSS attribute selector
