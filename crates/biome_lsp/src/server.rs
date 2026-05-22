@@ -694,7 +694,6 @@ impl ServerFactory {
                 service_tx,
                 Arc::new(GritSearchQuery::default()),
                 None,
-                true
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),

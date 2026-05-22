@@ -1824,7 +1824,6 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
         service_tx,
         Arc::new(search_provider),
         threads,
-        false
     ))
 }
 
