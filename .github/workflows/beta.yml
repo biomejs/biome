@@ -230,13 +230,8 @@ jobs:
           node-version: 24.15.0
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Pin Corepack 0.20
-        run: |
-          echo "Before: corepack => $(corepack --version || echo 'not installed')"
-          npm install -g corepack@0.20
-          echo "After : corepack => $(corepack --version)"
-          corepack enable
-          pnpm --version
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Set beta version
         run: node packages/@biomejs/biome/scripts/update-beta-version.mjs
