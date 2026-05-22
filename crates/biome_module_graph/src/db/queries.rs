@@ -177,17 +177,6 @@ pub fn traverse_import_tree_for_html_classes(
             }
         }
 
-        for import_path in html_info.static_import_paths.values() {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
-            }
-        }
-
         for import_path in html_info
             .static_import_paths
             .values()
@@ -391,6 +380,7 @@ pub fn find_js_exported_symbol<'db>(
                     }
                     ImportSymbol::Default => {
                         if let Ok(path) = reexport.import.resolved_path.as_deref()
+                            && seen_paths.insert(path.to_path_buf())
                             && let Some(module) = db.js_module_info_for_path(path)
                         {
                             stack.push((module, symbol_name));

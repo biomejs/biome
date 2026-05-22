@@ -101,12 +101,12 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         importers.push((file_path.to_path_buf(), module_info.clone()));
                     }
                 });
-
+            let mut discovered_css = vec![];
             for (file_path, module_info) in importers {
                 self.visited.insert(file_path.clone());
                 self.stack.push(file_path.clone());
 
-                let css_steps: Vec<_> = match &module_info {
+                discovered_css.extend(match &module_info {
                     ModuleInfoKind::Js(js_info) => js_info
                         .static_import_paths
                         .values()
@@ -119,7 +119,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                                 css_classes: css_info.classes.clone(),
                             })
                         })
-                        .collect(),
+                        .collect::<Vec<_>>(),
                     ModuleInfoKind::Html(html_info) => html_info
                         .imported_stylesheets
                         .iter()
@@ -134,14 +134,12 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                                 css_classes: css_info.classes.clone(),
                             })
                         })
-                        .collect(),
+                        .collect::<Vec<_>>(),
                     ModuleInfoKind::Css(_) => Vec::new(),
-                };
-
-                if !css_steps.is_empty() {
-                    self.current_css_iter = Some(css_steps.into_iter());
-                    break;
-                }
+                });
+            }
+            if !discovered_css.is_empty() {
+                self.current_css_iter = Some(discovered_css.into_iter());
             }
         }
     }

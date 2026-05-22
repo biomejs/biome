@@ -48,9 +48,10 @@ impl PathInfoCache {
         for path in paths {
             let mut parent = path.parent();
             while let Some(dir) = parent {
-                if self.get_or_insert(dir, fs).is_some() {
-                    break; // already cached, ancestors are too
+                if self.cache.pin().get(dir).is_some() {
+                    break; // already cached from a previous walk
                 }
+                self.get_or_insert(dir, fs);
                 parent = dir.parent();
             }
         }

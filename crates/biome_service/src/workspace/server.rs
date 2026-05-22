@@ -1407,7 +1407,7 @@ impl WorkspaceServer {
         path: &BiomePath,
         update_kind: &UpdateKind,
         infer_types: bool,
-    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 if let (Some(js_root), Some(services)) = (
@@ -1424,10 +1424,10 @@ impl WorkspaceServer {
                             &self.db.path_info_cache,
                             infer_types,
                         );
-                        self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
-                        (deps, diagnostics)
+                        self.db_set_module_info(path, ModuleInfoKind::Js(module_info))?;
+                        Ok((deps, diagnostics))
                     } else {
-                        Default::default()
+                        Ok(Default::default())
                     }
                 } else if let Some(css_root) =
                     SendNode::into_language_root::<AnyCssRoot>(root.clone())
@@ -1439,8 +1439,8 @@ impl WorkspaceServer {
                         &self.project_layout,
                         &self.db.path_info_cache,
                     );
-                    self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
-                    (deps, diagnostics)
+                    self.db_set_module_info(path, ModuleInfoKind::Css(module_info))?;
+                    Ok((deps, diagnostics))
                 } else if let Some(html_root) =
                     SendNode::into_language_root::<HtmlRoot>(root.clone())
                 {
@@ -1478,15 +1478,15 @@ impl WorkspaceServer {
                         &self.project_layout,
                         &self.db.path_info_cache,
                     );
-                    self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
-                    (deps, diagnostics)
+                    self.db_set_module_info(path, ModuleInfoKind::Html(module_info))?;
+                    Ok((deps, diagnostics))
                 } else {
-                    Default::default()
+                    Ok(Default::default())
                 }
             }
             UpdateKind::Removed => {
-                self.db_remove_module(path);
-                Default::default()
+                self.db_remove_module(path)?;
+                Ok(Default::default())
             }
         }
     }
@@ -1496,10 +1496,12 @@ impl WorkspaceServer {
     }
 
     /// Stores a [ModuleInfo] in the database
-    fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
-        let Ok(mut db) = self.lock_db() else {
-            return;
-        };
+    fn db_set_module_info(
+        &self,
+        path: &Utf8Path,
+        kind: ModuleInfoKind,
+    ) -> Result<(), WorkspaceError> {
+        let mut db = self.lock_db()?;
         let path_buf = path.to_path_buf();
 
         let existing = db.modules.pin().get(&path_buf).copied();
@@ -1509,14 +1511,14 @@ impl WorkspaceServer {
             let module_info = ModuleInfo::new(&*db, path_buf.clone(), kind);
             db.insert_module(path_buf, module_info);
         }
+        Ok(())
     }
 
     /// Removes a [ModuleInfo] from the database
-    fn db_remove_module(&self, path: &Utf8Path) {
-        let Ok(db) = self.lock_db() else {
-            return;
-        };
-        db.remove_module(path)
+    fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+        let db = self.lock_db()?;
+        db.remove_module(path);
+        Ok(())
     }
 
     /// Purges the path from the database
@@ -1559,7 +1561,7 @@ impl WorkspaceServer {
             &path,
             &update_kind,
             settings.module_graph_resolution_kind.is_modules_and_types(),
-        );
+        )?;
 
         match update_kind {
             UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _, _) => {
@@ -3030,8 +3032,6 @@ impl Workspace for WorkspaceServer {
         self.documents.pin().remove(path);
         self.node_cache.lock().unwrap().remove(path);
 
-        // TODO: Phase 5 — clear AST from Salsa when file is closed
-
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the
             // file may have gone out-of-sync between the client and the
@@ -3059,11 +3059,13 @@ impl Workspace for WorkspaceServer {
             super::UpdateKind::Remove => UpdateKind::Removed,
         };
 
+        // TODO: handle diagnostics here
         self.update_module_graph_internal(
             &params.path,
             &update_kind,
             settings.module_graph_resolution_kind.is_modules_and_types(),
-        );
+        )?;
+
         Ok(())
     }
 
