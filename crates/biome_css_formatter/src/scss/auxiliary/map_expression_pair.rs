@@ -3,10 +3,13 @@ use crate::utils::comment_trivia::format_leading_comments_with_soft_lines;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
-    ScssMapExpressionPair, ScssMapExpressionPairFields, is_in_scss_include_arguments,
+    CssSyntaxKind::{SCSS_EACH_AT_RULE, SCSS_FOR_AT_RULE, SCSS_IF_AT_RULE, SCSS_WHILE_AT_RULE},
+    ScssMapExpressionPair, ScssMapExpressionPairFields, ScssVariableDeclaration,
+    is_in_scss_include_arguments,
 };
 use biome_formatter::comments::CommentKind;
 use biome_formatter::{format_args, write};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssMapExpressionPair;
@@ -97,6 +100,7 @@ impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
         if is_self_breaking_value(&value)
             && !is_self_breaking_value(&key)
             && f.comments().leading_comments(self.node.syntax()).is_empty()
+            && !is_in_control_variable_map(self.node)
         {
             return write!(
                 f,
@@ -177,4 +181,25 @@ fn should_group_leading_block_comments_with_pair(
     }
 
     true
+}
+
+/// Returns `true` for map pairs in control variable maps.
+///
+/// Example: `@if true { $map: (key: (a, b)) }`.
+fn is_in_control_variable_map(node: &ScssMapExpressionPair) -> bool {
+    let Some(variable) = node
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(ScssVariableDeclaration::cast)
+    else {
+        return false;
+    };
+
+    variable.syntax().ancestors().skip(1).any(|ancestor| {
+        matches!(
+            ancestor.kind(),
+            SCSS_EACH_AT_RULE | SCSS_FOR_AT_RULE | SCSS_IF_AT_RULE | SCSS_WHILE_AT_RULE
+        )
+    })
 }
