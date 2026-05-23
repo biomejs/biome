@@ -1,3 +1,11 @@
 $map:(('key':'value','key': 'value' ,'key':'value','key' :'value','key':'value',):('key':'value',),('list','list' ,'list','list','list','list','list','list','list','list'):('list'),('list','long long long long long long long long long long long long long list'):'hello world',);
 
 $nested:(key:(nested-key:nested-value,other-key:other-value,),);
+
+$map-comments:(key4:(key:value,key:value,key:value,),);
+
+$icons:(cal-day-group:(left:253,top:73,),/* keep blank */
+
+cal-week-group:(left:1,top:169,),);
+
+@if true{$newKey:($key:($theme-name:$value))}
