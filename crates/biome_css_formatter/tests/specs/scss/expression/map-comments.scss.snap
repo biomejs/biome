@@ -81,9 +81,9 @@ $leadingBlockCommentsMap: (
 $leadingBlockCommentNestedMap: (
 	/* comment */
 	key3: (
-		key: value,
-		key: value,
-	),
+			key: value,
+			key: value,
+		),
 	key4: value,
 );
 
