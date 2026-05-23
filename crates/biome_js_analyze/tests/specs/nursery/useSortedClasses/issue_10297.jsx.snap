@@ -1,0 +1,215 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_10297.jsx
+---
+# Input
+```jsx
+<>
+	<span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`}>a</span>
+	<span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+	<span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+	<span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+	<span className={`card${isActive && ' p-4 flex'}`}>h</span>
+</>
+
+```
+
+# Diagnostics
+```
+issue_10297.jsx:3:37 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    1 │ <>
+    2 │ 	<span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`}>a</span>
+  > 3 │ 	<span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+      │ 	                                   ^^^^^^^^^^^
+    4 │ 	<span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+    5 │ 	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     1  1 │   <>
+     2  2 │     <span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`}>a</span>
+     3    │ - → <span·className={`card${isActive·?·'·p-4·flex'·:·''}`}>b</span>
+        3 │ + → <span·className={`card${isActive·?·'·flex·p-4'·:·''}`}>b</span>
+     4  4 │     <span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+     5  5 │     <span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+  
+
+```
+
+```
+issue_10297.jsx:4:33 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    2 │ 	<span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`}>a</span>
+    3 │ 	<span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+  > 4 │ 	<span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+      │ 	                               ^^^^^^^^^^^
+    5 │ 	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+    6 │ 	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     2  2 │     <span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`}>a</span>
+     3  3 │     <span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+     4    │ - → <span·className={`${isActive·?·'p-4·flex·'·:·''}base`}>c</span>
+        4 │ + → <span·className={`${isActive·?·'flex·p-4·'·:·''}base`}>c</span>
+     5  5 │     <span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+     6  6 │     <span className={`${someFunc('p-4 flex')}base`}>e</span>
+  
+
+```
+
+```
+issue_10297.jsx:5:37 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    3 │ 	<span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+    4 │ 	<span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+  > 5 │ 	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+      │ 	                                   ^^^^^^^^^^^^
+    6 │ 	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+    7 │ 	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     3  3 │     <span className={`card${isActive ? ' p-4 flex' : ''}`}>b</span>
+     4  4 │     <span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+     5    │ - → <span·className={`wrap${isActive·?·'·p-4·flex·'·:·''}end`}>d</span>
+        5 │ + → <span·className={`wrap${isActive·?·'·flex·p-4·'·:·''}end`}>d</span>
+     6  6 │     <span className={`${someFunc('p-4 flex')}base`}>e</span>
+     7  7 │     <span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+  
+
+```
+
+```
+issue_10297.jsx:6:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    4 │ 	<span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+    5 │ 	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+  > 6 │ 	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+      │ 	                             ^^^^^^^^^^
+    7 │ 	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+    8 │ 	<span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     4  4 │     <span className={`${isActive ? 'p-4 flex ' : ''}base`}>c</span>
+     5  5 │     <span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+     6    │ - → <span·className={`${someFunc('p-4·flex')}base`}>e</span>
+        6 │ + → <span·className={`${someFunc('flex·p-4')}base`}>e</span>
+     7  7 │     <span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+     8  8 │     <span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+  
+
+```
+
+```
+issue_10297.jsx:7:33 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    5 │ 	<span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+    6 │ 	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+  > 7 │ 	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+      │ 	                               ^^^^^^^^^^^^^^
+    8 │ 	<span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+    9 │ 	<span className={`card${isActive && ' p-4 flex'}`}>h</span>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     5  5 │     <span className={`wrap${isActive ? ' p-4 flex ' : ''}end`}>d</span>
+     6  6 │     <span className={`${someFunc('p-4 flex')}base`}>e</span>
+     7    │ - → <span·className={`${isActive·?·'p-4·flex·m-2'·:·''}base`}>f</span>
+        7 │ + → <span·className={`${isActive·?·'flex·p-4·m-2'·:·''}base`}>f</span>
+     8  8 │     <span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+     9  9 │     <span className={`card${isActive && ' p-4 flex'}`}>h</span>
+  
+
+```
+
+```
+issue_10297.jsx:8:42 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     6 │ 	<span className={`${someFunc('p-4 flex')}base`}>e</span>
+     7 │ 	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+   > 8 │ 	<span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+       │ 	                                        ^^^^^^^^^^^
+     9 │ 	<span className={`card${isActive && ' p-4 flex'}`}>h</span>
+    10 │ </>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     6  6 │     <span className={`${someFunc('p-4 flex')}base`}>e</span>
+     7  7 │     <span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+     8    │ - → <span·className={`${prefix}${isActive·?·'·p-4·flex'·:·''}`}>g</span>
+        8 │ + → <span·className={`${prefix}${isActive·?·'·flex·p-4'·:·''}`}>g</span>
+     9  9 │     <span className={`card${isActive && ' p-4 flex'}`}>h</span>
+    10 10 │   </>
+  
+
+```
+
+```
+issue_10297.jsx:9:38 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     7 │ 	<span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+     8 │ 	<span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+   > 9 │ 	<span className={`card${isActive && ' p-4 flex'}`}>h</span>
+       │ 	                                    ^^^^^^^^^^^
+    10 │ </>
+    11 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     7  7 │     <span className={`${isActive ? 'p-4 flex m-2' : ''}base`}>f</span>
+     8  8 │     <span className={`${prefix}${isActive ? ' p-4 flex' : ''}`}>g</span>
+     9    │ - → <span·className={`card${isActive·&&·'·p-4·flex'}`}>h</span>
+        9 │ + → <span·className={`card${isActive·&&·'·flex·p-4'}`}>h</span>
+    10 10 │   </>
+    11 11 │   
+  
+
+```

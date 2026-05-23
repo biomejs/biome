@@ -1,4 +1,7 @@
-use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
+use biome_js_syntax::{
+    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsTemplateChunkElement,
+    JsTemplateElement, is_transparent_expression_wrapper,
+};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use std::cmp::Ordering;
 
@@ -267,6 +270,24 @@ impl TemplateLiteralSpaceContext {
         })
     }
 
+    /// Like [`Self::from_chunk`], but for a string literal used as a `${...}` value;
+    /// the element directly adjacent to the substitution plays the role of the boundary.
+    pub(crate) fn from_string_literal(literal: &JsStringLiteralExpression) -> Option<Self> {
+        let element = enclosing_substitution(literal)?;
+        let inner = literal.inner_string_text().ok()?;
+        let value = inner.text();
+        if value.trim().is_empty() {
+            return None;
+        }
+
+        Some(Self {
+            prefix_is_var: boundary_glues(element.syntax().prev_sibling(), Side::Leading),
+            postfix_is_var: boundary_glues(element.syntax().next_sibling(), Side::Trailing),
+            leading_space: value.starts_with(' '),
+            trailing_space: value.ends_with(' '),
+        })
+    }
+
     /// Skip first class from sorting when it's connected to a variable: `${var}px-2 m-4`
     #[inline]
     pub(crate) fn ignore_prefix(&self) -> bool {
@@ -295,6 +316,59 @@ impl TemplateLiteralSpaceContext {
     }
 }
 
+/// The `${...}` element this literal is directly the value of, else `None`.
+fn enclosing_substitution(literal: &JsStringLiteralExpression) -> Option<JsTemplateElement> {
+    let mut node = literal.syntax().parent()?;
+    loop {
+        if let Some(element) = JsTemplateElement::cast_ref(&node) {
+            return Some(element);
+        }
+        // The literal stays the substitution value only through a transparent wrapper
+        // or a branch of a conditional/logical expression.
+        let keeps_value = is_transparent_expression_wrapper(&node)
+            || matches!(
+                node.kind(),
+                JsSyntaxKind::JS_CONDITIONAL_EXPRESSION | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            );
+        if !keeps_value {
+            return None;
+        }
+        node = node.parent()?;
+    }
+}
+
+/// Which side of the value a neighbouring element sits on.
+#[derive(Debug, Clone, Copy)]
+enum Side {
+    Leading,
+    Trailing,
+}
+
+/// Returns `true` when the sibling would glue onto the value with no separating space:
+/// another `${...}` substitution, or a non-empty chunk whose touching edge has no space.
+fn boundary_glues(sibling: Option<JsSyntaxNode>, side: Side) -> bool {
+    let Some(sibling) = sibling else {
+        return false;
+    };
+    if JsTemplateElement::can_cast(sibling.kind()) {
+        return true;
+    }
+    let Some(chunk) = JsTemplateChunkElement::cast(sibling) else {
+        return false;
+    };
+    let Ok(token) = chunk.template_chunk_token() else {
+        return false;
+    };
+    let text = token.text_trimmed();
+    if text.is_empty() {
+        return false;
+    }
+    match side {
+        Side::Leading => !text.ends_with(' '),
+        Side::Trailing => !text.starts_with(' '),
+    }
+}
+
 /// Returns the template space context for the given node
 pub(crate) fn get_template_literal_space_context(
     node: &AnyClassStringLike,
@@ -302,6 +376,9 @@ pub(crate) fn get_template_literal_space_context(
     match node {
         AnyClassStringLike::JsTemplateChunkElement(chunk) => {
             TemplateLiteralSpaceContext::from_chunk(chunk)
+        }
+        AnyClassStringLike::JsStringLiteralExpression(literal) => {
+            TemplateLiteralSpaceContext::from_string_literal(literal)
         }
         _ => None,
     }

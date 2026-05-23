@@ -195,14 +195,18 @@ impl Rule for UseSortedClasses {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        // Calculate the range offset to account for the ignored prefix and postfix.
-        let sort_range = if let Some(value) = node.value() {
-            let range = node.range();
-            let template_ctx = sort::get_template_literal_space_context(node);
-            let real_sort_range = get_sort_class_name_range(&value, &range, &template_ctx);
-            real_sort_range.unwrap_or(range)
-        } else {
-            node.range()
+        // Template chunk ranges match their text; other nodes include quote characters.
+        let sort_range = match node {
+            AnyClassStringLike::JsTemplateChunkElement(_) => {
+                let range = node.range();
+                node.value()
+                    .and_then(|value| {
+                        let template_ctx = sort::get_template_literal_space_context(node);
+                        get_sort_class_name_range(&value, &range, &template_ctx)
+                    })
+                    .unwrap_or(range)
+            }
+            _ => node.range(),
         };
 
         Some(RuleDiagnostic::new(
