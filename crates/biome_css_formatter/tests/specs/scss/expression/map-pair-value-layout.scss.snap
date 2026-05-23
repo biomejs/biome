@@ -18,6 +18,10 @@ cal-week-group:(left:1,top:169,),);
 
 @if true{$newKey:($key:($theme-name:$value))}
 
+@for $i from 1 through 2{$controlMap:(key:(a,b,c));}
+
+@each $item in a{$eachMap:(key:(a:b,c:d));}
+
 ```
 
 
@@ -86,9 +90,28 @@ $icons: (
 @if true {
 	$newKey: (
 		$key: (
-			$theme-name: $value,
-		),
+				$theme-name: $value,
+			),
 	)
+}
+
+@for $i from 1 through 2 {
+	$controlMap: (
+		key: (
+				a,
+				b,
+				c,
+			),
+	);
+}
+
+@each $item in a {
+	$eachMap: (
+		key: (
+				a: b,
+				c: d,
+			),
+	);
 }
 
 ```
