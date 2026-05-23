@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/expression/map-pair-value-layout.scss
 ---
 
@@ -21,6 +22,8 @@ cal-week-group:(left:1,top:169,),);
 @for $i from 1 through 2{$controlMap:(key:(a,b,c));}
 
 @each $item in a{$eachMap:(key:(a:b,c:d));}
+
+@while true{$whileMap:(key:(a,b,c));}
 
 ```
 
@@ -84,7 +87,7 @@ $icons: (
 	cal-week-group: (
 			left: 1,
 			top: 169,
-		),
+		)
 );
 
 @if true {
@@ -110,6 +113,16 @@ $icons: (
 		key: (
 				a: b,
 				c: d,
+			),
+	);
+}
+
+@while true {
+	$whileMap: (
+		key: (
+				a,
+				b,
+				c,
 			),
 	);
 }
