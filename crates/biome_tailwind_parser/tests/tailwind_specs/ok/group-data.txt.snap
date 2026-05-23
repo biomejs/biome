@@ -19,13 +19,17 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwFunctionalVariant {
-                    base_token: TW_BASE@0..5 "group" [] [],
-                    minus_token: DASH@5..6 "-" [] [],
-                    value: TwDataAttribute {
-                        data_token: DATA_KW@6..10 "data" [] [],
-                        minus_token: DASH@10..11 "-" [] [],
-                        value: TwArbitraryValue {
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@0..5 "group" [] [],
+                        },
+                        DASH@5..6 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@6..10 "data" [] [],
+                        },
+                        DASH@10..11 "-" [] [],
+                        TwArbitraryVariantSegment {
                             l_brack_token: L_BRACKET@11..12 "[" [] [],
                             value: CssGenericComponentValueList [
                                 CssIdentifier {
@@ -40,7 +44,7 @@ TwRoot {
                             ],
                             r_brack_token: R_BRACKET@28..29 "]" [] [],
                         },
-                    },
+                    ],
                 },
                 COLON@29..30 ":" [] [],
             ],
@@ -63,13 +67,15 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..36
     0: TW_FULL_CANDIDATE@0..36
       0: TW_VARIANT_LIST@0..30
-        0: TW_FUNCTIONAL_VARIANT@0..29
-          0: TW_BASE@0..5 "group" [] []
-          1: DASH@5..6 "-" [] []
-          2: TW_DATA_ATTRIBUTE@6..29
-            0: DATA_KW@6..10 "data" [] []
-            1: DASH@10..11 "-" [] []
-            2: TW_ARBITRARY_VALUE@11..29
+        0: TW_VARIANT_EXPRESSION@0..29
+          0: TW_VARIANT_SEGMENT_LIST@0..29
+            0: TW_NAMED_VARIANT_SEGMENT@0..5
+              0: TW_BASE@0..5 "group" [] []
+            1: DASH@5..6 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@6..10
+              0: TW_VALUE@6..10 "data" [] []
+            3: DASH@10..11 "-" [] []
+            4: TW_ARBITRARY_VARIANT_SEGMENT@11..29
               0: L_BRACKET@11..12 "[" [] []
               1: CSS_GENERIC_COMPONENT_VALUE_LIST@12..28
                 0: CSS_IDENTIFIER@12..23

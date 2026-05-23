@@ -1,6 +1,6 @@
 use crate::parser::TailwindParser;
+use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
-use crate::syntax::value::parse_value;
 use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -83,14 +83,11 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
         // variants can't start with a negative sign
         return Absent;
     }
-    if p.at(T![data]) {
-        return parse_data_attribute(p);
-    }
     if p.at(T!['[']) {
         return parse_arbitrary_variant(p);
     }
 
-    parse_static_or_functional_variant(p)
+    parse_variant_expression(p)
 }
 
 fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
@@ -110,24 +107,19 @@ fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_ARBITRARY_VARIANT))
 }
 
-fn parse_static_or_functional_variant(p: &mut TailwindParser) -> ParsedSyntax {
+fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    p.bump(TW_BASE);
 
-    if !p.at(T![-]) {
-        if !p.at(COLON) {
-            // if we don't reach a colon, we haven't actually parsed a variant.
-            m.abandon(p);
-            p.rewind(checkpoint);
-            return Absent;
-        }
-        return Present(m.complete(p, TW_STATIC_VARIANT));
+    let segments = p.start();
+    parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
+
+    while p.at(T![-]) {
+        p.bump_with_context(T![-], TailwindLexContext::VariantSegment);
+        parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
     }
 
-    p.expect(T![-]);
-
-    parse_value(p).or_add_diagnostic(p, expected_value);
+    segments.complete(p, TW_VARIANT_SEGMENT_LIST);
 
     if !p.at(COLON) {
         // if we don't reach a colon, we haven't actually parsed a variant.
@@ -136,18 +128,52 @@ fn parse_static_or_functional_variant(p: &mut TailwindParser) -> ParsedSyntax {
         return Absent;
     }
 
-    Present(m.complete(p, TW_FUNCTIONAL_VARIANT))
+    Present(m.complete(p, TW_VARIANT_EXPRESSION))
 }
 
-pub(crate) fn parse_data_attribute(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(T![data]) {
+fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    if p.at(T!['[']) {
+        return parse_arbitrary_variant_segment(p);
+    }
+
+    if p.at(T!['(']) {
+        return parse_css_variable_variant_segment(p);
+    }
+
+    parse_named_variant_segment(p)
+}
+
+fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(TW_VALUE) && !p.at(TW_BASE) && !p.at(T![data]) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(T![data]);
-    p.expect(T![-]);
-    parse_value(p).or_add_diagnostic(p, expected_value);
+    if p.at(TW_BASE) {
+        p.bump_with_context(TW_BASE, TailwindLexContext::VariantSegment);
+    } else if p.at(T![data]) {
+        p.bump_with_context(T![data], TailwindLexContext::VariantSegment);
+    } else {
+        p.bump_with_context(TW_VALUE, TailwindLexContext::VariantSegment);
+    }
 
-    Present(m.complete(p, TW_DATA_ATTRIBUTE))
+    Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
+}
+
+fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    let m = p.start();
+    p.expect_with_context(T!['['], TailwindLexContext::CssValue);
+    if !parse_css_generic_component_value_list(p) {
+        p.error(expected_value(p, p.cur_range()));
+    }
+    p.expect(T![']']);
+    Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
+}
+
+fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
+    let m = p.start();
+    p.expect(T!['(']);
+    p.expect(TW_VALUE);
+    p.expect(T![')']);
+    Present(m.complete(p, TW_CSS_VARIABLE_VARIANT_SEGMENT))
 }

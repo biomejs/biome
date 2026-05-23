@@ -19,12 +19,16 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwFunctionalVariant {
-                    base_token: TW_BASE@0..4 "aria" [] [],
-                    minus_token: DASH@4..5 "-" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@5..13 "disabled" [] [],
-                    },
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@0..4 "aria" [] [],
+                        },
+                        DASH@4..5 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@5..13 "disabled" [] [],
+                        },
+                    ],
                 },
                 COLON@13..14 ":" [] [],
             ],
@@ -52,11 +56,13 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..26
     0: TW_FULL_CANDIDATE@0..26
       0: TW_VARIANT_LIST@0..14
-        0: TW_FUNCTIONAL_VARIANT@0..13
-          0: TW_BASE@0..4 "aria" [] []
-          1: DASH@4..5 "-" [] []
-          2: TW_NAMED_VALUE@5..13
-            0: TW_VALUE@5..13 "disabled" [] []
+        0: TW_VARIANT_EXPRESSION@0..13
+          0: TW_VARIANT_SEGMENT_LIST@0..13
+            0: TW_NAMED_VARIANT_SEGMENT@0..4
+              0: TW_BASE@0..4 "aria" [] []
+            1: DASH@4..5 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@5..13
+              0: TW_VALUE@5..13 "disabled" [] []
         1: COLON@13..14 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@14..26

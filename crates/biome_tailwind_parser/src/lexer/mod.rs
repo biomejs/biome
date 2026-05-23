@@ -120,6 +120,23 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    fn consume_token_variant_segment(&mut self, current: u8) -> TailwindSyntaxKind {
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            COL => self.consume_byte(T![:]),
+            MIN => self.consume_byte(T![-]),
+            EXL => self.consume_byte(T![!]),
+            SLH => self.consume_byte(T![/]),
+            PRC | IDT | ZER | DIG => self.consume_variant_segment_name(),
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
     fn consume_token_css_value(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
@@ -409,26 +426,30 @@ impl<'src> TailwindLexer<'src> {
         if numbers_only { TW_NUMBER } else { TW_VALUE }
     }
 
-    /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
-    /// and they are followed by another '-', this is a Tailwind data-attribute variant.
-    /// In that case, emit DATA_KW so the parser can recognize `TwDataAttribute`.
     fn consume_after_dash(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
-
-        let bytes = self.source.as_bytes();
-        let slice = &bytes[self.position..];
-
-        if slice.len() >= 5 && &slice[..4] == b"data" && slice[4] == b'-' {
-            // Advance past "data" only. The following '-' will be emitted as its own token.
-            self.advance(4);
-            return DATA_KW;
-        }
 
         if self.current_byte() == Some(b'[') {
             return self.consume_byte(T!['[']);
         }
 
         self.consume_named_value()
+    }
+
+    fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            let dispatched = lookup_byte(byte);
+            if matches!(dispatched, WHS | COL | MIN | SLH | EXL | BTC | PNC) {
+                break;
+            }
+
+            let char = self.current_char_unchecked();
+            self.advance(char.len_utf8());
+        }
+
+        TW_VALUE
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
@@ -547,6 +568,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
                     }
                     TailwindLexContext::ArbitraryCandidate => {
                         self.consume_token_arbitrary_candidate(current)
+                    }
+                    TailwindLexContext::VariantSegment => {
+                        self.consume_token_variant_segment(current)
                     }
                     TailwindLexContext::CssValue => self.consume_token_css_value(current),
                     TailwindLexContext::CssUrlRawValue => {

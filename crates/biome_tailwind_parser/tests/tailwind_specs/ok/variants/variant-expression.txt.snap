@@ -1,0 +1,331 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+hover:flex group-hover:flex group-peer-hover:flex group-hover:peer-focus:flex focus-visible:ring-ring not-hover:flex has-[:disabled]:opacity-50
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@0..5 "hover" [] [],
+                        },
+                    ],
+                },
+                COLON@5..6 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@6..11 "flex" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@11..16 "group" [] [],
+                        },
+                        DASH@16..17 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@17..22 "hover" [] [],
+                        },
+                    ],
+                },
+                COLON@22..23 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@23..28 "flex" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@28..33 "group" [] [],
+                        },
+                        DASH@33..34 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@34..38 "peer" [] [],
+                        },
+                        DASH@38..39 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@39..44 "hover" [] [],
+                        },
+                    ],
+                },
+                COLON@44..45 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@45..50 "flex" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@50..55 "group" [] [],
+                        },
+                        DASH@55..56 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@56..61 "hover" [] [],
+                        },
+                    ],
+                },
+                COLON@61..62 ":" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@62..66 "peer" [] [],
+                        },
+                        DASH@66..67 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@67..72 "focus" [] [],
+                        },
+                    ],
+                },
+                COLON@72..73 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@73..78 "flex" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@78..83 "focus" [] [],
+                        },
+                        DASH@83..84 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@84..91 "visible" [] [],
+                        },
+                    ],
+                },
+                COLON@91..92 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@92..96 "ring" [] [],
+                minus_token: DASH@96..97 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@97..102 "ring" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@102..105 "not" [] [],
+                        },
+                        DASH@105..106 "-" [] [],
+                        TwNamedVariantSegment {
+                            value: TW_VALUE@106..111 "hover" [] [],
+                        },
+                    ],
+                },
+                COLON@111..112 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@112..117 "flex" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@117..120 "has" [] [],
+                        },
+                        DASH@120..121 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@121..122 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssGenericDelimiter {
+                                    value: COLON@122..123 ":" [] [],
+                                },
+                                CssIdentifier {
+                                    ident_token: IDENT@123..131 "disabled" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@131..132 "]" [] [],
+                        },
+                    ],
+                },
+                COLON@132..133 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@133..140 "opacity" [] [],
+                minus_token: DASH@140..141 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@141..143 "50" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@143..144 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..144
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..143
+    0: TW_FULL_CANDIDATE@0..11
+      0: TW_VARIANT_LIST@0..6
+        0: TW_VARIANT_EXPRESSION@0..5
+          0: TW_VARIANT_SEGMENT_LIST@0..5
+            0: TW_NAMED_VARIANT_SEGMENT@0..5
+              0: TW_BASE@0..5 "hover" [] []
+        1: COLON@5..6 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@6..11
+        0: TW_BASE@6..11 "flex" [] [Whitespace(" ")]
+      3: (empty)
+    1: TW_FULL_CANDIDATE@11..28
+      0: TW_VARIANT_LIST@11..23
+        0: TW_VARIANT_EXPRESSION@11..22
+          0: TW_VARIANT_SEGMENT_LIST@11..22
+            0: TW_NAMED_VARIANT_SEGMENT@11..16
+              0: TW_BASE@11..16 "group" [] []
+            1: DASH@16..17 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@17..22
+              0: TW_VALUE@17..22 "hover" [] []
+        1: COLON@22..23 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@23..28
+        0: TW_BASE@23..28 "flex" [] [Whitespace(" ")]
+      3: (empty)
+    2: TW_FULL_CANDIDATE@28..50
+      0: TW_VARIANT_LIST@28..45
+        0: TW_VARIANT_EXPRESSION@28..44
+          0: TW_VARIANT_SEGMENT_LIST@28..44
+            0: TW_NAMED_VARIANT_SEGMENT@28..33
+              0: TW_BASE@28..33 "group" [] []
+            1: DASH@33..34 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@34..38
+              0: TW_VALUE@34..38 "peer" [] []
+            3: DASH@38..39 "-" [] []
+            4: TW_NAMED_VARIANT_SEGMENT@39..44
+              0: TW_VALUE@39..44 "hover" [] []
+        1: COLON@44..45 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@45..50
+        0: TW_BASE@45..50 "flex" [] [Whitespace(" ")]
+      3: (empty)
+    3: TW_FULL_CANDIDATE@50..78
+      0: TW_VARIANT_LIST@50..73
+        0: TW_VARIANT_EXPRESSION@50..61
+          0: TW_VARIANT_SEGMENT_LIST@50..61
+            0: TW_NAMED_VARIANT_SEGMENT@50..55
+              0: TW_BASE@50..55 "group" [] []
+            1: DASH@55..56 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@56..61
+              0: TW_VALUE@56..61 "hover" [] []
+        1: COLON@61..62 ":" [] []
+        2: TW_VARIANT_EXPRESSION@62..72
+          0: TW_VARIANT_SEGMENT_LIST@62..72
+            0: TW_NAMED_VARIANT_SEGMENT@62..66
+              0: TW_BASE@62..66 "peer" [] []
+            1: DASH@66..67 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@67..72
+              0: TW_VALUE@67..72 "focus" [] []
+        3: COLON@72..73 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@73..78
+        0: TW_BASE@73..78 "flex" [] [Whitespace(" ")]
+      3: (empty)
+    4: TW_FULL_CANDIDATE@78..102
+      0: TW_VARIANT_LIST@78..92
+        0: TW_VARIANT_EXPRESSION@78..91
+          0: TW_VARIANT_SEGMENT_LIST@78..91
+            0: TW_NAMED_VARIANT_SEGMENT@78..83
+              0: TW_BASE@78..83 "focus" [] []
+            1: DASH@83..84 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@84..91
+              0: TW_VALUE@84..91 "visible" [] []
+        1: COLON@91..92 ":" [] []
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@92..102
+        0: TW_BASE@92..96 "ring" [] []
+        1: DASH@96..97 "-" [] []
+        2: TW_NAMED_VALUE@97..102
+          0: TW_VALUE@97..102 "ring" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    5: TW_FULL_CANDIDATE@102..117
+      0: TW_VARIANT_LIST@102..112
+        0: TW_VARIANT_EXPRESSION@102..111
+          0: TW_VARIANT_SEGMENT_LIST@102..111
+            0: TW_NAMED_VARIANT_SEGMENT@102..105
+              0: TW_BASE@102..105 "not" [] []
+            1: DASH@105..106 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@106..111
+              0: TW_VALUE@106..111 "hover" [] []
+        1: COLON@111..112 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@112..117
+        0: TW_BASE@112..117 "flex" [] [Whitespace(" ")]
+      3: (empty)
+    6: TW_FULL_CANDIDATE@117..143
+      0: TW_VARIANT_LIST@117..133
+        0: TW_VARIANT_EXPRESSION@117..132
+          0: TW_VARIANT_SEGMENT_LIST@117..132
+            0: TW_NAMED_VARIANT_SEGMENT@117..120
+              0: TW_BASE@117..120 "has" [] []
+            1: DASH@120..121 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@121..132
+              0: L_BRACKET@121..122 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@122..131
+                0: CSS_GENERIC_DELIMITER@122..123
+                  0: COLON@122..123 ":" [] []
+                1: CSS_IDENTIFIER@123..131
+                  0: IDENT@123..131 "disabled" [] []
+              2: R_BRACKET@131..132 "]" [] []
+        1: COLON@132..133 ":" [] []
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@133..143
+        0: TW_BASE@133..140 "opacity" [] []
+        1: DASH@140..141 "-" [] []
+        2: TW_NUMBER_VALUE@141..143
+          0: TW_NUMBER@141..143 "50" [] []
+        3: (empty)
+      3: (empty)
+  2: EOF@143..144 "" [Newline("\n")] []
+
+```

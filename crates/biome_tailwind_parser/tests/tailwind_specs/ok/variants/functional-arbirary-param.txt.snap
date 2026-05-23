@@ -19,18 +19,22 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwFunctionalVariant {
-                    base_token: TW_BASE@0..4 "aria" [] [],
-                    minus_token: DASH@4..5 "-" [] [],
-                    value: TwArbitraryValue {
-                        l_brack_token: L_BRACKET@5..6 "[" [] [],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                ident_token: IDENT@6..14 "disabled" [] [],
-                            },
-                        ],
-                        r_brack_token: R_BRACKET@14..15 "]" [] [],
-                    },
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@0..4 "aria" [] [],
+                        },
+                        DASH@4..5 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@5..6 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    ident_token: IDENT@6..14 "disabled" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@14..15 "]" [] [],
+                        },
+                    ],
                 },
                 COLON@15..16 ":" [] [],
             ],
@@ -58,15 +62,17 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..28
     0: TW_FULL_CANDIDATE@0..28
       0: TW_VARIANT_LIST@0..16
-        0: TW_FUNCTIONAL_VARIANT@0..15
-          0: TW_BASE@0..4 "aria" [] []
-          1: DASH@4..5 "-" [] []
-          2: TW_ARBITRARY_VALUE@5..15
-            0: L_BRACKET@5..6 "[" [] []
-            1: CSS_GENERIC_COMPONENT_VALUE_LIST@6..14
-              0: CSS_IDENTIFIER@6..14
-                0: IDENT@6..14 "disabled" [] []
-            2: R_BRACKET@14..15 "]" [] []
+        0: TW_VARIANT_EXPRESSION@0..15
+          0: TW_VARIANT_SEGMENT_LIST@0..15
+            0: TW_NAMED_VARIANT_SEGMENT@0..4
+              0: TW_BASE@0..4 "aria" [] []
+            1: DASH@4..5 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@5..15
+              0: L_BRACKET@5..6 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@6..14
+                0: CSS_IDENTIFIER@6..14
+                  0: IDENT@6..14 "disabled" [] []
+              2: R_BRACKET@14..15 "]" [] []
         1: COLON@15..16 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@16..28

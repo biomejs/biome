@@ -27,8 +27,12 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@20..25 "focus" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value: TW_BASE@20..25 "focus" [] [],
+                        },
+                    ],
                 },
                 COLON@25..26 ":" [] [],
             ],
@@ -62,8 +66,10 @@ TwRoot {
       3: (empty)
     1: TW_FULL_CANDIDATE@20..38
       0: TW_VARIANT_LIST@20..26
-        0: TW_STATIC_VARIANT@20..25
-          0: TW_BASE@20..25 "focus" [] []
+        0: TW_VARIANT_EXPRESSION@20..25
+          0: TW_VARIANT_SEGMENT_LIST@20..25
+            0: TW_NAMED_VARIANT_SEGMENT@20..25
+              0: TW_BASE@20..25 "focus" [] []
         1: COLON@25..26 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@26..38
