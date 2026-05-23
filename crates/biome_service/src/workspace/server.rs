@@ -135,7 +135,7 @@ pub struct WorkspaceServer {
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 
-    db: db::DbState,
+    db_state: db::DbState,
 }
 
 fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
@@ -231,13 +231,13 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
-            db: db::DbState::default(),
+            db_state: db::DbState::default(),
         }
     }
 
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> ProjectDatabase {
-        let db = self.db.db.lock().expect("db lock poisoned");
+        let db = self.db_state.db.lock().expect("db lock poisoned");
         db.clone()
     }
 
@@ -1421,7 +1421,7 @@ impl WorkspaceServer {
                             self.fs.as_ref(),
                             &self.project_layout,
                             Arc::new(semantic_model),
-                            &self.db.path_info_cache,
+                            &self.db_state.path_info_cache,
                             infer_types,
                         );
                         self.db_set_module_info(path, ModuleInfoKind::Js(module_info))?;
@@ -1437,7 +1437,7 @@ impl WorkspaceServer {
                         path,
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &self.db.path_info_cache,
+                        &self.db_state.path_info_cache,
                     );
                     self.db_set_module_info(path, ModuleInfoKind::Css(module_info))?;
                     Ok((deps, diagnostics))
@@ -1476,7 +1476,7 @@ impl WorkspaceServer {
                         path,
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &self.db.path_info_cache,
+                        &self.db_state.path_info_cache,
                     );
                     self.db_set_module_info(path, ModuleInfoKind::Html(module_info))?;
                     Ok((deps, diagnostics))
@@ -1492,7 +1492,7 @@ impl WorkspaceServer {
     }
 
     fn lock_db(&self) -> Result<MutexGuard<'_, ProjectDatabase>, WorkspaceError> {
-        self.db.lock_db()
+        self.db_state.lock_db()
     }
 
     /// Stores a [ModuleInfo] in the database
@@ -1516,6 +1516,7 @@ impl WorkspaceServer {
 
     /// Removes a [ModuleInfo] from the database
     fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+        self.db_state.path_info_cache.remove(path);
         let db = self.lock_db()?;
         db.remove_module(path);
         Ok(())
@@ -1523,6 +1524,7 @@ impl WorkspaceServer {
 
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
+        self.db_state.path_info_cache.remove(path);
         let Ok(db) = self.lock_db() else {
             return;
         };

@@ -5,11 +5,12 @@ use biome_db::Db;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use salsa::Storage;
+use std::sync::Arc;
 
 #[salsa::db]
 #[derive(Default, Clone)]
 pub struct ProjectDatabase {
-    pub modules: HashMap<Utf8PathBuf, ModuleInfo>,
+    pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     storage: Storage<Self>,
 }
 
