@@ -2,7 +2,7 @@ name: Needs reproduction
 
 on:
   issues:
-    types: [labeled]
+    types: [ labeled ]
 
 jobs:
   reply-labeled:
@@ -11,62 +11,20 @@ jobs:
     steps:
       - name: Remove triaging label
         if: contains(github.event.issue.labels.*.name, 'S-Bug-confirmed') && contains(github.event.issue.labels.*.name, 'S-Needs triage')
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
-          script: |
-            try {
-              await github.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                name: 'S-Needs triage',
-              });
-              core.info('Removed "S-Needs triage" label');
-            } catch (error) {
-              if (error.status === 404) {
-                core.info('"S-Needs triage" label was not present, skipping');
-              } else {
-                throw error;
-              }
-            }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --remove-label "S-Needs triage"
 
       - name: Needs reproduction
         if: github.event.label.name == 'S-Needs repro'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
-          script: |
-            const issueAuthor = context.payload.issue.user.login;
+        env:
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "Hello @${{ github.event.issue.user.login }}, please provide a minimal reproduction. You can use one of the following options:
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: [
-                `Hello @${issueAuthor}, please provide a minimal reproduction. You can use one of the following options:`,
-                '',
-                '- Provide a link to [our playground](https://biomejs.dev/playground), if it\'s applicable.',
-                '- Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via `npm create @biomejs/biome-reproduction`',
-                '',
-                'Issues marked with `S-Needs repro` will be **closed** if they have **no activity within 3 days**.',
-              ].join('\n'),
-            });
+          - Provide a link to [our playground](https://biomejs.dev/playground), if it's applicable.
+          - Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via \`npm create @biomejs/biome-reproduction\`
 
-            core.info('Posted reproduction request comment');
+          Issues marked with \`S-Needs repro\` will be **closed** if they have **no activity within 3 days**."
 
-            try {
-              await github.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                name: 'S-Needs triage',
-              });
-              core.info('Removed "S-Needs triage" label');
-            } catch (error) {
-              if (error.status === 404) {
-                core.info('"S-Needs triage" label was not present, skipping');
-              } else {
-                throw error;
-              }
-            }
+          gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --remove-label "S-Needs triage"

@@ -9,69 +9,27 @@ jobs:
     if: github.repository == 'biomejs/biome'
     runs-on: depot-ubuntu-24.04-arm-small
     steps:
-      - name: Close issues without reproduction
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          github-token: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
-          script: |
-            const daysInactive = 3;
-            // Convert days to milliseconds: days * hours * minutes * seconds * ms
-            const cutoff = new Date(Date.now() - daysInactive * 24 * 60 * 60 * 1000);
-            const label = 'S-Needs repro';
-            const closeComment =
-              'This issue has been automatically closed because it has been ' +
-              'inactive for more than 3 days and it does not have a minimal reproduction.';
+          persist-credentials: false
 
-            let page = 1;
-            const perPage = 100;
+      - name: Setup node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
 
-            while (true) {
-              const { data: issues } = await github.rest.issues.listForRepo({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: label,
-                state: 'open',
-                sort: 'updated',
-                direction: 'asc',
-                per_page: perPage,
-                page,
-              });
+      - name: Find stale issues
+        id: find-stale
+        run: echo "issues=$(node --experimental-strip-types .github/scripts/find-stale-issues.ts --token ${{ secrets.GITHUB_TOKEN }})" >> "$GITHUB_OUTPUT"
 
-              if (issues.length === 0) {
-                break;
-              }
-
-              for (const issue of issues) {
-                if (issue.pull_request) {
-                  continue;
-                }
-
-                const updatedAt = new Date(issue.updated_at);
-                if (updatedAt >= cutoff) {
-                  continue;
-                }
-
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  body: closeComment,
-                });
-
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  state: 'closed',
-                  state_reason: 'not_planned',
-                });
-
-                core.info(`Closed issue #${issue.number} (last updated: ${issue.updated_at})`);
-              }
-
-              if (issues.length < perPage) {
-                break;
-              }
-
-              page++;
-            }
+      - name: Close stale issues
+        if: steps.find-stale.outputs.issues != '[]'
+        env:
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+        run: |
+          echo '${{ steps.find-stale.outputs.issues }}' | jq -r '.[]' | while read -r issue; do
+            gh issue comment "$issue" --repo ${{ github.repository }} --body "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
+            gh issue close "$issue" --repo ${{ github.repository }} --reason "not planned"
+            echo "Closed issue #$issue"
+          done
