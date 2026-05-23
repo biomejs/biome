@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/expression/map-closing-comments.scss
+---
+
+# Input
+
+```scss
+$foo:('property1':(),'property2':1,/** comment 1 */
+/* comment 2 */
+);
+
+$bar:('property1':(),'property2':1,
+/** comment 1 */
+/* comment 2 */
+);
+
+$blank:('property1':(),'property2':1,/** comment 1 */
+
+/* comment 2 */
+);
+
+$nested:(outer:(inner:value,),/** one */
+/* two */);
+
+```
+
+
+# Formatted
+
+```scss
+$foo: (
+	"property1": (),
+	"property2": 1,
+	/** comment 1 */ /* comment 2 */
+);
+
+$bar: (
+	"property1": (),
+	"property2": 1,
+	/** comment 1 */ /* comment 2 */
+);
+
+$blank: (
+	"property1": (),
+	"property2": 1,
+
+	/** comment 1 */ /* comment 2 */
+);
+
+$nested: (
+	outer: (
+		inner: value,
+	),
+	/** one */ /* two */
+);
+
+```
