@@ -237,12 +237,10 @@ TABLE {}
 +    COLOR: RED;
    }
  
--  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
+   #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
 -    color: RED;
--  }
-+  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"}: {
-+      COLOR: RED;
-+    }
++    COLOR: RED;
+   }
  }
  
  @mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {
@@ -368,9 +366,9 @@ $KeepTopLevelVar: val;
     COLOR: RED;
   }
 
-  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"}: {
-      COLOR: RED;
-    }
+  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
+    COLOR: RED;
+  }
 }
 
 @mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {

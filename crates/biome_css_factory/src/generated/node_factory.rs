@@ -4029,7 +4029,7 @@ pub fn scss_namespaced_variable(
     ))
 }
 pub fn scss_nesting_declaration(
-    name: CssIdentifier,
+    name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
     value: ScssExpression,
     block: AnyCssDeclarationOrRuleBlock,
