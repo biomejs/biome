@@ -1,6 +1,5 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
-use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{is_at_scss_parent_selector_suffix, parse_scss_parent_selector_suffix};
 use crate::syntax::selector::selector_lex_context;
 use biome_css_syntax::CssSyntaxKind::{
@@ -56,14 +55,9 @@ fn parse_nested_selector(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     p.bump_with_context(T![&], context);
 
-    // `&-100\.200`: suffix ownership is decided after `&` switches the lexer
-    // into selector context, where numeric and escaped suffix parts are visible.
-    if is_at_scss_parent_selector_suffix(p) {
-        CssSyntaxFeatures::Scss
-            .parse_exclusive_syntax(p, parse_scss_parent_selector_suffix, |p, marker| {
-                scss_only_syntax_error(p, "SCSS parent selector suffixes", marker.range(p))
-            })
-            .ok();
+    if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_parent_selector_suffix(p) {
+        // Guarded above, so `&-#{$state}` must parse an adjacent suffix.
+        parse_scss_parent_selector_suffix(p).ok();
         return Present(m.complete(p, SCSS_PARENT_SELECTOR));
     }
 

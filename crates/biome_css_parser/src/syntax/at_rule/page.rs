@@ -188,9 +188,9 @@ impl ParseBlockBody for PageBlock {
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         at_margin_rule(p)
             || is_at_at_rule(p)
-           // SCSS allows variable declarations and nested properties inside any block.
+            // SCSS allows variable declarations and nested properties inside any block.
             || is_at_scss_variable_declaration(p)
-            || is_at_scss_nesting_declaration(p)
+            || (CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p))
             || is_at_any_declaration_with_semicolon(p)
             || is_at_qualified_rule(p)
     }
@@ -222,7 +222,7 @@ impl ParseNodeList for PageAtRuleItemList {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
             )
-        } else if is_at_scss_nesting_declaration(p) {
+        } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
             if let Ok(declaration) = try_parse_scss_nesting_declaration(p, T!['}']) {
                 return declaration;
             }
