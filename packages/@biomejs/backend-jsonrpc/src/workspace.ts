@@ -3262,7 +3262,7 @@ See https://biomejs.dev/linter/rules/use-consistent-member-accessibility
 	 */
 	useConsistentMemberAccessibility?: UseConsistentMemberAccessibilityConfiguration;
 	/**
-	* Require the consistent declaration of object literals. Defaults to explicit definitions.
+	* Require the consistent declaration of object literals.
 See https://biomejs.dev/linter/rules/use-consistent-object-definitions 
 	 */
 	useConsistentObjectDefinitions?: UseConsistentObjectDefinitionsConfiguration;

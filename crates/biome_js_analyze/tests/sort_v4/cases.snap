@@ -115,13 +115,49 @@ input:  flex w-1/2 w-1/3
 sorted: flex w-1/2 w-1/3
 ---
 input:  flex bg-red-500/50
-sorted: bg-red-500/50 flex
+sorted: flex bg-red-500/50
 ---
 input:  flex text-lg/8
-sorted: text-lg/8 flex
+sorted: flex text-lg/8
 ---
 input:  flex w-1/foo
-sorted: w-1/foo flex
+sorted: flex w-1/foo
+---
+input:  p-[10px] flex some-unknown
+sorted: some-unknown flex p-[10px]
+---
+input:  flex [color:red]
+sorted: flex [color:red]
+---
+input:  flex [--my-var:1]
+sorted: [--my-var:1] flex
+---
+input:  flex [color:red]/50
+sorted: flex [color:red]/50
+---
+input:  bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]
+sorted: bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]
+---
+input:  border-[#f00] border-[2px]
+sorted: border-[2px] border-[#f00]
+---
+input:  text-[#fff] text-[larger] text-[20px]
+sorted: text-[larger] text-[20px] text-[#fff]
+---
+input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
+sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
+---
+input:  ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex
+sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]
+---
+input:  ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50
+sorted: flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50
+---
+input:  text-[#fff]/50 text-[20px]/8 flex
+sorted: flex text-[20px]/8 text-[#fff]/50
+---
+input:  flex [mask-type:luminance]/50 [color:red]/50
+sorted: flex [mask-type:luminance]/50 [color:red]/50
 ---
 input:  to-purple-500 from-blue-500 via-pink-500
 sorted: from-blue-500 via-pink-500 to-purple-500

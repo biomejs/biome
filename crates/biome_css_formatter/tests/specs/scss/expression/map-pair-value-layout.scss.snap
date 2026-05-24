@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/expression/map-pair-value-layout.scss
 ---
 
@@ -9,6 +10,20 @@ info: scss/expression/map-pair-value-layout.scss
 $map:(('key':'value','key': 'value' ,'key':'value','key' :'value','key':'value',):('key':'value',),('list','list' ,'list','list','list','list','list','list','list','list'):('list'),('list','long long long long long long long long long long long long long list'):'hello world',);
 
 $nested:(key:(nested-key:nested-value,other-key:other-value,),);
+
+$map-comments:(key4:(key:value,key:value,key:value,),);
+
+$icons:(cal-day-group:(left:253,top:73,),/* keep blank */
+
+cal-week-group:(left:1,top:169,),);
+
+@if true{$newKey:($key:($theme-name:$value))}
+
+@for $i from 1 through 2{$controlMap:(key:(a,b,c));}
+
+@each $item in a{$eachMap:(key:(a:b,c:d));}
+
+@while true{$whileMap:(key:(a,b,c));}
 
 ```
 
@@ -52,5 +67,64 @@ $nested: (
 		other-key: other-value,
 	),
 );
+
+$map-comments: (
+	key4: (
+		key: value,
+		key: value,
+		key: value,
+	),
+);
+
+$icons: (
+	cal-day-group: (
+		left: 253,
+		top: 73,
+	),
+
+	/* keep blank */
+
+	cal-week-group: (
+			left: 1,
+			top: 169,
+		),
+);
+
+@if true {
+	$newKey: (
+		$key: (
+				$theme-name: $value,
+			),
+	)
+}
+
+@for $i from 1 through 2 {
+	$controlMap: (
+		key: (
+				a,
+				b,
+				c,
+			),
+	);
+}
+
+@each $item in a {
+	$eachMap: (
+		key: (
+				a: b,
+				c: d,
+			),
+	);
+}
+
+@while true {
+	$whileMap: (
+		key: (
+				a,
+				b,
+				c,
+			),
+	);
+}
 
 ```

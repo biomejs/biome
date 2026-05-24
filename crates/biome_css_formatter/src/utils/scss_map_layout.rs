@@ -6,6 +6,7 @@ use biome_css_syntax::{
     is_scss_map_key, single_expression_item,
 };
 use biome_formatter::{CstFormatContext, format_args, write};
+use biome_rowan::AstSeparatedList;
 
 /// Shared map layout policy for `ScssMapExpression`.
 ///
@@ -97,24 +98,9 @@ impl<'a> ScssMapLayout<'a> {
         // Include arguments accept any closing comment shape before `)`, while
         // standalone maps only special-case inline closing comments.
         let has_closing_comments = owns_map_closing_comments(self.node, f);
-        // `@if (a: b, c: d)` uses the map as a parenthesized condition.
-        // Prettier does not synthesize a closing comma there.
-        let should_omit_trailing_comma =
-            !has_closing_comments && is_in_scss_control_condition_sequence(self.node);
-        let trailing_comma = (!should_omit_trailing_comma).then_some(format_with(|f| {
-            if has_closing_comments {
-                write!(f, [token(",")])
-            } else {
-                write!(f, [if_group_breaks(&token(","))])
-            }
-        }));
-        let closing_comment_separator = format_with(|f| {
-            if is_in_scss_include_arguments(self.node.syntax()) {
-                write!(f, [soft_line_break_or_space()])
-            } else {
-                write!(f, [space()])
-            }
-        });
+        let trailing_comma = format_with(|f| self.write_trailing_comma(has_closing_comments, f));
+        let closing_comments =
+            format_with(|f| self.write_closing_comments(has_closing_comments, f));
 
         write!(
             f,
@@ -124,8 +110,7 @@ impl<'a> ScssMapLayout<'a> {
                     soft_line_break(),
                     pairs.format(),
                     trailing_comma,
-                    has_closing_comments.then_some(closing_comment_separator),
-                    has_closing_comments.then_some(format_dangling_comments(self.node.syntax()))
+                    closing_comments
                 ]),
                 soft_line_break(),
                 r_paren_token.format()
@@ -138,6 +123,47 @@ impl<'a> ScssMapLayout<'a> {
         // Prettier keeps direct `@each` maps inline when they fit:
         // `@each $k, $v in (a: 1, b: 2)`.
         !is_direct_each_value_map(self.node) && should_expand_map_expression(self.node)
+    }
+
+    fn write_trailing_comma(
+        &self,
+        has_closing_comments: bool,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        if has_closing_comments {
+            write!(f, [token(",")])
+        } else if self.should_omit_group_break_trailing_comma() {
+            Ok(())
+        } else {
+            write!(f, [if_group_breaks(&token(","))])
+        }
+    }
+
+    fn should_omit_group_break_trailing_comma(&self) -> bool {
+        // Prettier omits the closing comma in `@if (a: b)` and direct
+        // `@each $k, $v in (a: b)` maps.
+        is_in_scss_control_condition_sequence(self.node) || is_direct_each_value_map(self.node)
+    }
+
+    fn write_closing_comments(
+        &self,
+        has_closing_comments: bool,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        if !has_closing_comments {
+            return Ok(());
+        }
+
+        self.write_closing_comment_separator(f)?;
+        write!(f, [format_dangling_comments(self.node.syntax())])
+    }
+
+    fn write_closing_comment_separator(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if is_in_scss_include_arguments(self.node.syntax()) {
+            write!(f, [soft_line_break_or_space()])
+        } else {
+            write!(f, [space()])
+        }
     }
 }
 

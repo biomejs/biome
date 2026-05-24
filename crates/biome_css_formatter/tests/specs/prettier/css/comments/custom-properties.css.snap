@@ -28,16 +28,14 @@ font-size: 12px;
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,14 @@
+@@ -1,13 +1,13 @@
  /* comment 1 */
  :root {
    /* comment 2 */
 -  --prop: {
 +  --prop : {
      /* comment 3 */
--    color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
-+    color /* comment 4 */: /* comment 5 */
-+      #fff /* comment 6 */; /* comment 7 */
+     color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
      /* comment 8 */
      font-size: 12px;
      /* comment 9 */
@@ -56,8 +54,7 @@ font-size: 12px;
   /* comment 2 */
   --prop : {
     /* comment 3 */
-    color /* comment 4 */: /* comment 5 */
-      #fff /* comment 6 */; /* comment 7 */
+    color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
     /* comment 8 */
     font-size: 12px;
     /* comment 9 */

@@ -1,15 +1,16 @@
 // Render the auto-generated Rust file `tailwind_preset_v4.rs`.
 //
 // Codegen scope is intentionally narrow — only the long phf maps,
-// sets, and arrays are emitted. Structural types (`ValueType`,
-// `ThemeNamespace`, `Branch`, `Negative`, `UtilityEntry`,
-// `FunctionalEntry`) live in the hand-written sibling
-// `tailwind_preset_v4_types.rs` and are imported here.
+// sets, and arrays are emitted. Structural types (`NamedValueType`,
+// `CssDataType`, `ThemeNamespace`, `NamedBranch`, `ArbitraryBranch`,
+// `Negative`, `UtilityEntry`, `FunctionalEntry`) live in the hand-written
+// sibling `tailwind_preset_v4_types.rs` and are imported here.
 
 import type {
-	Branch,
+	ArbitraryBranch,
 	ExtractedUtilities,
 	FunctionalUtility,
+	NamedBranch,
 } from "./extract-utilities.js";
 import {
 	THEME_NAMESPACES,
@@ -27,18 +28,11 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
-// Some preset items are intentionally unused while the v4 sort algorithm is
-// still being implemented incrementally:
-// - \`PROPERTY_ORDER\` is consumed only when classifying arbitrary CSS
-//   (\`[mask:none]\`), which is a TODO.
-// - \`Branch::ArbitraryTyped\` and \`Branch::Arbitrary\` payload fields fire only for
-//   bracketed arbitrary values (\`p-[10px]\`), which is a TODO.
-#![expect(dead_code, reason = "intentionally unused while sort algorithm is being implemented; see TODO comment above")]
-
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    Branch::*, FunctionalEntry, Negative::*, ThemeNamespace, UtilityEntry, ValueType,
+    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
+    ThemeNamespace, UtilityEntry,
 };
 `;
 
@@ -54,12 +48,13 @@ function camelToScreamingSnake(s: string): string {
 	return camelToSnake(s).toUpperCase();
 }
 
-function renderPropertyOrder(props: string[]): string {
-	const items = props.map((p) => `    ${rustString(p)},`).join("\n");
-	return `// CSS property sort order.
-pub static PROPERTY_ORDER: [&str; ${props.length}] = [
+function renderPropertyIndex(props: string[]): string {
+	const items = props
+		.map((p, i) => `    ${rustString(p)} => ${i}u16,`)
+		.join("\n");
+	return `pub static PROPERTY_INDEX: phf::Map<&'static str, u16> = phf_map! {
 ${items}
-];
+};
 `;
 }
 
@@ -82,9 +77,9 @@ ${lines.join("\n")}
 `;
 }
 
-// Build the deduplicated keyword pool from every NamedKeyword branch
+// Build the deduplicated keyword pool from every NamedBranch::Keyword branch
 // across all utilities. Pool entries are unique sets, addressed by
-// stable index used in the generated Branch::NamedKeyword variant.
+// stable index used in the generated NamedBranch::Keyword variant.
 function collectKeywordPool(utils: ExtractedUtilities): {
 	pool: string[][];
 	idxOf: Map<string, number>;
@@ -92,8 +87,8 @@ function collectKeywordPool(utils: ExtractedUtilities): {
 	const pool: string[][] = [];
 	const idxOf = new Map<string, number>();
 	for (const u of utils.functional) {
-		for (const b of u.branches) {
-			if (b.kind !== "NamedKeyword") continue;
+		for (const b of u.namedBranches) {
+			if (b.kind !== "Keyword") continue;
 			const key = b.keywords.join("\0");
 			if (idxOf.has(key)) continue;
 			idxOf.set(key, pool.length);
@@ -117,15 +112,29 @@ ${items.join("\n")}
 `;
 }
 
-function renderBranchList(
+function renderNamedBranchList(
 	indent: string,
-	branches: Branch[],
+	branches: NamedBranch[],
 	propIdx: Map<string, number>,
 	propCount: number,
 	keywordIdx: Map<string, number>,
 ): string {
 	return branches
-		.map((b) => `${indent}${formatBranch(b, propIdx, propCount, keywordIdx)},`)
+		.map(
+			(b) =>
+				`${indent}${formatNamedBranch(b, propIdx, propCount, keywordIdx)},`,
+		)
+		.join("\n");
+}
+
+function renderArbitraryBranchList(
+	indent: string,
+	branches: ArbitraryBranch[],
+	propIdx: Map<string, number>,
+	propCount: number,
+): string {
+	return branches
+		.map((b) => `${indent}${formatArbitraryBranch(b, propIdx, propCount)},`)
 		.join("\n");
 }
 
@@ -142,18 +151,23 @@ function renderNegative(
 		case "SameBranches":
 			return `        negative: Some(SameBranches { registration_idx: ${u.negative.registration_idx} }),`;
 		case "Distinct": {
-			const items = renderBranchList(
+			const namedItems = renderNamedBranchList(
 				"                ",
-				u.negative.branches,
+				u.negative.namedBranches,
 				propIdx,
 				propCount,
 				keywordIdx,
 			);
+			const arbitraryItems = renderArbitraryBranchList(
+				"                ",
+				u.negative.arbitraryBranches,
+				propIdx,
+				propCount,
+			);
 			return `        negative: Some(Distinct {
             registration_idx: ${u.negative.registration_idx},
-            branches: &[
-${items}
-            ],
+${renderBranchSlice("            ", "named_branches", namedItems)}
+${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
         }),`;
 		}
 	}
@@ -166,22 +180,30 @@ function renderFunctionalUtilities(
 	keywordIdx: Map<string, number>,
 ): string {
 	const populated = utils.functional.filter(
-		(u) => u.branches.length > 0 || u.negative !== null,
+		(u) =>
+			u.namedBranches.length > 0 ||
+			u.arbitraryBranches.length > 0 ||
+			u.negative !== null,
 	);
 	const entries = populated.map((u) => {
-		const items = renderBranchList(
+		const namedItems = renderNamedBranchList(
 			"            ",
-			u.branches,
+			u.namedBranches,
 			propIdx,
 			propCount,
 			keywordIdx,
 		);
+		const arbitraryItems = renderArbitraryBranchList(
+			"            ",
+			u.arbitraryBranches,
+			propIdx,
+			propCount,
+		);
 		const negative = renderNegative(u, propIdx, propCount, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
         registration_idx: ${u.registration_idx},
-        branches: &[
-${items}
-        ],
+${renderBranchSlice("        ", "named_branches", namedItems)}
+${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
 ${negative}
     },`;
 	});
@@ -191,17 +213,30 @@ ${entries.join("\n")}
 `;
 }
 
-function formatBranch(
-	b: Branch,
+function renderBranchSlice(
+	indent: string,
+	field: string,
+	items: string,
+): string {
+	if (items.length === 0) {
+		return `${indent}${field}: &[],`;
+	}
+	return `${indent}${field}: &[
+${items}
+${indent}],`;
+}
+
+function formatNamedBranch(
+	b: NamedBranch,
 	propIdx: Map<string, number>,
 	propCount: number,
 	keywordIdx: Map<string, number>,
 ): string {
 	const idx = propIdx.get(b.sort_property) ?? propCount;
 	switch (b.kind) {
-		case "Named":
-			return `Named(ThemeNamespace::${b.namespace}, ${idx}, ${b.property_count})`;
-		case "NamedKeyword": {
+		case "Theme":
+			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${idx}, ${b.property_count})`;
+		case "Keyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
 			if (pool === undefined) {
@@ -209,14 +244,24 @@ function formatBranch(
 					`keyword pool missing entry for: ${b.keywords.join(",")}`,
 				);
 			}
-			return `NamedKeyword(${pool}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Keyword(${pool}, ${idx}, ${b.property_count})`;
 		}
-		case "NamedTyped":
-			return `NamedTyped(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
-		case "ArbitraryTyped":
-			return `ArbitraryTyped(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
-		case "Arbitrary":
-			return `Arbitrary(${idx}, ${b.property_count})`;
+		case "Typed":
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${idx}, ${b.property_count})`;
+	}
+}
+
+function formatArbitraryBranch(
+	b: ArbitraryBranch,
+	propIdx: Map<string, number>,
+	propCount: number,
+): string {
+	const idx = propIdx.get(b.sort_property) ?? propCount;
+	switch (b.kind) {
+		case "Typed":
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${idx}, ${b.property_count})`;
+		case "Fallback":
+			return `ArbitraryBranch::Fallback(${idx}, ${b.property_count})`;
 	}
 }
 
@@ -252,7 +297,7 @@ export function renderRust(input: {
 
 	return [
 		HEADER,
-		renderPropertyOrder(input.propertyOrder),
+		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
 		renderStaticUtilities(input.utilities, propIdx, propCount),
 		renderFunctionalUtilities(input.utilities, propIdx, propCount, keywordIdx),
