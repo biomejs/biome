@@ -21,6 +21,7 @@ pub(crate) use interpolated_regular::{
     parse_scss_interpolation_or_identifier,
 };
 pub(crate) use interpolated_selector::{
+    is_at_scss_interpolated_selector_identifier, is_nth_at_scss_interpolated_selector_identifier,
     parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 pub(crate) use module_member_access::{

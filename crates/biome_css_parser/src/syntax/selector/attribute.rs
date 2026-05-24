@@ -1,6 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
+    scss_only_syntax_error,
 };
 use crate::syntax::scss::{
     is_at_scss_interpolated_attribute_identifier, is_at_scss_interpolated_string,
@@ -8,14 +9,16 @@ use crate::syntax::scss::{
     parse_scss_interpolated_string,
 };
 use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
-use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, is_at_string, parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const ATTRIBUTE_SELECTOR_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![')'], T!['{']];
 #[inline]
@@ -88,7 +91,13 @@ fn parse_attribute_name_identifier(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolated_attribute_identifier(p) {
         // `[lang=#{$locale}]` keeps `lang` as CssIdentifier; only
         // `[data-#{$name}=x]` needs an interpolated attribute name.
-        parse_scss_interpolated_identifier(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_identifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p))
+            },
+        )
     } else {
         parse_regular_identifier(p)
     }
@@ -154,7 +163,13 @@ fn parse_attribute_modifier(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_interpolated_attribute_identifier(p) {
-        parse_scss_interpolated_attribute_modifier(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_attribute_modifier,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute modifiers", marker.range(p))
+            },
+        )
     } else {
         parse_attribute_modifier_keyword(p)
     }
@@ -188,9 +203,17 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     if is_at_scss_interpolated_attribute_identifier(p) {
-        parse_scss_interpolated_identifier(p).ok();
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_interpolated_identifier, |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated attribute values", marker.range(p))
+            })
+            .ok();
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p).ok();
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p))
+            })
+            .ok();
     } else if is_at_string(p) {
         parse_string(p).ok();
     } else {

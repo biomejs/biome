@@ -7,10 +7,10 @@ use crate::syntax::css_modules::{
     composes_not_allowed, expected_classes_list, expected_composes_import_source,
 };
 use crate::syntax::parse_error::{
-    expected_component_value, expected_identifier, tailwind_disabled,
+    expected_component_value, expected_identifier, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, parse_required_scss_value_until,
+    is_at_scss_interpolated_property_name, parse_required_scss_value_until,
     parse_scss_interpolated_property_name,
 };
 use crate::syntax::{
@@ -223,7 +223,7 @@ impl ParseRecovery for ComposesClassListParseRecovery {
 /// ```
 #[inline]
 pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_direct_generic_property(p) || is_at_scss_interpolated_property(p)
+    is_at_direct_generic_property(p) || is_at_scss_interpolated_property_name(p)
 }
 
 /// Detects the direct, non-interpolated property-name forms handled by the
@@ -280,8 +280,14 @@ pub(crate) fn parse_generic_property_name(p: &mut CssParser) -> ParsedSyntax {
         };
     }
 
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        return parse_scss_interpolated_property_name(p).or_else(|| parse_plain_property_name(p));
+    if is_at_scss_interpolated_property_name(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_property_name,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated property names", marker.range(p))
+            },
+        );
     }
 
     parse_plain_property_name(p)

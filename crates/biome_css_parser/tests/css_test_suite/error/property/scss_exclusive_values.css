@@ -1,0 +1,42 @@
+.unsupported-scss {
+  variable: $value;
+  variable-interpolation: $value#{suffix};
+  module-member: module.$value;
+  module-member-interpolation: module.$value#{suffix};
+  qualified-function: module.fn(1);
+  interpolation: #{$value};
+  adjacent-interpolations: #{$a}#{$b};
+  number-interpolation: 10#{unit};
+  dimension-interpolation: 10px#{suffix};
+  interpolated-name: foo#{$bar};
+  interpolated-string: "#{$value}";
+  interpolated-custom-property: --#{$name};
+  interpolated-custom-property-suffix: --theme-#{$slot};
+}
+
+.function-arguments {
+  variable: fn($value);
+  variable-interpolation: fn($value#{suffix});
+  module-member: fn(module.$value);
+  module-member-interpolation: fn(module.$value#{suffix});
+  qualified-function: fn(module.fn(1));
+  interpolation: fn(#{$value});
+  adjacent-interpolations: fn(#{$a}#{$b});
+  number-interpolation: fn(10#{unit});
+  dimension-interpolation: fn(10px#{suffix});
+  interpolated-name: fn(foo#{$bar});
+  interpolated-string: fn("#{$value}");
+  interpolated-custom-property: fn(--#{$name});
+  interpolated-custom-property-suffix: fn(--theme-#{$slot});
+}
+
+.property-names {
+  #{$name}: 1px;
+  margin-#{$side}: 1px;
+  --#{$prop}: 10px;
+  --theme-#{$slot}: red;
+}
+
+.malformed-css {
+  color: calc(# {value});
+}

@@ -1,6 +1,5 @@
 use crate::lexer::{CssLexContext, CssStringQuote};
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::scss::expression::{
     parse_scss_inner_expression_in_string_until, parse_scss_interpolation_prefix,
@@ -12,7 +11,6 @@ use biome_css_syntax::CssSyntaxKind::{
 };
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::Parser;
-use biome_parser::SyntaxFeature;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -25,7 +23,7 @@ const SCSS_INTERPOLATION_END_TOKEN_SET: biome_parser::TokenSet<CssSyntaxKind> =
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_string(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p) && p.at(SCSS_STRING_QUOTE)
+    p.at(SCSS_STRING_QUOTE)
 }
 
 /// Parses an SCSS string with embedded interpolations such as

@@ -13,7 +13,7 @@ use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
     parse_generic_property_name, parse_property_value_with_end_set,
 };
-use crate::syntax::scss::is_nth_at_scss_interpolated_property;
+use crate::syntax::scss::is_nth_at_scss_interpolated_property_name;
 use crate::syntax::selector::parse_selector;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -293,7 +293,8 @@ fn parse_supports_feature_selector(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn is_at_supports_feature_declaration(p: &mut CssParser) -> bool {
     p.at(T!['('])
-        && (is_nth_at_direct_generic_property(p, 1) || is_nth_at_scss_interpolated_property(p, 1))
+        && (is_nth_at_direct_generic_property(p, 1)
+            || is_nth_at_scss_interpolated_property_name(p, 1))
 }
 
 #[inline]

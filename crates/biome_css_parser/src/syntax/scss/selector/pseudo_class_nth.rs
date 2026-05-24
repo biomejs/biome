@@ -1,6 +1,5 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::expected_number;
 use crate::syntax::parse_number;
 use crate::syntax::scss::{
@@ -18,14 +17,10 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
+use biome_parser::{CompletedMarker, Parser};
 
 #[inline]
 pub(crate) fn is_at_scss_pseudo_class_nth(p: &mut CssParser) -> bool {
-    if !CssSyntaxFeatures::Scss.is_supported(p) {
-        return false;
-    }
-
     let n = if p.at_ts(PSEUDO_CLASS_NTH_SIGN_SET) {
         1
     } else {

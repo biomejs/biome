@@ -1,15 +1,13 @@
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::scss::{is_at_scss_interpolation, parse_scss_regular_interpolation};
 use biome_css_syntax::{CssSyntaxKind::SCSS_KEYFRAMES_SELECTOR, T};
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::prelude::SyntaxFeature;
 
 #[inline]
 pub(crate) fn is_at_scss_keyframes_selector(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_interpolation(p)
+    is_at_scss_interpolation(p)
 }
 
 /// Parses an interpolated keyframe selector.

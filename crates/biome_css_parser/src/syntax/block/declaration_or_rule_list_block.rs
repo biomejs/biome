@@ -4,7 +4,7 @@ use crate::syntax::block::ParseBlockBody;
 use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
     is_at_scss_variable_declaration, parse_scss_nesting_declaration,
     parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
 };
@@ -49,7 +49,7 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
         || is_at_nested_qualified_rule(p)
         || is_at_scss_nesting_declaration(p)
         || is_at_scss_variable_declaration(p)
-        || is_at_scss_interpolated_property(p)
+        || is_at_scss_interpolated_property_name(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
 }
@@ -59,6 +59,61 @@ fn is_at_top_level_qualified_rule(p: &mut CssParser) -> bool {
     !p.state().is_nesting_block
         && matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
         && is_at_qualified_rule(p)
+}
+
+/// Parses SCSS interpolation-led block items.
+///
+/// Examples: `#{$selector} {}` and `--#{$prop}: red;`.
+#[inline]
+fn parse_scss_interpolated_block_item(p: &mut CssParser, end_kind: CssSyntaxKind) -> ParsedSyntax {
+    // `#{$selector} {}` and `--#{$prop}: red;` share an interpolation start.
+    if let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, end_kind) {
+        return rule;
+    }
+
+    parse_declaration_with_semicolon(p)
+}
+
+/// Parses SCSS interpolation-led block items in CSS recovery mode.
+///
+/// Examples: `#{$selector} {}` and `--#{$prop}: red;`.
+#[inline]
+fn parse_exclusive_scss_interpolated_block_item(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> ParsedSyntax {
+    let declaration = CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        |p| parse_exclusive_scss_interpolated_property_declaration(p, end_kind),
+        |p, marker| {
+            scss_only_syntax_error(
+                p,
+                "SCSS interpolated property declarations",
+                marker.range(p),
+            )
+        },
+    );
+
+    if declaration.is_present() {
+        declaration
+    } else if is_at_nested_qualified_rule(p) {
+        // `#{$selector} {}` stays in the nested-rule recovery path.
+        parse_nested_qualified_rule(p)
+    } else {
+        Absent
+    }
+}
+
+#[inline]
+fn parse_exclusive_scss_interpolated_property_declaration(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> ParsedSyntax {
+    if is_at_scss_nesting_declaration(p) {
+        try_parse_scss_nesting_declaration(p, end_kind).unwrap_or(Absent)
+    } else {
+        parse_declaration_with_semicolon(p)
+    }
 }
 
 struct DeclarationOrRuleListParseRecovery {
@@ -99,7 +154,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_nesting_declaration(p) {
+        } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
             // Match Sass's declaration-first strategy for ambiguous `name:ident` and
             // `name::...` forms, but do the ambiguity check inside the same speculative
             // declaration parse so we don't pay a separate probe pass first.
@@ -122,17 +177,12 @@ impl ParseNodeList for DeclarationOrRuleList {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
             )
-        } else if is_at_scss_interpolated_property(p) {
-            // The remaining interpolation-bearing property names here are the
-            // dashed/custom-property forms that `is_at_scss_nesting_declaration`
-            // intentionally excludes, such as `--theme-#{$slot}: red;`.
-            if let Ok(rule) =
-                try_parse_nested_qualified_rule_without_selector_recovery(p, self.end_kind)
-            {
-                return rule;
+        } else if is_at_scss_interpolated_property_name(p) {
+            if CssSyntaxFeatures::Scss.is_supported(p) {
+                parse_scss_interpolated_block_item(p, self.end_kind)
+            } else {
+                parse_exclusive_scss_interpolated_block_item(p, self.end_kind)
             }
-
-            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             // if we are at a declaration,
             // we still can have a nested qualified rule or a declaration

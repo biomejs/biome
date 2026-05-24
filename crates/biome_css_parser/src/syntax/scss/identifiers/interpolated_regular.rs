@@ -5,7 +5,7 @@ use crate::syntax::scss::identifiers::interpolated_identifier::{
     is_at_identifier_continuation, is_at_scss_interpolated_identifier,
     parse_scss_interpolated_identifier_parts,
 };
-use crate::syntax::scss::is_at_scss_interpolation;
+use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier};
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
@@ -50,7 +50,7 @@ pub(crate) fn parse_scss_interpolated_name(p: &mut CssParser) -> ParsedSyntax {
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
 pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_interpolated_identifier(p) {
+    if !is_nth_at_scss_interpolated_identifier(p, 0) {
         return Absent;
     }
 
@@ -85,7 +85,7 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
 /// Docs: https://sass-lang.com/documentation/interpolation
 #[inline]
 pub(crate) fn parse_scss_interpolation_or_identifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_interpolated_identifier(p) {
+    if !is_nth_at_scss_interpolated_identifier(p, 0) {
         return Absent;
     }
 

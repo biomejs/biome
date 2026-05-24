@@ -31,6 +31,35 @@ fn is_at_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool {
         && !p.has_nth_preceding_whitespace(1)
 }
 
+#[inline]
+pub(crate) fn is_at_scss_interpolated_value_first_part(p: &mut CssParser) -> bool {
+    is_at_scss_namespaced_variable(p)
+        || is_at_scss_variable(p)
+        || is_at_any_dimension(p)
+        || p.at(CSS_NUMBER_LITERAL)
+}
+
+#[inline]
+pub(crate) fn is_at_scss_suffixed_interpolated_value(p: &mut CssParser) -> bool {
+    if is_at_scss_namespaced_variable(p) {
+        is_nth_at_adjacent_interpolation_suffix(p, 4)
+    } else if is_at_scss_variable(p) {
+        is_nth_at_adjacent_interpolation_suffix(p, 2)
+    } else if is_at_any_dimension(p) {
+        // `10px#{suffix}`: dimension heads include the unit token.
+        is_nth_at_adjacent_interpolation_suffix(p, 2)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        is_nth_at_adjacent_interpolation_suffix(p, 1)
+    } else {
+        false
+    }
+}
+
+#[inline]
+fn is_nth_at_adjacent_interpolation_suffix(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_interpolation(p, n) && !p.has_nth_preceding_whitespace(n)
+}
+
 /// Parses an SCSS interpolation-led value and upgrades it to a function call
 /// when the interpolation-shaped name is followed by `(`.
 ///
@@ -103,6 +132,58 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
             }
         }
         _ => Present(head),
+    }
+}
+
+/// Parses an interpolation-bearing value from a non-interpolation head.
+///
+/// Examples:
+/// ```scss
+/// $value#{suffix}
+/// module.$value#{suffix}
+/// 10#{unit}
+/// 10px#{suffix}
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/interpolation
+#[inline]
+pub(crate) fn parse_scss_suffixed_interpolated_value_until(
+    p: &mut CssParser,
+    should_stop: impl Fn(&mut CssParser) -> bool,
+) -> ParsedSyntax {
+    if !is_at_scss_interpolated_value_first_part(p) {
+        return Absent;
+    }
+
+    let first_part = match parse_scss_interpolated_value_first_part(p) {
+        Present(first_part) => first_part,
+        Absent => return Absent,
+    };
+
+    // `10 / 2` and `$value / 2` must leave the operator to Sass precedence;
+    // only adjacent interpolation suffixes like `10#{unit}` continue here.
+    if should_stop(p) || !is_at_scss_interpolation(p) {
+        return Present(first_part);
+    }
+
+    Present(parse_scss_interpolated_value(p, first_part, should_stop))
+}
+
+/// Parses the head before an adjacent interpolation suffix.
+///
+/// Examples: `$value`, `module.$value`, `10`, `10px`
+#[inline]
+fn parse_scss_interpolated_value_first_part(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_namespaced_variable(p) {
+        parse_scss_namespaced_variable(p)
+    } else if is_at_scss_variable(p) {
+        parse_scss_variable(p)
+    } else if is_at_any_dimension(p) {
+        parse_any_dimension(p)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        parse_regular_number(p)
+    } else {
+        Absent
     }
 }
 

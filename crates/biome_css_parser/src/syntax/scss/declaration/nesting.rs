@@ -7,17 +7,17 @@ use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
     SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
-    is_at_scss_interpolated_property, parse_scss_interpolated_identifier,
+    is_at_scss_interpolated_property_name, parse_scss_interpolated_identifier,
     parse_scss_optional_value_until,
 };
-use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
+use crate::syntax::{is_at_dashed_identifier, is_at_identifier, try_parse};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_DECLARATION, CSS_DECLARATION_WITH_SEMICOLON, CSS_GENERIC_PROPERTY, SCSS_NESTING_DECLARATION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Marker, Parser, SyntaxFeature};
+use biome_parser::{Marker, Parser};
 
 /// Parses a SCSS nested property declaration block, or falls back to a regular
 /// declaration when no block follows.
@@ -44,11 +44,10 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
 
 #[inline]
 pub(crate) fn is_at_scss_nesting_declaration(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && !is_at_dashed_identifier(p)
+    !is_at_dashed_identifier(p)
         && !is_at_scss_interpolated_dashed_identifier(p)
         && !p.at(T![composes])
-        && (is_at_scss_interpolated_property(p) || (is_at_identifier(p) && p.nth_at(1, T![:])))
+        && (is_at_scss_interpolated_property_name(p) || (is_at_identifier(p) && p.nth_at(1, T![:])))
 }
 
 struct ScssNestingMarkers {
