@@ -275,7 +275,7 @@ impl FormatHtmlElement {
                 f,
             )?;
             FormatNodeRule::fmt(
-                &FormatHtmlDoubleTextExpression::default(),
+                &FormatHtmlDoubleTextExpression,
                 &interpolation,
                 f,
             )?;
