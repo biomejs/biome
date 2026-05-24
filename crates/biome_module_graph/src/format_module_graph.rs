@@ -1,9 +1,10 @@
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssImport, CssImports};
 use crate::html_module_info::HtmlModuleInfoInner;
 use crate::js_module_info::{Exports, Imports, JsBindingData};
+use crate::module_graph::ModuleInfoKind;
 use crate::{
     BindingTypeData, CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport, ModuleInfo,
+    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
@@ -871,7 +872,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
 
 // #region ModuleInfo
 
-impl std::fmt::Display for ModuleInfo {
+impl std::fmt::Display for ModuleInfoKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let formatted = biome_formatter::format!(FormatTypeContext, [self])
             .expect("Formatting not to throw any FormatErrors");
@@ -884,7 +885,7 @@ impl std::fmt::Display for ModuleInfo {
     }
 }
 
-impl Format<FormatTypeContext> for ModuleInfo {
+impl Format<FormatTypeContext> for ModuleInfoKind {
     fn fmt(
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,

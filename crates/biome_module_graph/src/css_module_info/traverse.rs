@@ -1,4 +1,5 @@
-use crate::ModuleInfo;
+use crate::db::ModuleDb;
+use crate::module_graph::ModuleInfoKind;
 use biome_console::markup;
 use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -8,7 +9,7 @@ use std::vec::IntoIter;
 
 /// Minimal step for efficient CSS class checking during traversal.
 /// Used in the happy path where we're just checking if classes exist.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
@@ -18,7 +19,7 @@ pub struct CssClassStep {
 
 /// Rich diagnostic information including component chain.
 /// Only built when generating error diagnostics (class not found).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CssTraversalStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
@@ -35,7 +36,7 @@ pub struct CssTraversalStep {
 /// Tree structure representing import relationships for diagnostic display.
 /// This captures the full hierarchical structure of how CSS files are discovered
 /// through the component import tree.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ImportTreeNode {
     /// The path of this file (JS/JSX/HTML component)
     pub file_path: Utf8PathBuf,
@@ -49,9 +50,8 @@ pub struct ImportTreeNode {
 /// yielding CSS files imported by parent components (minimal data for performance).
 ///
 /// Uses depth-first search (DFS) with an iterative stack to explore the import tree.
-/// This approach is simpler and more memory-efficient than BFS.
 pub struct ImportTreeTraversal<'a> {
-    pub(crate) module_graph: &'a crate::ModuleGraph,
+    pub(crate) module_database: &'a dyn ModuleDb,
     /// DFS stack of file paths to process
     pub(crate) stack: Vec<Utf8PathBuf>,
     /// Set of already-visited files to prevent cycles
@@ -64,95 +64,84 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
     type Item = CssClassStep;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // First, yield any remaining CSS files from the current parent
-        if let Some(ref mut iter) = self.current_css_iter {
-            if let Some(step) = iter.next() {
-                return Some(step);
-            } else {
-                // Exhausted current CSS iterator, clear it
-                self.current_css_iter = None;
-            }
-        }
-
-        // DFS: Process next file from the stack
-        while let Some(current_path) = self.stack.pop() {
-            let data = self.module_graph.data();
-
-            // Find ALL unvisited files that import current_path
-            // We need to process all of them, not just the first one
-            for (file_path, module_info) in data.iter() {
-                if self.visited.contains(file_path) {
-                    continue;
+        loop {
+            if let Some(ref mut iter) = self.current_css_iter {
+                if let Some(step) = iter.next() {
+                    return Some(step);
+                } else {
+                    self.current_css_iter = None;
                 }
+            }
 
-                let imports_current = match module_info {
-                    ModuleInfo::Js(js_info) => js_info
-                        .static_import_paths
-                        .values()
-                        .chain(js_info.dynamic_import_paths.values())
-                        .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => html_info
-                        .imported_stylesheets
-                        .iter()
-                        .chain(html_info.static_import_paths.values())
-                        .chain(html_info.dynamic_import_paths.values())
-                        .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Css(_) => false,
-                };
+            let current_path = self.stack.pop()?;
 
-                if imports_current {
-                    self.visited.insert(file_path.clone());
+            let mut importers = Vec::new();
+            self.module_database
+                .for_each_module(&mut |file_path, module_info| {
+                    if self.visited.contains(file_path) {
+                        return;
+                    }
 
-                    // Push this parent onto the stack for further upward traversal
-                    self.stack.push(file_path.clone());
-
-                    // Collect CSS files imported by this parent
-                    let css_steps: Vec<_> = match module_info {
-                        ModuleInfo::Js(js_info) => js_info
+                    let imports_current = match module_info {
+                        ModuleInfoKind::Js(js_info) => js_info
                             .static_import_paths
                             .values()
-                            .filter_map(|import_path| {
-                                let path = import_path.as_path()?;
-                                let css_info = self.module_graph.css_module_info_for_path(path)?;
-
-                                Some(CssClassStep {
-                                    css_path: path.to_path_buf(),
-                                    css_classes: css_info.classes.clone(),
-                                })
-                            })
-                            .collect(),
-                        ModuleInfo::Html(html_info) => html_info
+                            .chain(js_info.dynamic_import_paths.values())
+                            .any(|p| p.as_path() == Some(current_path.as_path())),
+                        ModuleInfoKind::Html(html_info) => html_info
                             .imported_stylesheets
                             .iter()
                             .chain(html_info.static_import_paths.values())
                             .chain(html_info.dynamic_import_paths.values())
-                            .filter_map(|stylesheet_path| {
-                                let path = stylesheet_path.as_path()?;
-                                let css_info = self.module_graph.css_module_info_for_path(path)?;
-
-                                Some(CssClassStep {
-                                    css_path: path.to_path_buf(),
-                                    css_classes: css_info.classes.clone(),
-                                })
-                            })
-                            .collect(),
-                        ModuleInfo::Css(_) => Vec::new(),
+                            .any(|p| p.as_path() == Some(current_path.as_path())),
+                        ModuleInfoKind::Css(_) => false,
                     };
 
-                    if !css_steps.is_empty() {
-                        // Create a real iterator from the vector
-                        self.current_css_iter = Some(css_steps.into_iter());
-                        // Recursively call next() to yield the first CSS file
-                        return self.next();
+                    if imports_current {
+                        importers.push((file_path.to_path_buf(), module_info.clone()));
                     }
+                });
+            let mut discovered_css = vec![];
+            for (file_path, module_info) in importers {
+                self.visited.insert(file_path.clone());
+                self.stack.push(file_path.clone());
 
-                    // Continue checking other files that might also import current_path
-                    // Don't break - we need to find ALL importers
-                }
+                discovered_css.extend(match &module_info {
+                    ModuleInfoKind::Js(js_info) => js_info
+                        .static_import_paths
+                        .values()
+                        .filter_map(|import_path| {
+                            let path = import_path.as_path()?;
+                            let css_info = self.module_database.css_module_info_for_path(path)?;
+
+                            Some(CssClassStep {
+                                css_path: path.to_path_buf(),
+                                css_classes: css_info.classes.clone(),
+                            })
+                        })
+                        .collect::<Vec<_>>(),
+                    ModuleInfoKind::Html(html_info) => html_info
+                        .imported_stylesheets
+                        .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
+                        .filter_map(|stylesheet_path| {
+                            let path = stylesheet_path.as_path()?;
+                            let css_info = self.module_database.css_module_info_for_path(path)?;
+
+                            Some(CssClassStep {
+                                css_path: path.to_path_buf(),
+                                css_classes: css_info.classes.clone(),
+                            })
+                        })
+                        .collect::<Vec<_>>(),
+                    ModuleInfoKind::Css(_) => Vec::new(),
+                });
+            }
+            if !discovered_css.is_empty() {
+                self.current_css_iter = Some(discovered_css.into_iter());
             }
         }
-
-        None
     }
 }
 
@@ -173,8 +162,6 @@ impl<'a> ImportTreeDisplay<'a> {
 
 impl<'a> biome_console::fmt::Display for ImportTreeDisplay<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
         let root_node = RootTreeNode {
             node: self.node,
             working_directory: self.working_directory,
@@ -184,7 +171,6 @@ impl<'a> biome_console::fmt::Display for ImportTreeDisplay<'a> {
     }
 }
 
-/// Display wrapper for relative paths
 struct RelativePath<'a> {
     path: &'a Utf8Path,
     working_directory: Option<&'a Utf8Path>,
@@ -201,7 +187,6 @@ impl<'a> biome_console::fmt::Display for RelativePath<'a> {
     }
 }
 
-/// Root level tree node (displayed with "(this file)" suffix)
 struct RootTreeNode<'a> {
     node: &'a ImportTreeNode,
     working_directory: Option<&'a Utf8Path>,
@@ -215,7 +200,6 @@ impl<'a> biome_console::fmt::Display for RootTreeNode<'a> {
         };
         fmt.write_markup(markup! {{display_path}" (this file)"})?;
 
-        // Show imports inline if present
         if !self.node.css_imports.is_empty() {
             fmt.write_str(" -> which imports ")?;
             for (i, css_path) in self.node.css_imports.iter().enumerate() {
@@ -245,7 +229,6 @@ impl<'a> biome_console::fmt::Display for RootTreeNode<'a> {
     }
 }
 
-/// "imported by:" group
 struct ImportedByGroup<'a> {
     parents: &'a [ImportTreeNode],
     working_directory: Option<&'a Utf8Path>,
@@ -254,19 +237,15 @@ struct ImportedByGroup<'a> {
 
 impl<'a> biome_console::fmt::Display for ImportedByGroup<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        use biome_console::markup;
-
         let branch = if self.is_last { "└─ " } else { "├─ " };
         fmt.write_markup(markup! {"  "{branch}"imported by:\n"})?;
 
-        // Prefix for items: use pipe if this group is not the last sibling, spaces if it is
         let prefix = if self.is_last {
             "    ".to_string()
         } else {
             "  │ ".to_string()
         };
 
-        // Sort parents by file path for deterministic output
         let mut sorted_parents: Vec<_> = self.parents.iter().collect();
         sorted_parents.sort_by_key(|p| &p.file_path);
 
@@ -285,7 +264,6 @@ impl<'a> biome_console::fmt::Display for ImportedByGroup<'a> {
     }
 }
 
-/// A tree item (component file)
 struct TreeItem<'a> {
     node: &'a ImportTreeNode,
     working_directory: Option<&'a Utf8Path>,
@@ -301,10 +279,8 @@ impl<'a> biome_console::fmt::Display for TreeItem<'a> {
             working_directory: self.working_directory,
         };
 
-        // Write the file path
         fmt.write_markup(markup! {{self.prefix}{branch}"• "{display_path}})?;
 
-        // Show imports inline if present
         if !self.node.css_imports.is_empty() {
             fmt.write_str(" -> which imports ")?;
             for (i, css_path) in self.node.css_imports.iter().enumerate() {
@@ -321,14 +297,12 @@ impl<'a> biome_console::fmt::Display for TreeItem<'a> {
 
         fmt.write_str("\n")?;
 
-        // Show nested parent components recursively (imported by chain)
         if !self.node.parent_components.is_empty() {
             let child_prefix = format!("{}{}", self.prefix, if self.is_last { "  " } else { "│ " });
             fmt.write_markup(markup! {{child_prefix}"└─ imported by:\n"})?;
 
             let item_prefix = format!("{}  ", child_prefix);
 
-            // Sort parents by file path for deterministic output
             let mut sorted_parents: Vec<_> = self.node.parent_components.iter().collect();
             sorted_parents.sort_by_key(|p| &p.file_path);
 

@@ -3,7 +3,7 @@ use biome_module_graph::JsImportPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
-use crate::{JsRuleAction, services::module_graph::ResolvedImports};
+use crate::{JsRuleAction, services::database::ResolvedImports};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
@@ -165,7 +165,7 @@ impl Rule for UseImportExtensions {
     type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.module_info_for_path(ctx.file_path())?;
+        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();

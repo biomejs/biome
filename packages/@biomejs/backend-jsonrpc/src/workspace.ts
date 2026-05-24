@@ -9884,6 +9884,7 @@ export type Category =
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
+	| "internalError/db"
 	| "reporter/parse"
 	| "reporter/format"
 	| "reporter/violations"

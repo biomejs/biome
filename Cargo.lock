@@ -457,6 +457,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_db"
+version = "0.0.1"
+dependencies = [
+ "salsa",
+]
+
+[[package]]
 name = "biome_deserialize"
 version = "0.6.0"
 dependencies = [
@@ -1457,6 +1464,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1487,6 +1495,7 @@ dependencies = [
  "once_cell",
  "papaya",
  "rustc-hash 2.1.2",
+ "salsa",
  "schemars",
  "serde",
  "serde_json",
@@ -1590,12 +1599,14 @@ name = "biome_resolver"
 version = "0.1.0"
 dependencies = [
  "biome_console",
+ "biome_db",
  "biome_diagnostics",
  "biome_fs",
  "biome_json_value",
  "biome_package",
  "biome_rowan",
  "camino",
+ "salsa",
 ]
 
 [[package]]
@@ -1645,6 +1656,7 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_configuration",
+ "biome_db",
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
@@ -1668,6 +1680,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -1728,6 +1741,7 @@ dependencies = [
  "rayon",
  "regex",
  "rustc-hash 2.1.2",
+ "salsa",
  "schemars",
  "serde",
  "serde_json",
@@ -1814,6 +1828,7 @@ dependencies = [
  "biome_console",
  "biome_css_parser",
  "biome_css_syntax",
+ "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
@@ -2010,7 +2025,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cow-utils",
- "dashmap 6.2.1",
+ "dashmap 6.1.0",
  "dynify",
  "fast-float2",
  "float16",
@@ -2448,7 +2463,7 @@ version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2611,18 +2626,18 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-queue"
-version = "0.3.11"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df0346b5d5e76ac2fe4e327c5fd1118d6be7c51dfb18f9b7922923f287471e35"
+checksum = "0f58bbc28f91df819d0aa2a2c00cd19754769c2fad90579b3592b1c9ba7a3115"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.19"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "248e3bacc7dc6baa3b21e405ee045c3047101a49145e7e9eca583ab4c2ca5345"
+checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "darling"
@@ -2674,9 +2689,9 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "6.2.1"
+version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6361d5c062261c78a176addb82d4c821ae42bed6089de0e12603cd25de2059c"
+checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -2750,7 +2765,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3351,9 +3366,23 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash 0.2.0",
+]
+
+[[package]]
+name = "hashlink"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7382cf6263419f2d8df38c55d7da83da5c18aef87fc7a7fc1fb1e344edfe14c1"
+dependencies = [
+ "hashbrown 0.15.5",
+]
 
 [[package]]
 name = "heck"
@@ -3748,7 +3777,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.1",
+ "hashbrown 0.17.0",
  "serde",
  "serde_core",
 ]
@@ -3824,6 +3853,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "inventory"
+version = "0.3.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4f0c30c76f2f4ccee3fe55a2435f691ca00c0e4bd87abe4f4a851b1d4dac39b"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "ipnet"
 version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3847,7 +3885,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3892,7 +3930,7 @@ dependencies = [
  "portable-atomic",
  "portable-atomic-util",
  "serde_core",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4031,9 +4069,9 @@ dependencies = [
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.12.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
+checksum = "6db9c683daf087dc577b7506e9695b3d556a9f3849903fa28186283afd6809e9"
 
 [[package]]
 name = "litemap"
@@ -5109,15 +5147,15 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.1.4"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+checksum = "dade4812df5c384711475be5fcd8c162555352945401aed22a35bffeab61f657"
 dependencies = [
  "bitflags 2.9.3",
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5173,6 +5211,50 @@ name = "ryu-js"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd29631678d6fb0903b69223673e122c32e9ae559d0960a38d574695ebc0ea15"
+
+[[package]]
+name = "salsa"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4612ff789805e65c87e9b38cb749a293212a615af065bed8a2001086801498c3"
+dependencies = [
+ "boxcar",
+ "crossbeam-queue",
+ "crossbeam-utils",
+ "hashbrown 0.17.0",
+ "hashlink",
+ "indexmap",
+ "intrusive-collections",
+ "inventory",
+ "parking_lot",
+ "portable-atomic",
+ "rayon",
+ "rustc-hash 2.1.2",
+ "salsa-macro-rules",
+ "salsa-macros",
+ "smallvec",
+ "thin-vec",
+ "tracing",
+ "typeid",
+]
+
+[[package]]
+name = "salsa-macro-rules"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58e354cbac6939b9b09cd9c11fb419a53e64b4a0f755d929f56a09f4cc752e41"
+
+[[package]]
+name = "salsa-macros"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3067861075c2b80608f84ad49fb88f2c7610b94cdf8b4201e79ddee87f8980c8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+ "synstructure",
+]
 
 [[package]]
 name = "same-file"
@@ -5513,7 +5595,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -5617,9 +5699,9 @@ dependencies = [
 
 [[package]]
 name = "synstructure"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8af7666ab7b6390ab78131fb5b0fce11d6b7a6951602017c35fa82800708971"
+checksum = "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5654,7 +5736,7 @@ dependencies = [
  "getrandom 0.3.2",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5673,7 +5755,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "230a1b821ccbd75b185820a1f1ff7b14d21da1e442e22c0863ea5f08771a8874"
 dependencies = [
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -5995,7 +6077,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f0e711655c89181a6bc6a2cc348131fcd9680085f5b06b6af13427a393a6e72"
 dependencies = [
  "bytes",
- "dashmap 6.2.1",
+ "dashmap 6.1.0",
  "futures",
  "httparse",
  "ls-types",
@@ -6133,6 +6215,12 @@ dependencies = [
  "termcolor",
  "toml",
 ]
+
+[[package]]
+name = "typeid"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc7d623258602320d5c55d1bc22793b57daff0ec7efc270ea7d55ce1d5f5471c"
 
 [[package]]
 name = "unicase"

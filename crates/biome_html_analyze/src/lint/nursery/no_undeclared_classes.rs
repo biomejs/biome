@@ -5,7 +5,10 @@ use biome_html_syntax::{
     AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlOpeningElement,
     HtmlSelfClosingElement,
 };
-use biome_module_graph::{ImportTreeDisplay, ImportTreeNode};
+use biome_module_graph::{
+    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
+    traverse_import_tree_for_html_classes,
+};
 use biome_rowan::{AstNode, TextRange, TextSize};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
 use biome_string_case::StrOnlyExtension;
@@ -99,16 +102,17 @@ impl Rule for NoUndeclaredClasses {
             return Vec::new();
         }
 
-        let module_graph = ctx.module_graph();
+        let db = ctx.db();
         let file_path = ctx.file_path();
+        let Some(module) = db.module_for_path(file_path) else {
+            return Vec::new();
+        };
 
         // Collect all CSS steps reachable from this file (inline styles, linked
         // stylesheets, and CSS imported by parent files via upward traversal).
         // If no CSS is reachable at all, skip to avoid false positives on
         // completely unstyled files.
-        let css_steps: Vec<_> = module_graph
-            .traverse_import_tree_for_html_classes(file_path)
-            .collect();
+        let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, module);
 
         if css_steps.is_empty() {
             return Vec::new();
@@ -138,8 +142,8 @@ impl Rule for NoUndeclaredClasses {
             }
 
             // Only build the import tree for diagnostic display when the class is missing.
-            if !found_class {
-                let import_tree = module_graph.build_import_tree_for_html(file_path);
+            if !found_class && let Some(module) = db.module_for_path(file_path) {
+                let import_tree = build_import_tree_for_html(db, module);
                 let start = TextSize::from(class_data.inner_file_start + class_offset);
                 let end = start + TextSize::from(class_name.len() as u32);
                 signals.push(UndeclaredClass {

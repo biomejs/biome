@@ -19,6 +19,7 @@ name    = "module_graph"
 biome_console        = { workspace = true }
 biome_css_semantic   = { workspace = true }
 biome_css_syntax     = { workspace = true }
+biome_db             = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
@@ -37,6 +38,7 @@ indexmap             = { workspace = true }
 once_cell            = "1.21.4"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
+salsa                = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, optional = true }
 serde_json           = { workspace = true }
@@ -46,6 +48,7 @@ static_assertions    = { workspace = true }
 biome_configuration  = { path = "../biome_configuration" }
 biome_css_formatter  = { path = "../biome_css_formatter" }
 biome_css_parser     = { path = "../biome_css_parser" }
+biome_db             = { path = "../biome_db" }
 biome_deserialize    = { path = "../biome_deserialize" }
 biome_html_formatter = { path = "../biome_html_formatter" }
 biome_html_parser    = { path = "../biome_html_parser" }

@@ -1389,6 +1389,7 @@ mod tests {
             Arc::new(NoopQueryProvider {}),
             None,
         ));
+
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
 

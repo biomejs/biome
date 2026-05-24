@@ -207,19 +207,16 @@ pub(crate) fn analyze_and_snap(
     }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
-    let module_graph = if needs_module_graph {
-        module_graph_for_test_file(input_file, &project_layout)
-    } else {
-        Default::default()
-    };
     let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
-    let services = JsAnalyzerServices::from((
-        module_graph,
-        project_layout,
-        source_type,
-        Some(semantic_model),
-    ));
+    let mut services = JsAnalyzerServices::default()
+        .with_source_type(source_type)
+        .with_semantic_model(semantic_model)
+        .with_project_layout(project_layout.clone());
+    if needs_module_graph {
+        let module_db = module_graph_for_test_file(input_file, &project_layout);
+        services = services.with_module_db(module_db);
+    }
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {

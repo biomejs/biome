@@ -2462,7 +2462,7 @@ fn go_to_definition_html_class_inline_style() {
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::NoScanner,
+            scan_kind: ScanKind::Project,
             verbose: false,
         })
         .unwrap();
@@ -2607,7 +2607,7 @@ fn go_to_definition_vue_class_to_inline_style() {
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::NoScanner,
+            scan_kind: ScanKind::Project,
             verbose: false,
         })
         .unwrap();
@@ -2704,7 +2704,7 @@ foo();
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::NoScanner,
+            scan_kind: ScanKind::Project,
             verbose: false,
         })
         .unwrap();
@@ -2967,7 +2967,7 @@ fn go_to_definition_css_class_via_transitive_import() {
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::TypeAware,
+            scan_kind: ScanKind::Project,
             verbose: false,
         })
         .unwrap();

@@ -2,6 +2,7 @@ use crate::file_handlers::ResolveDefinitionParams;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_syntax::CssClassSelector;
 use biome_fs::BiomePath;
+use biome_module_graph::{SymbolName, find_css_class_definition};
 use biome_rowan::AstNode;
 use std::ops::Add;
 
@@ -11,16 +12,19 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
     let mut result = GoToDefinitionResult::default();
     if let DefinitionReference::CssClass { class_name } = params.definition_ref {
         let path = params.path.as_path();
-        for (css_path, mut range, content_offset) in params
-            .module_graph
-            .find_css_class_definition(path, class_name)
-        {
-            // For inline `<style>` blocks, the range is snippet-local.
-            // Apply the content_offset to get parent document coordinates.
-            if let Some(offset) = content_offset {
-                range += offset;
+        if let Some(module) = params.module_db.module_for_path(path) {
+            for (css_path, mut range, content_offset) in find_css_class_definition(
+                params.module_db,
+                module,
+                SymbolName::new(params.module_db, class_name),
+            ) {
+                // For inline `<style>` blocks, the range is snippet-local.
+                // Apply the content_offset to get parent document coordinates.
+                if let Some(offset) = content_offset {
+                    range += offset;
+                }
+                result.store(BiomePath::new(css_path), range);
             }
-            result.store(BiomePath::new(css_path), range);
         }
 
         if let Some(model) = params

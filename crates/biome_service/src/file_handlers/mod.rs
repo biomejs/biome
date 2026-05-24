@@ -63,7 +63,7 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
@@ -562,7 +562,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -629,7 +629,7 @@ type DebugFormatterIR = fn(
     &SettingsWithEditor,
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
-    fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, Option<AnyParse>, ProjectDatabase) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
@@ -649,7 +649,6 @@ pub struct DebugCapabilities {
     pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
-#[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
@@ -658,7 +657,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -684,7 +683,7 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -1218,7 +1217,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -1357,7 +1356,7 @@ pub(crate) struct ResolveBindingParams<'a> {
 pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) definition_ref: &'a DefinitionReference,
-    pub(crate) module_graph: &'a ModuleGraph,
+    pub(crate) module_db: &'a dyn ModuleDb,
     pub(crate) offset: Option<TextSize>,
     pub(crate) services: &'a DocumentServices,
 }

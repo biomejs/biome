@@ -584,7 +584,7 @@ fn lint(params: LintParams) -> LintResults {
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
     let html_services = HtmlAnalyzerServices {
-        module_graph: Some(params.module_graph.clone()),
+        module_db: Some(params.module_db.clone()),
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -610,7 +610,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph,
+        module_db,
         project_layout,
         language,
         only,
@@ -664,7 +664,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     let html_services = HtmlAnalyzerServices {
-        module_graph: Some(module_graph),
+        module_db: Some(module_db),
         project_layout: Some(project_layout),
     };
 
@@ -761,7 +761,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         loop {
             let mut pending_actions = Vec::new();
             let html_services = HtmlAnalyzerServices {
-                module_graph: Some(params.module_graph.clone()),
+                module_db: Some(params.module_db.clone()),
                 project_layout: Some(params.project_layout.clone()),
             };
 
@@ -819,7 +819,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     loop {
         let mut pending_actions = Vec::new();
         let html_services = HtmlAnalyzerServices {
-            module_graph: Some(params.module_graph.clone()),
+            module_db: Some(params.module_db.clone()),
             project_layout: Some(params.project_layout.clone()),
         };
 
@@ -848,7 +848,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     // Phase 2: all rules for final diagnostics
     {
         let html_services = HtmlAnalyzerServices {
-            module_graph: Some(params.module_graph.clone()),
+            module_db: Some(params.module_db.clone()),
             project_layout: Some(params.project_layout.clone()),
         };
         let (_, _) = analyze(
