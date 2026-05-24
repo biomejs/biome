@@ -1,0 +1,37 @@
+@debug value;
+@warn value;
+@error value;
+@return value;
+@use "theme";
+@forward "theme";
+@include button;
+@content;
+@extend .button;
+
+@at-root .item {
+	color: red;
+}
+
+@mixin button {
+	color: red;
+}
+
+@if condition {
+	color: red;
+}
+
+@else {
+	color: red;
+}
+
+@for item from 1 through 3 {
+	color: red;
+}
+
+@each item in list {
+	color: red;
+}
+
+@while condition {
+	color: red;
+}

@@ -1,14 +1,16 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
-    expected_any_pseudo_class_nth, expected_number, expected_selector,
+    expected_any_pseudo_class_nth, expected_number, expected_selector, scss_only_syntax_error,
 };
 use crate::syntax::scss::{is_at_scss_pseudo_class_nth, parse_scss_pseudo_class_nth};
 use crate::syntax::selector::{
     SELECTOR_FUNCTION_RECOVERY_SET, SelectorList, eat_or_recover_selector_function_close_token,
     recover_selector_function_parameter,
 };
-use crate::syntax::{parse_number, parse_regular_identifier, parse_regular_number};
+use crate::syntax::{
+    CssSyntaxFeatures, parse_number, parse_regular_identifier, parse_regular_number,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NTH_OFFSET, CSS_PSEUDO_CLASS_FUNCTION_NTH, CSS_PSEUDO_CLASS_NTH,
@@ -19,7 +21,7 @@ use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_NTH_SET: TokenSet<CssSyntaxKind> = token_set![
     T![nth_child],
@@ -124,7 +126,13 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_pseudo_class_nth(p) {
-        return parse_scss_pseudo_class_nth(p);
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_pseudo_class_nth,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated nth arguments", marker.range(p))
+            },
+        );
     }
 
     let m = p.start();

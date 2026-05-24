@@ -1,12 +1,11 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::selector::selector_lex_context;
 use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{SyntaxFeature, TokenSet, token_set};
+use biome_parser::{TokenSet, token_set};
 
 use super::list::parse_scss_inner_expression_until;
 use crate::syntax::scss::expected_scss_expression;
@@ -71,5 +70,5 @@ pub(crate) fn is_at_scss_interpolation(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolation(p: &mut CssParser, n: usize) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p) && p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{'])
+    p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{']) && !p.has_nth_preceding_whitespace(n + 1)
 }

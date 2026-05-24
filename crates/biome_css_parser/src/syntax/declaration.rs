@@ -5,7 +5,7 @@ use crate::syntax::property::{
     is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
     is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
     parse_scss_variable_declaration,
 };
@@ -25,8 +25,20 @@ impl ParseNodeList for DeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if is_at_scss_nesting_declaration(p) || is_at_scss_interpolated_property(p) {
+        if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
             parse_scss_interpolated_property_declaration(p)
+        } else if is_at_scss_interpolated_property_name(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_interpolated_property_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(
+                        p,
+                        "SCSS interpolated property declarations",
+                        marker.range(p),
+                    )
+                },
+            )
         } else {
             parse_any_declaration_with_semicolon(p)
         }

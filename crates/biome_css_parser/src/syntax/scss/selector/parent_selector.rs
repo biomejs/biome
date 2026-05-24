@@ -1,18 +1,18 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{parse_selector_identifier_fragment, selector_lex_context};
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_DIMENSION_VALUE, CSS_NUMBER, CSS_NUMBER_LITERAL, SCSS_PARENT_SELECTOR_SUFFIX,
     SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN, SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature};
 
 /// Parses the suffix in an SCSS parent selector after `&` has been consumed.
 ///
@@ -42,9 +42,7 @@ pub(crate) fn parse_scss_parent_selector_suffix(p: &mut CssParser) -> ParsedSynt
 
 #[inline]
 pub(crate) fn is_at_scss_parent_selector_suffix(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && !p.has_preceding_whitespace()
-        && is_at_scss_parent_selector_suffix_part(p)
+    !p.has_preceding_whitespace() && is_at_scss_parent_selector_suffix_part(p)
 }
 
 /// Parses adjacent suffix parts in `&-#{$state}` until whitespace or selector

@@ -23,11 +23,12 @@ use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
-    is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
-    parse_scss_function, parse_scss_interpolated_dashed_identifier,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
-    parse_scss_variable_declaration,
+    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
+    is_at_scss_variable_declaration, parse_scss_function,
+    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string, parse_scss_module_member_access,
+    parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
+    parse_scss_variable, parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -542,6 +543,16 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
         })
+    } else if is_at_scss_suffixed_interpolated_value(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                parse_scss_suffixed_interpolated_value_until(p, |p| {
+                    p.has_preceding_whitespace() || p.has_preceding_line_break()
+                })
+            },
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated values", m.range(p)),
+        )
     } else if is_at_scss_variable(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_variable, |p, m| {
             scss_only_syntax_error(p, "SCSS variables", m.range(p))
@@ -556,7 +567,11 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
                 add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
             })
     } else if is_at_scss_interpolated_dashed_identifier(p) {
-        parse_scss_interpolated_dashed_identifier(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_dashed_identifier,
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated dashed identifiers", m.range(p)),
+        )
     } else if is_at_scss_interpolated_function_or_value(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -564,9 +579,15 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             |p, m| scss_only_syntax_error(p, "SCSS interpolated values", m.range(p)),
         )
     } else if is_at_scss_parent_selector_value(p) {
-        parse_scss_parent_selector_value(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_parent_selector_value,
+            |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
+        )
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, m| {
+            scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p))
+        })
     } else {
         Absent
     }

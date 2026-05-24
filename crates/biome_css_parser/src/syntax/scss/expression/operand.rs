@@ -1,15 +1,12 @@
 use crate::parser::CssParser;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolation,
-    is_at_scss_namespaced_variable, is_at_scss_variable, parse_scss_function_call_from_name,
+    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_value_first_part,
+    is_at_scss_interpolation, is_at_scss_namespaced_variable, parse_scss_function_call_from_name,
     parse_scss_interpolated_function_or_value_until, parse_scss_interpolated_value,
-    parse_scss_variable,
+    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
 };
-use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::{parse_regular_identifier, parse_regular_number};
-use biome_css_syntax::CssSyntaxKind::{
-    CSS_NUMBER_LITERAL, SCSS_MODULE_MEMBER_ACCESS, SCSS_NAMESPACED_VARIABLE,
-};
+use biome_css_syntax::CssSyntaxKind::{SCSS_MODULE_MEMBER_ACCESS, SCSS_NAMESPACED_VARIABLE};
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
@@ -50,15 +47,18 @@ pub(super) fn parse_scss_expression_operand(
         return parse_scss_module_variable_operand(p);
     }
 
-    if is_at_scss_interpolatable_value(p) {
-        return parse_scss_interpolatable_value(p);
+    if is_at_scss_interpolated_value_first_part(p) {
+        return parse_scss_suffixed_interpolated_value_until(
+            p,
+            is_at_scss_expression_interpolated_value_boundary,
+        );
     }
 
     parse_scss_regular_expression_operand(p, options)
 }
 
-/// Parses `module.$name` as either a standalone module-member operand or an
-/// interpolatable namespaced variable.
+/// Parses `module.$name` as either a standalone module-member operand or a
+/// suffixed interpolated namespaced variable.
 ///
 /// Example:
 /// ```scss
@@ -85,7 +85,7 @@ fn parse_scss_module_variable_operand(p: &mut CssParser) -> ParsedSyntax {
         return parse_scss_function_call_from_name(p, name);
     }
 
-    if !is_at_scss_expression_interpolated_value_suffix(p) {
+    if is_at_scss_expression_interpolated_value_boundary(p) || !is_at_scss_interpolation(p) {
         return Present(head.complete(p, SCSS_MODULE_MEMBER_ACCESS));
     }
 
@@ -95,68 +95,6 @@ fn parse_scss_module_variable_operand(p: &mut CssParser) -> ParsedSyntax {
         head,
         is_at_scss_expression_interpolated_value_boundary,
     ))
-}
-
-/// Parses an interpolatable value such as `$value#{suffix}`, `10px#{suffix}`,
-/// or `10#{unit}`.
-///
-/// Examples:
-/// ```scss
-/// $value#{suffix}
-/// 10px#{suffix}
-/// 10#{unit}
-/// ```
-///
-/// Docs: https://sass-lang.com/documentation/interpolation
-#[inline]
-fn parse_scss_interpolatable_value(p: &mut CssParser) -> ParsedSyntax {
-    let first_part = match parse_scss_interpolatable_value_first_part(p) {
-        Present(first_part) => first_part,
-        Absent => return Absent,
-    };
-
-    // Return only the parsed head for `$value`, `$value #{suffix}`, `$value / 2`,
-    // and `3%4`; only interpolation suffixes like `$value#{suffix}` continue.
-    if !is_at_scss_expression_interpolated_value_suffix(p) {
-        return Present(first_part);
-    }
-
-    Present(parse_scss_interpolated_value(
-        p,
-        first_part,
-        is_at_scss_expression_interpolated_value_boundary,
-    ))
-}
-
-/// Parses the first part that can still accept adjacent interpolation.
-///
-/// Examples:
-/// ```scss
-/// $value#{suffix}
-/// 10px#{suffix}
-/// 10#{unit}
-/// ```
-#[inline]
-fn parse_scss_interpolatable_value_first_part(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_variable(p) {
-        parse_scss_variable(p)
-    } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
-    } else if p.at(CSS_NUMBER_LITERAL) {
-        parse_regular_number(p)
-    } else {
-        Absent
-    }
-}
-
-#[inline]
-fn is_at_scss_interpolatable_value(p: &mut CssParser) -> bool {
-    is_at_scss_variable(p) || is_at_any_dimension(p) || p.at(CSS_NUMBER_LITERAL)
-}
-
-#[inline]
-fn is_at_scss_expression_interpolated_value_suffix(p: &mut CssParser) -> bool {
-    !is_at_scss_expression_interpolated_value_boundary(p) && is_at_scss_interpolation(p)
 }
 
 /// Stops expression value chains before a space, line break, or operator.

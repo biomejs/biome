@@ -66,20 +66,23 @@ use crate::syntax::at_rule::tailwind::{
     parse_reference_at_rule, parse_slot_at_rule, parse_source_at_rule, parse_theme_at_rule,
     parse_utility_at_rule, parse_variant_at_rule,
 };
-use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
+use crate::syntax::at_rule::unknown::{
+    is_at_unknown_at_rule, parse_scss_interpolated_unknown_at_rule, parse_unknown_at_rule,
+};
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::at_rule::view_transition::{
     parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
 };
 
-use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
+use crate::syntax::parse_error::{expected_any_at_rule, scss_only_syntax_error, tailwind_disabled};
 use crate::syntax::scss::{
-    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
-    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
-    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
-    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
-    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
-    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    is_at_scss_interpolation, parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule,
+    parse_scss_content_at_rule, parse_scss_debug_at_rule, parse_scss_each_at_rule,
+    parse_scss_error_at_rule, parse_scss_extend_at_rule, parse_scss_for_at_rule,
+    parse_scss_forward_at_rule, parse_scss_function_at_rule, parse_scss_if_at_rule,
+    parse_scss_import_at_rule, parse_scss_include_at_rule, parse_scss_mixin_at_rule,
+    parse_scss_return_at_rule, parse_scss_use_at_rule, parse_scss_warn_at_rule,
+    parse_scss_while_at_rule,
 };
 use crate::syntax::{CssSyntaxFeatures, is_nth_at_dashed_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -262,6 +265,13 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
                 tailwind_disabled(p, m.range(p))
             })
             .or_else(|| parse_unknown_at_rule(p)),
+        _ if is_at_scss_interpolation(p) => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_unknown_at_rule,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated at-rule names", marker.range(p))
+            },
+        ),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }

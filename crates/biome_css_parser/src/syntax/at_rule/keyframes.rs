@@ -8,7 +8,9 @@ use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
-use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::parse_error::{
+    expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
+};
 use crate::syntax::scss::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
@@ -17,6 +19,7 @@ use crate::syntax::{
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::SyntaxFeature;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -371,7 +374,13 @@ fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_keyframes_selector(p) {
-        parse_scss_keyframes_selector(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_keyframes_selector,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated keyframe selectors", marker.range(p))
+            },
+        )
     } else if is_at_timeline_range_name(p) {
         parse_keyframes_range_selector(p)
     } else if is_at_percentage_dimension(p) {
