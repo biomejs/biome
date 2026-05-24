@@ -439,9 +439,20 @@ impl<'src> TailwindLexer<'src> {
     fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+        let mut end = 0usize;
+        while end < slice.len() {
+            let byte = slice[end];
+            if is_variant_segment_name_boundary(byte) || !byte.is_ascii() {
+                break;
+            }
+            end += 1;
+        }
+        self.advance(end);
+
         while let Some(byte) = self.current_byte() {
-            let dispatched = lookup_byte(byte);
-            if matches!(dispatched, WHS | COL | MIN | SLH | EXL | BTC | PNC) {
+            if is_variant_segment_name_boundary(byte) {
                 break;
             }
 
@@ -672,4 +683,12 @@ fn is_css_identifier_start(byte: u8) -> bool {
 
 fn is_css_identifier_continue(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN | DIG | ZER)
+}
+
+#[inline]
+fn is_variant_segment_name_boundary(byte: u8) -> bool {
+    matches!(
+        byte,
+        b'\t'..=b'\r' | b' ' | b':' | b'-' | b'/' | b'!' | b']' | b')'
+    )
 }
