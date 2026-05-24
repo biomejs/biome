@@ -3,12 +3,13 @@ use crate::utils::comment_trivia::format_leading_comments_with_soft_lines;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
-    AnyScssExpression, CssSyntaxToken, ScssMapExpressionPair, ScssMapExpressionPairFields,
+    CssSyntaxKind::{SCSS_EACH_AT_RULE, SCSS_FOR_AT_RULE, SCSS_IF_AT_RULE, SCSS_WHILE_AT_RULE},
+    ScssMapExpressionPair, ScssMapExpressionPairFields, ScssVariableDeclaration,
     is_in_scss_include_arguments,
 };
 use biome_formatter::comments::CommentKind;
 use biome_formatter::{format_args, write};
-use biome_rowan::SyntaxResult;
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssMapExpressionPair;
@@ -32,20 +33,7 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
     }
 
     fn fmt_fields(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssMapExpressionPairFields {
-            key,
-            colon_token,
-            value,
-        } = node.as_fields();
-
-        write!(
-            f,
-            [FormatScssMapPairLayout {
-                key: &key,
-                colon_token: &colon_token,
-                value: &value,
-            }]
-        )
+        write!(f, [FormatScssMapPairLayout { node }])
     }
 
     fn fmt_leading_comments(
@@ -94,62 +82,73 @@ impl ScssMapPairLeadingCommentLayout {
 /// `("long", "key"): value`. Parenthesized values stay after `:`, e.g.
 /// `key: (value)`.
 struct FormatScssMapPairLayout<'a> {
-    key: &'a SyntaxResult<AnyScssExpression>,
-    colon_token: &'a SyntaxResult<CssSyntaxToken>,
-    value: &'a SyntaxResult<AnyScssExpression>,
+    node: &'a ScssMapExpressionPair,
 }
 
 impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.is_value_self_breaking() && !self.is_key_self_breaking() {
+        let ScssMapExpressionPairFields {
+            key,
+            colon_token,
+            value,
+        } = self.node.as_fields();
+        let key = key?;
+        let colon_token = colon_token?;
+        let value = value?;
+
+        // `/* c */ key: (nested: value)` keeps the nested map in the pair group.
+        if is_self_breaking_value(&value)
+            && !is_self_breaking_value(&key)
+            && f.comments().leading_comments(self.node.syntax()).is_empty()
+            && !is_in_control_variable_map(self.node)
+        {
             return write!(
                 f,
                 [group(&format_args![
-                    self.key.format(),
-                    self.colon_token.format(),
+                    key.format(),
+                    colon_token.format(),
                     space(),
-                    self.value.format()
+                    value.format()
                 ])]
             );
         }
 
-        write!(f, [group(&indent(&self.format_breakable_pair()))])
+        let breakable_pair = format_with(|f| self.write_breakable_pair(f));
+
+        write!(f, [group(&indent(&breakable_pair))])
     }
 }
 
 impl FormatScssMapPairLayout<'_> {
-    fn is_key_self_breaking(&self) -> bool {
-        self.key.as_ref().is_ok_and(is_self_breaking_value)
-    }
-
-    fn is_value_self_breaking(&self) -> bool {
-        self.value.as_ref().is_ok_and(is_self_breaking_value)
-    }
-
     /// Formats a pair whose key or scalar value may break.
     ///
     /// Example: `("long", "key"): value`.
-    fn format_breakable_pair(&self) -> impl Format<CssFormatContext> + '_ {
-        format_with(|f| {
-            let separator = soft_line_break_or_space();
-            let value_separator = format_with(|f| {
-                if self.is_value_self_breaking() {
-                    write!(f, [space()])
-                } else {
-                    write!(f, [soft_line_break_or_space()])
-                }
-            });
-            let empty_separator = format_once(|_| Ok(()));
-            let mut fill = f.fill();
+    fn write_breakable_pair(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let ScssMapExpressionPairFields {
+            key,
+            colon_token,
+            value,
+        } = self.node.as_fields();
+        let key = key?;
+        let colon_token = colon_token?;
+        let value = value?;
+        let value_separator = format_with(|f| {
+            if is_self_breaking_value(&value) {
+                write!(f, [space()])
+            } else {
+                write!(f, [soft_line_break_or_space()])
+            }
+        });
+        let empty_separator = format_once(|_| Ok(()));
 
-            fill.entry(&separator, &dedent(&self.key.format()));
-            // `fill` alternates item/separator/item; `:` is an item glued to
-            // the key with an empty separator, e.g. `("a", "b"): value`.
-            fill.entry(&empty_separator, &self.colon_token.format());
-            fill.entry(&value_separator, &self.value.format());
+        let mut fill = f.fill();
+        fill.entry(&soft_line_break_or_space(), &dedent(&key.format()));
+        // `fill` alternates item/separator/item; `:` is an item glued to
+        // the key with an empty separator, e.g. `("a", "b"): value`.
+        fill.entry(&empty_separator, &colon_token.format());
+        fill.entry(&value_separator, &value.format());
 
-            fill.finish()
-        })
+        fill.finish()
     }
 }
 
@@ -182,4 +181,25 @@ fn should_group_leading_block_comments_with_pair(
     }
 
     true
+}
+
+/// Returns `true` for map pairs in control variable maps.
+///
+/// Example: `@if true { $map: (key: (a, b)) }`.
+fn is_in_control_variable_map(node: &ScssMapExpressionPair) -> bool {
+    let Some(variable) = node
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(ScssVariableDeclaration::cast)
+    else {
+        return false;
+    };
+
+    variable.syntax().ancestors().skip(1).any(|ancestor| {
+        matches!(
+            ancestor.kind(),
+            SCSS_EACH_AT_RULE | SCSS_FOR_AT_RULE | SCSS_IF_AT_RULE | SCSS_WHILE_AT_RULE
+        )
+    })
 }

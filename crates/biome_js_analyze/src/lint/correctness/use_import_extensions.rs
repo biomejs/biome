@@ -130,13 +130,6 @@ declare_lint_rule! {
     /// `javascript.preferences.importModuleSpecifierEnding` and
     /// `typescript.preferences.importModuleSpecifierEnding`
     /// in your [settings](https://code.visualstudio.com/docs/getstarted/settings).
-    ///
-    /// ## Caveats
-    ///
-    /// If you are using TypeScript, TypeScript version 5.0 or later is
-    /// required, also make sure to set
-    /// [`allowImportingTsExtensions: true`](https://typescriptlang.org/tsconfig#allowImportingTsExtensions)
-    /// in your `tsconfig.json`.
     pub UseImportExtensions {
         version: "1.8.0",
         name: "useImportExtensions",

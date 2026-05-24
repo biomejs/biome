@@ -13321,7 +13321,7 @@
 					]
 				},
 				"useConsistentObjectDefinitions": {
-					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.\nSee https://biomejs.dev/linter/rules/use-consistent-object-definitions",
+					"description": "Require the consistent declaration of object literals.\nSee https://biomejs.dev/linter/rules/use-consistent-object-definitions",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentObjectDefinitionsConfiguration" },
 						{ "type": "null" }

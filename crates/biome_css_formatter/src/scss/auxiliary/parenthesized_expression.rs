@@ -53,14 +53,12 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
     /// Formats the trailing comma inside parentheses that Prettier breaks.
     ///
     /// Examples: `@include mix($arg: (a))`, `key: (value)`.
-    fn trailing_comma(&self) -> impl Format<CssFormatContext> + '_ {
-        format_with(|f| {
-            if self.should_print_trailing_comma() {
-                write!(f, [if_group_breaks(&token(","))])
-            } else {
-                Ok(())
-            }
-        })
+    fn write_trailing_comma(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.should_print_trailing_comma() {
+            write!(f, [if_group_breaks(&token(","))])
+        } else {
+            Ok(())
+        }
     }
 
     /// Expands parenthesized map values and include keyword values.
@@ -132,12 +130,13 @@ impl Format<CssFormatContext> for ScssParenthesizedExpressionLayout<'_> {
             expression,
             r_paren_token,
         } = self.node.as_fields();
+        let trailing_comma = format_with(|f| self.write_trailing_comma(f));
 
         write!(
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent(&format_args![expression.format(), self.trailing_comma()]),
+                soft_block_indent(&format_args![expression.format(), trailing_comma]),
                 r_paren_token.format()
             ])
             .should_expand(self.should_expand())]
