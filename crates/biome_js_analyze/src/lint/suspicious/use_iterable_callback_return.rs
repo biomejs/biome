@@ -107,7 +107,7 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
+     /// When `checkForEach` is `false`, the above code will not trigger any diagnostic.
     ///
     /// ### `allowImplicit`
     ///
