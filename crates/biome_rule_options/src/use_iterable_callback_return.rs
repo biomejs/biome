@@ -10,7 +10,6 @@ pub struct UseIterableCallbackReturnOptions {
     pub check_for_each: Option<bool>,
     /// When `true`, allows callbacks in methods that require a return value
     /// (e.g. `map`, `filter`) to implicitly return `undefined` via `return;`.
-    /// This matches ESLint's `allowImplicit` option for `array-callback-return`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_implicit: Option<bool>,
 }
