@@ -436,11 +436,11 @@ impl<'src> TailwindLexer<'src> {
         self.consume_named_value()
     }
 
+    /// Consume a named variant segment in its own lexing context, so it does not
+    /// reuse utility base or value token kinds.
     fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
-        // Variant segments are re-lexed in their own context so they do not reuse
-        // utility base or value token kinds.
         let bytes = self.source.as_bytes();
         let slice = &bytes[self.position..];
         let mut end = 0usize;
