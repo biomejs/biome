@@ -647,6 +647,20 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
+        eslint_eslint::Rule::ArrayCallbackReturn(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_iterable_callback_return =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::ClassMethodsUseThis(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
