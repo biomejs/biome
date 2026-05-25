@@ -16,13 +16,11 @@ use biome_yaml_syntax::{
 pub(crate) fn is_bare_block_scalar_document(doc: &YamlDocument) -> bool {
     let fields = doc.as_fields();
     fields.bom_token.is_none()
-        && fields.directives.iter().next().is_none()
+        && fields.directives.is_empty()
         && fields.dashdashdash_token.is_none()
         && fields.dotdotdot_token.is_none()
         && match fields.node {
-            Some(AnyYamlBlockNode::YamlBlockInBlockNode(node)) => {
-                is_bare_block_scalar_node(&node)
-            }
+            Some(AnyYamlBlockNode::YamlBlockInBlockNode(node)) => is_bare_block_scalar_node(&node),
             _ => false,
         }
 }
@@ -31,7 +29,7 @@ pub(crate) fn is_bare_block_scalar_document(doc: &YamlDocument) -> bool {
 /// or literal scalar whose body has a shape this formatter can safely
 /// reindent. See [`has_well_indented_body`] for the exact rules.
 pub(crate) fn is_bare_block_scalar_node(node: &YamlBlockInBlockNode) -> bool {
-    if node.properties().iter().next().is_some() {
+    if !node.properties().is_empty() {
         return false;
     }
     let (headers, content) = match node.content() {
@@ -88,7 +86,7 @@ pub(crate) fn is_bare_block_scalar_root(root: &YamlRoot) -> bool {
     )
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Chomp {
     Clip,
     Strip,
@@ -143,14 +141,11 @@ fn compute_body(
     let body_text = content_text.strip_prefix('\n').unwrap_or(content_text);
     let lines: Vec<&str> = body_text.split('\n').collect();
 
-    let mut trailing_blanks = 0usize;
-    for line in lines.iter().rev() {
-        if line.trim().is_empty() {
-            trailing_blanks += 1;
-        } else {
-            break;
-        }
-    }
+    let trailing_blanks = lines
+        .iter()
+        .rev()
+        .take_while(|line| line.trim().is_empty())
+        .count();
     let body_lines = &lines[..lines.len() - trailing_blanks];
     let extra_blank_lines = trailing_blanks.saturating_sub(1);
 
@@ -165,6 +160,7 @@ fn compute_body(
             .unwrap_or(0)
     };
 
+    let indent_prefix = " ".repeat(canonical_indent);
     let mut out = String::with_capacity(content_text.len());
     for line in body_lines.iter() {
         out.push('\n');
@@ -175,19 +171,79 @@ fn compute_body(
             out.push_str(line);
         } else {
             let stripped = &line[inferred_indent.min(line.len())..];
-            for _ in 0..canonical_indent {
-                out.push(' ');
-            }
+            out.push_str(&indent_prefix);
             out.push_str(stripped);
         }
     }
     // File-terminating newline (one is always required; the chomping
     // indicator decides whether to add extra blank lines on top).
     out.push('\n');
-    if matches!(chomp, Chomp::Keep) {
+    if chomp == Chomp::Keep {
         for _ in 0..extra_blank_lines {
             out.push('\n');
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // The content token always starts with the newline that follows the
+    // header, and includes every body byte (interior whitespace, blank
+    // lines, trailing blanks) up to the end of the scalar's scope.
+
+    #[test]
+    fn clip_reindents_to_canonical_width() {
+        let body = compute_body("\n    123\n    456\n    789\n\n\n", false, Chomp::Clip, 2);
+        assert_eq!(body, "\n  123\n  456\n  789\n");
+    }
+
+    #[test]
+    fn strip_drops_all_trailing_blanks() {
+        let body = compute_body("\n    123\n    456\n    789\n\n\n", false, Chomp::Strip, 2);
+        assert_eq!(body, "\n  123\n  456\n  789\n");
+    }
+
+    #[test]
+    fn keep_preserves_trailing_blank_lines() {
+        let body = compute_body("\n    123\n    456\n    789\n\n\n", false, Chomp::Keep, 2);
+        assert_eq!(body, "\n  123\n  456\n  789\n\n\n");
+    }
+
+    #[test]
+    fn explicit_indent_preserves_body_verbatim() {
+        // With an explicit indentation indicator, lines that look "over-
+        // indented" relative to the indicator are real content and must
+        // not be normalized away.
+        let body = compute_body("\n    123\n   456\n  789\n\n\n", true, Chomp::Strip, 2);
+        assert_eq!(body, "\n    123\n   456\n  789\n");
+    }
+
+    #[test]
+    fn empty_body_produces_single_terminating_newline() {
+        // Just `|-\n` or `>+\n` with no content lines at all. We still
+        // need the file-terminating newline (the printer/option may strip
+        // it later if `trailing_newline` is off).
+        assert_eq!(compute_body("\n", false, Chomp::Clip, 2), "\n");
+        assert_eq!(compute_body("\n", false, Chomp::Strip, 2), "\n");
+        assert_eq!(compute_body("\n", false, Chomp::Keep, 2), "\n");
+    }
+
+    #[test]
+    fn keep_with_no_extra_blanks_emits_one_newline() {
+        // Body ends with exactly one newline — `Keep` should not invent
+        // extra blank lines that aren't in the source.
+        let body = compute_body("\n    abc\n", false, Chomp::Keep, 2);
+        assert_eq!(body, "\n  abc\n");
+    }
+
+    #[test]
+    fn interior_blank_line_is_preserved_as_empty() {
+        // A blank line within the body becomes a bare `\n` in the
+        // output — neither indented nor stripped.
+        let body = compute_body("\n    a\n\n    b\n\n", false, Chomp::Clip, 2);
+        assert_eq!(body, "\n  a\n\n  b\n");
+    }
 }
