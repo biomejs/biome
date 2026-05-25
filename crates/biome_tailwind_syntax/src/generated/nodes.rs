@@ -1171,10 +1171,10 @@ impl TwNamedVariantSegment {
     }
     pub fn as_fields(&self) -> TwNamedVariantSegmentFields {
         TwNamedVariantSegmentFields {
-            value: self.value(),
+            value_token: self.value_token(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
 }
@@ -1188,7 +1188,7 @@ impl Serialize for TwNamedVariantSegment {
 }
 #[derive(Serialize)]
 pub struct TwNamedVariantSegmentFields {
-    pub value: SyntaxResult<SyntaxToken>,
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwNumberValue {
@@ -3225,7 +3225,10 @@ impl std::fmt::Debug for TwNamedVariantSegment {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwNamedVariantSegment")
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("TwNamedVariantSegment").finish()

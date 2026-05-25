@@ -97,6 +97,7 @@ pub enum TailwindSyntaxKind {
     FR_KW,
     TW_BASE,
     TW_VALUE,
+    TW_VARIANT_SEGMENT,
     TW_NUMBER,
     TW_SELECTOR,
     TW_PROPERTY,
@@ -186,6 +187,7 @@ impl TailwindSyntaxKind {
             self,
             TW_BASE
                 | TW_VALUE
+                | TW_VARIANT_SEGMENT
                 | TW_NUMBER
                 | TW_SELECTOR
                 | TW_PROPERTY

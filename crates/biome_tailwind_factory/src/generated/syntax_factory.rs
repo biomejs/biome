@@ -808,7 +808,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(element.kind(), TW_BASE | TW_VALUE | T![data])
+                    && element.kind() == TW_VARIANT_SEGMENT
                 {
                     slots.mark_present();
                     current_element = elements.next();

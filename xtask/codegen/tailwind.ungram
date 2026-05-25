@@ -133,7 +133,7 @@ AnyTwVariantSegment =
 	| TwBogusVariantSegment
 
 TwNamedVariantSegment =
-	value: ('tw_base' | 'tw_value' | 'data')
+	value: 'tw_variant_segment'
 
 TwArbitraryVariantSegment =
 	'['

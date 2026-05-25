@@ -22,6 +22,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
     literals: &[
         "TW_BASE",
         "TW_VALUE",
+        "TW_VARIANT_SEGMENT",
         "TW_NUMBER",
         "TW_SELECTOR",
         "TW_PROPERTY",
