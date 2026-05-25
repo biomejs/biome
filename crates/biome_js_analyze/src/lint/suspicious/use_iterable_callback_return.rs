@@ -111,6 +111,8 @@ declare_lint_rule! {
     ///
     /// ### `allowImplicit`
     ///
+    /// **Since `v2.5.0`**
+    /// 
     /// Default: `false`
     ///
     /// When set to `true`, allows callbacks to implicitly return `undefined`
