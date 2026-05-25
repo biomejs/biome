@@ -1,5 +1,7 @@
 use biome_markdown_parser::parse_markdown;
-use biome_markdown_syntax::{MdContinuationIndent, MdListMarkerPrefix, MdOrderedListItem};
+use biome_markdown_syntax::{
+    MarkdownSyntaxKind, MdContinuationIndent, MdListMarkerPrefix, MdOrderedListItem,
+};
 use biome_rowan::{AstNode, AstNodeList};
 
 fn indent_len(indent: impl AstNodeList) -> usize {
@@ -75,5 +77,48 @@ fn quote_prefixed_nested_ordered_marker_does_not_steal_parent_indent() {
     assert_eq!(
         indent_len(marker_prefix(input, "1.").pre_marker_indent()),
         0
+    );
+}
+
+#[test]
+fn bullet_list_blank_separators_do_not_appear_as_siblings() {
+    // https://github.com/biomejs/biome/issues/10386
+    // Mixed item kinds (paragraph, thematic break, indent code, ATX header)
+    // must not leak MdNewline separators as direct children of MdBulletList.
+    let input = "* item with __bold__ and *italic*\n\
+                 \n\
+                 * item with `code` gg\n\
+                 \n\
+                 * item with `code`\n\
+                 \n\
+                 * - - -\n\
+                 \n\
+                 * - - -\n\
+                 \n\
+                 *     gg\n\
+                 \n\
+                 * # Header\n\
+                 \n\
+                 * **bold**\n";
+
+    let parsed = parse_markdown(input);
+    assert!(
+        !parsed.has_errors(),
+        "expected clean parse, got: {:?}",
+        parsed.diagnostics()
+    );
+
+    let syntax = parsed.syntax();
+    let stray: Vec<_> = syntax
+        .descendants()
+        .filter(|n| n.kind() == MarkdownSyntaxKind::MD_BULLET_LIST)
+        .flat_map(|list| list.children())
+        .filter(|child| child.kind() == MarkdownSyntaxKind::MD_NEWLINE)
+        .map(|n| n.text_trimmed_range())
+        .collect();
+    assert!(
+        stray.is_empty(),
+        "blank-line separators must live inside an MdBullet item, not as direct \
+         MdBulletList children. Stray MdNewline ranges: {stray:?}\n\n{syntax:#?}"
     );
 }

@@ -1927,7 +1927,9 @@ fn apply_blank_line_action(
             LoopAction::Continue
         }
         BlankLineAction::EndItemAfterBlank => {
-            consume_blank_line(p);
+            // Consume all separator newlines so they live inside this item's
+            // block list rather than leaking out as MdBulletList siblings.
+            consume_all_blank_lines(p);
             state.record_blank();
             LoopAction::Break
         }
@@ -1970,8 +1972,16 @@ fn apply_blank_line_action_with_prefix(
             // actual blank line, so EndItemAtBoundary behaves like EndItemAfterBlank.
             if line_has_quote_prefix {
                 consume_quote_prefix(p, quote_depth);
+                consume_blank_line(p);
+            } else if matches!(action, BlankLineAction::EndItemAfterBlank) {
+                // Outside a block quote, absorb every separator newline so they
+                // stay inside this item rather than leaking as MdBulletList
+                // siblings. Quote contexts keep the single-line behavior because
+                // each line still carries its own `>` prefix.
+                consume_all_blank_lines(p);
+            } else {
+                consume_blank_line(p);
             }
-            consume_blank_line(p);
             if !marker_line_break {
                 state.has_blank_line = true;
             }
@@ -3349,6 +3359,31 @@ fn consume_blank_line(p: &mut MarkdownParser) {
         let m = p.start();
         p.bump(NEWLINE);
         m.complete(p, MD_NEWLINE);
+    }
+}
+
+/// Consume every consecutive blank line, emitting one `MdNewline` node per
+/// line into the current item's block list.
+///
+/// Used when an item ends because blank lines separate it from a following
+/// sibling of the same list (`BlankLineAction::EndItemAfterBlank`). All the
+/// separator newlines belong to the preceding item so they do not leak out as
+/// direct `MdBulletList` children. Stops at the first line carrying non-blank
+/// content (the next item marker), leaving its indentation untouched.
+fn consume_all_blank_lines(p: &mut MarkdownParser) {
+    loop {
+        // Only consume the line if it is blank (whitespace then a newline);
+        // otherwise the indentation belongs to the next item's marker prefix.
+        let line_is_blank = p.lookahead(|p| {
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            p.at(NEWLINE)
+        });
+        if !line_is_blank {
+            break;
+        }
+        consume_blank_line(p);
     }
 }
 
