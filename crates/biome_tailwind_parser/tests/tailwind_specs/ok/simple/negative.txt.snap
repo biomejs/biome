@@ -48,7 +48,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@13..18 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@13..18 "hover" [] [],
                         },
                     ],
                 },
@@ -101,7 +101,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@13..18
           0: TW_VARIANT_SEGMENT_LIST@13..18
             0: TW_NAMED_VARIANT_SEGMENT@13..18
-              0: TW_BASE@13..18 "hover" [] []
+              0: TW_VARIANT_SEGMENT@13..18 "hover" [] []
         1: COLON@18..19 ":" [] []
       1: DASH@19..20 "-" [] []
       2: TW_FUNCTIONAL_CANDIDATE@20..24

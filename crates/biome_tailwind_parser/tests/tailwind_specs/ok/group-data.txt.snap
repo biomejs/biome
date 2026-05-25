@@ -22,11 +22,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@0..5 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@0..5 "group" [] [],
                         },
                         DASH@5..6 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@6..10 "data" [] [],
+                            value_token: TW_VARIANT_SEGMENT@6..10 "data" [] [],
                         },
                         DASH@10..11 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -70,10 +70,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@0..29
           0: TW_VARIANT_SEGMENT_LIST@0..29
             0: TW_NAMED_VARIANT_SEGMENT@0..5
-              0: TW_BASE@0..5 "group" [] []
+              0: TW_VARIANT_SEGMENT@0..5 "group" [] []
             1: DASH@5..6 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@6..10
-              0: TW_VALUE@6..10 "data" [] []
+              0: TW_VARIANT_SEGMENT@6..10 "data" [] []
             3: DASH@10..11 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@11..29
               0: L_BRACKET@11..12 "[" [] []

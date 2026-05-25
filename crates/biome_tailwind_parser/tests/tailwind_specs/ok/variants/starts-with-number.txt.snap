@@ -22,7 +22,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@0..3 "2xl" [] [],
+                            value_token: TW_VARIANT_SEGMENT@0..3 "2xl" [] [],
                         },
                     ],
                 },
@@ -50,7 +50,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@0..3
           0: TW_VARIANT_SEGMENT_LIST@0..3
             0: TW_NAMED_VARIANT_SEGMENT@0..3
-              0: TW_BASE@0..3 "2xl" [] []
+              0: TW_VARIANT_SEGMENT@0..3 "2xl" [] []
         1: COLON@3..4 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@4..9

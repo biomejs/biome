@@ -132,7 +132,7 @@ impl<'src> TailwindLexer<'src> {
             MIN => self.consume_byte(T![-]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
-            PRC | IDT | ZER | DIG => self.consume_variant_segment_name(),
+            IDT | ZER | DIG => self.consume_variant_segment_name(),
             _ => self.consume_unexpected_character(),
         }
     }
@@ -439,6 +439,8 @@ impl<'src> TailwindLexer<'src> {
     fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
+        // Variant segments are re-lexed in their own context so they do not reuse
+        // utility base or value token kinds.
         let bytes = self.source.as_bytes();
         let slice = &bytes[self.position..];
         let mut end = 0usize;
@@ -460,7 +462,7 @@ impl<'src> TailwindLexer<'src> {
             self.advance(char.len_utf8());
         }
 
-        TW_VALUE
+        TW_VARIANT_SEGMENT
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
@@ -687,8 +689,5 @@ fn is_css_identifier_continue(byte: u8) -> bool {
 
 #[inline]
 fn is_variant_segment_name_boundary(byte: u8) -> bool {
-    matches!(
-        byte,
-        b'\t'..=b'\r' | b' ' | b':' | b'-' | b'/' | b'!' | b']' | b')'
-    )
+    matches!(lookup_byte(byte), WHS | COL | MIN | SLH | EXL | BTC | PNC)
 }

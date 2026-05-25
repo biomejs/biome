@@ -55,7 +55,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@23..28 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@23..28 "hover" [] [],
                         },
                     ],
                 },
@@ -89,7 +89,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@45..50 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@45..50 "hover" [] [],
                         },
                     ],
                 },
@@ -97,7 +97,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@51..56 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@51..56 "focus" [] [],
                         },
                     ],
                 },
@@ -105,7 +105,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@57..61 "aria" [] [],
+                            value_token: TW_VARIANT_SEGMENT@57..61 "aria" [] [],
                         },
                         DASH@61..62 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -171,7 +171,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@109..112 "has" [] [],
+                            value_token: TW_VARIANT_SEGMENT@109..112 "has" [] [],
                         },
                         DASH@112..113 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -212,7 +212,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@146..154 "disabled" [] [],
+                            value_token: TW_VARIANT_SEGMENT@146..154 "disabled" [] [],
                         },
                     ],
                 },
@@ -270,7 +270,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@23..28
           0: TW_VARIANT_SEGMENT_LIST@23..28
             0: TW_NAMED_VARIANT_SEGMENT@23..28
-              0: TW_BASE@23..28 "hover" [] []
+              0: TW_VARIANT_SEGMENT@23..28 "hover" [] []
         1: COLON@28..29 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@29..45
@@ -293,17 +293,17 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@45..50
           0: TW_VARIANT_SEGMENT_LIST@45..50
             0: TW_NAMED_VARIANT_SEGMENT@45..50
-              0: TW_BASE@45..50 "hover" [] []
+              0: TW_VARIANT_SEGMENT@45..50 "hover" [] []
         1: COLON@50..51 ":" [] []
         2: TW_VARIANT_EXPRESSION@51..56
           0: TW_VARIANT_SEGMENT_LIST@51..56
             0: TW_NAMED_VARIANT_SEGMENT@51..56
-              0: TW_BASE@51..56 "focus" [] []
+              0: TW_VARIANT_SEGMENT@51..56 "focus" [] []
         3: COLON@56..57 ":" [] []
         4: TW_VARIANT_EXPRESSION@57..71
           0: TW_VARIANT_SEGMENT_LIST@57..71
             0: TW_NAMED_VARIANT_SEGMENT@57..61
-              0: TW_BASE@57..61 "aria" [] []
+              0: TW_VARIANT_SEGMENT@57..61 "aria" [] []
             1: DASH@61..62 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@62..71
               0: L_BRACKET@62..63 "[" [] []
@@ -351,7 +351,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@109..124
           0: TW_VARIANT_SEGMENT_LIST@109..124
             0: TW_NAMED_VARIANT_SEGMENT@109..112
-              0: TW_BASE@109..112 "has" [] []
+              0: TW_VARIANT_SEGMENT@109..112 "has" [] []
             1: DASH@112..113 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@113..124
               0: L_BRACKET@113..114 "[" [] []
@@ -380,7 +380,7 @@ TwRoot {
         2: TW_VARIANT_EXPRESSION@146..154
           0: TW_VARIANT_SEGMENT_LIST@146..154
             0: TW_NAMED_VARIANT_SEGMENT@146..154
-              0: TW_BASE@146..154 "disabled" [] []
+              0: TW_VARIANT_SEGMENT@146..154 "disabled" [] []
         3: COLON@154..155 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@155..173

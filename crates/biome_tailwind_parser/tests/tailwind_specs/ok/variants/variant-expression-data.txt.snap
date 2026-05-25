@@ -22,11 +22,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: DATA_KW@0..4 "data" [] [],
+                            value_token: TW_VARIANT_SEGMENT@0..4 "data" [] [],
                         },
                         DASH@4..5 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@5..11 "active" [] [],
+                            value_token: TW_VARIANT_SEGMENT@5..11 "active" [] [],
                         },
                     ],
                 },
@@ -43,7 +43,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: DATA_KW@17..21 "data" [] [],
+                            value_token: TW_VARIANT_SEGMENT@17..21 "data" [] [],
                         },
                         DASH@21..22 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -76,11 +76,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@41..46 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@41..46 "group" [] [],
                         },
                         DASH@46..47 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@47..51 "data" [] [],
+                            value_token: TW_VARIANT_SEGMENT@47..51 "data" [] [],
                         },
                         DASH@51..52 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -113,11 +113,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@71..76 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@71..76 "group" [] [],
                         },
                         DASH@76..77 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@77..80 "has" [] [],
+                            value_token: TW_VARIANT_SEGMENT@77..80 "has" [] [],
                         },
                         DASH@80..81 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -144,7 +144,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@91..95 "aria" [] [],
+                            value_token: TW_VARIANT_SEGMENT@91..95 "aria" [] [],
                         },
                         DASH@95..96 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -176,11 +176,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@119..122 "max" [] [],
+                            value_token: TW_VARIANT_SEGMENT@119..122 "max" [] [],
                         },
                         DASH@122..123 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@123..125 "md" [] [],
+                            value_token: TW_VARIANT_SEGMENT@123..125 "md" [] [],
                         },
                     ],
                 },
@@ -197,11 +197,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@131..134 "min" [] [],
+                            value_token: TW_VARIANT_SEGMENT@131..134 "min" [] [],
                         },
                         DASH@134..135 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@135..137 "lg" [] [],
+                            value_token: TW_VARIANT_SEGMENT@135..137 "lg" [] [],
                         },
                     ],
                 },
@@ -229,10 +229,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@0..11
           0: TW_VARIANT_SEGMENT_LIST@0..11
             0: TW_NAMED_VARIANT_SEGMENT@0..4
-              0: DATA_KW@0..4 "data" [] []
+              0: TW_VARIANT_SEGMENT@0..4 "data" [] []
             1: DASH@4..5 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@5..11
-              0: TW_VALUE@5..11 "active" [] []
+              0: TW_VARIANT_SEGMENT@5..11 "active" [] []
         1: COLON@11..12 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@12..17
@@ -243,7 +243,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@17..34
           0: TW_VARIANT_SEGMENT_LIST@17..34
             0: TW_NAMED_VARIANT_SEGMENT@17..21
-              0: DATA_KW@17..21 "data" [] []
+              0: TW_VARIANT_SEGMENT@17..21 "data" [] []
             1: DASH@21..22 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@22..34
               0: L_BRACKET@22..23 "[" [] []
@@ -265,10 +265,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@41..64
           0: TW_VARIANT_SEGMENT_LIST@41..64
             0: TW_NAMED_VARIANT_SEGMENT@41..46
-              0: TW_BASE@41..46 "group" [] []
+              0: TW_VARIANT_SEGMENT@41..46 "group" [] []
             1: DASH@46..47 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@47..51
-              0: TW_VALUE@47..51 "data" [] []
+              0: TW_VARIANT_SEGMENT@47..51 "data" [] []
             3: DASH@51..52 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@52..64
               0: L_BRACKET@52..53 "[" [] []
@@ -290,10 +290,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@71..84
           0: TW_VARIANT_SEGMENT_LIST@71..84
             0: TW_NAMED_VARIANT_SEGMENT@71..76
-              0: TW_BASE@71..76 "group" [] []
+              0: TW_VARIANT_SEGMENT@71..76 "group" [] []
             1: DASH@76..77 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@77..80
-              0: TW_VALUE@77..80 "has" [] []
+              0: TW_VARIANT_SEGMENT@77..80 "has" [] []
             3: DASH@80..81 "-" [] []
             4: TW_ARBITRARY_VARIANT_SEGMENT@81..84
               0: L_BRACKET@81..82 "[" [] []
@@ -311,7 +311,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@91..105
           0: TW_VARIANT_SEGMENT_LIST@91..105
             0: TW_NAMED_VARIANT_SEGMENT@91..95
-              0: TW_BASE@91..95 "aria" [] []
+              0: TW_VARIANT_SEGMENT@91..95 "aria" [] []
             1: DASH@95..96 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@96..105
               0: L_BRACKET@96..97 "[" [] []
@@ -333,10 +333,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@119..125
           0: TW_VARIANT_SEGMENT_LIST@119..125
             0: TW_NAMED_VARIANT_SEGMENT@119..122
-              0: TW_BASE@119..122 "max" [] []
+              0: TW_VARIANT_SEGMENT@119..122 "max" [] []
             1: DASH@122..123 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@123..125
-              0: TW_VALUE@123..125 "md" [] []
+              0: TW_VARIANT_SEGMENT@123..125 "md" [] []
         1: COLON@125..126 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@126..131
@@ -347,10 +347,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@131..137
           0: TW_VARIANT_SEGMENT_LIST@131..137
             0: TW_NAMED_VARIANT_SEGMENT@131..134
-              0: TW_BASE@131..134 "min" [] []
+              0: TW_VARIANT_SEGMENT@131..134 "min" [] []
             1: DASH@134..135 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@135..137
-              0: TW_VALUE@135..137 "lg" [] []
+              0: TW_VARIANT_SEGMENT@135..137 "lg" [] []
         1: COLON@137..138 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@138..142

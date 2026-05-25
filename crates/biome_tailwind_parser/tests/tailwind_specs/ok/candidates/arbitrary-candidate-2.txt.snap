@@ -22,7 +22,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@0..4 "dark" [] [],
+                            value_token: TW_VARIANT_SEGMENT@0..4 "dark" [] [],
                         },
                     ],
                 },
@@ -77,7 +77,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@0..4
           0: TW_VARIANT_SEGMENT_LIST@0..4
             0: TW_NAMED_VARIANT_SEGMENT@0..4
-              0: TW_BASE@0..4 "dark" [] []
+              0: TW_VARIANT_SEGMENT@0..4 "dark" [] []
         1: COLON@4..5 ":" [] []
       1: (empty)
       2: TW_ARBITRARY_CANDIDATE@5..41

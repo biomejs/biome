@@ -61,11 +61,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@57..62 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@57..62 "focus" [] [],
                         },
                         DASH@62..63 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@63..70 "visible" [] [],
+                            value_token: TW_VARIANT_SEGMENT@63..70 "visible" [] [],
                         },
                     ],
                 },
@@ -134,7 +134,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@122..127 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@122..127 "focus" [] [],
                         },
                     ],
                 },
@@ -156,11 +156,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@141..146 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@141..146 "focus" [] [],
                         },
                         DASH@146..147 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@147..154 "visible" [] [],
+                            value_token: TW_VARIANT_SEGMENT@147..154 "visible" [] [],
                         },
                     ],
                 },
@@ -182,11 +182,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@162..167 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@162..167 "focus" [] [],
                         },
                         DASH@167..168 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@168..175 "visible" [] [],
+                            value_token: TW_VARIANT_SEGMENT@168..175 "visible" [] [],
                         },
                     ],
                 },
@@ -208,7 +208,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@190..198 "disabled" [] [],
+                            value_token: TW_VARIANT_SEGMENT@190..198 "disabled" [] [],
                         },
                     ],
                 },
@@ -230,7 +230,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@218..226 "disabled" [] [],
+                            value_token: TW_VARIANT_SEGMENT@218..226 "disabled" [] [],
                         },
                     ],
                 },
@@ -293,10 +293,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@57..70
           0: TW_VARIANT_SEGMENT_LIST@57..70
             0: TW_NAMED_VARIANT_SEGMENT@57..62
-              0: TW_BASE@57..62 "focus" [] []
+              0: TW_VARIANT_SEGMENT@57..62 "focus" [] []
             1: DASH@62..63 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@63..70
-              0: TW_VALUE@63..70 "visible" [] []
+              0: TW_VARIANT_SEGMENT@63..70 "visible" [] []
         1: COLON@70..71 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@71..81
@@ -347,7 +347,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@122..127
           0: TW_VARIANT_SEGMENT_LIST@122..127
             0: TW_NAMED_VARIANT_SEGMENT@122..127
-              0: TW_BASE@122..127 "focus" [] []
+              0: TW_VARIANT_SEGMENT@122..127 "focus" [] []
         1: COLON@127..128 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@128..141
@@ -362,10 +362,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@141..154
           0: TW_VARIANT_SEGMENT_LIST@141..154
             0: TW_NAMED_VARIANT_SEGMENT@141..146
-              0: TW_BASE@141..146 "focus" [] []
+              0: TW_VARIANT_SEGMENT@141..146 "focus" [] []
             1: DASH@146..147 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@147..154
-              0: TW_VALUE@147..154 "visible" [] []
+              0: TW_VARIANT_SEGMENT@147..154 "visible" [] []
         1: COLON@154..155 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@155..162
@@ -380,10 +380,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@162..175
           0: TW_VARIANT_SEGMENT_LIST@162..175
             0: TW_NAMED_VARIANT_SEGMENT@162..167
-              0: TW_BASE@162..167 "focus" [] []
+              0: TW_VARIANT_SEGMENT@162..167 "focus" [] []
             1: DASH@167..168 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@168..175
-              0: TW_VALUE@168..175 "visible" [] []
+              0: TW_VARIANT_SEGMENT@168..175 "visible" [] []
         1: COLON@175..176 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@176..190
@@ -398,7 +398,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@190..198
           0: TW_VARIANT_SEGMENT_LIST@190..198
             0: TW_NAMED_VARIANT_SEGMENT@190..198
-              0: TW_BASE@190..198 "disabled" [] []
+              0: TW_VARIANT_SEGMENT@190..198 "disabled" [] []
         1: COLON@198..199 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@199..218
@@ -413,7 +413,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@218..226
           0: TW_VARIANT_SEGMENT_LIST@218..226
             0: TW_NAMED_VARIANT_SEGMENT@218..226
-              0: TW_BASE@218..226 "disabled" [] []
+              0: TW_VARIANT_SEGMENT@218..226 "disabled" [] []
         1: COLON@226..227 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@227..237

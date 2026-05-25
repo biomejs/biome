@@ -111,6 +111,9 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
 
+    p.source_mut()
+        .re_lex_current_in_context(TailwindLexContext::VariantSegment);
+
     let segments = p.start();
     parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
 
@@ -144,18 +147,12 @@ fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(TW_VALUE) && !p.at(TW_BASE) && !p.at(T![data]) {
+    if !p.at(TW_VARIANT_SEGMENT) {
         return Absent;
     }
 
     let m = p.start();
-    if p.at(TW_BASE) {
-        p.bump_with_context(TW_BASE, TailwindLexContext::VariantSegment);
-    } else if p.at(T![data]) {
-        p.bump_with_context(T![data], TailwindLexContext::VariantSegment);
-    } else {
-        p.bump_with_context(TW_VALUE, TailwindLexContext::VariantSegment);
-    }
+    p.bump_with_context(TW_VARIANT_SEGMENT, TailwindLexContext::VariantSegment);
 
     Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
 }

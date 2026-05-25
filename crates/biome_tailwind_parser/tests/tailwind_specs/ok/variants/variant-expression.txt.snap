@@ -22,7 +22,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@0..5 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@0..5 "hover" [] [],
                         },
                     ],
                 },
@@ -39,11 +39,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@11..16 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@11..16 "group" [] [],
                         },
                         DASH@16..17 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@17..22 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@17..22 "hover" [] [],
                         },
                     ],
                 },
@@ -60,15 +60,15 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@28..33 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@28..33 "group" [] [],
                         },
                         DASH@33..34 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@34..38 "peer" [] [],
+                            value_token: TW_VARIANT_SEGMENT@34..38 "peer" [] [],
                         },
                         DASH@38..39 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@39..44 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@39..44 "hover" [] [],
                         },
                     ],
                 },
@@ -85,11 +85,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@50..55 "group" [] [],
+                            value_token: TW_VARIANT_SEGMENT@50..55 "group" [] [],
                         },
                         DASH@55..56 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@56..61 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@56..61 "hover" [] [],
                         },
                     ],
                 },
@@ -97,11 +97,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@62..66 "peer" [] [],
+                            value_token: TW_VARIANT_SEGMENT@62..66 "peer" [] [],
                         },
                         DASH@66..67 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@67..72 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@67..72 "focus" [] [],
                         },
                     ],
                 },
@@ -118,11 +118,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@78..83 "focus" [] [],
+                            value_token: TW_VARIANT_SEGMENT@78..83 "focus" [] [],
                         },
                         DASH@83..84 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@84..91 "visible" [] [],
+                            value_token: TW_VARIANT_SEGMENT@84..91 "visible" [] [],
                         },
                     ],
                 },
@@ -144,11 +144,11 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@102..105 "not" [] [],
+                            value_token: TW_VARIANT_SEGMENT@102..105 "not" [] [],
                         },
                         DASH@105..106 "-" [] [],
                         TwNamedVariantSegment {
-                            value: TW_VALUE@106..111 "hover" [] [],
+                            value_token: TW_VARIANT_SEGMENT@106..111 "hover" [] [],
                         },
                     ],
                 },
@@ -165,7 +165,7 @@ TwRoot {
                 TwVariantExpression {
                     segments: TwVariantSegmentList [
                         TwNamedVariantSegment {
-                            value: TW_BASE@117..120 "has" [] [],
+                            value_token: TW_VARIANT_SEGMENT@117..120 "has" [] [],
                         },
                         DASH@120..121 "-" [] [],
                         TwArbitraryVariantSegment {
@@ -211,7 +211,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@0..5
           0: TW_VARIANT_SEGMENT_LIST@0..5
             0: TW_NAMED_VARIANT_SEGMENT@0..5
-              0: TW_BASE@0..5 "hover" [] []
+              0: TW_VARIANT_SEGMENT@0..5 "hover" [] []
         1: COLON@5..6 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@6..11
@@ -222,10 +222,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@11..22
           0: TW_VARIANT_SEGMENT_LIST@11..22
             0: TW_NAMED_VARIANT_SEGMENT@11..16
-              0: TW_BASE@11..16 "group" [] []
+              0: TW_VARIANT_SEGMENT@11..16 "group" [] []
             1: DASH@16..17 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@17..22
-              0: TW_VALUE@17..22 "hover" [] []
+              0: TW_VARIANT_SEGMENT@17..22 "hover" [] []
         1: COLON@22..23 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@23..28
@@ -236,13 +236,13 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@28..44
           0: TW_VARIANT_SEGMENT_LIST@28..44
             0: TW_NAMED_VARIANT_SEGMENT@28..33
-              0: TW_BASE@28..33 "group" [] []
+              0: TW_VARIANT_SEGMENT@28..33 "group" [] []
             1: DASH@33..34 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@34..38
-              0: TW_VALUE@34..38 "peer" [] []
+              0: TW_VARIANT_SEGMENT@34..38 "peer" [] []
             3: DASH@38..39 "-" [] []
             4: TW_NAMED_VARIANT_SEGMENT@39..44
-              0: TW_VALUE@39..44 "hover" [] []
+              0: TW_VARIANT_SEGMENT@39..44 "hover" [] []
         1: COLON@44..45 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@45..50
@@ -253,18 +253,18 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@50..61
           0: TW_VARIANT_SEGMENT_LIST@50..61
             0: TW_NAMED_VARIANT_SEGMENT@50..55
-              0: TW_BASE@50..55 "group" [] []
+              0: TW_VARIANT_SEGMENT@50..55 "group" [] []
             1: DASH@55..56 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@56..61
-              0: TW_VALUE@56..61 "hover" [] []
+              0: TW_VARIANT_SEGMENT@56..61 "hover" [] []
         1: COLON@61..62 ":" [] []
         2: TW_VARIANT_EXPRESSION@62..72
           0: TW_VARIANT_SEGMENT_LIST@62..72
             0: TW_NAMED_VARIANT_SEGMENT@62..66
-              0: TW_BASE@62..66 "peer" [] []
+              0: TW_VARIANT_SEGMENT@62..66 "peer" [] []
             1: DASH@66..67 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@67..72
-              0: TW_VALUE@67..72 "focus" [] []
+              0: TW_VARIANT_SEGMENT@67..72 "focus" [] []
         3: COLON@72..73 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@73..78
@@ -275,10 +275,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@78..91
           0: TW_VARIANT_SEGMENT_LIST@78..91
             0: TW_NAMED_VARIANT_SEGMENT@78..83
-              0: TW_BASE@78..83 "focus" [] []
+              0: TW_VARIANT_SEGMENT@78..83 "focus" [] []
             1: DASH@83..84 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@84..91
-              0: TW_VALUE@84..91 "visible" [] []
+              0: TW_VARIANT_SEGMENT@84..91 "visible" [] []
         1: COLON@91..92 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@92..102
@@ -293,10 +293,10 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@102..111
           0: TW_VARIANT_SEGMENT_LIST@102..111
             0: TW_NAMED_VARIANT_SEGMENT@102..105
-              0: TW_BASE@102..105 "not" [] []
+              0: TW_VARIANT_SEGMENT@102..105 "not" [] []
             1: DASH@105..106 "-" [] []
             2: TW_NAMED_VARIANT_SEGMENT@106..111
-              0: TW_VALUE@106..111 "hover" [] []
+              0: TW_VARIANT_SEGMENT@106..111 "hover" [] []
         1: COLON@111..112 ":" [] []
       1: (empty)
       2: TW_STATIC_CANDIDATE@112..117
@@ -307,7 +307,7 @@ TwRoot {
         0: TW_VARIANT_EXPRESSION@117..132
           0: TW_VARIANT_SEGMENT_LIST@117..132
             0: TW_NAMED_VARIANT_SEGMENT@117..120
-              0: TW_BASE@117..120 "has" [] []
+              0: TW_VARIANT_SEGMENT@117..120 "has" [] []
             1: DASH@120..121 "-" [] []
             2: TW_ARBITRARY_VARIANT_SEGMENT@121..132
               0: L_BRACKET@121..122 "[" [] []
