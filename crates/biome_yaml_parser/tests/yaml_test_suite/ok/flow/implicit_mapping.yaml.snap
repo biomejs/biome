@@ -1,0 +1,180 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+foo: bar
+"bar": baz
+'baz': qux
+*alias: value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..3 "foo" [] [],
+                                },
+                            },
+                            colon_token: COLON@3..5 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@5..5 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@5..8 "bar" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@8..8 "" [] [],
+                            },
+                        },
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowJsonNode {
+                                properties: YamlPropertyList [],
+                                content: YamlDoubleQuotedScalar {
+                                    value_token: DOUBLE_QUOTED_LITERAL@8..14 "\"bar\"" [Newline("\n")] [],
+                                },
+                            },
+                            colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@16..16 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@16..19 "baz" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@19..19 "" [] [],
+                            },
+                        },
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowJsonNode {
+                                properties: YamlPropertyList [],
+                                content: YamlSingleQuotedScalar {
+                                    value_token: SINGLE_QUOTED_LITERAL@19..25 "'baz'" [Newline("\n")] [],
+                                },
+                            },
+                            colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@27..27 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@27..30 "qux" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@30..30 "" [] [],
+                            },
+                        },
+                        YamlBlockMapImplicitEntry {
+                            key: YamlAliasNode {
+                                value_token: ALIAS_LITERAL@30..37 "*alias" [Newline("\n")] [],
+                            },
+                            colon_token: COLON@37..39 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@39..39 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@39..44 "value" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@44..44 "" [] [],
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@44..45 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@45..45 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..45
+  0: YAML_DOCUMENT_LIST@0..45
+    0: YAML_DOCUMENT@0..45
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..45
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..45
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..44
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..8
+              0: YAML_FLOW_YAML_NODE@0..3
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..3
+                  0: PLAIN_LITERAL@0..3 "foo" [] []
+              1: COLON@3..5 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@5..8
+                0: FLOW_START@5..5 "" [] []
+                1: YAML_FLOW_YAML_NODE@5..8
+                  0: YAML_PROPERTY_LIST@5..5
+                  1: YAML_PLAIN_SCALAR@5..8
+                    0: PLAIN_LITERAL@5..8 "bar" [] []
+                2: FLOW_END@8..8 "" [] []
+            1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@8..19
+              0: YAML_FLOW_JSON_NODE@8..14
+                0: YAML_PROPERTY_LIST@8..8
+                1: YAML_DOUBLE_QUOTED_SCALAR@8..14
+                  0: DOUBLE_QUOTED_LITERAL@8..14 "\"bar\"" [Newline("\n")] []
+              1: COLON@14..16 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@16..19
+                0: FLOW_START@16..16 "" [] []
+                1: YAML_FLOW_YAML_NODE@16..19
+                  0: YAML_PROPERTY_LIST@16..16
+                  1: YAML_PLAIN_SCALAR@16..19
+                    0: PLAIN_LITERAL@16..19 "baz" [] []
+                2: FLOW_END@19..19 "" [] []
+            2: YAML_BLOCK_MAP_IMPLICIT_ENTRY@19..30
+              0: YAML_FLOW_JSON_NODE@19..25
+                0: YAML_PROPERTY_LIST@19..19
+                1: YAML_SINGLE_QUOTED_SCALAR@19..25
+                  0: SINGLE_QUOTED_LITERAL@19..25 "'baz'" [Newline("\n")] []
+              1: COLON@25..27 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@27..30
+                0: FLOW_START@27..27 "" [] []
+                1: YAML_FLOW_YAML_NODE@27..30
+                  0: YAML_PROPERTY_LIST@27..27
+                  1: YAML_PLAIN_SCALAR@27..30
+                    0: PLAIN_LITERAL@27..30 "qux" [] []
+                2: FLOW_END@30..30 "" [] []
+            3: YAML_BLOCK_MAP_IMPLICIT_ENTRY@30..44
+              0: YAML_ALIAS_NODE@30..37
+                0: ALIAS_LITERAL@30..37 "*alias" [Newline("\n")] []
+              1: COLON@37..39 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@39..44
+                0: FLOW_START@39..39 "" [] []
+                1: YAML_FLOW_YAML_NODE@39..44
+                  0: YAML_PROPERTY_LIST@39..39
+                  1: YAML_PLAIN_SCALAR@39..44
+                    0: PLAIN_LITERAL@39..44 "value" [] []
+                2: FLOW_END@44..44 "" [] []
+          2: MAPPING_END@44..45 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@45..45 "" [] []
+
+```

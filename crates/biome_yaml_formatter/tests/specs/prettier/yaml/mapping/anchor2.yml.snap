@@ -43,17 +43,3 @@ key1: &default
 key2:
   <<: *default
 ```
-
-# Errors
-```
-anchor2.yml:7:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    6 │ key2:
-  > 7 │   <<: *default
-      │       ^
-    8 │ 
-  
-
-```

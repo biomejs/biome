@@ -133,35 +133,3 @@ comments:
     Backup contact is Nancy
     Billsmer @ 338-4338.
 ```
-
-# Errors
-```
-spec-example-2-27-invoice.yml:14:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    12 │         state   : MI
-    13 │         postal  : 48046
-  > 14 │ ship-to: *id001
-       │          ^
-    15 │ product:
-    16 │     - sku         : BL394D
-  
-spec-example-2-27-invoice.yml:20:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected token.
-  
-    18 │       description : Basketball
-    19 │       price       : 450.00
-  > 20 │     - sku         : BL4438H
-       │     ^^^^^^^^^^^^^^^^^^^^^^^
-  > 21 │       quantity    : 1
-        ...
-  > 27 │     Late afternoon is best.
-  > 28 │     Backup contact is Nancy
-  > 29 │     Billsmer @ 338-4338.
-  > 30 │ 
-       │ 
-  
-
-```

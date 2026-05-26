@@ -32,18 +32,3 @@ info: yaml/spec/aliases-in-explicit-block-mapping.yml
 : &b b
 : *a
 ```
-
-# Errors
-```
-aliases-in-explicit-block-mapping.yml:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    1 │ ? &a a
-    2 │ : &b b
-  > 3 │ : *a
-      │   ^
-    4 │ 
-  
-
-```

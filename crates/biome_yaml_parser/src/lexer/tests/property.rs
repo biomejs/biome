@@ -336,3 +336,56 @@ fn property_for_empty_map_value() {
         MAPPING_END:0
     );
 }
+
+#[test]
+fn alias_node() {
+    assert_lex!("*alias",
+        FLOW_START:0,
+        ALIAS_LITERAL:6,
+        FLOW_END:0
+    );
+}
+
+#[test]
+fn alias_as_mapping_key() {
+    assert_lex!("*alias : value",
+        MAPPING_START:0,
+        ALIAS_LITERAL:6,
+        WHITESPACE:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}
+
+#[test]
+fn quoted_key_with_space_before_colon() {
+    assert_lex!(r#""key" : value"#,
+        MAPPING_START:0,
+        DOUBLE_QUOTED_LITERAL:5,
+        WHITESPACE:1,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}
+
+#[test]
+fn plain_key_with_space_before_colon() {
+    assert_lex!("key   : value",
+        MAPPING_START:0,
+        PLAIN_LITERAL:6,
+        COLON:1,
+        WHITESPACE:1,
+        FLOW_START:0,
+        PLAIN_LITERAL:5,
+        FLOW_END:0,
+        MAPPING_END:0
+    );
+}

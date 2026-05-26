@@ -244,6 +244,7 @@ YamlBlockMapImplicitEntry =
 AnyYamlMappingImplicitKey =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
+	| YamlAliasNode
 
 // Block header
 // |+9
