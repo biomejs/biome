@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script lang="ts">
+import { User } from "./types";
+import Button from "./Button.svelte";
+
+let user: User = { name: "alice" };
+</script>
+
+<Button>{user.name}</Button>
+
+```
+
+# Emitted Messages
+
+```block
+file.svelte:2:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ <script lang="ts">
+  > 2 │ import { User } from "./types";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import Button from "./Button.svelte";
+    4 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    2 │ import·type·{·User·}·from·"./types";
+      │        +++++                        
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

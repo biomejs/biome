@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script lang="ts">
+import Button from "./Button.svelte";
+import { capitalize } from "./utils";
+
+let name = "alice";
+</script>
+
+<Button>{capitalize(name)}</Button>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -18,7 +19,6 @@ expression: redactor(content)
 
 ```vue
 <script lang="ts">
-import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -28,7 +28,7 @@ interface Props {
 
 let schema = z.object().optional();
 schema + sure();
-const props: Props = { title: "Hello" };
+const _props: Props = { title: "Hello" };
 </script>
 
 <html>
@@ -63,16 +63,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.vue:15:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:14:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    13 │ </script>
-    14 │ 
-  > 15 │ <html>
+    12 │ </script>
+    13 │ 
+  > 14 │ <html>
        │ ^^^^^^
-    16 │ 	<head>
-    17 │ 		<title>Svelte</title>
+    15 │ 	<head>
+    16 │ 		<title>Svelte</title>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -80,16 +80,16 @@ file.vue:15:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━�
 ```
 
 ```block
-file.vue:24:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:23:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    22 │ <style>
-    23 │ #id {
-  > 24 │ 	font-family: comic-sans;
+    21 │ <style>
+    22 │ #id {
+  > 23 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    25 │ }
-    26 │ .class {
+    24 │ }
+    25 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

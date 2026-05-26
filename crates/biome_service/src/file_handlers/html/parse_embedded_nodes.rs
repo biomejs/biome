@@ -17,9 +17,9 @@ use biome_html_syntax::{
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
-    HtmlSingleTextExpression, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName,
-    VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression, HtmlTextExpressions,
+    HtmlVariant, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
+    VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
@@ -123,6 +123,14 @@ pub(crate) fn parse_embedded_nodes(
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
                     && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+                }
+
+                // Spread attributes: <input {...props}>
+                if let Some(spread) = HtmlSpreadAttribute::cast_ref(&element)
+                    && let Ok(expression) = spread.argument()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -327,6 +335,19 @@ pub(crate) fn parse_embedded_nodes(
                         HtmlAttributeInitializerClause::can_cast(parent.kind())
                     })
                     && let Ok(expression) = attr.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        &mut nodes,
+                    );
+                }
+
+                // Spread attributes: <input {...props} />
+                if let Some(spread) = HtmlSpreadAttribute::cast_ref(&element)
+                    && let Ok(expression) = spread.argument()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(

@@ -349,12 +349,15 @@ impl Rule for NoUnusedVariables {
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
-        // Only suppress noUnusedVariables for imports and variable declarations in
-        // embedded script blocks. Function/class/type declarations should still be
-        // flagged unless they are actually referenced in the template
-        // (handled by is_used_as_reference below).
-        // Eventually, we should probably not ignore bindings in embedded blocks, because they might be genuinely unused.
-        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name)
+        // Suppress imports and variable declarations whose name matches an
+        // embedded binding only when the snippet we are linting is itself a
+        // non-source embed (Svelte `{@const}`, snippet parameters, Vue v-for,
+        // …). For source `<script>` blocks the embedded-binding set is
+        // polluted with the script's own declarations, so the check would
+        // self-suppress; for those, the `is_used_as_reference` check below
+        // — backed by `EmbeddedValueReferences` — is the precise gate.
+        let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && embedded_bindings.contains_binding(binding_name)
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))

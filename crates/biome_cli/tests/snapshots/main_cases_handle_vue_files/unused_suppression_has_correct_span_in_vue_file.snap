@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -17,7 +18,7 @@ expression: redactor(content)
 
 ```vue
 <template>
-  <div>Hello</div>
+  <div>{{ mdiSquareOutline }}</div>
 </template>
 
 <script lang="ts" setup>
