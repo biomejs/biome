@@ -11,7 +11,6 @@ use crate::{
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextSize};
 #[cfg(debug_assertions)]
 use std::cell::Cell;
-use std::marker::PhantomData;
 use std::ops::Sub;
 
 /// Returns true if:
@@ -67,11 +66,10 @@ pub struct FormatLeadingComments<'a, L: Language> {
 
 /// Formats leading comments followed by caller-provided content.
 #[derive(Debug, Copy, Clone)]
-pub struct FormatLeadingCommentsWithContent<'a, L: Language, Context, Content> {
+pub struct FormatLeadingCommentsWithContent<'a, L: Language, Content> {
     source: CommentSource<'a, L>,
     content: Content,
     layout: LeadingCommentLayout,
-    context: PhantomData<fn() -> Context>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -100,7 +98,7 @@ impl<'a, L: Language> FormatLeadingComments<'a, L> {
     pub fn with_following_content<Context, Content>(
         self,
         content: Content,
-    ) -> FormatLeadingCommentsWithContent<'a, L, Context, Content>
+    ) -> FormatLeadingCommentsWithContent<'a, L, Content>
     where
         Context: CstFormatContext<Language = L>,
         Content: Fn(&mut Formatter<Context>) -> FormatResult<()>,
@@ -114,7 +112,7 @@ impl<'a, L: Language> FormatLeadingComments<'a, L> {
     pub fn with_indented_following_content<Context, Content>(
         self,
         content: Content,
-    ) -> FormatLeadingCommentsWithContent<'a, L, Context, Content>
+    ) -> FormatLeadingCommentsWithContent<'a, L, Content>
     where
         Context: CstFormatContext<Language = L>,
         Content: Fn(&mut Formatter<Context>) -> FormatResult<()>,
@@ -126,7 +124,7 @@ impl<'a, L: Language> FormatLeadingComments<'a, L> {
         self,
         content: Content,
         layout: LeadingCommentLayout,
-    ) -> FormatLeadingCommentsWithContent<'a, L, Context, Content>
+    ) -> FormatLeadingCommentsWithContent<'a, L, Content>
     where
         Context: CstFormatContext<Language = L>,
         Content: Fn(&mut Formatter<Context>) -> FormatResult<()>,
@@ -135,7 +133,6 @@ impl<'a, L: Language> FormatLeadingComments<'a, L> {
             source: self.source,
             content,
             layout,
-            context: PhantomData,
         }
     }
 }
@@ -157,7 +154,7 @@ where
 }
 
 impl<Context, Content> Format<Context>
-    for FormatLeadingCommentsWithContent<'_, Context::Language, Context, Content>
+    for FormatLeadingCommentsWithContent<'_, Context::Language, Content>
 where
     Context: CstFormatContext,
     Content: Fn(&mut Formatter<Context>) -> FormatResult<()>,
@@ -719,7 +716,7 @@ where
 
     #[cold]
     fn fmt_skipped(&self, token: &SyntaxToken<L>, f: &mut Formatter<C>) -> FormatResult<()> {
-        fmt_skipped_token_trivia_impl(token, f)
+        format_skipped_token_trivia(token).fmt_skipped(f)
     }
 }
 
@@ -806,138 +803,138 @@ where
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         if f.comments().has_skipped(self.token) {
-            fmt_skipped_token_trivia_impl(self.token, f)
+            self.fmt_skipped(f)
         } else {
             Ok(())
         }
     }
 }
 
-#[cold]
-fn fmt_skipped_token_trivia_impl<L, Context>(
-    token: &SyntaxToken<L>,
-    f: &mut Formatter<Context>,
-) -> FormatResult<()>
-where
-    L: Language,
-    Context: CstFormatContext<Language = L>,
-{
-    // Lines/spaces before the next token/comment
-    let (mut lines, mut spaces) = match token.prev_token() {
-        Some(token) => {
-            let mut lines = 0u32;
-            let mut spaces = 0u32;
-            for piece in token.trailing_trivia().pieces().rev() {
-                if piece.is_whitespace() {
-                    spaces += 1;
-                } else if piece.is_newline() {
-                    spaces = 0;
-                    lines += 1;
-                } else {
-                    break;
-                }
-            }
+impl<L: Language> FormatSkippedTokenTrivia<'_, L> {
+    #[cold]
+    fn fmt_skipped<Context>(&self, f: &mut Formatter<Context>) -> FormatResult<()>
+    where
+        Context: CstFormatContext<Language = L>,
+    {
+        let token = self.token;
 
-            (lines, spaces)
-        }
-        None => (0, 0),
-    };
-
-    // The comments between the last skipped token trivia and the token
-    let mut dangling_comments = Vec::new();
-    let mut skipped_range: Option<TextRange> = None;
-
-    // Iterate over the remaining pieces to find the full range from the first to the last skipped token trivia.
-    // Extract the comments between the last skipped token trivia and the token.
-    for piece in token.leading_trivia().pieces() {
-        if piece.is_whitespace() {
-            spaces += 1;
-            continue;
-        }
-
-        if piece.is_newline() {
-            lines += 1;
-            spaces = 0;
-        } else if let Some(comment) = piece.as_comments() {
-            let source_comment = SourceComment {
-                kind: Context::Style::get_comment_kind(&comment),
-                lines_before: lines,
-                lines_after: 0,
-                piece: comment,
-                #[cfg(debug_assertions)]
-                formatted: Cell::new(true),
-            };
-
-            dangling_comments.push(source_comment);
-
-            lines = 0;
-            spaces = 0;
-        } else if piece.is_skipped() {
-            skipped_range = Some(match skipped_range {
-                Some(range) => range.cover(piece.text_range()),
-                None => {
-                    if dangling_comments.is_empty() {
-                        match lines {
-                            0 if spaces == 0 => {
-                                // Token had no space to previous token nor any preceding comment. Keep it that way
-                            }
-                            0 => write!(f, [space()])?,
-                            _ => write!(f, [hard_line_break()])?,
-                        };
+        // Lines/spaces before the next token/comment
+        let (mut lines, mut spaces) = match token.prev_token() {
+            Some(token) => {
+                let mut lines = 0u32;
+                let mut spaces = 0u32;
+                for piece in token.trailing_trivia().pieces().rev() {
+                    if piece.is_whitespace() {
+                        spaces += 1;
+                    } else if piece.is_newline() {
+                        spaces = 0;
+                        lines += 1;
                     } else {
-                        match lines {
-                            0 => write!(f, [space()])?,
-                            1 => write!(f, [hard_line_break()])?,
-                            _ => write!(f, [empty_line()])?,
-                        };
+                        break;
                     }
-
-                    piece.text_range()
                 }
-            });
 
-            lines = 0;
-            spaces = 0;
-            dangling_comments.clear();
-        }
-    }
-
-    let skipped_range =
-        skipped_range.unwrap_or_else(|| TextRange::empty(token.text_range().start()));
-
-    f.write_element(FormatElement::Tag(Tag::StartVerbatim(
-        VerbatimKind::Verbatim {
-            length: skipped_range.len(),
-        },
-    )))?;
-    write!(f, [located_token_text(token, skipped_range)])?;
-    f.write_element(FormatElement::Tag(Tag::EndVerbatim))?;
-
-    // Write whitespace separator between skipped/last comment and token
-    if dangling_comments.is_empty() {
-        match lines {
-            0 if spaces == 0 => {
-                // Don't write a space if there was none in the source document.
-                Ok(())
+                (lines, spaces)
             }
-            0 => write!(f, [space()]),
-            _ => write!(f, [hard_line_break()]),
-        }
-    } else {
-        match dangling_comments
-            .first()
-            .map_or(0, SourceComment::lines_before)
-        {
-            0 => write!(f, [space()])?,
-            1 => write!(f, [hard_line_break()])?,
-            _ => write!(f, [empty_line()])?,
+            None => (0, 0),
+        };
+
+        // The comments between the last skipped token trivia and the token
+        let mut dangling_comments = Vec::new();
+        let mut skipped_range: Option<TextRange> = None;
+
+        // Iterate over the remaining pieces to find the full range from the first to the last skipped token trivia.
+        // Extract the comments between the last skipped token trivia and the token.
+        for piece in token.leading_trivia().pieces() {
+            if piece.is_whitespace() {
+                spaces += 1;
+                continue;
+            }
+
+            if piece.is_newline() {
+                lines += 1;
+                spaces = 0;
+            } else if let Some(comment) = piece.as_comments() {
+                let source_comment = SourceComment {
+                    kind: Context::Style::get_comment_kind(&comment),
+                    lines_before: lines,
+                    lines_after: 0,
+                    piece: comment,
+                    #[cfg(debug_assertions)]
+                    formatted: Cell::new(true),
+                };
+
+                dangling_comments.push(source_comment);
+
+                lines = 0;
+                spaces = 0;
+            } else if piece.is_skipped() {
+                skipped_range = Some(match skipped_range {
+                    Some(range) => range.cover(piece.text_range()),
+                    None => {
+                        if dangling_comments.is_empty() {
+                            match lines {
+                                0 if spaces == 0 => {
+                                    // Token had no space to previous token nor any preceding comment. Keep it that way
+                                }
+                                0 => write!(f, [space()])?,
+                                _ => write!(f, [hard_line_break()])?,
+                            };
+                        } else {
+                            match lines {
+                                0 => write!(f, [space()])?,
+                                1 => write!(f, [hard_line_break()])?,
+                                _ => write!(f, [empty_line()])?,
+                            };
+                        }
+
+                        piece.text_range()
+                    }
+                });
+
+                lines = 0;
+                spaces = 0;
+                dangling_comments.clear();
+            }
         }
 
-        write!(f, [format_dangling_comments_from_slice(&dangling_comments)])?;
+        let skipped_range =
+            skipped_range.unwrap_or_else(|| TextRange::empty(token.text_range().start()));
 
-        match lines {
-            0 => write!(f, [space()]),
-            _ => write!(f, [hard_line_break()]),
+        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
+            VerbatimKind::Verbatim {
+                length: skipped_range.len(),
+            },
+        )))?;
+        write!(f, [located_token_text(token, skipped_range)])?;
+        f.write_element(FormatElement::Tag(Tag::EndVerbatim))?;
+
+        // Write whitespace separator between skipped/last comment and token
+        if dangling_comments.is_empty() {
+            match lines {
+                0 if spaces == 0 => {
+                    // Don't write a space if there was none in the source document.
+                    Ok(())
+                }
+                0 => write!(f, [space()]),
+                _ => write!(f, [hard_line_break()]),
+            }
+        } else {
+            match dangling_comments
+                .first()
+                .map_or(0, SourceComment::lines_before)
+            {
+                0 => write!(f, [space()])?,
+                1 => write!(f, [hard_line_break()])?,
+                _ => write!(f, [empty_line()])?,
+            }
+
+            write!(f, [format_dangling_comments_from_slice(&dangling_comments)])?;
+
+            match lines {
+                0 => write!(f, [space()]),
+                _ => write!(f, [hard_line_break()]),
+            }
         }
     }
 }
