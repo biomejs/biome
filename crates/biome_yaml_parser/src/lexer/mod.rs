@@ -403,6 +403,7 @@ impl<'src> YamlLexer<'src> {
                     self.consume_byte_as_token(T!['}'])
                 }
                 (b',', _) => self.consume_byte_as_token(T![,]),
+                (b'*', _) => self.consume_alias_node(),
                 (b'&', _) => self.consume_anchor_property(),
                 (b'!', _) => self.consume_tag_property(),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
