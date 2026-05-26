@@ -3,7 +3,9 @@ use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{Tag, located_token_text, text};
-use biome_formatter::trivia::{FormatLeadingComments, FormatTrailingComments};
+use biome_formatter::trivia::{
+    format_leading_comments_from_slice, format_trailing_comments_from_slice,
+};
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
     FormatWithRule, LINE_TERMINATORS, normalize_newlines,
@@ -174,7 +176,10 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(f, [FormatLeadingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [format_leading_comments_from_slice(outside_trimmed_range)]
+            )?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -237,7 +242,10 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
                 comment.mark_formatted();
             }
 
-            biome_formatter::write!(f, [FormatTrailingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [format_trailing_comments_from_slice(outside_trimmed_range)]
+            )?;
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))

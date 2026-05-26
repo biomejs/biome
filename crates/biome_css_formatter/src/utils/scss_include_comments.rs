@@ -14,16 +14,15 @@ use biome_css_syntax::{
 use biome_formatter::comments::{CommentPlacement, DecoratedComment};
 use biome_rowan::AstNode;
 
-/// Places comments that follow a map separator in an include argument.
+/// Places comments that follow a map separator.
 ///
-/// Example: `@include mix((a: b, /* end */))`.
+/// Example: `(a: b, /* end */)`.
 pub(crate) fn place_map_trailing_separator_comment(
     map_expression: &ScssMapExpression,
     preceding_pair: &ScssMapExpressionPair,
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    classify_map_trailing_separator_comment(map_expression, preceding_pair, &comment)
-        .into_comment_placement(comment)
+    place_map_separator_comment(map_expression, preceding_pair, comment)
 }
 
 /// Places comments that follow a list separator.
@@ -34,8 +33,7 @@ pub(crate) fn place_list_trailing_separator_comment(
     preceding_element: &ScssListExpressionElement,
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    classify_list_trailing_separator_comment(list_expression, preceding_element, &comment)
-        .into_comment_placement(comment)
+    place_list_separator_comment(list_expression, preceding_element, comment)
 }
 
 /// Places comments on include-owned separator paths.
@@ -44,62 +42,47 @@ pub(crate) fn place_list_trailing_separator_comment(
 pub(crate) fn place_separated_list_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    classify_separated_list_comment(&comment).into_comment_placement(comment)
+    place_include_separator_comment(comment)
 }
 
-/// Semantic attachment chosen by the include comment classifier.
-enum IncludeCommentAttachment {
-    Leading(CssSyntaxNode),
-    Trailing(CssSyntaxNode),
-    Dangling(CssSyntaxNode),
-    Default,
-}
-
-impl IncludeCommentAttachment {
-    /// Converts the semantic attachment into formatter comment placement.
-    fn into_comment_placement(
-        self,
-        comment: DecoratedComment<CssLanguage>,
-    ) -> CommentPlacement<CssLanguage> {
-        match self {
-            Self::Leading(node) => CommentPlacement::leading(node, comment),
-            Self::Trailing(node) => CommentPlacement::trailing(node, comment),
-            Self::Dangling(node) => CommentPlacement::dangling(node, comment),
-            Self::Default => CommentPlacement::Default(comment),
-        }
-    }
-}
-
-/// Classifies comments after map separators before attaching them.
-fn classify_map_trailing_separator_comment(
+/// Places comments after map separators.
+fn place_map_separator_comment(
     map_expression: &ScssMapExpression,
     preceding_pair: &ScssMapExpressionPair,
-    comment: &DecoratedComment<CssLanguage>,
-) -> IncludeCommentAttachment {
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
     let is_include_argument = is_in_scss_include_arguments(map_expression.syntax());
-    let is_separator_comment = is_trailing_separator_comment(preceding_pair.syntax(), comment);
+    let is_separator_comment = is_trailing_separator_comment(preceding_pair.syntax(), &comment);
 
     if is_include_argument
         && scss_include_keyword_argument_owner(map_expression.syntax()).is_some()
         && comment.kind().is_line()
         && comment.text_position().is_end_of_line()
     {
-        return IncludeCommentAttachment::Trailing(preceding_pair.syntax().clone());
+        return CommentPlacement::trailing(preceding_pair.syntax().clone(), comment);
     }
 
-    if !is_separator_comment && is_trailing_comment_on_node(preceding_pair.syntax(), comment) {
-        return IncludeCommentAttachment::Default;
+    if !is_separator_comment && is_trailing_comment_on_node(preceding_pair.syntax(), &comment) {
+        return CommentPlacement::Default(comment);
     }
 
     if is_include_argument {
         return attachment_before_next_or_closing(comment, map_expression.syntax().clone());
     }
 
+    let closing_owner = map_expression.pairs().into_syntax();
+
+    if !comment.kind().is_line()
+        && is_block_group_before_map_closing(preceding_pair.syntax(), &comment)
+    {
+        return CommentPlacement::dangling(closing_owner, comment);
+    }
+
     if is_separator_comment && comment.following_node().is_none() {
         return if comment.kind().is_line() {
-            IncludeCommentAttachment::Default
+            CommentPlacement::Default(comment)
         } else {
-            attachment_before_closing_or_default(comment, map_expression.syntax().clone())
+            attachment_before_closing_or_default(comment, closing_owner)
         };
     }
 
@@ -109,23 +92,23 @@ fn classify_map_trailing_separator_comment(
     }
 
     if !comment.kind().is_inline() || comment.text_position().is_own_line() {
-        return IncludeCommentAttachment::Default;
+        return CommentPlacement::Default(comment);
     }
 
-    attachment_before_next_or_closing(comment, map_expression.syntax().clone())
+    attachment_before_next_or_closing(comment, closing_owner)
 }
 
-/// Classifies comments after list separators before attaching them.
-fn classify_list_trailing_separator_comment(
+/// Places comments after list separators.
+fn place_list_separator_comment(
     list_expression: &ScssListExpression,
     preceding_element: &ScssListExpressionElement,
-    comment: &DecoratedComment<CssLanguage>,
-) -> IncludeCommentAttachment {
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
     if is_in_scss_include_arguments(list_expression.syntax()) {
-        return IncludeCommentAttachment::Default;
+        return CommentPlacement::Default(comment);
     }
 
-    let is_separator_comment = is_trailing_separator_comment(preceding_element.syntax(), comment);
+    let is_separator_comment = is_trailing_separator_comment(preceding_element.syntax(), &comment);
 
     if comment.kind().is_line()
         && comment.text_position().is_end_of_line()
@@ -134,35 +117,35 @@ fn classify_list_trailing_separator_comment(
     {
         attachment_before_next_or_closing(comment, list_expression.syntax().clone())
     } else {
-        IncludeCommentAttachment::Default
+        CommentPlacement::Default(comment)
     }
 }
 
-/// Classifies comments after include-owned list separators.
-fn classify_separated_list_comment(
-    comment: &DecoratedComment<CssLanguage>,
-) -> IncludeCommentAttachment {
-    let Some(preceding_node) = comment.preceding_node() else {
-        return IncludeCommentAttachment::Default;
+/// Places comments after include-owned list separators.
+fn place_include_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_node) = comment.preceding_node().cloned() else {
+        return CommentPlacement::Default(comment);
     };
 
-    if !is_in_scss_include_arguments(preceding_node) {
-        return IncludeCommentAttachment::Default;
+    if !is_in_scss_include_arguments(&preceding_node) {
+        return CommentPlacement::Default(comment);
     }
 
-    if let Some(keyword_argument) = keyword_argument_value_comment_owner(comment) {
-        return IncludeCommentAttachment::Dangling(keyword_argument.into_syntax());
+    if let Some(keyword_argument) = keyword_argument_value_comment_owner(&comment) {
+        return CommentPlacement::dangling(keyword_argument.into_syntax(), comment);
     }
 
-    let Some(closing_owner) = include_separator_comment_owner(preceding_node) else {
-        return IncludeCommentAttachment::Default;
+    let Some(closing_owner) = include_separator_comment_owner(&preceding_node) else {
+        return CommentPlacement::Default(comment);
     };
 
     if comment.kind().is_line() {
-        return classify_line_separator_comment(comment, preceding_node, closing_owner);
+        return place_line_separator_comment(comment, &preceding_node, closing_owner);
     }
 
-    classify_block_separator_comment(comment, preceding_node, closing_owner)
+    place_block_separator_comment(comment, &preceding_node, closing_owner)
 }
 
 /// Finds the keyword argument that owns a trailing self-breaking value comment.
@@ -203,14 +186,14 @@ fn include_separator_comment_owner(node: &CssSyntaxNode) -> Option<CssSyntaxNode
     })
 }
 
-/// Classifies line comments after include-owned separators.
-fn classify_line_separator_comment(
-    comment: &DecoratedComment<CssLanguage>,
+/// Places line comments after include-owned separators.
+fn place_line_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
     preceding_node: &CssSyntaxNode,
     closing_owner: CssSyntaxNode,
-) -> IncludeCommentAttachment {
-    if should_keep_line_comment_trailing(comment, preceding_node) {
-        return IncludeCommentAttachment::Trailing(preceding_node.clone());
+) -> CommentPlacement<CssLanguage> {
+    if should_keep_line_comment_trailing(&comment, preceding_node) {
+        return CommentPlacement::trailing(preceding_node.clone(), comment);
     }
 
     attachment_before_next_or_closing(comment, closing_owner)
@@ -237,36 +220,38 @@ fn should_keep_line_comment_trailing(
     )
 }
 
-/// Classifies block comments after include-owned separators.
-fn classify_block_separator_comment(
-    comment: &DecoratedComment<CssLanguage>,
+/// Places block comments after include-owned separators.
+fn place_block_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
     preceding_node: &CssSyntaxNode,
     closing_owner: CssSyntaxNode,
-) -> IncludeCommentAttachment {
-    if follows_closing_paren(comment) {
-        return IncludeCommentAttachment::Dangling(closing_owner);
+) -> CommentPlacement<CssLanguage> {
+    if follows_closing_paren(&comment) {
+        return CommentPlacement::dangling(closing_owner, comment);
     }
 
     let belongs_before_following = comment.text_position().is_own_line()
-        || !is_trailing_comment_on_node(preceding_node, comment);
+        || !is_trailing_comment_on_node(preceding_node, &comment);
 
     if let Some(following_node) = comment
         .following_node()
         .filter(|_| belongs_before_following)
     {
-        return IncludeCommentAttachment::Leading(separator_comment_owner(following_node));
+        let owner = separator_comment_owner(following_node);
+        return CommentPlacement::leading(owner, comment);
     }
 
-    IncludeCommentAttachment::Default
+    CommentPlacement::Default(comment)
 }
 
 /// Places comments before the next item, or before a closing `)`.
 fn attachment_before_next_or_closing(
-    comment: &DecoratedComment<CssLanguage>,
+    comment: DecoratedComment<CssLanguage>,
     closing_owner: CssSyntaxNode,
-) -> IncludeCommentAttachment {
+) -> CommentPlacement<CssLanguage> {
     if let Some(following_node) = comment.following_node() {
-        return IncludeCommentAttachment::Leading(separator_comment_owner(following_node));
+        let owner = separator_comment_owner(following_node);
+        return CommentPlacement::leading(owner, comment);
     }
 
     attachment_before_closing_or_default(comment, closing_owner)
@@ -274,13 +259,13 @@ fn attachment_before_next_or_closing(
 
 /// Places comments only when they belong before a closing `)`.
 fn attachment_before_closing_or_default(
-    comment: &DecoratedComment<CssLanguage>,
+    comment: DecoratedComment<CssLanguage>,
     closing_owner: CssSyntaxNode,
-) -> IncludeCommentAttachment {
-    if follows_closing_paren(comment) {
-        IncludeCommentAttachment::Dangling(closing_owner)
+) -> CommentPlacement<CssLanguage> {
+    if follows_closing_paren(&comment) {
+        CommentPlacement::dangling(closing_owner, comment)
     } else {
-        IncludeCommentAttachment::Default
+        CommentPlacement::Default(comment)
     }
 }
 
@@ -295,7 +280,48 @@ fn follows_closing_paren(comment: &DecoratedComment<CssLanguage>) -> bool {
         .is_some_and(|token| token.kind() == CssSyntaxKind::R_PAREN)
 }
 
-/// Returns true when the comment follows the separated-list comma.
+/// Returns `true` for a block comment group between a final map comma and `)`.
+///
+/// Example: `(a: b, /* c1 */ /* c2 */)`.
+fn is_block_group_before_map_closing(
+    node: &CssSyntaxNode,
+    comment: &DecoratedComment<CssLanguage>,
+) -> bool {
+    let Some(closing_paren) = comment
+        .following_token()
+        .filter(|token| token.kind() == CssSyntaxKind::R_PAREN)
+    else {
+        return false;
+    };
+
+    let Some(comma) = node
+        .last_token()
+        .and_then(|token| token.next_token())
+        .filter(|token| token.kind() == CssSyntaxKind::COMMA)
+    else {
+        return false;
+    };
+
+    if comma.text_trimmed_range().end() > comment.piece().text_range().start() {
+        return false;
+    }
+
+    comma
+        .trailing_trivia()
+        .pieces()
+        .chain(closing_paren.leading_trivia().pieces())
+        .filter(|piece| {
+            piece.is_comments()
+                && piece.text().starts_with("/*")
+                && piece.text_range().start() >= comma.text_trimmed_range().end()
+                && piece.text_range().end() <= closing_paren.text_trimmed_range().start()
+        })
+        .take(2)
+        .count()
+        > 1
+}
+
+/// Returns `true` when the comment follows the separated-list comma.
 fn is_trailing_separator_comment(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,

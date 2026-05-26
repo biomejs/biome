@@ -1,4 +1,3 @@
-use crate::comments::FormatCssLeadingComment;
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_same_group_leading_block_comment;
 use crate::utils::scss_expression::is_self_breaking_value;
@@ -6,11 +5,8 @@ use biome_css_syntax::{
     AnyScssExpression, CssLanguage, CssSyntaxNode, ScssListExpressionElement,
     is_in_scss_include_arguments,
 };
-use biome_formatter::comments::CommentKind;
-use biome_formatter::{FormatRefWithRule, format_args, write};
+use biome_formatter::write;
 use biome_rowan::AstNode;
-
-type SeparatorCommentBody<'a> = dyn Fn(&mut CssFormatter) -> FormatResult<()> + 'a;
 
 /// Shared opt-in for nodes that receive include separator comments.
 pub(crate) trait FormatScssSeparatorComments<N>: FormatNodeRule<N>
@@ -85,68 +81,42 @@ fn format_node_with_separator_comments(
     f: &mut CssFormatter,
     fmt_node: &impl Fn(&mut CssFormatter) -> FormatResult<()>,
 ) -> FormatResult<()> {
-    let should_indent_after_leading_block = has_same_group_leading_block_comment(node, f);
+    expand_if_has_leading_line_comment(node, f)?;
 
-    if should_indent_after_leading_block && node_has_self_breaking_value(node) {
-        write_separator_leading_comments(node, f, Some(fmt_node))?;
+    if has_same_group_leading_block_comment(node, f) {
+        if node_has_self_breaking_value(node) {
+            write!(
+                f,
+                [format_leading_comments(node).with_indented_following_content(fmt_node)]
+            )?;
+        } else {
+            write!(
+                f,
+                [format_leading_comments(node).with_following_content(fmt_node)]
+            )?;
+        }
+
         return Ok(());
     }
 
-    write_separator_leading_comments(node, f, None)?;
+    write!(f, [format_leading_comments(node)])?;
     fmt_node(f)
 }
 
-/// Writes leading comments that stay grouped with one separated item.
-fn write_separator_leading_comments(
+fn expand_if_has_leading_line_comment(
     node: &CssSyntaxNode,
     f: &mut CssFormatter,
-    indented_body: Option<&SeparatorCommentBody<'_>>,
 ) -> FormatResult<()> {
-    let comments = f.comments().clone();
-    let leading_comments = comments.leading_comments(node);
-    let comment_count = leading_comments.len();
+    let has_line_comment = f
+        .comments()
+        .leading_comments(node)
+        .iter()
+        .any(|comment| comment.kind().is_line());
 
-    for (index, comment) in leading_comments.iter().enumerate() {
-        let lines_after = comment.lines_after();
-        let kind = comment.kind();
-        let is_last_comment = index + 1 == comment_count;
-
-        write!(
-            f,
-            [FormatRefWithRule::new(comment, FormatCssLeadingComment)]
-        )?;
-
-        match kind {
-            CommentKind::Block | CommentKind::InlineBlock => match lines_after {
-                0 | 1 if is_last_comment => {
-                    if let Some(fmt_body) = indented_body {
-                        write!(
-                            f,
-                            [indent(&format_args![
-                                soft_line_break_or_space(),
-                                format_with(|f| fmt_body(f))
-                            ])]
-                        )?;
-                    } else {
-                        write!(f, [soft_line_break_or_space()])?;
-                    }
-                }
-                0 | 1 => write!(f, [soft_line_break_or_space()])?,
-                _ => write!(f, [empty_line()])?,
-            },
-            CommentKind::Line => {
-                // A leading `//` comment on the next include item must expand
-                // the parent group so the first format pass stays idempotent.
-                write!(f, [expand_parent()])?;
-
-                match lines_after {
-                    0 | 1 => write!(f, [hard_line_break()])?,
-                    _ => write!(f, [empty_line()])?,
-                }
-            }
-        }
-
-        comment.mark_formatted();
+    if has_line_comment {
+        // A leading `//` comment on the next include item must expand
+        // the parent group so the first format pass stays idempotent.
+        write!(f, [expand_parent()])?;
     }
 
     Ok(())
