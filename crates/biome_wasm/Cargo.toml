@@ -44,10 +44,10 @@ quote              = "1.0.14"
 schemars           = { workspace = true }
 
 [features]
-default = ["console_error_panic_hook"]
-unstable = ["lang_md", "lang_yaml"]
-lang_md = ["biome_service/lang_md"]
+default   = ["console_error_panic_hook"]
+lang_md   = ["biome_service/lang_md"]
 lang_yaml = ["biome_service/lang_yaml"]
+unstable  = ["lang_md", "lang_yaml"]
 
 [lints]
 workspace = true
