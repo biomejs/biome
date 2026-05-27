@@ -59,6 +59,10 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
 		},
+		"plugins": {
+			"description": "List of plugins to load.",
+			"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
+		},
 		"root": {
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -7386,6 +7390,10 @@
 						{ "$ref": "#/$defs/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"plugins": {
+					"description": "Specific configuration for additional plugins",
+					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7544,6 +7552,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"Plugins": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/PluginConfiguration" }
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
