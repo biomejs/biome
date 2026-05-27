@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#8590](https://github.com/biomejs/biome/issues/8590): [`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) and [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) now correctly flag truly-unused imports and `let`/`const` declarations inside Svelte, Vue, and Astro `<script>` blocks (when `html.experimentalFullSupportEnabled` is on). Previously, the script's own top-level bindings were registered into the embedded-binding set, which self-suppressed every diagnostic; precise template-reference tracking now drives the suppression instead. The following Svelte component now correctly reports `unusedImport` and `unusedLet`:
+Fixed [#8590](https://github.com/biomejs/biome/issues/8590): [`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) and [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) now correctly flag truly-unused imports and `let`/`const` declarations inside Svelte, Vue, and Astro `<script>` blocks (when `html.experimentalFullSupportEnabled` is on). Previously, the script's own top-level bindings were registered into the embedded-binding set, which self-suppressed every diagnostic; precise template-reference tracking now drives the suppression instead. The following Svelte component now correctly reports `unusedImport` and `unusedLet`.
 
 ```svelte
 <script lang="ts">
