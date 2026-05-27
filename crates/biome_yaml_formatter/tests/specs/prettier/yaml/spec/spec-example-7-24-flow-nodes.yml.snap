@@ -38,19 +38,3 @@ info: yaml/spec/spec-example-7-24-flow-nodes.yml
 - *anchor
 - !!str
 ```
-
-# Errors
-```
-spec-example-7-24-flow-nodes.yml:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    2 │ - 'b'
-    3 │ - &anchor "c"
-  > 4 │ - *anchor
-      │   ^
-    5 │ - !!str
-    6 │ 
-  
-
-```
