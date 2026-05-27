@@ -16,6 +16,17 @@ impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression
             r_double_curly_token,
         } = node.as_fields();
 
+        if is_multiline_double_text_expression(node) {
+            return write!(
+                f,
+                [
+                    l_double_curly_token.format(),
+                    block_indent(&expression.format()),
+                    r_double_curly_token.format(),
+                ]
+            );
+        }
+
         write!(
             f,
             [
@@ -27,4 +38,15 @@ impl FormatNodeRule<HtmlDoubleTextExpression> for FormatHtmlDoubleTextExpression
             ]
         )
     }
+}
+
+pub(crate) fn is_multiline_double_text_expression(node: &HtmlDoubleTextExpression) -> bool {
+    node.expression()
+        .ok()
+        .and_then(|expression| expression.html_literal_token().ok())
+        .is_some_and(|token| has_boundary_newline(token.text()))
+}
+
+fn has_boundary_newline(text: &str) -> bool {
+    text.starts_with(['\n', '\r']) || text.ends_with(['\n', '\r'])
 }

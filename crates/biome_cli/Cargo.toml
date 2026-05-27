@@ -64,16 +64,10 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = { workspace = true, features = [
-  "io-std",
-  "io-util",
-  "macros",
-  "net",
-  "rt",
-  "rt-multi-thread",
-  "sync",
-  "time"
-] }
+tokio                    = {
+  workspace = true,
+  features  = ["io-std", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"]
+}
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }

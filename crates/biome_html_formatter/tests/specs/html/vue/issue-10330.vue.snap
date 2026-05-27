@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/issue-10330.vue
+---
+
+# Input
+
+```vue
+<template>
+	<div>
+		<span>
+			<div>
+				<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+					$t("nav.my-rooms")
+				}}</v-btn>
+			</div>
+		</span>
+	</div>
+</template>
+
+```
+
+
+# Formatted
+
+```vue
+<template>
+	<div>
+		<span>
+			<div>
+				<v-btn v-if="store.state.user" variant="text" to="/my-rooms">
+					{{
+						$t("nav.my-rooms")
+					}}
+				</v-btn>
+			</div>
+		</span>
+	</div>
+</template>
+
+```

@@ -4,14 +4,15 @@ use crate::verbatim::{format_html_leading_comments, format_html_leading_comments
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, HtmlElement, HtmlElementFields,
-    HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression, HtmlElement,
+    HtmlElementFields, HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
 };
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
 
 use super::{
     closing_element::{FormatHtmlClosingElement, FormatHtmlClosingElementOptions},
+    double_text_expression::is_multiline_double_text_expression,
     opening_element::{FormatHtmlOpeningElement, FormatHtmlOpeningElementOptions},
 };
 
@@ -178,7 +179,8 @@ impl FormatHtmlElement {
             || opening_element
                 .r_angle_token()
                 .ok()
-                .is_some_and(|tok| tok.has_trailing_whitespace());
+                .is_some_and(|tok| tok.has_trailing_whitespace())
+            || first_child_is_multiline_interpolation(&children);
         let content_has_trailing_whitespace = children
             .syntax()
             .last_token()
@@ -186,7 +188,8 @@ impl FormatHtmlElement {
             || closing_element
                 .l_angle_token()
                 .ok()
-                .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
+                .is_some_and(|tok| tok.has_leading_whitespace_or_newline())
+            || last_child_is_multiline_interpolation(&children);
 
         // Check if there is a newline between the opening tag and the first child.
         // This is distinct from `content_has_leading_whitespace` which also matches spaces.
@@ -373,4 +376,27 @@ fn has_text_child(node: &HtmlElementList) -> bool {
             .value_token()
             .is_ok_and(|token| !token.text_trimmed().is_empty())
     })
+}
+
+fn first_child_is_multiline_interpolation(node: &HtmlElementList) -> bool {
+    node.iter()
+        .next()
+        .is_some_and(|child| is_multiline_interpolation(&child))
+}
+
+fn last_child_is_multiline_interpolation(node: &HtmlElementList) -> bool {
+    node.iter()
+        .last()
+        .is_some_and(|child| is_multiline_interpolation(&child))
+}
+
+fn is_multiline_interpolation(child: &AnyHtmlElement) -> bool {
+    let AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(
+        AnyHtmlTextExpression::HtmlDoubleTextExpression(expression),
+    )) = child
+    else {
+        return false;
+    };
+
+    is_multiline_double_text_expression(expression)
 }
