@@ -62,6 +62,7 @@ impl<'src> YamlLexer<'src> {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
+            b'-' if self.is_at_directive_end() => self.consume_directive_end(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
             b'!' | b'&' => self.consume_block_properties(),
             current if maybe_at_mapping_start(current, self.peek_byte()) => self
@@ -545,6 +546,28 @@ impl<'src> YamlLexer<'src> {
             }
         };
         LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
+    }
+
+    fn is_at_directive_end(&self) -> bool {
+        let is_dash = |c: u8| c == b'-';
+        // A DOC_START token can be evaluated as a plain token if it's not placed at the start of
+        // line
+        self.current_coordinate.column == 0
+            && self.current_byte().is_some_and(is_dash)
+            && self.peek_byte().is_some_and(is_dash)
+            && self.byte_at(2).is_some_and(is_dash)
+    }
+
+    fn consume_directive_end(&mut self) -> LinkedList<LexToken> {
+        self.assert_byte(b'-');
+        debug_assert_eq!(self.byte_at(1), Some(b'-'));
+        debug_assert_eq!(self.byte_at(2), Some(b'-'));
+        let start = self.current_coordinate;
+        let mut tokens = self.close_all_scopes();
+        self.advance(3);
+        tokens.push_back(LexToken::new(DIRECTIVE_END, start, self.current_coordinate));
+
+        tokens
     }
 
     fn is_at_doc_end(&self) -> bool {

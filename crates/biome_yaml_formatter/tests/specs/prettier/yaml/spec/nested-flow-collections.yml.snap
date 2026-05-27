@@ -47,26 +47,3 @@ info: yaml/spec/nested-flow-collections.yml
  ]
 }
 ```
-
-# Errors
-```
-nested-flow-collections.yml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a block mapping entry but instead found '}'.
-  
-    6 │   }
-    7 │  ]
-  > 8 │ }
-      │ ^
-    9 │ 
-  
-  i Expected a block mapping entry here.
-  
-    6 │   }
-    7 │  ]
-  > 8 │ }
-      │ ^
-    9 │ 
-  
-
-```
