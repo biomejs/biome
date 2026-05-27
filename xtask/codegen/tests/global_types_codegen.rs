@@ -2,6 +2,7 @@
 
 use std::{
     collections::BTreeMap,
+    env,
     fmt::Write as _,
     fs,
     path::{Path, PathBuf},
@@ -705,8 +706,8 @@ fn clean_cache_path(pin: &SourcePin) -> Result<PathCleanup> {
 
 /// Returns the production cache path for a TypeScript source pin.
 fn typescript_cache_path(pin: &SourcePin) -> PathBuf {
-    xtask_glue::project_root()
-        .join("target/xtask/typescript")
+    env::temp_dir()
+        .join("biome-global-types")
         .join(format!("{}-{}", pin.tag(), pin.sha()))
 }
 

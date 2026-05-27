@@ -1,6 +1,7 @@
 //! TypeScript source acquisition and default library discovery for global types codegen.
 
 use std::collections::{BTreeMap, HashSet};
+use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::fs::OpenOptions;
@@ -25,8 +26,8 @@ use crate::generate_global_types::SourcePin;
 /// Default remote used to acquire TypeScript sources.
 const DEFAULT_TYPESCRIPT_REPO_URL: &str = "https://github.com/microsoft/TypeScript.git";
 
-/// Workspace-relative cache directory for acquired TypeScript checkouts.
-const TYPESCRIPT_CACHE_RELATIVE_DIR: &str = "target/xtask/typescript";
+/// Subdirectory under the OS temporary directory used as the per-pin checkout cache.
+const TYPESCRIPT_CACHE_DIR_NAME: &str = "biome-global-types";
 
 /// Directory containing per-pin temporary checkout namespaces.
 const TEMP_CHECKOUT_DIR: &str = ".tmp";
@@ -229,10 +230,9 @@ pub struct SourceOptions {
     pub repo_url_override: Option<PathBuf>,
 }
 
-/// Acquires a pinned TypeScript checkout in the workspace cache.
+/// Acquires a pinned TypeScript checkout in the per-OS temporary cache.
 pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<AcquiredCheckout> {
-    let workspace_root = workspace_root()?;
-    let cache_parent = workspace_root.join(TYPESCRIPT_CACHE_RELATIVE_DIR);
+    let cache_parent = env::temp_dir().join(TYPESCRIPT_CACHE_DIR_NAME);
     let checkout_path = cache_parent.join(cache_key(pin));
 
     if checkout_path.exists() {
@@ -443,14 +443,6 @@ struct Frame {
 enum TripleSlashReference {
     File(String),
     Lib(String),
-}
-
-/// Returns the absolute path of the Biome repository root via `git rev-parse`.
-fn workspace_root() -> anyhow::Result<PathBuf> {
-    let mut command = new_git_command();
-    command.args(["rev-parse", "--show-toplevel"]);
-    let stdout = command_stdout(&mut command, "git rev-parse --show-toplevel")?;
-    Ok(PathBuf::from(stdout.trim()))
 }
 
 /// Builds a fresh `git` [`Command`] with environment variables that could
