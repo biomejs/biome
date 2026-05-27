@@ -62,6 +62,7 @@ impl<'src> YamlLexer<'src> {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
+            b'%' if self.is_at_directive() => self.consume_directive().into(),
             b'-' if self.is_at_directive_end() => self.consume_directive_end(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
             b'!' | b'&' => self.consume_block_properties(),
@@ -546,6 +547,39 @@ impl<'src> YamlLexer<'src> {
             }
         };
         LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
+    }
+
+    fn is_at_directive(&self) -> bool {
+        self.current_coordinate.column == 0 && self.current_byte().is_some_and(|c| c == b'%')
+    }
+
+    fn consume_directive(&mut self) -> LexToken {
+        self.assert_byte(b'%');
+        let start = self.current_coordinate;
+        while let Some(current) = self.current_byte() {
+            if is_break(current) || self.is_at_directive_trailing_trivia() {
+                break;
+            }
+            self.advance_char_unchecked();
+        }
+
+        LexToken::new(DIRECTIVE_LITERAL, start, self.current_coordinate)
+    }
+
+    fn is_at_directive_trailing_trivia(&self) -> bool {
+        match self.current_byte() {
+            Some(b'#') => self.prev_byte().is_none_or(is_blank),
+            Some(current) if is_space(current) => {
+                let mut offset = 0;
+                while self.byte_at(offset).is_some_and(is_space) {
+                    offset += 1;
+                }
+
+                self.byte_at(offset)
+                    .is_none_or(|c| c == b'#' || is_break(c))
+            }
+            _ => false,
+        }
     }
 
     fn is_at_directive_end(&self) -> bool {
