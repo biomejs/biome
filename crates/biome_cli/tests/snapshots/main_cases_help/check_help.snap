@@ -395,6 +395,9 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
                               `biome.json`
+        --threads=NUMBER      The number of threads to use. This is useful when running the CLI in
+                              environments with limited resource.
+                              [env:BIOME_THREADS: N/A]
         --only=<GROUP|RULE|DOMAIN|ACTION>  Run only the given lint rule, assist action, group of
                               rules and actions, or domain. If the severity level of a rule is
                               `off`, then the severity level of the rule is set to `error` if it is

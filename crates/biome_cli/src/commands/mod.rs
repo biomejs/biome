@@ -204,6 +204,17 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
+        /// The number of threads to use. This is useful when running the CLI in environments
+        /// with limited resource.
+        #[bpaf(
+            long("threads"),
+            argument("NUMBER"),
+            env("BIOME_THREADS"),
+            optional,
+            hide_usage
+        )]
+        threads: Option<usize>,
+
         /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
@@ -770,7 +781,7 @@ impl BiomeCommand {
 
     pub const fn get_threads(&self) -> Option<usize> {
         match self {
-            Self::Ci { threads, .. } => *threads,
+            Self::Check { threads, .. } | Self::Ci { threads, .. } => *threads,
             _ => None,
         }
     }

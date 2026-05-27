@@ -52,7 +52,7 @@ impl BiomeEnv {
             "What the log should look like. Possible values: pretty, compact, json. Default: pretty.",
         ),
         &BiomeEnvVariable::new("BIOME_CONFIG_PATH", "A path to the configuration file"),
-        &BiomeEnvVariable::new("BIOME_THREADS", "The number of threads to use in CI."),
+        &BiomeEnvVariable::new("BIOME_THREADS", "The number of threads to use in the CLI."),
         &BiomeEnvVariable::new(
             "BIOME_WATCHER_KIND",
             "The kind of watcher to use. Possible values: polling, recommended, none. Default: recommended.",

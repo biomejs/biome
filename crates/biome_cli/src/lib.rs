@@ -103,6 +103,7 @@ impl<'app> CliSession<'app> {
                 skip,
                 watch,
                 profile_rules,
+                threads: _,
             } => run_command(
                 self,
                 &log_options,
