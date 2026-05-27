@@ -14,4 +14,10 @@ Fixed [#8590](https://github.com/biomejs/biome/issues/8590): [`noUnusedImports`]
 <Button>{name}</Button>
 ```
 
-[`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) also now consults `EmbeddedValueReferences` so imports used only as Svelte component tags (`<Button />`) or inside template expressions stay quiet. As part of the same fix, spread attributes (`<input {...props} />` in Svelte and Astro) now count as a template reference to `props`.
+[`noUnusedImports`](https://biomejs.dev/linter/rules/no-unused-imports/) and [`noUnusedFunctionParameters`](https://biomejs.dev/linter/rules/no-unused-function-parameters/) now consult `EmbeddedValueReferences` too, so bindings used only in the template stay quiet. Template-reference extraction was extended to cover the Svelte constructs the parser leaves unattached or opaque, all of which previously produced false positives once the over-suppression was removed:
+
+- Spread attributes — `<input {...props} />` (Svelte and Astro).
+- `{expr}` interpolations inside quoted attribute values — `style="top: {top}px"`, `class="card {cls}"`.
+- Directive names — `use:action`, `transition:fn`, `in:fn`, `out:fn`, `animate:fn`.
+- Shorthand `bind:` — `<Dialog bind:open />` references the local `open`.
+- `{#snippet foo(param)}` parameters referenced only in the snippet body.

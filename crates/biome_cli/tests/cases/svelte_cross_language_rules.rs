@@ -237,3 +237,160 @@ const props = { id: "x", "data-test": "y" };
         result,
     ));
 }
+
+/// `{expr}` interpolations embedded inside quoted attribute values
+/// (`style="top: {top}px"`, `class="a {cls} b"`) reference their bindings. The
+/// parser stores these as opaque string tokens, so they must be scanned out.
+#[test]
+fn attribute_string_interpolation_counts_as_reference() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+let top = 0;
+let cls = "active";
+</script>
+
+<div style="top: {top}px" class="card {cls}"></div>
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "attribute_string_interpolation_counts_as_reference",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Directive names that resolve to imported values — `use:action`,
+/// `transition:fn`, `in:fn`, `out:fn`, `animate:fn` — count as references even
+/// when the directive has no `={...}` initializer.
+#[test]
+fn directive_names_count_as_references() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import { inView } from "./actions";
+import { fade } from "./transitions";
+</script>
+
+<div use:inView transition:fade>hi</div>
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedImports", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "directive_names_count_as_references",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Shorthand `bind:open` (no `={...}`) reads the local variable named by the
+/// property — it counts as a reference.
+#[test]
+fn bind_shorthand_counts_as_reference() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import Dialog from "./Dialog.svelte";
+let open = true;
+</script>
+
+<Dialog bind:open />
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "bind_shorthand_counts_as_reference",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// A `{#snippet foo(param)}` parameter used only inside the snippet body must
+/// not be flagged by `noUnusedFunctionParameters`.
+#[test]
+fn snippet_parameter_used_in_body_is_not_unused() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+let show = true;
+</script>
+
+{#if show}
+  {#snippet card(label: string)}
+    <span>{label}</span>
+  {/snippet}
+{/if}
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedFunctionParameters", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "snippet_parameter_used_in_body_is_not_unused",
+        fs,
+        console,
+        result,
+    ));
+}

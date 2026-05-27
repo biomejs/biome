@@ -1,3 +1,4 @@
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -138,6 +139,15 @@ impl Rule for NoUnusedFunctionParameters {
         let name = name.text_trimmed();
 
         if name.starts_with('_') {
+            return None;
+        }
+
+        // A Svelte `{#snippet foo(param)}` parameter can be referenced only in
+        // the snippet's template body (a separate embedded snippet the JS
+        // semantic model can't see). Treat template references as a use.
+        if let Some(refs) = ctx.get_service::<EmbeddedValueReferences>()
+            && refs.is_used_as_value(name)
+        {
             return None;
         }
 
