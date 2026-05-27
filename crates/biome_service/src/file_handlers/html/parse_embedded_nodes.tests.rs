@@ -127,3 +127,29 @@ fn svelte_each_with_incorrect_method_call_key() {
 
     assert_diagnostics(FILE_PATH, FILE_CONTENT);
 }
+
+#[test]
+fn svelte_interpolation_ranges_are_brace_and_string_aware() {
+    use super::svelte_interpolation_ranges;
+    use biome_rowan::{TextRange, TextSize};
+
+    fn slices(input: &str) -> Vec<&str> {
+        svelte_interpolation_ranges(input)
+            .into_iter()
+            .map(|r| &input[r])
+            .collect()
+    }
+
+    assert_eq!(slices("top: {top}px"), vec!["top"]);
+    assert_eq!(slices("a {x} b {y} c"), vec!["x", "y"]);
+    // A `}` inside a string doesn't end the group.
+    assert_eq!(slices("{ ok ? 'a}b' : c }"), vec![" ok ? 'a}b' : c "]);
+    // Nested braces.
+    assert_eq!(slices("{ {x: 1} }"), vec![" {x: 1} "]);
+    assert!(slices("plain text").is_empty());
+    // Ranges point at the inner expression, not the braces.
+    assert_eq!(
+        svelte_interpolation_ranges("ab{cd}"),
+        vec![TextRange::new(TextSize::from(3), TextSize::from(5))]
+    );
+}

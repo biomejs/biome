@@ -142,9 +142,11 @@ impl Rule for NoUnusedFunctionParameters {
             return None;
         }
 
-        // A Svelte `{#snippet foo(param)}` parameter can be referenced only in
-        // the snippet's template body (a separate embedded snippet the JS
-        // semantic model can't see). Treat template references as a use.
+        // A snippet parameter can be used in the snippet body, which the
+        // semantic model of the script doesn't see. Matching is by name: the
+        // template is a separate parse with no shared symbols, so a name clash
+        // can hide a real unused parameter — a false negative, never a false
+        // positive on a used one.
         if let Some(refs) = ctx.get_service::<EmbeddedValueReferences>()
             && refs.is_used(name)
         {

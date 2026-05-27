@@ -1,23 +1,18 @@
 use biome_html_syntax::{
-    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingProperty, HtmlElement, HtmlRoot,
-    HtmlSelfClosingElement, HtmlString, SvelteAnimateDirective, SvelteBindDirective,
-    SvelteInDirective, SvelteOutDirective, SvelteTransitionDirective, SvelteUseDirective,
+    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingProperty, AnySvelteDirective,
+    HtmlElement, HtmlFileSource, HtmlRoot, HtmlSelfClosingElement,
 };
-use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, AnyJsRoot, JsFileSource, JsReferenceIdentifier, JsStaticMemberExpression,
+    AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
     JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
-    /// Identifiers referenced as values in non-source snippets.
+    /// Identifiers referenced as values.
     pub references: Vec<Vec<(TextRange, TokenText)>>,
-    /// Identifiers referenced only as types (e.g. `icon: IconType` in a
-    /// `{#snippet}` parameter type). Tracked separately so `useImportType`
-    /// can keep distinguishing value vs type usage, while the unused-* rules
-    /// can treat either as a use.
+    /// Identifiers referenced only in type position (e.g. `icon: IconType`).
     pub type_references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
@@ -74,112 +69,62 @@ impl EmbeddedValueReferencesBuilder {
         }
     }
 
-    /// Visit an HTML root to track component element names as value references.
-    ///
-    /// This extracts component names from Vue/Svelte templates like:
-    /// - `<Component />` → tracks `Component`
-    /// - `<AvatarPrimitive.Fallback>` → tracks `AvatarPrimitive`
-    ///
-    /// When `is_svelte` is set, also extracts references from Svelte-only
-    /// constructs the parser leaves opaque or unattached: directive names
-    /// (`use:action`) and `{expr}` interpolations embedded inside quoted
-    /// attribute values (`style="top: {top}px"`).
-    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, is_svelte: bool) {
+    /// Tracks identifiers referenced from the template that the JS semantic
+    /// model of the `<script>` block can't see: component names (`<Button />`)
+    /// and, for Svelte, directive names (`use:action`). Interpolations are
+    /// parsed as snippets earlier and reach us via [`Self::visit_non_source_snippet`].
+    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
+        let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
-            // Check HtmlElement: <Component>...</Component>
             if let Some(element) = HtmlElement::cast_ref(&node) {
                 self.visit_html_element(&element);
             }
-
-            // Check HtmlSelfClosingElement: <Component />
             if let Some(element) = HtmlSelfClosingElement::cast_ref(&node) {
                 self.visit_html_self_closing_element(&element);
             }
-
-            if is_svelte && let Some(string) = HtmlString::cast_ref(&node) {
-                self.visit_svelte_attribute_string(&string);
-            }
-
-            // Svelte directive names that reference imported values:
-            // `use:action`, `transition:fn`, `in:fn`, `out:fn`, `animate:fn`.
-            // The `={initializer}` part is extracted as a snippet elsewhere; here
-            // we register the directive name itself (`action` / `fn`). `bind:`,
-            // `class:`, and `style:` are excluded — their property is a DOM/CSS
-            // name, not a JS reference.
-            if let Some(directive) = SvelteUseDirective::cast_ref(&node) {
-                if let Ok(value) = directive.value() {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
-            } else if let Some(directive) = SvelteTransitionDirective::cast_ref(&node) {
-                if let Ok(value) = directive.value() {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
-            } else if let Some(directive) = SvelteInDirective::cast_ref(&node) {
-                if let Ok(value) = directive.value() {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
-            } else if let Some(directive) = SvelteOutDirective::cast_ref(&node) {
-                if let Ok(value) = directive.value() {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
-            } else if let Some(directive) = SvelteAnimateDirective::cast_ref(&node) {
-                if let Ok(value) = directive.value() {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
-            } else if let Some(directive) = SvelteBindDirective::cast_ref(&node) {
-                // Shorthand `bind:open` (no `={...}`) binds the local variable
-                // named by the property. With an explicit initializer
-                // (`bind:value={x}`) the property is a DOM/component name and
-                // the reference `x` is extracted from the initializer snippet.
-                if let Ok(value) = directive.value()
-                    && value.initializer().is_none()
-                {
-                    self.register_svelte_binding_property(value.property().ok());
-                }
+            if is_svelte && let Some(directive) = AnySvelteDirective::cast_ref(&node) {
+                self.register_svelte_directive_reference(&directive);
             }
         }
     }
 
-    /// Registers the identifier of a Svelte directive property
-    /// (`use:action` → `action`) as a value reference.
+    /// Registers the directive name when it resolves to an imported binding.
+    /// `use`/`transition`/`in`/`out`/`animate` name a function; shorthand
+    /// `bind:open` reads the local `open`. `style:`/`class:` name a CSS
+    /// property, not a binding.
+    fn register_svelte_directive_reference(
+        &mut self,
+        directive: &AnySvelteDirective,
+    ) -> Option<()> {
+        let value = match directive {
+            AnySvelteDirective::SvelteUseDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteTransitionDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteInDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteOutDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteAnimateDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteBindDirective(d) => {
+                let value = d.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
+            AnySvelteDirective::SvelteStyleDirective(_)
+            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+        };
+        self.register_svelte_binding_property(value.property().ok())
+    }
+
     fn register_svelte_binding_property(
         &mut self,
         property: Option<AnySvelteBindingProperty>,
     ) -> Option<()> {
-        let name = property?;
-        let token = match name {
+        let token = match property? {
             AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
-            // A member like `transition:ns.fade` or a literal isn't a plain
-            // imported binding we can attribute to a single name; skip.
             AnySvelteBindingProperty::SvelteMemberProperty(_)
             | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
         };
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
-        Some(())
-    }
-
-    /// Extracts `{expr}` interpolations embedded inside a quoted Svelte
-    /// attribute value (`style="top: {top}px"`, `class="a {cls} b"`). The
-    /// parser stores the whole value as one opaque string token, so the
-    /// interpolations are invisible to the AST; we scan the raw text for
-    /// balanced `{...}` groups, parse each as JS, and register the references.
-    fn visit_svelte_attribute_string(&mut self, string: &HtmlString) -> Option<()> {
-        let token = string.value_token().ok()?;
-        let raw = token.text_trimmed();
-        // Strip surrounding quotes so a quote char doesn't open a string state.
-        let inner = raw
-            .strip_prefix('"')
-            .and_then(|s| s.strip_suffix('"'))
-            .or_else(|| raw.strip_prefix('\'').and_then(|s| s.strip_suffix('\'')))
-            .unwrap_or(raw);
-
-        for expr in svelte_interpolations(inner) {
-            // Ranges from this parse are throwaway: `is_used_as_value` only
-            // compares token text, never positions.
-            let parsed =
-                biome_js_parser::parse(expr, JsFileSource::ts(), JsParserOptions::default());
-            self.visit_non_source_snippet(&parsed.tree());
-        }
         Some(())
     }
 
@@ -263,20 +208,20 @@ impl EmbeddedValueReferencesBuilder {
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
         let name_token = reference.value_token().ok()?;
+        // Classify by how the reference is used here, not what it declares: a
+        // name in type position (`x: Foo`) goes to the type list, as a value
+        // (`new Foo()`) to the value list. Used both ways, it lands in both.
         if usage.is_only_type() {
-            // Type-only usage (`icon: IconType`): record separately so it
-            // counts as a use for the unused-* rules without confusing
-            // `useImportType` (which must still see it as "not a value").
             self.register_type_reference(
                 name_token.text_trimmed_range(),
                 name_token.token_text_trimmed(),
             );
-            return Some(());
+        } else {
+            self.register_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
         }
-        self.register_reference(
-            name_token.text_trimmed_range(),
-            name_token.token_text_trimmed(),
-        );
         Some(())
     }
 
@@ -287,65 +232,6 @@ impl EmbeddedValueReferencesBuilder {
         }
         Some(())
     }
-}
-
-/// Scans a Svelte attribute value for `{...}` interpolations and returns the
-/// inner expression text of each. Brace matching is balanced and aware of JS
-/// string and template literals, so a `}` inside a string (`{ok ? 'a}b' : c}`)
-/// or nested object (`{ {x: 1} }`) does not end the interpolation early.
-fn svelte_interpolations(input: &str) -> Vec<&str> {
-    let bytes = input.as_bytes();
-    let mut out = Vec::new();
-    let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] != b'{' {
-            i += 1;
-            continue;
-        }
-        // Start of an interpolation. Scan to the matching closing brace.
-        let start = i + 1;
-        let mut depth = 1usize;
-        let mut j = start;
-        // String/template-literal state inside the expression.
-        let mut quote: Option<u8> = None;
-        while j < bytes.len() {
-            let c = bytes[j];
-            if let Some(q) = quote {
-                if c == b'\\' {
-                    j += 2;
-                    continue;
-                }
-                if c == q {
-                    quote = None;
-                }
-                j += 1;
-                continue;
-            }
-            match c {
-                b'\'' | b'"' | b'`' => quote = Some(c),
-                b'{' => depth += 1,
-                b'}' => {
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                }
-                _ => {}
-            }
-            j += 1;
-        }
-        if depth == 0 {
-            let expr = input[start..j].trim();
-            if !expr.is_empty() {
-                out.push(expr);
-            }
-            i = j + 1;
-        } else {
-            // Unbalanced — stop scanning, the rest isn't a valid interpolation.
-            break;
-        }
-    }
-    out
 }
 
 #[cfg(test)]
@@ -427,28 +313,11 @@ mod tests {
 
         let mut service = EmbeddedValueReferences::default();
         let mut builder = service.builder();
-        builder.visit_html_root(&parsed.tree(), false);
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::vue());
         service.finish(builder);
 
         assert!(contains_reference(&service, "Component"));
         assert!(contains_reference(&service, "AvatarPrimitive"));
-    }
-
-    #[test]
-    fn extracts_svelte_attribute_string_interpolations() {
-        use biome_html_parser::{HtmlParserOptions, parse_html};
-
-        let source = r#"<div style="top: {top}px; left: {left}px" class="a {cls} b"></div>"#;
-        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
-
-        let mut service = EmbeddedValueReferences::default();
-        let mut builder = service.builder();
-        builder.visit_html_root(&parsed.tree(), true);
-        service.finish(builder);
-
-        assert!(contains_reference(&service, "top"));
-        assert!(contains_reference(&service, "left"));
-        assert!(contains_reference(&service, "cls"));
     }
 
     #[test]
@@ -485,27 +354,12 @@ mod tests {
 
         let mut service = EmbeddedValueReferences::default();
         let mut builder = service.builder();
-        builder.visit_html_root(&parsed.tree(), true);
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
         service.finish(builder);
 
         assert!(contains_reference(&service, "inView"));
         assert!(contains_reference(&service, "fade"));
         assert!(contains_reference(&service, "fly"));
         assert!(contains_reference(&service, "flip"));
-    }
-
-    #[test]
-    fn svelte_interpolations_is_brace_and_string_aware() {
-        assert_eq!(svelte_interpolations("top: {top}px"), vec!["top"]);
-        assert_eq!(svelte_interpolations("a {x} b {y} c"), vec!["x", "y"]);
-        // `}` inside a string must not end the interpolation early.
-        assert_eq!(
-            svelte_interpolations("{ ok ? 'a}b' : c }"),
-            vec!["ok ? 'a}b' : c"]
-        );
-        // Nested braces (object literal).
-        assert_eq!(svelte_interpolations("{ {x: 1} }"), vec!["{x: 1}"]);
-        // No interpolation.
-        assert!(svelte_interpolations("plain text").is_empty());
     }
 }

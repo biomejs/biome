@@ -545,7 +545,7 @@ impl WorkspaceServer {
         {
             let html_root: HtmlRoot = any_parse.tree();
             let mut builder = value_references.builder();
-            builder.visit_html_root(&html_root, html_file_source.is_svelte());
+            builder.visit_html_root(&html_root, &html_file_source);
             value_references.finish(builder);
         }
 
@@ -1719,7 +1719,7 @@ impl Workspace for WorkspaceServer {
         {
             let html_root: HtmlRoot = parsed.any_parse.tree();
             let mut builder = value_references.builder();
-            builder.visit_html_root(&html_root, html_file_source.is_svelte());
+            builder.visit_html_root(&html_root, &html_file_source);
             value_references.finish(builder);
         }
 
