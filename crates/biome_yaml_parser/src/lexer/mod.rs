@@ -551,11 +551,12 @@ impl<'src> YamlLexer<'src> {
     fn is_at_directive_end(&self) -> bool {
         let is_dash = |c: u8| c == b'-';
         // A DOC_START token can be evaluated as a plain token if it's not placed at the start of
-        // line
+        // line or followed by a space, a break, or EOF.
         self.current_coordinate.column == 0
             && self.current_byte().is_some_and(is_dash)
             && self.peek_byte().is_some_and(is_dash)
             && self.byte_at(2).is_some_and(is_dash)
+            && self.byte_at(3).is_none_or(|b| is_space(b) || is_break(b))
     }
 
     fn consume_directive_end(&mut self) -> LinkedList<LexToken> {

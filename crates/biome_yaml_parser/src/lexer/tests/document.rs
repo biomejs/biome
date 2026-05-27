@@ -69,6 +69,16 @@ fn lex_directive_end_with_scalar() {
 }
 
 #[test]
+fn lex_dashdashdash_scalar() {
+    assert_lex!(
+        "---foo",
+        FLOW_START:0,
+        PLAIN_LITERAL:6,
+        FLOW_END:0,
+    );
+}
+
+#[test]
 fn lex_doc_end_then_directive_end() {
     assert_lex!(
         "...\n---",
