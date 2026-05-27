@@ -371,7 +371,7 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+        let is_used_as_reference = embedded_references.is_used(binding_name);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;

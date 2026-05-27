@@ -394,3 +394,43 @@ let show = true;
         result,
     ));
 }
+
+/// An import used only as a *type* in a template snippet (`icon: IconType` in a
+/// `{#snippet}` parameter type) is a use — `noUnusedImports` must not flag it.
+/// `useImportType` still sees it as type-only (it's already `import type`).
+#[test]
+fn type_only_import_used_in_snippet_type_is_not_unused() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        BIOME_CONFIG_HTML_FULL_SUPPORT.as_bytes(),
+    );
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import type { IconType } from "./icons";
+</script>
+
+{#snippet card(p: { icon: IconType })}
+  <span>{p.icon}</span>
+{/snippet}
+"#
+        .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedImports", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "type_only_import_used_in_snippet_type_is_not_unused",
+        fs,
+        console,
+        result,
+    ));
+}

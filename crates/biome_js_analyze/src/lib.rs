@@ -54,6 +54,7 @@ pub struct JsAnalyzerServices {
     source_type: JsFileSource,
     embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
     embedded_value_references: Vec<Vec<(TextRange, TokenText)>>,
+    embedded_type_references: Vec<Vec<(TextRange, TokenText)>>,
     semantic_model: Option<SemanticModel>,
 }
 
@@ -79,6 +80,7 @@ impl
             source_type,
             embedded_bindings: Default::default(),
             embedded_value_references: Default::default(),
+            embedded_type_references: Default::default(),
             semantic_model,
         }
     }
@@ -98,6 +100,7 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             source_type,
             embedded_bindings: Default::default(),
             embedded_value_references: Default::default(),
+            embedded_type_references: Default::default(),
             semantic_model: None,
         }
     }
@@ -111,6 +114,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             source_type: JsFileSource::default(),
             embedded_bindings: Default::default(),
             embedded_value_references: Default::default(),
+            embedded_type_references: Default::default(),
             semantic_model: None,
         }
     }
@@ -123,6 +127,10 @@ impl JsAnalyzerServices {
 
     pub fn set_embedded_value_references(&mut self, refs: Vec<Vec<(TextRange, TokenText)>>) {
         self.embedded_value_references = refs;
+    }
+
+    pub fn set_embedded_type_references(&mut self, refs: Vec<Vec<(TextRange, TokenText)>>) {
+        self.embedded_type_references = refs;
     }
 }
 
@@ -181,6 +189,7 @@ where
         source_type,
         embedded_bindings,
         embedded_value_references,
+        embedded_type_references,
         semantic_model,
     } = services;
 
@@ -242,7 +251,10 @@ where
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
     services.insert_service(EmbeddedBindings(embedded_bindings));
-    services.insert_service(EmbeddedValueReferences(embedded_value_references));
+    services.insert_service(EmbeddedValueReferences::new(
+        embedded_value_references,
+        embedded_type_references,
+    ));
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).

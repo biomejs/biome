@@ -12,12 +12,19 @@ use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
+    /// Identifiers referenced as values in non-source snippets.
     pub references: Vec<Vec<(TextRange, TokenText)>>,
+    /// Identifiers referenced only as types (e.g. `icon: IconType` in a
+    /// `{#snippet}` parameter type). Tracked separately so `useImportType`
+    /// can keep distinguishing value vs type usage, while the unused-* rules
+    /// can treat either as a use.
+    pub type_references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedValueReferencesBuilder {
     references: Vec<(TextRange, TokenText)>,
+    type_references: Vec<(TextRange, TokenText)>,
 }
 
 impl EmbeddedValueReferences {
@@ -27,6 +34,7 @@ impl EmbeddedValueReferences {
 
     pub(crate) fn finish(&mut self, builder: EmbeddedValueReferencesBuilder) {
         self.references.push(builder.references);
+        self.type_references.push(builder.type_references);
     }
 }
 
@@ -34,11 +42,16 @@ impl EmbeddedValueReferencesBuilder {
     fn new() -> Self {
         Self {
             references: Vec::default(),
+            type_references: Vec::default(),
         }
     }
 
     pub(crate) fn register_reference(&mut self, range: TextRange, text: TokenText) {
         self.references.push((range, text));
+    }
+
+    pub(crate) fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
+        self.type_references.push((range, text));
     }
 
     /// Visit a non-source snippet to track value references
@@ -249,10 +262,17 @@ impl EmbeddedValueReferencesBuilder {
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
-        if usage.is_only_type() {
-            return None;
-        }
         let name_token = reference.value_token().ok()?;
+        if usage.is_only_type() {
+            // Type-only usage (`icon: IconType`): record separately so it
+            // counts as a use for the unused-* rules without confusing
+            // `useImportType` (which must still see it as "not a value").
+            self.register_type_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
+            return Some(());
+        }
         self.register_reference(
             name_token.text_trimmed_range(),
             name_token.token_text_trimmed(),
@@ -429,6 +449,31 @@ mod tests {
         assert!(contains_reference(&service, "top"));
         assert!(contains_reference(&service, "left"));
         assert!(contains_reference(&service, "cls"));
+    }
+
+    #[test]
+    fn tracks_type_only_references_separately() {
+        // `IconType` is used only as a type; it must land in type_references,
+        // not references, so useImportType still treats it as type-only while
+        // the unused-* rules see it as used.
+        let source = r#"const x: IconType = foo;"#;
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_non_source_snippet(&parse_js(source));
+        service.finish(builder);
+
+        let in_value = service
+            .references
+            .iter()
+            .any(|r| r.iter().any(|(_, t)| t.text() == "IconType"));
+        let in_type = service
+            .type_references
+            .iter()
+            .any(|r| r.iter().any(|(_, t)| t.text() == "IconType"));
+        assert!(!in_value, "IconType should not be a value reference");
+        assert!(in_type, "IconType should be a type reference");
+        // `foo` is a value reference.
+        assert!(contains_reference(&service, "foo"));
     }
 
     #[test]

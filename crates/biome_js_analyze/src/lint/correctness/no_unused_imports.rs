@@ -711,8 +711,10 @@ fn is_unused(
 
     // Imports referenced in a non-source embed (template expression, directive,
     // Svelte block) are used even though the JS semantic model can't see it.
+    // `is_used` covers value *and* type usage — an import used only as a type
+    // in a `{#snippet}` parameter (`icon: IconType`) is still used.
     if let Some(token) = binding_name.as_ref()
-        && embedded_references.is_used_as_value(token.text_trimmed())
+        && embedded_references.is_used(token.text_trimmed())
     {
         return false;
     }

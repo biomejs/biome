@@ -988,7 +988,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     }
 
     if let Some(value_refs) = params.document_services.embedded_value_references() {
-        services.set_embedded_value_references(value_refs.references)
+        services.set_embedded_value_references(value_refs.references);
+        services.set_embedded_type_references(value_refs.type_references);
     }
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -1175,7 +1176,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             }
 
             if let Some(value_refs) = params.document_services.embedded_value_references() {
-                services.set_embedded_value_references(value_refs.references)
+                services.set_embedded_value_references(value_refs.references);
+                services.set_embedded_type_references(value_refs.type_references);
             }
 
             let mut pending_actions = Vec::new();
@@ -1241,7 +1243,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
-            services.set_embedded_value_references(value_refs.references)
+            services.set_embedded_value_references(value_refs.references);
+            services.set_embedded_type_references(value_refs.type_references);
         }
 
         let mut pending_actions = Vec::new();
@@ -1281,7 +1284,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
-            services.set_embedded_value_references(value_refs.references)
+            services.set_embedded_value_references(value_refs.references);
+            services.set_embedded_type_references(value_refs.type_references);
         }
 
         let (_, _) = analyze(

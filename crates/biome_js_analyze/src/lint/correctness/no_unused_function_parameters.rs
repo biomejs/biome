@@ -146,7 +146,7 @@ impl Rule for NoUnusedFunctionParameters {
         // the snippet's template body (a separate embedded snippet the JS
         // semantic model can't see). Treat template references as a use.
         if let Some(refs) = ctx.get_service::<EmbeddedValueReferences>()
-            && refs.is_used_as_value(name)
+            && refs.is_used(name)
         {
             return None;
         }
