@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-decorator-metadata.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import { Controller, Inject } from "./decorators";
+import DefaultService, { NamedService } from "./service";
+import * as Services from "./services";
+
+@Controller()
+class AppController {
+	constructor(
+		private readonly defaultService: DefaultService,
+		private readonly namedService: NamedService,
+		private readonly namespacedService: Services.NamespacedService,
+	) {}
+}
+
+class ParameterDecoratorController {
+	constructor(@Inject("service") private readonly namedService: NamedService) {}
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

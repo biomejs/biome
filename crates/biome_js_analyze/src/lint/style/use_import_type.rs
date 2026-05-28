@@ -14,14 +14,16 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause, AnyJsModuleItem,
-    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource, JsIdentifierBinding,
-    JsImport, JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
-    JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
+    AnyJsClass, AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause,
+    AnyJsModuleItem, AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource,
+    JsConstructorClassMember, JsIdentifierBinding, JsImport, JsImportCombinedClause,
+    JsImportDefaultClause, JsLanguage, JsModuleItemList, JsNamedImportSpecifierList,
+    JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
-    TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement,
+    SyntaxResult, TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces,
+    trim_trailing_trivia_pieces,
 };
 use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
@@ -152,6 +154,33 @@ declare_lint_rule! {
     /// import { type A, type B } from "./mod.ts";
     /// export type { A, B };
     /// ```
+    ///
+    /// ### `preserveDecoratorMetadata`
+    ///
+    /// The `preserveDecoratorMetadata` option preserves value imports when an imported
+    /// class is used in a constructor parameter that can be emitted as TypeScript
+    /// decorator metadata.
+    ///
+    /// This is useful for projects using frameworks that rely on
+    /// `emitDecoratorMetadata` for dependency injection.
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "preserveDecoratorMetadata": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
+    /// import { Injectable } from "@nestjs/common";
+    /// import { Service } from "./service.ts";
+    ///
+    /// @Injectable()
+    /// export class Controller {
+    ///     constructor(private readonly service: Service) {}
+    /// }
+    /// ```
     pub UseImportType {
         version: "1.5.0",
         name: "useImportType",
@@ -191,6 +220,7 @@ impl Rule for UseImportType {
             .get_service::<EmbeddedValueReferences>()
             .expect("embedded value references service");
         let style = ctx.options().style.unwrap_or_default();
+        let preserve_decorator_metadata = ctx.options().preserve_decorator_metadata.unwrap_or(false);
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
             AnyJsImportClause::JsImportCombinedClause(clause) => {
@@ -199,11 +229,22 @@ impl Rule for UseImportType {
                 let is_default_used_as_type = if is_jsx_factory_binding(ctx, default_binding) {
                     false
                 } else {
-                    is_only_used_as_type(model, default_binding, references)
+                    is_only_used_as_type(
+                        model,
+                        default_binding,
+                        references,
+                        preserve_decorator_metadata,
+                    )
                 };
                 match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers) => {
-                        match named_import_type_fix(model, &named_specifiers, false, references) {
+                        match named_import_type_fix(
+                            model,
+                            &named_specifiers,
+                            false,
+                            references,
+                            preserve_decorator_metadata,
+                        ) {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
@@ -258,7 +299,12 @@ impl Rule for UseImportType {
 
                         match (
                             is_default_used_as_type,
-                            is_only_used_as_type(model, namespace_binding, references),
+                            is_only_used_as_type(
+                                model,
+                                namespace_binding,
+                                references,
+                                preserve_decorator_metadata,
+                            ),
                         ) {
                             (true, true) => Some(ImportTypeFix::UseImportType),
                             (true, false) => {
@@ -282,7 +328,12 @@ impl Rule for UseImportType {
                     return None;
                 }
 
-                is_only_used_as_type(model, default_binding, references)
+                is_only_used_as_type(
+                    model,
+                    default_binding,
+                    references,
+                    preserve_decorator_metadata,
+                )
                     .then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
@@ -309,6 +360,7 @@ impl Rule for UseImportType {
                     &clause.named_specifiers().ok()?,
                     type_token.is_some(),
                     references,
+                    preserve_decorator_metadata,
                 )? {
                     NamedImportTypeFix::UseImportType(specifiers) => {
                         if style == Style::InlineType {
@@ -350,7 +402,12 @@ impl Rule for UseImportType {
                     return None;
                 }
 
-                is_only_used_as_type(model, namespace_binding, references)
+                is_only_used_as_type(
+                    model,
+                    namespace_binding,
+                    references,
+                    preserve_decorator_metadata,
+                )
                     .then_some(ImportTypeFix::UseImportType)
             }
         }
@@ -824,6 +881,7 @@ fn is_only_used_as_type(
     model: &SemanticModel,
     binding: &JsIdentifierBinding,
     references: &EmbeddedValueReferences,
+    preserve_decorator_metadata: bool,
 ) -> bool {
     // First check if the binding is used as a value in embedded non-source snippets (templates)
     if let Ok(name_token) = binding.name_token()
@@ -836,6 +894,9 @@ fn is_only_used_as_type(
     let mut result = false;
     for reference in binding.all_references(model) {
         if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax()) {
+            if preserve_decorator_metadata && is_used_by_decorator_metadata(&reference) {
+                return false;
+            }
             result = reference.is_only_type();
             if !result {
                 break;
@@ -843,6 +904,40 @@ fn is_only_used_as_type(
         }
     }
     result
+}
+
+fn is_used_by_decorator_metadata(reference: &AnyJsIdentifierUsage) -> bool {
+    if !reference.is_only_type() {
+        return false;
+    }
+    let reference_range = reference.range();
+    let Some(constructor) = reference
+        .syntax()
+        .ancestors()
+        .find_map(JsConstructorClassMember::cast)
+    else {
+        return false;
+    };
+    let Ok(parameters) = constructor.parameters() else {
+        return false;
+    };
+    if !parameters.range().contains_range(reference_range) {
+        return false;
+    }
+    if parameters
+        .parameters()
+        .into_iter()
+        .filter_map(Result::ok)
+        .any(|parameter| parameter.has_any_decorator())
+    {
+        return true;
+    }
+    constructor
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsClass::cast)
+        .is_some_and(|class| !class.decorators().is_empty())
 }
 
 #[derive(Debug)]
@@ -858,6 +953,7 @@ fn named_import_type_fix(
     named_specifiers: &JsNamedImportSpecifiers,
     has_type_token: bool,
     value_refs: &EmbeddedValueReferences,
+    preserve_decorator_metadata: bool,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {
@@ -892,6 +988,7 @@ fn named_import_type_fix(
                             model,
                             local_name.as_js_identifier_binding()?,
                             value_refs,
+                            preserve_decorator_metadata,
                         ))
                     })
                     .unwrap_or(false)
