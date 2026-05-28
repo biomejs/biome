@@ -71,14 +71,14 @@ impl EmbeddedValueReferencesBuilder {
 
     /// Visit an HTML root to track component element names as value references.
     ///
-    /// Extracts component names from Vue/Svelte/Astro templates:
+    /// This extracts component names from Vue/Svelte/Astro templates like:
     /// - `<Component />` → tracks `Component`
     /// - `<AvatarPrimitive.Fallback>` → tracks `AvatarPrimitive`
     ///
-    /// When `file_source` is Svelte, also extracts references from directive
-    /// names (`use:action`, `transition:fade`, `bind:open` shorthand).
-    /// Interpolations inside attribute strings are parsed earlier as snippets
-    /// and reach us via [`Self::visit_non_source_snippet`].
+    /// When `file_source` is Svelte, also extracts references from Svelte-only
+    /// constructs the parser leaves opaque or unattached: directive names
+    /// (`use:action`) and `{expr}` interpolations embedded inside quoted
+    /// attribute values (`style="top: {top}px"`).
     pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
         let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
