@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 143
+expression: validBlankLines.css
+---
+# Input
+```css
+/*
+
+
+Copyright 2026 Acme
+
+
+*/
+.a { color: red; }
+/* should not generate diagnostics */
+.b { color: blue; }
+
+```

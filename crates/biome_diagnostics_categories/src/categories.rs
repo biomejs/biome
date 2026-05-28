@@ -252,6 +252,7 @@ define_categories! {
     "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/useArraySome": "https://biomejs.dev/linter/rules/use-array-some",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
+    "lint/nursery/useBannerComment": "https://biomejs.dev/linter/rules/use-banner-comment",
     "lint/nursery/useBaseline": "https://biomejs.dev/linter/rules/use-baseline",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",

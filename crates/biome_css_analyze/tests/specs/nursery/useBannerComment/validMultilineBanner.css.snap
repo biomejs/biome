@@ -1,0 +1,16 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 143
+expression: validMultilineBanner.css
+---
+# Input
+```css
+/*
+Copyright 2026 Acme
+All rights reserved
+*/
+.a { color: red; }
+/* should not generate diagnostics */
+.b { color: blue; }
+
+```
