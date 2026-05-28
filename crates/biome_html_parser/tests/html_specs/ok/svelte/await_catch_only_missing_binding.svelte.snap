@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -31,7 +32,7 @@ HtmlRoot {
                 then_clause: missing (optional),
                 catch_clause: SvelteAwaitCatchClause {
                     catch_token: CATCH_KW@16..21 "catch" [] [],
-                    name: missing (required),
+                    name: missing (optional),
                 },
                 r_curly_token: R_CURLY@21..22 "}" [] [],
                 children: HtmlElementList [
@@ -115,18 +116,4 @@ HtmlRoot {
         2: R_CURLY@46..47 "}" [] []
   4: EOF@47..48 "" [Newline("\n")] []
 
-```
-
-## Diagnostics
-
-```
-await_catch_only_missing_binding.svelte:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an expression, instead none was found.
-  
-  > 1 │ {#await promise catch}
-      │                      ^
-    2 │   <p>Error!</p>
-    3 │ {/await}
-  
 ```

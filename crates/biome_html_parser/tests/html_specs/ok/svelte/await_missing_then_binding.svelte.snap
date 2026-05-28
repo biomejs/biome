@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -63,7 +64,7 @@ HtmlRoot {
                 SvelteAwaitThenBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@36..39 "{:" [Newline("\n")] [],
                     then_token: THEN_KW@39..43 "then" [] [],
-                    name: missing (required),
+                    name: missing (optional),
                     r_curly_token: R_CURLY@43..44 "}" [] [],
                     children: HtmlElementList [
                         HtmlElement {
@@ -166,20 +167,4 @@ HtmlRoot {
         2: R_CURLY@67..68 "}" [] []
   4: EOF@68..69 "" [Newline("\n")] []
 
-```
-
-## Diagnostics
-
-```
-await_missing_then_binding.svelte:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an expression, instead none was found.
-  
-    1 │ {#await promise}
-    2 │   <p>Loading...</p>
-  > 3 │ {:then}
-      │       ^
-    4 │   <p>Done!</p>
-    5 │ {/await}
-  
 ```

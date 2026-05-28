@@ -480,12 +480,8 @@ fn parse_await_then_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    // The binding variable after `then` is optional: `{#await expr then}` is valid Svelte.
+    let _ = parse_single_text_expression_content(p);
 
     Present(m.complete(p, SVELTE_AWAIT_THEN_CLAUSE))
 }
@@ -497,11 +493,9 @@ fn parse_await_catch_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    // The binding variable after `catch` is optional: `{#await expr catch}` is valid Svelte.
+    let _ = parse_single_text_expression_content(p);
+
     Present(m.complete(p, SVELTE_AWAIT_CATCH_CLAUSE))
 }
 
@@ -634,13 +628,8 @@ fn parse_await_then_block(
     }
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'then'", p.cur_range()));
-    }
+    // The binding variable is optional: `{:then}` is valid Svelte.
+    let _ = parse_single_text_expression_content(p);
 
     p.expect(T!['}']);
 
@@ -672,13 +661,8 @@ fn parse_await_catch_block(
     }
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'catch'", p.cur_range()));
-    }
+    // The binding variable is optional: `{:catch}` is valid Svelte.
+    let _ = parse_single_text_expression_content(p);
 
     p.expect(T!['}']);
 
