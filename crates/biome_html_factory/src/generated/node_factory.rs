@@ -1243,7 +1243,7 @@ pub fn svelte_rest_binding(dotdotdot_token: SyntaxToken, name: SvelteName) -> Sv
 pub fn svelte_rename_binding(
     key: SvelteName,
     colon_token: SyntaxToken,
-    name: SvelteName,
+    name: AnySvelteBindingAssignmentBinding,
 ) -> SvelteRenameBinding {
     SvelteRenameBinding::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_RENAME_BINDING,

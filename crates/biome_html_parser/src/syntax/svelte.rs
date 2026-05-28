@@ -1013,6 +1013,22 @@ fn parse_rest_name(p: &mut HtmlParser) -> ParsedSyntax {
 /// a property name (key) from a local binding name (alias). This function handles both
 /// cases: if a `:` follows the identifier, it emits a `SvelteRenameBinding` node;
 /// otherwise the wrapping marker is abandoned and the plain `SvelteName` is returned.
+fn parse_binding_assignment_element(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.at(T![...]) {
+        parse_rest_name(p)
+    } else if p.at(T!['{']) {
+        let result = parse_curly_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else if p.at(T!['[']) {
+        let result = parse_square_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else {
+        parse_rename_or_plain_name(p)
+    }
+}
+
 fn parse_rename_or_plain_name(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     let result = parse_svelte_name(p);
@@ -1023,7 +1039,7 @@ fn parse_rename_or_plain_name(p: &mut HtmlParser) -> ParsedSyntax {
     p.re_lex(HtmlReLexContext::Svelte);
     if p.at(T![:]) {
         p.bump_with_context(T![:], HtmlLexContext::Svelte);
-        parse_svelte_name(p).or_add_diagnostic(p, |p, range| {
+        parse_binding_assignment_element(p).or_add_diagnostic(p, |p, range| {
             p.err_builder("Expected a binding name after ':'", range)
         });
         Present(m.complete(p, SVELTE_RENAME_BINDING))
@@ -1127,19 +1143,7 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     const LIST_KIND: Self::Kind = SVELTE_BINDING_ASSIGNMENT_BINDING_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if p.at(T![...]) {
-            parse_rest_name(p)
-        } else if p.at(T!['{']) {
-            let result = parse_curly_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else if p.at(T!['[']) {
-            let result = parse_square_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else {
-            parse_rename_or_plain_name(p)
-        }
+        parse_binding_assignment_element(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

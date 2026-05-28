@@ -1096,11 +1096,28 @@ fn register_svelte_destructured_bindings(
                         .register_binding(token.text_trimmed_range(), token.token_text_trimmed());
                 }
                 AnySvelteBindingAssignmentBinding::SvelteRenameBinding(rename) => {
-                    // In `{ prop: alias }`, `alias` is the local binding name.
-                    let name = rename.name().ok()?;
-                    let token = name.ident_token().ok()?;
-                    builder
-                        .register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+                    // The alias side (`{ prop: alias }` or `{ prop: { a, b } }`) is the binding.
+                    match rename.name().ok()? {
+                        AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
+                            let token = ident.ident_token().ok()?;
+                            builder.register_binding(
+                                token.text_trimmed_range(),
+                                token.token_text_trimmed(),
+                            );
+                        }
+                        AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(nested) => {
+                            queue.push_back(nested);
+                        }
+                        AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
+                            let name = rest.name().ok()?;
+                            let token = name.ident_token().ok()?;
+                            builder.register_binding(
+                                token.text_trimmed_range(),
+                                token.token_text_trimmed(),
+                            );
+                        }
+                        AnySvelteBindingAssignmentBinding::SvelteRenameBinding(_) => {}
+                    }
                 }
             }
         }

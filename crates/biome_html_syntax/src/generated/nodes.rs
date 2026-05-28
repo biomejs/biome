@@ -3281,7 +3281,7 @@ impl SvelteRenameBinding {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn name(&self) -> SyntaxResult<SvelteName> {
+    pub fn name(&self) -> SyntaxResult<AnySvelteBindingAssignmentBinding> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -3297,7 +3297,7 @@ impl Serialize for SvelteRenameBinding {
 pub struct SvelteRenameBindingFields {
     pub key: SyntaxResult<SvelteName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<SvelteName>,
+    pub name: SyntaxResult<AnySvelteBindingAssignmentBinding>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteSnippetBlock {

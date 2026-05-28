@@ -2412,7 +2412,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && SvelteName::can_cast(element.kind())
+                    && AnySvelteBindingAssignmentBinding::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

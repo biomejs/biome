@@ -429,7 +429,7 @@ SvelteRestBinding =
 SvelteRenameBinding =
  key: SvelteName
  ':'
- name: SvelteName
+ name: AnySvelteBindingAssignmentBinding
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^
