@@ -1,7 +1,7 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
-Add the `preserveDecoratorMetadata` option to `useImportType`.
+Fix [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) for projects that rely on TypeScript decorator metadata.
 
-When enabled, the rule preserves value imports used by constructor parameter types that can be emitted as TypeScript decorator metadata. This helps projects that rely on decorator metadata for dependency injection keep `useImportType` enabled for the rest of the file.
+The new `preserveDecoratorMetadata` option preserves value imports used by constructor parameter types that can be emitted as decorator metadata. This lets dependency-injection projects keep `useImportType` enabled for the rest of the file.
