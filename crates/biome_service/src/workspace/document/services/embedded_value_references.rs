@@ -96,10 +96,19 @@ impl EmbeddedValueReferencesBuilder {
         }
     }
 
-    /// Registers the directive name when it resolves to an imported binding.
-    /// `use`/`transition`/`in`/`out`/`animate` name a function; shorthand
-    /// `bind:open` reads the local `open`. `style:`/`class:` name a CSS
-    /// property, not a binding.
+    /// Registers the directive name as a value reference when it resolves to a
+    /// local binding. Which directives qualify:
+    ///
+    /// - `use:inView` → tracks `inView` (an action function)
+    /// - `transition:fade`, `in:fly`, `out:fly`, `animate:flip` → tracks the
+    ///   transition/animation function
+    /// - `bind:open` (shorthand, no `={...}`) → tracks `open` (reads the
+    ///   local variable of the same name)
+    /// - `bind:value={expr}` → skipped; the expression is a snippet handled
+    ///   elsewhere, and the directive name `value` is an HTML attribute, not a
+    ///   binding reference
+    /// - `style:color`, `class:active` → skipped; these name CSS
+    ///   properties/classes, not JS bindings
     fn register_svelte_directive_reference(
         &mut self,
         directive: &AnySvelteDirective,
@@ -123,6 +132,13 @@ impl EmbeddedValueReferencesBuilder {
         self.register_svelte_binding_property(value.property().ok())
     }
 
+    /// Extracts the identifier from a directive's binding property, if it is a
+    /// plain name. Only `SvelteName` maps to a local variable:
+    ///
+    /// - `bind:open` → property is `SvelteName("open")` → tracks `open`
+    /// - `bind:a.b` → property is `SvelteMemberProperty` → skipped (not a
+    ///   simple local binding)
+    /// - `bind:"literal"` → property is `SvelteLiteral` → skipped
     fn register_svelte_binding_property(
         &mut self,
         property: Option<AnySvelteBindingProperty>,
