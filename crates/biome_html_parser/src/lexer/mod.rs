@@ -576,22 +576,20 @@ impl<'src> HtmlLexer<'src> {
                     let checkpoint_pos = self.position;
                     let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        // Check if this keyword is in our stop list
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
-                        if should_stop {
-                            // Special case: `as const` is a TypeScript type assertion, not a
-                            // Svelte binding marker. If this `as` is immediately followed by
-                            // ` const` (and `const` is not part of a longer identifier), keep
-                            // consuming – the real Svelte `as` binding will come after `const`.
-                            if keyword_kind == AS_KW && self.is_as_const_assertion() {
-                                // continue consuming
-                            } else {
-                                // Rewind - don't consume the keyword
-                                self.position = checkpoint_pos;
-                                break;
-                            }
+                        // `as const` is a Svelte-specific TS assertion in `{#each}`;
+                        // keep scanning so the real binding `as` (which follows it)
+                        // is the one that stops us.
+                        let is_as_const = should_stop
+                            && keyword_kind == AS_KW
+                            && self.peek_keyword_after_space() == Some(CONST_KW);
+
+                        if should_stop && !is_as_const {
+                            // Rewind - don't consume the keyword
+                            self.position = checkpoint_pos;
+                            break;
                         }
                         // Not a stop keyword, continue (position already advanced by consume_language_identifier)
                     } else {
@@ -796,22 +794,19 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
-    /// Returns `true` when the lexer has just consumed an `as` keyword and the
-    /// remaining source starts with ` const` where `const` is NOT followed by
-    /// an identifier-continuation byte.  This indicates a TypeScript `as const`
-    /// type assertion rather than the Svelte `as <binding>` pattern.
-    fn is_as_const_assertion(&self) -> bool {
-        let rest = &self.source[self.position..];
-        // Must start with a space followed by "const"
-        if !rest.starts_with(" const") {
-            return false;
+    /// Peeks the next language keyword after horizontal whitespace, without
+    /// advancing the lexer position. Returns `None` if no keyword follows.
+    fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
+        let save = self.position;
+        while matches!(self.current_byte(), Some(b' ') | Some(b'\t')) {
+            self.position += 1;
         }
-        // Make sure "const" is a complete word (not e.g. " constantly")
-        let after_const = &rest[" const".len()..];
-        match after_const.as_bytes().first() {
-            None | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') => true,
-            Some(&b) => !is_at_continue_identifier(b),
-        }
+        let kind = self
+            .current_byte()
+            .filter(|b| is_at_start_identifier(*b))
+            .and_then(|b| self.consume_language_identifier(b));
+        self.position = save;
+        kind
     }
 
     /// Attempts to consume HTML-ish languages identifiers. If none is found, the function
