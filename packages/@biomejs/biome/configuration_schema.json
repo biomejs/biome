@@ -437,6 +437,17 @@
 				}
 			]
 		},
+		"BannerContent": {
+			"anyOf": [
+				{ "description": "A single canonical banner.", "type": "string" },
+				{
+					"description": "A list of acceptable banners. The first entry is used when auto-fixing.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
+				}
+			]
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
@@ -6892,6 +6903,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBannerComment": {
+					"description": "Enforce that every file starts with a configured banner comment.\nSee https://biomejs.dev/linter/rules/use-banner-comment",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBannerCommentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useBaseline": {
 					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
 					"anyOf": [
@@ -10981,6 +10999,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBannerCommentOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBannerCommentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBaselineOptions": {
 			"type": "object",
 			"properties": {
@@ -14637,6 +14665,22 @@
 		},
 		"UseAwaitThenableOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBannerCommentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBannerCommentOptions" }
+			]
+		},
+		"UseBannerCommentOptions": {
+			"type": "object",
+			"properties": {
+				"content": {
+					"description": "The expected banner content.\n\nAccepts either a single string (one canonical banner) or an array of\nstrings (any one of which is an acceptable banner).",
+					"anyOf": [{ "$ref": "#/$defs/BannerContent" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseBaselineConfiguration": {
