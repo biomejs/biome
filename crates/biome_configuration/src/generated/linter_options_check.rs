@@ -1829,6 +1829,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useFragmentSyntax",
         TypeId::of::<biome_rule_options::use_fragment_syntax::UseFragmentSyntaxOptions>(),
     ));
+    result.push(("nursery", "useFunctionComponentDefinition", TypeId::of::<biome_rule_options::use_function_component_definition::UseFunctionComponentDefinitionOptions>()));
     result.push((
         "a11y",
         "useGenericFontNames",

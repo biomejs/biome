@@ -78,6 +78,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noJsxLeakedDollar"),
         RuleFilter::Rule("nursery", "noJsxNamespace"),
         RuleFilter::Rule("nursery", "noReactStringRefs"),
+        RuleFilter::Rule("nursery", "useFunctionComponentDefinition"),
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
         RuleFilter::Rule("performance", "noJsxPropsBind"),
         RuleFilter::Rule("performance", "noSyncScripts"),

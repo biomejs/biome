@@ -388,6 +388,7 @@ pub mod use_flat_map;
 pub mod use_focusable_interactive;
 pub mod use_for_of;
 pub mod use_fragment_syntax;
+pub mod use_function_component_definition;
 pub mod use_generic_font_names;
 pub mod use_getter_return;
 pub mod use_global_this;
