@@ -76,9 +76,11 @@ impl EmbeddedValueReferencesBuilder {
     pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
         let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
+            // Check HtmlElement: <Component>...</Component>
             if let Some(element) = HtmlElement::cast_ref(&node) {
                 self.visit_html_element(&element);
             }
+            // Check HtmlSelfClosingElement: <Component />
             if let Some(element) = HtmlSelfClosingElement::cast_ref(&node) {
                 self.visit_html_self_closing_element(&element);
             }
