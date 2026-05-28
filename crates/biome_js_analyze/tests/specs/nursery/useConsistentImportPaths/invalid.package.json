@@ -1,0 +1,6 @@
+{
+	"imports": {
+		"#internal/*": "./src/internal/*"
+	}
+}
+
