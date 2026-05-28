@@ -1182,6 +1182,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_ts_ignore::NoTsIgnoreOptions>(),
     ));
     result.push((
+        "nursery",
+        "noTypeofUndefined",
+        TypeId::of::<biome_rule_options::no_typeof_undefined::NoTypeofUndefinedOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noUnassignedVariables",
         TypeId::of::<biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions>(),

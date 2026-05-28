@@ -1,0 +1,514 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import imported from "foo";
+let blockChecked;
+let commentChecked;
+
+typeof a.b === "undefined";
+typeof a.b !== "undefined";
+typeof a.b == "undefined";
+typeof a.b != 'undefined';
+typeof /* block comment */ blockChecked === "undefined";
+typeof // line comment
+	commentChecked === "undefined";
+
+let foo;
+typeof foo === "undefined";
+
+const bar = 1;
+typeof bar === "undefined";
+
+var baz;
+typeof baz === "undefined";
+
+for (const item of list) typeof item === "undefined";
+
+function outer(param, { nested }, [first]) {
+	typeof param === "undefined";
+	typeof nested === "undefined";
+	typeof first === "undefined";
+}
+
+function named() {
+	typeof named === "undefined";
+}
+
+typeof imported.value === "undefined";
+
+function parse(value) {
+	switch (typeof value === 'undefined') {}
+}
+
+function keepReturnComment(value) {
+	return typeof // comment
+		value === 'undefined';
+}
+
+foo
+typeof [] === "undefined";
+
+```
+
+# Diagnostics
+```
+invalid.js:6:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    4 │ let commentChecked;
+    5 │ 
+  > 6 │ typeof a.b === "undefined";
+      │ ^^^^^^^^^^
+    7 │ typeof a.b !== "undefined";
+    8 │ typeof a.b == "undefined";
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    6 │ typeof·a.b·===·"undefined";
+      │ -------        -         - 
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    6 │ typeof a.b === "undefined";
+  > 7 │ typeof a.b !== "undefined";
+      │ ^^^^^^^^^^
+    8 │ typeof a.b == "undefined";
+    9 │ typeof a.b != 'undefined';
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    7 │ typeof·a.b·!==·"undefined";
+      │ -------        -         - 
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+     6 │ typeof a.b === "undefined";
+     7 │ typeof a.b !== "undefined";
+   > 8 │ typeof a.b == "undefined";
+       │ ^^^^^^^^^^
+     9 │ typeof a.b != 'undefined';
+    10 │ typeof /* block comment */ blockChecked === "undefined";
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+     6  6 │   typeof a.b === "undefined";
+     7  7 │   typeof a.b !== "undefined";
+     8    │ - typeof·a.b·==·"undefined";
+        8 │ + a.b·===·undefined;
+     9  9 │   typeof a.b != 'undefined';
+    10 10 │   typeof /* block comment */ blockChecked === "undefined";
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+     7 │ typeof a.b !== "undefined";
+     8 │ typeof a.b == "undefined";
+   > 9 │ typeof a.b != 'undefined';
+       │ ^^^^^^^^^^
+    10 │ typeof /* block comment */ blockChecked === "undefined";
+    11 │ typeof // line comment
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+     7  7 │   typeof a.b !== "undefined";
+     8  8 │   typeof a.b == "undefined";
+     9    │ - typeof·a.b·!=·'undefined';
+        9 │ + a.b·!==·undefined;
+    10 10 │   typeof /* block comment */ blockChecked === "undefined";
+    11 11 │   typeof // line comment
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+     8 │ typeof a.b == "undefined";
+     9 │ typeof a.b != 'undefined';
+  > 10 │ typeof /* block comment */ blockChecked === "undefined";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ typeof // line comment
+    12 │ 	commentChecked === "undefined";
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+     8  8 │   typeof a.b == "undefined";
+     9  9 │   typeof a.b != 'undefined';
+    10    │ - typeof·/*·block·comment·*/·blockChecked·===·"undefined";
+       10 │ + (/*·block·comment·*/·blockChecked·)·===·undefined;
+    11 11 │   typeof // line comment
+    12 12 │   	commentChecked === "undefined";
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+     9 │ typeof a.b != 'undefined';
+    10 │ typeof /* block comment */ blockChecked === "undefined";
+  > 11 │ typeof // line comment
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ 	commentChecked === "undefined";
+       │ 	^^^^^^^^^^^^^^
+    13 │ 
+    14 │ let foo;
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+     9  9 │   typeof a.b != 'undefined';
+    10 10 │   typeof /* block comment */ blockChecked === "undefined";
+    11    │ - typeof·//·line·comment
+    12    │ - → commentChecked·===·"undefined";
+       11 │ + (//·line·comment
+       12 │ + → commentChecked·)·===·undefined;
+    13 13 │   
+    14 14 │   let foo;
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    14 │ let foo;
+  > 15 │ typeof foo === "undefined";
+       │ ^^^^^^^^^^
+    16 │ 
+    17 │ const bar = 1;
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    15 │ typeof·foo·===·"undefined";
+       │ -------        -         - 
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    17 │ const bar = 1;
+  > 18 │ typeof bar === "undefined";
+       │ ^^^^^^^^^^
+    19 │ 
+    20 │ var baz;
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    18 │ typeof·bar·===·"undefined";
+       │ -------        -         - 
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    20 │ var baz;
+  > 21 │ typeof baz === "undefined";
+       │ ^^^^^^^^^^
+    22 │ 
+    23 │ for (const item of list) typeof item === "undefined";
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    21 │ typeof·baz·===·"undefined";
+       │ -------        -         - 
+
+```
+
+```
+invalid.js:23:26 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    21 │ typeof baz === "undefined";
+    22 │ 
+  > 23 │ for (const item of list) typeof item === "undefined";
+       │                          ^^^^^^^^^^^
+    24 │ 
+    25 │ function outer(param, { nested }, [first]) {
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    23 │ for·(const·item·of·list)·typeof·item·===·"undefined";
+       │                          -------         -         - 
+
+```
+
+```
+invalid.js:26:2 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    25 │ function outer(param, { nested }, [first]) {
+  > 26 │ 	typeof param === "undefined";
+       │ 	^^^^^^^^^^^^
+    27 │ 	typeof nested === "undefined";
+    28 │ 	typeof first === "undefined";
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    26 │ → typeof·param·===·"undefined";
+       │   -------          -         - 
+
+```
+
+```
+invalid.js:27:2 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    25 │ function outer(param, { nested }, [first]) {
+    26 │ 	typeof param === "undefined";
+  > 27 │ 	typeof nested === "undefined";
+       │ 	^^^^^^^^^^^^^
+    28 │ 	typeof first === "undefined";
+    29 │ }
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    27 │ → typeof·nested·===·"undefined";
+       │   -------           -         - 
+
+```
+
+```
+invalid.js:28:2 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    26 │ 	typeof param === "undefined";
+    27 │ 	typeof nested === "undefined";
+  > 28 │ 	typeof first === "undefined";
+       │ 	^^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    28 │ → typeof·first·===·"undefined";
+       │   -------          -         - 
+
+```
+
+```
+invalid.js:32:2 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    31 │ function named() {
+  > 32 │ 	typeof named === "undefined";
+       │ 	^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    32 │ → typeof·named·===·"undefined";
+       │   -------          -         - 
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    33 │ }
+    34 │ 
+  > 35 │ typeof imported.value === "undefined";
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ function parse(value) {
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    35 │ typeof·imported.value·===·"undefined";
+       │ -------                   -         - 
+
+```
+
+```
+invalid.js:38:10 lint/nursery/noTypeofUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    37 │ function parse(value) {
+  > 38 │ 	switch (typeof value === 'undefined') {}
+       │ 	        ^^^^^^^^^^^^
+    39 │ }
+    40 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare with undefined directly.
+  
+    38 │ → switch·(typeof·value·===·'undefined')·{}
+       │           -------          -         -    
+
+```
+
+```
+invalid.js:42:9 lint/nursery/noTypeofUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    41 │ function keepReturnComment(value) {
+  > 42 │ 	return typeof // comment
+       │ 	       ^^^^^^^^^^^^^^^^^
+  > 43 │ 		value === 'undefined';
+       │ 		^^^^^
+    44 │ }
+    45 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/noTypeofUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare with undefined directly instead of using typeof.
+  
+    46 │ foo
+  > 47 │ typeof [] === "undefined";
+       │ ^^^^^^^^^
+    48 │ 
+  
+  i Direct comparison is shorter and clearer when the value is a local binding or property access.
+  
+  i Replace the comparison with === undefined or !== undefined.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

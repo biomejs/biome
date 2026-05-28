@@ -289,11 +289,53 @@ impl Rule for UseMyRuleName {
 
 **Step 4.** Run codegen: `just gen-rules && just gen-configuration`
 
+**Step 5.** Document each option in the rule rustdoc using Biome's expected structure:
+
+- Start with the option header, for example `### checkSomething`
+- Follow with a short description and the default value
+- Add a single `json,options` block showing how to enable or configure the option
+- Then add `#### Valid` and `#### Invalid` subsections for that option
+- Put only code examples in those `Valid` / `Invalid` sections; do not repeat config blocks there
+- If the examples rely on the option's config, mark them with `use_options`
+
+Use this shape:
+
+```rust
+/// ## Options
+///
+/// ### checkSomething
+///
+/// Explain what the option changes and why it exists.
+///
+/// Default: `false`.
+///
+/// ```json,options
+/// {
+///   "options": {
+///     "checkSomething": true
+///   }
+/// }
+/// ```
+///
+/// #### Valid
+///
+/// ```js,use_options
+/// someAllowedCase();
+/// ```
+///
+/// #### Invalid
+///
+/// ```js,use_options,expect_diagnostic
+/// someDisallowedCase();
+/// ```
+```
+
 **Key rules:**
 - All fields must be `Option<T>` for config merging to work
 - Use `Box<[Box<str>]>` instead of `Vec<String>` for collection fields
 - Use `#[derive(Merge)]` for simple cases, implement `Merge` manually for collections
 - Only add options when truly needed (conflicting community preferences, multiple valid interpretations)
+- Run `just lint-rules` after editing option docs so the examples are verified against the rule behavior
 
 ## Tips
 
