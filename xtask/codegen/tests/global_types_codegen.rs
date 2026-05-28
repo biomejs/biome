@@ -62,7 +62,7 @@ const EXPECTED_INVALID_LIB_ENTRY_FILENAME: &str = "libEntries filename";
 const EXPECTED_PINNED_SOURCE_PARSER_DIAGNOSTIC: &str = "parser diagnostics";
 
 /// Error text expected when a triple-slash path reference resolves to bytes not tracked by git.
-const EXPECTED_UNTRACKED_REFERENCE: &str = "not a tracked regular file";
+const EXPECTED_UNTRACKED_REFERENCE: &str = "missing object";
 
 const SINGLE_LIB_ENTRY: &str = "    [\"es5\", \"lib.es5.d.ts\"],\n";
 

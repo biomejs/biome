@@ -101,15 +101,6 @@ const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 1024;
 /// SHA-256 is 32 bytes; hex-encoded that is 64 characters.
 const SHA256_HEX_LENGTH: usize = 64;
 
-/// `git ls-files --stage` mode for a tracked regular file (`-rw-r--r--`).
-const GIT_REGULAR_FILE_MODE: &str = "100644";
-
-/// `git ls-files --stage` mode for a tracked executable regular file (`-rwxr-xr-x`).
-const GIT_EXECUTABLE_FILE_MODE: &str = "100755";
-
-/// Width of the mode prefix in a `git ls-files --stage` entry; both mode constants are 6 bytes.
-const GIT_FILE_MODE_LENGTH: usize = 6;
-
 /// Maximum number of polls when contending for the acquire lock.
 ///
 /// Combined with [`ACQUIRE_LOCK_POLL_INTERVAL_MS`] this bounds the wait at roughly
@@ -1819,7 +1810,6 @@ fn validate_reference_source_file(
 ) -> anyhow::Result<TrackedSourceFile> {
     validate_forward_slash_relative_path(root, relative)?;
     validate_no_symlink_components(root, relative)?;
-    validate_tracked_regular_file(root, relative)?;
 
     let candidate = forward_slash_relative_path(root, relative);
     let path = canonicalize_within(root, &candidate)?;
@@ -1878,39 +1868,6 @@ fn validate_no_symlink_components(root: &Path, relative: &str) -> anyhow::Result
                 path.display()
             );
         }
-    }
-
-    Ok(())
-}
-
-/// Bails unless `git ls-files --stage --error-unmatch` reports `relative` as a
-/// tracked regular file with mode 100644 or 100755.
-fn validate_tracked_regular_file(root: &Path, relative: &str) -> anyhow::Result<()> {
-    let literal_pathspec = format!(":(literal){relative}");
-    let mut ls_files = new_git_command();
-    ls_files
-        .arg("-C")
-        .arg(root)
-        .args(["ls-files", "--stage", "-z", "--error-unmatch", "--"])
-        .arg(literal_pathspec);
-    let stdout = command_stdout(&mut ls_files, "git ls-files --stage --error-unmatch")?;
-    let Some(entry) = stdout.strip_suffix('\0') else {
-        bail!(
-            "git did not report a tracked entry for {}",
-            forward_slash_relative_path(root, relative).display()
-        );
-    };
-    let Some((metadata, reported_path)) = entry.split_once('\t') else {
-        bail!("git reported malformed ls-files entry for {relative:?}: {entry:?}");
-    };
-    let Some(mode) = metadata.get(..GIT_FILE_MODE_LENGTH) else {
-        bail!("git reported truncated ls-files mode for {relative:?}: {entry:?}");
-    };
-    if mode != GIT_REGULAR_FILE_MODE && mode != GIT_EXECUTABLE_FILE_MODE {
-        bail!("git reports {relative:?} as non-regular mode {mode:?}");
-    }
-    if reported_path != relative {
-        bail!("git reported tracked path {reported_path:?}, expected {relative:?}");
     }
 
     Ok(())
