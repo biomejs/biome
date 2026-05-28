@@ -27,6 +27,14 @@ impl EmbeddedValueReferences {
             .any(|(_, token)| token.text() == identifier)
     }
 
+    /// Check if an identifier is used only as a type in any tracked non-source snippet.
+    pub(crate) fn is_used_as_type(&self, identifier: &str) -> bool {
+        self.types
+            .iter()
+            .flatten()
+            .any(|(_, token)| token.text() == identifier)
+    }
+
     /// Check if an identifier is referenced as value or type in any
     /// tracked non-source snippet.
     pub(crate) fn is_used(&self, identifier: &str) -> bool {

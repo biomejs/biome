@@ -825,24 +825,32 @@ fn is_only_used_as_type(
     binding: &JsIdentifierBinding,
     references: &EmbeddedValueReferences,
 ) -> bool {
-    // First check if the binding is used as a value in embedded non-source snippets (templates)
-    if let Ok(name_token) = binding.name_token()
-        && references.is_used_as_value(name_token.text_trimmed())
-    {
+    let name = binding.name_token().ok();
+    let name_str = name.as_ref().map(|t| t.text_trimmed());
+
+    // Used as a value in the template → not type-only.
+    if name_str.is_some_and(|n| references.is_used_as_value(n)) {
         return false;
     }
 
-    // Then check semantic model for type-only usage
-    let mut result = false;
+    let mut has_reference = false;
+    let mut all_type_only = true;
     for reference in binding.all_references(model) {
+        has_reference = true;
         if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax()) {
-            result = reference.is_only_type();
-            if !result {
+            if !reference.is_only_type() {
+                all_type_only = false;
                 break;
             }
         }
     }
-    result
+
+    if has_reference {
+        return all_type_only;
+    }
+
+    // No script references: type-only if the template uses it as a type.
+    name_str.is_some_and(|n| references.is_used_as_type(n))
 }
 
 #[derive(Debug)]
