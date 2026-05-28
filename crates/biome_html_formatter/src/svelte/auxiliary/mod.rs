@@ -39,6 +39,7 @@ pub(crate) mod member_property;
 pub(crate) mod name;
 pub(crate) mod out_directive;
 pub(crate) mod render_block;
+pub(crate) mod rename_binding;
 pub(crate) mod rest_binding;
 pub(crate) mod snippet_block;
 pub(crate) mod snippet_closing_block;

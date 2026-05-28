@@ -311,6 +311,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteRestBinding::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_RENAME_BINDING => {
+                    let $pattern = unsafe { $crate::SvelteRenameBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_SNIPPET_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteSnippetBlock::new_unchecked(node) };
                     $body

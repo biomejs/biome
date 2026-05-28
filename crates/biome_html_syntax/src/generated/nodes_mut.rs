@@ -1437,6 +1437,26 @@ impl SvelteRestBinding {
         )
     }
 }
+impl SvelteRenameBinding {
+    pub fn with_key(self, element: SvelteName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: SvelteName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl SvelteSnippetBlock {
     pub fn with_opening_block(self, element: SvelteSnippetOpeningBlock) -> Self {
         Self::unwrap_cast(

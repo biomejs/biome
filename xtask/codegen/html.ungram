@@ -416,11 +416,19 @@ AnySvelteBindingAssignmentBinding =
 	SvelteName
 	| AnySvelteDestructuredName
 	| SvelteRestBinding
+	| SvelteRenameBinding
 
 /// { ...rest }
 ///   ^^^^^^^
 SvelteRestBinding =
  '...'
+ name: SvelteName
+
+/// { component: Filter }
+///   ^^^^^^^^^^^^^^^^^^
+SvelteRenameBinding =
+ key: SvelteName
+ ':'
  name: SvelteName
 
 // {#each items, index} ... {/each}

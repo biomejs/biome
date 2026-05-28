@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: svelte/each_with_rename_binding.svelte
+---
+
+# Input
+
+```svelte
+{#each activeFilters as { id, component: Filter } (id)}
+  <Filter />
+{/each}
+
+{#each list as { foo: bar, baz: qux }}
+  <p>{bar} {qux}</p>
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#each activeFilters as { id, component: Filter } (id)}
+	<Filter />
+{/each}
+
+{#each list as { foo: bar, baz: qux }}
+	<p>{bar} {qux}</p>
+{/each}
+
+```

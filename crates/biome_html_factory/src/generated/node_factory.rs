@@ -1240,6 +1240,20 @@ pub fn svelte_rest_binding(dotdotdot_token: SyntaxToken, name: SvelteName) -> Sv
         ],
     ))
 }
+pub fn svelte_rename_binding(
+    key: SvelteName,
+    colon_token: SyntaxToken,
+    name: SvelteName,
+) -> SvelteRenameBinding {
+    SvelteRenameBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_RENAME_BINDING,
+        [
+            Some(SyntaxElement::Node(key.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_snippet_block(
     opening_block: SvelteSnippetOpeningBlock,
     closing_block: SvelteSnippetClosingBlock,
