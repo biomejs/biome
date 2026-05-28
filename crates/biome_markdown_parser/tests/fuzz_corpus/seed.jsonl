@@ -140,3 +140,6 @@
 {"markdown":"[ref]: /url\n1. item\n","html":"<ol>\n<li>item</li>\n</ol>\n"}
 {"markdown":"> a\n  2. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"2\">\n<li>item</li>\n</ol>\n"}
 {"markdown":"> a\n  10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"- ```\n- x\n- ```\n","html":"<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n"}
+{"markdown":"> - ```\n> - x\n> - ```\n","html":"<blockquote>\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"- a\n  - ```\n  - x\n  - ```\n","html":"<ul>\n<li>a\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</li>\n</ul>\n"}

@@ -140,7 +140,7 @@ schema       = [
   "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
-  "lang_grit",
+  "lang_grit"
 ]
 
 [lints]

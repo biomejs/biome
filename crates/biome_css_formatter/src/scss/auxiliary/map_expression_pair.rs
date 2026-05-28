@@ -1,13 +1,13 @@
 use crate::prelude::*;
-use crate::utils::comment_trivia::format_leading_comments_with_soft_lines;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
+    CssLanguage,
     CssSyntaxKind::{SCSS_EACH_AT_RULE, SCSS_FOR_AT_RULE, SCSS_IF_AT_RULE, SCSS_WHILE_AT_RULE},
     ScssMapExpressionPair, ScssMapExpressionPairFields, ScssVariableDeclaration,
     is_in_scss_include_arguments,
 };
-use biome_formatter::comments::CommentKind;
+use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 
@@ -20,12 +20,13 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
                 self.fmt_node_with_scss_separator_comments(node, f)
             }
             ScssMapPairLeadingCommentLayout::GroupWithPair => {
+                // Keep `/* c */ key: value` inside the pair group when it fits.
                 write!(
                     f,
-                    [group(&format_args![
-                        format_leading_comments_with_soft_lines(node.syntax()),
-                        format_with(|f| self.fmt_fields(node, f))
-                    ])]
+                    [group(
+                        &format_leading_comments(node.syntax())
+                            .with_following_content(|f| self.fmt_fields(node, f))
+                    )]
                 )
             }
             ScssMapPairLeadingCommentLayout::Default => self.fmt_fields(node, f),
@@ -68,7 +69,7 @@ impl ScssMapPairLeadingCommentLayout {
     fn for_pair(node: &ScssMapExpressionPair, f: &CssFormatter) -> Self {
         if is_in_scss_include_arguments(node.syntax()) {
             Self::Separator
-        } else if should_group_leading_block_comments_with_pair(node, f) {
+        } else if should_group_leading_comments_with_pair(node, f) {
             Self::GroupWithPair
         } else {
             Self::Default
@@ -152,22 +153,16 @@ impl FormatScssMapPairLayout<'_> {
     }
 }
 
-/// Returns `true` for `/* comment */ key: value`.
+/// Returns `true` for `// comment\nkey: value` and `/* comment */ key: value`.
 ///
 /// The comment joins the pair group, so long comments break before `key`.
-fn should_group_leading_block_comments_with_pair(
-    node: &ScssMapExpressionPair,
-    f: &CssFormatter,
-) -> bool {
+fn should_group_leading_comments_with_pair(node: &ScssMapExpressionPair, f: &CssFormatter) -> bool {
     let leading_comments = f.comments().leading_comments(node.syntax());
 
     if leading_comments.is_empty()
-        || !leading_comments.iter().all(|comment| {
-            matches!(
-                comment.kind(),
-                CommentKind::Block | CommentKind::InlineBlock
-            ) && comment.lines_after() <= 1
-        })
+        || !leading_comments
+            .iter()
+            .all(is_map_pair_group_leading_comment)
     {
         return false;
     }
@@ -181,6 +176,13 @@ fn should_group_leading_block_comments_with_pair(
     }
 
     true
+}
+
+fn is_map_pair_group_leading_comment(comment: &SourceComment<CssLanguage>) -> bool {
+    match comment.kind() {
+        CommentKind::Line => true,
+        CommentKind::Block | CommentKind::InlineBlock => comment.lines_after() <= 1,
+    }
 }
 
 /// Returns `true` for map pairs in control variable maps.

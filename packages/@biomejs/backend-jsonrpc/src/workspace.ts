@@ -69,6 +69,10 @@ export interface Configuration {
 	 */
 	overrides?: Overrides;
 	/**
+	 * List of plugins to load.
+	 */
+	plugins?: Plugins;
+	/**
 	* Indicates whether this configuration file is at the root of a Biome
 project. By default, this is `true`. 
 	 */
@@ -358,6 +362,7 @@ match these patterns.
 	rules?: Rules;
 }
 export type Overrides = OverridePattern[];
+export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
 /**
  * Set of properties to integrate Biome with a VCS software.
@@ -968,7 +973,12 @@ match these patterns.
 	 * Specific configuration for the Json language
 	 */
 	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for additional plugins
+	 */
+	plugins?: Plugins;
 }
+export type PluginConfiguration = string;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
