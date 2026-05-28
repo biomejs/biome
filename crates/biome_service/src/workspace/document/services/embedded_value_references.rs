@@ -11,14 +11,14 @@ use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
     /// Identifiers referenced as values.
-    pub references: Vec<Vec<(TextRange, TokenText)>>,
+    pub value_references: Vec<Vec<(TextRange, TokenText)>>,
     /// Identifiers referenced only in type position (e.g. `icon: IconType`). Constructs that create a type and a value e.g. `class` aren't tracked.
     pub type_references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedValueReferencesBuilder {
-    references: Vec<(TextRange, TokenText)>,
+    value_references: Vec<(TextRange, TokenText)>,
     type_references: Vec<(TextRange, TokenText)>,
 }
 
@@ -28,7 +28,7 @@ impl EmbeddedValueReferences {
     }
 
     pub(crate) fn finish(&mut self, builder: EmbeddedValueReferencesBuilder) {
-        self.references.push(builder.references);
+        self.value_references.push(builder.value_references);
         self.type_references.push(builder.type_references);
     }
 }
@@ -36,13 +36,13 @@ impl EmbeddedValueReferences {
 impl EmbeddedValueReferencesBuilder {
     fn new() -> Self {
         Self {
-            references: Vec::default(),
+            value_references: Vec::default(),
             type_references: Vec::default(),
         }
     }
 
     pub(crate) fn register_reference(&mut self, range: TextRange, text: TokenText) {
-        self.references.push((range, text));
+        self.value_references.push((range, text));
     }
 
     pub(crate) fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
@@ -69,10 +69,16 @@ impl EmbeddedValueReferencesBuilder {
         }
     }
 
-    /// Tracks identifiers referenced from the template that the JS semantic
-    /// model of the `<script>` block can't see: component names (`<Button />`)
-    /// and, for Svelte, directive names (`use:action`). Interpolations are
-    /// parsed as snippets earlier and reach us via [`Self::visit_non_source_snippet`].
+    /// Visit an HTML root to track component element names as value references.
+    ///
+    /// Extracts component names from Vue/Svelte/Astro templates:
+    /// - `<Component />` → tracks `Component`
+    /// - `<AvatarPrimitive.Fallback>` → tracks `AvatarPrimitive`
+    ///
+    /// When `file_source` is Svelte, also extracts references from directive
+    /// names (`use:action`, `transition:fade`, `bind:open` shorthand).
+    /// Interpolations inside attribute strings are parsed earlier as snippets
+    /// and reach us via [`Self::visit_non_source_snippet`].
     pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
         let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
@@ -248,7 +254,7 @@ mod tests {
     }
 
     fn contains_reference(service: &EmbeddedValueReferences, reference: &str) -> bool {
-        for refs in service.references.iter() {
+        for refs in service.value_references.iter() {
             if refs.iter().any(|(_, token)| {
                 let text = token.text();
                 text == reference
@@ -334,7 +340,7 @@ mod tests {
         service.finish(builder);
 
         let in_value = service
-            .references
+            .value_references
             .iter()
             .any(|r| r.iter().any(|(_, t)| t.text() == "IconType"));
         let in_type = service
@@ -363,5 +369,39 @@ mod tests {
         assert!(contains_reference(&service, "fade"));
         assert!(contains_reference(&service, "fly"));
         assert!(contains_reference(&service, "flip"));
+    }
+
+    #[test]
+    fn extracts_svelte_bind_shorthand() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        // `bind:open` without `={...}` is shorthand for `bind:open={open}` — the
+        // local variable `open` must be tracked as a value reference.
+        let source = r#"<Modal bind:open />"#;
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
+        service.finish(builder);
+
+        assert!(contains_reference(&service, "open"));
+    }
+
+    #[test]
+    fn ignores_svelte_bind_with_initializer() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        // `bind:value={expr}` has an explicit initializer; the directive name
+        // itself is not a variable reference (the expression is handled separately).
+        let source = r#"<input bind:value={myVal} />"#;
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
+        service.finish(builder);
+
+        assert!(!contains_reference(&service, "value"));
     }
 }

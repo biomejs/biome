@@ -988,7 +988,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     }
 
     if let Some(value_refs) = params.document_services.embedded_value_references() {
-        services.set_embedded_value_references(value_refs.references);
+        services.set_embedded_value_references(value_refs.value_references);
         services.set_embedded_type_references(value_refs.type_references);
     }
     let (_, analyze_diagnostics) = analyze(
@@ -1176,7 +1176,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             }
 
             if let Some(value_refs) = params.document_services.embedded_value_references() {
-                services.set_embedded_value_references(value_refs.references);
+                services.set_embedded_value_references(value_refs.value_references);
                 services.set_embedded_type_references(value_refs.type_references);
             }
 
@@ -1243,7 +1243,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
-            services.set_embedded_value_references(value_refs.references);
+            services.set_embedded_value_references(value_refs.value_references);
             services.set_embedded_type_references(value_refs.type_references);
         }
 
@@ -1284,7 +1284,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
-            services.set_embedded_value_references(value_refs.references);
+            services.set_embedded_value_references(value_refs.value_references);
             services.set_embedded_type_references(value_refs.type_references);
         }
 
