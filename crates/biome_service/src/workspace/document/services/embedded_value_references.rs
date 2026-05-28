@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 pub struct EmbeddedValueReferences {
     /// Identifiers referenced as values.
     pub references: Vec<Vec<(TextRange, TokenText)>>,
-    /// Identifiers referenced only in type position (e.g. `icon: IconType`).
+    /// Identifiers referenced only in type position (e.g. `icon: IconType`). Constructs that create a type and a value e.g. `class` aren't tracked.
     pub type_references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
