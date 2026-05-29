@@ -1,20 +1,20 @@
 [package]
-name = "biome_module_replacements"
-version = "0.5.7"
-authors.workspace = true
-edition.workspace = true
-description = "Data for e18e's module replacements"
-homepage.workspace = true
+name                 = "biome_module_replacements"
+version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Data for e18e's module replacements"
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
-publish = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lints]
-workspace = true
-
 [dependencies]
 phf = { workspace = true }
+
+[lints]
+workspace = true
