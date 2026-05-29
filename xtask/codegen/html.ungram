@@ -208,6 +208,7 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlAttributeSingleTextExpression
+	| SvelteInterpolatedString
 	| VueVForValue
 
 
@@ -226,6 +227,22 @@ HtmlAttributeSingleTextExpression =
 	'{'
 	expression: HtmlTextExpression
 	'}'
+
+// A quoted attribute value that mixes literal text with one or more Svelte
+// `{expression}` interpolations, e.g. `style="top: {top}px"` or `class="card {cls}"`.
+// The literal segments (including the surrounding quotes) are kept as chunks so
+// the original text round-trips, and each interpolation reuses
+// `HtmlAttributeSingleTextExpression`.
+SvelteInterpolatedString =
+	parts: SvelteInterpolatedStringPartList
+
+SvelteInterpolatedStringPartList = AnySvelteInterpolatedStringPart*
+
+AnySvelteInterpolatedStringPart =
+	SvelteInterpolatedStringChunk
+	| HtmlAttributeSingleTextExpression
+
+SvelteInterpolatedStringChunk = 'html_string_literal'
 
 // ==================================
 // Svelte

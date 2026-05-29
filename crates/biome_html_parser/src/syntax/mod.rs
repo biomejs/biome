@@ -642,6 +642,66 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
+/// Parses a Svelte attribute value that mixes literal text and `{expression}`
+/// interpolations, e.g. `style="top: {top}px"`.
+///
+/// On entry the current token is the whole `html_string_literal` value (quotes
+/// included). It is re-lexed into a sequence of literal chunks (each keeping its
+/// surrounding quote) and interpolations, which reuse the regular single text
+/// expression machinery so the embedded expressions are tracked like any other.
+fn parse_svelte_interpolated_string(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_STRING_LITERAL) {
+        return Absent;
+    }
+    // The value starts with the quote character that also terminates it.
+    let Some(quote) = p
+        .cur_text()
+        .bytes()
+        .next()
+        .filter(|byte| matches!(byte, b'"' | b'\''))
+    else {
+        return parse_attribute_string_literal(p);
+    };
+    let chunk_context = HtmlLexContext::SvelteInterpolatedStringChunk { quote };
+
+    let m = p.start();
+    // Re-lex the whole value into its first chunk: the opening quote plus the text
+    // up to the first interpolation.
+    p.re_lex(HtmlReLexContext::SvelteInterpolatedString);
+
+    let parts = p.start();
+    let mut first = true;
+    loop {
+        if p.at(HTML_STRING_LITERAL) {
+            // A literal chunk. The first chunk always precedes an interpolation; any
+            // later chunk that ends with the quote closes the value.
+            let ends_value = !first && p.cur_text().as_bytes().last() == Some(&quote);
+            let chunk = p.start();
+            let next_context = if ends_value {
+                inside_tag_context(p)
+            } else {
+                chunk_context
+            };
+            p.bump_with_context(HTML_STRING_LITERAL, next_context);
+            chunk.complete(p, SVELTE_INTERPOLATED_STRING_CHUNK);
+            first = false;
+            if ends_value {
+                break;
+            }
+        } else if p.at(T!['{']) {
+            if parse_single_text_expression(p, chunk_context).is_absent() {
+                break;
+            }
+            first = false;
+        } else {
+            break;
+        }
+    }
+    parts.complete(p, SVELTE_INTERPOLATED_STRING_PART_LIST);
+
+    Present(m.complete(p, SVELTE_INTERPOLATED_STRING))
+}
+
 fn parse_attribute_initializer(
     p: &mut HtmlParser,
     context: AttrInitializerContext,
@@ -699,6 +759,8 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
+    } else if Svelte.is_supported(p) && p.at(HTML_STRING_LITERAL) && p.cur_text().contains('{') {
+        parse_svelte_interpolated_string(p).or_add_diagnostic(p, expected_initializer);
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
@@ -801,6 +863,10 @@ pub(crate) fn parse_single_text_expression(
             || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
             || context == HtmlLexContext::InsideTagAstro
             || context == HtmlLexContext::InsideTagSvelte
+            || matches!(
+                context,
+                HtmlLexContext::SvelteInterpolatedStringChunk { .. }
+            )
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {

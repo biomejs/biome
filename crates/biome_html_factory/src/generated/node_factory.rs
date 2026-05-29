@@ -1205,6 +1205,22 @@ pub fn svelte_in_directive(
         ],
     ))
 }
+pub fn svelte_interpolated_string(
+    parts: SvelteInterpolatedStringPartList,
+) -> SvelteInterpolatedString {
+    SvelteInterpolatedString::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING,
+        [Some(SyntaxElement::Node(parts.into_syntax()))],
+    ))
+}
+pub fn svelte_interpolated_string_chunk(
+    html_string_literal_token: SyntaxToken,
+) -> SvelteInterpolatedStringChunk {
+    SvelteInterpolatedStringChunk::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING_CHUNK,
+        [Some(SyntaxElement::Token(html_string_literal_token))],
+    ))
+}
 pub fn svelte_key_block(
     opening_block: SvelteKeyOpeningBlock,
     children: HtmlElementList,
@@ -1848,6 +1864,18 @@ where
 {
     SvelteElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_interpolated_string_part_list<I>(items: I) -> SvelteInterpolatedStringPartList
+where
+    I: IntoIterator<Item = AnySvelteInterpolatedStringPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteInterpolatedStringPartList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

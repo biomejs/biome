@@ -15,6 +15,9 @@ impl AnyHtmlAttributeInitializer {
                     .map(|token| inner_string_text(&token).into())
                     .unwrap_or_default(),
             ),
+            // A value mixing literal text and `{expression}` interpolations has no
+            // single static string value.
+            Self::SvelteInterpolatedString(_) => None,
             Self::VueVForValue(_) => None,
         }
     }
@@ -23,6 +26,7 @@ impl AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(_) => None,
             Self::HtmlString(value) => Some(StaticValue::String(value.value_token().ok()?)),
+            Self::SvelteInterpolatedString(_) => None,
             Self::VueVForValue(_) => None,
         }
     }

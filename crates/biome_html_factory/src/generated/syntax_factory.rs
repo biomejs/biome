@@ -2124,6 +2124,44 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_IN_DIRECTIVE, children)
             }
+            SVELTE_INTERPOLATED_STRING => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && SvelteInterpolatedStringPartList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_INTERPOLATED_STRING.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_INTERPOLATED_STRING, children)
+            }
+            SVELTE_INTERPOLATED_STRING_CHUNK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_INTERPOLATED_STRING_CHUNK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_INTERPOLATED_STRING_CHUNK, children)
+            }
             SVELTE_KEY_BLOCK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -3231,6 +3269,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             SVELTE_ELSE_IF_CLAUSE_LIST => {
                 Self::make_node_list_syntax(kind, children, SvelteElseIfClause::can_cast)
             }
+            SVELTE_INTERPOLATED_STRING_PART_LIST => Self::make_node_list_syntax(
+                kind,
+                children,
+                AnySvelteInterpolatedStringPart::can_cast,
+            ),
             VUE_MODIFIER_LIST => Self::make_node_list_syntax(kind, children, VueModifier::can_cast),
             VUE_V_FOR_BINDING_LIST => Self::make_separated_list_syntax(
                 kind,

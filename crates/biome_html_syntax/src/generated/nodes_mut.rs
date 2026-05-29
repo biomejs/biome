@@ -1281,6 +1281,22 @@ impl SvelteInDirective {
         )
     }
 }
+impl SvelteInterpolatedString {
+    pub fn with_parts(self, element: SvelteInterpolatedStringPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl SvelteInterpolatedStringChunk {
+    pub fn with_html_string_literal_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl SvelteKeyBlock {
     pub fn with_opening_block(self, element: SvelteKeyOpeningBlock) -> Self {
         Self::unwrap_cast(
