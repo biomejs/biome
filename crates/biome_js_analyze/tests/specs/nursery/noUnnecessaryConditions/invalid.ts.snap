@@ -160,6 +160,147 @@ if (ro) console.log();
 declare const partialObj2: Partial<{a: string}>;
 if (partialObj2) console.log();
 
+// Falsy detection via logical-not on always-truthy operand
+const arrNotFalsy = [];
+if (!arrNotFalsy) {  // always false, should be flagged
+  console.log("never runs");
+}
+
+const objNotFalsy = {};
+if (!objNotFalsy) {  // always false, should be flagged
+  console.log("never runs");
+}
+
+// Truthy detection via double-not or not-falsy literal
+if (!false) {  // always true, should be flagged
+  console.log("always runs");
+}
+
+if (!0) {  // always true, should be flagged
+  console.log("always runs");
+}
+
+// Type-aware logical OR on member access
+interface Config {
+  items: string[];
+  name: string;
+  getCount(): number;
+}
+
+function unnecessaryOrOnMember(cfg: Config) {
+  return cfg.items || [];  // cfg.items is string[], always truthy - unnecessary
+}
+
+// if-condition on always-truthy member (array is always truthy)
+function unnecessaryIfOnMember(cfg: Config) {
+  if (cfg.items) {  // cfg.items is string[], always truthy - flag
+    return cfg.items[0];
+  }
+}
+
+// x: string compared with null - always false
+function cmpNullWithString(x: string) {
+  return x === null;  // always false
+}
+
+// x: string compared with undefined - always false
+function cmpUndefinedWithString(x: string) {
+  return x !== undefined;  // always true
+}
+
+// Switch on literal union with a case outside the union - unreachable
+function switchOnUnionWithUnreachable(value: 'a' | 'b' | 'c') {
+  switch (value) {
+    case 'a': return 1;
+    case 'd': return 2;  // unreachable - 'd' is not in the union
+  }
+}
+
+// Switch on literal true with case false - unreachable
+function switchOnTrue() {
+  switch (true) {
+    case false: return 1;  // unreachable
+    case true: return 2;
+  }
+}
+
+// Switch on literal number with impossible case - unreachable
+function switchOnSpecificNumber(value: 1 | 2 | 3) {
+  switch (value) {
+    case 4: return 4;  // unreachable
+  }
+}
+
+// Unreachable `case` with non-decimal numeric literals (hex, binary, octal, separators).
+function switchOnNonDecimalLiterals(value: 1 | 2 | 3) {
+  switch (value) {
+    case 0xFF: return "hex";      // 255 - unreachable
+    case 0b1010: return "bin";    // 10 - unreachable
+    case 0o17: return "oct";      // 15 - unreachable
+    case 1_000: return "sep";     // 1000 - unreachable
+  }
+}
+
+// Double-not on always-truthy types - still flagged (recursion inverts twice)
+function doubleNotOnArray() {
+  const xs: number[] = [];
+  if (!!xs) {  // always true, should be flagged
+    return xs;
+  }
+}
+
+// && with always-truthy member access - flagged
+interface AlwaysItems {
+  items: string[];
+}
+function andOnAlwaysTruthy(cfg: AlwaysItems) {
+  return cfg.items && cfg.items[0];  // cfg.items is string[] always truthy, && is redundant
+}
+
+// Ternary with always-truthy member condition - flagged
+function ternaryOnAlwaysTruthy(cfg: AlwaysItems) {
+  return cfg.items ? "yes" : "no";  // always "yes"
+}
+
+// Optional chain on a non-nullish call result - flagged
+function callReturningNonNullish(): string {
+  return "x";
+}
+const callChain = callReturningNonNullish()?.length;
+
+// `??` on a guaranteed object - flagged
+interface Settings { theme: string }
+function readSettings(s: Settings) {
+  return s.theme ?? "light";
+}
+
+// `null` on the left-hand side of `===` against a non-nullish value - flagged
+function leftNullCmp(x: number) {
+  return null === x;
+}
+
+// `undefined` on the left-hand side of `!==` against a non-nullish value - flagged
+function leftUndefinedCmp(x: number) {
+  return undefined !== x;
+}
+
+// `!` applied to a non-nullish member access - flagged via type information
+interface NonEmpty { items: string[] }
+function notOnAlwaysTruthyMember(c: NonEmpty) {
+  if (!c.items) {
+    return "never";
+  }
+}
+
+// Switch with mixed reachable and unreachable cases
+function switchMixed(value: 'a' | 'b') {
+  switch (value) {
+    case 'a': return 1;     // reachable
+    case 'b': return 2;     // reachable
+    case 'z': return 3;     // unreachable
+  }
+}
+
 const date = new Date();
 if (date) console.log(date);
 
@@ -169,7 +310,7 @@ if (date) console.log(date);
 ```
 invalid.ts:5:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     3 │ // Unnecessary conditions on non-nullable arrays
     4 │ function head<T>(items: T[]) {
@@ -178,9 +319,7 @@ invalid.ts:5:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━�
     6 │     return items[0].toUpperCase();
     7 │   }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -192,7 +331,7 @@ invalid.ts:5:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━�
 ```
 invalid.ts:12:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     10 │ // Unnecessary condition on constrained string type
     11 │ function foo(arg: 'bar' | 'baz') {
@@ -201,9 +340,67 @@ invalid.ts:12:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     13 │   }
     14 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
+  i The value's type can never be falsy, so this check is redundant.
   
-  i Remove the condition.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    16 │ // Unnecessary optional chaining on non-nullable string
+    17 │ function bar(arg: string) {
+  > 18 │   return arg?.length;  // ?. is unnecessary
+       │          ^^^
+    19 │ }
+    20 │ 
+  
+  i Replace ?. with ..
+  
+    16 │ // Unnecessary optional chaining on non-nullable string
+    17 │ function bar(arg: string) {
+  > 18 │   return arg?.length;  // ?. is unnecessary
+       │             ^^
+    19 │ }
+    20 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    28 │ function processUser() {
+    29 │   const user = getUser();
+  > 30 │   return user?.name;  // ?. is unnecessary
+       │          ^^^^
+    31 │ }
+    32 │ 
+  
+  i Replace ?. with ..
+  
+    28 │ function processUser() {
+    29 │   const user = getUser();
+  > 30 │   return user?.name;  // ?. is unnecessary
+       │              ^^
+    31 │ }
+    32 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -215,7 +412,7 @@ invalid.ts:12:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:34:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     33 │ // Always truthy literal conditions
   > 34 │ if (true) {
@@ -223,9 +420,7 @@ invalid.ts:34:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     35 │   console.log("always runs");
     36 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -237,7 +432,7 @@ invalid.ts:34:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:38:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     36 │ }
     37 │ 
@@ -246,9 +441,7 @@ invalid.ts:38:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     39 │   console.log("always runs");
     40 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -260,7 +453,7 @@ invalid.ts:38:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:42:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     40 │ }
     41 │ 
@@ -269,9 +462,7 @@ invalid.ts:42:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     43 │   console.log("always runs");
     44 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -283,7 +474,7 @@ invalid.ts:42:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:46:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     44 │ }
     45 │ 
@@ -292,9 +483,7 @@ invalid.ts:46:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     47 │   console.log("always runs");
     48 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -306,7 +495,7 @@ invalid.ts:46:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:50:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     48 │ }
     49 │ 
@@ -315,9 +504,7 @@ invalid.ts:50:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     51 │   console.log("always runs");
     52 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -329,7 +516,7 @@ invalid.ts:50:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:55:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     54 │ // Always falsy literal conditions
   > 55 │ if (false) {
@@ -337,9 +524,7 @@ invalid.ts:55:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     56 │   console.log("never runs");
     57 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -351,7 +536,7 @@ invalid.ts:55:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:59:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     57 │ }
     58 │ 
@@ -360,9 +545,7 @@ invalid.ts:59:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     60 │   console.log("never runs");
     61 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -374,7 +557,7 @@ invalid.ts:59:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:63:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     61 │ }
     62 │ 
@@ -383,9 +566,7 @@ invalid.ts:63:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     64 │   console.log("never runs");
     65 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -397,7 +578,7 @@ invalid.ts:63:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:67:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     65 │ }
     66 │ 
@@ -406,9 +587,7 @@ invalid.ts:67:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     68 │   console.log("never runs");
     69 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -420,7 +599,7 @@ invalid.ts:67:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:71:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     69 │ }
     70 │ 
@@ -429,9 +608,65 @@ invalid.ts:71:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
     72 │   console.log("never runs");
     73 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
+  i The value's type can never be truthy, so this check is redundant.
   
-  i Remove the condition.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:77:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    75 │ // Unnecessary nullish coalescing with non-nullable types
+    76 │ function testNullish(str: string) {
+  > 77 │   return str ?? "default";  // ?? is unnecessary
+       │          ^^^
+    78 │ }
+    79 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    75 │ // Unnecessary nullish coalescing with non-nullable types
+    76 │ function testNullish(str: string) {
+  > 77 │   return str ?? "default";  // ?? is unnecessary
+       │              ^^
+    78 │ }
+    79 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:81:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    80 │ function testNullish2(num: number) {
+  > 81 │   return num ?? 0;  // ?? is unnecessary
+       │          ^^^
+    82 │ }
+    83 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    80 │ function testNullish2(num: number) {
+  > 81 │   return num ?? 0;  // ?? is unnecessary
+       │              ^^
+    82 │ }
+    83 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -443,7 +678,7 @@ invalid.ts:71:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━
 ```
 invalid.ts:86:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     84 │ // Unnecessary logical OR with always truthy left side
     85 │ function testOr(obj: object) {
@@ -452,9 +687,7 @@ invalid.ts:86:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     87 │ }
     88 │ 
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -466,7 +699,7 @@ invalid.ts:86:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:91:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     89 │ // Unnecessary logical AND short-circuiting
     90 │ function testAnd() {
@@ -475,9 +708,7 @@ invalid.ts:91:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     92 │ }
     93 │ 
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -489,7 +720,7 @@ invalid.ts:91:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:95:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     94 │ // Unnecessary ternary conditions
   > 95 │ const result1 = true ? "yes" : "no";  // Condition is always true
@@ -497,9 +728,7 @@ invalid.ts:95:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     96 │ const result2 = false ? "yes" : "no";  // Condition is always false
     97 │ 
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -511,7 +740,7 @@ invalid.ts:95:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:96:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     94 │ // Unnecessary ternary conditions
     95 │ const result1 = true ? "yes" : "no";  // Condition is always true
@@ -520,9 +749,7 @@ invalid.ts:96:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     97 │ 
     98 │ // Unnecessary comparisons with literals
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -534,7 +761,7 @@ invalid.ts:96:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:99:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This comparison will always have the same result.
+  ! This comparison always has the same result.
   
      98 │ // Unnecessary comparisons with literals
    > 99 │ const comp1 = true === true;  // Always true
@@ -542,9 +769,7 @@ invalid.ts:99:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     100 │ const comp2 = false === true;  // Always false
     101 │ const comp3 = 5 > 3;  // Always true
   
-  i Based on the types being compared, this condition is redundant.
-  
-  i Remove the comparison.
+  i The operands' types make the outcome statically known.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -556,7 +781,7 @@ invalid.ts:99:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:100:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This comparison will always have the same result.
+  ! This comparison always has the same result.
   
      98 │ // Unnecessary comparisons with literals
      99 │ const comp1 = true === true;  // Always true
@@ -565,9 +790,7 @@ invalid.ts:100:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     101 │ const comp3 = 5 > 3;  // Always true
     102 │ const comp4 = "a" === "b";  // Always false
   
-  i Based on the types being compared, this condition is redundant.
-  
-  i Remove the comparison.
+  i The operands' types make the outcome statically known.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -579,7 +802,7 @@ invalid.ts:100:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:101:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This comparison will always have the same result.
+  ! This comparison always has the same result.
   
      99 │ const comp1 = true === true;  // Always true
     100 │ const comp2 = false === true;  // Always false
@@ -588,9 +811,7 @@ invalid.ts:101:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     102 │ const comp4 = "a" === "b";  // Always false
     103 │ 
   
-  i Based on the types being compared, this condition is redundant.
-  
-  i Remove the comparison.
+  i The operands' types make the outcome statically known.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -602,7 +823,7 @@ invalid.ts:101:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:102:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This comparison will always have the same result.
+  ! This comparison always has the same result.
   
     100 │ const comp2 = false === true;  // Always false
     101 │ const comp3 = 5 > 3;  // Always true
@@ -611,9 +832,7 @@ invalid.ts:102:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     103 │ 
     104 │ // While loops with constant conditions
   
-  i Based on the types being compared, this condition is redundant.
-  
-  i Remove the comparison.
+  i The operands' types make the outcome statically known.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -625,7 +844,7 @@ invalid.ts:102:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:105:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     104 │ // While loops with constant conditions
   > 105 │ while (true) {
@@ -633,9 +852,7 @@ invalid.ts:105:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     106 │   console.log("infinite loop");
     107 │   break;
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -647,7 +864,7 @@ invalid.ts:105:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:110:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     108 │ }
     109 │ 
@@ -656,9 +873,7 @@ invalid.ts:110:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     111 │   console.log("never runs");
     112 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -670,7 +885,7 @@ invalid.ts:110:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:117:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     115 │ do {
     116 │   console.log("runs once");
@@ -679,9 +894,7 @@ invalid.ts:117:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     118 │ 
     119 │ // For loops with constant conditions
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -693,7 +906,7 @@ invalid.ts:117:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:120:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     119 │ // For loops with constant conditions
   > 120 │ for (; true;) {
@@ -701,9 +914,7 @@ invalid.ts:120:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     121 │   break;
     122 │ }
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -715,7 +926,7 @@ invalid.ts:120:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:124:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     122 │ }
     123 │ 
@@ -724,9 +935,67 @@ invalid.ts:124:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     125 │   console.log("never runs");
     126 │ }
   
-  i The type being checked can never be truthy, making this condition redundant.
+  i The value's type can never be truthy, so this check is redundant.
   
-  i Remove the condition.
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:130:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    128 │ // Unnecessary optional chaining on arrays
+    129 │ function testArray(arr: string[]) {
+  > 130 │   return arr?.[0];  // ?. is unnecessary
+        │          ^^^
+    131 │ }
+    132 │ 
+  
+  i Replace ?. with ..
+  
+    128 │ // Unnecessary optional chaining on arrays
+    129 │ function testArray(arr: string[]) {
+  > 130 │   return arr?.[0];  // ?. is unnecessary
+        │             ^^
+    131 │ }
+    132 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:135:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    133 │ // Unnecessary optional chaining on function calls
+    134 │ function testCall(fn: () => string) {
+  > 135 │   return fn?.();  // ?. is unnecessary
+        │          ^^
+    136 │ }
+    137 │ 
+  
+  i Replace ?. with ..
+  
+    133 │ // Unnecessary optional chaining on function calls
+    134 │ function testCall(fn: () => string) {
+  > 135 │   return fn?.();  // ?. is unnecessary
+        │            ^^
+    136 │ }
+    137 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -738,7 +1007,7 @@ invalid.ts:124:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:139:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     138 │ // Logical expressions with mixed literals
   > 139 │ const mixed1 = true || false;  // Left side makes right irrelevant
@@ -746,9 +1015,7 @@ invalid.ts:139:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     140 │ const mixed2 = false && true;  // Left side makes right irrelevant
     141 │ const mixed3 = null ?? "default";  // Left side is always nullish
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -760,7 +1027,7 @@ invalid.ts:139:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:140:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always falsy based on the type.
+  ! This condition is always falsy.
   
     138 │ // Logical expressions with mixed literals
     139 │ const mixed1 = true || false;  // Left side makes right irrelevant
@@ -769,9 +1036,7 @@ invalid.ts:140:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     141 │ const mixed3 = null ?? "default";  // Left side is always nullish
     142 │ 
   
-  i The type being checked can never be truthy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be truthy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -783,7 +1048,7 @@ invalid.ts:140:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Coalescing is unnecessary for this type.
+  ! Unnecessary nullish coalescing.
   
     139 │ const mixed1 = true || false;  // Left side makes right irrelevant
     140 │ const mixed2 = false && true;  // Left side makes right irrelevant
@@ -792,7 +1057,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     142 │ 
     143 │ // Always truthy Pick/Omit object
   
-  i This is a nullish coalescing operator, which is unnecessary.
+  i Drop ?? and the fallback expression.
   
     139 │ const mixed1 = true || false;  // Left side makes right irrelevant
     140 │ const mixed2 = false && true;  // Left side makes right irrelevant
@@ -801,7 +1066,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     142 │ 
     143 │ // Always truthy Pick/Omit object
   
-  i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -813,7 +1078,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:145:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     143 │ // Always truthy Pick/Omit object
     144 │ declare const pickedObj: Pick<{a: string}, "a">;
@@ -822,9 +1087,7 @@ invalid.ts:145:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     146 │ 
     147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -836,7 +1099,7 @@ invalid.ts:145:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:148:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
   > 148 │ if (omitObj) console.log();
@@ -844,9 +1107,7 @@ invalid.ts:148:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     149 │ 
     150 │ // Always truthy Readonly/Partial object
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -858,7 +1119,7 @@ invalid.ts:148:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:152:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     150 │ // Always truthy Readonly/Partial object
     151 │ declare const ro: Readonly<{a: string}>;
@@ -867,9 +1128,7 @@ invalid.ts:152:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
     153 │ 
     154 │ declare const partialObj2: Partial<{a: string}>;
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -881,17 +1140,15 @@ invalid.ts:152:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 invalid.ts:155:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always truthy.
   
     154 │ declare const partialObj2: Partial<{a: string}>;
   > 155 │ if (partialObj2) console.log();
         │     ^^^^^^^^^^^
     156 │ 
-    157 │ const date = new Date();
+    157 │ // Falsy detection via logical-not on always-truthy operand
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
@@ -901,18 +1158,535 @@ invalid.ts:155:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 
 ```
-invalid.ts:158:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:159:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This condition is always falsy.
   
-    157 │ const date = new Date();
-  > 158 │ if (date) console.log(date);
+    157 │ // Falsy detection via logical-not on always-truthy operand
+    158 │ const arrNotFalsy = [];
+  > 159 │ if (!arrNotFalsy) {  // always false, should be flagged
+        │     ^^^^^^^^^^^^
+    160 │   console.log("never runs");
+    161 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:164:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    163 │ const objNotFalsy = {};
+  > 164 │ if (!objNotFalsy) {  // always false, should be flagged
+        │     ^^^^^^^^^^^^
+    165 │   console.log("never runs");
+    166 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:169:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    168 │ // Truthy detection via double-not or not-falsy literal
+  > 169 │ if (!false) {  // always true, should be flagged
+        │     ^^^^^^
+    170 │   console.log("always runs");
+    171 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:173:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    171 │ }
+    172 │ 
+  > 173 │ if (!0) {  // always true, should be flagged
+        │     ^^
+    174 │   console.log("always runs");
+    175 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:185:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    184 │ function unnecessaryOrOnMember(cfg: Config) {
+  > 185 │   return cfg.items || [];  // cfg.items is string[], always truthy - unnecessary
+        │          ^^^^^^^^^
+    186 │ }
+    187 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:190:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    188 │ // if-condition on always-truthy member (array is always truthy)
+    189 │ function unnecessaryIfOnMember(cfg: Config) {
+  > 190 │   if (cfg.items) {  // cfg.items is string[], always truthy - flag
+        │       ^^^^^^^^^
+    191 │     return cfg.items[0];
+    192 │   }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:197:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    195 │ // x: string compared with null - always false
+    196 │ function cmpNullWithString(x: string) {
+  > 197 │   return x === null;  // always false
+        │          ^^^^^^^^^^
+    198 │ }
+    199 │ 
+  
+  i The operands' types make the outcome statically known.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:202:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    200 │ // x: string compared with undefined - always false
+    201 │ function cmpUndefinedWithString(x: string) {
+  > 202 │   return x !== undefined;  // always true
+        │          ^^^^^^^^^^^^^^^
+    203 │ }
+    204 │ 
+  
+  i The operands' types make the outcome statically known.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:209:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    207 │   switch (value) {
+    208 │     case 'a': return 1;
+  > 209 │     case 'd': return 2;  // unreachable - 'd' is not in the union
+        │          ^^^
+    210 │   }
+    211 │ }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:216:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    214 │ function switchOnTrue() {
+    215 │   switch (true) {
+  > 216 │     case false: return 1;  // unreachable
+        │          ^^^^^
+    217 │     case true: return 2;
+    218 │   }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:224:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    222 │ function switchOnSpecificNumber(value: 1 | 2 | 3) {
+    223 │   switch (value) {
+  > 224 │     case 4: return 4;  // unreachable
+        │          ^
+    225 │   }
+    226 │ }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:231:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    229 │ function switchOnNonDecimalLiterals(value: 1 | 2 | 3) {
+    230 │   switch (value) {
+  > 231 │     case 0xFF: return "hex";      // 255 - unreachable
+        │          ^^^^
+    232 │     case 0b1010: return "bin";    // 10 - unreachable
+    233 │     case 0o17: return "oct";      // 15 - unreachable
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:232:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    230 │   switch (value) {
+    231 │     case 0xFF: return "hex";      // 255 - unreachable
+  > 232 │     case 0b1010: return "bin";    // 10 - unreachable
+        │          ^^^^^^
+    233 │     case 0o17: return "oct";      // 15 - unreachable
+    234 │     case 1_000: return "sep";     // 1000 - unreachable
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:233:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    231 │     case 0xFF: return "hex";      // 255 - unreachable
+    232 │     case 0b1010: return "bin";    // 10 - unreachable
+  > 233 │     case 0o17: return "oct";      // 15 - unreachable
+        │          ^^^^
+    234 │     case 1_000: return "sep";     // 1000 - unreachable
+    235 │   }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:234:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    232 │     case 0b1010: return "bin";    // 10 - unreachable
+    233 │     case 0o17: return "oct";      // 15 - unreachable
+  > 234 │     case 1_000: return "sep";     // 1000 - unreachable
+        │          ^^^^^
+    235 │   }
+    236 │ }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:241:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    239 │ function doubleNotOnArray() {
+    240 │   const xs: number[] = [];
+  > 241 │   if (!!xs) {  // always true, should be flagged
+        │       ^^^^
+    242 │     return xs;
+    243 │   }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:251:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    249 │ }
+    250 │ function andOnAlwaysTruthy(cfg: AlwaysItems) {
+  > 251 │   return cfg.items && cfg.items[0];  // cfg.items is string[] always truthy, && is redundant
+        │          ^^^^^^^^^
+    252 │ }
+    253 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:256:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    254 │ // Ternary with always-truthy member condition - flagged
+    255 │ function ternaryOnAlwaysTruthy(cfg: AlwaysItems) {
+  > 256 │   return cfg.items ? "yes" : "no";  // always "yes"
+        │          ^^^^^^^^^
+    257 │ }
+    258 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:263:19 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    261 │   return "x";
+    262 │ }
+  > 263 │ const callChain = callReturningNonNullish()?.length;
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    264 │ 
+    265 │ // `??` on a guaranteed object - flagged
+  
+  i Replace ?. with ..
+  
+    261 │   return "x";
+    262 │ }
+  > 263 │ const callChain = callReturningNonNullish()?.length;
+        │                                            ^^
+    264 │ 
+    265 │ // `??` on a guaranteed object - flagged
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:268:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    266 │ interface Settings { theme: string }
+    267 │ function readSettings(s: Settings) {
+  > 268 │   return s.theme ?? "light";
+        │          ^^^^^^^
+    269 │ }
+    270 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    266 │ interface Settings { theme: string }
+    267 │ function readSettings(s: Settings) {
+  > 268 │   return s.theme ?? "light";
+        │                  ^^
+    269 │ }
+    270 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:273:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    271 │ // `null` on the left-hand side of `===` against a non-nullish value - flagged
+    272 │ function leftNullCmp(x: number) {
+  > 273 │   return null === x;
+        │          ^^^^^^^^^^
+    274 │ }
+    275 │ 
+  
+  i The operands' types make the outcome statically known.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:278:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison always has the same result.
+  
+    276 │ // `undefined` on the left-hand side of `!==` against a non-nullish value - flagged
+    277 │ function leftUndefinedCmp(x: number) {
+  > 278 │   return undefined !== x;
+        │          ^^^^^^^^^^^^^^^
+    279 │ }
+    280 │ 
+  
+  i The operands' types make the outcome statically known.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:284:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    282 │ interface NonEmpty { items: string[] }
+    283 │ function notOnAlwaysTruthyMember(c: NonEmpty) {
+  > 284 │   if (!c.items) {
+        │       ^^^^^^^^
+    285 │     return "never";
+    286 │   }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:294:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    292 │     case 'a': return 1;     // reachable
+    293 │     case 'b': return 2;     // reachable
+  > 294 │     case 'z': return 3;     // unreachable
+        │          ^^^
+    295 │   }
+    296 │ }
+  
+  i The value passed to switch can never equal this value.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:299:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    298 │ const date = new Date();
+  > 299 │ if (date) console.log(date);
         │     ^^^^
-    159 │ 
+    300 │ 
   
-  i The type being checked can never be falsy, making this condition redundant.
-  
-  i Remove the condition.
+  i The value's type can never be falsy, so this check is redundant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
