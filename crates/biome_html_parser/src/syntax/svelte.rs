@@ -480,8 +480,7 @@ fn parse_await_then_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    // The binding variable after `then` is optional: `{#await expr then}` is valid Svelte.
-    let _ = parse_single_text_expression_content(p);
+    parse_single_text_expression_content(p).ok();
 
     Present(m.complete(p, SVELTE_AWAIT_THEN_CLAUSE))
 }
@@ -493,8 +492,7 @@ fn parse_await_catch_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    // The binding variable after `catch` is optional: `{#await expr catch}` is valid Svelte.
-    let _ = parse_single_text_expression_content(p);
+    parse_single_text_expression_content(p).ok();
 
     Present(m.complete(p, SVELTE_AWAIT_CATCH_CLAUSE))
 }
@@ -628,8 +626,7 @@ fn parse_await_then_block(
     }
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    // The binding variable is optional: `{:then}` is valid Svelte.
-    let _ = parse_single_text_expression_content(p);
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
@@ -661,8 +658,7 @@ fn parse_await_catch_block(
     }
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    // The binding variable is optional: `{:catch}` is valid Svelte.
-    let _ = parse_single_text_expression_content(p);
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
