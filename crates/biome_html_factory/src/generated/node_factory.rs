@@ -587,7 +587,7 @@ impl SvelteAwaitCatchBlockBuilder {
                 Some(SyntaxElement::Token(self.sv_curly_colon_token)),
                 Some(SyntaxElement::Token(self.catch_token)),
                 self.name
-                    .map(|node| SyntaxElement::Node(node.into_syntax())),
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.r_curly_token)),
                 Some(SyntaxElement::Node(self.children.into_syntax())),
             ],
@@ -615,7 +615,7 @@ impl SvelteAwaitCatchClauseBuilder {
             [
                 Some(SyntaxElement::Token(self.catch_token)),
                 self.name
-                    .map(|node| SyntaxElement::Node(node.into_syntax())),
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
@@ -719,7 +719,7 @@ impl SvelteAwaitThenBlockBuilder {
                 Some(SyntaxElement::Token(self.sv_curly_colon_token)),
                 Some(SyntaxElement::Token(self.then_token)),
                 self.name
-                    .map(|node| SyntaxElement::Node(node.into_syntax())),
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.r_curly_token)),
                 Some(SyntaxElement::Node(self.children.into_syntax())),
             ],
@@ -747,7 +747,7 @@ impl SvelteAwaitThenClauseBuilder {
             [
                 Some(SyntaxElement::Token(self.then_token)),
                 self.name
-                    .map(|node| SyntaxElement::Node(node.into_syntax())),
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
