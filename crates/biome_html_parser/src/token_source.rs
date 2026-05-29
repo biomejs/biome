@@ -49,6 +49,13 @@ pub(crate) enum HtmlLexContext {
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
 
+    /// Used when parsing a quoted attribute value in a Svelte file. Behaves like
+    /// [AttributeValue] for `{`, `{{`, `<`, `>` and unquoted values, but for a
+    /// quoted value (`"` or `'`) it reads only up to the first `{` interpolation
+    /// instead of consuming the whole string. This lets the parser detect whether
+    /// the value contains interpolations without a separate pre-scan.
+    SvelteAttributeValue,
+
     /// Lexes the literal parts of a Svelte interpolated attribute value, e.g. the
     /// `top: ` and `px` segments of `style="top: {top}px"`. A `{` is emitted as its
     /// own token (the start of an interpolation); any other run of text is a chunk
@@ -178,10 +185,6 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
-    /// Relex a whole `html_string_literal` attribute value as the first chunk of a
-    /// Svelte interpolated string: the opening quote plus the text up to the first
-    /// `{` interpolation (or the closing quote if there is none).
-    SvelteInterpolatedString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

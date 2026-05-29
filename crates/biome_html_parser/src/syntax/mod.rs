@@ -645,37 +645,31 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
 /// Parses a Svelte attribute value that mixes literal text and `{expression}`
 /// interpolations, e.g. `style="top: {top}px"`.
 ///
-/// On entry the current token is the whole `html_string_literal` value (quotes
-/// included). It is re-lexed into a sequence of literal chunks (each keeping its
-/// surrounding quote) and interpolations, which reuse the regular single text
-/// expression machinery so the embedded expressions are tracked like any other.
-fn parse_svelte_interpolated_string(p: &mut HtmlParser) -> ParsedSyntax {
+/// On entry the current token is already the first chunk (opening quote plus text
+/// up to the first `{`), produced by the [HtmlLexContext::SvelteAttributeValue]
+/// context. Interpolations reuse the regular single text expression machinery so
+/// embedded references are tracked like any other.
+fn parse_svelte_interpolated_string(p: &mut HtmlParser, quote: u8) -> ParsedSyntax {
     if !p.at(HTML_STRING_LITERAL) {
         return Absent;
     }
-    // The value starts with the quote character that also terminates it.
-    let Some(quote) = p
-        .cur_text()
-        .bytes()
-        .next()
-        .filter(|byte| matches!(byte, b'"' | b'\''))
-    else {
-        return parse_attribute_string_literal(p);
-    };
     let chunk_context = HtmlLexContext::SvelteInterpolatedStringChunk { quote };
 
     let m = p.start();
-    // Re-lex the whole value into its first chunk: the opening quote plus the text
-    // up to the first interpolation.
-    p.re_lex(HtmlReLexContext::SvelteInterpolatedString);
-
     let parts = p.start();
-    let mut first = true;
+
+    // Consume the first chunk (opening quote + text up to the first `{`).
+    let chunk = p.start();
+    p.bump_with_context(HTML_STRING_LITERAL, chunk_context);
+    chunk.complete(p, SVELTE_INTERPOLATED_STRING_CHUNK);
+
     loop {
-        if p.at(HTML_STRING_LITERAL) {
-            // A literal chunk. The first chunk always precedes an interpolation; any
-            // later chunk that ends with the quote closes the value.
-            let ends_value = !first && p.cur_text().as_bytes().last() == Some(&quote);
+        if p.at(T!['{']) {
+            if parse_single_text_expression(p, chunk_context).is_absent() {
+                break;
+            }
+        } else if p.at(HTML_STRING_LITERAL) {
+            let ends_value = p.cur_text().as_bytes().last() == Some(&quote);
             let chunk = p.start();
             let next_context = if ends_value {
                 inside_tag_context(p)
@@ -684,15 +678,9 @@ fn parse_svelte_interpolated_string(p: &mut HtmlParser) -> ParsedSyntax {
             };
             p.bump_with_context(HTML_STRING_LITERAL, next_context);
             chunk.complete(p, SVELTE_INTERPOLATED_STRING_CHUNK);
-            first = false;
             if ends_value {
                 break;
             }
-        } else if p.at(T!['{']) {
-            if parse_single_text_expression(p, chunk_context).is_absent() {
-                break;
-            }
-            first = false;
         } else {
             break;
         }
@@ -719,7 +707,15 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+    // In Svelte mode use SvelteAttributeValue so that quoted strings are lexed only
+    // up to the first `{`, letting the parser decide whether interpolation is needed
+    // without an extra pre-scan over the token text.
+    let attr_value_context = if Svelte.is_supported(p) {
+        HtmlLexContext::SvelteAttributeValue
+    } else {
+        HtmlLexContext::AttributeValue
+    };
+    p.bump_with_context(T![=], attr_value_context);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
             .parse_exclusive_syntax(
@@ -759,8 +755,26 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
-    } else if Svelte.is_supported(p) && p.at(HTML_STRING_LITERAL) && p.cur_text().contains('{') {
-        parse_svelte_interpolated_string(p).or_add_diagnostic(p, expected_initializer);
+    } else if p.at(HTML_STRING_LITERAL) {
+        // Detect whether a Svelte quoted attribute value contains interpolations.
+        // The SvelteAttributeValue context produced a partial chunk (opening quote +
+        // text up to the first `{`) when there is an interpolation, or the full string
+        // when there is none. A complete plain string has: last byte == opening quote
+        // byte AND length > 1 (length == 1 means only the opening quote was consumed,
+        // i.e. `{` follows immediately).
+        let text = p.cur_text().as_bytes();
+        let svelte_quote = text
+            .first()
+            .copied()
+            .filter(|b| matches!(b, b'"' | b'\'') && Svelte.is_supported(p));
+        let is_interpolated =
+            svelte_quote.is_some_and(|q| text.last() != Some(&q) || text.len() == 1);
+        if is_interpolated {
+            parse_svelte_interpolated_string(p, svelte_quote.unwrap())
+                .or_add_diagnostic(p, expected_initializer);
+        } else {
+            parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+        }
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
