@@ -711,15 +711,6 @@ fn typescript_cache_path(pin: &SourcePin) -> PathBuf {
         .join(format!("{}-{}", pin.tag(), pin.sha()))
 }
 
-/// Returns the acquire-lock path that production code derives for `pin`.
-fn acquire_lock_path_for_test(pin: &SourcePin) -> PathBuf {
-    let cache_path = typescript_cache_path(pin);
-    let cache_parent = cache_path
-        .parent()
-        .expect("cache path should have a parent");
-    cache_parent.join(format!(".lock-{}-{}", pin.tag(), pin.sha()))
-}
-
 /// Returns a production-shaped temporary checkout path for stale-cleanup tests.
 fn temporary_checkout_path_for_test(pin: &SourcePin, filename: &str) -> PathBuf {
     let cache_path = typescript_cache_path(pin);
@@ -982,60 +973,6 @@ mod tests {
         assert_eq!(
             checkout.command_line_parser_sha256().as_bytes(),
             repo.command_line_parser_sha256.as_bytes()
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn cache_hit_ignores_stale_acquire_lock() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let cache_path = typescript_cache_path(&pin);
-        let cache_parent = cache_path
-            .parent()
-            .context("cache path should have a parent")?;
-        let lock_path = cache_parent.join(format!(".lock-{}-{}", pin.tag(), pin.sha()));
-        fs::write(&lock_path, "stale-pid\n")?;
-        let options = source_options(true, false);
-
-        let checkout = acquire(&pin, &options)?;
-
-        assert_eq!(checkout.pin().sha().as_bytes(), pin.sha().as_bytes());
-        assert!(
-            !lock_path.exists(),
-            "cache hits should remove stranded acquire locks"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn cache_miss_recovers_stale_acquire_lock() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = clean_cache_path(&pin)?;
-        let cache_path = typescript_cache_path(&pin);
-        let cache_parent = cache_path
-            .parent()
-            .context("cache path should have a parent")?;
-        fs::create_dir_all(cache_parent)?;
-        let lock_path = acquire_lock_path_for_test(&pin);
-        fs::create_dir(&lock_path)?;
-        fs::write(lock_path.join("owner"), "99999999:stale\n")?;
-        let options = SourceOptions {
-            offline: false,
-            verify: false,
-            repo_url_override: Some(repo.path().to_path_buf()),
-        };
-
-        let checkout = acquire(&pin, &options)?;
-
-        assert_eq!(checkout.pin().sha().as_bytes(), pin.sha().as_bytes());
-        assert!(
-            !lock_path.exists(),
-            "cache miss should recover stale acquire lock directories"
         );
 
         Ok(())

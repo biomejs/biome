@@ -4,12 +4,9 @@ use std::collections::{BTreeMap, HashSet};
 use std::env;
 use std::fmt::Write as _;
 use std::fs;
-use std::fs::OpenOptions;
 use std::io::{BufReader, ErrorKind, Read as _, Write as _};
 use std::path::{Component, Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
-use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, anyhow, bail};
 use biome_js_parser::{JsParserOptions, parse};
@@ -100,25 +97,6 @@ const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 4;
 
 /// SHA-256 is 32 bytes; hex-encoded that is 64 characters.
 const SHA256_HEX_LENGTH: usize = 64;
-
-/// Maximum number of polls when contending for the acquire lock.
-///
-/// Combined with [`ACQUIRE_LOCK_POLL_INTERVAL_MS`] this bounds the wait at roughly
-/// 60 seconds, enough for a sibling clone+sparse-checkout to finish but short
-/// enough that a leaked lock file does not stall CI indefinitely.
-const ACQUIRE_LOCK_POLL_ATTEMPTS: u32 = 600;
-
-/// Sleep between acquire-lock polls in milliseconds.
-///
-/// Tuned with [`ACQUIRE_LOCK_POLL_ATTEMPTS`] to total roughly 60 seconds.
-const ACQUIRE_LOCK_POLL_INTERVAL_MS: u64 = 100;
-
-/// File stored inside an acquire-lock directory with the owner PID and token.
-const ACQUIRE_LOCK_OWNER_FILE: &str = "owner";
-
-/// Grace period before a missing/corrupt `owner` file marks a lock as an
-/// orphan. Sized to outlast any normal create-then-write window.
-const ACQUIRE_LOCK_ORPHAN_GRACE: Duration = Duration::from_secs(5);
 
 /// Lowercase nibble table used by the streaming hex encoder.
 const HEX_NIBBLES: &[u8; 16] = b"0123456789abcdef";
@@ -227,7 +205,6 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
     let checkout_path = cache_parent.join(cache_key(pin));
 
     if checkout_path.exists() {
-        remove_stale_acquire_lock(&cache_parent, pin)?;
         remove_stale_temporary_checkouts(&cache_parent, pin)?;
         validate_checkout(&checkout_path, pin)?;
     } else {
@@ -575,17 +552,15 @@ fn command_stdout_bytes(command: &mut Command, description: &str) -> anyhow::Res
     Ok(output.stdout)
 }
 
-/// Acquires the cache lock, sparse-checks out `lib` and `src/compiler` from
-/// the pinned TypeScript tag, validates the result, and atomically renames the
-/// temporary checkout into the cache slot.
+/// Sparse-checks out `lib` and `src/compiler` from the pinned TypeScript tag,
+/// validates the result, and atomically renames the temporary checkout into the
+/// cache slot.
 fn clone_checkout(
     cache_parent: &Path,
     checkout_path: &Path,
     pin: &SourcePin,
     opts: &SourceOptions,
 ) -> anyhow::Result<()> {
-    let _lock = AcquireLock::acquire(cache_parent, pin, checkout_path)?;
-
     if checkout_path.exists() {
         return validate_checkout(checkout_path, pin);
     }
@@ -679,273 +654,6 @@ impl Drop for TemporaryCheckout {
     /// Best-effort recursive removal of the temporary checkout directory.
     fn drop(&mut self) {
         let _ = fs::remove_dir_all(&self.path);
-    }
-}
-
-/// Filesystem lock that serializes concurrent xtask invocations cloning the same pin.
-///
-/// The lock is an atomically-created directory containing an owner token made
-/// from the process ID and a nonce. Live owners are left alone; dead owners and
-/// legacy file locks are removed before retrying. `Drop` removes the directory
-/// only when its owner token still matches, so a replaced lock is not deleted.
-struct AcquireLock {
-    path: PathBuf,
-    token: String,
-}
-
-impl AcquireLock {
-    /// Acquires the lock by atomically creating the lock directory, polling
-    /// while a peer holds it, and reclaiming the slot when the recorded owner
-    /// PID is dead. Times out at `ACQUIRE_LOCK_POLL_ATTEMPTS × INTERVAL_MS`.
-    fn acquire(cache_parent: &Path, pin: &SourcePin, checkout_path: &Path) -> anyhow::Result<Self> {
-        let path = acquire_lock_path(cache_parent, pin);
-        let token = acquire_lock_token();
-        for _ in 0..ACQUIRE_LOCK_POLL_ATTEMPTS {
-            match fs::create_dir(&path) {
-                Ok(()) => {
-                    let owner_path = acquire_lock_owner_path(&path);
-                    match OpenOptions::new()
-                        .create_new(true)
-                        .write(true)
-                        .open(&owner_path)
-                    {
-                        Ok(mut file) => {
-                            // Propagate writeln errors; a partially-written
-                            // owner file means Drop can never prove ownership
-                            // later, so the lock directory would leak forever.
-                            if let Err(error) = writeln!(file, "{token}") {
-                                let _ = fs::remove_dir_all(&path);
-                                return Err(error).with_context(|| {
-                                    format!(
-                                        "failed to write acquire lock owner at {}",
-                                        owner_path.display()
-                                    )
-                                });
-                            }
-                            if let Err(error) = file.sync_all() {
-                                let _ = fs::remove_dir_all(&path);
-                                return Err(error).with_context(|| {
-                                    format!(
-                                        "failed to flush acquire lock owner at {}",
-                                        owner_path.display()
-                                    )
-                                });
-                            }
-                            return Ok(Self { path, token });
-                        }
-                        Err(error) => {
-                            let _ = fs::remove_dir_all(&path);
-                            return Err(error).with_context(|| {
-                                format!(
-                                    "failed to write acquire lock owner at {}",
-                                    owner_path.display()
-                                )
-                            });
-                        }
-                    }
-                }
-                Err(error) if error.kind() == ErrorKind::AlreadyExists => {
-                    if remove_stale_acquire_lock_if_owner_dead(&path)? {
-                        continue;
-                    }
-                    thread::sleep(Duration::from_millis(ACQUIRE_LOCK_POLL_INTERVAL_MS));
-                }
-                Err(error) => {
-                    return Err(error).with_context(|| {
-                        format!("failed to create acquire lock at {}", path.display())
-                    });
-                }
-            }
-        }
-
-        let holder = read_acquire_lock_owner(&path).map_or_else(
-            |_| "<unreadable>".to_owned(),
-            |content| content.trim().to_owned(),
-        );
-        bail!(
-            "another xtask invocation (PID {holder}) holds the cache lock for {}; if that process is no longer running, remove {} and rerun",
-            checkout_path.display(),
-            path.display()
-        );
-    }
-}
-
-/// Returns the per-pin acquire-lock directory path `<cache_parent>/.lock-<key>`.
-fn acquire_lock_path(cache_parent: &Path, pin: &SourcePin) -> PathBuf {
-    cache_parent.join(format!(".lock-{}", cache_key(pin)))
-}
-
-/// Returns the owner-token file path inside an acquire-lock directory.
-fn acquire_lock_owner_path(lock_path: &Path) -> PathBuf {
-    lock_path.join(ACQUIRE_LOCK_OWNER_FILE)
-}
-
-/// Builds the owner token `<pid>:<nanos>` written into the lock directory so
-/// `Drop` can verify ownership before deleting it.
-fn acquire_lock_token() -> String {
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |duration| duration.as_nanos());
-    format!("{}:{nonce}", std::process::id())
-}
-
-/// Best-effort removal of the acquire-lock directory (or legacy lock file) for
-/// `pin`, used by callers that have already verified the prior holder is gone.
-fn remove_stale_acquire_lock(cache_parent: &Path, pin: &SourcePin) -> anyhow::Result<()> {
-    let path = acquire_lock_path(cache_parent, pin);
-    remove_acquire_lock_path(&path)
-}
-
-/// Removes the lock at `path`, tolerating either the new directory form or
-/// the legacy single-file form left by older binaries.
-fn remove_acquire_lock_path(path: &Path) -> anyhow::Result<()> {
-    match fs::remove_dir_all(path) {
-        Ok(()) => return Ok(()),
-        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(()),
-        Err(error) if error.kind() == ErrorKind::NotADirectory => {}
-        Err(error) => {
-            return Err(error)
-                .with_context(|| format!("failed to remove stale lock {}", path.display()));
-        }
-    }
-
-    match fs::remove_file(path) {
-        Ok(()) => Ok(()),
-        Err(error) if error.kind() == ErrorKind::NotFound => Ok(()),
-        Err(error) => {
-            Err(error).with_context(|| format!("failed to remove stale lock {}", path.display()))
-        }
-    }
-}
-
-/// Removes the lock if the owner PID is dead, the lock is a legacy file, or
-/// the owner file is missing/corrupt past [`ACQUIRE_LOCK_ORPHAN_GRACE`].
-/// Returns whether the slot was reclaimed.
-fn remove_stale_acquire_lock_if_owner_dead(path: &Path) -> anyhow::Result<bool> {
-    if path.is_file() {
-        remove_acquire_lock_path(path)?;
-        return Ok(true);
-    }
-
-    let pid = read_acquire_lock_owner(path).ok().and_then(|owner| {
-        owner
-            .split_once(':')
-            .and_then(|(pid, _)| pid.parse::<u32>().ok())
-    });
-
-    if let Some(pid) = pid {
-        if acquire_lock_owner_is_alive(pid) {
-            return Ok(false);
-        }
-        remove_acquire_lock_path(path)?;
-        return Ok(true);
-    }
-
-    if acquire_lock_dir_aged_past_grace(path)? {
-        remove_acquire_lock_path(path)?;
-        return Ok(true);
-    }
-
-    Ok(false)
-}
-
-/// True when the lock directory's mtime is past [`ACQUIRE_LOCK_ORPHAN_GRACE`]
-/// or the directory is gone.
-fn acquire_lock_dir_aged_past_grace(path: &Path) -> anyhow::Result<bool> {
-    let metadata = match fs::metadata(path) {
-        Ok(metadata) => metadata,
-        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(true),
-        Err(error) => {
-            return Err(error)
-                .with_context(|| format!("failed to stat acquire lock {}", path.display()));
-        }
-    };
-    let mtime = metadata
-        .modified()
-        .with_context(|| format!("failed to read mtime for acquire lock {}", path.display()))?;
-    let age = SystemTime::now().duration_since(mtime).unwrap_or_default();
-    Ok(age >= ACQUIRE_LOCK_ORPHAN_GRACE)
-}
-
-/// Reads the owner token from the lock directory's `owner` file, or from the
-/// legacy single-file form when `path` is a regular file.
-fn read_acquire_lock_owner(path: &Path) -> anyhow::Result<String> {
-    let owner_path = if path.is_dir() {
-        acquire_lock_owner_path(path)
-    } else {
-        path.to_path_buf()
-    };
-    fs::read_to_string(&owner_path)
-        .with_context(|| format!("failed to read acquire lock owner {}", owner_path.display()))
-}
-
-/// Best-effort liveness probe for a PID. Errors are treated as "alive" so
-/// stale-lock cleanup never races against a live peer; the recorded owner is
-/// only reclaimed when we can prove the process is gone.
-///
-/// Note: `kill -0` cannot distinguish `ESRCH` from `EPERM`, so a process
-/// owned by a different user looks "dead" here. Acceptable: codegen runs in
-/// single-user CI/dev, and the owner-token comparison in [`Drop`] still
-/// prevents deleting a lock we did not own.
-#[cfg(unix)]
-fn acquire_lock_owner_is_alive(pid: u32) -> bool {
-    if pid == std::process::id() {
-        return true;
-    }
-
-    Command::new("kill")
-        .arg("-0")
-        .arg(pid.to_string())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .map_or(true, |status| status.success())
-}
-
-/// Windows liveness probe via `tasklist`; same "errors = alive" contract as
-/// the Unix variant so stale-lock recovery never races against a live peer.
-#[cfg(windows)]
-fn acquire_lock_owner_is_alive(pid: u32) -> bool {
-    if pid == std::process::id() {
-        return true;
-    }
-
-    let filter = format!("PID eq {pid}");
-    let Ok(output) = Command::new("tasklist")
-        .args(["/FI", &filter, "/NH"])
-        .output()
-    else {
-        return true;
-    };
-    if !output.status.success() {
-        return true;
-    }
-
-    let pid_text = pid.to_string();
-    String::from_utf8_lossy(&output.stdout)
-        .lines()
-        .any(|line| line.split_whitespace().any(|part| part == pid_text))
-}
-
-/// Fallback liveness probe for platforms without a known process-listing API:
-/// conservatively assumes the owner is still alive so we never delete a lock
-/// we cannot prove is stale.
-#[cfg(not(any(unix, windows)))]
-fn acquire_lock_owner_is_alive(_pid: u32) -> bool {
-    true
-}
-
-impl Drop for AcquireLock {
-    /// Releases the lock directory only when its owner token still matches the
-    /// one this guard wrote, so a different process that has already taken
-    /// over the lock is not disturbed.
-    fn drop(&mut self) {
-        let Ok(owner) = read_acquire_lock_owner(&self.path) else {
-            return;
-        };
-        if owner.trim() == self.token {
-            let _ = remove_acquire_lock_path(&self.path);
-        }
     }
 }
 
