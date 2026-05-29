@@ -1305,6 +1305,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUnsafeValues",
+        TypeId::of::<biome_rule_options::no_unsafe_values::NoUnsafeValuesOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUntrustedLicenses",
         TypeId::of::<biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions>(),
     ));

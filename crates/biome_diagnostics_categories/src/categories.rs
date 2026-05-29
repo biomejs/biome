@@ -249,6 +249,7 @@ define_categories! {
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
     "lint/nursery/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
+    "lint/nursery/noUnsafeValues": "https://biomejs.dev/linter/rules/no-unsafe-values",
     "lint/nursery/noUntrustedLicenses": "https://biomejs.dev/linter/rules/no-untrusted-licenses",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
