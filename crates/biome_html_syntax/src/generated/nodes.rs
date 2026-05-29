@@ -1518,8 +1518,8 @@ impl SvelteAwaitCatchBlock {
     pub fn catch_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn name(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 2usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
@@ -1540,7 +1540,7 @@ impl Serialize for SvelteAwaitCatchBlock {
 pub struct SvelteAwaitCatchBlockFields {
     pub sv_curly_colon_token: SyntaxResult<SyntaxToken>,
     pub catch_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTextExpression>,
+    pub name: Option<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
     pub children: HtmlElementList,
 }
@@ -1567,8 +1567,8 @@ impl SvelteAwaitCatchClause {
     pub fn catch_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn name(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for SvelteAwaitCatchClause {
@@ -1582,7 +1582,7 @@ impl Serialize for SvelteAwaitCatchClause {
 #[derive(Serialize)]
 pub struct SvelteAwaitCatchClauseFields {
     pub catch_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTextExpression>,
+    pub name: Option<HtmlTextExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteAwaitClosingBlock {
@@ -1723,8 +1723,8 @@ impl SvelteAwaitThenBlock {
     pub fn then_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn name(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 2usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
@@ -1745,7 +1745,7 @@ impl Serialize for SvelteAwaitThenBlock {
 pub struct SvelteAwaitThenBlockFields {
     pub sv_curly_colon_token: SyntaxResult<SyntaxToken>,
     pub then_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTextExpression>,
+    pub name: Option<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
     pub children: HtmlElementList,
 }
@@ -1772,8 +1772,8 @@ impl SvelteAwaitThenClause {
     pub fn then_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<HtmlTextExpression> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn name(&self) -> Option<HtmlTextExpression> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for SvelteAwaitThenClause {
@@ -1787,7 +1787,7 @@ impl Serialize for SvelteAwaitThenClause {
 #[derive(Serialize)]
 pub struct SvelteAwaitThenClauseFields {
     pub then_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<HtmlTextExpression>,
+    pub name: Option<HtmlTextExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteBindDirective {
@@ -7003,7 +7003,7 @@ impl std::fmt::Debug for SvelteAwaitCatchBlock {
                     "catch_token",
                     &support::DebugSyntaxResult(self.catch_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("name", &support::DebugOptionalElement(self.name()))
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),
@@ -7059,7 +7059,7 @@ impl std::fmt::Debug for SvelteAwaitCatchClause {
                     "catch_token",
                     &support::DebugSyntaxResult(self.catch_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("name", &support::DebugOptionalElement(self.name()))
                 .finish()
         } else {
             f.debug_struct("SvelteAwaitCatchClause").finish()
@@ -7237,7 +7237,7 @@ impl std::fmt::Debug for SvelteAwaitThenBlock {
                     &support::DebugSyntaxResult(self.sv_curly_colon_token()),
                 )
                 .field("then_token", &support::DebugSyntaxResult(self.then_token()))
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("name", &support::DebugOptionalElement(self.name()))
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),
@@ -7290,7 +7290,7 @@ impl std::fmt::Debug for SvelteAwaitThenClause {
             DEPTH.set(current_depth + 1);
             f.debug_struct("SvelteAwaitThenClause")
                 .field("then_token", &support::DebugSyntaxResult(self.then_token()))
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("name", &support::DebugOptionalElement(self.name()))
                 .finish()
         } else {
             f.debug_struct("SvelteAwaitThenClause").finish()
