@@ -96,7 +96,7 @@ const DEFAULT_LIBRARY_PRIORITY_OFFSET: usize = 1;
 const OUTSIDE_DEFAULT_LIBRARY_PRIORITY_OFFSET: usize = 2;
 
 /// Maximum number of unique temporary checkout names to try for one acquisition.
-const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 1024;
+const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 4;
 
 /// SHA-256 is 32 bytes; hex-encoded that is 64 characters.
 const SHA256_HEX_LENGTH: usize = 64;
