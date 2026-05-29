@@ -2367,6 +2367,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 	 */
 	noShadow?: NoShadowConfiguration;
 	/**
+	* Disallow early returns in Solid components.
+See https://biomejs.dev/linter/rules/no-solid-early-return 
+	 */
+	noSolidEarlyReturn?: NoSolidEarlyReturnConfiguration;
+	/**
 	* Prevent the usage of synchronous scripts.
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
@@ -4493,6 +4498,9 @@ export type NoScriptUrlConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSolidEarlyReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSolidEarlyReturnOptions;
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
@@ -6335,6 +6343,11 @@ export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
 }
+export interface RuleWithNoSolidEarlyReturnOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSolidEarlyReturnOptions;
+}
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
@@ -8030,6 +8043,7 @@ Defaults to `true`.
 	 */
 	ignoreTypeValueShadow?: boolean;
 }
+export type NoSolidEarlyReturnOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -9258,6 +9272,7 @@ export type Category =
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noSolidEarlyReturn"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noTopLevelLiterals"
