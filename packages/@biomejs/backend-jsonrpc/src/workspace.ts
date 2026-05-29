@@ -8211,22 +8211,20 @@ export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
+/**
+ * Options for the `useNullishCoalescing` rule.
+ */
 export interface UseNullishCoalescingOptions {
 	/**
-	* Whether to ignore `||` expressions in conditional test positions
-(if/while/for/do-while/ternary conditions).
-
-When `true` (the default), the rule will not report `||` expressions
-that appear in places where the falsy-checking behavior may be intentional.
-
-Default: `true` 
+	 * Ignore `||` expressions in conditional test positions (default: `true`).
 	 */
 	ignoreConditionalTests?: boolean;
 	/**
-	* Whether to ignore ternary expressions that could be simplified
-using the nullish coalescing operator.
-
-Default: `false` 
+	 * Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).
+	 */
+	ignoreMixedLogicalExpressions?: boolean;
+	/**
+	 * Ignore ternary expressions that check for `null` or `undefined` (default: `false`).
 	 */
 	ignoreTernaryTests?: boolean;
 }
