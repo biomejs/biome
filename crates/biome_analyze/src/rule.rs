@@ -168,6 +168,8 @@ pub enum RuleSource<'a> {
     EslintRegexp(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://github.com/sveltejs/eslint-plugin-svelte)
+    EslintSvelte(&'a str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
     EslintSonarJs(&'a str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
@@ -247,6 +249,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactRsc(_) => write!(f, "eslint-plugin-react-rsc"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "@stylistic/eslint-plugin"),
             Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
@@ -332,6 +335,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactRsc(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
+            | Self::EslintSvelte(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintTypeScript(rule_name)
@@ -389,6 +393,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(_) => "react-rsc",
             Self::EslintRegexp(_) => "regexp",
             Self::EslintSolid(_) => "solid",
+            Self::EslintSvelte(_) => "svelte",
             Self::EslintSonarJs(_) => "sonarjs",
             Self::EslintStylistic(_) => "@stylistic",
             Self::EslintTypeScript(_) => "@typescript-eslint",
@@ -454,6 +459,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
