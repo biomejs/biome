@@ -16,7 +16,7 @@ pub struct SemanticModelBuilder {
     all_rules: Vec<Rule>,
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
-    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariable>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -229,15 +229,17 @@ impl SemanticModelBuilder {
                 let is_global_var =
                     self.is_in_root_selector && property.syntax().text_trimmed().starts_with("--");
 
-                if let Some(&current_rule_id) = self.current_rule_stack.last() {
+                if let Some(&current_rule_id) = self.current_rule_stack.last()
+                    && let Ok(property_name) = property.value()
+                {
                     if is_global_var {
-                        let property_name = property.syntax().text_trimmed().to_string();
                         self.global_custom_variables.insert(
-                            property_name,
+                            property_name.clone(),
                             CssGlobalCustomVariable::Root(CssModelDeclaration {
                                 declaration: AstPtr::new(&node),
                                 property: AstPtr::new(&property),
                                 value: value.clone(),
+                                property_name: property_name.clone(),
                             }),
                         );
                     }
@@ -246,6 +248,7 @@ impl SemanticModelBuilder {
                         declaration: AstPtr::new(&node),
                         property: AstPtr::new(&property),
                         value,
+                        property_name,
                     });
                 }
             }
@@ -262,17 +265,18 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                let property_name = property.to_trimmed_string();
-                self.global_custom_variables.insert(
-                    property_name,
-                    CssGlobalCustomVariable::AtProperty {
-                        property: AstPtr::new(&property),
-                        initial_value,
-                        syntax,
-                        inherits,
-                        range,
-                    },
-                );
+                if let Ok(property_name) = property.value() {
+                    self.global_custom_variables.insert(
+                        property_name,
+                        CssGlobalCustomVariable::AtProperty {
+                            property: AstPtr::new(&property),
+                            initial_value,
+                            syntax,
+                            inherits,
+                            range,
+                        },
+                    );
+                }
             }
         }
     }

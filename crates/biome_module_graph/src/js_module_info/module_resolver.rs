@@ -1,5 +1,3 @@
-use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
-
 use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, MAX_FLATTEN_DEPTH, ModuleId, Resolvable,
@@ -10,9 +8,11 @@ use biome_js_type_info::{
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
+use std::rc::Rc;
+use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
 
 use crate::{
-    JsExport, JsImportPath, JsOwnExport, ModuleDb, ProjectDatabase,
+    JsExport, JsImportPath, JsOwnExport, ModuleDb,
     js_module_info::{JsModuleInfoInner, utils::reached_too_many_types},
 };
 
@@ -43,7 +43,7 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 ///
 /// The module resolver is typically consumed through the `Typed` service.
 pub struct ModuleResolver {
-    module_db: ProjectDatabase,
+    module_db: Rc<dyn ModuleDb>,
 
     /// Modules from which this resolver is using types.
     ///
@@ -73,7 +73,7 @@ pub struct ModuleResolver {
 }
 
 impl ModuleResolver {
-    pub fn for_module(module_info: JsModuleInfo, module_db: ProjectDatabase) -> Self {
+    pub fn for_module(module_info: JsModuleInfo, module_db: Rc<dyn ModuleDb>) -> Self {
         let infer_types = module_info.infer_types;
 
         let types = if infer_types {

@@ -32,6 +32,7 @@ serde                    = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_graphql_parser = { path = "../biome_graphql_parser" }
+biome_languages      = { path = "../biome_languages", features = ["graphql"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_graphql"] }
 camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }

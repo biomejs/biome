@@ -28,7 +28,7 @@ pub struct SemanticModelBuilder {
     bindings_by_start: FxHashMap<TextSize, BindingId>,
     /// maps a reference range start to its binding index inside [SemanticModelBuilder::bindings] vec
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
-    exported: FxHashSet<TextSize>,
+    exported: FxHashSet<BindingId>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
     flavor: SemanticFlavor,
     pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
@@ -369,10 +369,9 @@ impl SemanticModelBuilder {
                 declaration_at,
                 range,
             } => {
-                self.exported.insert(declaration_at);
-
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
+                self.exported.insert(binding_id);
                 binding.export_ranges.push(range);
             }
         }

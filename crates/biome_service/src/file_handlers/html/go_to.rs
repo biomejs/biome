@@ -7,10 +7,11 @@ use biome_html_syntax::{
 };
 use biome_module_graph::ModuleDb;
 use biome_rowan::{AstNode, TextRange, TokenAtOffset};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let root: HtmlRoot = params.parse.tree();
+    let root: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
         TokenAtOffset::Single(token) => token,
@@ -71,10 +72,8 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
 
         // This branch is responsible for resolving component names.
         if let Some(element) = HtmlComponentName::cast_ref(&ancestor)
-            && let Some(embedded_bindings) = params.services.embedded_bindings()
             && let Some(element_value) = element.value_token().ok()
-            && let Some(binding) =
-                embedded_bindings.get_binding_with_source(element_value.text_trimmed())
+            && let Some(binding) = get_binding_with_source(element_value.text_trimmed())
             && let Some(source) = binding.source()
         {
             return Some(DefinitionReference::HtmlComponent {
@@ -107,7 +106,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 local_name,
                 source,
                 params.path.as_path(),
-                params.module_db,
+                &params.workspace_db,
                 &mut result,
             );
         }
@@ -124,7 +123,7 @@ fn resolve_import_definition(
     _local_name: &str,
     source: &str,
     current_path: &Utf8Path,
-    module_db: &dyn ModuleDb,
+    module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
     let module_info = module_db.html_module_info_for_path(current_path)?;

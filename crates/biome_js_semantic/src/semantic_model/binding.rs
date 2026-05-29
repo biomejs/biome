@@ -453,7 +453,7 @@ impl TsBindingReference {
 }
 
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
@@ -465,14 +465,14 @@ pub(crate) struct SemanticModelBindingData {
     pub(crate) jsdoc: Option<JsdocComment>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct SemanticModelReference {
     pub(crate) range_start: TextSize,
     pub(crate) ty: SemanticModelReferenceType,

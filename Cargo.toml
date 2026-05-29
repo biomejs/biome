@@ -19,6 +19,7 @@ biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
+biome_workspace_db           = { path = "./crates/biome_workspace_db" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -108,6 +109,7 @@ biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version =
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
+biome_languages              = { path = "./crates/biome_languages", version = "0.1.0" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.26", features = ["derive"] }
@@ -171,6 +173,7 @@ uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
+parking_lot                  = { version = "0.12.5" }
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

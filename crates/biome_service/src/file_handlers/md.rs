@@ -1,5 +1,5 @@
 use super::{
-    Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
+    AnyFileSource, Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::WorkspaceError;
@@ -80,7 +80,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        _file_source: &AnyFileSource,
     ) -> Self::ParserOptions {
         MarkdownParserOptions::default()
     }
@@ -90,7 +90,7 @@ impl ServiceLanguage for MarkdownLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
-        _document_file_source: &DocumentFileSource,
+        _document_file_source: &AnyFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, path);
@@ -128,7 +128,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        _file_source: &AnyFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
@@ -272,7 +272,7 @@ fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
+    file_source: AnyFileSource,
     text: &str,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -299,7 +299,7 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
@@ -314,7 +314,7 @@ fn debug_formatter_ir(
 
 pub(crate) fn format(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {

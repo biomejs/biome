@@ -18,6 +18,7 @@ biome_db             = { workspace = true }
 biome_fs             = { workspace = true }
 biome_js_analyze     = { workspace = true }
 biome_js_parser      = { workspace = true }
+biome_languages      = { workspace = true, features = ["js"] }
 biome_json_parser    = { workspace = true }
 biome_languages      = { workspace = true, features = ["all"] }
 biome_module_graph   = { workspace = true }

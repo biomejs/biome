@@ -1,5 +1,5 @@
 use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
+    AnalyzerCapabilities, AnyFileSource, Capabilities, DebugCapabilities, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
     ParseResult, ParserCapabilities, SearchCapabilities,
 };
@@ -104,7 +104,7 @@ impl ServiceLanguage for GritLanguage {
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        _file_source: &AnyFileSource,
     ) -> Self::ParserOptions {
     }
 
@@ -113,7 +113,7 @@ impl ServiceLanguage for GritLanguage {
         overrides: &crate::settings::OverrideSettings,
         language: &Self::FormatterSettings,
         path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        file_source: &super::AnyFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -156,7 +156,7 @@ impl ServiceLanguage for GritLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        _file_source: &AnyFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
@@ -311,7 +311,7 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     _biome_path: &BiomePath,
-    file_source: DocumentFileSource,
+    file_source: AnyFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -335,7 +335,7 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
 ) -> Result<String, WorkspaceError> {
@@ -351,7 +351,7 @@ fn debug_formatter_ir(
 #[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
@@ -369,7 +369,7 @@ fn format(
 #[tracing::instrument(level = "debug", skip_all)]
 fn format_range(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
     range: TextRange,
@@ -384,7 +384,7 @@ fn format_range(
 #[tracing::instrument(level = "debug", skip_all)]
 fn format_on_type(
     biome_path: &BiomePath,
-    document_file_source: &DocumentFileSource,
+    document_file_source: &AnyFileSource,
     parse: AnyParse,
     settings: &SettingsWithEditor,
     offset: TextSize,
@@ -423,9 +423,7 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
         .entered();
-    let diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);

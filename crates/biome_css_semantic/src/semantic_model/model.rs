@@ -44,7 +44,7 @@ impl SemanticModel {
             .collect()
     }
 
-    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
+    pub fn global_custom_variables(&self) -> &FxHashMap<TokenText, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
 
@@ -103,9 +103,28 @@ pub(crate) struct SemanticModelData {
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    pub(crate) global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariable>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
+}
+
+impl PartialEq for SemanticModel {
+    fn eq(&self, other: &Self) -> bool {
+        self.data.all_rules.len() == other.data.all_rules.len()
+            && self
+                .data
+                .all_rules
+                .iter()
+                .zip(other.data.all_rules.iter())
+                .all(|(r1, r2)| r1 == r2)
+            && self.global_custom_variables().len() == other.global_custom_variables().len()
+            && self.global_custom_variables().iter().all(|(key, val)| {
+                other
+                    .global_custom_variables()
+                    .get(key)
+                    .is_some_and(|other_val| val == other_val)
+            })
+    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -139,6 +158,25 @@ pub struct Rule {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
+}
+
+impl PartialEq for Rule {
+    fn eq(&self, other: &Self) -> bool {
+        self.specificity == other.specificity
+            && self.id == other.id
+            && self.selectors.len() == other.selectors.len()
+            && self
+                .selectors
+                .iter()
+                .zip(other.selectors.iter())
+                .all(|(s, o)| s == o)
+            && self.declarations.len() == other.declarations.len()
+            && self
+                .declarations
+                .iter()
+                .zip(other.declarations.iter())
+                .all(|(s, o)| s == o)
+    }
 }
 
 impl Rule {
@@ -423,6 +461,12 @@ pub struct Selector {
     pub(crate) specificity: Specificity,
 }
 
+impl PartialEq for Selector {
+    fn eq(&self, other: &Self) -> bool {
+        self.specificity == other.specificity && self.resolved == other.resolved
+    }
+}
+
 impl Selector {
     pub fn node(&self, root: &AnyCssRoot) -> AnyCssSelectorLike {
         self.node.to_node(root.syntax())
@@ -519,7 +563,14 @@ impl std::fmt::Display for Specificity {
 pub struct CssModelDeclaration {
     pub(crate) declaration: AstPtr<CssDeclaration>,
     pub(crate) property: AstPtr<CssProperty>,
+    pub(crate) property_name: TokenText,
     pub(crate) value: CssPropertyInitialValue,
+}
+
+impl PartialEq for CssModelDeclaration {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value && self.property_name == other.property_name
+    }
 }
 
 impl CssModelDeclaration {
@@ -556,6 +607,15 @@ pub enum CssPropertyInitialValue {
     GenericComponent(AstPtr<CssGenericComponentValueList>),
     Composes(AstPtr<CssComposesPropertyValue>),
     ScssExpression(AstPtr<ScssExpression>),
+}
+
+impl PartialEq for CssPropertyInitialValue {
+    fn eq(&self, other: &Self) -> bool {
+        matches!(self, Self::Composes(_)) == matches!(other, Self::Composes(_))
+            && matches!(self, Self::ScssExpression(_)) == matches!(other, Self::ScssExpression(_))
+            && matches!(self, Self::GenericComponent(_))
+                == matches!(other, Self::GenericComponent(_))
+    }
 }
 
 impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
@@ -599,6 +659,33 @@ pub enum CssGlobalCustomVariable {
         initial_value: Option<CssPropertyInitialValue>,
         range: TextRange,
     },
+}
+
+impl PartialEq for CssGlobalCustomVariable {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Root(this), Self::Root(other)) => this == other,
+            (
+                Self::AtProperty {
+                    inherits: self_inherits,
+                    initial_value: self_initial_value,
+                    syntax: self_syntax,
+                    ..
+                },
+                Self::AtProperty {
+                    inherits: other_inherits,
+                    initial_value: other_initial_value,
+                    syntax: other_syntax,
+                    ..
+                },
+            ) => {
+                self_inherits == other_inherits
+                    && self_initial_value == other_initial_value
+                    && self_syntax == other_syntax
+            }
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]

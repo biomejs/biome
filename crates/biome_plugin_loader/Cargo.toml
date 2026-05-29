@@ -40,8 +40,9 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser = { path = "../biome_js_parser" }
-insta           = { workspace = true }
+biome_js_parser  = { path = "../biome_js_parser" }
+biome_languages  = { path = "../biome_languages", features = ["js"] }
+insta            = { workspace = true }
 serde_json      = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]

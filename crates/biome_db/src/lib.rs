@@ -3,5 +3,149 @@
 // the lint fires inside the macro expansion.
 #![allow(impl_trait_redundant_captures)]
 
+pub mod testing;
+
+use biome_diagnostics::{Diagnostic, Severity};
+use biome_parser::AnyParse;
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_rowan::{AstNode, TextRange, TextSize};
+use camino::{Utf8Path, Utf8PathBuf};
+
 #[salsa::db]
-pub trait Db: salsa::Database {}
+pub trait Db: salsa::Database {
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource>;
+
+    fn parsed_snippets_for_path(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
+        self.parsed_source_for_path(path)
+            .map(|source| source.snippets(self).iter().copied().collect::<Vec<_>>())
+            .unwrap_or_default()
+    }
+}
+
+/// The primordial type of the biome database. It represents a parsed file.
+/// The `path` is the ID.
+#[salsa::input]
+#[derive(Debug)]
+pub struct ParsedSource {
+    #[returns(ref)]
+    pub path: Utf8PathBuf,
+
+    #[returns(ref)]
+    #[no_eq]
+    pub parsed: AnyParse,
+
+    pub document_source_index: usize,
+
+    #[returns(ref)]
+    pub snippets: Vec<ParsedSnippet>,
+}
+
+impl ParsedSource {
+    pub fn errors(&self, db: &dyn Db) -> usize {
+        self.parsed(db)
+            .diagnostics()
+            .iter()
+            .filter(|d| d.severity() >= Severity::Error)
+            .count()
+    }
+
+    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        self.parsed(db).clone().into_serde_diagnostics(None)
+    }
+}
+
+/// The primordial type of the biome database. It represents a parsed snippet.
+/// /// The `range` is the ID.
+#[salsa::input]
+#[derive(Debug)]
+pub struct ParsedSnippet {
+    #[returns(ref)]
+    #[no_eq]
+    pub parsed: AnyParse,
+
+    /// The range of the entire script element in the HTML document,
+    /// including the opening and closing tags.
+    #[returns(ref)]
+    pub element_range: TextRange,
+
+    /// The range of just the JavaScript content within the script element,
+    /// excluding the script tags themselves.
+    #[returns(ref)]
+    pub content_range: TextRange,
+
+    /// The offset where the JavaScript content starts in the parent document.
+    /// This is used for offset-aware parsing.
+    #[returns(ref)]
+    pub content_offset: TextSize,
+
+    /// The file source of the document
+    pub document_source_index: usize,
+}
+
+impl ParsedSnippet {
+    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        self.parsed(db)
+            .clone()
+            .into_serde_diagnostics(Some(*self.content_offset(db)))
+    }
+}
+
+/// Convenient type for source
+#[derive(Debug, Clone)]
+pub enum AnyParsedSource {
+    ParsedSource(ParsedSource),
+    ParsedSnippet(ParsedSnippet),
+}
+
+impl AnyParsedSource {
+    pub fn tree<N>(&self, db: &dyn Db) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.parsed(db).tree(),
+            Self::ParsedSnippet(parsed) => parsed.parsed(db).tree(),
+        }
+    }
+
+    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        match self {
+            Self::ParsedSource(parsed) => parsed.serde_diagnostics(db),
+            Self::ParsedSnippet(parsed) => parsed.serde_diagnostics(db),
+        }
+    }
+
+    pub fn diagnostics<'db>(&self, db: &'db dyn Db) -> &'db [ParseDiagnostic] {
+        match self {
+            Self::ParsedSource(parsed) => parsed.parsed(db).diagnostics(),
+            Self::ParsedSnippet(parsed) => parsed.parsed(db).diagnostics(),
+        }
+    }
+
+    pub fn diagnostic_offset(&self, db: &dyn Db) -> Option<TextSize> {
+        match self {
+            Self::ParsedSource(_) => None,
+            Self::ParsedSnippet(snippet) => Some(*snippet.content_offset(db)),
+        }
+    }
+
+    pub fn document_file_index(&self, db: &dyn Db) -> usize {
+        match self {
+            Self::ParsedSource(source) => source.document_source_index(db),
+            Self::ParsedSnippet(snippet) => snippet.document_source_index(db),
+        }
+    }
+}
+
+impl From<ParsedSource> for AnyParsedSource {
+    fn from(source: ParsedSource) -> Self {
+        AnyParsedSource::ParsedSource(source)
+    }
+}
+
+impl From<ParsedSnippet> for AnyParsedSource {
+    fn from(snippet: ParsedSnippet) -> Self {
+        AnyParsedSource::ParsedSnippet(snippet)
+    }
+}

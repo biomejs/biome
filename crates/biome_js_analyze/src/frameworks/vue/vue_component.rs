@@ -16,6 +16,7 @@ use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsIdentifierBinding, TsInterfaceDeclaration,
     TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
 };
+use biome_languages::js::JsFileSource;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText, declare_node_union,
 };
