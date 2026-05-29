@@ -61,8 +61,7 @@ impl Rule for NoProcessEnv {
         let object = node.object().ok()?;
         let member = node.member().ok()?.as_js_name()?.to_trimmed_text();
 
-        let (reference, name) =
-            global_identifier(&object.as_any_global_identifier_expression()?)?;
+        let (reference, name) = global_identifier(&object.as_any_global_identifier_expression()?)?;
 
         if member.text() == "env" && name.text() == "process" {
             return match model.binding(&reference) {
@@ -71,7 +70,10 @@ impl Rule for NoProcessEnv {
             };
         }
 
-        model.binding(&reference).filter(is_env_from_process).map(|_| ())
+        model
+            .binding(&reference)
+            .filter(is_env_from_process)
+            .map(|_| ())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -103,15 +105,13 @@ fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
 const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
 
 fn is_env_from_process(binding: &biome_js_semantic::Binding) -> bool {
-
-    binding
-    	.syntax()
-    	.ancestors()
-    	.skip(1)
-        .find_map(|n| AnyJsNamedImportSpecifier::cast(n.clone())?.imported_name())
-        .is_some_and(|name| name.text_trimmed() == "env")
-        && ancestors
-            .iter()
-            .find_map(|n| JsImport::cast(n.clone())?.source_text().ok())
-            .is_some_and(|src| PROCESS_MODULE_NAMES.contains(&src.text()))
+    binding.syntax().ancestors().skip(1).any(|n| {
+        AnyJsNamedImportSpecifier::cast(n.clone())?
+            .imported_name()
+            .is_some_and(|name| name.text_trimmed() == "env")
+            || JsImport::cast(n.clone())?
+                .source_text()
+                .ok()
+                .is_some_and(|src| PROCESS_MODULE_NAMES.contains(&src.text()))
+    })
 }
