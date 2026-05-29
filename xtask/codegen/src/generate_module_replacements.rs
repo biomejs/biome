@@ -157,15 +157,12 @@ fn mapping_entry_tokens(
     let url = option_known_url_tokens(mapping.url.as_ref());
 
     quote! {
-        (
-            #mapping_key,
-            ModuleReplacementMapping {
-                mapping_type: #mapping_type,
-                module_name: #module_name,
-                replacements: &[#(#replacements),*],
-                url: #url,
-            },
-        )
+        #mapping_key => ModuleReplacementMapping {
+            mapping_type: #mapping_type,
+            module_name: #module_name,
+            replacements: &[#(#replacements),*],
+            url: #url,
+        }
     }
 }
 
@@ -177,7 +174,7 @@ fn replacement_entry_tokens(
     let replacement = module_replacement_tokens(replacement);
 
     quote! {
-        (#replacement_key, #replacement)
+        #replacement_key => #replacement
     }
 }
 
@@ -187,11 +184,18 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
 
     for manifest in manifests.values() {
         for (mapping_key, mapping) in &manifest.mappings {
-            mappings.insert(mapping_key.clone(), mapping);
+            if mappings.insert(mapping_key.clone(), mapping).is_some() {
+                println!("Duplicate mapping id across manifests: {mapping_key}");
+            }
         }
 
         for (replacement_key, replacement) in &manifest.replacements {
-            replacements.insert(replacement_key.clone(), replacement);
+            if replacements
+                .insert(replacement_key.clone(), replacement)
+                .is_some()
+            {
+                println!("Duplicate replacement id across manifests: {replacement_key}");
+            }
         }
     }
 
@@ -204,14 +208,14 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
     });
 
     quote! {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug, Clone, Copy)]
         pub enum KnownUrlType {
             Mdn,
             Node,
             E18e,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug, Clone, Copy)]
         pub enum KnownUrl {
             Descriptor {
                 url_type: KnownUrlType,
@@ -220,40 +224,40 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
             Raw(&'static str),
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct EngineConstraint {
             pub engine: &'static str,
             pub min_version: Option<&'static str>,
             pub max_version: Option<&'static str>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct ModuleReplacementLike {
             pub id: &'static str,
             pub engines: &'static [EngineConstraint],
             pub preferred: bool,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct DocumentedModuleReplacement {
             pub common: ModuleReplacementLike,
             pub replacement_module: &'static str,
             pub url: Option<KnownUrl>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct NativeWebFeatureId {
             pub feature_id: &'static str,
             pub compat_key: &'static str,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct NativeNodeFeatureId {
             pub module_name: &'static str,
             pub export_name: Option<&'static str>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct NativeModuleReplacement {
             pub common: ModuleReplacementLike,
             pub url: KnownUrl,
@@ -262,7 +266,7 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
             pub node_feature_id: Option<NativeNodeFeatureId>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct SimpleModuleReplacement {
             pub common: ModuleReplacementLike,
             pub description: &'static str,
@@ -270,14 +274,14 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
             pub url: Option<KnownUrl>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct RemovalReplacement {
             pub common: ModuleReplacementLike,
             pub description: &'static str,
             pub url: Option<KnownUrl>,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub enum ModuleReplacement {
             Documented(DocumentedModuleReplacement),
             Native(NativeModuleReplacement),
@@ -285,7 +289,7 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
             Removal(RemovalReplacement),
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug)]
         pub struct ModuleReplacementMapping {
             pub mapping_type: &'static str,
             pub module_name: &'static str,
@@ -293,13 +297,13 @@ fn generate_code(manifests: BTreeMap<&str, ManifestModule>) -> proc_macro2::Toke
             pub url: Option<KnownUrl>,
         }
 
-        pub static MODULE_REPLACEMENTS_MAPPINGS: &[(&str, ModuleReplacementMapping)] = &[
-            #(#mappings),*
-        ];
+        pub static MODULE_REPLACEMENTS_MAPPINGS: phf::Map<&'static str, ModuleReplacementMapping> = phf::phf_map! {
+            #( #mappings ),*
+        };
 
-        pub static MODULE_REPLACEMENTS: &[(&str, ModuleReplacement)] = &[
-            #(#replacements),*
-        ];
+        pub static MODULE_REPLACEMENTS: phf::Map<&'static str, ModuleReplacement> = phf::phf_map! {
+            #( #replacements ),*
+        };
     }
 }
 

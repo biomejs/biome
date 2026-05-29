@@ -7,34 +7,34 @@ expression: invalid.js
 /* should generate diagnostics */
 
 // Simple
-const foo = require('is-number');
+const invalid1 = require('is-number');
 
-import foo from 'is-number';
+import invalid2 from 'is-number';
 
-const foo = await import('is-number');
+const invalid3 = await import('is-number');
 
 // Native
-import foo from 'object.entries';
+import invalid4 from 'object.entries';
 
 // Documented
-import foo from 'npm-run-all';
+import invalid5 from 'npm-run-all';
 
 // Removal
-import foo from 'sort-object';
+import invalid6 from 'sort-object';
 
 ```
 
 # Diagnostics
 ```
-invalid.js:4:21 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:26 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency is-number can be replaced.
   
     3 │ // Simple
-  > 4 │ const foo = require('is-number');
-      │                     ^^^^^^^^^^^
+  > 4 │ const invalid1 = require('is-number');
+      │                          ^^^^^^^^^^^
     5 │ 
-    6 │ import foo from 'is-number';
+    6 │ import invalid2 from 'is-number';
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -45,16 +45,16 @@ invalid.js:4:21 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 
 ```
-invalid.js:6:17 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:22 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency is-number can be replaced.
   
-    4 │ const foo = require('is-number');
+    4 │ const invalid1 = require('is-number');
     5 │ 
-  > 6 │ import foo from 'is-number';
-      │                 ^^^^^^^^^^^
+  > 6 │ import invalid2 from 'is-number';
+      │                      ^^^^^^^^^^^
     7 │ 
-    8 │ const foo = await import('is-number');
+    8 │ const invalid3 = await import('is-number');
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -65,14 +65,14 @@ invalid.js:6:17 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 
 ```
-invalid.js:8:26 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:31 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency is-number can be replaced.
   
-     6 │ import foo from 'is-number';
+     6 │ import invalid2 from 'is-number';
      7 │ 
-   > 8 │ const foo = await import('is-number');
-       │                          ^^^^^^^^^^^
+   > 8 │ const invalid3 = await import('is-number');
+       │                               ^^^^^^^^^^^
      9 │ 
     10 │ // Native
   
@@ -85,18 +85,18 @@ invalid.js:8:26 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 
 ```
-invalid.js:11:17 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:22 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency object.entries can be replaced.
   
     10 │ // Native
-  > 11 │ import foo from 'object.entries';
-       │                 ^^^^^^^^^^^^^^^^
+  > 11 │ import invalid4 from 'object.entries';
+       │                      ^^^^^^^^^^^^^^^^
     12 │ 
     13 │ // Documented
   
   i The following replacement is suggested:
-    - Remove the dependency in favour of a native implementation Object.entries.
+    - Remove the dependency in favor of a native implementation Object.entries.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -104,13 +104,13 @@ invalid.js:11:17 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 
 ```
-invalid.js:14:17 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:22 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency npm-run-all can be replaced.
   
     13 │ // Documented
-  > 14 │ import foo from 'npm-run-all';
-       │                 ^^^^^^^^^^^^^
+  > 14 │ import invalid5 from 'npm-run-all';
+       │                      ^^^^^^^^^^^^^
     15 │ 
     16 │ // Removal
   
@@ -127,13 +127,13 @@ invalid.js:14:17 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 
 ```
-invalid.js:17:17 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:22 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency sort-object can be replaced.
   
     16 │ // Removal
-  > 17 │ import foo from 'sort-object';
-       │                 ^^^^^^^^^^^^^
+  > 17 │ import invalid6 from 'sort-object';
+       │                      ^^^^^^^^^^^^^
     18 │ 
   
   i The following replacements are suggested:

@@ -2,12 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize::DeserializableValue;
-use biome_json_syntax::JsonRoot;
+use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue};
 use biome_module_replacements::{
     ModuleReplacement, find_mapping, find_replacement, resolve_doc_url,
 };
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::AstNode;
 use biome_rule_options::no_restricted_dependencies::NoRestrictedDependenciesOptions;
 
 use crate::utils::is_package_json;
@@ -41,7 +40,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// See https://e18e.dev/docs/replacements/ for the full list of replacements.
+    /// See <https://e18e.dev/docs/replacements/> for the full list of replacements.
     ///
     pub NoRestrictedDependencies {
         version: "next",
@@ -53,83 +52,46 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRestrictedDependencies {
-    type Query = Ast<JsonRoot>;
-    type State = RuleState;
-    type Signals = Vec<Self::State>;
+    type Query = Ast<JsonMember>;
+    type State = ();
+    type Signals = Option<Self::State>;
     type Options = NoRestrictedDependenciesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut found = Vec::new();
-
         let path = ctx.file_path();
         if !is_package_json(path) {
-            return found;
+            return None;
         }
 
-        let root = ctx.query();
-        let Some(value) = root.value().ok() else {
-            return found;
-        };
-        let Some(object) = value.as_json_object_value() else {
-            return found;
-        };
+        let node = ctx.query();
 
-        for member in object.json_member_list() {
-            let Some(member) = member.ok() else {
-                continue;
-            };
-            let Some(name) = member.name().ok() else {
-                continue;
-            };
-            let Some(name_text) = name.inner_string_text() else {
-                continue;
-            };
-            let Some(name_text) = name_text.ok() else {
-                continue;
-            };
-            if !DEPENDENCY_KEYS.contains(&name_text.text()) {
-                continue;
-            }
-
-            let Some(dep_value) = member.value().ok() else {
-                continue;
-            };
-            let Some(dep_object) = dep_value.as_json_object_value() else {
-                continue;
-            };
-
-            for member in dep_object.json_member_list() {
-                let Some(member) = member.ok() else {
-                    continue;
-                };
-                let Some(name) = member.name().ok() else {
-                    continue;
-                };
-                let Some(name) = name.as_json_member_name() else {
-                    continue;
-                };
-                let Some(name_text) = name.inner_string_text().ok() else {
-                    continue;
-                };
-
-                if find_mapping(name_text.text()).is_some() {
-                    found.push(RuleState {
-                        name: name_text,
-                        range: name.range(),
-                    });
-                }
-            }
+        let parent_member_list = JsonMemberList::cast(node.syntax().parent()?)?;
+        let parent_object = JsonObjectValue::cast(parent_member_list.syntax().parent()?)?;
+        let parent_member = JsonMember::cast(parent_object.syntax().parent()?)?;
+        let parent_member_name = parent_member.name().ok()?;
+        let parent_member_name_text = parent_member_name.inner_string_text()?.ok()?;
+        if !DEPENDENCY_KEYS.contains(&parent_member_name_text.text()) {
+            return None;
         }
 
-        found
+        let name = node.name().ok()?;
+        let name_text = name.inner_string_text()?.ok()?;
+        if find_mapping(name_text.text()).is_some() {
+            return Some(());
+        }
+
+        None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let mapping = find_mapping(state.name.text())?;
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let name = node.name().ok()?;
+        let name_text = name.inner_string_text()?.ok()?;
+        let mapping = find_mapping(name_text.text())?;
 
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            state.range,
+            name.range(),
             markup! {
                 "The dependency "<Emphasis>{mapping.module_name}</Emphasis>" can be replaced."
             },
@@ -149,7 +111,7 @@ impl Rule for NoRestrictedDependencies {
             match replacement {
                 ModuleReplacement::Native(replacement) => {
                     replacement_text.extend_with(markup! {
-                        "\n- Remove the dependency in favour of a native implementation "<Emphasis>{replacement.common.id}</Emphasis>"."
+                        "\n- Remove the dependency in favor of a native implementation "<Emphasis>{replacement.common.id}</Emphasis>"."
                     });
                 }
                 ModuleReplacement::Documented(replacement) => {
@@ -183,8 +145,3 @@ impl Rule for NoRestrictedDependencies {
 }
 
 const DEPENDENCY_KEYS: &[&str] = &["dependencies", "devDependencies"];
-
-pub struct RuleState {
-    name: TokenText,
-    range: TextRange,
-}

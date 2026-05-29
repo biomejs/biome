@@ -1,17 +1,17 @@
 /* should generate diagnostics */
 
 // Simple
-const foo = require('is-number');
+const invalid1 = require('is-number');
 
-import foo from 'is-number';
+import invalid2 from 'is-number';
 
-const foo = await import('is-number');
+const invalid3 = await import('is-number');
 
 // Native
-import foo from 'object.entries';
+import invalid4 from 'object.entries';
 
 // Documented
-import foo from 'npm-run-all';
+import invalid5 from 'npm-run-all';
 
 // Removal
-import foo from 'sort-object';
+import invalid6 from 'sort-object';

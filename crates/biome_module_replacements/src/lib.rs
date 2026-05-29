@@ -3,18 +3,23 @@ mod data;
 
 pub use data::*;
 
+/// Finds a module replacement mapping by module name.
+///
+/// Returns `Some` with a reference to the `ModuleReplacementMapping` if found, `None` otherwise.
 pub fn find_mapping(module_name: &str) -> Option<&'static ModuleReplacementMapping> {
-    MODULE_REPLACEMENTS_MAPPINGS
-        .iter()
-        .find_map(|(name, mapping)| (*name == module_name).then_some(mapping))
+    MODULE_REPLACEMENTS_MAPPINGS.get(module_name)
 }
 
+/// Finds a module replacement by replacement ID.
+///
+/// Returns `Some` with a reference to the `ModuleReplacement` if found, `None` otherwise.
 pub fn find_replacement(replacement_id: &str) -> Option<&'static ModuleReplacement> {
-    MODULE_REPLACEMENTS
-        .iter()
-        .find_map(|(name, replacement)| (*name == replacement_id).then_some(replacement))
+    MODULE_REPLACEMENTS.get(replacement_id)
 }
 
+/// Resolves a documentation URL to its string representation.
+///
+/// Returns `Some` with the resolved URL string if a URL is provided, `None` otherwise.
 pub fn resolve_doc_url(url: Option<KnownUrl>) -> Option<String> {
     let url = url?;
     match url {

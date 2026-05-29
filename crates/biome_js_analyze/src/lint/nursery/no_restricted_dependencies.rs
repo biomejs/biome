@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// const glob = await import("tinyglobby");
     /// ```
     ///
-    /// See https://e18e.dev/docs/replacements/ for the full list of replacements.
+    /// See <https://e18e.dev/docs/replacements/> for the full list of replacements.
     ///
     pub NoRestrictedDependencies {
         version: "next",
@@ -111,7 +111,7 @@ impl Rule for NoRestrictedDependencies {
             match replacement {
                 ModuleReplacement::Native(replacement) => {
                     replacement_text.extend_with(markup! {
-                        "\n- Remove the dependency in favour of a native implementation "<Emphasis>{replacement.common.id}</Emphasis>"."
+                        "\n- Remove the dependency in favor of a native implementation "<Emphasis>{replacement.common.id}</Emphasis>"."
                     });
                 }
                 ModuleReplacement::Documented(replacement) => {

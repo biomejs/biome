@@ -5,19 +5,19 @@ expression: invalid.ts
 # Input
 ```ts
 /* should generate diagnostics */
-import foo = require('is-number');
+import invalid = require('is-number');
 
 ```
 
 # Diagnostics
 ```
-invalid.ts:2:22 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:26 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The dependency is-number can be replaced.
   
     1 │ /* should generate diagnostics */
-  > 2 │ import foo = require('is-number');
-      │                      ^^^^^^^^^^^
+  > 2 │ import invalid = require('is-number');
+      │                          ^^^^^^^^^^^
     3 │ 
   
   i The following replacement is suggested:

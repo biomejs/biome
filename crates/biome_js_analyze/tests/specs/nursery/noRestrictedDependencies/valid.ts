@@ -1,2 +1,2 @@
 /* should not generate diagnostics */
-import foo = require('unknown-module');
+import valid = require('unknown-module');

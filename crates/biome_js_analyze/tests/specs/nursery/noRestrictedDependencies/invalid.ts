@@ -1,2 +1,2 @@
 /* should generate diagnostics */
-import foo = require('is-number');
+import invalid = require('is-number');

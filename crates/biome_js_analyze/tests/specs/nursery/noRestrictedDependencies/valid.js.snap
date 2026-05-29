@@ -5,16 +5,15 @@ expression: valid.js
 # Input
 ```js
 /* should not generate diagnostics */
-const foo = 303;
+const valid1 = 303;
 
-import foo from 'unknown-module';
+import valid2 from 'unknown-module';
 
-const foo = require('unknown-module');
+const valid3 = require('unknown-module');
 
 const moduleName = 'is-' + 'number';
 require(moduleName);
 
-const moduleName = 'is-' + 'number';
 await import(moduleName);
 
 ```
