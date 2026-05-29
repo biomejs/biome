@@ -1146,9 +1146,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 slots.into_node(MD_THEMATIC_BREAK_CHAR, children)
             }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
-            MD_BULLET_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyMdBulletListMember::can_cast)
-            }
+            MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
             MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
             MD_INDENT_TOKEN_LIST => {

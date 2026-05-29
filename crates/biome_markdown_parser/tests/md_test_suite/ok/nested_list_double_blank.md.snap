@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 190
 expression: snapshot
 ---
 
@@ -76,10 +77,10 @@ MdDocument {
                                         MdNewline {
                                             value_token: NEWLINE@16..17 "\n" [] [],
                                         },
+                                        MdNewline {
+                                            value_token: NEWLINE@17..18 "\n" [] [],
+                                        },
                                     ],
-                                },
-                                MdNewline {
-                                    value_token: NEWLINE@17..18 "\n" [] [],
                                 },
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
@@ -150,13 +151,13 @@ MdDocument {
                   0: MD_INDENT_CHAR@7..8 " " [] []
             2: MD_BULLET_LIST_ITEM@8..28
               0: MD_BULLET_LIST@8..28
-                0: MD_BULLET@8..17
+                0: MD_BULLET@8..18
                   0: MD_LIST_MARKER_PREFIX@8..10
                     0: MD_INDENT_TOKEN_LIST@8..8
                     1: MINUS@8..9 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@9..10 " " [] []
                     3: MD_INDENT_TOKEN_LIST@10..10
-                  1: MD_BLOCK_LIST@10..17
+                  1: MD_BLOCK_LIST@10..18
                     0: MD_PARAGRAPH@10..16
                       0: MD_INLINE_ITEM_LIST@10..16
                         0: MD_TEXTUAL@10..15
@@ -166,9 +167,9 @@ MdDocument {
                       1: (empty)
                     1: MD_NEWLINE@16..17
                       0: NEWLINE@16..17 "\n" [] []
-                1: MD_NEWLINE@17..18
-                  0: NEWLINE@17..18 "\n" [] []
-                2: MD_BULLET@18..28
+                    2: MD_NEWLINE@17..18
+                      0: NEWLINE@17..18 "\n" [] []
+                1: MD_BULLET@18..28
                   0: MD_LIST_MARKER_PREFIX@18..22
                     0: MD_INDENT_TOKEN_LIST@18..20
                       0: MD_INDENT_TOKEN@18..19

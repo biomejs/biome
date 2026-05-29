@@ -2,6 +2,7 @@
   a: b,
   "x":y,
   'z':,
+  *alias: value,
   :d,
   :,
   plain

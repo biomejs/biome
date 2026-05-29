@@ -11304,7 +11304,7 @@ impl ScssNestingDeclaration {
             block: self.block(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssDeclarationName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -11327,7 +11327,7 @@ impl Serialize for ScssNestingDeclaration {
 }
 #[derive(Serialize)]
 pub struct ScssNestingDeclarationFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,

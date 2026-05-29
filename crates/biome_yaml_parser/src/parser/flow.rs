@@ -24,10 +24,19 @@ pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
         Present(parse_flow_json_node(p, property_list))
     } else if is_at_flow_yaml_node(p) || !property_empty {
         Present(parse_flow_yaml_node(p, property_list))
+    } else if is_at_alias_node(p) {
+        property_list.undo_completion(p).abandon(p);
+        Present(parse_alias_node(p))
     } else {
         property_list.undo_completion(p).abandon(p);
         Absent
     }
+}
+
+pub(crate) fn parse_alias_node(p: &mut YamlParser) -> CompletedMarker {
+    let m = p.start();
+    p.bump(ALIAS_LITERAL);
+    m.complete(p, YAML_ALIAS_NODE)
 }
 
 pub(crate) fn parse_flow_json_node(
@@ -134,6 +143,16 @@ impl ParseSeparatedList for FlowSequenceEntryList {
             let m = p.start();
             parse_flow_map_value(p);
             Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+        } else if is_at_alias_node(p) {
+            // Plain yaml key, or empty key with props
+            let alias_node = parse_alias_node(p);
+            if p.at(T![:]) {
+                let m = alias_node.precede(p);
+                parse_flow_map_value(p);
+                Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+            } else {
+                Present(alias_node)
+            }
         } else {
             let property_list = PropertyList.parse_list(p);
             let property_empty = property_list.range(p).is_empty();
@@ -266,6 +285,12 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         if p.at(T![:]) {
             parse_flow_map_value(p);
         }
+    } else if is_at_alias_node(p) {
+        property_list.undo_completion(p).abandon(p);
+        parse_alias_node(p);
+        if p.at(T![:]) {
+            parse_flow_map_value(p);
+        }
     } else {
         // Empty key, and maybe empty value too
         property_list.undo_completion(p).abandon(p);
@@ -295,6 +320,14 @@ fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
             parse_flow_map_value(p);
         }
         Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
+    } else if is_at_alias_node(p) {
+        property_list.undo_completion(p).abandon(p);
+        let alias_node = parse_alias_node(p);
+        let m = alias_node.precede(p);
+        if p.at(T![:]) {
+            parse_flow_map_value(p);
+        }
+        Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
     } else {
         property_list.undo_completion(p).abandon(p);
         if p.at(T![:]) {
@@ -320,6 +353,10 @@ pub(crate) fn is_at_flow_json_node(p: &YamlParser) -> bool {
         || is_at_flow_mapping(p)
         || is_at_double_quoted_scalar(p)
         || is_at_single_quoted_scalar(p)
+}
+
+pub(crate) fn is_at_alias_node(p: &YamlParser) -> bool {
+    p.at(ALIAS_LITERAL)
 }
 
 fn is_at_flow_sequence(p: &YamlParser) -> bool {

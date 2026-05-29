@@ -140,6 +140,12 @@ impl<'src> YamlLexer<'src> {
         let mut tokens = properties;
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         tokens.append(&mut potential_mapping_keys);
+
+        // Consume any trailing trivia remaining before closing the mapping/flow, as we must not
+        // have trailing trivia followed MAPPING_END/FLOW_END token
+        let mut trivia = self.consume_trivia(true);
+        tokens.append(&mut trivia);
+
         if self
             .scopes
             .last()
@@ -154,10 +160,6 @@ impl<'src> YamlLexer<'src> {
             } else {
                 // Just a normal flow value
                 tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
-                // Consume any trailing trivia remaining before closing the flow, as we must not
-                // have trailing trivia followed FLOW_END token
-                let mut trivia = self.consume_trivia(true);
-                tokens.append(&mut trivia);
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
         } else if self.is_at_mapping_indicator() {
@@ -316,6 +318,8 @@ impl<'src> YamlLexer<'src> {
     fn consume_potential_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
         if is_flow_collection_indicator(current) {
             self.consume_flow_collection()
+        } else if current == b'*' {
+            self.consume_alias_node().into()
         } else if current == b'"' {
             self.consume_double_quoted_literal().into()
         } else if current == b'\'' {
@@ -399,6 +403,7 @@ impl<'src> YamlLexer<'src> {
                     self.consume_byte_as_token(T!['}'])
                 }
                 (b',', _) => self.consume_byte_as_token(T![,]),
+                (b'*', _) => self.consume_alias_node(),
                 (b'&', _) => self.consume_anchor_property(),
                 (b'!', _) => self.consume_tag_property(),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
@@ -664,7 +669,11 @@ impl<'src> YamlLexer<'src> {
                     // Check if we would breach parent scope before consuming trivia
                     let start = self.current_coordinate;
                     let mut trivia = self.consume_trivia(false);
-                    if self.breach_parent_scope() {
+                    if self
+                        .scopes
+                        .last()
+                        .is_some_and(|scope| !scope.indent_with_dash(self.current_coordinate))
+                    {
                         // Restore position and break
                         self.current_coordinate = start;
                         break;
@@ -701,6 +710,22 @@ impl<'src> YamlLexer<'src> {
         } else {
             properties
         }
+    }
+
+    fn consume_alias_node(&mut self) -> LexToken {
+        self.assert_byte(b'*');
+        let start = self.current_coordinate;
+        self.advance(1);
+
+        while let Some(c) = self.current_byte() {
+            if is_anchor_char(c) && c != b':' {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        LexToken::new(ALIAS_LITERAL, start, self.current_coordinate)
     }
 
     fn consume_anchor_property(&mut self) -> LexToken {
@@ -1129,6 +1154,7 @@ fn maybe_at_mapping_start(current: u8, peek: Option<u8>) -> bool {
         || is_start_of_plain(current, peek, false)
         || current == b'"'
         || current == b'\''
+        || current == b'*'
         // empty key
         || current == b':'
 }

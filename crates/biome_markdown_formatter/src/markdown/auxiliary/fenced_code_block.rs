@@ -84,7 +84,7 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
             write!(f, [token.format()])?;
         }
 
-        if let Ok(r_fence) = r_fence {
+        if let Some(r_fence) = r_fence {
             write!(
                 f,
                 [format_replaced(

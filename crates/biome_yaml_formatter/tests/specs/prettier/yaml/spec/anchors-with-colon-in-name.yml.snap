@@ -32,27 +32,3 @@ foo:
 foo:
   *a:
 ```
-
-# Errors
-```
-anchors-with-colon-in-name.yml:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    1 │ &a: key: &a value
-    2 │ foo:
-  > 3 │   *a:
-      │   ^
-    4 │ 
-  
-anchors-with-colon-in-name.yml:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected end of file.
-  
-    2 │ foo:
-    3 │   *a:
-  > 4 │ 
-      │ 
-  
-
-```

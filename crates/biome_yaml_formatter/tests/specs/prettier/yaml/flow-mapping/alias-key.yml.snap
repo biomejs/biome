@@ -26,26 +26,3 @@ info: yaml/flow-mapping/alias-key.yml
 ```yml
 {&123 foo, *123 : 456}
 ```
-
-# Errors
-```
-alias-key.yml:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-  > 1 │ {&123 foo, *123 : 456}
-      │            ^
-    2 │ 
-  
-alias-key.yml:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `123 `
-  
-  > 1 │ {&123 foo, *123 : 456}
-      │             ^^^^
-    2 │ 
-  
-  i Remove 123 
-  
-
-```

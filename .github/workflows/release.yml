@@ -220,7 +220,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.95.0-bullseye@sha256:b26cecc875df6d524e817cb7268496916b38393a3adfef191cf8c8b545883117
+      image: rust:1.95.0-bullseye@sha256:28afaeb8445f2a2e7d878bd34ed39ba02bb517efb29986188cbd59b7cf4f2fdf
 
     steps:
       - name: Checkout repository
