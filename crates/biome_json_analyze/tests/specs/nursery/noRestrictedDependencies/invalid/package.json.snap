@@ -19,7 +19,7 @@ expression: package.json
 ```
 package.json:3:5 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency is-number can be replaced.
+  i Use of the restricted dependency is-number detected.
   
     1 │ {
     2 │   "dependencies": {
@@ -27,6 +27,8 @@ package.json:3:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
       │     ^^^^^^^^^^^
     4 │     "object.entries": "0.0.0",
     5 │     "npm-run-all": "0.0.0",
+  
+  i The dependency can be replaced with a modern, native, or more maintainable alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -39,7 +41,7 @@ package.json:3:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 package.json:4:5 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency object.entries can be replaced.
+  i Use of the restricted dependency object.entries detected.
   
     2 │   "dependencies": {
     3 │     "is-number": "0.0.0",
@@ -47,6 +49,8 @@ package.json:4:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
       │     ^^^^^^^^^^^^^^^^
     5 │     "npm-run-all": "0.0.0",
     6 │     "sort-object": "0.0.0"
+  
+  i The dependency can be replaced with a modern, native, or more maintainable alternative.
   
   i The following replacement is suggested:
     - Remove the dependency in favor of a native implementation Object.entries.
@@ -59,7 +63,7 @@ package.json:4:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 package.json:5:5 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency npm-run-all can be replaced.
+  i Use of the restricted dependency npm-run-all detected.
   
     3 │     "is-number": "0.0.0",
     4 │     "object.entries": "0.0.0",
@@ -67,6 +71,8 @@ package.json:5:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
       │     ^^^^^^^^^^^^^
     6 │     "sort-object": "0.0.0"
     7 │   }
+  
+  i The dependency can be replaced with a modern, native, or more maintainable alternative.
   
   i The following replacements are suggested:
     - Replace with the alternative: npm-run-all2.
@@ -83,7 +89,7 @@ package.json:5:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
 ```
 package.json:6:5 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency sort-object can be replaced.
+  i Use of the restricted dependency sort-object detected.
   
     4 │     "object.entries": "0.0.0",
     5 │     "npm-run-all": "0.0.0",
@@ -91,6 +97,8 @@ package.json:6:5 lint/nursery/noRestrictedDependencies ━━━━━━━━�
       │     ^^^^^^^^^^^^^
     7 │   }
     8 │ }
+  
+  i The dependency can be replaced with a modern, native, or more maintainable alternative.
   
   i The following replacements are suggested:
     - Remove the dependency as it's no longer needed. `Object.entries` and `Array.prototype.sort` can be used to sort object keys.

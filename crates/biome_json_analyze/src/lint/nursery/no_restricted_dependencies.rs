@@ -93,9 +93,11 @@ impl Rule for NoRestrictedDependencies {
             rule_category!(),
             name.range(),
             markup! {
-                "The dependency "<Emphasis>{mapping.module_name}</Emphasis>" can be replaced."
+                "Use of the restricted dependency "<Emphasis>{mapping.module_name}</Emphasis>" detected."
             },
-        );
+        ).note(markup! {
+            "The dependency can be replaced with a modern, native, or more maintainable alternative."
+        });
 
         let mut replacement_text = if mapping.replacements.len() > 1 {
             markup!("The following replacements are suggested:").to_owned()

@@ -13,12 +13,14 @@ import invalid = require('is-number');
 ```
 invalid.ts:2:26 lint/nursery/noRestrictedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency is-number can be replaced.
+  i Use of the restricted dependency is-number detected.
   
     1 │ /* should generate diagnostics */
   > 2 │ import invalid = require('is-number');
       │                          ^^^^^^^^^^^
     3 │ 
+  
+  i The dependency can be replaced with a modern, native, or more maintainable alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
