@@ -154,5 +154,146 @@ if (ro) console.log();
 declare const partialObj2: Partial<{a: string}>;
 if (partialObj2) console.log();
 
+// Falsy detection via logical-not on always-truthy operand
+const arrNotFalsy = [];
+if (!arrNotFalsy) {  // always false, should be flagged
+  console.log("never runs");
+}
+
+const objNotFalsy = {};
+if (!objNotFalsy) {  // always false, should be flagged
+  console.log("never runs");
+}
+
+// Truthy detection via double-not or not-falsy literal
+if (!false) {  // always true, should be flagged
+  console.log("always runs");
+}
+
+if (!0) {  // always true, should be flagged
+  console.log("always runs");
+}
+
+// Type-aware logical OR on member access
+interface Config {
+  items: string[];
+  name: string;
+  getCount(): number;
+}
+
+function unnecessaryOrOnMember(cfg: Config) {
+  return cfg.items || [];  // cfg.items is string[], always truthy - unnecessary
+}
+
+// if-condition on always-truthy member (array is always truthy)
+function unnecessaryIfOnMember(cfg: Config) {
+  if (cfg.items) {  // cfg.items is string[], always truthy - flag
+    return cfg.items[0];
+  }
+}
+
+// x: string compared with null - always false
+function cmpNullWithString(x: string) {
+  return x === null;  // always false
+}
+
+// x: string compared with undefined - always false
+function cmpUndefinedWithString(x: string) {
+  return x !== undefined;  // always true
+}
+
+// Switch on literal union with a case outside the union - unreachable
+function switchOnUnionWithUnreachable(value: 'a' | 'b' | 'c') {
+  switch (value) {
+    case 'a': return 1;
+    case 'd': return 2;  // unreachable - 'd' is not in the union
+  }
+}
+
+// Switch on literal true with case false - unreachable
+function switchOnTrue() {
+  switch (true) {
+    case false: return 1;  // unreachable
+    case true: return 2;
+  }
+}
+
+// Switch on literal number with impossible case - unreachable
+function switchOnSpecificNumber(value: 1 | 2 | 3) {
+  switch (value) {
+    case 4: return 4;  // unreachable
+  }
+}
+
+// Unreachable `case` with non-decimal numeric literals (hex, binary, octal, separators).
+function switchOnNonDecimalLiterals(value: 1 | 2 | 3) {
+  switch (value) {
+    case 0xFF: return "hex";      // 255 - unreachable
+    case 0b1010: return "bin";    // 10 - unreachable
+    case 0o17: return "oct";      // 15 - unreachable
+    case 1_000: return "sep";     // 1000 - unreachable
+  }
+}
+
+// Double-not on always-truthy types - still flagged (recursion inverts twice)
+function doubleNotOnArray() {
+  const xs: number[] = [];
+  if (!!xs) {  // always true, should be flagged
+    return xs;
+  }
+}
+
+// && with always-truthy member access - flagged
+interface AlwaysItems {
+  items: string[];
+}
+function andOnAlwaysTruthy(cfg: AlwaysItems) {
+  return cfg.items && cfg.items[0];  // cfg.items is string[] always truthy, && is redundant
+}
+
+// Ternary with always-truthy member condition - flagged
+function ternaryOnAlwaysTruthy(cfg: AlwaysItems) {
+  return cfg.items ? "yes" : "no";  // always "yes"
+}
+
+// Optional chain on a non-nullish call result - flagged
+function callReturningNonNullish(): string {
+  return "x";
+}
+const callChain = callReturningNonNullish()?.length;
+
+// `??` on a guaranteed object - flagged
+interface Settings { theme: string }
+function readSettings(s: Settings) {
+  return s.theme ?? "light";
+}
+
+// `null` on the left-hand side of `===` against a non-nullish value - flagged
+function leftNullCmp(x: number) {
+  return null === x;
+}
+
+// `undefined` on the left-hand side of `!==` against a non-nullish value - flagged
+function leftUndefinedCmp(x: number) {
+  return undefined !== x;
+}
+
+// `!` applied to a non-nullish member access - flagged via type information
+interface NonEmpty { items: string[] }
+function notOnAlwaysTruthyMember(c: NonEmpty) {
+  if (!c.items) {
+    return "never";
+  }
+}
+
+// Switch with mixed reachable and unreachable cases
+function switchMixed(value: 'a' | 'b') {
+  switch (value) {
+    case 'a': return 1;     // reachable
+    case 'b': return 2;     // reachable
+    case 'z': return 3;     // unreachable
+  }
+}
+
 const date = new Date();
 if (date) console.log(date);

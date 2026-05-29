@@ -125,42 +125,42 @@ various-combinations-of-tags-and-anchors.yml:16:1 parse ━━━━━━━━
   
 various-combinations-of-tags-and-anchors.yml:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `:` but instead found ``
+  × expected `:` but instead found `!!map`
   
     17 │ &anchor6 b6: 2
     18 │ ---
   > 19 │ !!map
-       │ 
+       │ ^^^^^
     20 │ &a8 !!str key8: value7
     21 │ ---
   
-  i Remove 
+  i Remove !!map
   
 various-combinations-of-tags-and-anchors.yml:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `:` but instead found ``
+  × expected `:` but instead found `!!map`
   
     20 │ &a8 !!str key8: value7
     21 │ ---
   > 22 │ !!map
-       │ 
+       │ ^^^^^
     23 │ !!str &a10 key10: value9
     24 │ ---
   
-  i Remove 
+  i Remove !!map
   
 various-combinations-of-tags-and-anchors.yml:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `:` but instead found ``
+  × expected `:` but instead found `!!str`
   
     23 │ !!str &a10 key10: value9
     24 │ ---
   > 25 │ !!str &a11
-       │ 
+       │ ^^^^^
     26 │ value11
     27 │ 
   
-  i Remove 
+  i Remove !!str
   
 various-combinations-of-tags-and-anchors.yml:27:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

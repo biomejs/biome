@@ -189,3 +189,111 @@ type Options = {
 function svgToImage(options?: Options) {
   const { format = 'image/png' } = options || {};
 }
+
+function qux(arg: string | null) {
+  return arg?.length;
+}
+
+function arr(xs: string[] | undefined) {
+  return xs?.[0];
+}
+
+function fn(f: (() => string) | undefined) {
+  return f?.();
+}
+
+// Nullable member access - must NOT be flagged
+interface MaybeConfig {
+  items?: string[];
+  name: string | undefined;
+}
+
+function validOrOnNullable(cfg: MaybeConfig) {
+  return cfg.items || [];  // cfg.items is string[] | undefined, OR is necessary
+}
+
+function validIfOnNullable(cfg: MaybeConfig) {
+  if (cfg.name) { // string | undefined, necessary
+    return cfg.name;
+  }
+}
+
+// Legitimate null checks
+function validNullCheck(x: string | null) {
+  return x === null;  // necessary - x can be null
+}
+
+function validUndefinedCheck(x: string | undefined) {
+  return x !== undefined;  // necessary - x can be undefined
+}
+
+function validNullishUnionCheck(x: string | null | undefined) {
+  return x == null;  // necessary - x can be null or undefined
+}
+
+// x: undefined | string compared with null - NOT detected by narrow pass
+// (neither string nor undefined is null, but the union type doesn't resolve
+// to non-nullish because it contains undefined, so is_non_nullish() is false)
+function cmpNullWithOptional(x: undefined | string) {
+  return x === null;  // always false - x is never null, but not flagged by narrow pass
+}
+
+// Switch on literal union with all cases covered - no flag
+function switchOnLiteralUnion(value: 'a' | 'b' | 'c') {
+  switch (value) {
+    case 'a': return 1;
+    case 'b': return 2;
+    case 'c': return 3;
+  }
+}
+
+// Switch on literal union with default only - no flag
+function switchOnUnionDefault(value: 'a' | 'b' | 'c') {
+  switch (value) {
+    default:
+      break;
+  }
+}
+
+// Switch on plain string - any string literal case is reachable
+function switchOnString(value: string) {
+  switch (value) {
+    case 'hello': return 1;
+    case 'world': return 2;
+  }
+}
+
+// Switch on plain number - any number literal case is reachable
+function switchOnNumber(value: number) {
+  switch (value) {
+    case 1: return 1;
+    case 2: return 2;
+  }
+}
+
+// number || 0 is not flagged because 0 is a legitimate falsy fallback.
+// cfg.getCount() returns number; zero is a valid replacement for a falsy number.
+interface _Config2 {
+  getCount(): number;
+}
+function unnecessaryOrOnCall(cfg: _Config2) {
+  return cfg.getCount() || 0;
+}
+
+// Nullish coalescing on genuinely nullable types - MUST NOT be flagged
+function nullishStr(arg: string | undefined) {
+  return arg ?? "default";
+}
+
+function nullishNum(arg: number | null) {
+  return arg ?? 0;
+}
+
+function nullishUnion(arg: string | null | undefined) {
+  return arg ?? "fallback";
+}
+
+// Double-not on nullable types - idiomatic boolean coercion, NOT flagged
+function doubleNotCoerce(user: { name: string } | undefined) {
+  return !!user;
+}

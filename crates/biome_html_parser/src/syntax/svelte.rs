@@ -480,12 +480,7 @@ fn parse_await_then_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    parse_single_text_expression_content(p).ok();
 
     Present(m.complete(p, SVELTE_AWAIT_THEN_CLAUSE))
 }
@@ -497,11 +492,8 @@ fn parse_await_catch_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    parse_single_text_expression_content(p).ok();
+
     Present(m.complete(p, SVELTE_AWAIT_CATCH_CLAUSE))
 }
 
@@ -634,13 +626,7 @@ fn parse_await_then_block(
     }
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'then'", p.cur_range()));
-    }
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
@@ -672,13 +658,7 @@ fn parse_await_catch_block(
     }
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'catch'", p.cur_range()));
-    }
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
