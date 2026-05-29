@@ -100,10 +100,14 @@ fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
         .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }
 
+const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
+
 fn is_env_from_process(binding: &biome_js_semantic::Binding) -> bool {
-    const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
-    let ancestors: Vec<_> = binding.syntax().ancestors().collect();
-    ancestors
+
+    binding
+    	.syntax()
+    	.ancestors()
+    	.skip(1)
         .iter()
         .find_map(|n| AnyJsNamedImportSpecifier::cast(n.clone())?.imported_name())
         .is_some_and(|name| name.text_trimmed() == "env")
