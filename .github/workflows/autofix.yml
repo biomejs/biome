@@ -46,8 +46,6 @@ jobs:
         run: cargo codegen-bindings
       - name: Run the migrate codegen
         run: cargo codegen-migrate
-      - name: Regenerate global types
-        run: cargo run -p xtask_codegen --features global_types -- global-types
 
       # Format Rust and TOML files
       - name: Run format

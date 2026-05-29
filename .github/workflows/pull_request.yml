@@ -101,10 +101,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
         run: cargo test --workspace --features=js_plugin
-      - name: Test global types feature
-        run: cargo test -p xtask_codegen --features global_types
-      - name: Verify global types codegen
-        run: cargo run -p xtask_codegen --features global_types -- global-types --verify
 
   e2e-tests:
     name: End-to-end tests

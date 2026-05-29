@@ -28,7 +28,6 @@ gen-all:
   just gen-configuration
   just gen-migrate
   just gen-bindings
-  just gen-global-types
   just format
 
 # Generates TypeScript types and JSON schema of the configuration
