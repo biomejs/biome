@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-pair-leading-comments.scss
+---
+
+# Input
+
+```scss
+$foo:(property1:(),// comment 1
+// comment 2
+
+property2:1,/** comment 1 */
+/* comment 2 */
+property3:2);
+
+$line:(// keep
+key:(inner:value,),);
+
+```
+
+
+# Formatted
+
+```scss
+$foo: (
+	property1: (),
+	// comment 1
+	// comment 2
+	property2: 1,
+	/** comment 1 */ /* comment 2 */ property3: 2,
+);
+
+$line: (
+	// keep
+	key: (
+			inner: value,
+		)
+);
+
+```

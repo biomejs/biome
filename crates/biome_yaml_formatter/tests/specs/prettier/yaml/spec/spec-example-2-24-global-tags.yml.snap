@@ -76,27 +76,5 @@ spec-example-2-24-global-tags.yml:1:1 parse ━━━━━━━━━━━━
     2 │ --- !shape
     3 │   # Use the ! handle for presenting
   
-spec-example-2-24-global-tags.yml:9:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-     7 │   radius: 7
-     8 │ - !line
-   > 9 │   start: *ORIGIN
-       │          ^
-    10 │   finish: { x: 89, y: 102 }
-    11 │ - !label
-  
-spec-example-2-24-global-tags.yml:12:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    10 │   finish: { x: 89, y: 102 }
-    11 │ - !label
-  > 12 │   start: *ORIGIN
-       │          ^
-    13 │   color: 0xFFEEBB
-    14 │   text: Pretty vector drawing.
-  
 
 ```

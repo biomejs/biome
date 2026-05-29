@@ -3156,7 +3156,7 @@ ScssNamespacedVariable =
 // font: { family: sans-serif; size: 12px; }
 // ^^^^
 ScssNestingDeclaration =
-	name: CssIdentifier
+	name: AnyCssDeclarationName
 	':'
 	value: ScssExpression
 	block: AnyCssDeclarationOrRuleBlock

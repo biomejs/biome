@@ -59,6 +59,10 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
 		},
+		"plugins": {
+			"description": "List of plugins to load.",
+			"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
+		},
 		"root": {
 			"description": "Indicates whether this configuration file is at the root of a Biome\nproject. By default, this is `true`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -6806,7 +6810,7 @@
 					]
 				},
 				"noUnnecessaryConditions": {
-					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+					"description": "Disallow conditions that always evaluate to the same value.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
 						{ "type": "null" }
@@ -7586,6 +7590,10 @@
 						{ "$ref": "#/$defs/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"plugins": {
+					"description": "Specific configuration for additional plugins",
+					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -7748,6 +7756,34 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"PluginConfiguration": {
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"anyOf": [
+				{ "description": "A plain path to the plugin.", "type": "string" },
+				{
+					"description": "A path with additional options.",
+					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginWithOptions": {
+			"description": "Plugin path with additional options.",
+			"type": "object",
+			"properties": {
+				"includes": {
+					"description": "A list of glob patterns. The plugin will only run on files matching\nthese patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				},
+				"path": { "description": "The path to the plugin.", "type": "string" }
+			},
+			"additionalProperties": false,
+			"required": ["path"]
+		},
+		"Plugins": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/PluginConfiguration" }
 		},
 		"PresetConfig": {
 			"description": "A preset configuration for enabling a set of rules.",
@@ -15579,17 +15615,20 @@
 			]
 		},
 		"UseNullishCoalescingOptions": {
+			"description": "Options for the `useNullishCoalescing` rule.",
 			"type": "object",
 			"properties": {
 				"ignoreConditionalTests": {
-					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
+					"type": ["boolean", "null"]
+				},
+				"ignoreMixedLogicalExpressions": {
+					"description": "Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).",
+					"type": ["boolean", "null"]
 				},
 				"ignoreTernaryTests": {
-					"description": "Whether to ignore ternary expressions that could be simplified\nusing the nullish coalescing operator.\n\nDefault: `false`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore ternary expressions that check for `null` or `undefined` (default: `false`).",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

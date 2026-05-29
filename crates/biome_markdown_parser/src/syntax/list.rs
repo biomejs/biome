@@ -336,35 +336,6 @@ struct ListItemBlankInfo {
     ends_with_blank_line: bool,
 }
 
-fn skip_blank_lines_between_items(
-    p: &mut MarkdownParser,
-    has_item_after_blank_lines: impl Fn(&mut MarkdownParser) -> bool,
-    is_tight: &mut bool,
-    last_item_ends_with_blank: &mut bool,
-) {
-    // Skip blank lines between list items.
-    // Per CommonMark §5.3, blank lines between items make the list loose
-    // but don't end the list.
-    //
-    // Any NEWLINE we see at this position (after the item-terminating newline)
-    // represents a blank line between items. We don't use at_blank_line() here
-    // because it checks if what comes AFTER the newline is blank, but we're
-    // already past one newline - any additional newlines ARE blank lines.
-    while p.at(NEWLINE) {
-        // Only skip if there's another list item after the blank lines
-        if !has_item_after_blank_lines(p) {
-            break;
-        }
-        // Blank lines between items make the list loose
-        *is_tight = false;
-        *last_item_ends_with_blank = true;
-        // Emit blank line as an explicit MdNewline CST node
-        let newline_m = p.start();
-        p.bump(NEWLINE);
-        newline_m.complete(p, MD_NEWLINE);
-    }
-}
-
 fn update_list_tightness(
     blank_info: ListItemBlankInfo,
     is_tight: &mut bool,
@@ -388,7 +359,6 @@ fn parse_list_element_common<M, FMarker, FParse>(
     marker_state: &mut Option<M>,
     current_marker: FMarker,
     parse_item: FParse,
-    has_item_after_blank_lines: impl Fn(&mut MarkdownParser) -> bool,
     is_tight: &mut bool,
     last_item_ends_with_blank: &mut bool,
 ) -> ParsedSyntax
@@ -399,12 +369,13 @@ where
     let prev_is_tight = *is_tight;
     let prev_last_item_ends_with_blank = *last_item_ends_with_blank;
 
-    skip_blank_lines_between_items(
-        p,
-        has_item_after_blank_lines,
-        is_tight,
-        last_item_ends_with_blank,
-    );
+    // Separator blank lines between items are consumed by the preceding item
+    // (see `consume_all_blank_lines`), so they live inside that item's block
+    // rather than as `MdBulletList` children, per the grammar
+    // `MdBulletList = MdBullet*`. By the time we get here the parser is
+    // positioned at the next marker, never at a blank line. List looseness from
+    // those blanks is recorded by `update_list_tightness` via the preceding
+    // item's `ListItemBlankInfo`.
 
     if marker_state.is_none() {
         *marker_state = current_marker(p);
@@ -413,8 +384,8 @@ where
     let (parsed, blank_info) = parse_item(p);
 
     if parsed.is_absent() {
-        // The blank lines we skipped didn't lead to a valid item in this list.
-        // Restore tightness — the blank lines belong to a parent context.
+        // No valid item here, so any preceding blank lines belong to a parent
+        // context. Restore tightness as it was before this attempt.
         *is_tight = prev_is_tight;
         *last_item_ends_with_blank = prev_last_item_ends_with_blank;
     } else {
@@ -522,7 +493,6 @@ impl ParseNodeList for BulletList {
             &mut self.marker_kind,
             current_bullet_marker,
             parse_bullet,
-            |p| has_bullet_item_after_blank_lines_at_indent(p, self.marker_indent),
             &mut self.is_tight,
             &mut self.last_item_ends_with_blank,
         );
@@ -994,7 +964,6 @@ impl ParseNodeList for OrderedList {
             &mut self.marker_delim,
             current_ordered_delim,
             parse_ordered_bullet,
-            |p| has_ordered_item_after_blank_lines_at_indent(p, self.marker_indent),
             &mut self.is_tight,
             &mut self.last_item_ends_with_blank,
         );
@@ -1927,7 +1896,9 @@ fn apply_blank_line_action(
             LoopAction::Continue
         }
         BlankLineAction::EndItemAfterBlank => {
-            consume_blank_line(p);
+            // Consume all separator newlines so they live inside this item's
+            // block list rather than leaking out as MdBulletList siblings.
+            consume_all_blank_lines(p);
             state.record_blank();
             LoopAction::Break
         }
@@ -1970,8 +1941,16 @@ fn apply_blank_line_action_with_prefix(
             // actual blank line, so EndItemAtBoundary behaves like EndItemAfterBlank.
             if line_has_quote_prefix {
                 consume_quote_prefix(p, quote_depth);
+                consume_blank_line(p);
+            } else if matches!(action, BlankLineAction::EndItemAfterBlank) {
+                // Outside a block quote, absorb every separator newline so they
+                // stay inside this item rather than leaking as MdBulletList
+                // siblings. Quote contexts keep the single-line behavior because
+                // each line still carries its own `>` prefix.
+                consume_all_blank_lines(p);
+            } else {
+                consume_blank_line(p);
             }
-            consume_blank_line(p);
             if !marker_line_break {
                 state.has_blank_line = true;
             }
@@ -2032,8 +2011,7 @@ fn handle_first_line_marker_only(
     }
 
     // Now check if we're at a blank line (the line immediately after marker is empty).
-    // Per CommonMark: if marker-only line is followed by a blank line,
-    // the item is truly empty and subsequent content is outside the list.
+    // A marker-only line followed by a blank line always ends *this* item.
     let now_at_blank_line = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);
@@ -2042,6 +2020,26 @@ fn handle_first_line_marker_only(
     });
 
     if now_at_blank_line {
+        // Per CommonMark §5.3 (example 315), an empty item followed by a blank
+        // line does NOT end the *list* when a same-marker item continues after
+        // the blank — the items stay one list that becomes loose. Absorb the
+        // separator blank line(s) into this empty item (so they don't leak as
+        // direct MdBulletList siblings) and record the blank so the list is
+        // marked loose.
+        let continues_same_marker = if state.parent_marker_kind.is_some() {
+            has_bullet_item_after_blank_lines_at_indent(p, state.marker_indent)
+                && !marker_changes_after_blank_lines(p, state.parent_marker_kind)
+        } else if state.parent_ordered_delim.is_some() {
+            has_ordered_item_after_blank_lines_at_indent(p, state.marker_indent)
+                && !delim_changes_after_blank_lines(p, state.parent_ordered_delim)
+        } else {
+            false
+        };
+        if continues_same_marker {
+            consume_all_blank_lines(p);
+            state.has_blank_line = true;
+            state.last_was_blank = true;
+        }
         return LoopAction::Break;
     }
 
@@ -3349,6 +3347,31 @@ fn consume_blank_line(p: &mut MarkdownParser) {
         let m = p.start();
         p.bump(NEWLINE);
         m.complete(p, MD_NEWLINE);
+    }
+}
+
+/// Consume every consecutive blank line, emitting one `MdNewline` node per
+/// line into the current item's block list.
+///
+/// Used when an item ends because blank lines separate it from a following
+/// sibling of the same list (`BlankLineAction::EndItemAfterBlank`). All the
+/// separator newlines belong to the preceding item so they do not leak out as
+/// direct `MdBulletList` children. Stops at the first line carrying non-blank
+/// content (the next item marker), leaving its indentation untouched.
+fn consume_all_blank_lines(p: &mut MarkdownParser) {
+    loop {
+        // Only consume the line if it is blank (whitespace then a newline);
+        // otherwise the indentation belongs to the next item's marker prefix.
+        let line_is_blank = p.lookahead(|p| {
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            p.at(NEWLINE)
+        });
+        if !line_is_blank {
+            break;
+        }
+        consume_blank_line(p);
     }
 }
 

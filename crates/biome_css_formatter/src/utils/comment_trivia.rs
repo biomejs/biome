@@ -1,8 +1,6 @@
-use crate::comments::FormatCssLeadingComment;
 use crate::prelude::*;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode};
 use biome_formatter::comments::{CommentKind, DecoratedComment};
-use biome_formatter::{FormatRefWithRule, write};
 
 /// Returns `true` when the last leading block comment stays with this node.
 pub(crate) fn has_same_group_leading_block_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
@@ -17,40 +15,6 @@ pub(crate) fn has_same_group_leading_block_comment(node: &CssSyntaxNode, f: &Css
         })
 }
 
-/// Formats leading comments with soft lines after each comment.
-///
-/// Group this with the node for `/* comment */ key: value`, so the pair breaks
-/// only when the group does not fit.
-pub(crate) const fn format_leading_comments_with_soft_lines(
-    node: &CssSyntaxNode,
-) -> FormatLeadingCommentsWithSoftLines<'_> {
-    FormatLeadingCommentsWithSoftLines { node }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub(crate) struct FormatLeadingCommentsWithSoftLines<'a> {
-    node: &'a CssSyntaxNode,
-}
-
-impl Format<CssFormatContext> for FormatLeadingCommentsWithSoftLines<'_> {
-    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let comments = f.comments().clone();
-
-        for comment in comments.leading_comments(self.node) {
-            write!(
-                f,
-                [
-                    FormatRefWithRule::new(comment, FormatCssLeadingComment),
-                    soft_line_break_or_space()
-                ]
-            )?;
-            comment.mark_formatted();
-        }
-
-        Ok(())
-    }
-}
-
 /// Returns `true` for comments that stay on the node's closing line.
 ///
 /// Example: `(a, b) /* end */`.
@@ -62,7 +26,7 @@ pub(crate) fn has_inline_trailing_comment(node: &CssSyntaxNode) -> bool {
     })
 }
 
-/// Returns true when `comment` is in the node's trailing trivia.
+/// Returns `true` when `comment` is in the node's trailing trivia.
 pub(crate) fn is_trailing_comment_on_node(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,

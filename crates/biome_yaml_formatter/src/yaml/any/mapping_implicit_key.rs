@@ -10,6 +10,7 @@ impl FormatRule<AnyYamlMappingImplicitKey> for FormatAnyYamlMappingImplicitKey {
         match node {
             AnyYamlMappingImplicitKey::YamlFlowJsonNode(node) => node.format().fmt(f),
             AnyYamlMappingImplicitKey::YamlFlowYamlNode(node) => node.format().fmt(f),
+            AnyYamlMappingImplicitKey::YamlAliasNode(node) => node.format().fmt(f),
         }
     }
 }

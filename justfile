@@ -128,8 +128,8 @@ build-wasm-web-dev:
     --typescript
 
 # Build WASM for web target (release)
-build-wasm-web:
-  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm
+build-wasm-web *args='':
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_wasm {{args}}
   wasm-bindgen target/wasm32-unknown-unknown/release/biome_wasm.wasm \
     --out-dir packages/@biomejs/wasm-web \
     --no-demangle \

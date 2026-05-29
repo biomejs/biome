@@ -19,13 +19,14 @@ pub(crate) fn owns_include_closing_comments(node: &CssSyntaxNode, f: &CssFormatt
     is_in_scss_include_arguments(node) && f.comments().has_dangling_comments(node)
 }
 
-/// Returns `true` when this map layout prints comments before `)`.
-pub(crate) fn owns_map_closing_comments(node: &ScssMapExpression, f: &CssFormatter) -> bool {
-    if is_in_scss_include_arguments(node.syntax()) {
-        node.pairs().len() > 0 && owns_include_closing_comments(node.syntax(), f)
-    } else {
-        has_inline_map_closing_comments(node, f)
-    }
+/// Returns `true` when an include-owned map prints comments before `)`.
+pub(crate) fn owns_include_map_closing_comments(
+    node: &ScssMapExpression,
+    f: &CssFormatter,
+) -> bool {
+    is_in_scss_include_arguments(node.syntax())
+        && node.pairs().len() > 0
+        && owns_include_closing_comments(node.syntax(), f)
 }
 
 /// Writes include-owned comments before the closing `)`.
@@ -38,18 +39,14 @@ pub(crate) fn write_include_closing_comments(
         return Ok(());
     }
 
-    write_closing_comments(node, spacing, f)
-}
-
-/// Writes comments that stay on the include path before the closing `)`.
-fn write_closing_comments(
-    node: &CssSyntaxNode,
-    spacing: ClosingCommentSpacing,
-    f: &mut CssFormatter,
-) -> FormatResult<()> {
     let has_line_closing_comment = has_line_closing_comment(node, f);
 
-    write_space_before_closing_comment(spacing, has_line_closing_comment, f)?;
+    match spacing {
+        ClosingCommentSpacing::Adaptive if !has_line_closing_comment => write!(f, [space()])?,
+        ClosingCommentSpacing::Adaptive | ClosingCommentSpacing::SoftLineBreak => {
+            write!(f, [soft_line_break_or_space()])?;
+        }
+    }
 
     write!(
         f,
@@ -60,32 +57,12 @@ fn write_closing_comments(
     )
 }
 
-fn write_space_before_closing_comment(
-    spacing: ClosingCommentSpacing,
-    has_line_closing_comment: bool,
-    f: &mut CssFormatter,
-) -> FormatResult<()> {
-    match spacing {
-        ClosingCommentSpacing::Adaptive if !has_line_closing_comment => write!(f, [space()]),
-        ClosingCommentSpacing::Adaptive | ClosingCommentSpacing::SoftLineBreak => {
-            write!(f, [soft_line_break_or_space()])
-        }
-    }
-}
-
+/// Returns `true` for `//` comments before the include-owned closing `)`.
+///
+/// Example: `@include mix((a, // end\n))` needs a hard break before `)`.
 fn has_line_closing_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
     f.comments()
         .dangling_comments(node)
         .iter()
         .any(|comment| comment.kind().is_line())
-}
-
-/// Returns `true` for inline comments after the last map pair.
-fn has_inline_map_closing_comments(node: &ScssMapExpression, f: &CssFormatter) -> bool {
-    node.pairs().len() > 0
-        && !f.comments().dangling_comments(node.syntax()).is_empty()
-        && f.comments()
-            .dangling_comments(node.syntax())
-            .iter()
-            .all(|comment| comment.kind().is_inline() && comment.lines_before() == 0)
 }

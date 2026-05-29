@@ -1,4 +1,3 @@
-use crate::comments::FormatCssLeadingComment;
 use crate::prelude::*;
 use crate::utils::component_value_list::{ValueListLayout, get_value_list_layout};
 use biome_css_syntax::{
@@ -6,7 +5,8 @@ use biome_css_syntax::{
     CssLanguage,
 };
 use biome_formatter::comments::SourceComment;
-use biome_formatter::{FormatRefWithRule, format_args, write};
+use biome_formatter::trivia::format_dangling_comment;
+use biome_formatter::{format_args, write};
 use biome_rowan::SyntaxResult;
 
 #[derive(Debug, Clone, Default)]
@@ -65,16 +65,16 @@ impl<'a> CssPropertyColonComments<'a> {
             return write!(f, [colon.format()]);
         }
 
+        // This comment belongs between the property name and `:`, e.g.
+        // `color/* c */: red`.
         for comment in colon_boundary_comments {
-            let formatted = FormatRefWithRule::new(comment, FormatCssLeadingComment);
+            let formatted = format_dangling_comment(comment);
 
             if comment.kind().is_line() {
                 write!(f, [space(), formatted])?;
             } else {
                 write!(f, [formatted])?;
             }
-
-            comment.mark_formatted();
         }
 
         // Prettier keeps `color // note\n: red` as a raw name/colon boundary.
@@ -108,9 +108,10 @@ impl<'a> CssPropertyColonComments<'a> {
             return write!(f, [space(), value.format()]);
         }
 
+        // This comment belongs between `:` and the value, e.g.
+        // `color:/* c */ red`.
         for (index, comment) in value_boundary_comments.iter().enumerate() {
             self.fmt_value_boundary_comment(index, comment, f)?;
-            comment.mark_formatted();
         }
 
         let should_break_before_value = value_boundary_comments
@@ -134,7 +135,7 @@ impl<'a> CssPropertyColonComments<'a> {
         comment: &SourceComment<CssLanguage>,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let formatted = FormatRefWithRule::new(comment, FormatCssLeadingComment);
+        let formatted = format_dangling_comment(comment);
 
         if comment.lines_before() > 0 {
             if comment.kind().is_line() {
