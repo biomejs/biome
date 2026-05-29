@@ -70,6 +70,7 @@ impl From<ConsistentTypeImportsOptions> for use_import_type::UseImportTypeOption
     fn from(val: ConsistentTypeImportsOptions) -> Self {
         Self {
             style: val.fix_style.map(|fix_style| fix_style.into()),
+            preserve_decorator_metadata: None,
         }
     }
 }
