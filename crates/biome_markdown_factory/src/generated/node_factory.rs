@@ -81,19 +81,42 @@ pub fn md_fenced_code_block(
     code_list: MdCodeNameList,
     content: MdInlineItemList,
     r_fence_indent: MdIndentTokenList,
-    r_fence_token: SyntaxToken,
-) -> MdFencedCodeBlock {
-    MdFencedCodeBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_FENCED_CODE_BLOCK,
-        [
-            Some(SyntaxElement::Node(indent.into_syntax())),
-            Some(SyntaxElement::Token(l_fence_token)),
-            Some(SyntaxElement::Node(code_list.into_syntax())),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Node(r_fence_indent.into_syntax())),
-            Some(SyntaxElement::Token(r_fence_token)),
-        ],
-    ))
+) -> MdFencedCodeBlockBuilder {
+    MdFencedCodeBlockBuilder {
+        indent,
+        l_fence_token,
+        code_list,
+        content,
+        r_fence_indent,
+        r_fence_token: None,
+    }
+}
+pub struct MdFencedCodeBlockBuilder {
+    indent: MdIndentTokenList,
+    l_fence_token: SyntaxToken,
+    code_list: MdCodeNameList,
+    content: MdInlineItemList,
+    r_fence_indent: MdIndentTokenList,
+    r_fence_token: Option<SyntaxToken>,
+}
+impl MdFencedCodeBlockBuilder {
+    pub fn with_r_fence_token(mut self, r_fence_token: SyntaxToken) -> Self {
+        self.r_fence_token = Some(r_fence_token);
+        self
+    }
+    pub fn build(self) -> MdFencedCodeBlock {
+        MdFencedCodeBlock::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_FENCED_CODE_BLOCK,
+            [
+                Some(SyntaxElement::Node(self.indent.into_syntax())),
+                Some(SyntaxElement::Token(self.l_fence_token)),
+                Some(SyntaxElement::Node(self.code_list.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+                Some(SyntaxElement::Node(self.r_fence_indent.into_syntax())),
+                self.r_fence_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_hard_line(value_token: SyntaxToken) -> MdHardLine {
     MdHardLine::unwrap_cast(SyntaxNode::new_detached(

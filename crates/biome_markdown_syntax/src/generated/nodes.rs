@@ -294,8 +294,8 @@ impl MdFencedCodeBlock {
     pub fn r_fence_indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 4usize)
     }
-    pub fn r_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+    pub fn r_fence(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for MdFencedCodeBlock {
@@ -313,7 +313,7 @@ pub struct MdFencedCodeBlockFields {
     pub code_list: MdCodeNameList,
     pub content: MdInlineItemList,
     pub r_fence_indent: MdIndentTokenList,
-    pub r_fence: SyntaxResult<SyntaxToken>,
+    pub r_fence: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdHardLine {
@@ -2279,7 +2279,7 @@ impl std::fmt::Debug for MdFencedCodeBlock {
                 .field("code_list", &self.code_list())
                 .field("content", &self.content())
                 .field("r_fence_indent", &self.r_fence_indent())
-                .field("r_fence", &support::DebugSyntaxResult(self.r_fence()))
+                .field("r_fence", &support::DebugOptionalElement(self.r_fence()))
                 .finish()
         } else {
             f.debug_struct("MdFencedCodeBlock").finish()

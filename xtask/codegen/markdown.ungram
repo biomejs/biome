@@ -122,7 +122,7 @@ MdFencedCodeBlock =
 	code_list: MdCodeNameList
 	content: MdInlineItemList
 	r_fence_indent: MdIndentTokenList
-	r_fence: ('```' | '~~~')
+	r_fence: ('```' | '~~~')?
 
 MdCodeNameList = MdTextual*
 

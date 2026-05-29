@@ -1,24 +1,22 @@
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 
+/// Options for the `useNullishCoalescing` rule.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseNullishCoalescingOptions {
-    /// Whether to ignore `||` expressions in conditional test positions
-    /// (if/while/for/do-while/ternary conditions).
-    ///
-    /// When `true` (the default), the rule will not report `||` expressions
-    /// that appear in places where the falsy-checking behavior may be intentional.
-    ///
-    /// Default: `true`
+    /// Ignore `||` expressions in conditional test positions (default: `true`).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_conditional_tests: Option<bool>,
 
-    /// Whether to ignore ternary expressions that could be simplified
-    /// using the nullish coalescing operator.
-    ///
-    /// Default: `false`
+    /// Ignore ternary expressions that check for `null` or `undefined` (default: `false`).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_ternary_tests: Option<bool>,
+
+    /// Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_mixed_logical_expressions: Option<bool>,
 }
 
 impl UseNullishCoalescingOptions {
@@ -28,5 +26,9 @@ impl UseNullishCoalescingOptions {
 
     pub fn ignore_ternary_tests(&self) -> bool {
         self.ignore_ternary_tests.unwrap_or(false)
+    }
+
+    pub fn ignore_mixed_logical_expressions(&self) -> bool {
+        self.ignore_mixed_logical_expressions.unwrap_or(false)
     }
 }

@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build WASM module for the web
-        run: just build-wasm-web
+        run: just build-wasm-web --features=unstable
 
       # https://github.com/actions/cache/issues/342
       - name: Clear old wasm cache

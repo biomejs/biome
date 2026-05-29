@@ -57,18 +57,3 @@ bar:
  <<: *anchor
  K3: "Three"
 ```
-
-# Errors
-```
-inline-extend-syntax.yml:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-     8 │ bar:
-   > 9 │  <<: *anchor
-       │      ^
-    10 │  K3: "Three"
-    11 │ 
-  
-
-```

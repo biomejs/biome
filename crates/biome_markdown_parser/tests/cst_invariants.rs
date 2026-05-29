@@ -153,6 +153,111 @@ fn blockquoted_bullet_list_blank_separators_do_not_appear_as_siblings() {
     );
 }
 
+/// Counts the direct `MdBullet` children of the first `MdBulletList`.
+fn bullet_item_count(input: &str) -> usize {
+    bullet_item_counts(input).first().copied().unwrap_or(0)
+}
+
+/// Counts the direct `MdBullet` children of every `MdBulletList`, in
+/// document order — one entry per list, so nesting is observable.
+fn bullet_item_counts(input: &str) -> Vec<usize> {
+    parse_markdown(input)
+        .syntax()
+        .descendants()
+        .filter(|n| n.kind() == MarkdownSyntaxKind::MD_BULLET_LIST)
+        .map(|list| {
+            list.children()
+                .filter(|c| c.kind() == MarkdownSyntaxKind::MD_BULLET)
+                .count()
+        })
+        .collect()
+}
+
+/// Returns true if the typed AST debug-print contains a missing required slot.
+fn has_missing_required(input: &str) -> bool {
+    let parsed = parse_markdown(input);
+    format!("{:#?}", parsed.tree()).contains("missing (required)")
+}
+
+#[test]
+fn unterminated_fence_has_no_missing_required_slot() {
+    // CommonMark §4.5: a fenced code block need not be closed; if the end of
+    // the container is reached, the block ends there. The absent closing fence
+    // must not leave a "missing (required)" `r_fence` slot in the CST.
+    for input in ["```\n", "~~~\n", "```\naaa\n"] {
+        assert!(
+            !has_missing_required(input),
+            "unterminated fence left a missing required slot for {input:?}\n\n{:#?}",
+            parse_markdown(input).tree()
+        );
+    }
+}
+
+#[test]
+fn fence_as_bullet_item_does_not_swallow_siblings() {
+    // https://github.com/biomejs/biome/issues/ (fence-as-bullet differential)
+    // `- ```` opens a fenced code block whose content indent is the item's
+    // marker width (2). The next line `- x` is at column 0, below that indent,
+    // so it cannot continue the item: item 1's fence ends unterminated and
+    // `- x` starts a sibling. CommonMark yields three items, not one swallowed
+    // block. The unterminated fences must also leave no missing required slot.
+    let input = "- ```\n- x\n- ```\n";
+
+    assert_eq!(
+        bullet_item_count(input),
+        3,
+        "fence in a bullet item swallowed its siblings:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+    assert!(
+        !has_missing_required(input),
+        "fence-as-bullet left a missing required slot:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+}
+
+#[test]
+fn nested_fence_as_bullet_item_does_not_swallow_siblings() {
+    // Same defect one level deep: the inner list's items must stay separate.
+    // CommonMark yields an outer list of one item (`a`) whose inner list has
+    // three items (empty fence, `x`, empty fence). Asserting the per-list
+    // counts — not just the absence of a missing slot — guards the swallow.
+    let input = "- a\n  - ```\n  - x\n  - ```\n";
+
+    assert_eq!(
+        bullet_item_counts(input),
+        [1, 3],
+        "nested fence in a bullet item swallowed its siblings:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+    assert!(
+        !has_missing_required(input),
+        "nested fence-as-bullet left a missing required slot:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+}
+
+#[test]
+fn blockquoted_fence_as_bullet_item_does_not_swallow_siblings() {
+    // The fence-as-bullet break must fire before the line's blockquote prefix
+    // is consumed into the code block; otherwise `> - x` has its `>` absorbed
+    // and `- x` is mis-parsed as a paragraph inside item 1. CommonMark yields a
+    // blockquote whose list has three items (empty fence, `x`, empty fence).
+    let input = "> - ```\n> - x\n> - ```\n";
+
+    assert_eq!(
+        bullet_item_counts(input),
+        [3],
+        "blockquoted fence in a bullet item swallowed its siblings:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+    assert!(
+        !has_missing_required(input),
+        "blockquoted fence-as-bullet left a missing required slot:\n{:#?}",
+        parse_markdown(input).tree()
+    );
+}
+
 #[test]
 fn no_fixture_has_bullet_list_newline_siblings() {
     // Corpus-level invariant: parse every checked-in Markdown fixture and assert

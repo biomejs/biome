@@ -33,18 +33,3 @@ info: yaml/spec/spec-example-6-23-node-properties.yml
   !!str bar
 &a2 baz : *a1
 ```
-
-# Errors
-```
-spec-example-6-23-node-properties.yml:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    1 │ !!str &a1 "foo":
-    2 │   !!str bar
-  > 3 │ &a2 baz : *a1
-      │           ^
-    4 │ 
-  
-
-```

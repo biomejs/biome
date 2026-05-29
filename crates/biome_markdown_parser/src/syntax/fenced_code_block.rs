@@ -162,7 +162,7 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
 ///   code_list: MdCodeNameList
 ///   content: MdInlineItemList
 ///   r_fence_indent: MdIndentTokenList
-///   r_fence: ('```' | '~~~')
+///   r_fence: ('```' | '~~~')?  // absent for an unterminated fence (§4.5)
 pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_fenced_code_block_impl(p, false)
 }
@@ -310,6 +310,17 @@ fn prepare_next_code_content_token(
     quote_depth: usize,
     at_line_start: &mut bool,
 ) -> CodeContentTokenAction {
+    // A fenced code block cannot be lazily continued (CommonMark §4.5). When a
+    // content line de-indents below the enclosing list item's required indent
+    // (measured after any blockquote prefixes), it no longer belongs to the
+    // item, so the item — and thus this unterminated block — ends here. This is
+    // decided *before* consuming the line's quote prefix, so on a de-indent the
+    // prefix is handed back to the list/quote parser with the rest of the
+    // sibling line instead of being absorbed into the code block.
+    if *at_line_start && line_below_list_item_indent(p, quote_depth) {
+        return CodeContentTokenAction::Break;
+    }
+
     if *at_line_start && quote_depth > 0 && !consume_quote_prefixes_in_code_content(p, quote_depth)
     {
         return CodeContentTokenAction::Break;
@@ -527,6 +538,74 @@ pub(crate) fn backtick_info_violation(p: &mut MarkdownParser) -> Option<TextRang
 
         None
     })
+}
+
+/// Skip up to `quote_depth` blockquote prefixes (`>` with optional 0-3 leading
+/// spaces and one trailing space/tab) in raw source starting at `idx`.
+///
+/// Returns the index just past the last prefix, or `None` if fewer than
+/// `quote_depth` prefixes are present — in which case the missing-prefix path
+/// in [`consume_quote_prefixes_in_code_content`] handles ending the block.
+///
+/// The leading-indent run reuses [`consume_indent`]; the marker is a single
+/// ASCII `>` and the one optional trailing separator is space/tab only (per
+/// CommonMark, narrower than `biome_unicode_table`'s `WHS`), so both stay
+/// explicit byte checks.
+fn skip_quote_prefixes_in_source(
+    bytes: &[u8],
+    mut idx: usize,
+    quote_depth: usize,
+) -> Option<usize> {
+    for _ in 0..quote_depth {
+        idx = consume_indent(bytes, idx, MAX_BLOCK_PREFIX_INDENT, false)?;
+        if bytes.get(idx) != Some(&b'>') {
+            return None;
+        }
+        idx += 1;
+        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
+            idx += 1;
+        }
+    }
+    Some(idx)
+}
+
+/// At a content line start, returns `true` when the line's leading indent —
+/// measured after any blockquote prefixes — is below the enclosing list item's
+/// required indent, i.e. the line belongs to an outer container, not this item.
+///
+/// The current position is the raw start of the line (set by
+/// [`MarkdownParser::set_virtual_line_start`] after the preceding newline), so
+/// indentation is measured from there with [`consume_indent`], the same helper
+/// the closing-fence probe uses. CommonMark block indentation is spaces and
+/// tabs only (tabs to the next [`TAB_STOP_SPACES`] multiple) — deliberately not
+/// `biome_unicode_table`'s `WHS`, which also matches `\n\r\f\v` and would
+/// mis-measure indent. Blank lines (only whitespace before the end of line)
+/// are exempt: they stay inside the code block.
+fn line_below_list_item_indent(p: &MarkdownParser, quote_depth: usize) -> bool {
+    let required = p.state().list_item_required_indent;
+    if required == 0 {
+        return false;
+    }
+
+    let Some((start, source)) = get_source_context(p) else {
+        return false;
+    };
+
+    let bytes = source.as_bytes();
+    let Some(content_start) = skip_quote_prefixes_in_source(bytes, start, quote_depth) else {
+        return false;
+    };
+
+    // Enough indent to keep continuing the item?
+    if consume_indent(bytes, content_start, required, true).is_some() {
+        return false;
+    }
+
+    // Below the required indent: break unless the line is blank, in which case
+    // the remaining (under-required) indent runs straight into the line end.
+    let after_indent =
+        consume_indent(bytes, content_start, required, false).unwrap_or(content_start);
+    !matches!(bytes.get(after_indent), None | Some(b'\n' | b'\r'))
 }
 
 fn at_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usize) -> bool {

@@ -88,7 +88,7 @@ MdDocument {
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
-            r_fence: missing (required),
+            r_fence: missing (optional),
         },
     ],
     eof_token: EOF@45..45 "" [] [],
