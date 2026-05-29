@@ -49,18 +49,13 @@ pub(crate) enum HtmlLexContext {
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
 
-    /// Used when parsing a quoted attribute value in a Svelte file. Behaves like
-    /// [AttributeValue] for `{`, `{{`, `<`, `>` and unquoted values, but for a
-    /// quoted value (`"` or `'`) it reads only up to the first `{` interpolation
-    /// instead of consuming the whole string. This lets the parser detect whether
-    /// the value contains interpolations without a separate pre-scan.
+    /// Like [AttributeValue] but for quoted values stops at `{` instead of consuming
+    /// the whole string, so the parser can detect interpolations without a pre-scan.
     SvelteAttributeValue,
 
-    /// Lexes the literal parts of a Svelte interpolated attribute value, e.g. the
-    /// `top: ` and `px` segments of `style="top: {top}px"`. A `{` is emitted as its
-    /// own token (the start of an interpolation); any other run of text is a chunk
-    /// terminated by the next `{` or by the closing quote. The stored byte is the
-    /// quote that delimits the value.
+    /// Lexes literal chunks of a Svelte interpolated attribute value (e.g. `top: ` and
+    /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
+    /// runs until the next `{` or the closing quote.
     SvelteInterpolatedStringChunk { quote: u8 },
 
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.

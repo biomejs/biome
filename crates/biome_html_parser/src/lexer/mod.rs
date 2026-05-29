@@ -410,13 +410,6 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::SvelteAttributeValue] context.
-    ///
-    /// For a quoted value (`"` or `'`), consume the opening quote plus the text up to
-    /// (but not including) the first `{` interpolation, or up to and including the
-    /// closing quote if there is none. For all other characters, fall through to the
-    /// regular [HtmlLexContext::AttributeValue] dispatch so that `{`, `<`, `>`,
-    /// whitespace, and unquoted values are handled identically.
     fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
         if matches!(current, b'"' | b'\'') {
             self.advance(1);
@@ -427,9 +420,6 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::SvelteInterpolatedStringChunk] context.
-    ///
-    /// A `{` starts an interpolation and is emitted on its own; everything else is a
-    /// literal chunk that runs until the next `{` or the closing quote.
     fn consume_token_svelte_interpolated_string_chunk(
         &mut self,
         current: u8,
@@ -442,16 +432,12 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a run of literal text inside a Svelte interpolated attribute value,
-    /// stopping before the next `{` interpolation. The closing `quote` is included in
-    /// the chunk and ends it. Assumes the caller is not currently positioned on a `{`.
     fn consume_svelte_interpolated_string_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
         while let Some(current) = self.current_byte() {
             if current == b'{' {
                 break;
             }
             if current == quote {
-                // Closing quote: include it and end the chunk.
                 self.advance(1);
                 break;
             }
