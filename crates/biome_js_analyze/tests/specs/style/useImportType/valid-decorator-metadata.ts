@@ -1,7 +1,14 @@
 /* should not generate diagnostics */
 
-import { Controller, Inject } from "./decorators";
-import DefaultService, { NamedService } from "./service";
+import { Controller, Field, Inject, Route } from "./decorators";
+import DefaultService, {
+	GetterService,
+	MethodParamService,
+	MethodReturnService,
+	NamedService,
+	PropertyService,
+	SetterService,
+} from "./service";
 import * as Services from "./services";
 
 @Controller()
@@ -15,4 +22,30 @@ class AppController {
 
 class ParameterDecoratorController {
 	constructor(@Inject("service") private readonly namedService: NamedService) {}
+}
+
+class MethodDecoratorController {
+	@Route()
+	handle(service: MethodParamService): MethodReturnService {
+		throw new Error("not implemented");
+	}
+}
+
+class MethodParameterDecoratorController {
+	handle(@Inject("service") service: MethodParamService): MethodReturnService {
+		throw new Error("not implemented");
+	}
+}
+
+class PropertyDecoratorController {
+	@Field()
+	property: PropertyService;
+
+	@Field()
+	get value(): GetterService {
+		throw new Error("not implemented");
+	}
+
+	@Field()
+	set value(value: SetterService) {}
 }

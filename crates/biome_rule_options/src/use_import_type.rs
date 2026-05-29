@@ -7,7 +7,7 @@ pub struct UseImportTypeOptions {
     /// The style to apply when import types. Default to "auto"
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub style: Option<Style>,
-    /// Preserve value imports used by TypeScript decorator metadata.
+    /// Preserve value imports used in TypeScript decorator metadata.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub preserve_decorator_metadata: Option<bool>,
 }

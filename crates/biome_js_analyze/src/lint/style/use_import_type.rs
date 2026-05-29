@@ -15,15 +15,17 @@ use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsClass, AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause,
-    AnyJsModuleItem, AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource,
-    JsConstructorClassMember, JsIdentifierBinding, JsImport, JsImportCombinedClause,
-    JsImportDefaultClause, JsLanguage, JsModuleItemList, JsNamedImportSpecifierList,
-    JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
+    AnyJsFormalParameter, AnyJsMethodModifier, AnyJsModuleItem, AnyJsModuleSource,
+    AnyJsNamedImportSpecifier, AnyJsPropertyModifier, AnyJsRoot, JsFileSource,
+    JsConstructorClassMember, JsGetterClassMember, JsIdentifierBinding, JsImport,
+    JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsMethodClassMember,
+    JsModuleItemList, JsNamedImportSpecifierList, JsNamedImportSpecifiers,
+    JsPropertyClassMember, JsSetterClassMember, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement,
     SyntaxResult, TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces,
-    trim_trailing_trivia_pieces,
+    trim_trailing_trivia_pieces, TextRange,
 };
 use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
@@ -160,7 +162,7 @@ declare_lint_rule! {
     /// ### `preserveDecoratorMetadata`
     ///
     /// The `preserveDecoratorMetadata` option preserves value imports when an imported
-    /// class is used in a constructor parameter that can be emitted as TypeScript
+    /// class is used in a decorated declaration that can be emitted as TypeScript
     /// decorator metadata.
     ///
     /// This is useful for projects using frameworks that rely on
@@ -913,13 +915,54 @@ fn is_used_by_decorator_metadata(reference: &AnyJsIdentifierUsage) -> bool {
         return false;
     }
     let reference_range = reference.range();
-    let Some(constructor) = reference
+
+    if let Some(constructor) = reference
         .syntax()
         .ancestors()
         .find_map(JsConstructorClassMember::cast)
-    else {
-        return false;
-    };
+    {
+        return is_constructor_metadata_reference(&constructor, reference_range);
+    }
+
+    if let Some(method) = reference
+        .syntax()
+        .ancestors()
+        .find_map(JsMethodClassMember::cast)
+    {
+        return is_method_metadata_reference(&method, reference_range);
+    }
+
+    if let Some(property) = reference
+        .syntax()
+        .ancestors()
+        .find_map(JsPropertyClassMember::cast)
+    {
+        return is_property_metadata_reference(&property, reference_range);
+    }
+
+    if let Some(getter) = reference
+        .syntax()
+        .ancestors()
+        .find_map(JsGetterClassMember::cast)
+    {
+        return is_getter_metadata_reference(&getter, reference_range);
+    }
+
+    if let Some(setter) = reference
+        .syntax()
+        .ancestors()
+        .find_map(JsSetterClassMember::cast)
+    {
+        return is_setter_metadata_reference(&setter, reference_range);
+    }
+
+    false
+}
+
+fn is_constructor_metadata_reference(
+    constructor: &JsConstructorClassMember,
+    reference_range: TextRange,
+) -> bool {
     let Ok(parameters) = constructor.parameters() else {
         return false;
     };
@@ -940,6 +983,107 @@ fn is_used_by_decorator_metadata(reference: &AnyJsIdentifierUsage) -> bool {
         .skip(1)
         .find_map(AnyJsClass::cast)
         .is_some_and(|class| !class.decorators().is_empty())
+}
+
+fn is_method_metadata_reference(
+    method: &JsMethodClassMember,
+    reference_range: TextRange,
+) -> bool {
+    if !method_has_decorator(method) && !method_has_decorated_parameter(method) {
+        return false;
+    }
+
+    if method
+        .parameters()
+        .is_ok_and(|parameters| parameters.range().contains_range(reference_range))
+    {
+        return true;
+    }
+
+    method
+        .return_type_annotation()
+        .is_some_and(|return_type| return_type.range().contains_range(reference_range))
+}
+
+fn is_property_metadata_reference(
+    property: &JsPropertyClassMember,
+    reference_range: TextRange,
+) -> bool {
+    property_has_decorator(property)
+        && property
+            .property_annotation()
+            .is_some_and(|annotation| annotation.range().contains_range(reference_range))
+}
+
+fn is_getter_metadata_reference(
+    getter: &JsGetterClassMember,
+    reference_range: TextRange,
+) -> bool {
+    getter_has_decorator(getter)
+        && getter
+            .return_type()
+            .is_some_and(|return_type| return_type.range().contains_range(reference_range))
+}
+
+fn is_setter_metadata_reference(
+    setter: &JsSetterClassMember,
+    reference_range: TextRange,
+) -> bool {
+    if !setter_has_decorator(setter)
+        && !setter
+            .parameter()
+            .is_ok_and(|parameter| formal_parameter_has_decorator(&parameter))
+    {
+        return false;
+    }
+
+    setter
+        .parameter()
+        .is_ok_and(|parameter| parameter.range().contains_range(reference_range))
+}
+
+fn method_has_decorator(method: &JsMethodClassMember) -> bool {
+    method
+        .modifiers()
+        .iter()
+        .any(|modifier| matches!(modifier, AnyJsMethodModifier::JsDecorator(_)))
+}
+
+fn method_has_decorated_parameter(method: &JsMethodClassMember) -> bool {
+    method.parameters().is_ok_and(|parameters| {
+        parameters
+            .items()
+            .into_iter()
+            .filter_map(Result::ok)
+            .any(|parameter| parameter.has_any_decorator())
+    })
+}
+
+fn formal_parameter_has_decorator(parameter: &AnyJsFormalParameter) -> bool {
+    parameter
+        .decorators()
+        .is_some_and(|decorators| !decorators.is_empty())
+}
+
+fn property_has_decorator(property: &JsPropertyClassMember) -> bool {
+    property
+        .modifiers()
+        .iter()
+        .any(|modifier| matches!(modifier, AnyJsPropertyModifier::JsDecorator(_)))
+}
+
+fn getter_has_decorator(getter: &JsGetterClassMember) -> bool {
+    getter
+        .modifiers()
+        .iter()
+        .any(|modifier| matches!(modifier, AnyJsMethodModifier::JsDecorator(_)))
+}
+
+fn setter_has_decorator(setter: &JsSetterClassMember) -> bool {
+    setter
+        .modifiers()
+        .iter()
+        .any(|modifier| matches!(modifier, AnyJsMethodModifier::JsDecorator(_)))
 }
 
 #[derive(Debug)]

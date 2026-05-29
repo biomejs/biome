@@ -15004,7 +15004,7 @@
 			"type": "object",
 			"properties": {
 				"preserveDecoratorMetadata": {
-					"description": "Preserve value imports used by TypeScript decorator metadata.",
+					"description": "Preserve value imports used in TypeScript decorator metadata.",
 					"type": ["boolean", "null"]
 				},
 				"style": {
