@@ -2278,7 +2278,8 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedString
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(),
+            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(
+            ),
         )
     }
 }
@@ -2290,7 +2291,8 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedStri
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(),
+            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(
+            ),
         )
     }
 }
