@@ -644,11 +644,6 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
 
 /// Parses a Svelte attribute value that mixes literal text and `{expression}`
 /// interpolations, e.g. `style="top: {top}px"`.
-///
-/// On entry the current token is already the first chunk (opening quote plus text
-/// up to the first `{`), produced by the [HtmlLexContext::SvelteAttributeValue]
-/// context. Interpolations reuse the regular single text expression machinery so
-/// embedded references are tracked like any other.
 fn parse_svelte_interpolated_string(p: &mut HtmlParser, quote: u8) -> ParsedSyntax {
     if !p.at(HTML_STRING_LITERAL) {
         return Absent;
@@ -658,7 +653,6 @@ fn parse_svelte_interpolated_string(p: &mut HtmlParser, quote: u8) -> ParsedSynt
     let m = p.start();
     let parts = p.start();
 
-    // Consume the first chunk (opening quote + text up to the first `{`).
     let chunk = p.start();
     p.bump_with_context(HTML_STRING_LITERAL, chunk_context);
     chunk.complete(p, SVELTE_INTERPOLATED_STRING_CHUNK);
@@ -707,9 +701,6 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    // In Svelte mode use SvelteAttributeValue so that quoted strings are lexed only
-    // up to the first `{`, letting the parser decide whether interpolation is needed
-    // without an extra pre-scan over the token text.
     let attr_value_context = if Svelte.is_supported(p) {
         HtmlLexContext::SvelteAttributeValue
     } else {
@@ -756,12 +747,7 @@ fn parse_attribute_initializer(
             )
             .ok();
     } else if p.at(HTML_STRING_LITERAL) {
-        // Detect whether a Svelte quoted attribute value contains interpolations.
-        // The SvelteAttributeValue context produced a partial chunk (opening quote +
-        // text up to the first `{`) when there is an interpolation, or the full string
-        // when there is none. A complete plain string has: last byte == opening quote
-        // byte AND length > 1 (length == 1 means only the opening quote was consumed,
-        // i.e. `{` follows immediately).
+        // length == 1 means only the opening quote was consumed (i.e. `{` follows immediately).
         let text = p.cur_text().as_bytes();
         let svelte_quote = text
             .first()
