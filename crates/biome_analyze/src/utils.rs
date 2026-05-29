@@ -169,20 +169,23 @@ pub fn count_lines_in_file<L: Language>(
     is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
     skip_blank_lines: bool,
 ) -> usize {
-    node.descendants()
-        .flat_map(|descendant| descendant.tokens().collect::<Vec<_>>())
-        .filter(|token| !is_eof_token(token))
-        .fold(0, |acc, token| {
-            if skip_blank_lines {
-                return acc + token.has_leading_newline() as usize;
+    let mut count = 0;
+    for descendant in node.descendants() {
+        for token in descendant.tokens() {
+            if is_eof_token(&token) {
+                continue;
             }
-
-            acc + token
-                .trim_trailing_trivia()
-                .leading_trivia()
-                .pieces()
-                .filter(|piece| piece.is_newline())
-                .count()
-        })
-        + 1 // Add 1 for the first line
+            if skip_blank_lines {
+                count += token.has_leading_newline() as usize;
+            } else {
+                count += token
+                    .trim_trailing_trivia()
+                    .leading_trivia()
+                    .pieces()
+                    .filter(|piece| piece.is_newline())
+                    .count();
+            }
+        }
+    }
+    count + 1
 }
