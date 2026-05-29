@@ -12,6 +12,8 @@ declare_lint_rule! {
     /// Svelte uses keyed each blocks to track list items across updates. Without a key, Svelte
     /// updates items by position, which can cause state to move between items when the list changes.
     ///
+    /// For more information, see the Svelte documentation on [keyed each blocks](https://svelte.dev/docs/svelte/each#Keyed-each-blocks).
+    ///
     /// ## Examples
     ///
     /// ### Invalid
