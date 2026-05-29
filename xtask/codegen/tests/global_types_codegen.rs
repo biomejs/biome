@@ -61,9 +61,6 @@ const EXPECTED_INVALID_LIB_ENTRY_FILENAME: &str = "libEntries filename";
 /// Error text expected when the real codegen path sees parser diagnostics in pinned sources.
 const EXPECTED_PINNED_SOURCE_PARSER_DIAGNOSTIC: &str = "parser diagnostics";
 
-/// Error text expected when a triple-slash path reference resolves to bytes not tracked by git.
-const EXPECTED_UNTRACKED_REFERENCE: &str = "missing object";
-
 const SINGLE_LIB_ENTRY: &str = "    [\"es5\", \"lib.es5.d.ts\"],\n";
 
 /// libEntries rows that exercise ordered libs and Map-style overwrite semantics.
@@ -331,29 +328,6 @@ fn fixture_git_repo_with_shadowed_root_lib_reference() -> Result<FixtureRepo> {
     })
 }
 
-/// Builds a fixture whose path reference targets an ignored, untracked file.
-fn fixture_git_repo_with_ignored_path_reference() -> Result<FixtureRepo> {
-    let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-    fs::write(repo.path().join(".gitignore"), "ignored.d.ts\n")?;
-    fs::write(
-        repo.path().join("lib/lib.es5.d.ts"),
-        "/// <reference path=\"../ignored.d.ts\"/>\ninterface SeedGlobal {}\n",
-    )?;
-    run_git(repo.path(), &["add", "."])?;
-    run_git(repo.path(), &["commit", "-m", "reference ignored file"])?;
-    let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
-    run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
-
-    Ok(FixtureRepo {
-        temp: repo.temp,
-        tag: repo.tag,
-        head,
-        command_line_parser_sha256,
-    })
-}
-
 #[cfg(unix)]
 /// Builds a fixture whose path reference crosses an untracked symlinked directory.
 fn fixture_git_repo_with_intermediate_symlink_path_reference() -> Result<FixtureRepo> {
@@ -521,33 +495,6 @@ fn fixture_git_repo_with_mixed_case_lib_reference() -> Result<FixtureRepo> {
     )?;
     run_git(repo.path(), &["add", "."])?;
     run_git(repo.path(), &["commit", "-m", "reference mixed-case lib"])?;
-    let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
-    run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
-
-    Ok(FixtureRepo {
-        temp: repo.temp,
-        tag: repo.tag,
-        head,
-        command_line_parser_sha256,
-    })
-}
-
-/// Builds a fixture whose path reference points outside the default lib directory.
-fn fixture_git_repo_with_external_path_reference() -> Result<FixtureRepo> {
-    let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-    fs::create_dir_all(repo.path().join("extras"))?;
-    fs::write(
-        repo.path().join("lib/lib.es5.d.ts"),
-        "/// <reference path=\"../extras/dep.d.ts\"/>\ninterface SeedGlobal {}\n",
-    )?;
-    fs::write(
-        repo.path().join("extras/dep.d.ts"),
-        "interface CommittedBlobGlobal {}\n",
-    )?;
-    run_git(repo.path(), &["add", "."])?;
-    run_git(repo.path(), &["commit", "-m", "reference external dep"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
     let command_line_parser_sha256 =
@@ -821,6 +768,7 @@ fn expect_error_contains<T>(result: Result<T>, expected: &str) -> Result<()> {
 }
 
 /// Asserts that every expected fragment appears somewhere in an error chain.
+#[cfg(unix)]
 fn expect_error_chain_contains_all<T>(result: Result<T>, expected: &[&str]) -> Result<()> {
     let Err(error) = result else {
         bail!("expected an error but got success");
@@ -1271,26 +1219,6 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn path_references_reject_ignored_untracked_files() -> Result<()> {
-        let repo = fixture_git_repo_with_ignored_path_reference()?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let cache_path = typescript_cache_path(&pin);
-        fs::write(
-            cache_path.join("ignored.d.ts"),
-            "interface IgnoredGlobal {}\n",
-        )?;
-        let options = source_options(true, false);
-        let checkout = acquire(&pin, &options)?;
-        let libs = parse_lib_entries(&checkout)?;
-
-        expect_error_chain_contains_all(
-            discover(&checkout, &libs, TRANSITIVE_PROFILE_ROOTS),
-            &[EXPECTED_UNTRACKED_REFERENCE, "ignored.d.ts"],
-        )
-    }
-
     #[cfg(unix)]
     #[test]
     fn path_references_reject_untracked_intermediate_symlink_dirs() -> Result<()> {
@@ -1424,65 +1352,6 @@ mod tests {
             ["lib/lib.es5.d.ts", "lib/lib.shared.d.ts"],
             "TypeScript lowercases lib reference names before libMap lookup"
         );
-
-        Ok(())
-    }
-
-    #[test]
-    fn discovery_reads_pinned_git_blobs_after_cache_worktree_mutation() -> Result<()> {
-        let repo = fixture_git_repo_with_external_path_reference()?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
-        let checkout = acquire(&pin, &options)?;
-        let cache_path = typescript_cache_path(&pin);
-        run_git(
-            &cache_path,
-            &["update-index", "--skip-worktree", "extras/dep.d.ts"],
-        )?;
-        fs::write(
-            cache_path.join("extras/dep.d.ts"),
-            "interface DirtyWorktreeGlobal {}\n",
-        )?;
-        let libs = parse_lib_entries(&checkout)?;
-
-        let discovered = discover(&checkout, &libs, TRANSITIVE_PROFILE_ROOTS)?;
-        let dep = discovered
-            .iter()
-            .find(|file| file.repo_relative == "extras/dep.d.ts")
-            .context("expected extras/dep.d.ts to be discovered")?;
-
-        assert!(
-            dep.bytes_lf
-                .windows(b"CommittedBlobGlobal".len())
-                .any(|window| window == b"CommittedBlobGlobal"),
-            "discovery must use committed blob bytes"
-        );
-        assert!(
-            !dep.bytes_lf
-                .windows(b"DirtyWorktreeGlobal".len())
-                .any(|window| window == b"DirtyWorktreeGlobal"),
-            "worktree mutations after acquire must not affect generated source bytes"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn command_line_parser_reads_pinned_git_blob_after_worktree_mutation() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
-        let checkout = acquire(&pin, &options)?;
-        fs::write(
-            typescript_cache_path(&pin).join(COMMAND_LINE_PARSER_PATH),
-            "export const libEntries = [broken worktree bytes];\n",
-        )?;
-
-        let entries = parse_lib_entries(&checkout)?;
-
-        assert_eq!(libs_bytes(&entries), b"es5\n");
 
         Ok(())
     }

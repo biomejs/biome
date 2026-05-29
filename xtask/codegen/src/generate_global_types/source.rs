@@ -2,11 +2,10 @@
 
 use std::collections::{BTreeMap, HashSet};
 use std::env;
-use std::fmt::Write as _;
 use std::fs;
-use std::io::{BufReader, ErrorKind, Read as _, Write as _};
+use std::io::ErrorKind;
 use std::path::{Component, Path, PathBuf};
-use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
+use std::process::Command;
 
 use anyhow::{Context, anyhow, bail};
 use biome_js_parser::{JsParserOptions, parse};
@@ -100,21 +99,6 @@ const SHA256_HEX_LENGTH: usize = 64;
 
 /// Lowercase nibble table used by the streaming hex encoder.
 const HEX_NIBBLES: &[u8; 16] = b"0123456789abcdef";
-
-/// Upper bound on a single `git cat-file --batch` blob payload (16 MiB).
-///
-/// TypeScript declaration files are kilobytes; this constant caps the
-/// pre-allocation driven by the size git reports in the batch header so a
-/// corrupted cache or a malicious `repo_url_override` cannot make the codegen
-/// allocate an arbitrary amount of memory before we read.
-const MAX_BLOB_SIZE_BYTES: usize = 16 * 1024 * 1024;
-
-/// Upper bound on a single `git cat-file --batch` response header line.
-///
-/// Headers are always `<sha> blob <size>\n` or `<object> missing\n`, both
-/// comfortably under 200 bytes. This cap protects the reused `header_buffer`
-/// from unbounded growth if a corrupted child ever emits a pathological line.
-const MAX_BATCH_HEADER_BYTES: usize = 512;
 
 /// A canonical filesystem path that has been proven to stay within a root.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -226,7 +210,7 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
             .with_context(|| format!("failed to canonicalize {}", checkout_path.display()))?,
     );
     let command_line_parser_bytes =
-        read_blob_lf_normalized(&checkout_path, pin.sha(), COMMAND_LINE_PARSER_RELATIVE_PATH)?;
+        read_source_file_lf_normalized(&checkout_path.join(COMMAND_LINE_PARSER_RELATIVE_PATH))?;
     let command_line_parser_sha256 = sha256_hex_from_bytes(&command_line_parser_bytes);
 
     Ok(AcquiredCheckout {
@@ -238,10 +222,11 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
 
 /// Parses TypeScript's `libEntries` table from `commandLineParser.ts`.
 pub fn parse_lib_entries(checkout: &AcquiredCheckout) -> anyhow::Result<LibEntries> {
-    let bytes = read_blob_lf_normalized(
-        checkout.root.as_path(),
-        checkout.pin.sha(),
-        COMMAND_LINE_PARSER_RELATIVE_PATH,
+    let bytes = read_source_file_lf_normalized(
+        &checkout
+            .root
+            .as_path()
+            .join(COMMAND_LINE_PARSER_RELATIVE_PATH),
     )?;
     let actual_sha = sha256_hex_from_bytes(&bytes);
     if actual_sha != checkout.command_line_parser_sha256 {
@@ -334,7 +319,6 @@ pub fn discover(
             .context("failed to resolve TypeScript lib directory")?;
     let mut visited = HashSet::new();
     let mut discovered = Vec::<DiscoveredFile>::new();
-    let mut batch = BatchCatFile::new(checkout.root.as_path())?;
 
     for filename in profile_roots {
         let relative = default_library_relative_path(filename);
@@ -346,13 +330,7 @@ pub fn discover(
         }
         visited.insert(source.repo_relative.clone());
 
-        let mut stack = vec![make_frame(
-            source,
-            checkout.root.as_path(),
-            checkout.pin.sha(),
-            libs,
-            &mut batch,
-        )?];
+        let mut stack = vec![make_frame(source, checkout.root.as_path(), libs)?];
         while !stack.is_empty() {
             let child_path = {
                 let frame = stack.last_mut().expect("stack is not empty");
@@ -378,13 +356,7 @@ pub fn discover(
 
             if !visited.contains(&child_path.repo_relative) {
                 visited.insert(child_path.repo_relative.clone());
-                stack.push(make_frame(
-                    child_path,
-                    checkout.root.as_path(),
-                    checkout.pin.sha(),
-                    libs,
-                    &mut batch,
-                )?);
+                stack.push(make_frame(child_path, checkout.root.as_path(), libs)?);
             }
         }
     }
@@ -748,351 +720,11 @@ fn normalize_lf(mut bytes: Vec<u8>) -> Vec<u8> {
     bytes
 }
 
-/// Reads a single pinned blob via `git cat-file blob` and applies the same LF
-/// normalization as [`BatchCatFile::read_blob_lf_normalized`].
-fn read_blob_lf_normalized(root: &Path, revision: &str, relative: &str) -> anyhow::Result<Vec<u8>> {
-    Ok(normalize_lf(git_cat_file_blob(root, revision, relative)?))
-}
-
-/// Single-shot `git cat-file blob <revision>:<relative>` for one-off reads
-/// (the discovery hot path uses [`BatchCatFile`] instead).
-fn git_cat_file_blob(root: &Path, revision: &str, relative: &str) -> anyhow::Result<Vec<u8>> {
-    let object = format!("{revision}:{relative}");
-    let mut child = new_git_command()
-        .arg("-C")
-        .arg(root)
-        .args(["cat-file", "blob"])
-        .arg(&object)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .with_context(|| format!("failed to spawn git cat-file blob {object}"))?;
-    let Some(stdout) = child.stdout.take() else {
-        let _ = child.kill();
-        let _ = child.wait();
-        bail!("git cat-file blob {object} did not expose the piped stdout handle");
-    };
-
-    // Read at most MAX_BLOB_SIZE_BYTES + 1 so we can detect an over-cap blob
-    // without buffering the entire payload into memory first.
-    let mut bytes = Vec::new();
-    if let Err(error) = stdout
-        .take(MAX_BLOB_SIZE_BYTES as u64 + 1)
-        .read_to_end(&mut bytes)
-    {
-        let _ = child.kill();
-        let _ = child.wait();
-        return Err(error)
-            .with_context(|| format!("failed to read git cat-file blob {object} stdout"));
-    }
-    if bytes.len() > MAX_BLOB_SIZE_BYTES {
-        let _ = child.kill();
-        let _ = child.wait();
-        bail!("git cat-file blob {object} returned more than {MAX_BLOB_SIZE_BYTES} bytes",);
-    }
-    let output = child
-        .wait_with_output()
-        .with_context(|| format!("failed to reap git cat-file blob {object}"))?;
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        bail!("git cat-file blob {object} failed: {}", stderr.trim());
-    }
-    Ok(bytes)
-}
-
-/// Outcome of parsing a `git cat-file --batch` response header line, with all
-/// borrows already consumed so the caller is free to mutate `self`.
-enum BatchHeaderOutcome {
-    /// Header announced a blob payload of `size` bytes.
-    Blob { size: usize },
-    /// Header announced a blob payload larger than [`MAX_BLOB_SIZE_BYTES`].
-    OverCap { size: usize },
-    /// Header announced a missing object (no payload follows).
-    Missing,
-}
-
-/// Parses a `git cat-file --batch` response header into an owned outcome. The
-/// returned value carries no references into `header_buffer` so the caller
-/// can mutate other `BatchCatFile` fields without borrow-checker grief.
-fn parse_batch_header(header_buffer: &[u8], object: &str) -> anyhow::Result<BatchHeaderOutcome> {
-    let header_text = std::str::from_utf8(header_buffer).with_context(|| {
-        format!("git cat-file --batch returned a non-UTF-8 header for {object}")
-    })?;
-    let header = header_text.trim_end_matches('\n');
-
-    // Git emits one of two header forms per request:
-    //   "<sha> blob <size>"  for a found blob
-    //   "<object> missing"   when the object is unknown
-    let mut parts = header.split(' ');
-    let _first = parts.next();
-    let Some(kind) = parts.next() else {
-        bail!("git cat-file --batch returned malformed header {header:?} for {object}");
-    };
-    if kind == "missing" {
-        if parts.next().is_some() {
-            bail!(
-                "git cat-file --batch returned trailing tokens after missing for {object}: {header:?}"
-            );
-        }
-        return Ok(BatchHeaderOutcome::Missing);
-    }
-    if kind != "blob" {
-        bail!("git cat-file --batch returned non-blob {kind:?} for {object}");
-    }
-    let Some(size_str) = parts.next() else {
-        bail!("git cat-file --batch returned header without size for {object}: {header:?}");
-    };
-    if parts.next().is_some() {
-        bail!("git cat-file --batch returned trailing tokens after size for {object}: {header:?}");
-    }
-    let size: usize = size_str.parse().with_context(|| {
-        format!("git cat-file --batch returned invalid size in header {header:?} for {object}")
-    })?;
-    if size > MAX_BLOB_SIZE_BYTES {
-        return Ok(BatchHeaderOutcome::OverCap { size });
-    }
-    Ok(BatchHeaderOutcome::Blob { size })
-}
-
-/// Long-running `git cat-file --batch` child process used to amortize fork
-/// overhead when [`discover`] reads many pinned blobs in a single codegen run.
-struct BatchCatFile {
-    child: Option<Child>,
-    stdin: Option<ChildStdin>,
-    /// `Option` so [`BatchCatFile::poison`] and `Drop` can close the read end
-    /// of git's stdout pipe before reaping, letting a child that is blocked
-    /// writing an oversized payload return from its `write()` with `EPIPE`.
-    stdout: Option<BufReader<ChildStdout>>,
-    /// Reused buffer for the per-request `<revision>:<relative>` object spec.
-    object_buffer: String,
-    /// Reused buffer for the per-request `<sha> blob <size>` response header.
-    header_buffer: Vec<u8>,
-    /// When set, [`Drop`] kills the child instead of waiting on it: bailing
-    /// mid-batch leaves git holding an unread payload and `wait()` would
-    /// deadlock against the full stdout pipe.
-    poisoned: bool,
-}
-
-impl BatchCatFile {
-    /// Spawns a long-running `git cat-file --batch` child for the given root.
-    ///
-    /// Stderr is sent to `/dev/null` (or the Windows equivalent): the child's
-    /// stderr buffer is bounded, and a never-drained pipe would deadlock the
-    /// child as soon as git writes a warning. We do not want to interleave a
-    /// drain thread with the request/response loop on stdout.
-    fn new(root: &Path) -> anyhow::Result<Self> {
-        let mut child = new_git_command()
-            .arg("-C")
-            .arg(root)
-            .args(["cat-file", "--batch"])
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .spawn()
-            .context("failed to spawn git cat-file --batch")?;
-        // If either handle take fails, we must not return early without
-        // reaping the spawned child or it becomes a zombie.
-        let Some(stdin) = child.stdin.take() else {
-            let _ = child.kill();
-            let _ = child.wait();
-            bail!("git cat-file --batch did not expose the piped stdin handle");
-        };
-        let Some(stdout) = child.stdout.take() else {
-            let _ = child.kill();
-            let _ = child.wait();
-            bail!("git cat-file --batch did not expose the piped stdout handle");
-        };
-        Ok(Self {
-            child: Some(child),
-            stdin: Some(stdin),
-            stdout: Some(BufReader::new(stdout)),
-            object_buffer: String::new(),
-            header_buffer: Vec::new(),
-            poisoned: false,
-        })
-    }
-
-    /// Marks the batch as unrecoverable and closes the stdout read end so the
-    /// child unblocks from any in-flight `write()`. Called before every
-    /// `bail!` that aborts mid-protocol; [`Drop`] then kills + reaps the child
-    /// instead of attempting an orderly shutdown.
-    fn poison(&mut self) {
-        self.poisoned = true;
-        self.stdout.take();
-        self.stdin.take();
-    }
-
-    /// Reads the raw blob bytes for `<revision>:<relative>` via the
-    /// long-running git plumbing process.
-    fn read_blob(&mut self, revision: &str, relative: &str) -> anyhow::Result<Vec<u8>> {
-        // Build the object spec into the reused buffer before any I/O.
-        self.object_buffer.clear();
-        write!(self.object_buffer, "{revision}:{relative}").expect("writing to String cannot fail");
-
-        // Send the request. Any write/flush failure desynchronizes the
-        // protocol, so poison before returning.
-        if let Err(error) = self.write_request() {
-            self.poison();
-            return Err(error);
-        }
-
-        // Read the header line with an explicit cap so a corrupted child
-        // cannot grow `header_buffer` without bound, then parse it into an
-        // owned outcome so subsequent `poison()` calls do not conflict with
-        // borrows into `self.header_buffer`.
-        if let Err(error) = self.read_header_bytes() {
-            self.poison();
-            return Err(error);
-        }
-        let outcome = match parse_batch_header(&self.header_buffer, &self.object_buffer) {
-            Ok(outcome) => outcome,
-            Err(error) => {
-                self.poison();
-                return Err(error);
-            }
-        };
-        let size = match outcome {
-            BatchHeaderOutcome::Missing => {
-                // "missing" consumes no payload; protocol is still
-                // synchronized so no poison is required.
-                bail!("git cat-file --batch missing object {}", self.object_buffer);
-            }
-            BatchHeaderOutcome::OverCap { size } => {
-                // We have decided to reject this payload without draining it,
-                // so poison the child to short-circuit `Drop::wait()` instead
-                // of deadlocking against a full stdout pipe.
-                let cap = MAX_BLOB_SIZE_BYTES;
-                let object = std::mem::take(&mut self.object_buffer);
-                self.poison();
-                bail!(
-                    "git cat-file --batch returned a blob of {size} bytes for {object}, which exceeds the {cap}-byte cap",
-                );
-            }
-            BatchHeaderOutcome::Blob { size } => size,
-        };
-
-        let stdout = self
-            .stdout
-            .as_mut()
-            .expect("stdout retained while struct is alive");
-        let mut bytes = vec![0_u8; size];
-        if let Err(error) = stdout.read_exact(&mut bytes) {
-            let object = std::mem::take(&mut self.object_buffer);
-            self.poison();
-            return Err(error).with_context(|| {
-                format!("failed to read blob {object} from git cat-file --batch")
-            });
-        }
-
-        // Each blob payload is followed by a single LF terminator.
-        let mut trailing = [0_u8; 1];
-        if let Err(error) = stdout.read_exact(&mut trailing) {
-            let object = std::mem::take(&mut self.object_buffer);
-            self.poison();
-            return Err(error)
-                .with_context(|| format!("failed to read trailing newline for {object}"));
-        }
-        if trailing[0] != b'\n' {
-            let object = std::mem::take(&mut self.object_buffer);
-            self.poison();
-            bail!("git cat-file --batch missing trailing newline for {object}");
-        }
-
-        Ok(bytes)
-    }
-
-    /// Writes the current `object_buffer` to `stdin` and flushes; on success
-    /// the child can begin emitting the response header.
-    fn write_request(&mut self) -> anyhow::Result<()> {
-        let stdin = self
-            .stdin
-            .as_mut()
-            .expect("stdin retained while struct is alive");
-        writeln!(stdin, "{}", self.object_buffer).with_context(|| {
-            format!(
-                "failed to write {} to git cat-file --batch stdin",
-                self.object_buffer
-            )
-        })?;
-        stdin
-            .flush()
-            .context("failed to flush git cat-file --batch stdin")
-    }
-
-    /// Reads the header line into `header_buffer`, refusing anything larger
-    /// than [`MAX_BATCH_HEADER_BYTES`] so the reused buffer cannot grow
-    /// without bound.
-    fn read_header_bytes(&mut self) -> anyhow::Result<()> {
-        self.header_buffer.clear();
-        let stdout = self
-            .stdout
-            .as_mut()
-            .expect("stdout retained while struct is alive");
-        let bytes_read = std::io::BufRead::read_until(
-            &mut stdout.by_ref().take(MAX_BATCH_HEADER_BYTES as u64 + 1),
-            b'\n',
-            &mut self.header_buffer,
-        )
-        .with_context(|| {
-            format!(
-                "failed to read git cat-file --batch header for {}",
-                self.object_buffer
-            )
-        })?;
-        if bytes_read == 0 {
-            bail!(
-                "git cat-file --batch closed before returning a header for {}",
-                self.object_buffer
-            );
-        }
-        // `read_until` may return `MAX_BATCH_HEADER_BYTES + 1` bytes when the
-        // line ends with `\n` exactly at the cap, so length is the unambiguous
-        // gate: anything past the cap rejects independently of whether the
-        // child also emitted a newline.
-        if self.header_buffer.len() > MAX_BATCH_HEADER_BYTES {
-            bail!(
-                "git cat-file --batch header exceeded {MAX_BATCH_HEADER_BYTES} bytes for {}",
-                self.object_buffer
-            );
-        }
-        if self.header_buffer.last() != Some(&b'\n') {
-            bail!(
-                "git cat-file --batch closed mid-header for {}",
-                self.object_buffer
-            );
-        }
-        Ok(())
-    }
-
-    /// Batched companion to [`read_blob_lf_normalized`] (single-shot): reads
-    /// the pinned blob and folds CRLF to LF so the resulting bytes hash
-    /// identically across both read paths.
-    fn read_blob_lf_normalized(
-        &mut self,
-        revision: &str,
-        relative: &str,
-    ) -> anyhow::Result<Vec<u8>> {
-        Ok(normalize_lf(self.read_blob(revision, relative)?))
-    }
-}
-
-impl Drop for BatchCatFile {
-    /// Closes both pipes before reaping. Closing stdout's read end unblocks a
-    /// child that may be mid-`write()` after the batch was poisoned; closing
-    /// stdin lets git exit cleanly on the happy path.
-    fn drop(&mut self) {
-        // Closing stdin lets git exit gracefully on the happy path; closing
-        // stdout unblocks a child that is mid-write after a poison.
-        self.stdin.take();
-        self.stdout.take();
-        if let Some(mut child) = self.child.take() {
-            if self.poisoned {
-                // Don't trust a poisoned child to exit on its own.
-                let _ = child.kill();
-            }
-            let _ = child.wait();
-        }
-    }
+/// Reads a source file from the validated checkout and normalizes CR/CRLF
+/// line endings to LF.
+fn read_source_file_lf_normalized(path: &Path) -> anyhow::Result<Vec<u8>> {
+    let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    Ok(normalize_lf(bytes))
 }
 
 /// Computes the lowercase SHA-256 hex of `bytes`. Used by
@@ -1204,16 +836,14 @@ fn validate_lib_entry_filename(index: usize, filename: &str) -> anyhow::Result<(
     Ok(())
 }
 
-/// Reads the file's pinned blob via `batch`, parses its triple-slash references,
-/// and returns a stack frame ready for the discovery DFS.
+/// Reads the file from the validated checkout, parses its triple-slash
+/// references, and returns a stack frame ready for the discovery DFS.
 fn make_frame(
     source_file: TrackedSourceFile,
     root: &Path,
-    revision: &str,
     libs: &LibEntries,
-    batch: &mut BatchCatFile,
 ) -> anyhow::Result<Frame> {
-    let bytes_lf = batch.read_blob_lf_normalized(revision, &source_file.repo_relative)?;
+    let bytes_lf = read_source_file_lf_normalized(source_file.path.as_path())?;
     let source = std::str::from_utf8(&bytes_lf).with_context(|| {
         format!(
             "{} is not valid UTF-8",
