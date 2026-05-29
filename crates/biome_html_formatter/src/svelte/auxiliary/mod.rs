@@ -31,6 +31,8 @@ pub(crate) mod if_block;
 pub(crate) mod if_closing_block;
 pub(crate) mod if_opening_block;
 pub(crate) mod in_directive;
+pub(crate) mod interpolated_string;
+pub(crate) mod interpolated_string_chunk;
 pub(crate) mod key_block;
 pub(crate) mod key_closing_block;
 pub(crate) mod key_opening_block;

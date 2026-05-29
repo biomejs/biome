@@ -275,6 +275,15 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteInDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING => {
+                    let $pattern = unsafe { $crate::SvelteInterpolatedString::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING_CHUNK => {
+                    let $pattern =
+                        unsafe { $crate::SvelteInterpolatedStringChunk::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_KEY_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteKeyBlock::new_unchecked(node) };
                     $body
@@ -483,6 +492,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_INTERPOLATED_STRING_PART_LIST => {
+                    let $pattern =
+                        unsafe { $crate::SvelteInterpolatedStringPartList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {

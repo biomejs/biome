@@ -1,0 +1,486 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style="top: {top}px"></div>
+<div class="card {cls}"></div>
+<div class="{a} between {b}"></div>
+<div data-x="{value}"></div>
+<div title="no interpolation here"></div>
+<div style='single {q} quotes'></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@5..10 "style" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: SvelteInterpolatedString {
+                                parts: SvelteInterpolatedStringPartList [
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@11..17 "\"top: " [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@17..18 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@18..21 "top" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@21..22 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@22..25 "px\"" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@25..26 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@26..27 "<" [] [],
+                slash_token: SLASH@27..28 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@28..31 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@31..32 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@32..34 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@34..38 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@38..43 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@43..44 "=" [] [],
+                            value: SvelteInterpolatedString {
+                                parts: SvelteInterpolatedStringPartList [
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@44..50 "\"card " [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@50..51 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@51..54 "cls" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@54..55 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@55..56 "\"" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@56..57 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@57..58 "<" [] [],
+                slash_token: SLASH@58..59 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@59..62 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@62..63 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@63..65 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@65..69 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@69..74 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@74..75 "=" [] [],
+                            value: SvelteInterpolatedString {
+                                parts: SvelteInterpolatedStringPartList [
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@75..76 "\"" [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@76..77 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@77..78 "a" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@78..79 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@79..88 " between " [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@88..89 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@89..90 "b" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@90..91 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@91..92 "\"" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@92..93 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@93..94 "<" [] [],
+                slash_token: SLASH@94..95 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@95..98 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@98..99 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@99..101 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@101..105 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@105..111 "data-x" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@111..112 "=" [] [],
+                            value: SvelteInterpolatedString {
+                                parts: SvelteInterpolatedStringPartList [
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@112..113 "\"" [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@113..114 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@114..119 "value" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@119..120 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@120..121 "\"" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@121..122 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@122..123 "<" [] [],
+                slash_token: SLASH@123..124 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@124..127 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@127..128 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@128..130 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@130..134 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@134..139 "title" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@139..140 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@140..163 "\"no interpolation here\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@163..164 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@164..165 "<" [] [],
+                slash_token: SLASH@165..166 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@166..169 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@169..170 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@170..172 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@172..176 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@176..181 "style" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@181..182 "=" [] [],
+                            value: SvelteInterpolatedString {
+                                parts: SvelteInterpolatedStringPartList [
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@182..190 "'single " [] [],
+                                    },
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@190..191 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@191..192 "q" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@192..193 "}" [] [],
+                                    },
+                                    SvelteInterpolatedStringChunk {
+                                        html_string_literal_token: HTML_STRING_LITERAL@193..201 " quotes'" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@201..202 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@202..203 "<" [] [],
+                slash_token: SLASH@203..204 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@204..207 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@207..208 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@208..209 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..209
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..208
+    0: HTML_ELEMENT@0..32
+      0: HTML_OPENING_ELEMENT@0..26
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..25
+          0: HTML_ATTRIBUTE@5..25
+            0: HTML_ATTRIBUTE_NAME@5..10
+              0: HTML_LITERAL@5..10 "style" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..25
+              0: EQ@10..11 "=" [] []
+              1: SVELTE_INTERPOLATED_STRING@11..25
+                0: SVELTE_INTERPOLATED_STRING_PART_LIST@11..25
+                  0: SVELTE_INTERPOLATED_STRING_CHUNK@11..17
+                    0: HTML_STRING_LITERAL@11..17 "\"top: " [] []
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@17..22
+                    0: L_CURLY@17..18 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@18..21
+                      0: HTML_LITERAL@18..21 "top" [] []
+                    2: R_CURLY@21..22 "}" [] []
+                  2: SVELTE_INTERPOLATED_STRING_CHUNK@22..25
+                    0: HTML_STRING_LITERAL@22..25 "px\"" [] []
+        3: R_ANGLE@25..26 ">" [] []
+      1: HTML_ELEMENT_LIST@26..26
+      2: HTML_CLOSING_ELEMENT@26..32
+        0: L_ANGLE@26..27 "<" [] []
+        1: SLASH@27..28 "/" [] []
+        2: HTML_TAG_NAME@28..31
+          0: HTML_LITERAL@28..31 "div" [] []
+        3: R_ANGLE@31..32 ">" [] []
+    1: HTML_ELEMENT@32..63
+      0: HTML_OPENING_ELEMENT@32..57
+        0: L_ANGLE@32..34 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@34..38
+          0: HTML_LITERAL@34..38 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@38..56
+          0: HTML_ATTRIBUTE@38..56
+            0: HTML_ATTRIBUTE_NAME@38..43
+              0: HTML_LITERAL@38..43 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@43..56
+              0: EQ@43..44 "=" [] []
+              1: SVELTE_INTERPOLATED_STRING@44..56
+                0: SVELTE_INTERPOLATED_STRING_PART_LIST@44..56
+                  0: SVELTE_INTERPOLATED_STRING_CHUNK@44..50
+                    0: HTML_STRING_LITERAL@44..50 "\"card " [] []
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@50..55
+                    0: L_CURLY@50..51 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@51..54
+                      0: HTML_LITERAL@51..54 "cls" [] []
+                    2: R_CURLY@54..55 "}" [] []
+                  2: SVELTE_INTERPOLATED_STRING_CHUNK@55..56
+                    0: HTML_STRING_LITERAL@55..56 "\"" [] []
+        3: R_ANGLE@56..57 ">" [] []
+      1: HTML_ELEMENT_LIST@57..57
+      2: HTML_CLOSING_ELEMENT@57..63
+        0: L_ANGLE@57..58 "<" [] []
+        1: SLASH@58..59 "/" [] []
+        2: HTML_TAG_NAME@59..62
+          0: HTML_LITERAL@59..62 "div" [] []
+        3: R_ANGLE@62..63 ">" [] []
+    2: HTML_ELEMENT@63..99
+      0: HTML_OPENING_ELEMENT@63..93
+        0: L_ANGLE@63..65 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@65..69
+          0: HTML_LITERAL@65..69 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@69..92
+          0: HTML_ATTRIBUTE@69..92
+            0: HTML_ATTRIBUTE_NAME@69..74
+              0: HTML_LITERAL@69..74 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@74..92
+              0: EQ@74..75 "=" [] []
+              1: SVELTE_INTERPOLATED_STRING@75..92
+                0: SVELTE_INTERPOLATED_STRING_PART_LIST@75..92
+                  0: SVELTE_INTERPOLATED_STRING_CHUNK@75..76
+                    0: HTML_STRING_LITERAL@75..76 "\"" [] []
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@76..79
+                    0: L_CURLY@76..77 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@77..78
+                      0: HTML_LITERAL@77..78 "a" [] []
+                    2: R_CURLY@78..79 "}" [] []
+                  2: SVELTE_INTERPOLATED_STRING_CHUNK@79..88
+                    0: HTML_STRING_LITERAL@79..88 " between " [] []
+                  3: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@88..91
+                    0: L_CURLY@88..89 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@89..90
+                      0: HTML_LITERAL@89..90 "b" [] []
+                    2: R_CURLY@90..91 "}" [] []
+                  4: SVELTE_INTERPOLATED_STRING_CHUNK@91..92
+                    0: HTML_STRING_LITERAL@91..92 "\"" [] []
+        3: R_ANGLE@92..93 ">" [] []
+      1: HTML_ELEMENT_LIST@93..93
+      2: HTML_CLOSING_ELEMENT@93..99
+        0: L_ANGLE@93..94 "<" [] []
+        1: SLASH@94..95 "/" [] []
+        2: HTML_TAG_NAME@95..98
+          0: HTML_LITERAL@95..98 "div" [] []
+        3: R_ANGLE@98..99 ">" [] []
+    3: HTML_ELEMENT@99..128
+      0: HTML_OPENING_ELEMENT@99..122
+        0: L_ANGLE@99..101 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@101..105
+          0: HTML_LITERAL@101..105 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@105..121
+          0: HTML_ATTRIBUTE@105..121
+            0: HTML_ATTRIBUTE_NAME@105..111
+              0: HTML_LITERAL@105..111 "data-x" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@111..121
+              0: EQ@111..112 "=" [] []
+              1: SVELTE_INTERPOLATED_STRING@112..121
+                0: SVELTE_INTERPOLATED_STRING_PART_LIST@112..121
+                  0: SVELTE_INTERPOLATED_STRING_CHUNK@112..113
+                    0: HTML_STRING_LITERAL@112..113 "\"" [] []
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@113..120
+                    0: L_CURLY@113..114 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@114..119
+                      0: HTML_LITERAL@114..119 "value" [] []
+                    2: R_CURLY@119..120 "}" [] []
+                  2: SVELTE_INTERPOLATED_STRING_CHUNK@120..121
+                    0: HTML_STRING_LITERAL@120..121 "\"" [] []
+        3: R_ANGLE@121..122 ">" [] []
+      1: HTML_ELEMENT_LIST@122..122
+      2: HTML_CLOSING_ELEMENT@122..128
+        0: L_ANGLE@122..123 "<" [] []
+        1: SLASH@123..124 "/" [] []
+        2: HTML_TAG_NAME@124..127
+          0: HTML_LITERAL@124..127 "div" [] []
+        3: R_ANGLE@127..128 ">" [] []
+    4: HTML_ELEMENT@128..170
+      0: HTML_OPENING_ELEMENT@128..164
+        0: L_ANGLE@128..130 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@130..134
+          0: HTML_LITERAL@130..134 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@134..163
+          0: HTML_ATTRIBUTE@134..163
+            0: HTML_ATTRIBUTE_NAME@134..139
+              0: HTML_LITERAL@134..139 "title" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@139..163
+              0: EQ@139..140 "=" [] []
+              1: HTML_STRING@140..163
+                0: HTML_STRING_LITERAL@140..163 "\"no interpolation here\"" [] []
+        3: R_ANGLE@163..164 ">" [] []
+      1: HTML_ELEMENT_LIST@164..164
+      2: HTML_CLOSING_ELEMENT@164..170
+        0: L_ANGLE@164..165 "<" [] []
+        1: SLASH@165..166 "/" [] []
+        2: HTML_TAG_NAME@166..169
+          0: HTML_LITERAL@166..169 "div" [] []
+        3: R_ANGLE@169..170 ">" [] []
+    5: HTML_ELEMENT@170..208
+      0: HTML_OPENING_ELEMENT@170..202
+        0: L_ANGLE@170..172 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@172..176
+          0: HTML_LITERAL@172..176 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@176..201
+          0: HTML_ATTRIBUTE@176..201
+            0: HTML_ATTRIBUTE_NAME@176..181
+              0: HTML_LITERAL@176..181 "style" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@181..201
+              0: EQ@181..182 "=" [] []
+              1: SVELTE_INTERPOLATED_STRING@182..201
+                0: SVELTE_INTERPOLATED_STRING_PART_LIST@182..201
+                  0: SVELTE_INTERPOLATED_STRING_CHUNK@182..190
+                    0: HTML_STRING_LITERAL@182..190 "'single " [] []
+                  1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@190..193
+                    0: L_CURLY@190..191 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@191..192
+                      0: HTML_LITERAL@191..192 "q" [] []
+                    2: R_CURLY@192..193 "}" [] []
+                  2: SVELTE_INTERPOLATED_STRING_CHUNK@193..201
+                    0: HTML_STRING_LITERAL@193..201 " quotes'" [] []
+        3: R_ANGLE@201..202 ">" [] []
+      1: HTML_ELEMENT_LIST@202..202
+      2: HTML_CLOSING_ELEMENT@202..208
+        0: L_ANGLE@202..203 "<" [] []
+        1: SLASH@203..204 "/" [] []
+        2: HTML_TAG_NAME@204..207
+          0: HTML_LITERAL@204..207 "div" [] []
+        3: R_ANGLE@207..208 ">" [] []
+  4: EOF@208..209 "" [Newline("\n")] []
+
+```

@@ -2256,6 +2256,82 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteInDirective {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteInterpolatedString>
+    for crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteInterpolatedString,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteInterpolatedString>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedString {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteInterpolatedString,
+        crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedString {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteInterpolatedString,
+        crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::interpolated_string::FormatSvelteInterpolatedString::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::SvelteInterpolatedStringChunk>
+    for crate::svelte::auxiliary::interpolated_string_chunk::FormatSvelteInterpolatedStringChunk
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteInterpolatedStringChunk,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteInterpolatedStringChunk>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedStringChunk {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteInterpolatedStringChunk,
+        crate::svelte::auxiliary::interpolated_string_chunk::FormatSvelteInterpolatedStringChunk,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::interpolated_string_chunk::FormatSvelteInterpolatedStringChunk::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedStringChunk {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteInterpolatedStringChunk,
+        crate::svelte::auxiliary::interpolated_string_chunk::FormatSvelteInterpolatedStringChunk,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::interpolated_string_chunk::FormatSvelteInterpolatedStringChunk::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteKeyBlock>
     for crate::svelte::auxiliary::key_block::FormatSvelteKeyBlock
 {
@@ -3791,6 +3867,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteElseIfClauseList
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedStringPartList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteInterpolatedStringPartList,
+        crate::svelte::lists::interpolated_string_part_list::FormatSvelteInterpolatedStringPartList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::lists::interpolated_string_part_list::FormatSvelteInterpolatedStringPartList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteInterpolatedStringPartList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteInterpolatedStringPartList,
+        crate::svelte::lists::interpolated_string_part_list::FormatSvelteInterpolatedStringPartList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::lists::interpolated_string_part_list::FormatSvelteInterpolatedStringPartList::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4549,6 +4650,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteEachName {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::any::each_name::FormatAnySvelteEachName::default(),
+        )
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteInterpolatedStringPart {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnySvelteInterpolatedStringPart,
+        crate::svelte::any::interpolated_string_part::FormatAnySvelteInterpolatedStringPart,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::any::interpolated_string_part::FormatAnySvelteInterpolatedStringPart::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteInterpolatedStringPart {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnySvelteInterpolatedStringPart,
+        crate::svelte::any::interpolated_string_part::FormatAnySvelteInterpolatedStringPart,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::any::interpolated_string_part::FormatAnySvelteInterpolatedStringPart::default(),
         )
     }
 }

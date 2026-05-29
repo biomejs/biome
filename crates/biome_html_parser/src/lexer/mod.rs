@@ -410,6 +410,44 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume a token in the [HtmlLexContext::SvelteInterpolatedStringChunk] context.
+    ///
+    /// A `{` starts an interpolation and is emitted on its own; everything else is a
+    /// literal chunk that runs until the next `{` or the closing quote.
+    fn consume_token_svelte_interpolated_string_chunk(
+        &mut self,
+        current: u8,
+        quote: u8,
+    ) -> HtmlSyntaxKind {
+        if current == b'{' {
+            self.consume_byte(T!['{'])
+        } else {
+            self.consume_svelte_interpolated_string_chunk(quote)
+        }
+    }
+
+    /// Consume a run of literal text inside a Svelte interpolated attribute value,
+    /// stopping before the next `{` interpolation. The closing `quote` is included in
+    /// the chunk and ends it. Assumes the caller is not currently positioned on a `{`.
+    fn consume_svelte_interpolated_string_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' {
+                break;
+            }
+            if current == quote {
+                // Closing quote: include it and end the chunk.
+                self.advance(1);
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
+            }
+        }
+
+        HTML_STRING_LITERAL
+    }
+
     /// Consume a token in the [HtmlLexContext::Doctype] context.
     fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
@@ -1408,6 +1446,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_vue_v_for_expression(current, quote)
                     }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::SvelteInterpolatedStringChunk { quote } => {
+                        self.consume_token_svelte_interpolated_string_chunk(current, quote)
+                    }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
@@ -1507,6 +1548,12 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteInterpolatedString => {
+                    // `current` is the opening quote of the attribute value. Consume it,
+                    // then read the literal text up to the first interpolation.
+                    self.advance(1);
+                    self.consume_svelte_interpolated_string_chunk(current)
+                }
             },
             None => EOF,
         };
