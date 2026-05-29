@@ -108,7 +108,6 @@ fn is_env_from_process(binding: &biome_js_semantic::Binding) -> bool {
     	.syntax()
     	.ancestors()
     	.skip(1)
-        .iter()
         .find_map(|n| AnyJsNamedImportSpecifier::cast(n.clone())?.imported_name())
         .is_some_and(|name| name.text_trimmed() == "env")
         && ancestors
