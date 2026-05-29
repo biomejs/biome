@@ -1125,7 +1125,6 @@ dependencies = [
  "camino",
  "hashbrown 0.15.5",
  "insta",
- "pastey",
  "rustc-hash 2.1.2",
 ]
 

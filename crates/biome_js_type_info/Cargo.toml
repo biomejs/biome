@@ -20,7 +20,6 @@ biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 camino                    = { workspace = true }
 hashbrown                 = { workspace = true }
-pastey                    = { workspace = true }
 rustc-hash                = { workspace = true }
 
 [dev-dependencies]

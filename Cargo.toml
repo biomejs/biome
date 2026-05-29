@@ -127,7 +127,6 @@ jiff                         = "0.2.24"
 libc                         = "0.2.186"
 mimalloc                     = "0.1.50"
 papaya                       = "0.2.4"
-pastey                       = "0.1.1"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
