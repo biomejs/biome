@@ -15378,7 +15378,7 @@
 			"type": "object",
 			"properties": {
 				"allowImplicit": {
-					"description": "When `true`, allows callbacks in methods that require a return value\n(e.g. `map`, `filter`) to implicitly return `undefined` via `return;`.\nThis matches ESLint's `allowImplicit` option for `array-callback-return`.",
+					"description": "When `true`, allows callbacks in methods that require a return value\n(e.g. `map`, `filter`) to implicitly return `undefined` via `return;`.",
 					"type": ["boolean", "null"]
 				},
 				"checkForEach": {
