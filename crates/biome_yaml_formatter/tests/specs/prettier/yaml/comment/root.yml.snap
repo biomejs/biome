@@ -25,13 +25,15 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,11 +1,8 @@
- [
+@@ -2,13 +2,9 @@
+   source_position(0),
    "#hello world",
    hard_line_break,
+-  source_position(13),
 -  "#hello world",
 -  hard_line_break,
    verbatim([
+     source_position(0),
      "#hello world
 -#hello world
  "

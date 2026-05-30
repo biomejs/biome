@@ -33,13 +33,17 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1,12 +1,8 @@
+@@ -1,15 +1,10 @@
  [
-   "# Comment",
-   empty_line,
+-  source_position(0),
 -  "# Comment",
 -  empty_line,
+-  source_position(13),
++  source_position(2),
+   "# Comment",
+   empty_line,
    verbatim([
+     source_position(0),
 -    "# Comment
 -
 -  # Comment
