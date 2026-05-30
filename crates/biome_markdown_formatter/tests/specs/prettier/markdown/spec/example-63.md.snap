@@ -26,14 +26,22 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -1 +1,5 @@
--["## Foo", empty_line, "Bar", hard_line_break]
-\ No newline at end of file
-+[
-+  "## Foo
-+Bar",
-+  hard_line_break
-+]
+@@ -1,10 +1,11 @@
+ [
+-  source_position(0),
+   "## ",
+-  source_position(2),
++  source_position(0),
+   "Foo",
+-  empty_line,
+-  source_position(7),
++  source_position(3),
++  "
++",
++  source_position(4),
+   "Bar",
+   hard_line_break
+ ]
 \ No newline at end of file
 
 ```
