@@ -3,18 +3,27 @@ const { platform, arch, env, version, release } = process;
 const { execSync } = require("child_process");
 
 function isMusl() {
-	let stderr;
+	let nodeReportHeader;
 	try {
-		stderr = execSync("ldd --version", {
-			stdio: ['pipe', 'pipe', 'pipe']
+		nodeReportHeader = process.report?.getReport?.()?.header;
+	} catch {
+		nodeReportHeader = undefined;
+	}
+
+	if (nodeReportHeader != null) {
+		return nodeReportHeader.glibcVersionRuntime == null;
+	}
+
+	let lddOutput;
+	try {
+		lddOutput = execSync("ldd --version", {
+			stdio: ["pipe", "pipe", "pipe"],
 		});
 	} catch (err) {
-		stderr = err.stderr;
+		lddOutput = err.stderr;
 	}
-	if (stderr.indexOf("musl") > -1) {
-		return true;
-	}
-	return false;
+
+	return lddOutput?.includes("musl") ?? false;
 }
 
 const PLATFORMS = {
