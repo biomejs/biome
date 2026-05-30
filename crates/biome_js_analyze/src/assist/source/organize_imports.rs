@@ -172,45 +172,6 @@ declare_source_rule! {
     /// - `:STYLE:`: paths ending with the following style extensions:
     ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
     ///
-    /// #### Kind matcher
-    ///
-    /// Use a kind matcher to filter imports by their syntactic kind.
-    /// Currently, the only supported kind is `bare`, which matches
-    /// bare (side-effect) imports such as `import "polyfill"`.
-    /// Prefix the kind with `!` to match everything except that kind.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "sortBareImports": true,
-    ///         "groups": [
-    ///             { "kind": "!bare" },
-    ///             ":BLANK_LINE:",
-    ///             { "kind": "bare" }
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// The kind matcher composes with the `source` field,
-    /// allowing patterns such as "only bare imports that import a CSS file":
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "sortBareImports": true,
-    ///         "groups": [
-    ///             { "kind": "bare", "source": "**/*.css" }
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// :::note
-    /// The `bare` kind requires [`sortBareImports`](#sortbareimports) to be `true`
-    /// for bare imports to participate in group matching.
-    /// :::
-    ///
     /// #### Type-only matcher
     ///
     /// Use a type-only matcher to separate `import type` from regular imports:
@@ -245,6 +206,86 @@ declare_source_rule! {
     /// ```
     ///
     /// The `source` field accepts predefined groups and glob patterns.
+    ///
+    /// #### Kind matcher
+    ///
+    /// Use a kind matcher to filter imports by their syntactic kind.
+    /// Currently, the only supported kind is `bare`, which matches
+    /// bare (side-effect) imports such as `import "polyfill"`.
+    /// The kind matcher composes with the `source` field,
+    /// allowing patterns such as "only bare imports that import a style file":
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "kind": "bare", "source": ":STYLE:" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./b.css";
+    /// import d from "./d.js";
+    /// import "./a.css";
+    /// ```
+    ///
+    /// If you don't set [`sortBareImports`](#sortbareimports) to `true`,
+    /// then bare imports that are not matched are not sorted with other imports.
+    /// Using the previous configuration, the following code...
+    ///
+    /// ```ts,ignore
+    /// import "./e.css";
+    /// import d from "./d.js";
+    /// import "./c.css";
+    /// import "./x.js";
+    /// import "./b.css";
+    /// import "./a.css";
+    /// ```
+    ///
+    /// ...is sorted as:
+    ///
+    /// ```ts,ignore
+    /// import "./c.css";
+    /// import "./e.css";
+    /// import d from "./d.js";
+    /// import "./x.js";
+    /// import "./a.css";
+    /// import "./b.css";
+    /// ```
+    ///
+    /// Another subtlety of not setting [`sortBareImports`](#sortbareimports) to `true`
+    /// is that the following configuration doesn't group bare imports at the end:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [{ "kind": "!bare" }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If you want to group bare imports last,
+    /// you have to create a group that explicitly matches bare imports:
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "kind": "!bare" },
+    ///             ":BLANK_LINE:",
+    ///             { "kind": "bare" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./b.css";
+    /// import d from "./d.js";
+    /// import "./a.css";
+    /// ```
     ///
     /// ### `sortBareImports`
     ///
