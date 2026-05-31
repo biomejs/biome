@@ -12,7 +12,7 @@ jobs:
       - name: Remove triaging label
         if: contains(github.event.issue.labels.*.name, 'S-Bug-confirmed') && contains(github.event.issue.labels.*.name, 'S-Needs triage')
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "S-Needs triage"
