@@ -974,7 +974,7 @@ pub fn css_function_at_rule(
 }
 pub fn css_function_at_rule_declarator(
     function_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
@@ -990,7 +990,7 @@ pub fn css_function_at_rule_declarator(
 }
 pub struct CssFunctionAtRuleDeclaratorBuilder {
     function_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,

@@ -931,7 +931,7 @@ CssViewTransitionAtRuleDeclarator =
 
 CssFunctionAtRuleDeclarator =
 	'function'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 	'('
 	parameters: CssFunctionParameterList
 	')'
