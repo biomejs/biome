@@ -1,0 +1,20 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/use-semicolonless.scss
+---
+
+# Input
+
+```scss
+@use
+"theme"
+
+```
+
+
+# Formatted
+
+```scss
+@use "theme";
+
+```

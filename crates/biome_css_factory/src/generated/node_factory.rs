@@ -3406,24 +3406,23 @@ pub fn scss_forward_as_clause(
 pub fn scss_forward_at_rule(
     forward_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
 ) -> ScssForwardAtRuleBuilder {
     ScssForwardAtRuleBuilder {
         forward_token,
         url,
-        semicolon_token,
         as_clause: None,
         visibility_clause: None,
         with_clause: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssForwardAtRuleBuilder {
     forward_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
     as_clause: Option<ScssForwardAsClause>,
     visibility_clause: Option<AnyScssForwardVisibilityClause>,
     with_clause: Option<ScssWithClause>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssForwardAtRuleBuilder {
     pub fn with_as_clause(mut self, as_clause: ScssForwardAsClause) -> Self {
@@ -3441,6 +3440,10 @@ impl ScssForwardAtRuleBuilder {
         self.with_clause = Some(with_clause);
         self
     }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
     pub fn build(self) -> ScssForwardAtRule {
         ScssForwardAtRule::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::SCSS_FORWARD_AT_RULE,
@@ -3453,7 +3456,8 @@ impl ScssForwardAtRuleBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.with_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -4277,25 +4281,21 @@ pub fn scss_use_as_clause(
         ],
     ))
 }
-pub fn scss_use_at_rule(
-    use_token: SyntaxToken,
-    url: CssString,
-    semicolon_token: SyntaxToken,
-) -> ScssUseAtRuleBuilder {
+pub fn scss_use_at_rule(use_token: SyntaxToken, url: CssString) -> ScssUseAtRuleBuilder {
     ScssUseAtRuleBuilder {
         use_token,
         url,
-        semicolon_token,
         as_clause: None,
         with_clause: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssUseAtRuleBuilder {
     use_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
     as_clause: Option<ScssUseAsClause>,
     with_clause: Option<ScssWithClause>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssUseAtRuleBuilder {
     pub fn with_as_clause(mut self, as_clause: ScssUseAsClause) -> Self {
@@ -4304,6 +4304,10 @@ impl ScssUseAtRuleBuilder {
     }
     pub fn with_with_clause(mut self, with_clause: ScssWithClause) -> Self {
         self.with_clause = Some(with_clause);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
         self
     }
     pub fn build(self) -> ScssUseAtRule {
@@ -4316,7 +4320,8 @@ impl ScssUseAtRuleBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.with_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
