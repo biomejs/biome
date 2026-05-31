@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-matchers-without-enabling-sort-bare-imports.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+bare-matchers-without-enabling-sort-bare-imports.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The groups option contains kind matchers set to bare or !bare. They have no effect because the sortBareImports option is not set to true. Set sortBareImports to true or remove the bare kind matchers.
+  
+     6 │         "organizeImports": {
+     7 │           "level": "on",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "groups": [
+  > 10 │               { "kind": "bare", "source": ":STYLE:" }
+  > 11 │             ]
+  > 12 │           }
+       │           ^
+    13 │         }
+    14 │       }
+  
+  i We are assessing an approach to sort a subset of bare imports, using bare kind matchers without setting sortBareImports to true. See the Pull Request for more details.
+  
+
+```

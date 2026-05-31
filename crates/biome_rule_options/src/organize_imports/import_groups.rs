@@ -28,6 +28,11 @@ impl ImportGroups {
             .unwrap_or(self.0.len()) as u16
     }
 
+    /// Is there a group that match or unmatch explicitly bare imports?
+    pub fn has_bare_matchers(&self) -> bool {
+        self.0.iter().any(|group| group.has_bare_matchers())
+    }
+
     /// Returns how many blank lines must separate `first_group` and `second_group`.
     pub fn separated_by_blank_line(&self, first_group: u16, second_group: u16) -> bool {
         self.0
@@ -86,6 +91,16 @@ impl ImportGroup {
             Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
         }
     }
+
+    fn has_bare_matchers(&self) -> bool {
+        match self {
+            Self::BlankLine => false,
+            Self::Matcher(group_matcher) => group_matcher.has_bare_matchers(),
+            Self::MatcherList(group_matchers) => group_matchers
+                .iter()
+                .any(|group_matcher| group_matcher.has_bare_matchers()),
+        }
+    }
 }
 impl Deserializable for ImportGroup {
     fn deserialize(
@@ -128,6 +143,15 @@ impl GroupMatcher {
         match self {
             Self::Import(_) => false,
             Self::Source(matcher) => matcher.is_negated(),
+        }
+    }
+
+    pub fn has_bare_matchers(&self) -> bool {
+        match self {
+            Self::Import(import_matcher) => import_matcher
+                .kind
+                .is_some_and(|kind_matcher| kind_matcher.kind.is_bare()),
+            Self::Source(_source_matcher) => false,
         }
     }
 
@@ -197,14 +221,14 @@ impl ImportMatcher {
 /// Kind matcher for [`ImportMatcher::kind`].
 ///
 /// Accepts a plain kind (e.g. `"bare"`) or a negated kind (e.g. `"!bare"`).
-#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Copy, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct NegatableImportKindMatcher {
     is_negated: bool,
     kind: ImportKindMatcher,
 }
 impl NegatableImportKindMatcher {
-    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
         self.kind.is_match(candidate) != self.is_negated
     }
 }
@@ -286,17 +310,23 @@ impl schemars::JsonSchema for NegatableImportKindMatcher {
     }
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ImportKindMatcher {
     #[serde(rename = "bare")]
     Bare,
 }
 impl ImportKindMatcher {
-    fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Bare => candidate.is_bare,
         }
+    }
+
+    pub const fn is_bare(self) -> bool {
+        matches!(self, Self::Bare)
     }
 }
 impl std::fmt::Display for ImportKindMatcher {
