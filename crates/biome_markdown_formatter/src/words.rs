@@ -1,5 +1,5 @@
 use biome_formatter::prelude::*;
-use biome_formatter::{Format, FormatResult};
+use biome_formatter::{Format, FormatOptions, FormatResult};
 use biome_markdown_syntax::{AnyMdInline, MdHardLine, MdInlineItemList};
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
 
@@ -23,10 +23,17 @@ impl MdWord {
 
 impl Format<MarkdownFormatContext> for MdWord {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        source_position(self.source_position).fmt(f)?;
-        f.write_element(FormatElement::LocatedTokenText {
-            slice: self.text.clone(),
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 

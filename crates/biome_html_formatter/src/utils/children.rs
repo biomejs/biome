@@ -79,10 +79,17 @@ impl HtmlWord {
 
 impl Format<HtmlFormatContext> for HtmlWord {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        source_position(self.source_position).fmt(f)?;
-        f.write_element(FormatElement::LocatedTokenText {
-            slice: self.text.clone(),
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 

@@ -4,14 +4,16 @@ pub mod tag;
 use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
-use crate::{TagKind, TextSize};
+use crate::{IndentWidth, TagKind, TextSize};
 use biome_rowan::TokenText;
 #[cfg(target_pointer_width = "64")]
 use biome_rowan::static_assert;
 use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
+use std::num::NonZeroU32;
 use std::ops::Deref;
 use std::rc::Rc;
+use unicode_width::UnicodeWidthChar;
 
 /// Language agnostic IR for formatting source code.
 ///
@@ -41,6 +43,7 @@ pub enum FormatElement {
     Text {
         /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
         text: Box<str>,
+        text_width: TextWidth,
     },
 
     /// A token for a text that is taken as is from the source code (input text and formatted representation are identical).
@@ -48,6 +51,23 @@ pub enum FormatElement {
     LocatedTokenText {
         /// The token text
         slice: TokenText,
+        text_width: TextWidth,
+    },
+
+    /// Arbitrary text with a known source position, used when source-map generation is enabled.
+    MappedText {
+        /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
+        text: Box<str>,
+        /// The start position of the text in the unformatted source code.
+        source_position: TextSize,
+    },
+
+    /// Source text with a known source position, used when source-map generation is enabled.
+    MappedLocatedTokenText {
+        /// The token text
+        slice: TokenText,
+        /// The start position of the text in the unformatted source code.
+        source_position: TextSize,
     },
 
     /// Prevents that line suffixes move past this boundary. Forces the printer to print any pending
@@ -80,6 +100,22 @@ impl std::fmt::Debug for FormatElement {
             Self::LocatedTokenText { slice, .. } => {
                 fmt.debug_tuple("LocatedTokenText").field(slice).finish()
             }
+            Self::MappedText {
+                text,
+                source_position,
+            } => fmt
+                .debug_tuple("MappedText")
+                .field(text)
+                .field(source_position)
+                .finish(),
+            Self::MappedLocatedTokenText {
+                slice,
+                source_position,
+            } => fmt
+                .debug_tuple("MappedLocatedTokenText")
+                .field(slice)
+                .field(source_position)
+                .finish(),
             Self::LineSuffixBoundary => write!(fmt, "LineSuffixBoundary"),
             Self::BestFitting(best_fitting) => {
                 fmt.debug_tuple("BestFitting").field(&best_fitting).finish()
@@ -223,7 +259,11 @@ impl FormatElement {
     pub const fn is_text(&self) -> bool {
         matches!(
             self,
-            Self::LocatedTokenText { .. } | Self::Text { .. } | Self::Token { .. }
+            Self::LocatedTokenText { .. }
+                | Self::MappedLocatedTokenText { .. }
+                | Self::MappedText { .. }
+                | Self::Text { .. }
+                | Self::Token { .. }
         )
     }
 
@@ -251,8 +291,11 @@ impl FormatElements for FormatElement {
             Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
             Self::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
 
-            Self::Text { text, .. } => text.contains('\n'),
-            Self::LocatedTokenText { slice, .. } => slice.contains('\n'),
+            Self::Text { text_width, .. } | Self::LocatedTokenText { text_width, .. } => {
+                text_width.is_multiline()
+            }
+            Self::MappedText { text, .. } => text.contains('\n'),
+            Self::MappedLocatedTokenText { slice, .. } => slice.contains('\n'),
             Self::Interned(interned) => interned.will_break(),
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
@@ -287,6 +330,59 @@ impl FormatElements for FormatElement {
             Self::Tag(tag) if tag.kind() == kind && tag.is_end() => Some(tag),
             _ => None,
         }
+    }
+}
+
+/// New-type wrapper for a single-line text unicode width.
+///
+/// The stored value is the actual width plus one, allowing `Option<Width>` to
+/// fit into the same space as a `u32`.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct Width(NonZeroU32);
+
+impl Width {
+    pub(crate) const fn new(width: u32) -> Self {
+        Self(NonZeroU32::MIN.saturating_add(width))
+    }
+
+    pub const fn value(self) -> u32 {
+        self.0.get() - 1
+    }
+}
+
+/// The pre-computed unicode width of single-line text, or a marker for multiline text.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum TextWidth {
+    Width(Width),
+    Multiline,
+}
+
+impl TextWidth {
+    pub fn from_text(text: &str, indent_width: IndentWidth) -> Self {
+        let mut width = 0u32;
+
+        for c in text.chars() {
+            let char_width = match c {
+                '\t' => indent_width.value() as u32,
+                '\n' => return Self::Multiline,
+                c => c.width().unwrap_or(0) as u32,
+            };
+
+            width = width.saturating_add(char_width);
+        }
+
+        Self::Width(Width::new(width))
+    }
+
+    pub const fn width(self) -> Option<Width> {
+        match self {
+            Self::Width(width) => Some(width),
+            Self::Multiline => None,
+        }
+    }
+
+    pub(crate) const fn is_multiline(self) -> bool {
+        matches!(self, Self::Multiline)
     }
 }
 
