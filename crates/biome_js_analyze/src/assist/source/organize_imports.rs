@@ -1055,7 +1055,7 @@ impl Rule for OrganizeImports {
                     && let Some(groups) = groups
                     && let Some(import_group) = groups.get(key.group)
                 {
-                    import_group.matches_bare()
+                    import_group.matches_bare(&(&key).into())
                 } else {
                     false
                 };
@@ -1289,8 +1289,8 @@ impl Rule for OrganizeImports {
                             .take(slot_indexes.len())
                             .filter_map(|item| {
                                 let info = ImportInfo::from_module_item(&item)?.0;
-                                let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 let key = ImportKey::new(info, groups);
+                                let item = organized_items.remove(&key.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
                                     key,
                                     was_merged: false,

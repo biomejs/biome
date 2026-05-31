@@ -7,7 +7,7 @@
           "level": "on",
           "options": {
             "groups": [
-              { "kind": "bare", "source": ":STYLE:" }
+              [{ "kind": "bare", "source": ":STYLE:" }, ":PACKAGE:"]
             ]
           }
         }

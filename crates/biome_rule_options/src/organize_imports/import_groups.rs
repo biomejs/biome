@@ -92,14 +92,21 @@ impl ImportGroup {
         }
     }
 
-    /// Returns `true` if it matches bare imports.
-    pub fn matches_bare(&self) -> bool {
+    /// Returns `true` if it matches the bare import `candidate`.
+    pub fn matches_bare(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::BlankLine => false,
-            Self::Matcher(group_matcher) => group_matcher.matches_bare(),
-            Self::MatcherList(group_matchers) => group_matchers
-                .iter()
-                .any(|group_matcher| group_matcher.matches_bare()),
+            Self::Matcher(group_matcher) => {
+                group_matcher.matches_bare() && group_matcher.is_match(candidate)
+            }
+            Self::MatcherList(group_matchers) => {
+                // It is not possible to have exceptions
+                // because import matcher hasno exceptions and
+                // glob patterns (that can have exceptions) cannot explicitly match bare imports.
+                group_matchers.iter().any(|group_matcher| {
+                    group_matcher.matches_bare() && group_matcher.is_match(candidate)
+                })
+            }
         }
     }
 }

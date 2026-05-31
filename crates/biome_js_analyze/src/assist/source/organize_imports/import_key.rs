@@ -26,7 +26,7 @@ pub struct ImportKey {
 impl ImportKey {
     pub fn new(info: ImportInfo, groups: Option<&ImportGroups>) -> Self {
         Self {
-            group: groups.map_or(0, |groups| groups.index(&((&info).into()))),
+            group: groups.map_or(0, |groups| groups.index(&(&info).into())),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,
@@ -70,6 +70,15 @@ impl Ord for ImportKey {
 impl PartialOrd for ImportKey {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+impl<'a> From<&'a ImportKey> for ImportCandidate<'a> {
+    fn from(value: &'a ImportKey) -> Self {
+        Self {
+            has_type_token: value.kind.has_type_token(),
+            is_bare: value.kind == ImportStatementKind::Bare,
+            source: value.source.as_ref().map(ImportSourceCandidate::new),
+        }
     }
 }
 
