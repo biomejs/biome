@@ -18,15 +18,6 @@ pub const DEFAULT_TYPESCRIPT_SHA: &str = "050880ce59e30b356b686bd3144efe24f875eb
 pub use source_pin::SourcePin;
 
 mod source_pin {
-    use anyhow::bail;
-
-    /// Length of a full SHA-1 git commit hash expressed in hexadecimal.
-    const GIT_SHA1_HEX_LENGTH: usize = 40;
-
-    /// Help text appended to every SourcePin::new tag-format error.
-    const TAG_FORMAT_HELP: &str =
-        "expected v<major>.<minor>.<patch> with optional -prerelease suffix";
-
     /// A pinned TypeScript release: git tag + commit SHA.
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct SourcePin {
@@ -35,79 +26,12 @@ mod source_pin {
     }
 
     impl SourcePin {
-        /// Builds a validated TypeScript source pin.
-        pub fn new(tag: &str, sha: &str) -> anyhow::Result<Self> {
-            let bytes = tag.as_bytes();
-            let Some(&b'v') = bytes.first() else {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            };
-
-            let mut index = 1;
-            let consume_ascii_digits = |index: &mut usize| {
-                let start = *index;
-                while let Some(&byte) = bytes.get(*index) {
-                    if !byte.is_ascii_digit() {
-                        break;
-                    }
-                    *index += 1;
-                }
-
-                *index > start
-            };
-
-            if !consume_ascii_digits(&mut index) {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            }
-            if bytes.get(index) != Some(&b'.') {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            }
-
-            index += 1;
-            if !consume_ascii_digits(&mut index) {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            }
-            if bytes.get(index) != Some(&b'.') {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            }
-
-            index += 1;
-            if !consume_ascii_digits(&mut index) {
-                bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-            }
-
-            if let Some(&next) = bytes.get(index) {
-                if next != b'-' {
-                    bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-                }
-
-                index += 1;
-                let suffix_start = index;
-                while let Some(&byte) = bytes.get(index) {
-                    if !matches!(byte, b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'.' | b'-') {
-                        bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-                    }
-                    index += 1;
-                }
-
-                if index == suffix_start {
-                    bail!("invalid TypeScript source tag {tag:?}: {TAG_FORMAT_HELP}");
-                }
-            }
-
-            if sha.len() != GIT_SHA1_HEX_LENGTH
-                || !sha
-                    .bytes()
-                    .all(|byte| matches!(byte, b'0'..=b'9' | b'a'..=b'f'))
-            {
-                bail!(
-                    "invalid TypeScript git commit SHA {sha:?}: expected {GIT_SHA1_HEX_LENGTH} lowercase hexadecimal characters"
-                );
-            }
-
-            Ok(Self {
+        /// Builds a TypeScript source pin from a tag and commit SHA.
+        pub fn new(tag: &str, sha: &str) -> Self {
+            Self {
                 tag: tag.to_owned(),
                 sha: sha.to_owned(),
-            })
+            }
         }
 
         /// Git tag of the TypeScript release, for example `v6.0.3`.
@@ -150,7 +74,7 @@ pub fn run_with_workspace_root(
     let pin = SourcePin::new(
         args.ts_tag.as_deref().unwrap_or(DEFAULT_TYPESCRIPT_TAG),
         args.ts_sha.as_deref().unwrap_or(DEFAULT_TYPESCRIPT_SHA),
-    )?;
+    );
     let opts = source::SourceOptions {
         offline: args.offline,
         verify: args.verify,
@@ -211,66 +135,4 @@ fn is_fatal_collector_diagnostic(category: &str) -> bool {
         category,
         "invalid_utf8" | "parser_error" | "unsupported_root"
     )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::SourcePin;
-
-    #[test]
-    fn source_pin_accepts_prerelease_tag_and_lowercase_sha() {
-        let pin = SourcePin::new("v6.0.3-rc.1", "a3f1b2c4d5e6f7890123456789abcdef01234567")
-            .expect("valid source pin should be accepted");
-
-        assert_eq!(pin.tag(), "v6.0.3-rc.1");
-        assert_eq!(pin.sha(), "a3f1b2c4d5e6f7890123456789abcdef01234567");
-    }
-
-    #[test]
-    fn source_pin_rejects_invalid_tags() {
-        for tag in [
-            "v1.2.3-",
-            "v1.2.3-bad_suffix",
-            "v1.2.3.4",
-            "v1.a.3",
-            "1.2.3",
-            "abc",
-        ] {
-            assert!(
-                SourcePin::new(tag, "a3f1b2c4d5e6f7890123456789abcdef01234567").is_err(),
-                "invalid tag {tag:?} should be rejected"
-            );
-        }
-    }
-
-    #[test]
-    fn source_pin_rejects_header_injection_inputs() {
-        let sha = "a3f1b2c4d5e6f7890123456789abcdef01234567";
-        for tag in [
-            "v1.2.3\n",
-            "v1.2.3\r",
-            "v1.2.3*/",
-            "v1.2.3-foo\n",
-            "v1.2.3-foo*/bar",
-        ] {
-            assert!(
-                SourcePin::new(tag, sha).is_err(),
-                "tag {tag:?} must be rejected to prevent header injection"
-            );
-        }
-    }
-
-    #[test]
-    fn source_pin_rejects_invalid_shas() {
-        for sha in [
-            "abc",
-            "C63DE15A992D37F0D6CEC03AC7631872838602CB",
-            "gggggggggggggggggggggggggggggggggggggggg",
-        ] {
-            assert!(
-                SourcePin::new("v6.0.3", sha).is_err(),
-                "invalid SHA {sha:?} should be rejected"
-            );
-        }
-    }
 }

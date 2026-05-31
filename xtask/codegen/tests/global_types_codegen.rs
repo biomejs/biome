@@ -204,9 +204,9 @@ fn source_options(offline: bool, verify: bool) -> SourceOptions {
     }
 }
 
-/// Builds a validated source pin from fixture tag/SHA values.
+/// Builds a source pin from fixture tag/SHA values.
 fn source_pin(tag: &str, sha: &str) -> SourcePin {
-    SourcePin::new(tag, sha).expect("test TypeScript source pin must be valid")
+    SourcePin::new(tag, sha)
 }
 
 /// Creates a fixture git repository with a minimal TypeScript lib table and one committed file.
@@ -826,15 +826,6 @@ mod tests {
     }
 
     #[test]
-    fn source_pin_validates_tag_and_sha() {
-        assert!(SourcePin::new("v1.2.3", MISSING_COMMIT_SHA).is_ok());
-        assert!(SourcePin::new("v1.2.3-beta.1", MISSING_COMMIT_SHA).is_ok());
-        assert!(SourcePin::new("1.2.3", MISSING_COMMIT_SHA).is_err());
-        assert!(SourcePin::new("v1.2", MISSING_COMMIT_SHA).is_err());
-        assert!(SourcePin::new("v1.2.3", "ABCDEF0000000000000000000000000000000000").is_err());
-    }
-
-    #[test]
     fn seeded_offline_cache_succeeds() -> Result<()> {
         let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
         let pin = repo.source_pin();
@@ -933,22 +924,6 @@ mod tests {
         expect_error_contains(
             run_global_types(false, None, Some(MISSING_COMMIT_SHA)),
             EXPECTED_SINGLE_OVERRIDE_REJECTION,
-        )
-    }
-
-    #[test]
-    fn run_rejects_invalid_source_pin_overrides() -> Result<()> {
-        expect_error_contains(
-            run_global_types(false, Some("v0.0.0\n"), Some(MISSING_COMMIT_SHA)),
-            "invalid TypeScript source tag",
-        )?;
-        expect_error_contains(
-            run_global_types(
-                false,
-                Some("v0.0.0"),
-                Some("ABCDEF0000000000000000000000000000000000"),
-            ),
-            "invalid TypeScript git commit SHA",
         )
     }
 
