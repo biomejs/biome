@@ -28,7 +28,7 @@ impl GlobalTypeId {
     /// Test-only constructor for synthesizing `GlobalTypeId` values at
     /// arbitrary indices, including out-of-range indices used by negative-path
     /// tests.
-    #[cfg(test)]
+    #[cfg(all(test, debug_assertions))]
     pub(crate) const fn new_for_test(index: usize) -> Self {
         Self(TypeId::new(index))
     }
