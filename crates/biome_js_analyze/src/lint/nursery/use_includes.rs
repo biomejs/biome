@@ -1,13 +1,15 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression, T,
 };
+use biome_js_type_info::{ResolvedTypeData, Type, TypeData};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use crate::services::typed::Typed;
 
 declare_lint_rule! {
     /// Prefer `Array#includes()` over `Array#indexOf()` checks.
@@ -20,29 +22,29 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid1.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) !== -1;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid2.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) >= 0;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid3.ts
     /// const arr = [1, 2, 3];
     /// arr.indexOf(1) === -1;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```ts
     /// const arr = [1, 2, 3];
     /// arr.includes(1);
     /// ```
     ///
-    /// ```js
+    /// ```ts
     /// const arr = [1, 2, 3];
     /// // Positional use of indexOf is fine
     /// const pos = arr.indexOf(1);
@@ -54,6 +56,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("prefer-includes").inspired()],
+        domains: &[RuleDomain::Types],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -75,15 +78,17 @@ pub struct UseIncludesState {
     pub kind: CheckKind,
 }
 
+use biome_rule_options::use_includes::UseIncludesOptions;
+
 impl Rule for UseIncludes {
-    type Query = Ast<JsBinaryExpression>;
+    type Query = Typed<JsBinaryExpression>;
     type State = UseIncludesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIncludesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binary = ctx.query();
-        detect_index_of_pattern(binary)
+        detect_index_of_pattern(ctx, binary)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -165,18 +170,27 @@ impl Rule for UseIncludes {
 /// Attempts to detect the pattern `expr.indexOf(value) OP literal` or the
 /// reversed form `literal OP expr.indexOf(value)` and normalise it so that
 /// the left-hand side is always the `indexOf` call.
-fn detect_index_of_pattern(binary: &JsBinaryExpression) -> Option<UseIncludesState> {
+fn detect_index_of_pattern(
+    ctx: &RuleContext<UseIncludes>,
+    binary: &JsBinaryExpression,
+) -> Option<UseIncludesState> {
     let operator = binary.operator().ok()?;
     let left = binary.left().ok()?;
     let right = binary.right().ok()?;
 
     // Try both orientations: `indexOf OP literal` and `literal OP indexOf`.
     if let Some(call) = as_index_of_call(&left) {
+        if !ensure_known_includes_type(ctx, &call) {
+            return None;
+        }
         let normalized_op = operator;
         return try_match_operator(binary, call, &right, normalized_op);
     }
 
     if let Some(call) = as_index_of_call(&right) {
+        if !ensure_known_includes_type(ctx, &call) {
+            return None;
+        }
         // Swap the operator direction so the rest of the logic stays symmetric.
         let swapped = swap_operator(operator)?;
         return try_match_operator(binary, call, &left, swapped);
@@ -226,8 +240,10 @@ fn try_match_operator(
         JsBinaryOperator::GreaterThanOrEqual if is_zero(other) => CheckKind::Includes,
         JsBinaryOperator::GreaterThan if is_negative_one(other) => CheckKind::Includes,
 
-        // indexOf === -1 | indexOf == -1 | indexOf < 0  →  !includes
-        JsBinaryOperator::StrictEquality | JsBinaryOperator::Equality
+        // indexOf === -1 | indexOf == -1 | indexOf < 0 | indexOf <= -1 →  !includes
+        JsBinaryOperator::StrictEquality
+        | JsBinaryOperator::Equality
+        | JsBinaryOperator::LessThanOrEqual
             if is_negative_one(other) =>
         {
             CheckKind::NotIncludes
@@ -297,5 +313,54 @@ fn as_number_literal(expr: &AnyJsExpression) -> Option<f64> {
         .as_any_js_literal_expression()
         .and_then(|lit| lit.as_js_number_literal_expression().cloned())
         .and_then(|n| n.as_number())
+}
+
+fn ensure_known_includes_type(ctx: &RuleContext<UseIncludes>, call: &JsCallExpression) -> bool {
+    let callee = call.callee().ok();
+    let member = callee.as_ref().and_then(|c| c.as_js_static_member_expression());
+    let object = member.and_then(|m| m.object().ok());
+    
+    let Some(object) = object else {
+        return false;
+    };
+
+    all_type_variants_match(&ctx.type_of_expression(&object), |current, raw| {
+        current.is_string_or_string_literal() || current.is_array_of(|_| true) || matches!(raw, TypeData::Tuple(_))
+    })
+}
+
+fn all_type_variants_match(ty: &Type, mut predicate: impl FnMut(&Type, &TypeData) -> bool) -> bool {
+    let mut saw_variant = false;
+    let mut pending = vec![ty.clone()];
+
+    while let Some(current) = pending.pop() {
+        if current.is_union() {
+            let mut variants = current.flattened_union_variants().peekable();
+            if variants.peek().is_none() {
+                return false;
+            }
+            saw_variant = true;
+            pending.extend(variants);
+            continue;
+        }
+
+        let Some(raw) = current.resolved_data().map(ResolvedTypeData::as_raw_data) else {
+            return false;
+        };
+
+        match raw {
+            TypeData::Generic(generic) if generic.constraint.is_known() => {
+                let Some(constraint) = current.resolve(&generic.constraint) else {
+                    return false;
+                };
+                pending.push(constraint);
+            }
+            TypeData::Generic(_) => return false,
+            _ if predicate(&current, raw) => saw_variant = true,
+            _ => return false,
+        }
+    }
+
+    saw_variant
 }
 

@@ -11,6 +11,7 @@ arr.indexOf(1) > -1;
 arr.indexOf(1) === -1;
 arr.indexOf(1) == -1;
 arr.indexOf(1) < 0;
+arr.indexOf(1) <= -1;
 
 // reversed operands
 -1 !== arr.indexOf(1);
@@ -21,6 +22,7 @@ arr.indexOf(1) < 0;
 -1 === arr.indexOf(1);
 -1 == arr.indexOf(1);
 0 > arr.indexOf(1);
+-1 >= arr.indexOf(1);
 
 // works with strings too
 str.indexOf("world") !== -1;

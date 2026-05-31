@@ -18,6 +18,7 @@ arr.indexOf(1) > -1;
 arr.indexOf(1) === -1;
 arr.indexOf(1) == -1;
 arr.indexOf(1) < 0;
+arr.indexOf(1) <= -1;
 
 // reversed operands
 -1 !== arr.indexOf(1);
@@ -28,6 +29,7 @@ arr.indexOf(1) < 0;
 -1 === arr.indexOf(1);
 -1 == arr.indexOf(1);
 0 > arr.indexOf(1);
+-1 >= arr.indexOf(1);
 
 // works with strings too
 str.indexOf("world") !== -1;
@@ -191,7 +193,7 @@ invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   > 12 │ arr.indexOf(1) == -1;
        │ ^^^^^^^^^^^^^^^^^^^^
     13 │ arr.indexOf(1) < 0;
-    14 │ 
+    14 │ arr.indexOf(1) <= -1;
   
   i includes() is more readable and clearly expresses intent.
   
@@ -205,7 +207,7 @@ invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
        12 │ + !
        13 │ + arr.includes(1);
     13 14 │   arr.indexOf(1) < 0;
-    14 15 │   
+    14 15 │   arr.indexOf(1) <= -1;
   
 
 ```
@@ -219,8 +221,8 @@ invalid.js:13:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     12 │ arr.indexOf(1) == -1;
   > 13 │ arr.indexOf(1) < 0;
        │ ^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ // reversed operands
+    14 │ arr.indexOf(1) <= -1;
+    15 │ 
   
   i includes() is more readable and clearly expresses intent.
   
@@ -233,35 +235,37 @@ invalid.js:13:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     13    │ - arr.indexOf(1)·<·0;
        13 │ + !
        14 │ + arr.includes(1);
-    14 15 │   
-    15 16 │   // reversed operands
+    14 15 │   arr.indexOf(1) <= -1;
+    15 16 │   
   
 
 ```
 
 ```
-invalid.js:16:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use includes() instead of indexOf() to check for presence.
+  i Use !...includes() instead of indexOf() to check for presence.
   
-    15 │ // reversed operands
-  > 16 │ -1 !== arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    17 │ -1 != arr.indexOf(1);
-    18 │ 0 <= arr.indexOf(1);
+    12 │ arr.indexOf(1) == -1;
+    13 │ arr.indexOf(1) < 0;
+  > 14 │ arr.indexOf(1) <= -1;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // reversed operands
   
   i includes() is more readable and clearly expresses intent.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Unsafe fix: Replace with .includes().
+  i Unsafe fix: Replace with !...includes().
   
-    14 14 │   
-    15 15 │   // reversed operands
-    16    │ - -1·!==·arr.indexOf(1);
-       16 │ + arr.includes(1);
-    17 17 │   -1 != arr.indexOf(1);
-    18 18 │   0 <= arr.indexOf(1);
+    12 12 │   arr.indexOf(1) == -1;
+    13 13 │   arr.indexOf(1) < 0;
+    14    │ - arr.indexOf(1)·<=·-1;
+       14 │ + !
+       15 │ + arr.includes(1);
+    15 16 │   
+    16 17 │   // reversed operands
   
 
 ```
@@ -271,12 +275,11 @@ invalid.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
 
   i Use includes() instead of indexOf() to check for presence.
   
-    15 │ // reversed operands
-    16 │ -1 !== arr.indexOf(1);
-  > 17 │ -1 != arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^^^
-    18 │ 0 <= arr.indexOf(1);
-    19 │ -1 < arr.indexOf(1);
+    16 │ // reversed operands
+  > 17 │ -1 !== arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    18 │ -1 != arr.indexOf(1);
+    19 │ 0 <= arr.indexOf(1);
   
   i includes() is more readable and clearly expresses intent.
   
@@ -284,12 +287,12 @@ invalid.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with .includes().
   
-    15 15 │   // reversed operands
-    16 16 │   -1 !== arr.indexOf(1);
-    17    │ - -1·!=·arr.indexOf(1);
+    15 15 │   
+    16 16 │   // reversed operands
+    17    │ - -1·!==·arr.indexOf(1);
        17 │ + arr.includes(1);
-    18 18 │   0 <= arr.indexOf(1);
-    19 19 │   -1 < arr.indexOf(1);
+    18 18 │   -1 != arr.indexOf(1);
+    19 19 │   0 <= arr.indexOf(1);
   
 
 ```
@@ -299,12 +302,12 @@ invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
 
   i Use includes() instead of indexOf() to check for presence.
   
-    16 │ -1 !== arr.indexOf(1);
-    17 │ -1 != arr.indexOf(1);
-  > 18 │ 0 <= arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^^
-    19 │ -1 < arr.indexOf(1);
-    20 │ 
+    16 │ // reversed operands
+    17 │ -1 !== arr.indexOf(1);
+  > 18 │ -1 != arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    19 │ 0 <= arr.indexOf(1);
+    20 │ -1 < arr.indexOf(1);
   
   i includes() is more readable and clearly expresses intent.
   
@@ -312,12 +315,12 @@ invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with .includes().
   
-    16 16 │   -1 !== arr.indexOf(1);
-    17 17 │   -1 != arr.indexOf(1);
-    18    │ - 0·<=·arr.indexOf(1);
+    16 16 │   // reversed operands
+    17 17 │   -1 !== arr.indexOf(1);
+    18    │ - -1·!=·arr.indexOf(1);
        18 │ + arr.includes(1);
-    19 19 │   -1 < arr.indexOf(1);
-    20 20 │   
+    19 19 │   0 <= arr.indexOf(1);
+    20 20 │   -1 < arr.indexOf(1);
   
 
 ```
@@ -327,12 +330,12 @@ invalid.js:19:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
 
   i Use includes() instead of indexOf() to check for presence.
   
-    17 │ -1 != arr.indexOf(1);
-    18 │ 0 <= arr.indexOf(1);
-  > 19 │ -1 < arr.indexOf(1);
+    17 │ -1 !== arr.indexOf(1);
+    18 │ -1 != arr.indexOf(1);
+  > 19 │ 0 <= arr.indexOf(1);
        │ ^^^^^^^^^^^^^^^^^^^
-    20 │ 
-    21 │ -1 === arr.indexOf(1);
+    20 │ -1 < arr.indexOf(1);
+    21 │ 
   
   i includes() is more readable and clearly expresses intent.
   
@@ -340,40 +343,40 @@ invalid.js:19:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with .includes().
   
-    17 17 │   -1 != arr.indexOf(1);
-    18 18 │   0 <= arr.indexOf(1);
-    19    │ - -1·<·arr.indexOf(1);
+    17 17 │   -1 !== arr.indexOf(1);
+    18 18 │   -1 != arr.indexOf(1);
+    19    │ - 0·<=·arr.indexOf(1);
        19 │ + arr.includes(1);
-    20 20 │   
-    21 21 │   -1 === arr.indexOf(1);
+    20 20 │   -1 < arr.indexOf(1);
+    21 21 │   
   
 
 ```
 
 ```
-invalid.js:21:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use !...includes() instead of indexOf() to check for presence.
+  i Use includes() instead of indexOf() to check for presence.
   
-    19 │ -1 < arr.indexOf(1);
-    20 │ 
-  > 21 │ -1 === arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    22 │ -1 == arr.indexOf(1);
-    23 │ 0 > arr.indexOf(1);
+    18 │ -1 != arr.indexOf(1);
+    19 │ 0 <= arr.indexOf(1);
+  > 20 │ -1 < arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ -1 === arr.indexOf(1);
   
   i includes() is more readable and clearly expresses intent.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Unsafe fix: Replace with !...includes().
+  i Unsafe fix: Replace with .includes().
   
-    19 19 │   -1 < arr.indexOf(1);
-    20 20 │   
-    21    │ - -1·===·arr.indexOf(1);
-       21 │ + !arr.includes(1);
-    22 22 │   -1 == arr.indexOf(1);
-    23 23 │   0 > arr.indexOf(1);
+    18 18 │   -1 != arr.indexOf(1);
+    19 19 │   0 <= arr.indexOf(1);
+    20    │ - -1·<·arr.indexOf(1);
+       20 │ + arr.includes(1);
+    21 21 │   
+    22 22 │   -1 === arr.indexOf(1);
   
 
 ```
@@ -383,11 +386,12 @@ invalid.js:22:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
 
   i Use !...includes() instead of indexOf() to check for presence.
   
-    21 │ -1 === arr.indexOf(1);
-  > 22 │ -1 == arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^^^
-    23 │ 0 > arr.indexOf(1);
-    24 │ 
+    20 │ -1 < arr.indexOf(1);
+    21 │ 
+  > 22 │ -1 === arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    23 │ -1 == arr.indexOf(1);
+    24 │ 0 > arr.indexOf(1);
   
   i includes() is more readable and clearly expresses intent.
   
@@ -395,12 +399,12 @@ invalid.js:22:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with !...includes().
   
-    20 20 │   
-    21 21 │   -1 === arr.indexOf(1);
-    22    │ - -1·==·arr.indexOf(1);
+    20 20 │   -1 < arr.indexOf(1);
+    21 21 │   
+    22    │ - -1·===·arr.indexOf(1);
        22 │ + !arr.includes(1);
-    23 23 │   0 > arr.indexOf(1);
-    24 24 │   
+    23 23 │   -1 == arr.indexOf(1);
+    24 24 │   0 > arr.indexOf(1);
   
 
 ```
@@ -410,12 +414,11 @@ invalid.js:23:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
 
   i Use !...includes() instead of indexOf() to check for presence.
   
-    21 │ -1 === arr.indexOf(1);
-    22 │ -1 == arr.indexOf(1);
-  > 23 │ 0 > arr.indexOf(1);
-       │ ^^^^^^^^^^^^^^^^^^
-    24 │ 
-    25 │ // works with strings too
+    22 │ -1 === arr.indexOf(1);
+  > 23 │ -1 == arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    24 │ 0 > arr.indexOf(1);
+    25 │ -1 >= arr.indexOf(1);
   
   i includes() is more readable and clearly expresses intent.
   
@@ -423,54 +426,27 @@ invalid.js:23:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with !...includes().
   
-    21 21 │   -1 === arr.indexOf(1);
-    22 22 │   -1 == arr.indexOf(1);
-    23    │ - 0·>·arr.indexOf(1);
+    21 21 │   
+    22 22 │   -1 === arr.indexOf(1);
+    23    │ - -1·==·arr.indexOf(1);
        23 │ + !arr.includes(1);
-    24 24 │   
-    25 25 │   // works with strings too
+    24 24 │   0 > arr.indexOf(1);
+    25 25 │   -1 >= arr.indexOf(1);
   
 
 ```
 
 ```
-invalid.js:26:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use includes() instead of indexOf() to check for presence.
-  
-    25 │ // works with strings too
-  > 26 │ str.indexOf("world") !== -1;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ str.indexOf("world") === -1;
-    28 │ 
-  
-  i includes() is more readable and clearly expresses intent.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Replace with .includes().
-  
-    24 24 │   
-    25 25 │   // works with strings too
-    26    │ - str.indexOf("world")·!==·-1;
-       26 │ + str.includes("world");
-    27 27 │   str.indexOf("world") === -1;
-    28 28 │   
-  
-
-```
-
-```
-invalid.js:27:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use !...includes() instead of indexOf() to check for presence.
   
-    25 │ // works with strings too
-    26 │ str.indexOf("world") !== -1;
-  > 27 │ str.indexOf("world") === -1;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ 
-    29 │ // parenthesized expressions
+    22 │ -1 === arr.indexOf(1);
+    23 │ -1 == arr.indexOf(1);
+  > 24 │ 0 > arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^
+    25 │ -1 >= arr.indexOf(1);
+    26 │ 
   
   i includes() is more readable and clearly expresses intent.
   
@@ -478,27 +454,110 @@ invalid.js:27:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with !...includes().
   
-    25 25 │   // works with strings too
-    26 26 │   str.indexOf("world") !== -1;
-    27    │ - str.indexOf("world")·===·-1;
-       27 │ + !
+    22 22 │   -1 === arr.indexOf(1);
+    23 23 │   -1 == arr.indexOf(1);
+    24    │ - 0·>·arr.indexOf(1);
+       24 │ + !arr.includes(1);
+    25 25 │   -1 >= arr.indexOf(1);
+    26 26 │   
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use !...includes() instead of indexOf() to check for presence.
+  
+    23 │ -1 == arr.indexOf(1);
+    24 │ 0 > arr.indexOf(1);
+  > 25 │ -1 >= arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // works with strings too
+  
+  i includes() is more readable and clearly expresses intent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    23 23 │   -1 == arr.indexOf(1);
+    24 24 │   0 > arr.indexOf(1);
+    25    │ - -1·>=·arr.indexOf(1);
+       25 │ + !arr.includes(1);
+    26 26 │   
+    27 27 │   // works with strings too
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for presence.
+  
+    27 │ // works with strings too
+  > 28 │ str.indexOf("world") !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ str.indexOf("world") === -1;
+    30 │ 
+  
+  i includes() is more readable and clearly expresses intent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    26 26 │   
+    27 27 │   // works with strings too
+    28    │ - str.indexOf("world")·!==·-1;
        28 │ + str.includes("world");
-    28 29 │   
-    29 30 │   // parenthesized expressions
+    29 29 │   str.indexOf("world") === -1;
+    30 30 │   
   
 
 ```
 
 ```
-invalid.js:30:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use !...includes() instead of indexOf() to check for presence.
+  
+    27 │ // works with strings too
+    28 │ str.indexOf("world") !== -1;
+  > 29 │ str.indexOf("world") === -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ // parenthesized expressions
+  
+  i includes() is more readable and clearly expresses intent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    27 27 │   // works with strings too
+    28 28 │   str.indexOf("world") !== -1;
+    29    │ - str.indexOf("world")·===·-1;
+       29 │ + !
+       30 │ + str.includes("world");
+    30 31 │   
+    31 32 │   // parenthesized expressions
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for presence.
   
-    29 │ // parenthesized expressions
-  > 30 │ (arr.indexOf(1)) !== -1;
+    31 │ // parenthesized expressions
+  > 32 │ (arr.indexOf(1)) !== -1;
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ arr.indexOf(1) !== (-1);
-    32 │ 
+    33 │ arr.indexOf(1) !== (-1);
+    34 │ 
   
   i includes() is more readable and clearly expresses intent.
   
@@ -506,26 +565,26 @@ invalid.js:30:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with .includes().
   
-    28 28 │   
-    29 29 │   // parenthesized expressions
-    30    │ - (arr.indexOf(1))·!==·-1;
-       30 │ + arr.includes(1);
-    31 31 │   arr.indexOf(1) !== (-1);
-    32 32 │   
+    30 30 │   
+    31 31 │   // parenthesized expressions
+    32    │ - (arr.indexOf(1))·!==·-1;
+       32 │ + arr.includes(1);
+    33 33 │   arr.indexOf(1) !== (-1);
+    34 34 │   
   
 
 ```
 
 ```
-invalid.js:31:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use includes() instead of indexOf() to check for presence.
   
-    29 │ // parenthesized expressions
-    30 │ (arr.indexOf(1)) !== -1;
-  > 31 │ arr.indexOf(1) !== (-1);
+    31 │ // parenthesized expressions
+    32 │ (arr.indexOf(1)) !== -1;
+  > 33 │ arr.indexOf(1) !== (-1);
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ 
+    34 │ 
   
   i includes() is more readable and clearly expresses intent.
   
@@ -533,11 +592,11 @@ invalid.js:31:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Replace with .includes().
   
-    29 29 │   // parenthesized expressions
-    30 30 │   (arr.indexOf(1)) !== -1;
-    31    │ - arr.indexOf(1)·!==·(-1);
-       31 │ + arr.includes(1);
-    32 32 │   
+    31 31 │   // parenthesized expressions
+    32 32 │   (arr.indexOf(1)) !== -1;
+    33    │ - arr.indexOf(1)·!==·(-1);
+       33 │ + arr.includes(1);
+    34 34 │   
   
 
 ```
