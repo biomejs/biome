@@ -11,7 +11,6 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail};
-use sha2::{Digest as _, Sha256};
 use xtask_codegen::{
     GlobalTypesArgs,
     generate_global_types::{
@@ -24,8 +23,6 @@ use xtask_codegen::{
 const TEMP_CREATE_RETRIES: usize = 32;
 
 const COLLECTOR_FIXTURE_COUNT: usize = 9;
-
-const SHA256_HEX_LENGTH: usize = 64;
 
 const TEMP_REPO_PREFIX: &str = "bgt";
 
@@ -138,7 +135,6 @@ struct FixtureRepo {
     temp: TempDir,
     tag: String,
     head: String,
-    command_line_parser_sha256: String,
 }
 
 impl FixtureRepo {
@@ -228,15 +224,8 @@ fn fixture_git_repo(lib_entries: &str) -> Result<FixtureRepo> {
     let tag = fixture_tag_for_temp_dir(&temp)?;
     run_git(temp.path(), &["tag", tag.as_str()])?;
     let head = git_stdout_trimmed(temp.path(), &["rev-parse", "HEAD"])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(temp.path().join(COMMAND_LINE_PARSER_PATH))?);
 
-    Ok(FixtureRepo {
-        temp,
-        tag,
-        head,
-        command_line_parser_sha256,
-    })
+    Ok(FixtureRepo { temp, tag, head })
 }
 
 /// Writes the minimal TypeScript source tree needed by the global-types source codegen.
@@ -284,14 +273,11 @@ fn fixture_git_repo_with_transitive_libs() -> Result<FixtureRepo> {
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     // Move the tag so the recorded HEAD still resolves via `tag^{commit}`.
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -317,14 +303,11 @@ fn fixture_git_repo_with_shadowed_root_lib_reference() -> Result<FixtureRepo> {
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -347,14 +330,11 @@ fn fixture_git_repo_with_intermediate_symlink_path_reference() -> Result<Fixture
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -374,14 +354,11 @@ fn fixture_git_repo_with_backslash_path_reference() -> Result<FixtureRepo> {
     run_git(repo.path(), &["commit", "-m", "reference backslash path"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -403,14 +380,11 @@ fn fixture_git_repo_with_mixed_reference_attributes() -> Result<FixtureRepo> {
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -428,14 +402,11 @@ fn fixture_git_repo_with_no_default_lib_and_path_reference() -> Result<FixtureRe
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -471,14 +442,11 @@ interface SeedGlobal {}
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -497,14 +465,11 @@ fn fixture_git_repo_with_mixed_case_lib_reference() -> Result<FixtureRepo> {
     run_git(repo.path(), &["commit", "-m", "reference mixed-case lib"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -531,14 +496,11 @@ fn fixture_git_repo_with_symlinked_default_lib_reference() -> Result<FixtureRepo
     )?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -555,14 +517,11 @@ fn fixture_git_repo_with_symlinked_profile_root() -> Result<FixtureRepo> {
     run_git(repo.path(), &["commit", "-m", "symlink profile root"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -580,14 +539,11 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
     run_git(repo.path(), &["commit", "-m", "make lib malformed"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -604,14 +560,11 @@ fn fixture_git_repo_with_all_profile_roots() -> Result<FixtureRepo> {
     run_git(repo.path(), &["commit", "-m", "add profile roots"])?;
     let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
     run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-    let command_line_parser_sha256 =
-        sha256_hex(&fs::read(repo.path().join(COMMAND_LINE_PARSER_PATH))?);
 
     Ok(FixtureRepo {
         temp: repo.temp,
         tag: repo.tag,
         head,
-        command_line_parser_sha256,
     })
 }
 
@@ -670,18 +623,9 @@ fn temporary_checkout_path_for_test(pin: &SourcePin, filename: &str) -> PathBuf 
         .join(filename)
 }
 
-/// Mirrors production's hashed namespace for temporary checkout directories.
+/// Mirrors production's cache-key namespace for temporary checkout directories.
 fn temporary_checkout_namespace_for_test(pin: &SourcePin) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(pin.tag().as_bytes());
-    hasher.update([0]);
-    hasher.update(pin.sha().as_bytes());
-    let digest = hasher.finalize();
-    let mut hex = String::with_capacity(SHA256_HEX_LENGTH);
-    for byte in digest {
-        write!(&mut hex, "{byte:02x}").expect("writing to String cannot fail");
-    }
-    hex
+    format!("{}-{}", pin.tag(), pin.sha())
 }
 
 /// Runs the global-types command with test-controlled pin overrides.
@@ -830,18 +774,6 @@ fn normalize_lf(bytes: Vec<u8>) -> Vec<u8> {
     normalized
 }
 
-/// Computes lowercase SHA-256 hex for fixture files.
-fn sha256_hex(bytes: &[u8]) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(bytes);
-    let digest = hasher.finalize();
-    let mut hex = String::with_capacity(SHA256_HEX_LENGTH);
-    for byte in digest {
-        write!(&mut hex, "{byte:02x}").expect("writing to String cannot fail");
-    }
-    hex
-}
-
 /// Formats collector output using stable `Debug` sections for fixture files.
 fn stringify_collector_output(output: &CollectorOutput) -> String {
     let mut text = String::new();
@@ -870,11 +802,6 @@ mod tests {
             "//! Generated by `just gen-global-types`. Do not edit.",
             "pub(crate) const GENERATED_TYPESCRIPT_TAG: &str =",
             "pub(crate) const GENERATED_TYPESCRIPT_SHA: &str =",
-            "pub(crate) const COMMAND_LINE_PARSER_SHA256: &str =",
-            "pub(crate) const GENERATED_SOURCE_FILES: &[(&str, &str)] = &[",
-            "pub(crate) const GENERATED_COLLECTED_DECLARATION_COUNT: usize =",
-            "pub(crate) const GENERATED_COVERAGE_OUTCOME_COUNT: usize =",
-            "pub(crate) const GENERATED_COLLECTOR_OUTPUT_SHA256: &str =",
             "pub(crate) const GENERATED_GLOBAL_TYPE_COUNT: usize =",
             "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
             "pub(crate) fn set_generated_global_type_data(",
@@ -918,10 +845,6 @@ mod tests {
 
         assert_eq!(checkout.pin().tag().as_bytes(), repo.tag.as_bytes());
         assert_eq!(checkout.pin().sha().as_bytes(), repo.head.as_bytes());
-        assert_eq!(
-            checkout.command_line_parser_sha256().as_bytes(),
-            repo.command_line_parser_sha256.as_bytes()
-        );
 
         Ok(())
     }
@@ -1405,7 +1328,6 @@ mod tests {
             let discovered = xtask_codegen::generate_global_types::source::DiscoveredFile {
                 path: canonical_path,
                 repo_relative: dts_name,
-                sha256_hex: sha256_hex(&bytes),
                 bytes_lf: bytes,
             };
 

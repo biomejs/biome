@@ -15,7 +15,6 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, Text, TokenText};
 use biome_string_case::StrLikeExtension;
-use sha2::{Digest, Sha256};
 
 use crate::generate_global_types::SourcePin;
 
@@ -94,12 +93,6 @@ const OUTSIDE_DEFAULT_LIBRARY_PRIORITY_OFFSET: usize = 2;
 /// Maximum number of unique temporary checkout names to try for one acquisition.
 const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 4;
 
-/// SHA-256 is 32 bytes; hex-encoded that is 64 characters.
-const SHA256_HEX_LENGTH: usize = 64;
-
-/// Lowercase nibble table used by the streaming hex encoder.
-const HEX_NIBBLES: &[u8; 16] = b"0123456789abcdef";
-
 /// A canonical filesystem path that has been proven to stay within a root.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CanonicalPath(PathBuf);
@@ -124,8 +117,6 @@ impl CanonicalPath {
 pub struct AcquiredCheckout {
     root: CanonicalPath,
     pin: SourcePin,
-    /// SHA-256 of `src/compiler/commandLineParser.ts` after LF normalization.
-    command_line_parser_sha256: String,
 }
 
 impl AcquiredCheckout {
@@ -137,11 +128,6 @@ impl AcquiredCheckout {
     /// Pinned TypeScript source tag and commit.
     pub fn pin(&self) -> &SourcePin {
         &self.pin
-    }
-
-    /// SHA-256 of `src/compiler/commandLineParser.ts` after LF normalization.
-    pub fn command_line_parser_sha256(&self) -> &str {
-        &self.command_line_parser_sha256
     }
 }
 
@@ -161,8 +147,6 @@ pub struct DiscoveredFile {
     pub repo_relative: String,
     /// File bytes after LF normalization.
     pub bytes_lf: Vec<u8>,
-    /// SHA-256 of `bytes_lf` (LF-normalized contents), not raw on-disk bytes.
-    pub sha256_hex: String,
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -209,14 +193,10 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
         fs::canonicalize(&checkout_path)
             .with_context(|| format!("failed to canonicalize {}", checkout_path.display()))?,
     );
-    let command_line_parser_bytes =
-        read_source_file_lf_normalized(&checkout_path.join(COMMAND_LINE_PARSER_RELATIVE_PATH))?;
-    let command_line_parser_sha256 = sha256_hex_from_bytes(&command_line_parser_bytes);
 
     Ok(AcquiredCheckout {
         root: canonical_root,
         pin: pin.clone(),
-        command_line_parser_sha256,
     })
 }
 
@@ -228,15 +208,6 @@ pub fn parse_lib_entries(checkout: &AcquiredCheckout) -> anyhow::Result<LibEntri
             .as_path()
             .join(COMMAND_LINE_PARSER_RELATIVE_PATH),
     )?;
-    let actual_sha = sha256_hex_from_bytes(&bytes);
-    if actual_sha != checkout.command_line_parser_sha256 {
-        bail!(
-            "commandLineParser.ts SHA mismatch at {}:{}: read {actual_sha}, expected {}",
-            checkout.pin.sha(),
-            COMMAND_LINE_PARSER_RELATIVE_PATH,
-            checkout.command_line_parser_sha256
-        );
-    }
     let source = std::str::from_utf8(&bytes).context("commandLineParser.ts is not valid UTF-8")?;
     let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
 
@@ -660,7 +631,7 @@ fn unique_temporary_checkout_path(cache_parent: &Path, pin: &SourcePin) -> anyho
     );
 }
 
-/// Returns the per-pin namespace directory `<cache_parent>/.tmp/<digest>`
+/// Returns the per-pin namespace directory `<cache_parent>/.tmp/<tag>-<sha>`
 /// under which temporary checkouts for `pin` are isolated.
 fn temporary_checkout_namespace_path(cache_parent: &Path, pin: &SourcePin) -> PathBuf {
     cache_parent
@@ -668,14 +639,9 @@ fn temporary_checkout_namespace_path(cache_parent: &Path, pin: &SourcePin) -> Pa
         .join(temporary_checkout_namespace(pin))
 }
 
-/// Returns a SHA-256 hex digest of `tag\0sha`, used as the per-pin namespace
-/// directory for temporary checkouts so different pins never collide.
+/// Reuses the per-pin cache key as the temporary checkout namespace directory.
 fn temporary_checkout_namespace(pin: &SourcePin) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(pin.tag().as_bytes());
-    hasher.update([0]);
-    hasher.update(pin.sha().as_bytes());
-    encode_sha256_hex(&hasher.finalize())
+    cache_key(pin)
 }
 
 /// Canonicalizes `path` and bails if the result escapes `root`.
@@ -725,26 +691,6 @@ fn normalize_lf(mut bytes: Vec<u8>) -> Vec<u8> {
 fn read_source_file_lf_normalized(path: &Path) -> anyhow::Result<Vec<u8>> {
     let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
     Ok(normalize_lf(bytes))
-}
-
-/// Computes the lowercase SHA-256 hex of `bytes`. Used by
-/// [`discovered_file_from_frame`] to digest the already LF-normalized buffer
-/// without re-reading it from git.
-fn sha256_hex_from_bytes(bytes: &[u8]) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(bytes);
-    encode_sha256_hex(&hasher.finalize())
-}
-
-/// Lowercase hex-encodes a 32-byte SHA-256 digest using a table lookup, with
-/// the output `String` pre-sized to [`SHA256_HEX_LENGTH`].
-pub(super) fn encode_sha256_hex(digest: &[u8]) -> String {
-    let mut output = String::with_capacity(SHA256_HEX_LENGTH);
-    for &byte in digest {
-        output.push(HEX_NIBBLES[(byte >> 4) as usize] as char);
-        output.push(HEX_NIBBLES[(byte & 0x0f) as usize] as char);
-    }
-    output
 }
 
 /// Returns the identifier text when the pattern is a single identifier binding.
@@ -1220,16 +1166,12 @@ fn forward_slash_relative_path(root: &Path, relative: &str) -> PathBuf {
     path
 }
 
-/// Materializes a discovery stack frame into the per-file output record,
-/// hashing the cached LF-normalized bytes once.
+/// Materializes a discovery stack frame into the per-file output record.
 fn discovered_file_from_frame(frame: Frame) -> DiscoveredFile {
-    let sha256_hex = sha256_hex_from_bytes(&frame.bytes_lf);
-
     DiscoveredFile {
         path: frame.source.path,
         repo_relative: frame.source.repo_relative,
         bytes_lf: frame.bytes_lf,
-        sha256_hex,
     }
 }
 

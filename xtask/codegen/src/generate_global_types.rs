@@ -4,8 +4,6 @@
 use crate::GlobalTypesArgs;
 
 use anyhow::bail;
-use sha2::{Digest as _, Sha256};
-use std::fmt::{Debug, Write as _};
 use std::path::Path;
 
 pub mod collect;
@@ -124,18 +122,6 @@ mod source_pin {
     }
 }
 
-/// Deterministic coverage counts produced by the typed declaration collector.
-pub struct CollectorSummary {
-    /// Total number of `Collected` declarations across every discovered file.
-    pub declaration_count: usize,
-    /// Total number of coverage outcomes (collected + scope events + diagnostics)
-    /// across every discovered file.
-    pub coverage_outcome_count: usize,
-    /// SHA-256 hex of the cumulative `Debug`-formatted records and coverage
-    /// outcomes in TypeScript Program order; embedded in the generated module.
-    pub collector_output_sha256_hex: String,
-}
-
 /// Acquires the pinned TypeScript checkout, parses `libEntries`, walks the
 /// reference closure, and emits `crates/biome_js_type_info/src/generated/global_types.rs`.
 pub fn run(args: GlobalTypesArgs, mode: xtask_glue::Mode) -> anyhow::Result<()> {
@@ -174,34 +160,19 @@ pub fn run_with_workspace_root(
     let checkout = source::acquire(&pin, &opts)?;
     let libs = source::parse_lib_entries(&checkout)?;
     let source_files = source::discover(&checkout, &libs, source::PROFILE_ROOTS)?;
-    let collector_summary = collect_discovered_sources(&source_files)?;
+    collect_discovered_sources(&source_files)?;
 
-    emit::emit_global_types(
-        checkout.pin(),
-        checkout.command_line_parser_sha256(),
-        &source_files,
-        &collector_summary,
-        mode,
-        workspace_root,
-    )?;
+    emit::emit_global_types(checkout.pin(), mode, workspace_root)?;
     Ok(())
 }
 
 /// Runs the typed declaration collector over every discovered source and
 /// fails the run if any pinned file produced a fatal parser diagnostic.
-fn collect_discovered_sources(
-    source_files: &[source::DiscoveredFile],
-) -> anyhow::Result<CollectorSummary> {
-    let mut declaration_count = 0;
-    let mut coverage_outcome_count = 0;
-    let mut collector_output_sha256 = Sha256::new();
+fn collect_discovered_sources(source_files: &[source::DiscoveredFile]) -> anyhow::Result<()> {
     let mut fatal_diagnostics = Vec::new();
 
     for source_file in source_files {
         let output = collect::collect(source_file);
-        update_collector_output_hash(&mut collector_output_sha256, source_file, &output);
-        declaration_count += output.records.len();
-        coverage_outcome_count += output.coverage.len();
         fatal_diagnostics.extend(output.coverage.into_iter().filter_map(|outcome| {
             let collect::CoverageOutcome::Diagnostic(diagnostic) = outcome else {
                 return None;
@@ -230,52 +201,7 @@ fn collect_discovered_sources(
         );
     }
 
-    let collector_output_digest = collector_output_sha256.finalize();
-    Ok(CollectorSummary {
-        declaration_count,
-        coverage_outcome_count,
-        collector_output_sha256_hex: sha256_hex(&collector_output_digest),
-    })
-}
-
-/// Folds one collector output into the cumulative SHA-256 used to detect
-/// silent changes in the typed declaration coverage across codegen runs.
-fn update_collector_output_hash(
-    hasher: &mut Sha256,
-    source_file: &source::DiscoveredFile,
-    output: &collect::CollectorOutput,
-) {
-    hasher.update(b"file ");
-    hasher.update(source_file.repo_relative.as_bytes());
-    hasher.update(b"\nrecords\n");
-    for record in &output.records {
-        update_hash_debug_line(hasher, record);
-    }
-    hasher.update(b"coverage\n");
-    for outcome in &output.coverage {
-        update_hash_debug_line(hasher, outcome);
-    }
-}
-
-/// Streams one `Debug` line into the cumulative hash without an intermediate
-/// `String` buffer.
-fn update_hash_debug_line<T: Debug>(hasher: &mut Sha256, value: &T) {
-    writeln!(&mut Sha256Writer(hasher), "{value:?}").expect("writing to Sha256 cannot fail");
-}
-
-/// `fmt::Write` adapter that feeds formatted text into a `Sha256`.
-struct Sha256Writer<'a>(&'a mut Sha256);
-
-impl std::fmt::Write for Sha256Writer<'_> {
-    fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        self.0.update(s.as_bytes());
-        Ok(())
-    }
-}
-
-/// Lowercase hex encoding for a SHA-256 digest, used for the collector digest.
-fn sha256_hex(bytes: &[u8]) -> String {
-    source::encode_sha256_hex(bytes)
+    Ok(())
 }
 
 /// Categories that should abort codegen instead of being recorded as
