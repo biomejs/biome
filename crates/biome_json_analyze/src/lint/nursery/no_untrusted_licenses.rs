@@ -308,7 +308,7 @@ impl Rule for NoUntrustedLicenses {
                     },
                 )
                 .note(markup! {
-                    "Add the license to the allow list or remove it from from the project."
+                    "Add the license to the allow list or remove it from the project."
                 }),
                 RejectReason::NotFsfLibre => RuleDiagnostic::new(
                     rule_category!(),
@@ -318,7 +318,7 @@ impl Rule for NoUntrustedLicenses {
                     },
                 )
                 .note(markup! {
-                    "Add the license to the allow list or remove it from from the project."
+                    "Add the license to the allow list or remove it from the project."
                 }),
                 RejectReason::Deprecated => RuleDiagnostic::new(
                     rule_category!(),

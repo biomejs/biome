@@ -100,3 +100,52 @@
 {"markdown":"Foo\n===\n\n- ## Foo\n\n> bar *em* <b>tag</b>\n\n","html":"<h1>Foo</h1>\n<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<blockquote>\n<p>bar <em>em</em> <b>tag</b></p>\n</blockquote>\n"}
 {"markdown":"```js\ncode here\n```\n\n","html":"<pre><code class=\"language-js\">code here\n</code></pre>\n"}
 {"markdown":"- ## Foo\n> *em* `x` [link](url) *em*\n\n","html":"<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<blockquote>\n<p><em>em</em> <code>x</code> <a href=\"url\">link</a> <em>em</em></p>\n</blockquote>\n"}
+{"markdown":"- # Bar\n\n+ item\n","html":"<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n"}
+{"markdown":"- bar\n\n+ item\n","html":"<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n"}
+{"markdown":"- ---\n\n+ item\n","html":"<hr />\n<ul>\n<li>item</li>\n</ul>\n"}
+{"markdown":"- Foo\n  ---\n\n+ item\n","html":"<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n"}
+{"markdown":"- item\n\n  ```\n  code\n  ```\n\n+ other\n","html":"<ul>\n<li>\n<p>item</p>\n<pre><code>code\n</code></pre>\n</li>\n</ul>\n<ul>\n<li>other</li>\n</ul>\n"}
+{"markdown":"- # Bar\n\n+ item one\n\n* item two\n","html":"<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n"}
+{"markdown":"- one\n\n+ two\n","html":"<ul>\n<li>one</li>\n</ul>\n<ul>\n<li>two</li>\n</ul>\n"}
+{"markdown":"1. one\n\n2) two\n","html":"<ol>\n<li>one</li>\n</ol>\n<ol start=\"2\">\n<li>two</li>\n</ol>\n"}
+{"markdown":"- outer\n  * nested\n  lazy line\nhello\n","html":"<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- outer\n  - nested\n  lazy line\nhello\n","html":"<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- outer\n  - nested\n  lazy line\n\n    indented\n","html":"<ul>\n<li>outer\n<ul>\n<li>\n<p>nested\nlazy line</p>\n<p>indented</p>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- top\n  - sub a\n\n  - sub b\n","html":"<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- top\n  - sub a\n\n\n  - sub b\n","html":"<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- top\n  - sub a\n\n\n\n  - sub b\n","html":"<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"- bullet\n\n1. ordered\n","html":"<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"}
+{"markdown":"1. ordered\n\n- bullet\n","html":"<ol>\n<li>ordered</li>\n</ol>\n<ul>\n<li>bullet</li>\n</ul>\n"}
+{"markdown":"* item one\n\n- item two\n","html":"<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n"}
+{"markdown":"- [a]: /url\n\t---\n","html":"<ul>\n<li>\n<hr />\n</li>\n</ul>\n"}
+{"markdown":"1.  [a]: /url\n \t---\n","html":"<ol>\n<li>\n<hr />\n</li>\n</ol>\n"}
+{"markdown":"- [a]: /url\n\t--x\n","html":"<ul>\n<li>--x</li>\n</ul>\n"}
+{"markdown":"> - [a]: /url\n> \t--x\n","html":"<blockquote>\n<ul>\n<li>--x</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"* one\n* two\n```\ncode here\n```\n","html":"<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n"}
+{"markdown":">💡 Biomeは、[Prettierのオプションに対する考え方](https://prettier.io/docs/en/option-philosophy)と同様のアプローチを採用しています。\n","html":"<blockquote>\n<p>💡 Biomeは、<a href=\"https://prettier.io/docs/en/option-philosophy\">Prettierのオプションに対する考え方</a>と同様のアプローチを採用しています。</p>\n</blockquote>\n"}
+{"markdown":"- item\n\n  <details>\n  <summary>Info</summary>\n  content\n  </details>\n","html":"<ul>\n<li>\n<p>item</p>\n<details>\n<summary>Info</summary>\ncontent\n</details>\n</li>\n</ul>\n"}
+{"markdown":"Allowed: <div class=\"a\"\n>ok</div> tag.\n","html":"<p>Allowed: &lt;div class=&quot;a&quot;</p>\n<blockquote>\n<p>ok</div> tag.</p>\n</blockquote>\n"}
+{"markdown":"> \t- nested\n","html":"<blockquote>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":">\t- nested\n","html":"<blockquote>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- nested\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> a\n10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"- item\n\n\t```\n\tcode body\n\t```\n","html":"<ul>\n<li>\n<p>item</p>\n<pre><code>code body\n</code></pre>\n</li>\n</ul>\n"}
+{"markdown":"[bar]: /url\n10. item\nnested\n","html":"<p>10. item\nnested</p>\n"}
+{"markdown":"[bar]: /url\n\tcode line\n","html":"<p>code line</p>\n"}
+{"markdown":"> a\nb\n10. item\n","html":"<blockquote>\n<p>a\nb</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":">\t\tfoo\n","html":"<blockquote>\n<pre><code>  foo\n</code></pre>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- a\n> \t- b\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"> outer\n> \t- nested\n> outer\n> \t- nested\n","html":"<blockquote>\n<p>outer</p>\n<ul>\n<li>nested\nouter</li>\n<li>nested</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"10. item\n    \tnested text\n---\n","html":"<ol start=\"10\">\n<li>item\nnested text</li>\n</ol>\n<hr />\n"}
+{"markdown":"[ref]: /url\n1. item\n","html":"<ol>\n<li>item</li>\n</ol>\n"}
+{"markdown":"> a\n  2. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"2\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"> a\n  10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"- ```\n- x\n- ```\n","html":"<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n"}
+{"markdown":"> - ```\n> - x\n> - ```\n","html":"<blockquote>\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"- a\n  - ```\n  - x\n  - ```\n","html":"<ul>\n<li>a\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\n* c\n","html":"<ul>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"*\n\n* c\n","html":"<ul>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"1. a\n2.\n\n3. c\n","html":"<ol>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ol>\n"}
+{"markdown":"* a\n*\n\n\n* c\n","html":"<ul>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\n- c\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<ul>\n<li>c</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\nfoo\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<p>foo</p>\n"}

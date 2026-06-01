@@ -1,0 +1,22 @@
+name: AgentScan
+
+on:
+  pull_request_target:
+    types: [ opened, reopened ]
+  issues:
+    types: [ opened ]
+
+permissions: { }
+
+jobs:
+  agentscan:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+      contents: read
+    steps:
+      - name: AgentScan
+        uses: MatteoGabriele/agentscan-action@0a0c88109b5153dff2805f969f5060441efb7b65 # v1.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

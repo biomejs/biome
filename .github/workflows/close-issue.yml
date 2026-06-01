@@ -4,20 +4,32 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
-
-permissions:
-  issues: write
-
 jobs:
   close-issues:
     if: github.repository == 'biomejs/biome'
     runs-on: depot-ubuntu-24.04-arm-small
     steps:
-      - name: Close issue without reproduction
-        uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0 # v3.8.0
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          actions: "close-issues"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          labels: "S-Needs repro"
-          inactive-day: 3
-          body: "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
+          persist-credentials: false
+
+      - name: Setup node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.16.0
+
+      - name: Find stale issues
+        id: find-stale
+        run: echo "issues=$(node --experimental-strip-types .github/scripts/find-stale-issues.ts --token ${{ secrets.GITHUB_TOKEN }})" >> "$GITHUB_OUTPUT"
+
+      - name: Close stale issues
+        if: steps.find-stale.outputs.issues != '[]'
+        env:
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+        run: |
+          echo '${{ steps.find-stale.outputs.issues }}' | jq -r '.[]' | while read -r issue; do
+            gh issue comment "$issue" --repo ${{ github.repository }} --body "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
+            gh issue close "$issue" --repo ${{ github.repository }} --reason "not planned"
+            echo "Closed issue #$issue"
+          done

@@ -21,12 +21,12 @@ use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumen
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
-    FileExitsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
+    FileExistsParams, FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
     IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
-    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
+    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PullActionsParams,
     PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
     PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
     RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
@@ -34,7 +34,6 @@ use crate::workspace::{
     UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
-use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
@@ -48,7 +47,6 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
-use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
@@ -57,7 +55,9 @@ use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
@@ -68,7 +68,6 @@ use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
@@ -89,6 +88,7 @@ pub struct WorkspaceServer {
     module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
+    #[cfg(feature = "plugins")]
     plugin_caches: Arc<HashMap<Utf8PathBuf, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
@@ -97,8 +97,7 @@ pub struct WorkspaceServer {
     /// Stores the document sources used across the workspace
     file_sources: boxcar::Vec<DocumentFileSource>,
 
-    /// Stores patterns to search for.
-    patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
+    search_provider: Arc<dyn SearchQuery>,
 
     /// Node cache for faster parsing of modified documents.
     ///
@@ -144,6 +143,7 @@ impl WorkspaceServer {
         fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceNotification>,
+        search_provider: Arc<dyn SearchQuery>,
         threads: Option<usize>,
     ) -> Self {
         init_thread_pool(threads);
@@ -153,10 +153,11 @@ impl WorkspaceServer {
             projects: Default::default(),
             project_layout: Default::default(),
             module_graph: Default::default(),
+            #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: boxcar::Vec::default(),
-            patterns: Default::default(),
+            search_provider,
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
             fs,
@@ -809,6 +810,7 @@ impl WorkspaceServer {
         Ok(parsed)
     }
 
+    #[cfg(feature = "plugins")]
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
@@ -833,11 +835,12 @@ impl WorkspaceServer {
         diagnostics
     }
 
+    #[cfg(feature = "plugins")]
     fn get_analyzer_plugins_for_project(
         &self,
         path: &Utf8Path,
         plugins: &Plugins,
-    ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
+    ) -> Result<biome_analyze::AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
             None => Ok(Vec::new()),
@@ -1265,25 +1268,27 @@ impl Workspace for WorkspaceServer {
                 .collect(),
         )?;
 
-        let plugin_diagnostics = self.load_plugins(
-            &workspace_directory.clone().unwrap_or_default(),
-            &settings.as_all_plugins(),
-        );
+        #[cfg(feature = "plugins")]
+        {
+            let plugin_diagnostics = self.load_plugins(
+                &workspace_directory.clone().unwrap_or_default(),
+                &settings.as_all_plugins(),
+            );
 
-        let has_errors = plugin_diagnostics
-            .iter()
-            .any(|d| d.severity() >= Severity::Error);
+            let has_errors = plugin_diagnostics
+                .iter()
+                .any(|d| d.severity() >= Severity::Error);
 
-        if has_errors {
-            return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+            if has_errors {
+                return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+            }
+            diagnostics.extend(
+                plugin_diagnostics
+                    .into_iter()
+                    .map(Into::into)
+                    .collect::<Vec<_>>(),
+            );
         }
-
-        diagnostics.extend(
-            plugin_diagnostics
-                .into_iter()
-                .map(Into::into)
-                .collect::<Vec<_>>(),
-        );
 
         if !is_root {
             self.projects.set_nested_settings(
@@ -1360,7 +1365,10 @@ impl Workspace for WorkspaceServer {
 
         self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
-        self.plugin_caches.pin().remove(&project_path);
+        #[cfg(feature = "plugins")]
+        {
+            self.plugin_caches.pin().remove(&project_path);
+        }
 
         Ok(())
     }
@@ -1378,7 +1386,7 @@ impl Workspace for WorkspaceServer {
         Ok(OpenFileResult { diagnostics })
     }
 
-    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
         Ok(self
             .documents
             .pin()
@@ -1819,14 +1827,19 @@ impl Workspace for WorkspaceServer {
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
-            let plugins = if categories.is_lint() {
-                self.get_analyzer_plugins_for_project(
-                    settings.source_path().unwrap_or_default().as_path(),
-                    &settings.get_plugins_for_path(&path),
-                )
-                .map_err(WorkspaceError::plugin_errors)?
-            } else {
-                Vec::new()
+            let plugins = cfg_select! {
+                feature = "plugins" => {
+                    if categories.is_lint() {
+                        self.get_analyzer_plugins_for_project(
+                            settings.source_path().unwrap_or_default().as_path(),
+                            &settings.get_plugins_for_path(&path),
+                        )
+                        .map_err(WorkspaceError::plugin_errors)?
+                    } else {
+                        Vec::new()
+                    }
+                },
+                _ => Vec::new()
             };
             let settings = self.settings_handle(&settings, inline_config);
             let results = lint(LintParams {
@@ -1974,14 +1987,19 @@ impl Workspace for WorkspaceServer {
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
         {
-            let plugins = if categories.is_lint() {
-                self.get_analyzer_plugins_for_project(
-                    settings.source_path().unwrap_or_default().as_path(),
-                    &settings.get_plugins_for_path(&path),
-                )
-                .map_err(WorkspaceError::plugin_errors)?
-            } else {
-                Vec::new()
+            let plugins = cfg_select! {
+                feature = "plugins" => {
+                    if categories.is_lint() {
+                        self.get_analyzer_plugins_for_project(
+                            settings.source_path().unwrap_or_default().as_path(),
+                            &settings.get_plugins_for_path(&path),
+                        )
+                        .map_err(WorkspaceError::plugin_errors)?
+                    } else {
+                        Vec::new()
+                    }
+                },
+                _ => Vec::new()
             };
             let handle = self.settings_handle(&settings, inline_config);
             let mut final_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
@@ -2303,19 +2321,22 @@ impl Workspace for WorkspaceServer {
 
         let (mut parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
-
-        let plugins = self
-            .get_analyzer_plugins_for_project(
-                settings.source_path().unwrap_or_default().as_path(),
-                &settings.get_plugins_for_path(&path),
-            )
-            .map_err(WorkspaceError::plugin_errors)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let plugins = if rule_categories.contains(RuleCategory::Lint) {
-            plugins
-        } else {
-            Vec::new()
+
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if rule_categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.source_path().unwrap_or_default().as_path(),
+                        &settings.get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
         };
 
         let mut errors = 0;
@@ -2475,12 +2496,10 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ParsePatternParams,
     ) -> Result<ParsePatternResult, WorkspaceError> {
-        let options =
-            CompilePatternOptions::default().with_default_language(params.default_language);
-        let pattern = compile_pattern_with_options(&params.pattern, options)?;
+        let pattern_id = self
+            .search_provider
+            .parse_pattern(params.pattern.as_ref(), params.default_language)?;
 
-        let pattern_id = make_search_pattern_id();
-        self.patterns.pin().insert(pattern_id.clone(), pattern);
         Ok(ParsePatternResult { pattern_id })
     }
 
@@ -2496,11 +2515,6 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let patterns = self.patterns.pin();
-        let query = patterns
-            .get(&pattern)
-            .ok_or_else(WorkspaceError::invalid_pattern)?;
-
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let search = capabilities
@@ -2516,13 +2530,21 @@ impl Workspace for WorkspaceServer {
         let document_file_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings = self.settings_handle(&settings, None);
-        let matches = search(&path, &document_file_source, parse, query, &settings)?;
+        let provider = self.search_provider.clone();
+        let matches = search(
+            &path,
+            &document_file_source,
+            parse,
+            provider.as_ref(),
+            &settings,
+            pattern,
+        )?;
 
         Ok(SearchResults { path, matches })
     }
 
     fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError> {
-        self.patterns.pin().remove(&params.pattern);
+        self.search_provider.drop_pattern(params.pattern);
         Ok(())
     }
 
@@ -2846,14 +2868,6 @@ fn init_thread_pool(threads: Option<usize>) {
 
 #[cfg(target_family = "wasm")]
 fn init_thread_pool(_threads: Option<usize>) {}
-
-/// Generates a pattern ID that we can use as "handle" for referencing
-/// previously parsed search queries.
-fn make_search_pattern_id() -> PatternId {
-    static COUNTER: AtomicUsize = AtomicUsize::new(1);
-    let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
-    format!("p{counter}").into()
-}
 
 #[cfg(test)]
 #[path = "server.tests.rs"]

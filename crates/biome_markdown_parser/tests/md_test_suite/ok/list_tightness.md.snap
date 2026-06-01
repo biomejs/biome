@@ -666,18 +666,21 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@547..548 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@548..549 " " [] [],
+                                },
+                            ],
+                        },
                         MdBulletListItem {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@547..548 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@548..549 " " [] [],
-                                            },
-                                        ],
+                                        pre_marker_indent: MdIndentTokenList [],
                                         marker: MINUS@549..550 "-" [] [],
                                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@550..551 " " [] [],
                                         content_indent: MdIndentTokenList [],
@@ -816,18 +819,21 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@631..632 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@632..633 " " [] [],
+                                },
+                            ],
+                        },
                         MdBulletListItem {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@631..632 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@632..633 " " [] [],
-                                            },
-                                        ],
+                                        pre_marker_indent: MdIndentTokenList [],
                                         marker: MINUS@633..634 "-" [] [],
                                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@634..635 " " [] [],
                                         content_indent: MdIndentTokenList [],
@@ -1281,15 +1287,17 @@ MdDocument {
                 1: MD_TEXTUAL@546..547
                   0: MD_TEXTUAL_LITERAL@546..547 "\n" [] []
               1: (empty)
-            1: MD_BULLET_LIST_ITEM@547..572
-              0: MD_BULLET_LIST@547..572
-                0: MD_BULLET@547..560
-                  0: MD_LIST_MARKER_PREFIX@547..551
-                    0: MD_INDENT_TOKEN_LIST@547..549
-                      0: MD_INDENT_TOKEN@547..548
-                        0: MD_INDENT_CHAR@547..548 " " [] []
-                      1: MD_INDENT_TOKEN@548..549
-                        0: MD_INDENT_CHAR@548..549 " " [] []
+            1: MD_CONTINUATION_INDENT@547..549
+              0: MD_INDENT_TOKEN_LIST@547..549
+                0: MD_INDENT_TOKEN@547..548
+                  0: MD_INDENT_CHAR@547..548 " " [] []
+                1: MD_INDENT_TOKEN@548..549
+                  0: MD_INDENT_CHAR@548..549 " " [] []
+            2: MD_BULLET_LIST_ITEM@549..572
+              0: MD_BULLET_LIST@549..572
+                0: MD_BULLET@549..560
+                  0: MD_LIST_MARKER_PREFIX@549..551
+                    0: MD_INDENT_TOKEN_LIST@549..549
                     1: MINUS@549..550 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@550..551 " " [] []
                     3: MD_INDENT_TOKEN_LIST@551..551
@@ -1378,15 +1386,17 @@ MdDocument {
                 1: MD_TEXTUAL@630..631
                   0: MD_TEXTUAL_LITERAL@630..631 "\n" [] []
               1: (empty)
-            1: MD_BULLET_LIST_ITEM@631..655
-              0: MD_BULLET_LIST@631..655
-                0: MD_BULLET@631..643
-                  0: MD_LIST_MARKER_PREFIX@631..635
-                    0: MD_INDENT_TOKEN_LIST@631..633
-                      0: MD_INDENT_TOKEN@631..632
-                        0: MD_INDENT_CHAR@631..632 " " [] []
-                      1: MD_INDENT_TOKEN@632..633
-                        0: MD_INDENT_CHAR@632..633 " " [] []
+            1: MD_CONTINUATION_INDENT@631..633
+              0: MD_INDENT_TOKEN_LIST@631..633
+                0: MD_INDENT_TOKEN@631..632
+                  0: MD_INDENT_CHAR@631..632 " " [] []
+                1: MD_INDENT_TOKEN@632..633
+                  0: MD_INDENT_CHAR@632..633 " " [] []
+            2: MD_BULLET_LIST_ITEM@633..655
+              0: MD_BULLET_LIST@633..655
+                0: MD_BULLET@633..643
+                  0: MD_LIST_MARKER_PREFIX@633..635
+                    0: MD_INDENT_TOKEN_LIST@633..633
                     1: MINUS@633..634 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@634..635 " " [] []
                     3: MD_INDENT_TOKEN_LIST@635..635

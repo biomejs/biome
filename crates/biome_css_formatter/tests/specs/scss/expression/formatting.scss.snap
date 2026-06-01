@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/formatting.scss
+info: scss/expression/formatting.scss
 ---
 
 # Input
@@ -108,7 +108,7 @@ $list-mixed: 1 2, 3 4;
 
 $paren-nested: ((1 + 2) * 3);
 
-$comparison: $a <= $b and $c >= $d;
+$comparison: $a<=$b and $c>= $d;
 
 $logic: not($a or $b);
 

@@ -1,6 +1,9 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
+use crate::syntax::scss::{
+    is_at_scss_interpolated_identifier, is_at_scss_interpolated_string,
+    parse_scss_interpolated_string, parse_scss_interpolation_or_identifier,
+};
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -48,7 +51,8 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
     Present(m.complete(p, kind))
 }
 
-struct PseudoValueList;
+/// Parses pseudo argument values such as `:lang(en, #{$locale})`.
+pub(crate) struct PseudoValueList;
 
 impl ParseSeparatedList for PseudoValueList {
     type Kind = CssSyntaxKind;
@@ -77,11 +81,16 @@ impl ParseSeparatedList for PseudoValueList {
     }
 }
 
+/// Checks pseudo values such as `en`, `"de"`, or `#{$locale}`.
 #[inline]
-fn is_at_pseudo_value(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
+pub(crate) fn is_at_pseudo_value(p: &mut CssParser) -> bool {
+    is_at_identifier(p)
+        || is_at_string(p)
+        || is_at_scss_interpolated_identifier(p)
+        || is_at_scss_interpolated_string(p)
 }
 
+/// Parses one pseudo value item such as `en`, `"de"`, or `#{$locale}`.
 #[inline]
 fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_pseudo_value(p) {
@@ -92,6 +101,8 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
         parse_scss_interpolated_string(p)
     } else if is_at_string(p) {
         parse_string(p)
+    } else if is_at_scss_interpolated_identifier(p) {
+        parse_scss_interpolation_or_identifier(p)
     } else {
         parse_regular_identifier(p)
     }

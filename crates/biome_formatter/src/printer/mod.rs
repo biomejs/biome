@@ -289,9 +289,21 @@ impl<'a> Printer<'a> {
                 }
                 stack.pop(tag.kind())?;
             }
-            FormatElement::Tag(tag @ (EndIndent | EndAlign | EndLineSuffix)) => {
+            FormatElement::Tag(tag @ (EndIndent | EndLineSuffix)) => {
                 stack.pop(tag.kind())?;
                 indent_stack.pop();
+            }
+            FormatElement::Tag(EndAlign) => {
+                stack.pop(TagKind::Align)?;
+                indent_stack.pop();
+                // A line break inside the align block captures `pending_indent`
+                // from the indent stack while the align is active. After popping,
+                // the indent stack no longer includes that align, but
+                // `pending_indent` still does — sync it so the stale alignment
+                // doesn't leak to the next text element outside the block.
+                if !self.state.pending_indent.is_empty() {
+                    self.state.pending_indent = indent_stack.indention();
+                }
             }
             FormatElement::Tag(tag @ EndDedent(mode)) => {
                 match mode {
@@ -2134,5 +2146,61 @@ Group 1 breaks"#
         }));
 
         assert_eq!(result.as_code(), "textanother");
+    }
+
+    #[test]
+    fn align_does_not_leak_pending_indent() {
+        // A hard_line_break as the last element inside align() used to
+        // capture the align's indentation into pending_indent. Because
+        // EndAlign did not sync pending_indent back to the (now smaller)
+        // indent stack, the next text element outside the align block
+        // would be printed with the stale, wider indentation.
+        let result = format(&format_args![
+            token("- "),
+            align(2, &format_args![token("content"), hard_line_break()]),
+            token("next")
+        ]);
+
+        // "next" must start at column 0 — the align(2) block has ended.
+        assert_eq!("- content\nnext", result.as_code());
+    }
+
+    #[test]
+    fn nested_align_does_not_leak_pending_indent() {
+        let result = format(&format_args![
+            token("- "),
+            align(
+                2,
+                &format_args![
+                    token("a"),
+                    hard_line_break(),
+                    token("- "),
+                    align(2, &format_args![token("b"), hard_line_break()]),
+                    token("after_inner")
+                ]
+            ),
+            hard_line_break(),
+            token("after_outer")
+        ]);
+
+        // After inner align(2) ends, "after_inner" should get 2 spaces
+        // (from the outer align), not 4.
+        // After outer align(2) ends, "after_outer" should get 0 spaces.
+        assert_eq!("- a\n  - b\n  after_inner\nafter_outer", result.as_code());
+    }
+
+    #[test]
+    fn align_without_trailing_break_no_leak() {
+        // When the last element inside align is text (not a line break),
+        // pending_indent is empty and no leak can occur.
+        let result = format(&format_args![
+            token("- "),
+            align(2, &token("content")),
+            hard_line_break(),
+            token("next")
+        ]);
+
+        // "next" at column 0 — the hard_line_break is outside align.
+        assert_eq!("- content\nnext", result.as_code());
     }
 }

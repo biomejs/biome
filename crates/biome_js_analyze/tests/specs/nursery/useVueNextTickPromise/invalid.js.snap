@@ -1,0 +1,128 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { nextTick } from "vue";
+import * as Vue from "vue";
+
+nextTick(() => {
+    updateDom();
+});
+
+nextTick(function () {
+    updateDom();
+});
+
+Vue.nextTick(() => {
+    updateDom();
+});
+
+export default {
+    mounted() {
+        this.$nextTick(() => {
+            updateDom();
+        });
+    },
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:5:1 lint/nursery/useVueNextTickPromise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Vue `nextTick` was called with a callback.
+  
+    3 │ import * as Vue from "vue";
+    4 │ 
+  > 5 │ nextTick(() => {
+      │ ^^^^^^^^^^^^^^^^
+  > 6 │     updateDom();
+  > 7 │ });
+      │ ^^
+    8 │ 
+    9 │ nextTick(function () {
+  
+  i Promise syntax composes better with `await` and keeps asynchronous control flow explicit.
+  
+  i Call `nextTick` without a callback, then await it or chain `.then()` instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useVueNextTickPromise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Vue `nextTick` was called with a callback.
+  
+     7 │ });
+     8 │ 
+   > 9 │ nextTick(function () {
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │     updateDom();
+  > 11 │ });
+       │ ^^
+    12 │ 
+    13 │ Vue.nextTick(() => {
+  
+  i Promise syntax composes better with `await` and keeps asynchronous control flow explicit.
+  
+  i Call `nextTick` without a callback, then await it or chain `.then()` instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useVueNextTickPromise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Vue `nextTick` was called with a callback.
+  
+    11 │ });
+    12 │ 
+  > 13 │ Vue.nextTick(() => {
+       │ ^^^^^^^^^^^^^^^^^^^^
+  > 14 │     updateDom();
+  > 15 │ });
+       │ ^^
+    16 │ 
+    17 │ export default {
+  
+  i Promise syntax composes better with `await` and keeps asynchronous control flow explicit.
+  
+  i Call `nextTick` without a callback, then await it or chain `.then()` instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:9 lint/nursery/useVueNextTickPromise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Vue `nextTick` was called with a callback.
+  
+    17 │ export default {
+    18 │     mounted() {
+  > 19 │         this.$nextTick(() => {
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │             updateDom();
+  > 21 │         });
+       │         ^^
+    22 │     },
+    23 │ };
+  
+  i Promise syntax composes better with `await` and keeps asynchronous control flow explicit.
+  
+  i Call `nextTick` without a callback, then await it or chain `.then()` instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

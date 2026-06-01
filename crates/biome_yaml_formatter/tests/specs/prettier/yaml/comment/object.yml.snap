@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/object.yml
+---
+
+# Input
+
+```yml
+#6445
+
+obj:
+  # before
+
+
+  # before
+
+
+  key: value
+
+
+  # after
+
+
+  # after
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,10 +3,14 @@
+ obj:
+   # before
+ 
++
+   # before
+ 
++
+   key: value
+ 
++
+   # after
+ 
++
+   # after
+```
+
+# Output
+
+```yml
+#6445
+
+obj:
+  # before
+
+
+  # before
+
+
+  key: value
+
+
+  # after
+
+
+  # after
+```

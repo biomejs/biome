@@ -106,13 +106,19 @@ pub struct DescendingSelector {
 fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
     match selector {
         AnyCssSelector::CssCompoundSelector(s) => {
-            let simple = s
-                .simple_selector()
-                .map_or(String::new(), |s| s.syntax().text_trimmed().to_string());
-            let sub = s.sub_selectors().syntax().text_trimmed().to_string();
+            let mut result = String::new();
+            if let Some(simple) = s.simple_selector() {
+                simple.syntax().text_trimmed().for_each_chunk(|chunk| {
+                    result.push_str(chunk);
+                });
+            }
 
-            let last_selector = [simple, sub].join("");
-            Some(last_selector)
+            s.sub_selectors()
+                .syntax()
+                .text_trimmed()
+                .for_each_chunk(|chunk| result.push_str(chunk));
+
+            Some(result)
         }
         AnyCssSelector::CssComplexSelector(s) => {
             s.right().as_ref().ok().and_then(find_tail_selector_str)
@@ -211,7 +217,7 @@ impl Rule for NoDescendingSpecificity {
             ).detail(node.high.0, markup!(
                 "This selector specificity is "{node.high.1.to_string()}
             ))
-            .note(markup! {
+                .note(markup! {
                     "Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
             }),
         )

@@ -32,5 +32,9 @@ similar-asserts     = { workspace = true }
 
 [dev-dependencies]
 
+[features]
+lang_md   = ["biome_service/lang_md"]
+lang_yaml = ["biome_service/lang_yaml"]
+
 [lints]
 workspace = true

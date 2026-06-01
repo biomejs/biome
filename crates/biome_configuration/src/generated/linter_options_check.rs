@@ -1492,6 +1492,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueImportCompilerMacros",
+        TypeId::of::<
+            biome_rule_options::no_vue_import_compiler_macros::NoVueImportCompilerMacrosOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noVueOptionsApi",
         TypeId::of::<biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions>(),
     ));
@@ -2198,8 +2205,18 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useTestHooksInOrder",
+        TypeId::of::<biome_rule_options::use_test_hooks_in_order::UseTestHooksInOrderOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useTestHooksOnTop",
         TypeId::of::<biome_rule_options::use_test_hooks_on_top::UseTestHooksOnTopOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useThisInClassMethods",
+        TypeId::of::<biome_rule_options::use_this_in_class_methods::UseThisInClassMethodsOptions>(),
     ));
     result.push((
         "style",
@@ -2309,6 +2326,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useVueMultiWordComponentNames", TypeId::of::<biome_rule_options::use_vue_multi_word_component_names::UseVueMultiWordComponentNamesOptions>()));
     result.push((
         "nursery",
+        "useVueNextTickPromise",
+        TypeId::of::<biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueVForKey",
         TypeId::of::<biome_rule_options::use_vue_v_for_key::UseVueVForKeyOptions>(),
     ));
@@ -2332,6 +2354,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "useVueValidVElseIf",
         TypeId::of::<biome_rule_options::use_vue_valid_v_else_if::UseVueValidVElseIfOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidVFor",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_for::UseVueValidVForOptions>(),
     ));
     result.push((
         "nursery",

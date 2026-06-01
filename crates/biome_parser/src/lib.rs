@@ -17,7 +17,7 @@ use biome_rowan::{
     TextRange, TextSize,
 };
 pub use marker::{CompletedMarker, Marker};
-use std::any::type_name;
+use std::{any::type_name, ops::Range};
 pub use token_set::TokenSet;
 
 pub mod diagnostic;
@@ -202,6 +202,18 @@ pub trait Parser: Sized {
     /// Get the source code of the parser's current token.
     fn cur_text(&self) -> &str {
         &self.source().text()[self.cur_range()]
+    }
+
+    /// Get the source code of the parser's nth token.
+    fn nth_text<'l, Lex>(&mut self, n: usize) -> Option<&str>
+    where
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+    {
+        let range = self.source_mut().nth_range(n)?;
+        let range: Range<usize> = range.into();
+
+        self.source().text().get(range)
     }
 
     /// Checks if the parser is currently at a specific token

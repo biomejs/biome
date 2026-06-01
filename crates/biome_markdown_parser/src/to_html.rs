@@ -43,14 +43,13 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent,
-    MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock,
-    MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic,
-    MdInlineItemList, MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdNewline, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix,
-    MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak,
-    MdTextual, MdThematicBreakBlock,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
+    MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent, MdDocument, MdEntityReference,
+    MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode,
+    MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
+    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
+    MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
+    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -62,6 +61,72 @@ use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
     is_dash_only_thematic_break_text,
 };
+
+/// Compute the absolute column (0-indexed) where `node` begins on its line,
+/// after stripping quote-prefix tokens (which are virtual and not rendered).
+///
+/// Walks the syntax tree from `node`'s line start until `node`'s first token,
+/// expanding tabs to the next `TAB_STOP_SPACES` boundary. Tokens that descend
+/// from an `MD_QUOTE_PREFIX` node contribute zero columns, matching how the
+/// renderer strips those prefixes from emitted content.
+fn line_start_column_of(node: &SyntaxNode<MarkdownLanguage>) -> usize {
+    use biome_markdown_syntax::MarkdownSyntaxKind::{
+        MD_QUOTE_INDENT_LIST, MD_QUOTE_POST_MARKER_SPACE, MD_QUOTE_PREFIX, NEWLINE, R_ANGLE,
+    };
+    let Some(first) = node.first_token() else {
+        return 0;
+    };
+    // Locate the most recent token that contains a line break before `first`.
+    let mut anchor = first.prev_token();
+    while let Some(tok) = anchor.clone() {
+        if tok.kind() == NEWLINE || tok.text().contains('\n') || tok.text().contains('\r') {
+            break;
+        }
+        anchor = tok.prev_token();
+    }
+    // Walk forward from after the anchor to `first`, accumulating columns
+    // contributed by non-prefix tokens. No allocation needed because
+    // `next_token` yields the same sequence in original order.
+    let mut col = 0usize;
+    let mut cursor = match anchor {
+        Some(tok) => tok.next_token(),
+        None => node.first_token().and_then(|t| {
+            let mut c = Some(t);
+            while let Some(tok) = c.clone() {
+                if tok.prev_token().is_none() {
+                    return Some(tok);
+                }
+                c = tok.prev_token();
+            }
+            None
+        }),
+    };
+    while let Some(tok) = cursor {
+        if tok == first {
+            break;
+        }
+        let kind = tok.kind();
+        let in_quote_prefix = tok
+            .parent()
+            .and_then(|p| p.ancestors().find(|n| n.kind() == MD_QUOTE_PREFIX))
+            .is_some();
+        if !in_quote_prefix
+            && !matches!(
+                kind,
+                R_ANGLE | MD_QUOTE_POST_MARKER_SPACE | MD_QUOTE_INDENT_LIST
+            )
+        {
+            for c in tok.text().chars() {
+                match c {
+                    '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
+                    _ => col += 1,
+                }
+            }
+        }
+        cursor = tok.next_token();
+    }
+    col
+}
 
 /// Compute the column width of an `MdIndentTokenList`.
 fn indent_list_width(list: &biome_markdown_syntax::MdIndentTokenList) -> usize {
@@ -468,6 +533,11 @@ struct HtmlRenderer<'a> {
 struct Buffer {
     kind: BufferKind,
     content: String,
+    /// Byte ranges in `content` that originated from a decoded entity /
+    /// numeric character reference. Whitespace inside these ranges must
+    /// NOT be stripped by the paragraph/header close-time trim, so that
+    /// e.g. `&#9;foo` keeps the decoded tab and `&#1;foo` keeps U+0001.
+    entity_ranges: Vec<std::ops::Range<usize>>,
 }
 
 enum BufferKind {
@@ -520,6 +590,7 @@ impl<'a> HtmlRenderer<'a> {
             buffers: vec![Buffer {
                 kind: BufferKind::Root,
                 content: String::new(),
+                entity_ranges: Vec::new(),
             }],
             list_stack: Vec::new(),
             list_item_stack: Vec::new(),
@@ -655,10 +726,7 @@ impl<'a> HtmlRenderer<'a> {
             let start = list
                 .md_bullet_list()
                 .iter()
-                .find_map(|member| match member {
-                    AnyMdBulletListMember::MdBullet(bullet) => Some(bullet),
-                    _ => None,
-                })
+                .next()
                 .and_then(|bullet| bullet.prefix().ok())
                 .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {
@@ -992,7 +1060,7 @@ impl<'a> HtmlRenderer<'a> {
         }
 
         if let Some(entity) = MdEntityReference::cast(node) {
-            render_entity_reference(&entity, self.out_mut());
+            render_entity_reference(&entity, self.buffer_mut());
         }
     }
 
@@ -1005,12 +1073,21 @@ impl<'a> HtmlRenderer<'a> {
                     return;
                 }
                 let mut content = buffer.content;
+                let mut entity_ranges = buffer.entity_ranges;
                 if state.quote_indent > 0 {
-                    content = strip_quote_prefixes(&content, state.quote_indent);
+                    let stripped = strip_quote_prefixes(&content, state.quote_indent);
+                    // The byte ranges no longer line up after stripping
+                    // quote prefixes — fall back to the structural trim
+                    // alone for this (rare) case. Entity ranges are kept
+                    // as `Vec::new()` so no preservation applies.
+                    if stripped != content {
+                        entity_ranges = Vec::new();
+                    }
+                    content = stripped;
                 }
-                let content = strip_paragraph_indent(
-                    content.trim_matches(|c| c == ' ' || c == '\n' || c == '\r'),
-                );
+                let trimmed = trim_buffer_preserving_entities(&content, &entity_ranges);
+                let base_offset = trimmed.as_ptr() as usize - content.as_ptr() as usize;
+                let content = strip_paragraph_indent(trimmed, base_offset, &entity_ranges);
 
                 if state.in_tight_list {
                     self.push_str(&content);
@@ -1030,7 +1107,17 @@ impl<'a> HtmlRenderer<'a> {
                 self.push_str("<h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">");
-                self.push_str(buffer.content.trim());
+                // Setext headings can span multiple inline lines; leading
+                // whitespace on each continuation line is structural padding
+                // and must be stripped (matching paragraph rendering).
+                let trimmed =
+                    trim_buffer_preserving_entities(&buffer.content, &buffer.entity_ranges);
+                let base_offset = trimmed.as_ptr() as usize - buffer.content.as_ptr() as usize;
+                self.push_str(&strip_paragraph_indent(
+                    trimmed,
+                    base_offset,
+                    &buffer.entity_ranges,
+                ));
                 self.push_str("</h");
                 self.push_str(&state.level.to_string());
                 self.push_str(">\n");
@@ -1141,6 +1228,7 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.push(Buffer {
             kind,
             content: String::new(),
+            entity_ranges: Vec::new(),
         });
     }
 
@@ -1148,11 +1236,16 @@ impl<'a> HtmlRenderer<'a> {
         self.buffers.pop().unwrap_or(Buffer {
             kind: BufferKind::Root,
             content: String::new(),
+            entity_ranges: Vec::new(),
         })
     }
 
     fn out_mut(&mut self) -> &mut String {
         &mut self.buffers.last_mut().expect("missing buffer").content
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        self.buffers.last_mut().expect("missing buffer")
     }
 
     fn push_str(&mut self, value: &str) {
@@ -1183,18 +1276,56 @@ fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
 /// initial whitespace, and that whitespace is stripped in the output.
 /// The first line keeps its content unchanged; subsequent lines have all
 /// leading spaces and tabs stripped.
-fn strip_paragraph_indent(content: &str) -> String {
+/// Strip leading whitespace from each continuation line, but preserve
+/// whitespace bytes that fall inside `entity_ranges`. `base_offset` is the
+/// byte position of `content` inside the original buffer the entity ranges
+/// refer to (typically the offset produced by
+/// [`trim_buffer_preserving_entities`]).
+fn strip_paragraph_indent(
+    content: &str,
+    base_offset: usize,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> String {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+    let mut result = String::with_capacity(content.len());
+    let mut line_start = 0usize;
     let mut first_line = true;
-    map_lines(content, |line, out| {
-        if first_line {
-            // First line: keep as-is
-            first_line = false;
-            out.push_str(line);
-        } else {
-            // Continuation lines: strip ALL leading whitespace
-            out.push_str(line.trim_start());
+    let bytes = content.as_bytes();
+    for line in content.split('\n') {
+        let raw_line_len = line.len();
+        if !first_line {
+            result.push('\n');
         }
-    })
+        let line = line.strip_suffix('\r').unwrap_or(line);
+        if first_line {
+            result.push_str(line);
+            first_line = false;
+        } else {
+            let mut skip = 0usize;
+            for (offset, ch) in line.char_indices() {
+                if !ch.is_whitespace() {
+                    skip = offset;
+                    break;
+                }
+                if in_entity(base_offset + line_start + offset) {
+                    skip = offset;
+                    break;
+                }
+                skip = offset + ch.len_utf8();
+            }
+            result.push_str(&line[skip..]);
+        }
+        line_start += raw_line_len;
+        // `split('\n')` consumed exactly one '\n' between segments.
+        if bytes.get(line_start) == Some(&b'\n') {
+            line_start += 1;
+        }
+    }
+    result
 }
 
 /// Render an ATX header (# style).
@@ -1249,7 +1380,14 @@ fn render_fenced_code_block(
     let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
     let fence_indent = fence_leading_indent.min(MAX_BLOCK_PREFIX_INDENT);
-    let content_indent = container_indent + fence_indent;
+    // When a tab spans the boundary between list/quote indent and fence indent,
+    // the tab token gets fully assigned to the surrounding continuation indent
+    // and the fence's own indent slot ends up empty (CST tokens are indivisible).
+    // The actual fence column on the line still includes the post-container
+    // portion of that tab, so we cross-check with the real column position and
+    // use whichever value is larger.
+    let absolute_column = line_start_column_of(code.syntax());
+    let content_indent = (container_indent + fence_indent).max(absolute_column);
 
     // Get info string (language) - process escapes
     let info_string: String = code
@@ -1452,18 +1590,61 @@ fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
     out.push_str(&content);
 }
 
-/// Render an entity reference.
-fn render_entity_reference(entity: &MdEntityReference, out: &mut String) {
-    if let Ok(token) = entity.value_token() {
-        let text = token.text();
-        // Decode known entities or pass through
-        if let Some(decoded) = decode_entity(text) {
-            out.push_str(&escape_html(&decoded));
-        } else {
-            // Unknown entity - pass through as-is (escaped)
-            out.push_str(&escape_html(text));
-        }
+/// Render an entity reference into the current buffer.
+///
+/// The byte range covered by the rendered output is recorded on the
+/// buffer's `entity_ranges` so that the paragraph/header close-time
+/// trim can preserve whitespace that was produced by decoding a
+/// numeric character reference (e.g. `&#9;` → `\t`, `&#1;` → U+0001).
+fn render_entity_reference(entity: &MdEntityReference, buffer: &mut Buffer) {
+    let Ok(token) = entity.value_token() else {
+        return;
+    };
+    let text = token.text();
+    let rendered = match decode_entity(text) {
+        Some(decoded) => escape_html(&decoded),
+        None => escape_html(text),
+    };
+    let start = buffer.content.len();
+    buffer.content.push_str(&rendered);
+    let end = buffer.content.len();
+    if end > start {
+        buffer.entity_ranges.push(start..end);
     }
+}
+
+/// Trim leading and trailing structural whitespace from `content`, but
+/// preserve whitespace that lives inside any of the byte ranges in
+/// `entity_ranges` (where each range marks output produced by
+/// [`render_entity_reference`]).
+///
+/// The returned slice borrows from `content`.
+fn trim_buffer_preserving_entities<'a>(
+    content: &'a str,
+    entity_ranges: &[std::ops::Range<usize>],
+) -> &'a str {
+    let in_entity = |byte: usize| -> bool {
+        entity_ranges
+            .iter()
+            .any(|r| byte >= r.start && byte < r.end)
+    };
+
+    let bytes = content.as_bytes();
+    let mut start = 0;
+    while start < bytes.len()
+        && matches!(bytes[start], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(start)
+    {
+        start += 1;
+    }
+    let mut end = bytes.len();
+    while end > start
+        && matches!(bytes[end - 1], b' ' | b'\t' | b'\n' | b'\r')
+        && !in_entity(end - 1)
+    {
+        end -= 1;
+    }
+    &content[start..end]
 }
 
 /// Render a link title attribute.
@@ -2268,5 +2449,28 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_entity_tab_on_continuation_line_is_preserved() {
+        // `&#9;` decodes to a tab. On a continuation line the tab is
+        // entity-sourced and must survive the structural indent trim.
+        let html = render("foo\n&#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
+    }
+
+    #[test]
+    fn test_entity_space_on_continuation_line_is_preserved() {
+        // `&#x20;` decodes to a space; preserved even though it is whitespace.
+        let html = render("foo\n&#x20;bar\n");
+        assert_eq!(html, "<p>foo\n bar</p>\n");
+    }
+
+    #[test]
+    fn test_structural_indent_still_stripped_before_entity() {
+        // Literal leading spaces are structural and stripped; the entity-sourced
+        // whitespace that follows is preserved.
+        let html = render("foo\n   &#9;bar\n");
+        assert_eq!(html, "<p>foo\n\tbar</p>\n");
     }
 }

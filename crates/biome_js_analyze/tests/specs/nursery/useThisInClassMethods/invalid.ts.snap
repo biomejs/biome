@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+abstract class Base {
+    abstract method(): void;
+}
+
+class Derived extends Base {
+    override method() {}
+
+    protected protectedMethod() {}
+
+    private privateMethod() {}
+}
+
+interface Service {
+    run(): void;
+}
+
+class ServiceImpl implements Service {
+    run() {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:7:14 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method method.
+  
+    6 │ class Derived extends Base {
+  > 7 │     override method() {}
+      │              ^^^^^^
+    8 │ 
+    9 │     protected protectedMethod() {}
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:15 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method protectedMethod.
+  
+     7 │     override method() {}
+     8 │ 
+   > 9 │     protected protectedMethod() {}
+       │               ^^^^^^^^^^^^^^^
+    10 │ 
+    11 │     private privateMethod() {}
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:13 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method privateMethod.
+  
+     9 │     protected protectedMethod() {}
+    10 │ 
+  > 11 │     private privateMethod() {}
+       │             ^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method run.
+  
+    18 │ class ServiceImpl implements Service {
+  > 19 │     run() {}
+       │     ^^^
+    20 │ }
+    21 │ 
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

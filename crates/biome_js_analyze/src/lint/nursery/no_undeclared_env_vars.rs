@@ -215,7 +215,10 @@ fn extract_from_computed_member(
 
 /// Checks if the object is a global env object (`process` or `Bun`, not shadowed by a local binding)
 fn is_global_env_object(expr: &AnyJsExpression, model: &biome_js_semantic::SemanticModel) -> bool {
-    let Some((reference, name)) = global_identifier(expr) else {
+    let Some((reference, name)) = expr
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    else {
         return false;
     };
 
@@ -251,7 +254,10 @@ fn match_deno_env_get(
     }
 
     let deno_object = env_member.object().ok()?.omit_parentheses();
-    let Some((reference, name)) = global_identifier(&deno_object) else {
+    let Some((reference, name)) = deno_object
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    else {
         return Some(None);
     };
     if name.text() != "Deno" || model.binding(&reference).is_some() {

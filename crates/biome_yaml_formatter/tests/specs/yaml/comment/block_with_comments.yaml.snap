@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/block_with_comments.yaml
+---
+
+# Input
+
+```yaml
+# top comment
+a: 10
+# between
+b: 20
+c: 30 # inline
+
+```
+
+
+# Formatted
+
+```yaml
+# top comment
+a: 10
+# between
+b: 20
+c: 30 # inline
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"# top comment\na: 10\n# between\nb: 20\nc: 30 # inline\n" => 0..51

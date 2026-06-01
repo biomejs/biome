@@ -1,0 +1,98 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 206
+expression: snapshot
+---
+
+## Input
+
+```css
+@use "theme" with ($primary: blue,);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@1..5 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@5..13 "\"theme\"" [] [Whitespace(" ")],
+                },
+                as_clause: missing (optional),
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@13..18 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@18..19 "(" [] [],
+                        items: ScssModuleConfigurationItemList [
+                            ScssModuleConfiguration {
+                                name: ScssVariable {
+                                    dollar_token: DOLLAR@19..20 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@20..27 "primary" [] [],
+                                    },
+                                },
+                                colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@29..33 "blue" [] [],
+                                        },
+                                    ],
+                                },
+                                modifier: missing (optional),
+                            },
+                            COMMA@33..34 "," [] [],
+                        ],
+                        r_paren_token: R_PAREN@34..35 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@35..36 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..37
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..36
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: SCSS_USE_AT_RULE@1..36
+        0: USE_KW@1..5 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@5..13
+          0: CSS_STRING_LITERAL@5..13 "\"theme\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: SCSS_WITH_CLAUSE@13..35
+          0: WITH_KW@13..18 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@18..35
+            0: L_PAREN@18..19 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@19..34
+              0: SCSS_MODULE_CONFIGURATION@19..33
+                0: SCSS_VARIABLE@19..27
+                  0: DOLLAR@19..20 "$" [] []
+                  1: CSS_IDENTIFIER@20..27
+                    0: IDENT@20..27 "primary" [] []
+                1: COLON@27..29 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@29..33
+                  0: SCSS_EXPRESSION_ITEM_LIST@29..33
+                    0: CSS_IDENTIFIER@29..33
+                      0: IDENT@29..33 "blue" [] []
+                3: (empty)
+              1: COMMA@33..34 "," [] []
+            2: R_PAREN@34..35 ")" [] []
+        4: SEMICOLON@35..36 ";" [] []
+  2: EOF@36..37 "" [Newline("\n")] []
+
+```

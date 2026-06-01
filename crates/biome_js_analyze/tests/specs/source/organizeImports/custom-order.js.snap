@@ -18,14 +18,20 @@ import { test as testNode } from "@scopeB/lib"
 ```
 custom-order.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { test as testBun } from "bun:test"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { test as testNode } from "node:test"
-    3 │ import { test as testNode } from "@scopeX/special/subpath"
+  > 2 │ import { test as testNode } from "node:test"
+  > 3 │ import { test as testNode } from "@scopeX/special/subpath"
+  > 4 │ import { test as testNode } from "@scopeX/special"
+  > 5 │ import { test as testNode } from "@scopeX/lib"
+  > 6 │ import { test as testNode } from "@scopeA/lib"
+  > 7 │ import { test as testNode } from "@scopeB/lib"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   import { test as testBun } from "bun:test"
     2 2 │   import { test as testNode } from "node:test"

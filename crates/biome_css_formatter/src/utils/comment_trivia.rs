@@ -26,7 +26,7 @@ pub(crate) fn has_inline_trailing_comment(node: &CssSyntaxNode) -> bool {
     })
 }
 
-/// Returns true when `comment` is in the node's trailing trivia.
+/// Returns `true` when `comment` is in the node's trailing trivia.
 pub(crate) fn is_trailing_comment_on_node(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,

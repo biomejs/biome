@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/function_arguments_trailing_commas.css
+---
+
+# Input
+
+```css
+a {
+  custom-property-empty-fallback: var(--name,);
+  custom-property-with-fallback: var(--name, red,);
+
+  transition-timing-function: func1(
+      func2(
+          func3(
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+              "veryVeryVeryVeryVeryLongValue",
+          ),
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+      ),
+      "veryVeryVeryVeryVeryLongValue",
+      "veryVeryVeryVeryVeryLongValue",
+      func3(
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue",
+          "veryVeryVeryVeryVeryLongValue"
+      )
+  );
+}
+
+```
+
+
+# Formatted
+
+```css
+a {
+	custom-property-empty-fallback: var(--name,);
+	custom-property-with-fallback: var(--name, red,);
+
+	transition-timing-function: func1(
+		func2(
+			func3(
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue",
+				"veryVeryVeryVeryVeryLongValue"
+			),
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		),
+		"veryVeryVeryVeryVeryLongValue",
+		"veryVeryVeryVeryVeryLongValue",
+		func3(
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue",
+			"veryVeryVeryVeryVeryLongValue"
+		)
+	);
+}
+
+```

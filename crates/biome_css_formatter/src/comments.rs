@@ -6,10 +6,10 @@ use crate::utils::scss_include_comments::{
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
-    ScssAtRootSelector, ScssEachHeader, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
-    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T,
-    TextLen, TextSize, is_in_scss_include_arguments, single_expression_item,
+    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage, ScssAtRootAtRule,
+    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
+    ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
+    ScssMapExpressionPair, T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -18,7 +18,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::SyntaxTriviaPieceComments;
+use biome_rowan::{AstSeparatedList, SyntaxTriviaPieceComments};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -108,7 +108,7 @@ impl CommentStyle for CssCommentStyle {
         handle_scss_map_trailing_separator_comment(comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
-            .or_else(handle_scss_each_iterable_comment)
+            .or_else(handle_scss_each_value_list_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
@@ -165,15 +165,23 @@ fn handle_scss_list_trailing_separator_comment(
     place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
 }
 
-/// Keeps `@each ... in /* comment */ (a, b)` comments with the iterable.
-fn handle_scss_each_iterable_comment(
+/// Keeps `@each ... in /* comment */ a, b` comments after `in`.
+fn handle_scss_each_value_list_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
     let Some(expression) = comment.following_node().and_then(ScssExpression::cast_ref) else {
         return CommentPlacement::Default(comment);
     };
 
-    if !expression
+    let Some(value_list) = expression
+        .syntax()
+        .parent()
+        .and_then(ScssEachValueList::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !value_list
         .syntax()
         .parent()
         .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
@@ -181,13 +189,18 @@ fn handle_scss_each_iterable_comment(
         return CommentPlacement::Default(comment);
     }
 
-    if !single_expression_item(&expression).is_some_and(|item| {
-        item.as_scss_list_expression().is_some() || item.as_scss_map_expression().is_some()
-    }) {
+    let Some(first_value) = value_list.elements().next() else {
         return CommentPlacement::Default(comment);
-    }
+    };
+    let Ok(first_value) = first_value.node() else {
+        return CommentPlacement::Default(comment);
+    };
 
-    CommentPlacement::leading(expression.into_syntax(), comment)
+    if first_value.syntax() == expression.syntax() {
+        CommentPlacement::leading(value_list.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_scss_expression_item_trailing_line_comment(
@@ -311,7 +324,6 @@ fn handle_function_comment(
 fn handle_generic_property_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    // Check if the comment is inside a CSS generic property (e.g., color: value)
     let Some(generic_property) = comment
         .enclosing_node()
         .ancestors()
@@ -326,46 +338,73 @@ fn handle_generic_property_comment(
 
     let comment_piece = comment.piece();
 
-    // Check if the comment is in the name's trailing trivia (before colon)
-    // Example: `color /* comment */: value`
+    if is_between_property_colon_and_value(&generic_property, comment_piece.text_range().start()) {
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
+    }
+
     if let Some(name_token) = name.syntax().last_token() {
         for piece in name_token.trailing_trivia().pieces() {
-            if piece.is_comments() && piece.text() == comment_piece.text() {
-                // Our placement is slightly better than Prettier because it adds some spacing
-                return CommentPlacement::trailing(name.into_syntax(), comment);
+            if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
+                // `color/* comment */: red` keeps the comment between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
         }
     }
 
     if let (Some(preceding), Some(following)) = (comment.preceding_node(), comment.following_node())
+        && preceding == name.syntax()
+        && following
+            .parent()
+            .and_then(CssGenericComponentValueList::cast)
+            .is_some()
     {
-        // If preceding is the property name and following is in the value list
-        if preceding == name.syntax()
-            && following
-                .parent()
-                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
-        {
-            // Place comment as dangling on the property so it can be formatted inline
-            // between the colon and values
-            return CommentPlacement::trailing(generic_property.into_syntax(), comment);
-        }
+        return CommentPlacement::trailing(generic_property.into_syntax(), comment);
     }
 
     CommentPlacement::Default(comment)
+}
+
+fn is_between_property_colon_and_value(
+    property: &CssGenericProperty,
+    comment_start: TextSize,
+) -> bool {
+    // `color: /* comment */ red` belongs to the property colon boundary.
+    let Ok(colon) = property.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = property
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
 }
 
 fn handle_declaration_name_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
     match comment.preceding_node() {
-        Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            if following_node
+        Some(preceding_node) if AnyCssDeclarationName::can_cast(preceding_node.kind()) => {
+            if let Some(generic_property) =
+                preceding_node.parent().and_then(CssGenericProperty::cast)
+            {
+                // `color // comment\n: red` keeps the comment between name and colon.
+                return CommentPlacement::dangling(generic_property.into_syntax(), comment);
+            }
+
+            if preceding_node
                 .parent()
-                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
+                .and_then(CssGenericComponentValueList::cast)
+                .is_some()
             {
                 CommentPlacement::Default(comment)
             } else {
-                CommentPlacement::leading(following_node.clone(), comment)
+                CommentPlacement::leading(preceding_node.clone(), comment)
             }
         }
         _ => CommentPlacement::Default(comment),

@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/scalar/double_quoted.yaml
+---
+
+# Input
+
+```yaml
+"Double quoted"
+
+```
+
+
+# Formatted
+
+```yaml
+"Double quoted"
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\"Double quoted\"\n" => 0..16

@@ -19,11 +19,11 @@ serde                  = { workspace = true, features = ["derive"], optional = t
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }
-biome_formatter_test  = { path = "../biome_formatter_test" }
+biome_formatter_test  = { path = "../biome_formatter_test", features = ["lang_md"] }
 biome_fs              = { path = "../biome_fs" }
 biome_markdown_parser = { path = "../biome_markdown_parser" }
 biome_parser          = { path = "../biome_parser" }
-biome_service         = { path = "../biome_service", features = ["markdown"] }
+biome_service         = { path = "../biome_service", features = ["lang_md"] }
 camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
 similar-asserts       = { workspace = true }

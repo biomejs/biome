@@ -183,6 +183,17 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteBindDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::SvelteBindFunctionBindingExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => {
+                    let $pattern = unsafe {
+                        $crate::SvelteBindFunctionBindingInitializerClause::new_unchecked(node)
+                    };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_CLASS_DIRECTIVE => {
                     let $pattern = unsafe { $crate::SvelteClassDirective::new_unchecked(node) };
                     $body

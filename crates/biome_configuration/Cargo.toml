@@ -37,7 +37,7 @@ biome_js_formatter         = { workspace = true, features = ["serde"] }
 biome_json_formatter       = { workspace = true, features = ["serde"] }
 biome_json_parser          = { workspace = true }
 biome_json_syntax          = { workspace = true }
-biome_plugin_loader        = { workspace = true }
+biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
@@ -60,10 +60,12 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-default    = []
-cli        = ["dep:bpaf"]
-markdown   = []
-schema     = [
+cli          = ["dep:bpaf"]
+lang_graphql = ["biome_configuration_macros/lang_graphql"]
+lang_md      = []
+lang_yaml    = []
+plugins      = ["dep:biome_plugin_loader"]
+schema       = [
   "biome_analyze/schema",
   "biome_formatter/schema",
   "biome_html_formatter/schema",
@@ -74,8 +76,10 @@ schema     = [
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
   "dep:schemars",
+  "lang_graphql",
+  "plugins",
 ]
-test-utils = []
+test-utils   = []
 
 [lints]
 workspace = true

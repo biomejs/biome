@@ -41,15 +41,9 @@ HtmlRoot {
             children: HtmlElementList [
                 SvelteConstBlock {
                     sv_curly_at_token: SV_CURLY_AT@30..34 "{@" [Newline("\n"), Whitespace("\t")] [],
-                    const_token: CONST_KW@34..39 "const" [] [],
+                    const_token: CONST_KW@34..40 "const" [] [Whitespace(" ")],
                     expression: missing (required),
-                    r_curly_token: missing (required),
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@39..40 " " [] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@40..41 "}" [] [],
+                    r_curly_token: R_CURLY@40..41 "}" [] [],
                 },
             ],
             else_clause: missing (optional),
@@ -86,15 +80,11 @@ HtmlRoot {
           3: (empty)
         4: R_CURLY@29..30 "}" [] []
       1: HTML_ELEMENT_LIST@30..41
-        0: SVELTE_CONST_BLOCK@30..39
+        0: SVELTE_CONST_BLOCK@30..41
           0: SV_CURLY_AT@30..34 "{@" [Newline("\n"), Whitespace("\t")] []
-          1: CONST_KW@34..39 "const" [] []
+          1: CONST_KW@34..40 "const" [] [Whitespace(" ")]
           2: (empty)
-          3: (empty)
-        1: HTML_CONTENT@39..40
-          0: HTML_LITERAL@39..40 " " [] []
-        2: HTML_CONTENT@40..41
-          0: HTML_LITERAL@40..41 "}" [] []
+          3: R_CURLY@40..41 "}" [] []
       2: (empty)
       3: SVELTE_EACH_CLOSING_BLOCK@41..49
         0: SV_CURLY_SLASH@41..44 "{/" [Newline("\n")] []
@@ -107,13 +97,13 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-const_missing_expression.svelte:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const_missing_expression.svelte:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an expression but instead found ' '.
+  × Expected an expression but instead found '}'.
   
     1 │ {#each ["1", "2", "3"] as val}
   > 2 │ 	{@const }
-      │ 	       ^
+      │ 	        ^
     3 │ {/each}
     4 │ 
   
@@ -121,7 +111,7 @@ const_missing_expression.svelte:2:9 parse ━━━━━━━━━━━━�
   
     1 │ {#each ["1", "2", "3"] as val}
   > 2 │ 	{@const }
-      │ 	       ^
+      │ 	        ^
     3 │ {/each}
     4 │ 
   

@@ -1,0 +1,11 @@
+@media (#{$feature}:) {
+  .missing-value {
+    color: red;
+  }
+}
+
+@container (#{$min} <= inline-size <=) {
+  .container-missing-right-value {
+    color: red;
+  }
+}

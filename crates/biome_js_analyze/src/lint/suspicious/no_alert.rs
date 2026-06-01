@@ -115,7 +115,7 @@ fn check_expression(expr: &AnyJsExpression, model: &SemanticModel) -> Option<&'s
 }
 
 fn check_global_identifier(expr: &AnyJsExpression, model: &SemanticModel) -> Option<&'static str> {
-    let (reference, name) = global_identifier(expr)?;
+    let (reference, name) = global_identifier(&expr.as_any_global_identifier_expression()?)?;
     let name_text = name.text();
 
     if model.binding(&reference).is_none()
@@ -132,7 +132,8 @@ fn check_static_member_expression(
     model: &SemanticModel,
 ) -> Option<&'static str> {
     let object = member_expr.object().ok()?;
-    let (reference, object_name) = global_identifier(&object)?;
+    let (reference, object_name) =
+        global_identifier(&object.as_any_global_identifier_expression()?)?;
     let object_name_text = object_name.text();
 
     if is_global_object(object_name_text) && model.binding(&reference).is_none() {
@@ -151,7 +152,8 @@ fn check_computed_member_expression(
     model: &SemanticModel,
 ) -> Option<&'static str> {
     let object = computed_member_expr.object().ok()?;
-    let (reference, object_name) = global_identifier(&object)?;
+    let (reference, object_name) =
+        global_identifier(&object.as_any_global_identifier_expression()?)?;
     let object_name_text = object_name.text();
 
     if is_global_object(object_name_text) && model.binding(&reference).is_none() {

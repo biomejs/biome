@@ -1,0 +1,26 @@
+selector{prop:// comment
+value;}
+
+selector{prop:/* block */value;}
+
+selector{prop:
+/* block */value;}
+
+selector{prop
+// inline
+:value;}
+
+selector{prop/* block */:value;}
+
+selector{prop
+/* block */
+:value;}
+
+selector{prop/* before */:// after
+value;}
+
+selector{prop/* before */:/* after */value;}
+
+selector{prop:/* first */ /* second */value;}
+
+selector{prop:/* after */value/* keep */;}

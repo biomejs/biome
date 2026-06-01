@@ -109,6 +109,21 @@ impl<'src> CssTokenSource<'src> {
         self.lexer.lexer().is_at_scss_interpolated_function(start)
     }
 
+    /// Delegates to the lexer-owned source scanner for quoted-string URL
+    /// expression classification.
+    ///
+    /// Examples: `url('v'+1)` or `url("#{$bg}" + ".png")`.
+    pub(crate) fn is_at_scss_string_concatenation(&self) -> bool {
+        let start = usize::from(self.current_range().start());
+        self.lexer.lexer().is_at_scss_string_concatenation(start)
+    }
+
+    /// Checks after the current token for `url('v'+1)`-style concatenation.
+    pub(crate) fn is_current_token_followed_by_scss_concatenation_plus(&self) -> bool {
+        let start = usize::from(self.current_range().end());
+        self.lexer.lexer().is_at_scss_concatenation_plus(start)
+    }
+
     #[inline]
     fn effective_context(&self, context: CssLexContext) -> CssLexContext {
         match (

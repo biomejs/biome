@@ -9,6 +9,9 @@ info: comments/inline-with-block-element.html
 <!-- comment --><div>
 <div></div>
 </div>
+
+<!-- comment --> <div></div>
+
 ```
 
 
@@ -19,5 +22,8 @@ info: comments/inline-with-block-element.html
 <div>
 	<div></div>
 </div>
+
+<!-- comment -->
+<div></div>
 
 ```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 192
 expression: snapshot
 ---
 
@@ -52,15 +51,18 @@ MdDocument {
                                     marker_token: R_ANGLE@11..12 ">" [] [],
                                     post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@12..13 " " [] [],
                                 },
+                                MdContinuationIndent {
+                                    indent: MdIndentTokenList [
+                                        MdIndentToken {
+                                            md_indent_char_token: MD_INDENT_CHAR@13..15 "  " [] [],
+                                        },
+                                    ],
+                                },
                                 MdOrderedListItem {
                                     md_bullet_list: MdBulletList [
                                         MdBullet {
                                             prefix: MdListMarkerPrefix {
-                                                pre_marker_indent: MdIndentTokenList [
-                                                    MdIndentToken {
-                                                        md_indent_char_token: MD_INDENT_CHAR@13..15 "  " [] [],
-                                                    },
-                                                ],
+                                                pre_marker_indent: MdIndentTokenList [],
                                                 marker: MD_ORDERED_LIST_MARKER@15..17 "1." [] [],
                                                 post_marker_space_token: MD_LIST_POST_MARKER_SPACE@17..18 " " [] [],
                                                 content_indent: MdIndentTokenList [],
@@ -124,13 +126,15 @@ MdDocument {
                   0: MD_QUOTE_INDENT_LIST@11..11
                   1: R_ANGLE@11..12 ">" [] []
                   2: MD_QUOTE_POST_MARKER_SPACE@12..13 " " [] []
-                2: MD_ORDERED_LIST_ITEM@13..24
-                  0: MD_BULLET_LIST@13..24
-                    0: MD_BULLET@13..24
-                      0: MD_LIST_MARKER_PREFIX@13..18
-                        0: MD_INDENT_TOKEN_LIST@13..15
-                          0: MD_INDENT_TOKEN@13..15
-                            0: MD_INDENT_CHAR@13..15 "  " [] []
+                2: MD_CONTINUATION_INDENT@13..15
+                  0: MD_INDENT_TOKEN_LIST@13..15
+                    0: MD_INDENT_TOKEN@13..15
+                      0: MD_INDENT_CHAR@13..15 "  " [] []
+                3: MD_ORDERED_LIST_ITEM@15..24
+                  0: MD_BULLET_LIST@15..24
+                    0: MD_BULLET@15..24
+                      0: MD_LIST_MARKER_PREFIX@15..18
+                        0: MD_INDENT_TOKEN_LIST@15..15
                         1: MD_ORDERED_LIST_MARKER@15..17 "1." [] []
                         2: MD_LIST_POST_MARKER_SPACE@17..18 " " [] []
                         3: MD_INDENT_TOKEN_LIST@18..18

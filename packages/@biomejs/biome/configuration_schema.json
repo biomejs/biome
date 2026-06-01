@@ -17,7 +17,7 @@
 			"anyOf": [{ "$ref": "#/$defs/CssConfiguration" }, { "type": "null" }]
 		},
 		"extends": {
-			"description": "A list of paths to other JSON files, used to extends the current configuration.",
+			"description": "A list of paths to other JSON files, used to extend the current configuration.",
 			"anyOf": [{ "$ref": "#/$defs/Extends" }, { "type": "null" }]
 		},
 		"files": {
@@ -1547,6 +1547,14 @@
 				}
 			]
 		},
+		"DestructuringConfig": {
+			"type": "object",
+			"properties": {
+				"array": { "type": ["boolean", "null"] },
+				"object": { "type": ["boolean", "null"] }
+			},
+			"additionalProperties": false
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -2086,6 +2094,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"IgnoreClassesWithImplements": {
+			"description": "Controls how `useThisInClassMethods` treats classes that implement interfaces.",
+			"oneOf": [
+				{
+					"description": "Check members in classes that implement interfaces the same way as any other class.",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Ignore every eligible instance member in classes that implement at least one interface.",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Ignore only public eligible members in classes that implement at least one interface.\n\nProtected and private members in those classes are still checked.",
+					"type": "string",
+					"const": "public-fields"
+				}
+			]
 		},
 		"ImportGroup": {
 			"anyOf": [
@@ -6005,6 +6033,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueImportCompilerMacrosConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueImportCompilerMacrosOptions" }
+			]
+		},
+		"NoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6593,7 +6631,7 @@
 					]
 				},
 				"noUnnecessaryConditions": {
-					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+					"description": "Disallow conditions that always evaluate to the same value.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
 						{ "type": "null" }
@@ -6638,6 +6676,13 @@
 					"description": "Disallows using arrow functions when defining a watcher.\nSee https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueArrowFuncInWatchConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueImportCompilerMacros": {
+					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueImportCompilerMacrosConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6955,10 +7000,24 @@
 						{ "type": "null" }
 					]
 				},
+				"useTestHooksInOrder": {
+					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksInOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTestHooksOnTop": {
 					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThisInClassMethods": {
+					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7020,6 +7079,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueNextTickPromise": {
+					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueNextTickPromiseConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueVForKey": {
 					"description": "Enforce that elements using v-for also specify a unique key.\nSee https://biomejs.dev/linter/rules/use-vue-v-for-key",
 					"anyOf": [
@@ -7059,6 +7125,13 @@
 					"description": "Enforce valid v-else-if directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-else-if",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVFor": {
+					"description": "Enforces valid v-for directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7225,6 +7298,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"trailingCommas": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
+					"anyOf": [{ "$ref": "#/$defs/JsTrailingCommas" }, { "type": "null" }]
 				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
@@ -10574,6 +10651,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueImportCompilerMacrosOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueOptionsApiOptions": {
 			"type": "object",
 			"properties": {
@@ -11996,11 +12082,29 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTestHooksInOrderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTestHooksInOrderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTestHooksOnTopOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseTestHooksOnTopOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseThisInClassMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseThisInClassMethodsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12216,6 +12320,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueNextTickPromiseOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueNextTickPromiseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueVForKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -12268,6 +12381,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueValidVElseOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueValidVForOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVForOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12910,7 +13032,7 @@
 					]
 				},
 				"useConsistentObjectDefinitions": {
-					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.\nSee https://biomejs.dev/linter/rules/use-consistent-object-definitions",
+					"description": "Require the consistent declaration of object literals.\nSee https://biomejs.dev/linter/rules/use-consistent-object-definitions",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentObjectDefinitionsConfiguration" },
 						{ "type": "null" }
@@ -14437,6 +14559,20 @@
 		},
 		"UseDestructuringOptions": {
 			"type": "object",
+			"properties": {
+				"assignmentExpression": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				},
+				"variableDeclarator": {
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseDisposablesConfiguration": {
@@ -15150,17 +15286,20 @@
 			]
 		},
 		"UseNullishCoalescingOptions": {
+			"description": "Options for the `useNullishCoalescing` rule.",
 			"type": "object",
 			"properties": {
 				"ignoreConditionalTests": {
-					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
+					"type": ["boolean", "null"]
+				},
+				"ignoreMixedLogicalExpressions": {
+					"description": "Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).",
+					"type": ["boolean", "null"]
 				},
 				"ignoreTernaryTests": {
-					"description": "Whether to ignore ternary expressions that could be simplified\nusing the nullish coalescing operator.\n\nDefault: `false`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore ternary expressions that check for `null` or `undefined` (default: `false`).",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -15623,6 +15762,16 @@
 			]
 		},
 		"UseTemplateOptions": { "type": "object", "additionalProperties": false },
+		"UseTestHooksInOrderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTestHooksInOrderOptions" }
+			]
+		},
+		"UseTestHooksInOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseTestHooksOnTopConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15631,6 +15780,35 @@
 		},
 		"UseTestHooksOnTopOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseThisInClassMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseThisInClassMethodsOptions" }
+			]
+		},
+		"UseThisInClassMethodsOptions": {
+			"description": "Options for the `useThisInClassMethods` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreClassesWithImplements": {
+					"description": "Whether members of classes with an `implements` clause should be ignored.\n\nDefaults to `\"none\"`, which means implemented classes are checked like any other class.\nUse `\"all\"` to ignore every eligible member in such classes, or `\"public-fields\"`\nto ignore only public members in them.",
+					"anyOf": [
+						{ "$ref": "#/$defs/IgnoreClassesWithImplements" },
+						{ "type": "null" }
+					]
+				},
+				"ignoreMethods": {
+					"description": "Method names that should be ignored by the rule.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreOverrideMethods": {
+					"description": "Whether methods marked with `override` should be ignored.\n\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseThrowNewErrorConfiguration": {
@@ -15935,6 +16113,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueNextTickPromiseConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueNextTickPromiseOptions" }
+			]
+		},
+		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueVForKeyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15989,6 +16177,16 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVElseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVForConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVForOptions" }
+			]
+		},
+		"UseVueValidVForOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

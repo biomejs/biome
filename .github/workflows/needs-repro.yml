@@ -4,9 +4,6 @@ on:
   issues:
     types: [ labeled ]
 
-permissions:
-  issues: write
-
 jobs:
   reply-labeled:
     if: github.repository == 'biomejs/biome'
@@ -14,25 +11,25 @@ jobs:
     steps:
       - name: Remove triaging label
         if: contains(github.event.issue.labels.*.name, 'S-Bug-confirmed') && contains(github.event.issue.labels.*.name, 'S-Needs triage')
-        uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0 # v3.8.0
-        with:
-          actions: "remove-labels"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          labels: "S-Needs triage"
+        env:
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "S-Needs triage"
 
       - name: Needs reproduction
         if: github.event.label.name == 'S-Needs repro'
-        uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0 # v3.8.0
-        with:
-          actions: "create-comment, remove-labels"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            Hello @${{ github.event.issue.user.login }}, please provide a minimal reproduction. You can use one of the following options:
+        env:
+          GH_TOKEN: ${{ secrets.BIOME_ISSUE_AUTOMATION }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Hello @$AUTHOR, please provide a minimal reproduction. You can use one of the following options:
 
-            - Provide a link to [our playground](https://biomejs.dev/playground), if it's applicable.
-            - Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via `npm create @biomejs/biome-reproduction`
+          - Provide a link to [our playground](https://biomejs.dev/playground), if it's applicable.
+          - Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via \`npm create @biomejs/biome-reproduction\`
 
-            Issues marked with `S-Needs repro` will be **closed** if they have **no activity within 3 days**.
-          labels: "S-Needs triage"
+          Issues marked with \`S-Needs repro\` will be **closed** if they have **no activity within 3 days**."
+
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "S-Needs triage"

@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script setup>
+import { defineProps, defineEmits as emits } from "vue";
+
+defineProps({});
+emits([]);
+</script>
+
+<template>
+  <div />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:10 lint/nursery/noVueImportCompilerMacros ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue compiler macro defineProps should not be imported.
+  
+    1 │ <script setup>
+  > 2 │ import { defineProps, defineEmits as emits } from "vue";
+      │          ^^^^^^^^^^^
+    3 │ 
+    4 │ defineProps({});
+  
+  i Compiler macros are automatically available inside <script setup> blocks.
+  
+  i Remove this import and use the macro directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:2:23 lint/nursery/noVueImportCompilerMacros ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Vue compiler macro defineEmits should not be imported.
+  
+    1 │ <script setup>
+  > 2 │ import { defineProps, defineEmits as emits } from "vue";
+      │                       ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ defineProps({});
+  
+  i Compiler macros are automatically available inside <script setup> blocks.
+  
+  i Remove this import and use the macro directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

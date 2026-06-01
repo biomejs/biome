@@ -64,8 +64,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
                 .map_or_else(|| range, |source_map| source_map.source_range(range))
         }
 
-        let preserve_outer_trivia =
-            matches!(self.kind, VerbatimKind::Suppressed) && self.node.parent().is_none();
+        let preserve_outer_trivia = self.node.parent().is_none();
 
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
@@ -280,8 +279,17 @@ fn format_leading_comments_impl(
                         } else if is_block_element {
                             // Block elements always get a line break after leading comments
                             biome_formatter::write!(f, [hard_line_break()])?;
-                        } else {
-                            // Inline elements get a space
+                        } else if comment.piece().text().chars().nth(1) == Some('*') {
+                            // Non-HTML block comments, such as `/* */` in Svelte, still need a
+                            // separator from the following inline element.
+
+                            // The above condition seems unusual at a glance. Clearly it would be more ideal to provide
+                            // this function with more information about the comment, such as whether it's an HTML
+                            // comment or not. However, this is a pragmatic solution to avoid having to thread more
+                            // information through the formatter for now, and it works because `<!--` is the only
+                            // comment syntax in HTML, and because line comments (e.g. `//`) don't match this condition.
+                            //
+                            // Checking the second character lets us only require a single check instead of calling starts_with for every comment, which is more expensive.
                             biome_formatter::write!(f, [space()])?;
                         }
                     }

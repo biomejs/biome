@@ -27,9 +27,9 @@ HtmlRoot {
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..21 "{#" [Comments("<!-- if / else -->"), Newline("\n")] [],
-                if_token: IF_KW@21..23 "if" [] [],
+                if_token: IF_KW@21..24 "if" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@23..50 " porridge.temperature > 100" [] [],
+                    html_literal_token: HTML_LITERAL@24..50 "porridge.temperature > 100" [] [],
                 },
                 r_curly_token: R_CURLY@50..51 "}" [] [],
                 children: HtmlElementList [
@@ -111,9 +111,9 @@ HtmlRoot {
     0: SVELTE_IF_BLOCK@0..100
       0: SVELTE_IF_OPENING_BLOCK@0..68
         0: SV_CURLY_HASH@0..21 "{#" [Comments("<!-- if / else -->"), Newline("\n")] []
-        1: IF_KW@21..23 "if" [] []
-        2: HTML_TEXT_EXPRESSION@23..50
-          0: HTML_LITERAL@23..50 " porridge.temperature > 100" [] []
+        1: IF_KW@21..24 "if" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@24..50
+          0: HTML_LITERAL@24..50 "porridge.temperature > 100" [] []
         3: R_CURLY@50..51 "}" [] []
         4: HTML_ELEMENT_LIST@51..68
           0: HTML_ELEMENT@51..68

@@ -134,45 +134,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 ```diff
 --- Prettier
 +++ Biome
-@@ -8,7 +8,7 @@
-   height: 1#{$var};
-   width: calc(100% - #{$sidebar-width});
-   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
--  font: #{$font-size}/#{$line-height};
-+  font: #{$font-size} / #{$line-height};
-   content: "I have #{8 + 2} books on SASS!";
-   border: #{$var} #{$var} #{$var};
-   filter: #{$var}#{$var}#{$var};
-@@ -40,14 +40,17 @@
- @import url("#{$foundation-dir}/components/grid");
- @import url(#{$foundation-dir}/components/grid);
- @import url($foundation-dir/components/grid);
--@import url($foundation-dir + "/components/grid");
-+@import url($foundation-dir+"/components/grid");
- 
- @function get-font-family($family) {
-   @return $family;
- }
--@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
-+@import url("//fonts.googleapis.com/css?family=#{get-font-family(
-+    "Roboto"
-+  )}:100,300,500,700,900&display=swap");
- @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
- 
-+
- @keyframes loader {
-   0% {
-     transform: translate3d(0, 0, 0);
-@@ -58,22 +61,14 @@
-   }
- 
-   50% {
--    transform: translate3d(0, $bounce-height, 0)
--      scale(
--        $loader-bounce-horizontal-expansion,
--        $loader-bounce-vertical-compression
--      );
-+    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+@@ -66,10 +66,7 @@
    }
  }
  
@@ -183,12 +145,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 +$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
  
  @each $icon in $icons {
--  .icon-#{nth($icon, 1)},
--  %icon-#{nth($icon, 1)} {
-+  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-     content: "#{nth($icon, 2)}";
-   }
- }
+   .icon-#{nth($icon, 1)},
 ```
 
 # Output
@@ -204,7 +161,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
   height: 1#{$var};
   width: calc(100% - #{$sidebar-width});
   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
-  font: #{$font-size} / #{$line-height};
+  font: #{$font-size}/#{$line-height};
   content: "I have #{8 + 2} books on SASS!";
   border: #{$var} #{$var} #{$var};
   filter: #{$var}#{$var}#{$var};
@@ -236,16 +193,13 @@ $foundation-dir: "foundation";
 @import url("#{$foundation-dir}/components/grid");
 @import url(#{$foundation-dir}/components/grid);
 @import url($foundation-dir/components/grid);
-@import url($foundation-dir+"/components/grid");
+@import url($foundation-dir + "/components/grid");
 
 @function get-font-family($family) {
   @return $family;
 }
-@import url("//fonts.googleapis.com/css?family=#{get-font-family(
-    "Roboto"
-  )}:100,300,500,700,900&display=swap");
+@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
 @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
-
 
 @keyframes loader {
   0% {
@@ -257,417 +211,26 @@ $foundation-dir: "foundation";
   }
 
   50% {
-    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+    transform: translate3d(0, $bounce-height, 0)
+      scale(
+        $loader-bounce-horizontal-expansion,
+        $loader-bounce-vertical-compression
+      );
   }
 }
 
 $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 
 @each $icon in $icons {
-  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+  .icon-#{nth($icon, 1)},
+  %icon-#{nth($icon, 1)} {
     content: "#{nth($icon, 2)}";
   }
 }
 ```
 
-# Errors
-```
-3943.scss:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-   > 99 │ @keyframes loader {
-        │ ^
-    100 │   0% {
-    101 │     transform: translate3d(0, 0, 0);
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:99:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-   > 99 │ @keyframes loader {
-        │                   ^
-  > 100 │   0% {
-        │   ^^^^
-    101 │     transform: translate3d(0, 0, 0);
-    102 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:101:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-     99 │ @keyframes loader {
-    100 │   0% {
-  > 101 │     transform: translate3d(0, 0, 0);
-        │              ^
-    102 │   }
-    103 │ 
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:101:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-     99 │ @keyframes loader {
-    100 │   0% {
-  > 101 │     transform: translate3d(0, 0, 0);
-        │                                    ^
-  > 102 │   }
-  > 103 │ 
-  > 104 │   #{50% - $loader-icon-duration} {
-        │   ^^^^^^^^^
-    105 │     transform: translate3d(0, $bounce-height, 0);
-    106 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:104:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    102 │   }
-    103 │ 
-  > 104 │   #{50% - $loader-icon-duration} {
-        │                                ^^^
-    105 │     transform: translate3d(0, $bounce-height, 0);
-    106 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:105:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    104 │   #{50% - $loader-icon-duration} {
-  > 105 │     transform: translate3d(0, $bounce-height, 0);
-        │              ^
-    106 │   }
-    107 │ 
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:105:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    104 │   #{50% - $loader-icon-duration} {
-  > 105 │     transform: translate3d(0, $bounce-height, 0);
-        │                                                 ^
-  > 106 │   }
-  > 107 │ 
-  > 108 │   50% {
-        │   ^^^^^
-    109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
-    110 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:109:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    108 │   50% {
-  > 109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
-        │              ^
-    110 │   }
-    111 │ }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:109:129 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    108 │   50% {
-  > 109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
-        │                                                                                                                                 ^
-  > 110 │   }
-  > 111 │ }
-  > 112 │ 
-  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-        │ ^
-    114 │ 
-    115 │ @each $icon in $icons {
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:113:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    111 │ }
-    112 │ 
-  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-        │       ^
-    114 │ 
-    115 │ @each $icon in $icons {
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:113:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    111 │ }
-    112 │ 
-  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-        │              ^^^^^^^
-    114 │ 
-    115 │ @each $icon in $icons {
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:113:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    111 │ }
-    112 │ 
-  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-        │                                   ^^^^^^^
-    114 │ 
-    115 │ @each $icon in $icons {
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:113:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    111 │ }
-    112 │ 
-  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-        │                                                   ^^^^^^^
-  > 114 │ 
-  > 115 │ @each $icon in $icons {
-        │ ^
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-    117 │     content: "#{nth($icon, 2)}";
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:115:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-    114 │ 
-  > 115 │ @each $icon in $icons {
-        │       ^
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-    117 │     content: "#{nth($icon, 2)}";
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:115:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-    114 │ 
-  > 115 │ @each $icon in $icons {
-        │                ^
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-    117 │     content: "#{nth($icon, 2)}";
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:115:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
-    114 │ 
-  > 115 │ @each $icon in $icons {
-        │                       ^
-  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-        │   ^
-    117 │     content: "#{nth($icon, 2)}";
-    118 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:116:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-        │         ^^
-    117 │     content: "#{nth($icon, 2)}";
-    118 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:116:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-        │                        ^^^^
-    117 │     content: "#{nth($icon, 2)}";
-    118 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:116:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-        │                                 ^^
-    117 │     content: "#{nth($icon, 2)}";
-    118 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:116:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-        │                                                ^^^
-    117 │     content: "#{nth($icon, 2)}";
-    118 │   }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:117:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-  > 117 │     content: "#{nth($icon, 2)}";
-        │            ^^^^^
-    118 │   }
-    119 │ }
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:117:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    115 │ @each $icon in $icons {
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-  > 117 │     content: "#{nth($icon, 2)}";
-        │                              ^^^
-  > 118 │   }
-  > 119 │ }
-        │ ^
-    120 │ 
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-3943.scss:117:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing closing quote
-  
-    115 │ @each $icon in $icons {
-    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
-  > 117 │     content: "#{nth($icon, 2)}";
-        │                               ^^
-    118 │   }
-    119 │ }
-  
-  i The closing quote must be on the same line.
-  
-3943.scss:120:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead the file ends
-  
-    118 │   }
-    119 │ }
-  > 120 │ 
-        │ 
-  
-  i the file ends here
-  
-    118 │   }
-    119 │ }
-  > 120 │ 
-        │ 
-  
-
-```
-
 # Lines exceeding max width of 80 characters
 ```
-   51: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
-   64:     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+   48: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+   49: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
 ```

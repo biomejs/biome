@@ -1,0 +1,193 @@
+---
+source: crates/biome_js_analyze/tests/sort_v4_test.rs
+expression: rendered
+input_file: crates/biome_js_analyze/tests/sort_v4/cases.jsonc
+---
+input:  flex block absolute
+sorted: absolute block flex
+---
+input:  static visible flex
+sorted: visible static flex
+---
+input:  sr-only block flex absolute relative
+sorted: sr-only absolute relative block flex
+---
+input:  pointer-events-none collapse static visible
+sorted: pointer-events-none visible collapse static
+---
+input:  flex
+sorted: flex
+---
+input:  bg-red-500 flex p-4
+sorted: flex bg-red-500 p-4
+---
+input:  p-4 m-2 flex
+sorted: m-2 flex p-4
+---
+input:  text-lg bg-red-500 p-4
+sorted: bg-red-500 p-4 text-lg
+---
+input:  p-4 p-2
+sorted: p-4 p-2
+---
+input:  origin-top flex p-4
+sorted: flex origin-top p-4
+---
+input:  flex-1 flex p-4
+sorted: flex flex-1 p-4
+---
+input:  font-bold flex p-4
+sorted: flex p-4 font-bold
+---
+input:  font-serif font-bold flex
+sorted: flex font-serif font-bold
+---
+input:  font-medium font-sans p-4
+sorted: p-4 font-sans font-medium
+---
+input:  w-10 flex p-4
+sorted: flex w-10 p-4
+---
+input:  w-1/2 flex p-4
+sorted: flex w-1/2 p-4
+---
+input:  w-full flex p-4
+sorted: w-full flex p-4
+---
+input:  w-screen w-10 w-full
+sorted: w-screen w-full w-10
+---
+input:  aspect-square flex
+sorted: flex aspect-square
+---
+input:  aspect-video flex
+sorted: flex aspect-video
+---
+input:  aspect-9/16 flex
+sorted: flex aspect-9/16
+---
+input:  p-4 flex -mt-2
+sorted: -mt-2 flex p-4
+---
+input:  flex mt-3 -mt-2
+sorted: -mt-2 mt-3 flex
+---
+input:  flex -mt-2 -inset-2
+sorted: -inset-2 -mt-2 flex
+---
+input:  flex -bg-red-500 p-4
+sorted: -bg-red-500 flex p-4
+---
+input:  p-4 flex -z-auto
+sorted: -z-auto flex p-4
+---
+input:  p-4 flex -z-10
+sorted: -z-10 flex p-4
+---
+input:  flex p-4 -flex
+sorted: -flex flex p-4
+---
+input:  p-4 foo flex
+sorted: foo flex p-4
+---
+input:  baz p-4 foo flex bar
+sorted: baz foo bar flex p-4
+---
+input:  bg-rainbow flex bg-red-500
+sorted: bg-rainbow flex bg-red-500
+---
+input:  foo bar baz
+sorted: foo bar baz
+---
+input:  flex p-
+sorted: p- flex
+---
+input:  myCustom flex p-4
+sorted: myCustom flex p-4
+---
+input:  from-50% flex
+sorted: flex from-50%
+---
+input:  to-100% via-25% from-50%
+sorted: from-50% via-25% to-100%
+---
+input:  flex w-1/2 w-1/3
+sorted: flex w-1/2 w-1/3
+---
+input:  flex bg-red-500/50
+sorted: flex bg-red-500/50
+---
+input:  flex text-lg/8
+sorted: flex text-lg/8
+---
+input:  flex w-1/foo
+sorted: flex w-1/foo
+---
+input:  p-[10px] flex some-unknown
+sorted: some-unknown flex p-[10px]
+---
+input:  flex [color:red]
+sorted: flex [color:red]
+---
+input:  flex [--my-var:1]
+sorted: [--my-var:1] flex
+---
+input:  flex [color:red]/50
+sorted: flex [color:red]/50
+---
+input:  bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]
+sorted: bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]
+---
+input:  border-[#f00] border-[2px]
+sorted: border-[2px] border-[#f00]
+---
+input:  text-[#fff] text-[larger] text-[20px]
+sorted: text-[larger] text-[20px] text-[#fff]
+---
+input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
+sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
+---
+input:  ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex
+sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]
+---
+input:  ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50
+sorted: flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50
+---
+input:  text-[#fff]/50 text-[20px]/8 flex
+sorted: flex text-[20px]/8 text-[#fff]/50
+---
+input:  flex [mask-type:luminance]/50 [color:red]/50
+sorted: flex [mask-type:luminance]/50 [color:red]/50
+---
+input:  to-purple-500 from-blue-500 via-pink-500
+sorted: from-blue-500 via-pink-500 to-purple-500
+---
+input:  to-100% via-pink-500 from-blue-500 from-25%
+sorted: from-blue-500 from-25% via-pink-500 to-100%
+---
+input:  bg-red-500 from-blue-500 to-purple-500
+sorted: bg-red-500 from-blue-500 to-purple-500
+---
+input:  p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2
+sorted: m-2 bg-linear-to-r from-blue-500 to-purple-500 p-4
+---
+input:  mask-linear-to-75% mask-linear-from-25%
+sorted: mask-linear-from-25% mask-linear-to-75%
+---
+input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
+sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm
+---
+input:  bg-accent animate-pulse rounded-md
+sorted: bg-accent animate-pulse rounded-md
+---
+input:  text-primary-foreground bg-primary hover:bg-primary/90
+sorted: text-primary-foreground bg-primary hover:bg-primary/90
+---
+input:  px-4 has-[>svg]:px-3 h-9 py-2
+sorted: has-[>svg]:px-3 h-9 py-2 px-4
+---
+input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50
+sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
+---
+input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
+sorted: items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 focus-visible:border-ring justify-center outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 shrink-0 gap-2 rounded-md text-sm transition-all font-medium

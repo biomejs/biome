@@ -35,7 +35,7 @@ jobs:
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
-      - uses: tombi-toml/setup-tombi@9880d1d3ba5e745d410c697366c513b337704388 # v1.0.11
+      - uses: tombi-toml/setup-tombi@74c3f4f31e7915e27c3397831e4c628463e3e0da # v1.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -57,7 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run cargo check
-        run: cargo check --workspace --all-targets --release
+        run: cargo check --workspace --all-targets --all-features --release
       - name: Run clippy
         run: cargo lint
 
@@ -76,7 +76,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run udeps
-        run: cargo +nightly udeps --all-targets
+        run: cargo +nightly udeps --all-targets --all-features
 
   deny:
     name: Cargo Deny
@@ -85,7 +85,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install cargo-deny
-        uses: taiki-e/install-action@db5fb34fa772531a3ece57ca434f579eb334e0fb # v2.75.30
+        uses: taiki-e/install-action@15413b256f995d819248ea62704771a959284285 # v2.79.13
         with:
           tool: cargo-deny
       - run: cargo deny check bans

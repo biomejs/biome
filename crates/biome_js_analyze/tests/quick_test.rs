@@ -27,16 +27,18 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+    const SOURCE: &str = r#"export function foo(_arg: string) {
+  const { bar, ...params } = something();
+  return console.log(bar, params);
 
-type PostcssOptions = Parameters<postcssModules>[0]
-
-export function f(options: PostcssOptions) {
-	console.log(options)
+  function something() {
+    const obj: Record<string, string> = { bar: "bar" };
+    const { bar, baz } = obj;
+    return { bar, baz };
+  }
 }
 "#;
 

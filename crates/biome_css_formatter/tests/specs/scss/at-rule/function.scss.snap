@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/function.scss
+assertion_line: 249
+info: scss/at-rule/function.scss
 ---
 
 # Input
@@ -16,6 +17,17 @@ $rest...
 $value * $ratio;
 }
 
+@function --highlight  ( ) {
+result:var(--highlight,#{$highlight});
+}
+
+$function-name: highlight;
+
+@function
+--#{$function-name}  ( ) {
+result: red;
+}
+
 ```
 
 
@@ -24,6 +36,16 @@ $value * $ratio;
 ```scss
 @function double($value: 2, $ratio: 1.5, $rest...) {
 	@return $value * $ratio;
+}
+
+@function --highlight() {
+	result: var(--highlight, #{$highlight});
+}
+
+$function-name: highlight;
+
+@function --#{$function-name}() {
+	result: red;
 }
 
 ```

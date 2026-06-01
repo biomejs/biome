@@ -1328,6 +1328,79 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_BIND_DIRECTIVE, children)
             }
+            SVELTE_BIND_FUNCTION_BINDING_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [,]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlTextExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_BIND_FUNCTION_BINDING_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_BIND_FUNCTION_BINDING_EXPRESSION, children)
+            }
+            SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteBindFunctionBindingExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE, children)
+            }
             SVELTE_CLASS_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -1519,7 +1592,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                    && AnySvelteDirectiveInitializerClause::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

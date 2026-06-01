@@ -76,7 +76,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
+::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=2,col=1,endColumn=33::Sort these imports.
 ```
 
 ```block
@@ -108,7 +108,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=assist/source/organizeImports,file=main.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
+::error title=assist/source/organizeImports,file=main.ts,line=1,endLine=2,col=1,endColumn=33::Sort these imports.
 ```
 
 ```block

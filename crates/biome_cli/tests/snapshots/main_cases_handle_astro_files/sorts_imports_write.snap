@@ -8,6 +8,8 @@ expression: redactor(content)
 ---
 import { Code } from "astro:components";
 import { getLocale } from "astro:i18n";
+import "style.css";
+import { A, B } from "./util.js";
 ---
 <div></div>
 ```

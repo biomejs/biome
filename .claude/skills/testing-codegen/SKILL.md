@@ -12,7 +12,7 @@ Use this skill for testing and code generation. Covers snapshot testing with
 ## Prerequisites
 
 1. Install required tools: `just install-tools` (installs `cargo-insta`)
-2. Install pnpm: `corepack enable` and `pnpm install` in repo root
+2. Install pnpm: `curl -fsSL https://get.pnpm.io/install.sh | sh -` in repo root
 3. Understand which changes require code generation
 
 ## Common Workflows

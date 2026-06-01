@@ -11,9 +11,11 @@ mod function_at_rule;
 mod if_at_rule;
 mod import_at_rule;
 mod include_at_rule;
+mod keyframes;
 mod mixin_at_rule;
 mod module_clauses;
 mod parameter;
+mod query_feature;
 mod return_at_rule;
 mod use_at_rule;
 mod warn;
@@ -21,6 +23,7 @@ mod while_at_rule;
 
 use crate::parser::CssParser;
 use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -39,7 +42,9 @@ pub(crate) use function_at_rule::parse_scss_function_at_rule;
 pub(crate) use if_at_rule::parse_scss_if_at_rule;
 pub(crate) use import_at_rule::parse_scss_import_at_rule;
 pub(crate) use include_at_rule::parse_scss_include_at_rule;
+pub(crate) use keyframes::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
+pub(crate) use query_feature::parse_scss_interpolated_query_feature;
 pub(crate) use return_at_rule::parse_scss_return_at_rule;
 pub(crate) use use_at_rule::parse_scss_use_at_rule;
 pub(crate) use warn::parse_scss_warn_at_rule;
@@ -62,7 +67,25 @@ pub(super) fn parse_scss_expression_at_rule(
     p.bump(keyword);
     parse_scss_expression_until(p, SCSS_STATEMENT_AT_RULE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
-    p.expect(T![;]);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, kind))
+}
+
+/// Expects a semicolon after a blockless SCSS at-rule.
+///
+/// Examples:
+/// ```scss
+/// @use "theme"
+/// @mixin x { @include button }
+/// ```
+#[inline]
+pub(super) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
+    // Dart Sass allows omitting the final semicolon only at the end of the
+    // current block or file, not before the next statement.
+    if p.eat(T![;]) || p.at(T!['}']) || p.at(EOF) {
+        return;
+    }
+
+    p.expect(T![;]);
 }

@@ -1,14 +1,16 @@
 use crate::context::CssFormatContext;
-use biome_css_syntax::{CssLanguage, CssSyntaxNode};
+use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, text};
-use biome_formatter::trivia::{FormatLeadingComments, FormatTrailingComments};
+use biome_formatter::prelude::{Tag, located_token_text, text};
+use biome_formatter::trivia::{
+    format_leading_comments_from_slice, format_trailing_comments_from_slice,
+};
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
     FormatWithRule, LINE_TERMINATORS, normalize_newlines,
 };
-use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, TextSize};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -30,6 +32,91 @@ pub fn format_css_verbatim_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'
     }
 }
 
+/// Formats a source range from a subtree as verbatim source text.
+///
+/// Use this when a formatter must preserve source spacing but still replace
+/// selected tokens. Example: SCSS string interpolation keeps `#{ get($map) }`
+/// spacing while normalizing the string token in `#{".5"}`.
+///
+/// `range` must be inside `node.text_trimmed_range()`.
+pub(crate) fn format_css_verbatim_range<FormatToken>(
+    node: &CssSyntaxNode,
+    range: TextRange,
+    format_token: FormatToken,
+) -> FormatCssVerbatimRange<'_, FormatToken>
+where
+    FormatToken: Fn(
+        &CssSyntaxToken,
+        TextRange,
+        &mut Formatter<CssFormatContext>,
+    ) -> FormatResult<CssVerbatimTokenFormat>,
+{
+    FormatCssVerbatimRange {
+        node,
+        range,
+        format_token,
+    }
+}
+
+pub(crate) struct FormatCssVerbatimRange<'node, FormatToken> {
+    node: &'node CssSyntaxNode,
+    range: TextRange,
+    format_token: FormatToken,
+}
+
+/// Describes how a verbatim range formatter handled one token.
+pub(crate) enum CssVerbatimTokenFormat {
+    /// Copy the token text from the original source.
+    Source,
+    /// The caller already wrote a replacement for the token.
+    Replacement,
+}
+
+impl<FormatToken> Format<CssFormatContext> for FormatCssVerbatimRange<'_, FormatToken>
+where
+    FormatToken: Fn(
+        &CssSyntaxToken,
+        TextRange,
+        &mut Formatter<CssFormatContext>,
+    ) -> FormatResult<CssVerbatimTokenFormat>,
+{
+    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
+        debug_assert!(self.node.text_trimmed_range().contains_range(self.range));
+        mark_css_verbatim_subtree(self.node, f);
+
+        let mut last_end = self.range.start();
+
+        for token in self.node.descendants_tokens(Direction::Next) {
+            let Some(range) = token.text_trimmed_range().intersect(self.range) else {
+                continue;
+            };
+
+            if range.is_empty() {
+                continue;
+            }
+
+            if last_end < range.start() {
+                write_verbatim_range_source(self.node, TextRange::new(last_end, range.start()), f)?;
+            }
+
+            f.state_mut().track_token(&token);
+
+            match (self.format_token)(&token, range, f)? {
+                CssVerbatimTokenFormat::Source => located_token_text(&token, range).fmt(f)?,
+                CssVerbatimTokenFormat::Replacement => {}
+            }
+
+            last_end = range.end();
+        }
+
+        if last_end < self.range.end() {
+            write_verbatim_range_source(self.node, TextRange::new(last_end, self.range.end()), f)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatCssVerbatimNode<'node> {
     node: &'node CssSyntaxNode,
@@ -48,20 +135,12 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
                 .map_or_else(|| range, |source_map| source_map.source_range(range))
         }
 
-        let preserve_outer_trivia =
-            matches!(self.kind, VerbatimKind::Suppressed) && self.node.parent().is_none();
+        let preserve_outer_trivia = self.node.parent().is_none();
 
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
-                SyntaxElement::Node(node) => {
-                    let comments = f.context().comments();
-                    comments.mark_suppression_checked(&node);
-
-                    for comment in comments.leading_dangling_trailing_comments(&node) {
-                        comment.mark_formatted();
-                    }
-                }
+                SyntaxElement::Node(node) => mark_css_verbatim_node(&node, f),
             }
         }
 
@@ -97,7 +176,10 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(f, [FormatLeadingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [format_leading_comments_from_slice(outside_trimmed_range)]
+            )?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -160,11 +242,56 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
                 comment.mark_formatted();
             }
 
-            biome_formatter::write!(f, [FormatTrailingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [format_trailing_comments_from_slice(outside_trimmed_range)]
+            )?;
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))
     }
+}
+
+/// Marks comments and suppression checks for a subtree printed as source text.
+///
+/// Use this when a formatter writes verbatim source for a node and its child
+/// formatters do not run, such as string interpolation `#{ get($map) }`.
+fn mark_css_verbatim_subtree(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
+    mark_css_verbatim_node(node, f);
+
+    for element in node.descendants_with_tokens(Direction::Next) {
+        let SyntaxElement::Node(node) = element else {
+            continue;
+        };
+
+        mark_css_verbatim_node(&node, f);
+    }
+}
+
+fn mark_css_verbatim_node(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
+    let comments = f.context().comments();
+    comments.mark_suppression_checked(node);
+
+    for comment in comments.leading_dangling_trailing_comments(node) {
+        comment.mark_formatted();
+    }
+}
+
+fn write_verbatim_range_source(
+    node: &CssSyntaxNode,
+    range: TextRange,
+    f: &mut Formatter<CssFormatContext>,
+) -> FormatResult<()> {
+    let raw = node.text_trimmed();
+    let raw_start = node.text_trimmed_range().start();
+    let relative_range = TextRange::new(range.start() - raw_start, range.end() - raw_start);
+    let mut source = range.start();
+
+    raw.slice(relative_range).try_for_each_chunk(|chunk| {
+        text(chunk, source).fmt(f)?;
+        source += TextSize::from(chunk.len() as u32);
+        Ok(())
+    })
 }
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method

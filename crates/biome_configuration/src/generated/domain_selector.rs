@@ -114,6 +114,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noIdenticalTestTitle"),
         RuleFilter::Rule("nursery", "useConsistentTestIt"),
         RuleFilter::Rule("nursery", "useExpect"),
+        RuleFilter::Rule("nursery", "useTestHooksInOrder"),
         RuleFilter::Rule("nursery", "useTestHooksOnTop"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
@@ -151,11 +152,13 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noVueReservedProps"),
         RuleFilter::Rule("correctness", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
+        RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueOptionsApi"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
+        RuleFilter::Rule("nursery", "useVueNextTickPromise"),
     ]
 });
 impl DomainSelector {

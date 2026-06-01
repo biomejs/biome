@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-parenthesized-value.scss
+---
+
+# Input
+
+```scss
+$map:(key:(value),other-key:(nested:value));
+
+$map-with-list:(key:(value,),other-key:(nested:value));
+
+$nested-map:(key:(nested:value),other-key:(value));
+
+```
+
+
+# Formatted
+
+```scss
+$map: (
+	key: (
+		value,
+	),
+	other-key: (
+		nested: value,
+	),
+);
+
+$map-with-list: (
+	key: (
+		value,
+	),
+	other-key: (
+		nested: value,
+	),
+);
+
+$nested-map: (
+	key: (
+		nested: value,
+	),
+	other-key: (
+		value,
+	),
+);
+
+```

@@ -13,10 +13,10 @@ use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsU
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, JsConfiguration, JsonConfiguration,
+    LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
+    OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist,
+    push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -27,20 +27,24 @@ use biome_formatter::{
     LineEnding, LineWidth, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_graphql_formatter::context::GraphqlFormatOptions;
+#[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_grit")]
 use biome_grit_formatter::context::GritFormatOptions;
+#[cfg(feature = "lang_grit")]
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_markdown_syntax::MarkdownLanguage;
+#[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -69,6 +73,7 @@ pub struct Settings {
     /// Assist settings
     pub assist: AssistSettings,
     /// Plugin settings.
+    #[cfg(feature = "plugins")]
     pub plugins: Plugins,
     /// overrides
     pub override_settings: OverrideSettings,
@@ -180,6 +185,7 @@ impl Settings {
             self.languages.css = css.into()
         }
         // graphql settings
+        #[cfg(feature = "lang_graphql")]
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into()
         }
@@ -189,16 +195,26 @@ impl Settings {
             self.languages.html = html.into();
         }
 
-        #[cfg(feature = "markdown")]
+        #[cfg(feature = "lang_md")]
         {
             if let Some(markdown) = configuration.markdown {
                 self.languages.markdown = markdown.into();
             }
         }
 
+        #[cfg(feature = "lang_yaml")]
+        {
+            if let Some(yaml) = configuration.yaml {
+                self.languages.yaml = yaml.into();
+            }
+        }
+
         // plugin settings
-        if let Some(plugins) = configuration.plugins {
-            self.plugins = plugins;
+        #[cfg(feature = "plugins")]
+        {
+            if let Some(plugins) = configuration.plugins {
+                self.plugins = plugins;
+            }
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -301,7 +317,8 @@ impl Settings {
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
-    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
+    #[cfg(feature = "plugins")]
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, biome_plugin_loader::Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
@@ -314,7 +331,8 @@ impl Settings {
     }
 
     /// Return all plugins configured in setting
-    pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
+    #[cfg(feature = "plugins")]
+    pub fn as_all_plugins(&self) -> Cow<'_, biome_plugin_loader::Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         let all_override_plugins = self
@@ -577,6 +595,7 @@ pub struct OverrideFormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub trailing_newline: Option<TrailingNewline>,
 }
 
@@ -593,6 +612,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
             expand: conf.expand,
+            trailing_commas: conf.trailing_commas,
             trailing_newline: conf.trailing_newline,
         }
     }
@@ -682,10 +702,15 @@ pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
     pub css: LanguageSettings<CssLanguage>,
+    #[cfg(feature = "lang_graphql")]
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
+    #[cfg(feature = "lang_grit")]
     pub grit: LanguageSettings<GritLanguage>,
-    pub markdown: LanguageSettings<MarkdownLanguage>,
+    #[cfg(feature = "lang_md")]
+    pub markdown: LanguageSettings<biome_markdown_syntax::MarkdownLanguage>,
+    #[cfg(feature = "lang_yaml")]
+    pub yaml: LanguageSettings<biome_yaml_syntax::YamlLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -767,8 +792,11 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     }
 }
 
-impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
-    fn from(graphql: GraphqlConfiguration) -> Self {
+#[cfg(feature = "lang_graphql")]
+impl From<biome_configuration::graphql::GraphqlConfiguration>
+    for LanguageSettings<GraphqlLanguage>
+{
+    fn from(graphql: biome_configuration::graphql::GraphqlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = graphql.formatter {
@@ -787,8 +815,9 @@ impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
     }
 }
 
-impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
-    fn from(grit: GritConfiguration) -> Self {
+#[cfg(feature = "lang_grit")]
+impl From<biome_configuration::GritConfiguration> for LanguageSettings<GritLanguage> {
+    fn from(grit: biome_configuration::GritConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = grit.formatter {
             language_setting.formatter = formatter.into();
@@ -829,10 +858,27 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     }
 }
 
-impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
-    fn from(markdown: MarkdownConfiguration) -> Self {
+#[cfg(feature = "lang_md")]
+impl From<biome_configuration::MarkdownConfiguration>
+    for LanguageSettings<biome_markdown_syntax::MarkdownLanguage>
+{
+    fn from(markdown: biome_configuration::MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
+        }
+
+        language_setting
+    }
+}
+
+#[cfg(feature = "lang_yaml")]
+impl From<biome_configuration::yaml::YamlConfiguration>
+    for LanguageSettings<biome_yaml_syntax::YamlLanguage>
+{
+    fn from(yaml: biome_configuration::yaml::YamlConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = yaml.formatter {
             language_setting.formatter = formatter.into();
         }
 
@@ -1398,6 +1444,7 @@ impl OverrideSettings {
             .unwrap_or(base_setting)
     }
 
+    #[cfg(feature = "lang_grit")]
     pub fn apply_override_grit_format_options(
         &self,
         path: &Utf8Path,
@@ -1507,10 +1554,11 @@ impl OverrideSettings {
     }
 
     /// Scans and aggregates all the overrides into a single [GraphqlFormatOptions]
+    #[cfg(feature = "lang_graphql")]
     pub fn apply_override_graphql_format_options(
         &self,
         path: &Utf8Path,
-        options: &mut GraphqlFormatOptions,
+        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
     ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1543,6 +1591,7 @@ impl OverrideSettings {
                         biome_css_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_graphql")]
                     push_to_analyzer_rules(
                         rules,
                         biome_graphql_analyze::METADATA.deref(),
@@ -1571,6 +1620,7 @@ impl OverrideSettings {
                         biome_css_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_graphql")]
                     push_to_analyzer_assist(
                         actions,
                         biome_graphql_analyze::METADATA.deref(),
@@ -1602,6 +1652,7 @@ pub struct OverrideSettingPattern {
     /// Files specific settings
     pub files: OverrideFilesSettings,
     /// Additional plugins to be applied
+    #[cfg(feature = "plugins")]
     pub plugins: Plugins,
 }
 
@@ -1638,7 +1689,7 @@ impl OverrideSettingPattern {
         if let Some(quote_properties) = js_formatter.quote_properties {
             options.set_quote_properties(quote_properties);
         }
-        if let Some(trailing_commas) = js_formatter.trailing_commas {
+        if let Some(trailing_commas) = js_formatter.trailing_commas.or(formatter.trailing_commas) {
             options.set_trailing_commas(trailing_commas);
         }
         if let Some(semicolons) = js_formatter.semicolons {
@@ -1689,6 +1740,11 @@ impl OverrideSettingPattern {
         }
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
+        } else if let Some(trailing_commas) = formatter.trailing_commas {
+            options.set_trailing_commas(match trailing_commas {
+                TrailingCommas::All | TrailingCommas::Es5 => JsonTrailingCommas::All,
+                TrailingCommas::None => JsonTrailingCommas::None,
+            });
         }
         if let Some(expand_lists) = json_formatter.expand.or(formatter.expand) {
             options.set_expand(expand_lists);
@@ -1732,7 +1788,11 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
+    #[cfg(feature = "lang_graphql")]
+    fn apply_overrides_to_graphql_format_options(
+        &self,
+        options: &mut biome_graphql_formatter::context::GraphqlFormatOptions,
+    ) {
         let graphql_formatter = &self.languages.graphql.formatter;
         let formatter = &self.formatter;
 
@@ -1764,7 +1824,7 @@ impl OverrideSettingPattern {
             options.set_trailing_newline(trailing_newline);
         }
     }
-
+    #[cfg(feature = "lang_grit")]
     fn apply_overrides_to_grit_format_options(&self, options: &mut GritFormatOptions) {
         let grit_formatter = &self.languages.grit.formatter;
         let formatter = &self.formatter;
@@ -1922,6 +1982,7 @@ pub fn to_override_settings(
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
                 expand: formatter.expand,
+                trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
             })
             .unwrap_or_default();
@@ -1940,7 +2001,6 @@ pub fn to_override_settings(
                 actions: assist.actions,
             })
             .unwrap_or_default();
-        let plugins = pattern.plugins.unwrap_or_default();
 
         let files = pattern
             .files
@@ -1953,8 +2013,6 @@ pub fn to_override_settings(
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
-        let graphql = pattern.graphql.take().unwrap_or_default();
-        let grit = pattern.grit.take().unwrap_or_default();
         let html = pattern.html.take().unwrap_or_default();
 
         languages.javascript =
@@ -1962,9 +2020,18 @@ pub fn to_override_settings(
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
-        languages.graphql =
-            to_graphql_language_settings(graphql, &current_settings.languages.graphql);
-        languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
+        #[cfg(feature = "lang_graphql")]
+        {
+            let graphql = pattern.graphql.take().unwrap_or_default();
+            languages.graphql =
+                to_graphql_language_settings(graphql, &current_settings.languages.graphql);
+        }
+
+        #[cfg(feature = "lang_grit")]
+        {
+            let grit = pattern.grit.take().unwrap_or_default();
+            languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
+        }
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
@@ -1974,7 +2041,8 @@ pub fn to_override_settings(
             assist,
             languages,
             files,
-            plugins,
+            #[cfg(feature = "plugins")]
+            plugins: pattern.plugins.unwrap_or_default(),
         };
 
         override_settings.patterns.push(pattern_setting);
@@ -2063,8 +2131,9 @@ fn to_css_language_settings(
     language_setting
 }
 
+#[cfg(feature = "lang_graphql")]
 fn to_graphql_language_settings(
-    mut conf: GraphqlConfiguration,
+    mut conf: biome_configuration::graphql::GraphqlConfiguration,
     _parent_settings: &LanguageSettings<GraphqlLanguage>,
 ) -> LanguageSettings<GraphqlLanguage> {
     let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
@@ -2080,9 +2149,9 @@ fn to_graphql_language_settings(
 
     language_setting
 }
-
+#[cfg(feature = "lang_grit")]
 fn to_grit_language_settings(
-    mut conf: GritConfiguration,
+    mut conf: biome_configuration::GritConfiguration,
     _parent_settings: &LanguageSettings<GritLanguage>,
 ) -> LanguageSettings<GritLanguage> {
     let mut language_setting: LanguageSettings<GritLanguage> = LanguageSettings::default();

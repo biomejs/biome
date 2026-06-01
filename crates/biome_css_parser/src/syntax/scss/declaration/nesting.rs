@@ -5,9 +5,10 @@ use crate::syntax::declaration::{
 };
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
-    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression, is_at_scss_interpolated_identifier,
+    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression,
+    is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
     is_at_scss_interpolated_property, parse_scss_interpolated_identifier,
-    parse_scss_optional_value_until,
+    parse_scss_interpolated_property_name, parse_scss_optional_value_until,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
 use biome_css_syntax::CssSyntaxKind::{
@@ -43,10 +44,19 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
 
 #[inline]
 pub(crate) fn is_at_scss_nesting_declaration(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && !is_at_dashed_identifier(p)
-        && !p.at(T![composes])
-        && (is_at_scss_interpolated_property(p) || (is_at_identifier(p) && p.nth_at(1, T![:])))
+    if !CssSyntaxFeatures::Scss.is_supported(p) || p.at(T![composes]) {
+        return false;
+    }
+
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        return true;
+    }
+
+    if is_at_dashed_identifier(p) {
+        return false;
+    }
+
+    is_at_scss_interpolated_property(p) || (is_at_identifier(p) && p.nth_at(1, T![:]))
 }
 
 struct ScssNestingMarkers {
@@ -62,6 +72,10 @@ struct ScssNestingMarkers {
 /// nesting entrypoints.
 #[inline]
 fn parse_scss_nesting_declaration_candidate(p: &mut CssParser) -> Option<(ParsedSyntax, bool)> {
+    if !is_at_scss_nesting_declaration(p) {
+        return None;
+    }
+
     let (markers, could_be_selector) = parse_scss_nesting_declaration_prefix(p)?;
     let syntax = parse_scss_nesting_declaration_after_prefix(p, markers);
 
@@ -104,12 +118,18 @@ fn parse_scss_nesting_declaration_after_prefix(
 /// is not actually followed by `:`.
 #[inline]
 fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNestingMarkers, bool)> {
+    if !is_at_scss_nesting_declaration(p) {
+        return None;
+    }
+
     let declaration = p.start();
     let property = p.start();
 
-    // Guarded by `is_at_scss_nesting_declaration`, so a name parse cannot fail
-    // here. The only real rejection point in this prefix parser is a missing `:`.
-    parse_scss_interpolated_identifier(p).ok();
+    if is_at_scss_interpolated_property(p) {
+        parse_scss_interpolated_property_name(p).ok();
+    } else if is_at_scss_interpolated_identifier(p) {
+        parse_scss_interpolated_identifier(p).ok();
+    }
 
     if !p.at(T![:]) {
         declaration.abandon(p);

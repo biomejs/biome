@@ -45,6 +45,38 @@ puma,sea-slug,egret,salamander{
 
 @each $element,$size in(h1:20px,h2:16px,h3:14px){}
 
+@each $element,$size in (h1:20px,h2:16px,h3:14px){}
+
+@each $element,$size in(
+h1:20px,
+
+h2:16px,
+
+h3:14px
+){}
+
+@each $element,$size in (
+h1:20px,
+
+h2:16px,
+
+h3:14px
+){}
+
+@each $pair in(
+h1:20px,
+
+h2:16px
+){}
+
+@each $element,$size in(h1:20px,h2:16px,){}
+
+@each $element,$size in(
+h1:20px,
+
+h2:16px,
+){}
+
 @each
 $element,
 $size
@@ -63,4 +95,8 @@ h3
 14px
 )
 {
+}
+
+@each in puma,sea-slug{
+color:red;
 }

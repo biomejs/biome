@@ -11,7 +11,8 @@ fn test_specificity_type_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -25,7 +26,8 @@ fn test_specificity_class_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -39,7 +41,8 @@ fn test_specificity_id_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -53,7 +56,8 @@ fn test_specificity_type_and_class_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -67,7 +71,8 @@ fn test_specificity_attribute_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -81,7 +86,8 @@ fn test_specificity_pseudo_class_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -95,7 +101,8 @@ fn test_specificity_pseudo_element_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -109,7 +116,8 @@ fn test_specificity_complex_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -123,7 +131,8 @@ fn test_specificity_pseudo_class_functions() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -137,7 +146,8 @@ fn test_specificity_with_pseudo_function_where() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -152,7 +162,8 @@ fn test_specificity_with_pseudo_function_is() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -167,7 +178,8 @@ fn test_specificity_nested_selector() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -182,7 +194,8 @@ fn test_specificity_nested_pseudo_class() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -200,7 +213,8 @@ fn test_specificity_nested_pseudo_class_functions() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -218,7 +232,8 @@ fn test_specificity_multiple_nesting() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -244,7 +259,8 @@ fn test_specificity_nested_pseudo_elements_and_classes() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -262,7 +278,8 @@ fn test_specificity_nested_combinators() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -281,7 +298,8 @@ fn test_specificity_with_nested_pseudo_functions() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
     let specificity = &selector.specificity;
@@ -300,7 +318,8 @@ fn test_specificity_nested_selector_lists() {
     let root = parse.tree();
 
     let model = semantic_model(&root);
-    let rule = model.rules().first().unwrap();
+    let rules = model.rules();
+    let rule = rules.first().unwrap();
 
     let expected_specificities = [
         Specificity(0, 0, 1), // "div"
@@ -325,8 +344,8 @@ fn test_specificity_deeply_nested_rules() {
     let model = semantic_model(&root);
 
     // Navigate through nested rules to reach the deepest rule
-    let parent_rule = model
-        .rules()
+    let rules = model.rules();
+    let parent_rule = rules
         .first()
         .expect("Expected to find parent rule with selector 'a'");
 

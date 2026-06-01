@@ -1,0 +1,22 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/single-expression.svelte
+---
+
+# Input
+
+```svelte
+<!-- 1 -->
+{"test"}
+<!-- 2 -->
+
+```
+
+
+# Formatted
+
+```svelte
+<!-- 1 -->
+{"test"}
+<!-- 2 -->
+```

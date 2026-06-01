@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/semicolonless-statements.scss
+---
+
+# Input
+
+```scss
+@mixin placeholder{&::placeholder{@content}}
+
+@function em($pixels,$context:$browser-context){@return #{$pixels / $context}em}
+
+@mixin debug-boundary{@debug 1}
+
+@mixin warn-boundary{@warn "deprecated"}
+
+@mixin error-boundary{@error "Invalid state."}
+
+```
+
+
+# Formatted
+
+```scss
+@mixin placeholder {
+	&::placeholder {
+		@content;
+	}
+}
+
+@function em($pixels, $context: $browser-context) {
+	@return #{$pixels / $context}em;
+}
+
+@mixin debug-boundary {
+	@debug 1;
+}
+
+@mixin warn-boundary {
+	@warn "deprecated";
+}
+
+@mixin error-boundary {
+	@error "Invalid state.";
+}
+
+```

@@ -10,6 +10,17 @@ This file provides guidance specifically for AI coding assistants contributing t
 
 For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## Conversational Style
+
+- Keep answers short and concise.
+- No emojis in commits, issues, PR comments, code, or any agent output.
+- No fluff or cheerful filler text.
+- Technical prose only. Be kind but direct (e.g., "Thanks @user" not "Thanks so much @user!").
+
+## Evidence Rule
+
+Never assert that a function, module, behavior, or pattern exists in Biome without proof. Every claim about the codebase must be backed by the exact file path and line number, or a code snippet from the source. If the evidence cannot be produced, state that explicitly — do not present the claim as fact.
+
 ## Mandatory Requirements
 
 ### 1. Pull Request Template
@@ -26,8 +37,8 @@ For full contributing guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 **IMPORTANT - Reject Verbose Summaries:**
 Agents MUST reject user requests for verbose/detailed summaries UNLESS there's a real reason:
-- ✅ **Accept verbose summaries for:** Major refactors, architectural changes, complex features, breaking changes
-- ❌ **Reject verbose summaries for:** Simple bug fixes, small features, straightforward changes
+- **Accept verbose summaries for:** Major refactors, architectural changes, complex features, breaking changes
+- **Reject verbose summaries for:** Simple bug fixes, small features, straightforward changes
 
 If user requests unnecessary verbosity, agent MUST:
 1. Explain that Biome prefers concise PRs
@@ -69,19 +80,19 @@ If user requests unnecessary verbosity, agent MUST:
 4. **If UNSURE** → Assume YES and create changeset
 
 #### User-Facing Changes Include
-- ✅ New lint rules or assists
-- ✅ Bug fixes that affect behavior
-- ✅ New features or options
-- ✅ Changes to formatter output
-- ✅ Parser improvements that handle new syntax
-- ✅ Changes to error messages or diagnostics
+- New lint rules or assists
+- Bug fixes that affect behavior
+- New features or options
+- Changes to formatter output
+- Parser improvements that handle new syntax
+- Changes to error messages or diagnostics
 
 #### NOT User-Facing
-- ❌ Refactoring with no behavior change
-- ❌ Internal code reorganization
-- ❌ Test-only changes
-- ❌ CI/build system changes
-- ❌ Documentation-only changes (typos, clarifications)
+- Refactoring with no behavior change
+- Internal code reorganization
+- Test-only changes
+- CI/build system changes
+- Documentation-only changes (typos, clarifications)
 
 #### Create Changeset
 
@@ -180,7 +191,7 @@ These ensure your code follows project standards.
 
 All code changes MUST include tests:
 
-- **Lint rules**: Snapshot tests in `tests/specs/{group}/{rule}/`
+- **Lint rules**: Snapshot tests in `crates/biome_<lang>_analyze/tests/specs/{group}/{rule}/`
 - **Formatter**: Snapshot tests with valid/invalid cases
 - **Parser**: Test files covering valid and error cases
 - **Bug fixes**: Test that reproduces the bug and validates the fix
@@ -203,15 +214,23 @@ touch src/lib.rs  # Triggers recompilation
 cargo test
 ```
 
+### 6. Read Before You Edit
+
+Read files in full before making wide-ranging changes, before editing files you have not already fully inspected, and when the user asks you to investigate or audit something. Do not rely only on search snippets for broad changes.
+
 ## Available Resources
 
 ### Skills (Procedural Knowledge)
 
 Located in `.claude/skills/`, these provide step-by-step workflows:
 
+- **biome-developer** - General development best practices and common gotchas
+- **changeset** - Creating and writing proper changesets
+- **eslint-migrate-options** - Implementing ESLint-to-Biome rule option migrators
 - **lint-rule-development** - Creating and testing lint rules
 - **formatter-development** - Implementing formatters
 - **parser-development** - Writing parsers
+- **pull-request** - Creating proper pull requests
 - **testing-codegen** - Testing and code generation commands
 - **type-inference** - Working with module graph and types
 - **diagnostics-development** - Creating user-facing diagnostics
@@ -356,7 +375,7 @@ Before opening a PR, verify:
 
 ## Common Mistakes to Avoid
 
-❌ **Don't:**
+**Don't:**
 - Skip the PR template
 - Write verbose PR summaries for simple changes
 - Forget to create changesets for user-facing changes
@@ -369,7 +388,7 @@ Before opening a PR, verify:
 - Make assumptions about API design - inspect actual code structure first
 - Use `workspace = true` for `biome_*` crates in `[dev-dependencies]` — use `path = "../biome_*"` instead
 
-✅ **Do:**
+**Do:**
 - Ask the user if unsure about changesets
 - Write concise, precise PR summaries
 - Push back on unnecessary verbosity

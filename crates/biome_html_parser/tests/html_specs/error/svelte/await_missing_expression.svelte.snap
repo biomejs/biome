@@ -23,89 +23,87 @@ HtmlRoot {
     frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        HtmlBogusElement {
-            items: [
-                HtmlBogus {
-                    items: [
-                        SV_CURLY_HASH@0..2 "{#" [] [],
-                        AWAIT_KW@2..7 "await" [] [],
-                        HTML_LITERAL@7..7 "" [] [],
-                        R_CURLY@7..8 "}" [] [],
-                        HtmlElementList [
-                            HtmlElement {
-                                opening_element: HtmlOpeningElement {
-                                    l_angle_token: L_ANGLE@8..12 "<" [Newline("\n"), Whitespace("  ")] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@12..13 "p" [] [],
-                                    },
-                                    attributes: HtmlAttributeList [],
-                                    r_angle_token: R_ANGLE@13..14 ">" [] [],
-                                },
-                                children: HtmlElementList [
-                                    HtmlContent {
-                                        value_token: HTML_LITERAL@14..24 "Loading..." [] [],
-                                    },
-                                ],
-                                closing_element: HtmlClosingElement {
-                                    l_angle_token: L_ANGLE@24..25 "<" [] [],
-                                    slash_token: SLASH@25..26 "/" [] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@26..27 "p" [] [],
-                                    },
-                                    r_angle_token: R_ANGLE@27..28 ">" [] [],
-                                },
+        SvelteAwaitBlock {
+            opening_block: SvelteAwaitOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                await_token: AWAIT_KW@2..7 "await" [] [],
+                expression: missing (required),
+                then_clause: missing (optional),
+                catch_clause: missing (optional),
+                r_curly_token: R_CURLY@7..8 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@8..12 "<" [Newline("\n"), Whitespace("  ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@12..13 "p" [] [],
                             },
-                        ],
-                    ],
-                },
-                SvelteAwaitClausesList [
-                    SvelteAwaitThenBlock {
-                        sv_curly_colon_token: SV_CURLY_COLON@28..31 "{:" [Newline("\n")] [],
-                        then_token: THEN_KW@31..35 "then" [] [],
-                        name: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@35..41 " value" [] [],
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@13..14 ">" [] [],
                         },
-                        r_curly_token: R_CURLY@41..42 "}" [] [],
                         children: HtmlElementList [
-                            HtmlElement {
-                                opening_element: HtmlOpeningElement {
-                                    l_angle_token: L_ANGLE@42..46 "<" [Newline("\n"), Whitespace("  ")] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@46..47 "p" [] [],
-                                    },
-                                    attributes: HtmlAttributeList [],
-                                    r_angle_token: R_ANGLE@47..48 ">" [] [],
-                                },
-                                children: HtmlElementList [
-                                    HtmlContent {
-                                        value_token: HTML_LITERAL@48..61 "The value is" [] [Whitespace(" ")],
-                                    },
-                                    HtmlSingleTextExpression {
-                                        l_curly_token: L_CURLY@61..62 "{" [] [],
-                                        expression: HtmlTextExpression {
-                                            html_literal_token: HTML_LITERAL@62..67 "value" [] [],
-                                        },
-                                        r_curly_token: R_CURLY@67..68 "}" [] [],
-                                    },
-                                ],
-                                closing_element: HtmlClosingElement {
-                                    l_angle_token: L_ANGLE@68..69 "<" [] [],
-                                    slash_token: SLASH@69..70 "/" [] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@70..71 "p" [] [],
-                                    },
-                                    r_angle_token: R_ANGLE@71..72 ">" [] [],
-                                },
+                            HtmlContent {
+                                value_token: HTML_LITERAL@14..24 "Loading..." [] [],
                             },
                         ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@24..25 "<" [] [],
+                            slash_token: SLASH@25..26 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@26..27 "p" [] [],
+                            },
+                            r_angle_token: R_ANGLE@27..28 ">" [] [],
+                        },
                     },
                 ],
-                SvelteAwaitClosingBlock {
-                    sv_curly_slash_token: SV_CURLY_SLASH@72..75 "{/" [Newline("\n")] [],
-                    await_token: AWAIT_KW@75..80 "await" [] [],
-                    r_curly_token: R_CURLY@80..81 "}" [] [],
+            },
+            clauses: SvelteAwaitClausesList [
+                SvelteAwaitThenBlock {
+                    sv_curly_colon_token: SV_CURLY_COLON@28..31 "{:" [Newline("\n")] [],
+                    then_token: THEN_KW@31..36 "then" [] [Whitespace(" ")],
+                    name: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@36..41 "value" [] [],
+                    },
+                    r_curly_token: R_CURLY@41..42 "}" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@42..46 "<" [Newline("\n"), Whitespace("  ")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@46..47 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@47..48 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@48..61 "The value is" [] [Whitespace(" ")],
+                                },
+                                HtmlSingleTextExpression {
+                                    l_curly_token: L_CURLY@61..62 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@62..67 "value" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@67..68 "}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@68..69 "<" [] [],
+                                slash_token: SLASH@69..70 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@70..71 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@71..72 ">" [] [],
+                            },
+                        },
+                    ],
                 },
             ],
+            closing_block: SvelteAwaitClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@72..75 "{/" [Newline("\n")] [],
+                await_token: AWAIT_KW@75..80 "await" [] [],
+                r_curly_token: R_CURLY@80..81 "}" [] [],
+            },
         },
     ],
     eof_token: EOF@81..82 "" [Newline("\n")] [],
@@ -120,13 +118,15 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..81
-    0: HTML_BOGUS_ELEMENT@0..81
-      0: HTML_BOGUS@0..28
+    0: SVELTE_AWAIT_BLOCK@0..81
+      0: SVELTE_AWAIT_OPENING_BLOCK@0..28
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: AWAIT_KW@2..7 "await" [] []
-        2: HTML_LITERAL@7..7 "" [] []
-        3: R_CURLY@7..8 "}" [] []
-        4: HTML_ELEMENT_LIST@8..28
+        2: (empty)
+        3: (empty)
+        4: (empty)
+        5: R_CURLY@7..8 "}" [] []
+        6: HTML_ELEMENT_LIST@8..28
           0: HTML_ELEMENT@8..28
             0: HTML_OPENING_ELEMENT@8..14
               0: L_ANGLE@8..12 "<" [Newline("\n"), Whitespace("  ")] []
@@ -146,9 +146,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@28..72
         0: SVELTE_AWAIT_THEN_BLOCK@28..72
           0: SV_CURLY_COLON@28..31 "{:" [Newline("\n")] []
-          1: THEN_KW@31..35 "then" [] []
-          2: HTML_TEXT_EXPRESSION@35..41
-            0: HTML_LITERAL@35..41 " value" [] []
+          1: THEN_KW@31..36 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@36..41
+            0: HTML_LITERAL@36..41 "value" [] []
           3: R_CURLY@41..42 "}" [] []
           4: HTML_ELEMENT_LIST@42..72
             0: HTML_ELEMENT@42..72

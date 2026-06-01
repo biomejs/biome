@@ -1,0 +1,136 @@
+[
+	// ─── static utilities ──────────────────────────────────────────
+	// STATIC_UTILITIES exact-match keywords. Sorted by property_idx,
+	// then property_count desc, then registration_idx.
+
+	"flex block absolute",
+	"static visible flex",                         // already sorted
+	"sr-only block flex absolute relative",        // sr-only multi-prop floats up
+	"pointer-events-none collapse static visible", // visibility group tie-broken by reg_idx
+	"flex",                                        // single-token passthrough
+
+	// ─── functional + named value ──────────────────────────────────
+	// Named (theme namespace), NamedKeyword (hardcoded keyword pool),
+	// NamedTyped (Number / Percentage / Ratio predicates).
+
+	"bg-red-500 flex p-4",   // ThemeNamespace::Color
+	"p-4 m-2 flex",          // NamedTyped(Number)
+	"text-lg bg-red-500 p-4",
+	"p-4 p-2",               // same basename, stable input order
+	"origin-top flex p-4",   // NamedKeyword pool
+	"flex-1 flex p-4",       // STATIC `flex` wins over functional `flex` basename
+
+	// font basename — Named(Font) for `--font-*` theme keys,
+	// Named(FontWeight) for `--font-weight-*` theme keys.
+	"font-bold flex p-4",
+	"font-serif font-bold flex",
+	"font-medium font-sans p-4",
+
+	// w basename — Named(Spacing) for `--spacing-*` keys,
+	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
+	"w-10 flex p-4",         // NamedTyped(Number)
+	"w-1/2 flex p-4",        // NamedTyped(Ratio)
+	"w-full flex p-4",       // Named(Spacing) — `--spacing-full` theme key
+	"w-screen w-10 w-full",  // multi-value same basename, stable order
+
+	// aspect basename — NamedKeyword pool (auto/square),
+	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
+	"aspect-square flex",    // NamedKeyword
+	"aspect-video flex",     // Named(Aspect)
+	"aspect-9/16 flex",      // NamedTyped(Ratio)
+
+	// ─── negative-prefixed functional utilities ────────────────────
+	// Parser splits `-` off; classify routes through `entry.negative`
+	// to pick the correct (registration_idx, branches) slot.
+
+	"p-4 flex -mt-2",            // SameBranches: -mt reuses mt's branches
+	"flex mt-3 -mt-2",           // negative + positive of same basename, distinct reg_idx
+	"flex -mt-2 -inset-2",       // two SameBranches negatives sorted by their own reg_idx
+	"flex -bg-red-500 p-4",      // -bg has no negative entry → Unknown → floats to front
+	"p-4 flex -z-auto",          // -z drops NamedKeyword(auto) → resolve fails → Unknown
+	"p-4 flex -z-10",            // Distinct: -z keeps NamedTyped(Number), routes to z-index
+
+	// negative static utilities. The parser strips the leading `-` and
+	// hands us a TwStaticCandidate; classify uses
+	// `negative_registration_idx` to pick the matching slot, falling
+	// back to Unknown when it's `None` (Tailwind doesn't register a
+	// negative form).
+	"flex p-4 -flex",            // -flex: negative_registration_idx is None → Unknown
+
+	// ─── unknown classes ───────────────────────────────────────────
+	// Tokens that resolve to no branch float to the front and keep
+	// their relative input order (stable sort).
+
+	"p-4 foo flex",
+	"baz p-4 foo flex bar",
+	"bg-rainbow flex bg-red-500", // basename matches but value resolves to nothing → unknown
+	"foo bar baz",                // all unknown — output unchanged
+	"flex p-",                    // empty value after `-` → unknown
+	"myCustom flex p-4",
+
+	// ─── new value-kind dispatch (post-#10332) ─────────────────────
+	// TwNumberValue → NamedTyped(Number); TwPercentageValue →
+	// NamedTyped(Percentage); a numeric modifier on a numeric value
+	// is treated as a fraction when the entry has a Ratio branch.
+
+	"from-50% flex",              // TwPercentageValue → gradient-stop
+	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
+	"flex w-1/2 w-1/3",           // two ratios share the same w branch, stable input order
+	"flex bg-red-500/50",         // color modifier — base named color sort key
+	"flex text-lg/8",             // line-height modifier — base named text-size sort key
+	"flex w-1/foo",               // non-fraction modifier — base number sort key
+
+	// ─── sort_class_list edge cases ────────────────────────────────
+
+	"p-[10px] flex some-unknown",
+	"flex [color:red]",
+	"flex [--my-var:1]",
+	"flex [color:red]/50",
+	"bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]",
+	"border-[#f00] border-[2px]",
+	"text-[#fff] text-[larger] text-[20px]",
+	"bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex",
+	"ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex",
+
+	// ─── arbitrary value modifiers ─────────────────────────────────
+	// Modifiers do not contribute to the sort key for arbitrary values;
+	// the base utility and arbitrary value still determine the property
+	// bucket.
+
+	"ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50",
+	"text-[#fff]/50 text-[20px]/8 flex",
+	"flex [mask-type:luminance]/50 [color:red]/50",
+
+	// ─── gradients ──────────────────────────────────────────────────
+	// from/via/to are registered in order; sort must preserve that
+	// bucket order when interleaved with other utilities or shuffled
+	// across colors and percentages.
+
+	"to-purple-500 from-blue-500 via-pink-500",                   // colors only, scrambled
+	"to-100% via-pink-500 from-blue-500 from-25%",                // mixed color + percentage stops
+	"bg-red-500 from-blue-500 to-purple-500",                     // bg-color does not interleave with gradient stops
+	"p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2",         // linear gradient with surrounding spacing
+	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
+
+	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
+	// Inputs scrambled; output captured by snapshot.
+	// Source: github.com/shadcn-ui/ui registry/new-york-v4.
+
+	// Card
+	"shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col",
+
+	// Skeleton
+	"bg-accent animate-pulse rounded-md",
+
+	// Button primary variant
+	"text-primary-foreground bg-primary hover:bg-primary/90",
+
+	// Button default size
+	"px-4 has-[>svg]:px-3 h-9 py-2",
+
+	// Button outline variant
+	"hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+
+	// Button base
+	"items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0"
+]
