@@ -107,7 +107,7 @@ const CARRIAGE_RETURN_BYTE: u8 = b'\r';
 const LINE_FEED_BYTE: u8 = b'\n';
 
 const COLLECTOR_FIXTURES: [&str; COLLECTOR_FIXTURE_COUNT] = [
-    "collector.basic",
+    "collector.top-level-global",
     "collector.multiple-var",
     "collector.qualified-namespace",
     "collector.unsupported",
