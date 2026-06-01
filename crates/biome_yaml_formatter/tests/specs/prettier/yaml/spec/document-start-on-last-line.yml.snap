@@ -32,19 +32,3 @@ a: b
 a: b
 ---
 ```
-
-# Errors
-```
-document-start-on-last-line.yml:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found ``
-  
-    2 │ a: b
-    3 │ ---
-  > 4 │ 
-      │ 
-  
-  i Remove 
-  
-
-```
