@@ -24,4 +24,5 @@ other: {a: b}
 
 ## Unimplemented nodes/tokens
 
-"key: [1, 2, 3]\nother: {a: b}\n" => 0..29
+" [1, 2, 3" => 4..13
+" {a: b" => 21..27

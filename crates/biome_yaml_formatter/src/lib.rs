@@ -380,6 +380,6 @@ mod tests {
         let options = YamlFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
 
-        assert_eq!(formatted.print().unwrap().as_code(), "foo: bar");
+        assert_eq!(formatted.print().unwrap().as_code(), "foo: bar\n");
     }
 }

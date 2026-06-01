@@ -33,11 +33,10 @@ info: yaml/block_scalar/folded_scalar.yaml
 - >+
  kept
 
-
 ```
 
 
 
 ## Unimplemented nodes/tokens
 
-"- >\n hello\n world\n\n- >-\n stripped\n\n- >+\n kept\n\n" => 0..47
+"- >\n hello\n world\n\n- >-\n stripped\n\n- >+\n kept" => 0..45
