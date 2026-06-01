@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_html_syntax::{AnySvelteBlockItem, SvelteEachOpeningBlock};
@@ -36,6 +36,7 @@ declare_lint_rule! {
         version: "next",
         name: "useSvelteRequireEachKey",
         language: "html",
+        domains: &[RuleDomain::Svelte],
         recommended: true,
         sources: &[RuleSource::EslintSvelte("require-each-key").same()],
     }
