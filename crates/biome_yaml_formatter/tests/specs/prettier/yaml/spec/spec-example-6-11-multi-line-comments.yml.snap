@@ -15,27 +15,19 @@ key:    # Comment
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+spec-example-6-11-multi-line-comments.yml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,3 +1,5 @@
--key: # Comment
--  # lines
-+key:    # Comment
-+        # lines
-   value
-+
-+
-```
-
-# Output
-
-```yml
-key:    # Comment
-        # lines
-  value
-
+  × expected `:` but instead found ``
+  
+    1 │ key: # lines # Comment
+    2 │ value
+  > 3 │ 
+      │ 
+  
+  i Remove 
+  
 
 ```

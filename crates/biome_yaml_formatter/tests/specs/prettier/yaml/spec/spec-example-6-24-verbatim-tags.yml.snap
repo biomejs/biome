@@ -17,15 +17,13 @@ info: yaml/spec/spec-example-6-24-verbatim-tags.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,2 @@
+@@ -1 +1 @@
 -!<tag:yaml.org,2002:str> foo: !<!bar> baz
-+!<tag:yaml.org,2002:str> foo :
-+  !<!bar> baz
++!<tag:yaml.org,2002:str> foo : !<!bar> baz
 ```
 
 # Output
 
 ```yml
-!<tag:yaml.org,2002:str> foo :
-  !<!bar> baz
+!<tag:yaml.org,2002:str> foo : !<!bar> baz
 ```
