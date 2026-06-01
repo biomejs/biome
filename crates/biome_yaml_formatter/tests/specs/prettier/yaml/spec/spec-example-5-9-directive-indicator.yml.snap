@@ -30,17 +30,3 @@ info: yaml/spec/spec-example-5-9-directive-indicator.yml
 %YAML 1.2
 --- text
 ```
-
-# Errors
-```
-spec-example-5-9-directive-indicator.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `%`
-  
-  > 1 │ %YAML 1.2
-      │ ^
-    2 │ --- text
-    3 │ 
-  
-
-```

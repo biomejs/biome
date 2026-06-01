@@ -64,17 +64,3 @@ info: yaml/spec/spec-example-2-24-global-tags.yml
   color: 0xFFEEBB
   text: Pretty vector drawing.
 ```
-
-# Errors
-```
-spec-example-2-24-global-tags.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `%`
-  
-  > 1 │ %TAG ! tag:clarkevans.com,2002:
-      │ ^
-    2 │ --- !shape
-    3 │   # Use the ! handle for presenting
-  
-
-```
