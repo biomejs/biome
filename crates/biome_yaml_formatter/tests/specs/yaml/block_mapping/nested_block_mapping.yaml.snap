@@ -17,7 +17,9 @@ outer:
 # Formatted
 
 ```yaml
-outer: inner: value
-nested: deep: leaf
+outer:
+  inner: value
+  nested:
+    deep: leaf
 
 ```
