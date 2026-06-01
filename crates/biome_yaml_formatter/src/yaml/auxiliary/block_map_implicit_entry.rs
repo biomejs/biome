@@ -22,7 +22,8 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
         write!(f, [key.format(), colon_token.format()])?;
 
         if let Some(value) = value {
-            if is_nested_block_collection(&value) {
+            let has_leading_comments = f.comments().has_leading_comments(value.syntax());
+            if has_leading_comments || is_nested_block_collection(&value) {
                 return write!(
                     f,
                     [indent(&format_args![hard_line_break(), value.format()])]
