@@ -2724,7 +2724,7 @@ impl CssFunctionAtRuleDeclarator {
     pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -2751,7 +2751,7 @@ impl Serialize for CssFunctionAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssFunctionAtRuleDeclaratorFields {
     pub function_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssDashedIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameters: CssFunctionParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -9836,8 +9836,8 @@ impl ScssForwardAtRule {
     pub fn with_clause(&self) -> Option<ScssWithClause> {
         support::node(&self.syntax, 4usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for ScssForwardAtRule {
@@ -9855,7 +9855,7 @@ pub struct ScssForwardAtRuleFields {
     pub as_clause: Option<ScssForwardAsClause>,
     pub visibility_clause: Option<AnyScssForwardVisibilityClause>,
     pub with_clause: Option<ScssWithClause>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssFunctionAtRule {
@@ -12012,8 +12012,8 @@ impl ScssUseAtRule {
     pub fn with_clause(&self) -> Option<ScssWithClause> {
         support::node(&self.syntax, 3usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
 }
 impl Serialize for ScssUseAtRule {
@@ -12030,7 +12030,7 @@ pub struct ScssUseAtRuleFields {
     pub url: SyntaxResult<CssString>,
     pub as_clause: Option<ScssUseAsClause>,
     pub with_clause: Option<ScssWithClause>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssVariable {
@@ -29071,7 +29071,7 @@ impl std::fmt::Debug for ScssForwardAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -31749,7 +31749,7 @@ impl std::fmt::Debug for ScssUseAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {

@@ -1084,7 +1084,7 @@ impl CssFunctionAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssDashedIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3962,10 +3962,10 @@ impl ScssForwardAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -4810,10 +4810,10 @@ impl ScssUseAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
 }

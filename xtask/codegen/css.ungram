@@ -931,7 +931,7 @@ CssViewTransitionAtRuleDeclarator =
 
 CssFunctionAtRuleDeclarator =
 	'function'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 	'('
 	parameters: CssFunctionParameterList
 	')'
@@ -2805,7 +2805,7 @@ ScssUseAtRule =
 	url: CssString
 	as_clause: ScssUseAsClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as *
 // ^^^^
@@ -2830,7 +2830,7 @@ ScssForwardAtRule =
 	as_clause: ScssForwardAsClause?
 	visibility_clause: AnyScssForwardVisibilityClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as theme-*
 // ^^^^^^^^^^^

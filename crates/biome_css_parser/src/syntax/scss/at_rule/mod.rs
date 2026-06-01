@@ -23,6 +23,7 @@ mod while_at_rule;
 
 use crate::parser::CssParser;
 use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -66,21 +67,23 @@ pub(super) fn parse_scss_expression_at_rule(
     p.bump(keyword);
     parse_scss_expression_until(p, SCSS_STATEMENT_AT_RULE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
-    expect_scss_statement_at_rule_end(p);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, kind))
 }
 
-/// Accepts `;` or a closing block boundary for SCSS statement at-rules.
+/// Expects a semicolon after a blockless SCSS at-rule.
 ///
 /// Examples:
 /// ```scss
-/// @mixin x { @content; }
-/// @mixin x { @content }
+/// @use "theme"
+/// @mixin x { @include button }
 /// ```
 #[inline]
-pub(super) fn expect_scss_statement_at_rule_end(p: &mut CssParser) {
-    if p.eat(T![;]) || p.at(T!['}']) {
+pub(super) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
+    // Dart Sass allows omitting the final semicolon only at the end of the
+    // current block or file, not before the next statement.
+    if p.eat(T![;]) || p.at(T!['}']) || p.at(EOF) {
         return;
     }
 

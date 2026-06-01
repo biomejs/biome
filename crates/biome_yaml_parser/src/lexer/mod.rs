@@ -693,7 +693,11 @@ impl<'src> YamlLexer<'src> {
                     // Check if we would breach parent scope before consuming trivia
                     let start = self.current_coordinate;
                     let mut trivia = self.consume_trivia(false);
-                    if self.breach_parent_scope() {
+                    if self
+                        .scopes
+                        .last()
+                        .is_some_and(|scope| !scope.indent_with_dash(self.current_coordinate))
+                    {
                         // Restore position and break
                         self.current_coordinate = start;
                         break;

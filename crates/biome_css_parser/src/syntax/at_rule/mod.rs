@@ -73,6 +73,7 @@ use crate::syntax::at_rule::view_transition::{
 };
 
 use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
+use crate::syntax::scss::is_nth_at_scss_interpolated_dashed_identifier;
 use crate::syntax::scss::{
     parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
     parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
@@ -132,14 +133,9 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_face] => parse_font_face_at_rule(p),
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
-        T![function]
-            if CssSyntaxFeatures::Scss.is_supported(p) && is_nth_at_dashed_identifier(p, 1) =>
-        {
-            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
-            parse_function_at_rule(p)
-        }
         T![function] => {
-            if CssSyntaxFeatures::Scss.is_supported(p) {
+            // `@function --highlight()` is plain CSS in SCSS; `double()` stays Sass.
+            if CssSyntaxFeatures::Scss.is_supported(p) && !is_at_css_function_at_rule_name(p) {
                 parse_scss_function_at_rule(p)
             } else {
                 parse_function_at_rule(p)
@@ -265,6 +261,11 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }
+}
+
+#[inline]
+fn is_at_css_function_at_rule_name(p: &mut CssParser) -> bool {
+    is_nth_at_dashed_identifier(p, 1) || is_nth_at_scss_interpolated_dashed_identifier(p, 1)
 }
 
 #[inline]

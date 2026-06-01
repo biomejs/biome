@@ -3,6 +3,9 @@ use crate::syntax::at_rule::parse_error::{
 };
 use crate::syntax::block::parse_declaration_or_at_rule_list_block;
 use crate::syntax::parse_error::expected_dashed_identifier;
+use crate::syntax::scss::{
+    is_at_scss_interpolated_dashed_identifier, parse_scss_interpolated_dashed_identifier,
+};
 use crate::syntax::value::r#type::{
     is_at_syntax_single_component, is_at_syntax_type, is_at_type_function,
     parse_any_syntax_component, parse_type_function,
@@ -60,7 +63,7 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     let m = p.start();
     p.bump(T![function]);
 
-    parse_dashed_identifier(p)
+    parse_function_name(p)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['('], T!['{']]),
@@ -75,6 +78,15 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     parse_returns_statement(p).ok();
 
     Present(m.complete(p, CSS_FUNCTION_AT_RULE_DECLARATOR))
+}
+
+#[inline]
+fn parse_function_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_interpolated_dashed_identifier(p) {
+        parse_scss_interpolated_dashed_identifier(p)
+    } else {
+        parse_dashed_identifier(p)
+    }
 }
 
 #[inline]
