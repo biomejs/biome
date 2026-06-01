@@ -207,16 +207,14 @@ impl Rule for UseImportType {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
-                                } else if specifiers.is_empty() {
-                                    // Don't group inline type-imports,
-                                    // when the default import is not only used as a type.
-                                    None
                                 } else if style == Style::SeparatedType {
                                     Some(ImportTypeFix::ExtractCombinedImportType(Box::default()))
-                                } else {
+                                } else if !specifiers.is_empty() {
                                     // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
                                     Some(ImportTypeFix::AddTypeQualifiers(specifiers))
+                                } else {
+                                    None
                                 }
                             }
                             Some(NamedImportTypeFix::AddInlineTypeQualifiers(specifiers)) => {
@@ -997,10 +995,11 @@ fn extract_combined_specifier_in_new_import(
                                 type_token.leading_trivia().pieces(),
                                 trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                             ))?;
-                        new_specifiers = new_specifiers.replace_child(
-                            specifier.clone().into_syntax().into(),
-                            new_specifier.into_syntax().into(),
-                        )?;
+                        let slot_index = specifier.syntax().index();
+                        new_specifiers = new_specifiers.splice_slots(
+                            slot_index..=slot_index,
+                            [Some(new_specifier.into_syntax().into())],
+                        );
                     }
                 }
                 let new_specifiers = JsNamedImportSpecifierList::unwrap_cast(new_specifiers);
