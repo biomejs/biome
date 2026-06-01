@@ -7671,6 +7671,11 @@
 					"const": "qwik"
 				},
 				{
+					"description": "Svelte framework rules",
+					"type": "string",
+					"const": "svelte"
+				},
+				{
 					"description": "Vue.js framework rules",
 					"type": "string",
 					"const": "vue"

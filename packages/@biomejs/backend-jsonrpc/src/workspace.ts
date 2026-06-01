@@ -1079,6 +1079,7 @@ export type RuleDomain =
 	| "solid"
 	| "next"
 	| "qwik"
+	| "svelte"
 	| "vue"
 	| "project"
 	| "tailwind"
