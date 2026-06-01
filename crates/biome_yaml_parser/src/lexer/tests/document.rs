@@ -69,6 +69,16 @@ fn lex_directive_end_with_scalar() {
 }
 
 #[test]
+fn lex_directive_end_with_comment() {
+    assert_lex!(
+        "--- # comment",
+        DIRECTIVE_END:3,
+        WHITESPACE:1,
+        COMMENT:9,
+    );
+}
+
+#[test]
 fn lex_dashdashdash_scalar() {
     assert_lex!(
         "---foo",
