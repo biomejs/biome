@@ -11,13 +11,10 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail};
-use xtask_codegen::{
-    GlobalTypesArgs,
-    generate_global_types::{
-        SourcePin,
-        collect::{CollectorOutput, CoverageOutcome, collect},
-        source::{CanonicalPath, LibEntries, SourceOptions, acquire, discover, parse_lib_entries},
-    },
+use xtask_codegen::generate_global_types::{
+    SourcePin,
+    collect::{CollectorOutput, CoverageOutcome, collect},
+    source::{CanonicalPath, LibEntries, SourceOptions, acquire, discover, parse_lib_entries},
 };
 
 const TEMP_CREATE_RETRIES: usize = 32;
@@ -45,12 +42,6 @@ const EXPECTED_DIRTY_TREE: &str = "uncommitted modifications";
 
 /// Error text expected when local git index flags would hide worktree changes.
 const EXPECTED_INDEX_FLAGS: &str = "index flags";
-
-/// Error text expected when verify mode receives explicit TypeScript overrides.
-const EXPECTED_VERIFY_OVERRIDE_REJECTION: &str = "--verify";
-
-/// Error text expected when only one TypeScript override is supplied.
-const EXPECTED_SINGLE_OVERRIDE_REJECTION: &str = "--ts-tag and --ts-sha";
 
 /// Error text expected when `libEntries` contains a non-basename declaration filename.
 const EXPECTED_INVALID_LIB_ENTRY_FILENAME: &str = "libEntries filename";
@@ -628,27 +619,6 @@ fn temporary_checkout_namespace_for_test(pin: &SourcePin) -> String {
     format!("{}-{}", pin.tag(), pin.sha())
 }
 
-/// Runs the global-types command with test-controlled pin overrides.
-fn run_global_types(
-    verify: bool,
-    ts_tag: Option<&str>,
-    ts_sha: Option<&str>,
-) -> xtask_glue::Result<()> {
-    xtask_codegen::generate_global_types::run(
-        GlobalTypesArgs {
-            verify,
-            ts_tag: ts_tag.map(str::to_owned),
-            ts_sha: ts_sha.map(str::to_owned),
-            offline: true,
-        },
-        if verify {
-            xtask_glue::Mode::Verify
-        } else {
-            xtask_glue::Mode::Overwrite
-        },
-    )
-}
-
 /// Runs git in `cwd` and returns stdout bytes on success.
 fn run_git(cwd: &Path, args: &[&str]) -> Result<Vec<u8>> {
     let output = Command::new("git").args(args).current_dir(cwd).output()?;
@@ -905,26 +875,6 @@ mod tests {
         }
 
         Ok(())
-    }
-
-    #[test]
-    fn verify_rejects_single_overrides() -> Result<()> {
-        expect_error_contains(
-            run_global_types(true, Some("v0.0.0"), None),
-            EXPECTED_VERIFY_OVERRIDE_REJECTION,
-        )?;
-        expect_error_contains(
-            run_global_types(true, None, Some(MISSING_COMMIT_SHA)),
-            EXPECTED_VERIFY_OVERRIDE_REJECTION,
-        )?;
-        expect_error_contains(
-            run_global_types(false, Some("v0.0.0"), None),
-            EXPECTED_SINGLE_OVERRIDE_REJECTION,
-        )?;
-        expect_error_contains(
-            run_global_types(false, None, Some(MISSING_COMMIT_SHA)),
-            EXPECTED_SINGLE_OVERRIDE_REJECTION,
-        )
     }
 
     #[test]
@@ -1261,14 +1211,11 @@ mod tests {
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
 
         expect_error_contains(
-            xtask_codegen::generate_global_types::run(
-                GlobalTypesArgs {
-                    verify: false,
-                    ts_tag: Some(repo.tag.clone()),
-                    ts_sha: Some(repo.head.clone()),
-                    offline: true,
-                },
+            xtask_codegen::generate_global_types::run_with_workspace_root(
+                &pin,
+                &source_options(true, false),
                 xtask_glue::Mode::Verify,
+                &xtask_glue::project_root(),
             ),
             EXPECTED_PINNED_SOURCE_PARSER_DIAGNOSTIC,
         )
@@ -1442,12 +1389,8 @@ mod tests {
         )?;
 
         let Err(error) = xtask_codegen::generate_global_types::run_with_workspace_root(
-            GlobalTypesArgs {
-                verify: false,
-                ts_tag: Some(repo.tag.clone()),
-                ts_sha: Some(repo.head.clone()),
-                offline: true,
-            },
+            &pin,
+            &source_options(true, false),
             xtask_glue::Mode::Verify,
             temp.path(),
         ) else {
@@ -1476,23 +1419,15 @@ mod tests {
         let temp = TempDir::new("verify-match")?;
 
         xtask_codegen::generate_global_types::run_with_workspace_root(
-            GlobalTypesArgs {
-                verify: false,
-                ts_tag: Some(repo.tag.clone()),
-                ts_sha: Some(repo.head.clone()),
-                offline: true,
-            },
+            &pin,
+            &source_options(true, false),
             xtask_glue::Mode::Overwrite,
             temp.path(),
         )?;
 
         xtask_codegen::generate_global_types::run_with_workspace_root(
-            GlobalTypesArgs {
-                verify: false,
-                ts_tag: Some(repo.tag.clone()),
-                ts_sha: Some(repo.head.clone()),
-                offline: true,
-            },
+            &pin,
+            &source_options(true, false),
             xtask_glue::Mode::Verify,
             temp.path(),
         )?;

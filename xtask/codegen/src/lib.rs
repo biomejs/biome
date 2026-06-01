@@ -94,18 +94,6 @@ pub struct GlobalTypesArgs {
     /// Only verify that the generated file is up-to-date; do not write.
     #[bpaf(long("verify"), switch)]
     pub verify: bool,
-
-    /// TypeScript git tag to fetch (e.g. "v6.0.3"). Must be paired with --ts-sha.
-    #[bpaf(long("ts-tag"), argument("TAG"), optional)]
-    pub ts_tag: Option<String>,
-
-    /// Git commit SHA the TypeScript tag must resolve to. Must be paired with --ts-tag.
-    #[bpaf(long("ts-sha"), argument("SHA"), optional)]
-    pub ts_sha: Option<String>,
-
-    /// Run without network access; use only a locally cached archive.
-    #[bpaf(long("offline"), switch)]
-    pub offline: bool,
 }
 
 #[derive(Debug, Clone, Bpaf)]

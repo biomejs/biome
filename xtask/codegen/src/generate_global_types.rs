@@ -50,38 +50,27 @@ mod source_pin {
 /// reference closure, and emits `crates/biome_js_type_info/src/generated/global_types.rs`.
 pub fn run(args: GlobalTypesArgs, mode: xtask_glue::Mode) -> anyhow::Result<()> {
     let workspace_root = xtask_glue::project_root();
-    run_with_workspace_root(args, mode, &workspace_root)
-}
-
-/// Runs global-types codegen using `workspace_root` as the generated-output root.
-///
-/// This keeps the source cache rooted at the actual repository while allowing
-/// tests to verify the real emit/verify path against an isolated output tree.
-pub fn run_with_workspace_root(
-    args: GlobalTypesArgs,
-    mode: xtask_glue::Mode,
-    workspace_root: &Path,
-) -> anyhow::Result<()> {
-    if args.verify && (args.ts_tag.is_some() || args.ts_sha.is_some()) {
-        anyhow::bail!(
-            "--verify cannot be combined with --ts-tag or --ts-sha; verification always uses the default pin"
-        );
-    }
-    if args.ts_tag.is_some() != args.ts_sha.is_some() {
-        anyhow::bail!("--ts-tag and --ts-sha must be supplied together");
-    }
-
-    let pin = SourcePin::new(
-        args.ts_tag.as_deref().unwrap_or(DEFAULT_TYPESCRIPT_TAG),
-        args.ts_sha.as_deref().unwrap_or(DEFAULT_TYPESCRIPT_SHA),
-    );
+    let pin = SourcePin::new(DEFAULT_TYPESCRIPT_TAG, DEFAULT_TYPESCRIPT_SHA);
     let opts = source::SourceOptions {
-        offline: args.offline,
+        offline: false,
         verify: args.verify,
         repo_url_override: None,
     };
+    run_with_workspace_root(&pin, &opts, mode, &workspace_root)
+}
 
-    let checkout = source::acquire(&pin, &opts)?;
+/// Runs global-types codegen for an explicit source pin and options, writing the
+/// generated module under `workspace_root`.
+///
+/// Tests drive the real acquire/emit/verify path through this entry point with a
+/// fixture pin and an isolated output tree.
+pub fn run_with_workspace_root(
+    pin: &SourcePin,
+    opts: &source::SourceOptions,
+    mode: xtask_glue::Mode,
+    workspace_root: &Path,
+) -> anyhow::Result<()> {
+    let checkout = source::acquire(pin, opts)?;
     let libs = source::parse_lib_entries(&checkout)?;
     let source_files = source::discover(&checkout, &libs, source::PROFILE_ROOTS)?;
     collect_discovered_sources(&source_files)?;
