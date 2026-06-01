@@ -2724,7 +2724,7 @@ impl CssFunctionAtRuleDeclarator {
     pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -2751,7 +2751,7 @@ impl Serialize for CssFunctionAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssFunctionAtRuleDeclaratorFields {
     pub function_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssDashedIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameters: CssFunctionParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
