@@ -64,9 +64,7 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
         }
 
         let node = ctx.query();
-        if let Some(callee_name) = get_callee_name(node)
-            && callee_name != "defineProps"
-        {
+        if get_callee_name(node).is_none_or(|callee_name| callee_name != "defineProps") {
             return None;
         }
 
