@@ -10,11 +10,6 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
             eof_token: _,
         } = node.as_fields();
 
-        if node.syntax().text_trimmed().to_string().contains('#') {
-            // TODO: Implement stable formatting for comments in YAML documents.
-            return format_verbatim_node(node.syntax()).fmt(f);
-        }
-
         if documents.iter().any(|document| {
             matches!(
                 document,

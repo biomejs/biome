@@ -3,10 +3,12 @@ mod context;
 mod cst;
 mod generated;
 mod prelude;
+mod trivia;
 mod verbatim;
 mod yaml;
 
 pub use crate::context::{YamlFormatContext, YamlFormatOptions};
+pub(crate) use crate::trivia::*;
 
 use biome_deserialize::TextRange;
 use biome_formatter::comments::Comments;
