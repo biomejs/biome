@@ -37,30 +37,60 @@ info: yaml/comment/sequence-2.yml
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -25,3 +25,4 @@
- 
- 
- - none(2)
-+  
+# Prettier differences
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -26,7 +26,8 @@
-   # before-after.comment
+```diff
+--- Prettier
++++ Biome
+@@ -1,24 +1,13 @@
+-- before
++- before # before.comment
++- after # after.comment
  
+-  # before.comment
+-- after
+-  # after.comment
++- before-after # before-after.comment
  
--- none(2)"
-+- none(2)
-+  "
-   ]),
-   hard_line_break
- ]
-\ No newline at end of file
+-- before-after
+-
+-  # before-after.comment
+-
+ - none:
+-  # none.comment
+-- before(2 line)
+-
+-  # before.comment
+-- after(2 line)
+-  # after.comment
+-
+-- before-after(2 line)
++# none.comment
++- before(2 line) # before.comment
++- after(2 line) # after.comment
+ 
+-  # before-after.comment
++- before-after(2 line) # before-after.comment
+ 
+-- none(2)
+-  # none.comment
++- none(2) # none.comment
+```
 
+# Output
+
+```yml
+- before # before.comment
+- after # after.comment
+
+- before-after # before-after.comment
+
+- none:
+# none.comment
+- before(2 line) # before.comment
+- after(2 line) # after.comment
+
+- before-after(2 line) # before-after.comment
+
+- none(2) # none.comment
 ```
