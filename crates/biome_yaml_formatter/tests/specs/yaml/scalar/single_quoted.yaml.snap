@@ -17,9 +17,3 @@ info: yaml/scalar/single_quoted.yaml
 'single quoted'
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"'single quoted'" => 0..15

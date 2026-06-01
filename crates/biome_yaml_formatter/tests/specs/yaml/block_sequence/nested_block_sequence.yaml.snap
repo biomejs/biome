@@ -17,15 +17,8 @@ info: yaml/block_sequence/nested_block_sequence.yaml
 # Formatted
 
 ```yaml
--
-  - 20
+- - 20
   - 30
 - - 40
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"-\n  - 20\n  - 30\n- - 40" => 0..22

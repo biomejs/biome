@@ -21,10 +21,3 @@ a: 10
 "c": 30
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"'b':" => 6..10
-"\"c\":" => 14..18

@@ -39,4 +39,6 @@ info: yaml/block_scalar/folded_scalar.yaml
 
 ## Unimplemented nodes/tokens
 
-"- >\n hello\n world\n\n- >-\n stripped\n\n- >+\n kept" => 0..45
+" >\n hello\n worl" => 1..16
+" >-\n strippe" => 20..32
+" >+\n kep" => 36..44
