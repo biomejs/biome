@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/variable-declaration-boundary-comments.scss
+---
+
+# Input
+
+```scss
+@mixin boundary{/* leading */ $color /* name */ :/* value */red/* trailing */!default /* modifier */ ;$plain:/* value */red/* trailing */ ;}
+$line:red!default // c
+;
+
+```
+
+
+# Formatted
+
+```scss
+@mixin boundary {
+	/* leading */
+	$color/* name */ : /* value */ red /* trailing */ !default /* modifier */ ;
+	$plain: /* value */ red /* trailing */;
+}
+$line: red !default; // c
+
+```
