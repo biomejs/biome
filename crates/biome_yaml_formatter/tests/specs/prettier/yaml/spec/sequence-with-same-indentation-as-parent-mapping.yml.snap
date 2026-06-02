@@ -14,25 +14,31 @@ info: yaml/spec/sequence-with-same-indentation-as-parent-mapping.yml
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+sequence-with-same-indentation-as-parent-mapping.yml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,4 +1,4 @@
- 1:
--  - 2
--  - 3
-+- 2
-+- 3
- 4: 5
-```
+  × Expected a block mapping entry but instead found '- 3
+    4: 5'.
+  
+    1 │ 1:
+    2 │   - 2
+  > 3 │ - 3
+      │ ^^^
+  > 4 │ 4: 5
+      │ ^^^^
+    5 │ 
+  
+  i Expected a block mapping entry here.
+  
+    1 │ 1:
+    2 │   - 2
+  > 3 │ - 3
+      │ ^^^
+  > 4 │ 4: 5
+      │ ^^^^
+    5 │ 
+  
 
-# Output
-
-```yml
-1:
-- 2
-- 3
-4: 5
 ```

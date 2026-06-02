@@ -1,6 +1,7 @@
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
+    SourceComment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
@@ -57,8 +58,22 @@ impl CommentStyle for YamlCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        handle_global_suppression(comment)
+        handle_global_suppression(comment).or_else(handle_end_of_line_comment)
     }
+}
+
+fn handle_end_of_line_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    if comment.text_position() != CommentTextPosition::EndOfLine {
+        return CommentPlacement::Default(comment);
+    }
+
+    if let Some(preceding_node) = comment.preceding_node() {
+        return CommentPlacement::trailing(preceding_node.clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 fn handle_global_suppression(

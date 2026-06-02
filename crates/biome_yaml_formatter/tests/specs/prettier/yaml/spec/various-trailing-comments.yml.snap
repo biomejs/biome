@@ -26,54 +26,46 @@ block: > # lala
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,15 +1,16 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,5 +1,5 @@
  a: "double
-   quotes" # lala
+-  quotes" # lala # lala # lala # lala
++  quotes" # lala # lala
  b: plain
--  value # lala
--c: #lala
-+ value  # lala
-+c  : #lala
-   d
- ? # lala
--  - seq1
-+ - seq1
- : # lala
--  - #lala
--    seq2
--e: &node # lala
--  - x: y
-+ - #lala
-+  seq2
-+e:
-+ &node # lala
-+ - x: y
- block: > # lala
-   abcde
-```
+  value # lala
+ c: d #lala
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -3,10 +3,10 @@
+   verbatim([
+     "\"double
+   quotes\"",
+-    line_suffix([" # lala # lala"]),
++    line_suffix([" # lala"]),
+     expand_parent
+   ]),
+-  line_suffix([" # lala # lala"]),
++  line_suffix([" # lala"]),
+   expand_parent,
+   hard_line_break,
+   "b: plain
+@@ -14,9 +14,10 @@
+   line_suffix([" # lala"]),
+   expand_parent,
+   hard_line_break,
+-  "c: d",
++  "c",
+   line_suffix([" #lala"]),
+   expand_parent,
++  ": d",
+   hard_line_break,
+   verbatim([
+     "? # lala
 
-```yml
-a: "double
-  quotes" # lala
-b: plain
- value  # lala
-c  : #lala
-  d
-? # lala
- - seq1
-: # lala
- - #lala
-  seq2
-e:
- &node # lala
- - x: y
-block: > # lala
-  abcde
 ```

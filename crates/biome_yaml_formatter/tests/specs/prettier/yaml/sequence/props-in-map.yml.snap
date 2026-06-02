@@ -18,10 +18,12 @@ a: !!set &anchor
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,3 @@
- a: !!set &anchor
+@@ -1,3 +1,4 @@
+-a: !!set &anchor
 -  - 123
 -  - 456
++a:
++  !!set &anchor
 +- 123
 +- 456
 ```
@@ -29,7 +31,8 @@ a: !!set &anchor
 # Output
 
 ```yml
-a: !!set &anchor
+a:
+  !!set &anchor
 - 123
 - 456
 ```

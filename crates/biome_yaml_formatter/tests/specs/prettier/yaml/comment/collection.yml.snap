@@ -1,0 +1,126 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/collection.yml
+---
+
+# Input
+
+```yml
+a: # a.trailingComment
+  123
+  # implicitMappingValue
+
+? b
+  # explicitMappingKey
+: c
+  # explicitMappingValue
+
+d:
+  - 123
+  # sequence
+
+e:
+  - 123
+    # sequenceItem
+
+f:
+  - a
+  # b.leadingComments
+  - b
+    # b.endComments
+  - c
+    # c.endComments
+  # sequence.endComments
+# documentBody.children
+
+empty_content:
+  # hello world
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,6 +3,7 @@
+ ? b
+   # explicitMappingKey
+ : c
++  
+ 
+ d:
+   - 123
+@@ -10,6 +11,7 @@
+ 
+ e:
+   - 123
++    
+ 
+ f:
+   - a
+@@ -17,7 +19,7 @@
+   - b
+     # b.endComments
+   - c
+-
++    
+ # sequence.endComments
+ # documentBody.children
+ 
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,12 +1,16 @@
+ [
+-  "a: 123",
+-  line_suffix([" # a.trailingComment # implicitMappingValue"]),
++  "a",
++  line_suffix([" # a.trailingComment"]),
++  expand_parent,
++  ": 123",
++  line_suffix([" # implicitMappingValue"]),
+   expand_parent,
+   empty_line,
+   verbatim([
+     "? b
+   # explicitMappingKey
+-: c"
++: c
++  "
+   ]),
+   empty_line,
+   "d:",
+@@ -15,7 +19,13 @@
+   "# sequence",
+   empty_line,
+   "e:",
+-  indent([hard_line_break, verbatim(["- 123"])]),
++  indent([
++    hard_line_break,
++    verbatim([
++      "- 123
++    "
++    ])
++  ]),
+   empty_line,
+   "f:",
+   indent([
+@@ -25,10 +35,11 @@
+   # b.leadingComments
+   - b
+     # b.endComments
+-  - c"
++  - c
++    "
+     ])
+   ]),
+-  empty_line,
++  hard_line_break,
+   "# sequence.endComments",
+   hard_line_break,
+   "# documentBody.children",
+
+```

@@ -28,4 +28,4 @@ info: yaml/block_sequence/nested_block_sequence.yaml
 
 ## Unimplemented nodes/tokens
 
-"-\n  - 20\n  - 30\n- - 40\n" => 0..23
+"-\n  - 20\n  - 30\n- - 40" => 0..22

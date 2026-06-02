@@ -34,11 +34,8 @@ keep: |+
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,19 +1,19 @@
--# Strip
--# Comments:
-+ # Strip
-+  # Comments:
+@@ -2,18 +2,18 @@
+ # Comments:
  strip: |-
    # text
 -
@@ -70,8 +67,8 @@ keep: |+
 # Output
 
 ```yml
- # Strip
-  # Comments:
+# Strip
+# Comments:
 strip: |-
   # text
   

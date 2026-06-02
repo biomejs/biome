@@ -28,4 +28,4 @@ info: yaml/block_sequence/simple_block_sequence.yaml
 
 ## Unimplemented nodes/tokens
 
-"- 10\n- '20'\n- \"30\"\n- hello\n" => 0..27
+"- 10\n- '20'\n- \"30\"\n- hello" => 0..26

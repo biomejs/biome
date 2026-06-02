@@ -22,4 +22,4 @@ info: yaml/scalar/single_quoted.yaml
 
 ## Unimplemented nodes/tokens
 
-"'single quoted'\n" => 0..16
+"'single quoted'" => 0..15

@@ -21,26 +21,22 @@ info: yaml/spec/spec-example-6-12-separation-spaces.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
+@@ -1,6 +1,4 @@
  { first: Sammy, last: Sosa }:
--  # Statistics:
+   # Statistics:
 -  hr: # Home runs
 -    65
-+# Statistics:
-+  hr:  # Home runs
-+     65
-   avg: # Average
+-  avg: # Average
 -    0.278
-+   0.278
++  hr: 65 # Home runs
++  avg: 0.278 # Average
 ```
 
 # Output
 
 ```yml
 { first: Sammy, last: Sosa }:
-# Statistics:
-  hr:  # Home runs
-     65
-  avg: # Average
-   0.278
+  # Statistics:
+  hr: 65 # Home runs
+  avg: 0.278 # Average
 ```

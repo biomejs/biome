@@ -17,33 +17,49 @@ mapping:
 ```
 
 
-# Prettier differences
+# Error
+```text
+reformat: formatter output had syntax errors where input had none:
+spec-example-5-3-block-structure-indicators.yml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```diff
---- Prettier
-+++ Biome
-@@ -1,6 +1,7 @@
- sequence:
--  - one
--  - two
-+- one
-+- two
- mapping:
--  sky: blue
--  sea: green
-+  ? sky
-+  : blue
-+  sea : green
-```
+  × Expected a block mapping entry but instead found '- two
+    mapping:
+      ? sky
+      : blue
+      sea: green'.
+  
+    1 │ sequence:
+    2 │   - one
+  > 3 │ - two
+      │ ^^^^^
+  > 4 │ mapping:
+  > 5 │   ? sky
+  > 6 │   : blue
+  > 7 │   sea: green
+      │   ^^^^^^^^^^
+    8 │ 
+  
+  i Expected a block mapping entry here.
+  
+    1 │ sequence:
+    2 │   - one
+  > 3 │ - two
+      │ ^^^^^
+  > 4 │ mapping:
+  > 5 │   ? sky
+  > 6 │   : blue
+  > 7 │   sea: green
+      │   ^^^^^^^^^^
+    8 │ 
+  
+spec-example-5-3-block-structure-indicators.yml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Output
+  × Unexpected end of file.
+  
+    6 │   : blue
+    7 │   sea: green
+  > 8 │ 
+      │ 
+  
 
-```yml
-sequence:
-- one
-- two
-mapping:
-  ? sky
-  : blue
-  sea : green
 ```

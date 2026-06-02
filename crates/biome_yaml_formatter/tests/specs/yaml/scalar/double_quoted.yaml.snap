@@ -22,4 +22,4 @@ info: yaml/scalar/double_quoted.yaml
 
 ## Unimplemented nodes/tokens
 
-"\"Double quoted\"\n" => 0..16
+"\"Double quoted\"" => 0..15

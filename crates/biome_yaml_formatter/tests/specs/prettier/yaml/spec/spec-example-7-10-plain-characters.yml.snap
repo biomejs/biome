@@ -36,7 +36,7 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 +  ": - ()",
 +  "Up, up and away!",
 +  -123,
-+  http://example.com/foo#bar ]
++  http://example.com/foo
 ```
 
 # Output
@@ -53,7 +53,7 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
   ": - ()",
   "Up, up and away!",
   -123,
-  http://example.com/foo#bar ]
+  http://example.com/foo
 ```
 
 # Errors

@@ -20,21 +20,18 @@ c: d	#X
 --- Prettier
 +++ Biome
 @@ -1,4 +1,4 @@
--a: b
--seq:
+ a: b
+ seq:
 -  - a
--c: d #X
-+a: b	
-+seq:	
-+ - a	
-+c: d	#X
++  - a	
+ c: d #X
 ```
 
 # Output
 
 ```yml
-a: b	
-seq:	
- - a	
-c: d	#X
+a: b
+seq:
+  - a	
+c: d #X
 ```

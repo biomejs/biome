@@ -20,11 +20,10 @@ info: yaml/spec/tags-in-block-sequence.yml
 --- Prettier
 +++ Biome
 @@ -1,4 +1,4 @@
--- !!str a
+ - !!str a
 -- b
 -- !!int 42
 -- d
-+ - !!str a
 + - b
 + - !!int 42
 + - d
@@ -33,7 +32,7 @@ info: yaml/spec/tags-in-block-sequence.yml
 # Output
 
 ```yml
- - !!str a
+- !!str a
  - b
  - !!int 42
  - d
