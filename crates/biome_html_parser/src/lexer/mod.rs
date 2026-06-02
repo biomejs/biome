@@ -797,7 +797,7 @@ impl<'src> HtmlLexer<'src> {
     /// Peeks the next language keyword after whitespace, without
     /// advancing the lexer position. Returns `None` if no keyword follows.
     fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
-        let checkpoint = self.checkpoint();
+        let save = self.position;
         while self.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
             self.position += 1;
         }
@@ -805,7 +805,7 @@ impl<'src> HtmlLexer<'src> {
             .current_byte()
             .filter(|b| is_at_start_identifier(*b))
             .and_then(|b| self.consume_language_identifier(b));
-        self.rewind(checkpoint);
+        self.position = save;
         kind
     }
 
