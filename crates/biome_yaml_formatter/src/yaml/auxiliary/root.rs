@@ -7,7 +7,7 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
     fn fmt_fields(&self, node: &YamlRoot, f: &mut YamlFormatter) -> FormatResult<()> {
         let YamlRootFields {
             documents,
-            eof_token: _,
+            eof_token,
         } = node.as_fields();
 
         if documents.iter().any(|document| {
@@ -27,9 +27,9 @@ impl FormatNodeRule<YamlRoot> for FormatYamlRoot {
         write!(f, [documents.format()])?;
 
         if f.options().trailing_newline().value() {
-            write!(f, [hard_line_break()])
-        } else {
-            Ok(())
+            write!(f, [hard_line_break()])?;
         }
+
+        write!(f, [format_removed(&eof_token?)])
     }
 }

@@ -5,6 +5,20 @@ use biome_formatter::trivia::FormatToken;
 use biome_formatter::{Argument, Format, FormatResult};
 use biome_yaml_syntax::YamlSyntaxToken;
 
+pub(crate) struct FormatRemoved<'a> {
+    token: &'a YamlSyntaxToken,
+}
+
+pub(crate) fn format_removed(token: &YamlSyntaxToken) -> FormatRemoved<'_> {
+    FormatRemoved { token }
+}
+
+impl<'a> Format<YamlFormatContext> for FormatRemoved<'a> {
+    fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
+        FormatYamlSyntaxToken.format_removed(self.token, f)
+    }
+}
+
 pub(crate) struct FormatReplaced<'a> {
     token: &'a YamlSyntaxToken,
     content: Argument<'a, YamlFormatContext>,

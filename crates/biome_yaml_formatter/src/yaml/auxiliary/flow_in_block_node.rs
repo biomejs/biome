@@ -6,11 +6,18 @@ pub(crate) struct FormatYamlFlowInBlockNode;
 impl FormatNodeRule<YamlFlowInBlockNode> for FormatYamlFlowInBlockNode {
     fn fmt_fields(&self, node: &YamlFlowInBlockNode, f: &mut YamlFormatter) -> FormatResult<()> {
         let YamlFlowInBlockNodeFields {
-            flow_start_token: _,
+            flow_start_token,
             flow,
-            flow_end_token: _,
+            flow_end_token,
         } = node.as_fields();
 
-        write!(f, [flow.format()])
+        write!(
+            f,
+            [
+                format_removed(&flow_start_token?), // always empty, ignored
+                flow.format(),
+                format_removed(&flow_end_token?), // always empty, ignored
+            ]
+        )
     }
 }
