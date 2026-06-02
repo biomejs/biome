@@ -794,19 +794,34 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
+    /// Executes `op` speculatively: saves the current byte position,
+    /// runs `op`, then restores it. Only `self.position` is saved and
+    /// restored — other lexer state is not affected. This is safe for
+    /// callers that only advance position (e.g. whitespace skipping and
+    /// `consume_language_identifier`), and avoids the overhead of a full
+    /// `checkpoint()`/`rewind()` in a hot inner loop.
+    #[inline]
+    fn lookahead<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let save = self.position;
+        let result = op(self);
+        self.position = save;
+        result
+    }
+
     /// Peeks the next language keyword after whitespace, without
     /// advancing the lexer position. Returns `None` if no keyword follows.
     fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
-        let save = self.position;
-        while self.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
-            self.position += 1;
-        }
-        let kind = self
-            .current_byte()
-            .filter(|b| is_at_start_identifier(*b))
-            .and_then(|b| self.consume_language_identifier(b));
-        self.position = save;
-        kind
+        self.lookahead(|this| {
+            while this.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
+                this.position += 1;
+            }
+            this.current_byte()
+                .filter(|b| is_at_start_identifier(*b))
+                .and_then(|b| this.consume_language_identifier(b))
+        })
     }
 
     /// Attempts to consume HTML-ish languages identifiers. If none is found, the function
