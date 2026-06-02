@@ -25,7 +25,7 @@ bare-matchers-without-enabling-sort-bare-imports.options:8:22 deserialize ━━
     13 │         }
     14 │       }
   
-  i We are assessing an approach to sort a subset of bare imports, using bare kind matchers without setting sortBareImports to true. See the Pull Request for more details.
+  i This might change in a future versions of Biome. See the Pull Request for more details.
   
 
 ```

@@ -51,7 +51,7 @@ impl DeserializableValidator for OrganizeImportsOptions {
                 .with_range(range)
                 .with_custom_severity(Severity::Error)
                 .with_note(markup!(
-                        "We are assessing an approach to sort a subset of bare imports, using bare kind matchers without setting "<Emphasis>"sortBareImports"</Emphasis>" to "<Emphasis>"true"</Emphasis>". "
+                        "This might change in a future versions of Biome. "
                         "See the "<Hyperlink href="https://github.com/biomejs/biome/pull/10190">"Pull Request"</Hyperlink>" for more details."
                     ))
             );
