@@ -1,10 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::format_args;
 use biome_formatter::write;
-use biome_yaml_syntax::{
-    AnyYamlBlockInBlockContent, AnyYamlBlockNode, YamlBlockMapImplicitEntry,
-    YamlBlockMapImplicitEntryFields,
-};
+use biome_yaml_syntax::{YamlBlockMapImplicitEntry, YamlBlockMapImplicitEntryFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockMapImplicitEntry;
 impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEntry {
@@ -23,7 +20,7 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
 
         if let Some(value) = value {
             let has_leading_comments = f.comments().has_leading_comments(value.syntax());
-            if has_leading_comments || is_nested_block_collection(&value) {
+            if has_leading_comments || value.is_nested_block_collection() {
                 return write!(
                     f,
                     [indent(&format_args![hard_line_break(), value.format()])]
@@ -35,18 +32,4 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
 
         Ok(())
     }
-}
-
-fn is_nested_block_collection(value: &AnyYamlBlockNode) -> bool {
-    matches!(
-        value,
-        AnyYamlBlockNode::YamlBlockInBlockNode(node)
-            if matches!(
-                node.content(),
-                Ok(
-                    AnyYamlBlockInBlockContent::YamlBlockMapping(_)
-                        | AnyYamlBlockInBlockContent::YamlBlockSequence(_)
-                )
-            )
-    )
 }
