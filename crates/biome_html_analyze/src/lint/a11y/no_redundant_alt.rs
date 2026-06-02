@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlFileSource};
-use biome_rowan::AstNode;
+use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement, HtmlFileSource};
+use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
 
@@ -74,16 +74,31 @@ impl Rule for NoRedundantAlt {
             .ok()?;
 
         match alt {
-            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(ref expression) => {
-                let value = expression.expression().ok()?.html_literal_token().ok()?;
-
-                is_redundant_alt(value.text_trimmed()).then_some(alt)
-            }
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_) => None,
             AnyHtmlAttributeInitializer::HtmlString(ref value) => {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
-            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => None,
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => {
+                // Check only the static text chunks — interpolation expressions are skipped.
+                // If any chunk contains a redundant word the alt is flagged regardless of
+                // what the expressions evaluate to at runtime.
+                let static_text: String = value
+                    .elements()
+                    .iter()
+                    .filter_map(|el| match el {
+                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => chunk
+                            .html_template_chunk_token()
+                            .ok()
+                            .map(|t| t.text_trimmed().to_string()),
+                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
+                    })
+                    .collect();
+                if static_text.is_empty() {
+                    return None;
+                }
+                is_redundant_alt(&static_text).then_some(alt)
+            }
             AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }

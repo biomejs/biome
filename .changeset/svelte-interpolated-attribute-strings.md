@@ -2,8 +2,8 @@
 "@biomejs/biome": patch
 ---
 
-The HTML parser now parses Svelte `{expression}` interpolations inside quoted attribute values into structured nodes, instead of treating the whole value as an opaque string.
+Improved Svelte lint rule accuracy for quoted attribute values containing `{expression}` interpolations.
 
-```svelte
-<div style="top: {top}px" class="card {cls}"></div>
-```
+- [`noRedundantAlt`](https://biomejs.dev/linter/rules/no-redundant-alt/) no longer emits false positives when the alt text contains an interpolation, e.g. `alt="image of {person}"`.
+- [`useButtonType`](https://biomejs.dev/linter/rules/use-button-type/) no longer emits false positives for dynamic button types written as `type="{dynamicType}"`.
+- [`noScriptUrl`](https://biomejs.dev/linter/rules/no-script-url/) no longer emits false positives for dynamic hrefs such as `href="{url}"`.

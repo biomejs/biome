@@ -10,3 +10,7 @@
 
 <!-- We also should not flag components, only HTML elements -->
 <Button>submit</Button>
+
+<!-- Svelte template attribute values with interpolation are treated as dynamic — no false positive -->
+<button type="{dynamicType}">Dynamic type</button>
+<button type="sub{x}">Mixed type</button>
