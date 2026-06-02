@@ -9638,6 +9638,7 @@ export type Advice =
 	| { list: MarkupBuf[] }
 	| { frame: Location }
 	| { diff: TextEdit }
+	| { codeSuggestion: [Location, TextEdit] }
 	| { backtrace: [MarkupBuf, Backtrace] }
 	| { command: string }
 	| { group: [MarkupBuf, Advices] };
