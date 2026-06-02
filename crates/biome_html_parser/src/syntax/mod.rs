@@ -750,8 +750,7 @@ fn parse_attribute_initializer(
         // token (DOUBLE_QUOTE or SINGLE_QUOTE). Parse as a template attribute value that
         // handles both interpolated (with {expr}) and plain text content.
         let quote = if p.at(T!['"']) { b'"' } else { b'\'' };
-        parse_svelte_template_attribute_value(p, quote)
-            .or_add_diagnostic(p, expected_initializer);
+        parse_svelte_template_attribute_value(p, quote).or_add_diagnostic(p, expected_initializer);
     } else if p.at(HTML_STRING_LITERAL) {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     } else {
@@ -856,10 +855,7 @@ pub(crate) fn parse_single_text_expression(
             || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
             || context == HtmlLexContext::InsideTagAstro
             || context == HtmlLexContext::InsideTagSvelte
-            || matches!(
-                context,
-                HtmlLexContext::SvelteTemplateChunk { .. }
-            )
+            || matches!(context, HtmlLexContext::SvelteTemplateChunk { .. })
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {
