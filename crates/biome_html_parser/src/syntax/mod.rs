@@ -750,9 +750,9 @@ fn parse_attribute_initializer(
         // up to the first `{` (or the full string if there is no `{`). An O(1)
         // last-byte check tells us which case we're in.
         let text = p.cur_text().as_bytes();
-        let is_interpolated = text
-            .first()
-            .is_some_and(|&q| matches!(q, b'"' | b'\'') && (text.last() != Some(&q) || text.len() == 1));
+        let is_interpolated = text.first().is_some_and(|&q| {
+            matches!(q, b'"' | b'\'') && (text.last() != Some(&q) || text.len() == 1)
+        });
         if is_interpolated {
             let quote = text[0];
             p.re_lex(HtmlReLexContext::SvelteTemplateQuote);
