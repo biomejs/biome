@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use biome_formatter::format_args;
 use biome_formatter::write;
 use biome_yaml_syntax::{YamlBlockSequenceEntry, YamlBlockSequenceEntryFields};
 #[derive(Debug, Clone, Default)]
@@ -12,7 +11,7 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
         write!(f, [minus_token.format()])?;
 
         if let Some(value) = value {
-            write!(f, [space(), align(2, &format_args![value.format()])])?;
+            write!(f, [space(), align(2, &value.format())])?;
         }
 
         Ok(())
