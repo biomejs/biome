@@ -11,6 +11,9 @@ impl FormatNodeRule<SvelteRenameBinding> for FormatSvelteRenameBinding {
             name,
         } = node.as_fields();
 
-        write!(f, [key.format(), colon_token.format(), space(), name.format()])
+        write!(
+            f,
+            [key.format(), colon_token.format(), space(), name.format()]
+        )
     }
 }

@@ -3165,6 +3165,51 @@ pub struct SvelteOutDirectiveFields {
     pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteRenameBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteRenameBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteRenameBindingFields {
+        SvelteRenameBindingFields {
+            key: self.key(),
+            colon_token: self.colon_token(),
+            name: self.name(),
+        }
+    }
+    pub fn key(&self) -> SyntaxResult<SvelteName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AnySvelteBindingAssignmentBinding> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteRenameBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteRenameBindingFields {
+    pub key: SyntaxResult<SvelteName>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AnySvelteBindingAssignmentBinding>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteRenderBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3253,51 +3298,6 @@ impl Serialize for SvelteRestBinding {
 pub struct SvelteRestBindingFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<SvelteName>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteRenameBinding {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteRenameBinding {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteRenameBindingFields {
-        SvelteRenameBindingFields {
-            key: self.key(),
-            colon_token: self.colon_token(),
-            name: self.name(),
-        }
-    }
-    pub fn key(&self) -> SyntaxResult<SvelteName> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn name(&self) -> SyntaxResult<AnySvelteBindingAssignmentBinding> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-impl Serialize for SvelteRenameBinding {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteRenameBindingFields {
-    pub key: SyntaxResult<SvelteName>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<AnySvelteBindingAssignmentBinding>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteSnippetBlock {
@@ -8978,6 +8978,58 @@ impl From<SvelteOutDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for SvelteRenameBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_RENAME_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_RENAME_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteRenameBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteRenameBinding")
+                .field("key", &support::DebugSyntaxResult(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteRenameBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteRenameBinding> for SyntaxNode {
+    fn from(n: SvelteRenameBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteRenameBinding> for SyntaxElement {
+    fn from(n: SvelteRenameBinding) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for SvelteRenderBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9085,58 +9137,6 @@ impl From<SvelteRestBinding> for SyntaxNode {
 }
 impl From<SvelteRestBinding> for SyntaxElement {
     fn from(n: SvelteRestBinding) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for SvelteRenameBinding {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_RENAME_BINDING as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_RENAME_BINDING
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteRenameBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteRenameBinding")
-                .field("key", &support::DebugSyntaxResult(self.key()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteRenameBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<SvelteRenameBinding> for SyntaxNode {
-    fn from(n: SvelteRenameBinding) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteRenameBinding> for SyntaxElement {
-    fn from(n: SvelteRenameBinding) -> Self {
         n.syntax.into()
     }
 }
@@ -13091,17 +13091,17 @@ impl std::fmt::Display for SvelteOutDirective {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for SvelteRenameBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for SvelteRenderBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for SvelteRestBinding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for SvelteRenameBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
