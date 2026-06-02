@@ -36,8 +36,14 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@26..27 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@27..32 "\"red\"" [] [],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@27..28 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@28..31 "red" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@31..32 "\"" [] [],
                                 },
                             },
                         },
@@ -87,8 +93,12 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@26..26
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..32
                 0: EQ@26..27 "=" [] []
-                1: HTML_STRING@27..32
-                  0: HTML_STRING_LITERAL@27..32 "\"red\"" [] []
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@27..32
+                  0: DOUBLE_QUOTE@27..28 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@28..31
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@28..31
+                      0: HTML_TEMPLATE_CHUNK@28..31 "red" [] []
+                  2: DOUBLE_QUOTE@31..32 "\"" [] []
         3: R_ANGLE@32..33 ">" [] []
       1: HTML_ELEMENT_LIST@33..46
         0: HTML_CONTENT@33..46

@@ -59,8 +59,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@29..30 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@30..39 "\"loading\"" [] [],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@30..31 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@31..38 "loading" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@38..39 "\"" [] [],
                                         },
                                     },
                                 },
@@ -81,8 +87,14 @@ HtmlRoot {
                                             },
                                             initializer: HtmlAttributeInitializerClause {
                                                 eq_token: EQ@56..57 "=" [] [],
-                                                value: HtmlString {
-                                                    value_token: HTML_STRING_LITERAL@57..66 "\"spinner\"" [] [],
+                                                value: SvelteTemplateAttributeValue {
+                                                    l_quote: DOUBLE_QUOTE@57..58 "\"" [] [],
+                                                    elements: SvelteTemplateElementList [
+                                                        SvelteTemplateChunkElement {
+                                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@58..65 "spinner" [] [],
+                                                        },
+                                                    ],
+                                                    r_quote: DOUBLE_QUOTE@65..66 "\"" [] [],
                                                 },
                                             },
                                         },
@@ -156,8 +168,14 @@ HtmlRoot {
                                         },
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@159..160 "=" [] [],
-                                            value: HtmlString {
-                                                value_token: HTML_STRING_LITERAL@160..169 "\"success\"" [] [],
+                                            value: SvelteTemplateAttributeValue {
+                                                l_quote: DOUBLE_QUOTE@160..161 "\"" [] [],
+                                                elements: SvelteTemplateElementList [
+                                                    SvelteTemplateChunkElement {
+                                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@161..168 "success" [] [],
+                                                    },
+                                                ],
+                                                r_quote: DOUBLE_QUOTE@168..169 "\"" [] [],
                                             },
                                         },
                                     },
@@ -244,8 +262,14 @@ HtmlRoot {
                                         },
                                         initializer: HtmlAttributeInitializerClause {
                                             eq_token: EQ@276..277 "=" [] [],
-                                            value: HtmlString {
-                                                value_token: HTML_STRING_LITERAL@277..284 "\"error\"" [] [],
+                                            value: SvelteTemplateAttributeValue {
+                                                l_quote: DOUBLE_QUOTE@277..278 "\"" [] [],
+                                                elements: SvelteTemplateElementList [
+                                                    SvelteTemplateChunkElement {
+                                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@278..283 "error" [] [],
+                                                    },
+                                                ],
+                                                r_quote: DOUBLE_QUOTE@283..284 "\"" [] [],
                                             },
                                         },
                                     },
@@ -395,8 +419,12 @@ HtmlRoot {
                     0: HTML_LITERAL@24..29 "class" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@29..39
                     0: EQ@29..30 "=" [] []
-                    1: HTML_STRING@30..39
-                      0: HTML_STRING_LITERAL@30..39 "\"loading\"" [] []
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@30..39
+                      0: DOUBLE_QUOTE@30..31 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@31..38
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@31..38
+                          0: HTML_TEMPLATE_CHUNK@31..38 "loading" [] []
+                      2: DOUBLE_QUOTE@38..39 "\"" [] []
               3: R_ANGLE@39..40 ">" [] []
             1: HTML_ELEMENT_LIST@40..124
               0: HTML_ELEMENT@40..74
@@ -410,8 +438,12 @@ HtmlRoot {
                         0: HTML_LITERAL@51..56 "class" [] []
                       1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@56..66
                         0: EQ@56..57 "=" [] []
-                        1: HTML_STRING@57..66
-                          0: HTML_STRING_LITERAL@57..66 "\"spinner\"" [] []
+                        1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@57..66
+                          0: DOUBLE_QUOTE@57..58 "\"" [] []
+                          1: SVELTE_TEMPLATE_ELEMENT_LIST@58..65
+                            0: SVELTE_TEMPLATE_CHUNK_ELEMENT@58..65
+                              0: HTML_TEMPLATE_CHUNK@58..65 "spinner" [] []
+                          2: DOUBLE_QUOTE@65..66 "\"" [] []
                   3: R_ANGLE@66..67 ">" [] []
                 1: HTML_ELEMENT_LIST@67..67
                 2: HTML_CLOSING_ELEMENT@67..74
@@ -461,8 +493,12 @@ HtmlRoot {
                       0: HTML_LITERAL@154..159 "class" [] []
                     1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@159..169
                       0: EQ@159..160 "=" [] []
-                      1: HTML_STRING@160..169
-                        0: HTML_STRING_LITERAL@160..169 "\"success\"" [] []
+                      1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@160..169
+                        0: DOUBLE_QUOTE@160..161 "\"" [] []
+                        1: SVELTE_TEMPLATE_ELEMENT_LIST@161..168
+                          0: SVELTE_TEMPLATE_CHUNK_ELEMENT@161..168
+                            0: HTML_TEMPLATE_CHUNK@161..168 "success" [] []
+                        2: DOUBLE_QUOTE@168..169 "\"" [] []
                 3: R_ANGLE@169..170 ">" [] []
               1: HTML_ELEMENT_LIST@170..239
                 0: HTML_ELEMENT@170..192
@@ -521,8 +557,12 @@ HtmlRoot {
                       0: HTML_LITERAL@271..276 "class" [] []
                     1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@276..284
                       0: EQ@276..277 "=" [] []
-                      1: HTML_STRING@277..284
-                        0: HTML_STRING_LITERAL@277..284 "\"error\"" [] []
+                      1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@277..284
+                        0: DOUBLE_QUOTE@277..278 "\"" [] []
+                        1: SVELTE_TEMPLATE_ELEMENT_LIST@278..283
+                          0: SVELTE_TEMPLATE_CHUNK_ELEMENT@278..283
+                            0: HTML_TEMPLATE_CHUNK@278..283 "error" [] []
+                        2: DOUBLE_QUOTE@283..284 "\"" [] []
                 3: R_ANGLE@284..285 ">" [] []
               1: HTML_ELEMENT_LIST@285..375
                 0: HTML_ELEMENT@285..304

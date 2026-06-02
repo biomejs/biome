@@ -74,7 +74,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "is",
         "define",
     ],
-    literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
+    literals: &["HTML_STRING_LITERAL", "HTML_LITERAL", "HTML_TEMPLATE_CHUNK"],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
     nodes: &[
         "HTML_ROOT",
@@ -168,9 +168,9 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_DIRECTIVE_MODIFIER_LIST",
         "SVELTE_LITERAL",
         "SVELTE_MEMBER_PROPERTY",
-        "SVELTE_INTERPOLATED_STRING",
-        "SVELTE_INTERPOLATED_STRING_PART_LIST",
-        "SVELTE_INTERPOLATED_STRING_CHUNK",
+        "SVELTE_TEMPLATE_ATTRIBUTE_VALUE",
+        "SVELTE_TEMPLATE_ELEMENT_LIST",
+        "SVELTE_TEMPLATE_CHUNK_ELEMENT",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",

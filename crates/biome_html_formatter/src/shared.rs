@@ -18,7 +18,7 @@ impl Format<HtmlFormatContext> for FmtAnyAttributeInitializer {
             AnyHtmlAttributeInitializer::HtmlString(node) => {
                 node.format().with_options(self.compact).fmt(f)
             }
-            AnyHtmlAttributeInitializer::SvelteInterpolatedString(node) => node.format().fmt(f),
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(node) => node.format().fmt(f),
             AnyHtmlAttributeInitializer::VueVForValue(node) => node.format().fmt(f),
         }
     }

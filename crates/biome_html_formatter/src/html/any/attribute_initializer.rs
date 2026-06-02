@@ -12,7 +12,7 @@ impl FormatRule<AnyHtmlAttributeInitializer> for FormatAnyHtmlAttributeInitializ
                 node.format().fmt(f)
             }
             AnyHtmlAttributeInitializer::HtmlString(node) => node.format().fmt(f),
-            AnyHtmlAttributeInitializer::SvelteInterpolatedString(node) => node.format().fmt(f),
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(node) => node.format().fmt(f),
             AnyHtmlAttributeInitializer::VueVForValue(node) => node.format().fmt(f),
         }
     }

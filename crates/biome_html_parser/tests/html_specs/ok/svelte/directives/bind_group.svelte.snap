@@ -33,8 +33,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@11..12 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@12..20 "\"radio\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@12..13 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@13..18 "radio" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@18..20 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -64,8 +70,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@47..48 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@48..52 "\"a\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@48..49 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@49..50 "a" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@50..52 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -85,8 +97,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@66..67 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@67..75 "\"radio\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@67..68 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@68..73 "radio" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@73..75 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -116,8 +134,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@102..103 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@103..107 "\"b\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@103..104 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@104..105 "b" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@105..107 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -137,8 +161,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@121..122 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@122..133 "\"checkbox\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@122..123 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@123..131 "checkbox" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@131..133 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -168,8 +198,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@160..161 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@161..168 "\"mint\"" [] [Whitespace(" ")],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@161..162 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@162..166 "mint" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@166..168 "\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -200,8 +236,12 @@ HtmlRoot {
             0: HTML_LITERAL@7..11 "type" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..20
             0: EQ@11..12 "=" [] []
-            1: HTML_STRING@12..20
-              0: HTML_STRING_LITERAL@12..20 "\"radio\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@12..20
+              0: DOUBLE_QUOTE@12..13 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@13..18
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@13..18
+                  0: HTML_TEMPLATE_CHUNK@13..18 "radio" [] []
+              2: DOUBLE_QUOTE@18..20 "\"" [] [Whitespace(" ")]
         1: SVELTE_BIND_DIRECTIVE@20..42
           0: BIND_KW@20..24 "bind" [] []
           1: SVELTE_DIRECTIVE_VALUE@24..42
@@ -221,8 +261,12 @@ HtmlRoot {
             0: HTML_LITERAL@42..47 "value" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@47..52
             0: EQ@47..48 "=" [] []
-            1: HTML_STRING@48..52
-              0: HTML_STRING_LITERAL@48..52 "\"a\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@48..52
+              0: DOUBLE_QUOTE@48..49 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@49..50
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@49..50
+                  0: HTML_TEMPLATE_CHUNK@49..50 "a" [] []
+              2: DOUBLE_QUOTE@50..52 "\"" [] [Whitespace(" ")]
       3: SLASH@52..53 "/" [] []
       4: R_ANGLE@53..54 ">" [] []
     1: HTML_SELF_CLOSING_ELEMENT@54..109
@@ -235,8 +279,12 @@ HtmlRoot {
             0: HTML_LITERAL@62..66 "type" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@66..75
             0: EQ@66..67 "=" [] []
-            1: HTML_STRING@67..75
-              0: HTML_STRING_LITERAL@67..75 "\"radio\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@67..75
+              0: DOUBLE_QUOTE@67..68 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@68..73
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@68..73
+                  0: HTML_TEMPLATE_CHUNK@68..73 "radio" [] []
+              2: DOUBLE_QUOTE@73..75 "\"" [] [Whitespace(" ")]
         1: SVELTE_BIND_DIRECTIVE@75..97
           0: BIND_KW@75..79 "bind" [] []
           1: SVELTE_DIRECTIVE_VALUE@79..97
@@ -256,8 +304,12 @@ HtmlRoot {
             0: HTML_LITERAL@97..102 "value" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@102..107
             0: EQ@102..103 "=" [] []
-            1: HTML_STRING@103..107
-              0: HTML_STRING_LITERAL@103..107 "\"b\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@103..107
+              0: DOUBLE_QUOTE@103..104 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@104..105
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@104..105
+                  0: HTML_TEMPLATE_CHUNK@104..105 "b" [] []
+              2: DOUBLE_QUOTE@105..107 "\"" [] [Whitespace(" ")]
       3: SLASH@107..108 "/" [] []
       4: R_ANGLE@108..109 ">" [] []
     2: HTML_SELF_CLOSING_ELEMENT@109..170
@@ -270,8 +322,12 @@ HtmlRoot {
             0: HTML_LITERAL@117..121 "type" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@121..133
             0: EQ@121..122 "=" [] []
-            1: HTML_STRING@122..133
-              0: HTML_STRING_LITERAL@122..133 "\"checkbox\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@122..133
+              0: DOUBLE_QUOTE@122..123 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@123..131
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@123..131
+                  0: HTML_TEMPLATE_CHUNK@123..131 "checkbox" [] []
+              2: DOUBLE_QUOTE@131..133 "\"" [] [Whitespace(" ")]
         1: SVELTE_BIND_DIRECTIVE@133..155
           0: BIND_KW@133..137 "bind" [] []
           1: SVELTE_DIRECTIVE_VALUE@137..155
@@ -291,8 +347,12 @@ HtmlRoot {
             0: HTML_LITERAL@155..160 "value" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@160..168
             0: EQ@160..161 "=" [] []
-            1: HTML_STRING@161..168
-              0: HTML_STRING_LITERAL@161..168 "\"mint\"" [] [Whitespace(" ")]
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@161..168
+              0: DOUBLE_QUOTE@161..162 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@162..166
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@162..166
+                  0: HTML_TEMPLATE_CHUNK@162..166 "mint" [] []
+              2: DOUBLE_QUOTE@166..168 "\"" [] [Whitespace(" ")]
       3: SLASH@168..169 "/" [] []
       4: R_ANGLE@169..170 ">" [] []
   4: EOF@170..171 "" [Newline("\n")] []

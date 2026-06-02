@@ -33,8 +33,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@11..12 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@12..17 "\"500\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@12..13 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@13..16 "500" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@16..17 "\"" [] [],
                             },
                         },
                     },
@@ -75,8 +81,12 @@ HtmlRoot {
               0: HTML_LITERAL@6..11 "title" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..17
               0: EQ@11..12 "=" [] []
-              1: HTML_STRING@12..17
-                0: HTML_STRING_LITERAL@12..17 "\"500\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@12..17
+                0: DOUBLE_QUOTE@12..13 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@13..16
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@13..16
+                    0: HTML_TEMPLATE_CHUNK@13..16 "500" [] []
+                2: DOUBLE_QUOTE@16..17 "\"" [] []
         3: R_ANGLE@17..18 ">" [] []
       1: HTML_ELEMENT_LIST@18..18
       2: HTML_CLOSING_ELEMENT@18..26

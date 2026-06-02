@@ -53,10 +53,10 @@ pub(crate) enum HtmlLexContext {
     /// the whole string, so the parser can detect interpolations without a pre-scan.
     SvelteAttributeValue,
 
-    /// Lexes literal chunks of a Svelte interpolated attribute value (e.g. `top: ` and
+    /// Lexes literal chunks of a Svelte template attribute value (e.g. `top: ` and
     /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
     /// runs until the next `{` or the closing quote.
-    SvelteInterpolatedStringChunk { quote: u8 },
+    SvelteTemplateChunk { quote: u8 },
 
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
     /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.

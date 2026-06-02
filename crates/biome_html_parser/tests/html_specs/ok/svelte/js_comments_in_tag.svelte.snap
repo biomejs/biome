@@ -103,8 +103,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@110..111 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@111..116 "\"foo\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@111..112 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@112..115 "foo" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@115..116 "\"" [] [],
                             },
                         },
                     },
@@ -137,8 +143,14 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@181..182 "=" [] [],
-                        value: HtmlString {
-                            value_token: HTML_STRING_LITERAL@182..188 "\"text\"" [] [],
+                        value: SvelteTemplateAttributeValue {
+                            l_quote: DOUBLE_QUOTE@182..183 "\"" [] [],
+                            elements: SvelteTemplateElementList [
+                                SvelteTemplateChunkElement {
+                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@183..187 "text" [] [],
+                                },
+                            ],
+                            r_quote: DOUBLE_QUOTE@187..188 "\"" [] [],
                         },
                     },
                 },
@@ -159,8 +171,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@235..236 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@236..243 "\"value\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@236..237 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@237..242 "value" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@242..243 "\"" [] [],
                             },
                         },
                     },
@@ -170,8 +188,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@278..279 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@279..288 "\"my-span\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@279..280 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@280..287 "my-span" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@287..288 "\"" [] [],
                             },
                         },
                     },
@@ -251,8 +275,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@475..476 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@476..501 "\"foo\"" [] [Whitespace(" "), Comments("/* block comment */")],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@476..477 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@477..480 "foo" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@480..501 "\"" [] [Whitespace(" "), Comments("/* block comment */")],
                             },
                         },
                     },
@@ -323,8 +353,12 @@ HtmlRoot {
               0: HTML_LITERAL@80..110 "class" [Newline("\n"), Whitespace("  "), Comments("/* block comment */"), Newline("\n"), Whitespace("  ")] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@110..116
               0: EQ@110..111 "=" [] []
-              1: HTML_STRING@111..116
-                0: HTML_STRING_LITERAL@111..116 "\"foo\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@111..116
+                0: DOUBLE_QUOTE@111..112 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@112..115
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@112..115
+                    0: HTML_TEMPLATE_CHUNK@112..115 "foo" [] []
+                2: DOUBLE_QUOTE@115..116 "\"" [] []
         3: R_ANGLE@116..118 ">" [Newline("\n")] []
       1: HTML_ELEMENT_LIST@118..122
         0: HTML_CONTENT@118..122
@@ -345,8 +379,12 @@ HtmlRoot {
             0: HTML_LITERAL@136..181 "type" [Newline("\n"), Whitespace("  "), Comments("/* multi-line\n     bl ..."), Newline("\n"), Whitespace("  ")] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@181..188
             0: EQ@181..182 "=" [] []
-            1: HTML_STRING@182..188
-              0: HTML_STRING_LITERAL@182..188 "\"text\"" [] []
+            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@182..188
+              0: DOUBLE_QUOTE@182..183 "\"" [] []
+              1: SVELTE_TEMPLATE_ELEMENT_LIST@183..187
+                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@183..187
+                  0: HTML_TEMPLATE_CHUNK@183..187 "text" [] []
+              2: DOUBLE_QUOTE@187..188 "\"" [] []
       3: SLASH@188..190 "/" [Newline("\n")] []
       4: R_ANGLE@190..191 ">" [] []
     3: HTML_ELEMENT@191..304
@@ -360,15 +398,23 @@ HtmlRoot {
               0: HTML_LITERAL@198..235 "data-test" [Newline("\n"), Whitespace("  "), Comments("// comment before attr"), Newline("\n"), Whitespace("  ")] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@235..243
               0: EQ@235..236 "=" [] []
-              1: HTML_STRING@236..243
-                0: HTML_STRING_LITERAL@236..243 "\"value\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@236..243
+                0: DOUBLE_QUOTE@236..237 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@237..242
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@237..242
+                    0: HTML_TEMPLATE_CHUNK@237..242 "value" [] []
+                2: DOUBLE_QUOTE@242..243 "\"" [] []
           1: HTML_ATTRIBUTE@243..288
             0: HTML_ATTRIBUTE_NAME@243..278
               0: HTML_LITERAL@243..278 "id" [Newline("\n"), Whitespace("  "), Comments("/* comment between at ..."), Newline("\n"), Whitespace("  ")] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@278..288
               0: EQ@278..279 "=" [] []
-              1: HTML_STRING@279..288
-                0: HTML_STRING_LITERAL@279..288 "\"my-span\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@279..288
+                0: DOUBLE_QUOTE@279..280 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@280..287
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@280..287
+                    0: HTML_TEMPLATE_CHUNK@280..287 "my-span" [] []
+                2: DOUBLE_QUOTE@287..288 "\"" [] []
         3: R_ANGLE@288..290 ">" [Newline("\n")] []
       1: HTML_ELEMENT_LIST@290..297
         0: HTML_CONTENT@290..297
@@ -421,8 +467,12 @@ HtmlRoot {
               0: HTML_LITERAL@470..475 "class" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@475..501
               0: EQ@475..476 "=" [] []
-              1: HTML_STRING@476..501
-                0: HTML_STRING_LITERAL@476..501 "\"foo\"" [] [Whitespace(" "), Comments("/* block comment */")]
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@476..501
+                0: DOUBLE_QUOTE@476..477 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@477..480
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@477..480
+                    0: HTML_TEMPLATE_CHUNK@477..480 "foo" [] []
+                2: DOUBLE_QUOTE@480..501 "\"" [] [Whitespace(" "), Comments("/* block comment */")]
         3: R_ANGLE@501..502 ">" [] []
       1: HTML_ELEMENT_LIST@502..506
         0: HTML_CONTENT@502..506
