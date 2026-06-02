@@ -1004,17 +1004,9 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
     }
 }
 
-/// Prefixes every line of `code` after the first with `indent`, but skips
-/// lines inside regions whose content is preserved verbatim by the
-/// embedded-language formatter:
-///
-/// * JavaScript/TypeScript **template literals** (backtick strings):
-///   continuation lines already carry their author-intended indentation, so
-///   adding the host indent again on every `check --write` pass would cause
-///   diverging indentation growth.
-/// * CSS/JS **block comments** (`/* … */`): same reasoning.
-///
-/// Empty lines are left alone so no trailing whitespace sneaks in.
+/// Prefixes every line of `code` after the first with `indent`, skipping
+/// lines inside template literals and block comments (whose content the
+/// formatter preserves verbatim). Empty lines are left alone.
 fn reindent_embedded_code(code: &str, indent: &str) -> String {
     if indent.is_empty() {
         return code.to_string();
