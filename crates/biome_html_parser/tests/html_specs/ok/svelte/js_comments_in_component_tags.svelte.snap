@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -45,14 +46,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@35..36 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@36..37 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@37..42 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@42..43 "\"" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@36..43 "\"value\"" [] [],
                         },
                     },
                 },
@@ -72,14 +67,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@78..79 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@79..80 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@80..85 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@85..86 "\"" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@79..86 "\"value\"" [] [],
                         },
                     },
                 },
@@ -99,14 +88,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@132..133 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@133..134 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@134..139 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@139..141 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -126,14 +109,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@182..183 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@183..184 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@184..189 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@189..191 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@183..191 "\"value\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -159,14 +136,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@236..237 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@237..238 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@238..243 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@243..244 "\"" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@237..244 "\"value\"" [] [],
                         },
                     },
                 },
@@ -197,12 +168,8 @@ HtmlRoot {
             0: HTML_LITERAL@10..35 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@35..43
             0: EQ@35..36 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@36..43
-              0: DOUBLE_QUOTE@36..37 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@37..42
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@37..42
-                  0: HTML_TEMPLATE_CHUNK@37..42 "value" [] []
-              2: DOUBLE_QUOTE@42..43 "\"" [] []
+            1: HTML_STRING@36..43
+              0: HTML_STRING_LITERAL@36..43 "\"value\"" [] []
       3: SLASH@43..45 "/" [Newline("\n")] []
       4: R_ANGLE@45..46 ">" [] []
     1: HTML_SELF_CLOSING_ELEMENT@46..89
@@ -215,12 +182,8 @@ HtmlRoot {
             0: HTML_LITERAL@57..78 "prop" [Newline("\n"), Comments("// line comment"), Newline("\n")] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@78..86
             0: EQ@78..79 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@79..86
-              0: DOUBLE_QUOTE@79..80 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@80..85
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@80..85
-                  0: HTML_TEMPLATE_CHUNK@80..85 "value" [] []
-              2: DOUBLE_QUOTE@85..86 "\"" [] []
+            1: HTML_STRING@79..86
+              0: HTML_STRING_LITERAL@79..86 "\"value\"" [] []
       3: SLASH@86..88 "/" [Newline("\n")] []
       4: R_ANGLE@88..89 ">" [] []
     2: HTML_SELF_CLOSING_ELEMENT@89..143
@@ -233,12 +196,8 @@ HtmlRoot {
             0: HTML_LITERAL@128..132 "prop" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@132..141
             0: EQ@132..133 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@133..141
-              0: DOUBLE_QUOTE@133..134 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@134..139
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@134..139
-                  0: HTML_TEMPLATE_CHUNK@134..139 "value" [] []
-              2: DOUBLE_QUOTE@139..141 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@133..141
+              0: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@141..142 "/" [] []
       4: R_ANGLE@142..143 ">" [] []
     3: HTML_SELF_CLOSING_ELEMENT@143..193
@@ -251,12 +210,8 @@ HtmlRoot {
             0: HTML_LITERAL@177..182 "prop" [Newline("\n")] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@182..191
             0: EQ@182..183 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@183..191
-              0: DOUBLE_QUOTE@183..184 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@184..189
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@184..189
-                  0: HTML_TEMPLATE_CHUNK@184..189 "value" [] []
-              2: DOUBLE_QUOTE@189..191 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@183..191
+              0: HTML_STRING_LITERAL@183..191 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@191..192 "/" [] []
       4: R_ANGLE@192..193 ">" [] []
     4: HTML_SELF_CLOSING_ELEMENT@193..247
@@ -273,12 +228,8 @@ HtmlRoot {
             0: HTML_LITERAL@211..236 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@236..244
             0: EQ@236..237 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@237..244
-              0: DOUBLE_QUOTE@237..238 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@238..243
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@238..243
-                  0: HTML_TEMPLATE_CHUNK@238..243 "value" [] []
-              2: DOUBLE_QUOTE@243..244 "\"" [] []
+            1: HTML_STRING@237..244
+              0: HTML_STRING_LITERAL@237..244 "\"value\"" [] []
       3: SLASH@244..246 "/" [Newline("\n")] []
       4: R_ANGLE@246..247 ">" [] []
   4: EOF@247..248 "" [Newline("\n")] []

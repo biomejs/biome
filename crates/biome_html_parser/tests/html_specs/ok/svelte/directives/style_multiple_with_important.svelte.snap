@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -38,14 +39,8 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@26..27 "=" [] [],
-                                value: SvelteTemplateAttributeValue {
-                                    l_quote: DOUBLE_QUOTE@27..28 "\"" [] [],
-                                    elements: SvelteTemplateElementList [
-                                        SvelteTemplateChunkElement {
-                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@28..31 "red" [] [],
-                                        },
-                                    ],
-                                    r_quote: DOUBLE_QUOTE@31..33 "\"" [] [Whitespace(" ")],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@27..33 "\"red\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -60,14 +55,8 @@ HtmlRoot {
                             modifiers: SvelteDirectiveModifierList [],
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@44..45 "=" [] [],
-                                value: SvelteTemplateAttributeValue {
-                                    l_quote: DOUBLE_QUOTE@45..46 "\"" [] [],
-                                    elements: SvelteTemplateElementList [
-                                        SvelteTemplateChunkElement {
-                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@46..51 "100px" [] [],
-                                        },
-                                    ],
-                                    r_quote: DOUBLE_QUOTE@51..53 "\"" [] [Whitespace(" ")],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@45..53 "\"100px\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -137,12 +126,8 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@26..26
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..33
                 0: EQ@26..27 "=" [] []
-                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@27..33
-                  0: DOUBLE_QUOTE@27..28 "\"" [] []
-                  1: SVELTE_TEMPLATE_ELEMENT_LIST@28..31
-                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@28..31
-                      0: HTML_TEMPLATE_CHUNK@28..31 "red" [] []
-                  2: DOUBLE_QUOTE@31..33 "\"" [] [Whitespace(" ")]
+                1: HTML_STRING@27..33
+                  0: HTML_STRING_LITERAL@27..33 "\"red\"" [] [Whitespace(" ")]
           1: SVELTE_STYLE_DIRECTIVE@33..53
             0: STYLE_KW@33..38 "style" [] []
             1: SVELTE_DIRECTIVE_VALUE@38..53
@@ -152,12 +137,8 @@ HtmlRoot {
               2: SVELTE_DIRECTIVE_MODIFIER_LIST@44..44
               3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@44..53
                 0: EQ@44..45 "=" [] []
-                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@45..53
-                  0: DOUBLE_QUOTE@45..46 "\"" [] []
-                  1: SVELTE_TEMPLATE_ELEMENT_LIST@46..51
-                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@46..51
-                      0: HTML_TEMPLATE_CHUNK@46..51 "100px" [] []
-                  2: DOUBLE_QUOTE@51..53 "\"" [] [Whitespace(" ")]
+                1: HTML_STRING@45..53
+                  0: HTML_STRING_LITERAL@45..53 "\"100px\"" [] [Whitespace(" ")]
           2: SVELTE_STYLE_DIRECTIVE@53..90
             0: STYLE_KW@53..58 "style" [] []
             1: SVELTE_DIRECTIVE_VALUE@58..90

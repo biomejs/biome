@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -67,14 +68,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@42..43 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@43..44 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@44..49 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@49..51 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@43..51 "\"value\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -140,14 +135,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@118..119 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@119..120 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@120..125 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@125..127 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@119..127 "\"value\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -173,14 +162,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@152..153 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@153..154 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@154..159 "value" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@159..161 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@153..161 "\"value\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -233,12 +216,8 @@ HtmlRoot {
             0: HTML_LITERAL@38..42 "attr" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..51
             0: EQ@42..43 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@43..51
-              0: DOUBLE_QUOTE@43..44 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@44..49
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@44..49
-                  0: HTML_TEMPLATE_CHUNK@44..49 "value" [] []
-              2: DOUBLE_QUOTE@49..51 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@43..51
+              0: HTML_STRING_LITERAL@43..51 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@51..52 "/" [] []
       4: R_ANGLE@52..53 ">" [] []
     2: HTML_ELEMENT@53..81
@@ -284,12 +263,8 @@ HtmlRoot {
             0: HTML_LITERAL@106..118 "data-foo.bar" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@118..127
             0: EQ@118..119 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@119..127
-              0: DOUBLE_QUOTE@119..120 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@120..125
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@120..125
-                  0: HTML_TEMPLATE_CHUNK@120..125 "value" [] []
-              2: DOUBLE_QUOTE@125..127 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@119..127
+              0: HTML_STRING_LITERAL@119..127 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@127..128 "/" [] []
       4: R_ANGLE@128..129 ">" [] []
     5: HTML_SELF_CLOSING_ELEMENT@129..163
@@ -306,12 +281,8 @@ HtmlRoot {
             0: HTML_LITERAL@139..152 "attr.data-foo" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@152..161
             0: EQ@152..153 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@153..161
-              0: DOUBLE_QUOTE@153..154 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@154..159
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@154..159
-                  0: HTML_TEMPLATE_CHUNK@154..159 "value" [] []
-              2: DOUBLE_QUOTE@159..161 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@153..161
+              0: HTML_STRING_LITERAL@153..161 "\"value\"" [] [Whitespace(" ")]
       3: SLASH@161..162 "/" [] []
       4: R_ANGLE@162..163 ">" [] []
   4: EOF@163..164 "" [Newline("\n")] []
