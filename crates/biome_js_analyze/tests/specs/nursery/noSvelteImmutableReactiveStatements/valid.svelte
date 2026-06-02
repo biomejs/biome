@@ -1,0 +1,27 @@
+<!-- should not generate diagnostics -->
+<script>
+	import { writable } from "svelte/store";
+
+	export let base;
+	let count = 0;
+	const config = { x: 1 };
+	const store = writable(0);
+
+	// Depends on a prop, which the parent component can update.
+	$: doubledProp = base * 2;
+
+	// Depends on a `let`, which could be reassigned (here or in the template).
+	$: doubledCount = count * 2;
+
+	// Depends on a `const` object whose members may be mutated.
+	$: scaled = config.x * 2;
+
+	// Depends on a store accessed with the `$` prefix.
+	$: doubledStore = $store * 2;
+
+	// Built-in `$$props` is reactive.
+	$: spread = { ...$$props };
+
+	// Member assignments are treated as intentional side effects.
+	$: document.title = base;
+</script>

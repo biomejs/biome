@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { PI } from "./constants.js";
+
+	const base = 1;
+	const factor = 2;
+
+	// `const` primitive dependencies: this never re-runs.
+	$: doubled = base * factor;
+
+	// imported binding: immutable.
+	$: area = PI * base;
+
+	// reactive block referencing only immutable values.
+	$: {
+		sum = base + PI;
+	}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:9:2 lint/nursery/noSvelteImmutableReactiveStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This reactive statement only references immutable values, so it never re-runs.
+  
+     8 │ 	// `const` primitive dependencies: this never re-runs.
+   > 9 │ 	$: doubled = base * factor;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ 	// imported binding: immutable.
+  
+  i A reactive statement ($:) re-runs when the reactive values it references change. Since every referenced value is immutable, this runs only once, like a regular statement.
+  
+  i Reference a reactive value (a let that is reassigned, a store, or a prop), or convert it to a regular statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:2 lint/nursery/noSvelteImmutableReactiveStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This reactive statement only references immutable values, so it never re-runs.
+  
+    11 │ 	// imported binding: immutable.
+  > 12 │ 	$: area = PI * base;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ 	// reactive block referencing only immutable values.
+  
+  i A reactive statement ($:) re-runs when the reactive values it references change. Since every referenced value is immutable, this runs only once, like a regular statement.
+  
+  i Reference a reactive value (a let that is reassigned, a store, or a prop), or convert it to a regular statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:2 lint/nursery/noSvelteImmutableReactiveStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This reactive statement only references immutable values, so it never re-runs.
+  
+    14 │ 	// reactive block referencing only immutable values.
+  > 15 │ 	$: {
+       │ 	^^^^
+  > 16 │ 		sum = base + PI;
+  > 17 │ 	}
+       │ 	^
+    18 │ </script>
+    19 │ 
+  
+  i A reactive statement ($:) re-runs when the reactive values it references change. Since every referenced value is immutable, this runs only once, like a regular statement.
+  
+  i Reference a reactive value (a let that is reassigned, a store, or a prop), or convert it to a regular statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

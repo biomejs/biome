@@ -1140,6 +1140,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_suspicious_semicolon_in_jsx::NoSuspiciousSemicolonInJsxOptions,
         >(),
     ));
+    result.push(("nursery", "noSvelteImmutableReactiveStatements", TypeId::of::<biome_rule_options::no_svelte_immutable_reactive_statements::NoSvelteImmutableReactiveStatementsOptions>()));
     result.push((
         "a11y",
         "noSvgWithoutTitle",
@@ -2193,6 +2194,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_strict_mode::UseStrictModeOptions>(),
     ));
     result.push(("nursery", "useStringStartsEndsWith", TypeId::of::<biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions>()));
+    result.push(("nursery", "useSvelteRequireEachKey", TypeId::of::<biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions>()));
     result.push((
         "style",
         "useSymbolDescription",

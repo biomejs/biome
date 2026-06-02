@@ -5215,6 +5215,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteImmutableReactiveStatementsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteImmutableReactiveStatementsOptions" }
+			]
+		},
+		"NoSvelteImmutableReactiveStatementsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvgWithoutTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6591,6 +6601,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteImmutableReactiveStatements": {
+					"description": "Disallow reactive statements that reference only immutable values.\nSee https://biomejs.dev/linter/rules/no-svelte-immutable-reactive-statements",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoSvelteImmutableReactiveStatementsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noSyncScripts": {
 					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
@@ -6993,6 +7012,13 @@
 					"description": "Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.\nSee https://biomejs.dev/linter/rules/use-string-starts-ends-with",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseStringStartsEndsWithConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSvelteRequireEachKey": {
+					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteRequireEachKeyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7649,6 +7675,11 @@
 					"description": "Qwik framework rules",
 					"type": "string",
 					"const": "qwik"
+				},
+				{
+					"description": "Svelte framework rules",
+					"type": "string",
+					"const": "svelte"
 				},
 				{
 					"description": "Vue.js framework rules",
@@ -9946,6 +9977,17 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteImmutableReactiveStatementsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoSvelteImmutableReactiveStatementsOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvgWithoutTitleOptions": {
 			"type": "object",
 			"properties": {
@@ -12046,6 +12088,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseStringStartsEndsWithOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseSvelteRequireEachKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteRequireEachKeyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15726,6 +15777,16 @@
 			]
 		},
 		"UseStringStartsEndsWithOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteRequireEachKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteRequireEachKeyOptions" }
+			]
+		},
+		"UseSvelteRequireEachKeyOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

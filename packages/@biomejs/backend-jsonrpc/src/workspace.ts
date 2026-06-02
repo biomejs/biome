@@ -1069,6 +1069,7 @@ export type RuleDomain =
 	| "solid"
 	| "next"
 	| "qwik"
+	| "svelte"
 	| "vue"
 	| "project"
 	| "tailwind"
@@ -2357,6 +2358,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 	 */
 	noShadow?: NoShadowConfiguration;
 	/**
+	* Disallow reactive statements that reference only immutable values.
+See https://biomejs.dev/linter/rules/no-svelte-immutable-reactive-statements 
+	 */
+	noSvelteImmutableReactiveStatements?: NoSvelteImmutableReactiveStatementsConfiguration;
+	/**
 	* Prevent the usage of synchronous scripts.
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
@@ -2645,6 +2651,11 @@ See https://biomejs.dev/linter/rules/use-spread
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Require keyed {#each} blocks in Svelte templates.
+See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
+	 */
+	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
@@ -4483,6 +4494,9 @@ export type NoScriptUrlConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSvelteImmutableReactiveStatementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteImmutableReactiveStatementsOptions;
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
@@ -4654,6 +4668,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteRequireEachKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteRequireEachKeyOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6325,6 +6342,10 @@ export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
 }
+export interface RuleWithNoSvelteImmutableReactiveStatementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteImmutableReactiveStatementsOptions;
+}
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
@@ -6571,6 +6592,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseSvelteRequireEachKeyOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteRequireEachKeyOptions;
 }
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
@@ -8020,6 +8045,7 @@ Defaults to `true`.
 	 */
 	ignoreTypeValueShadow?: boolean;
 }
+export type NoSvelteImmutableReactiveStatementsOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -8257,6 +8283,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteRequireEachKeyOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9250,6 +9277,7 @@ export type Category =
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noSvelteImmutableReactiveStatements"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noTopLevelLiterals"
@@ -9317,6 +9345,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
