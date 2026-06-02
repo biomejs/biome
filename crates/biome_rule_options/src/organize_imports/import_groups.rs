@@ -228,7 +228,7 @@ pub struct NegatableImportKindMatcher {
     kind: ImportKindMatcher,
 }
 impl NegatableImportKindMatcher {
-    pub fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
         self.kind.is_match(candidate) != self.is_negated
     }
 }
@@ -319,13 +319,13 @@ pub enum ImportKindMatcher {
     Bare,
 }
 impl ImportKindMatcher {
-    fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
+    fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Bare => candidate.is_bare,
         }
     }
 
-    pub const fn is_bare(self) -> bool {
+    pub const fn is_bare(&self) -> bool {
         matches!(self, Self::Bare)
     }
 }
