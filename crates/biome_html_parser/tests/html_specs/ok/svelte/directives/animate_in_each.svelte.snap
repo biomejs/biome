@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -91,14 +92,8 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@109..110 "=" [] [],
-                                        value: SvelteTemplateAttributeValue {
-                                            l_quote: DOUBLE_QUOTE@110..111 "\"" [] [],
-                                            elements: SvelteTemplateElementList [
-                                                SvelteTemplateChunkElement {
-                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@111..119 "checkbox" [] [],
-                                                },
-                                            ],
-                                            r_quote: DOUBLE_QUOTE@119..121 "\"" [] [Whitespace(" ")],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@110..121 "\"checkbox\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -214,12 +209,8 @@ HtmlRoot {
                     0: HTML_LITERAL@105..109 "type" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@109..121
                     0: EQ@109..110 "=" [] []
-                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@110..121
-                      0: DOUBLE_QUOTE@110..111 "\"" [] []
-                      1: SVELTE_TEMPLATE_ELEMENT_LIST@111..119
-                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@111..119
-                          0: HTML_TEMPLATE_CHUNK@111..119 "checkbox" [] []
-                      2: DOUBLE_QUOTE@119..121 "\"" [] [Whitespace(" ")]
+                    1: HTML_STRING@110..121
+                      0: HTML_STRING_LITERAL@110..121 "\"checkbox\"" [] [Whitespace(" ")]
                 1: SVELTE_BIND_DIRECTIVE@121..146
                   0: BIND_KW@121..125 "bind" [] []
                   1: SVELTE_DIRECTIVE_VALUE@125..146

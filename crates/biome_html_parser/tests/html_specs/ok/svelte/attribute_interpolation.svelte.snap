@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -220,14 +221,8 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@139..140 "=" [] [],
-                            value: SvelteTemplateAttributeValue {
-                                l_quote: DOUBLE_QUOTE@140..141 "\"" [] [],
-                                elements: SvelteTemplateElementList [
-                                    SvelteTemplateChunkElement {
-                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@141..162 "no interpolation here" [] [],
-                                    },
-                                ],
-                                r_quote: DOUBLE_QUOTE@162..163 "\"" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@140..163 "\"no interpolation here\"" [] [],
                             },
                         },
                     },
@@ -440,12 +435,8 @@ HtmlRoot {
               0: HTML_LITERAL@134..139 "title" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@139..163
               0: EQ@139..140 "=" [] []
-              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@140..163
-                0: DOUBLE_QUOTE@140..141 "\"" [] []
-                1: SVELTE_TEMPLATE_ELEMENT_LIST@141..162
-                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@141..162
-                    0: HTML_TEMPLATE_CHUNK@141..162 "no interpolation here" [] []
-                2: DOUBLE_QUOTE@162..163 "\"" [] []
+              1: HTML_STRING@140..163
+                0: HTML_STRING_LITERAL@140..163 "\"no interpolation here\"" [] []
         3: R_ANGLE@163..164 ">" [] []
       1: HTML_ELEMENT_LIST@164..164
       2: HTML_CLOSING_ELEMENT@164..170

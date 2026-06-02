@@ -412,15 +412,27 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
-        if current == b'"' {
+        if matches!(current, b'"' | b'\'') && self.svelte_attribute_has_interpolation(current) {
             self.advance(1);
-            T!['"']
-        } else if current == b'\'' {
-            self.advance(1);
-            T!["'"]
+            if current == b'"' { T!['"'] } else { T!["'"] }
         } else {
             self.consume_token_attribute_value(current)
         }
+    }
+
+    /// Peek ahead (without consuming) to check if a quoted attribute value
+    /// contains at least one `{` before the closing quote.
+    fn svelte_attribute_has_interpolation(&self, quote: u8) -> bool {
+        let rest = self.source[self.position + 1..].as_bytes();
+        for byte in rest {
+            if *byte == b'{' {
+                return true;
+            }
+            if *byte == quote {
+                return false;
+            }
+        }
+        false
     }
 
     /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.

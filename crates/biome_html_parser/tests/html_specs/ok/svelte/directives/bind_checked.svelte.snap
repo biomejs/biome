@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 143
 expression: snapshot
 ---
 
@@ -32,14 +33,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@11..12 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@12..13 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@13..21 "checkbox" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@21..23 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@12..23 "\"checkbox\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -79,14 +74,8 @@ HtmlRoot {
                     },
                     initializer: HtmlAttributeInitializerClause {
                         eq_token: EQ@62..63 "=" [] [],
-                        value: SvelteTemplateAttributeValue {
-                            l_quote: DOUBLE_QUOTE@63..64 "\"" [] [],
-                            elements: SvelteTemplateElementList [
-                                SvelteTemplateChunkElement {
-                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@64..72 "checkbox" [] [],
-                                },
-                            ],
-                            r_quote: DOUBLE_QUOTE@72..74 "\"" [] [Whitespace(" ")],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@63..74 "\"checkbox\"" [] [Whitespace(" ")],
                         },
                     },
                 },
@@ -137,12 +126,8 @@ HtmlRoot {
             0: HTML_LITERAL@7..11 "type" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..23
             0: EQ@11..12 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@12..23
-              0: DOUBLE_QUOTE@12..13 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@13..21
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@13..21
-                  0: HTML_TEMPLATE_CHUNK@13..21 "checkbox" [] []
-              2: DOUBLE_QUOTE@21..23 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@12..23
+              0: HTML_STRING_LITERAL@12..23 "\"checkbox\"" [] [Whitespace(" ")]
         1: SVELTE_BIND_DIRECTIVE@23..48
           0: BIND_KW@23..27 "bind" [] []
           1: SVELTE_DIRECTIVE_VALUE@27..48
@@ -169,12 +154,8 @@ HtmlRoot {
             0: HTML_LITERAL@58..62 "type" [] []
           1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@62..74
             0: EQ@62..63 "=" [] []
-            1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@63..74
-              0: DOUBLE_QUOTE@63..64 "\"" [] []
-              1: SVELTE_TEMPLATE_ELEMENT_LIST@64..72
-                0: SVELTE_TEMPLATE_CHUNK_ELEMENT@64..72
-                  0: HTML_TEMPLATE_CHUNK@64..72 "checkbox" [] []
-              2: DOUBLE_QUOTE@72..74 "\"" [] [Whitespace(" ")]
+            1: HTML_STRING@63..74
+              0: HTML_STRING_LITERAL@63..74 "\"checkbox\"" [] [Whitespace(" ")]
         1: SVELTE_BIND_DIRECTIVE@74..111
           0: BIND_KW@74..78 "bind" [] []
           1: SVELTE_DIRECTIVE_VALUE@78..111
