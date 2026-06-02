@@ -201,6 +201,18 @@ impl TokenText {
             finished: false,
         }
     }
+
+    /// Returns an iterator over the non-whitespace substrings of this `TokenText`.
+    ///
+    /// This follows the behavior of [`str::split_whitespace`], using
+    /// `char::is_whitespace` and omitting empty substrings. The returned items
+    /// reference the same underlying token with adjusted ranges.
+    pub fn split_whitespace(&self) -> TokenTextSplitWhitespace {
+        TokenTextSplitWhitespace {
+            token: self.token.clone(),
+            remaining: self.range,
+        }
+    }
 }
 
 /// A trait representing a pattern that can be used to split a `TokenText`.
@@ -262,6 +274,39 @@ impl<P: TokenTextPattern> Iterator for TokenTextSplit<P> {
             let piece = TokenText::with_range(self.token.clone(), self.remaining);
             Some(piece)
         }
+    }
+}
+
+/// Iterator over the non-whitespace substrings of a `TokenText`.
+pub struct TokenTextSplitWhitespace {
+    token: GreenToken,
+    remaining: TextRange,
+}
+
+impl Iterator for TokenTextSplitWhitespace {
+    type Item = TokenText;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let hay = &self.token.text()[self.remaining];
+
+        let start = hay
+            .char_indices()
+            .find_map(|(idx, ch)| (!ch.is_whitespace()).then_some(idx))?;
+
+        let rest = &hay[start..];
+        let end = rest
+            .char_indices()
+            .find_map(|(idx, ch)| ch.is_whitespace().then_some(start + idx))
+            .unwrap_or(hay.len());
+
+        let start = self.remaining.start() + TextSize::from(start as u32);
+        let end = self.remaining.start() + TextSize::from(end as u32);
+        self.remaining = TextRange::new(end, self.remaining.end());
+
+        Some(TokenText::with_range(
+            self.token.clone(),
+            TextRange::new(start, end),
+        ))
     }
 }
 
@@ -354,6 +399,41 @@ mod tests {
         assert!(it.next().is_some());
         assert!(it.next().is_none());
         assert!(it.next().is_none());
+    }
+
+    #[test]
+    fn split_whitespace_basic() {
+        let t = tt("  foo \t bar\n\r baz  ");
+        let parts: Vec<String> = t.split_whitespace().map(|p| p.text().to_string()).collect();
+        assert_eq!(parts, vec!["foo", "bar", "baz"]);
+    }
+
+    #[test]
+    fn split_whitespace_all_whitespace() {
+        let t = tt(" \t\n\r ");
+        assert_eq!(t.split_whitespace().count(), 0);
+    }
+
+    #[test]
+    fn split_whitespace_unicode() {
+        let t = tt("foo\u{2003}bar\u{2028}baz");
+        let parts: Vec<String> = t.split_whitespace().map(|p| p.text().to_string()).collect();
+        assert_eq!(parts, vec!["foo", "bar", "baz"]);
+    }
+
+    #[test]
+    fn split_whitespace_preserves_ranges() {
+        let t = tt("  foo  bar  ");
+        let parts: Vec<TokenText> = t.split_whitespace().collect();
+
+        assert_eq!(
+            parts[0].relative_range(),
+            TextRange::new(2.into(), 5.into())
+        );
+        assert_eq!(
+            parts[1].relative_range(),
+            TextRange::new(7.into(), 10.into())
+        );
     }
 
     #[test]

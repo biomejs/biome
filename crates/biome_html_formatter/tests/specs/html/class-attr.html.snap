@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: class-attr.html
+---
+
+# Input
+
+```html
+<p
+  class="
+    foo
+    bar
+    baz
+  "
+>
+</p>
+
+
+<p
+  class="
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+    foo
+    bar
+    baz
+  "
+>
+</p>
+
+```
+
+
+# Formatted
+
+```html
+<p class="foo bar baz"></p>
+
+<p
+	class="foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz"
+></p>
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: 	class="foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz foo bar baz"
+```

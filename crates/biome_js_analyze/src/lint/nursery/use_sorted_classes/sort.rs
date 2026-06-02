@@ -138,7 +138,7 @@ pub fn sort_class_name(
         .map_or((false, false), |ctx| ctx.get_ignore_flags());
 
     // Obtain classes by splitting the class string by whitespace.
-    let mut classes_iter = class_name.split_whitespace();
+    let mut classes_iter = class_name.text().split_whitespace();
     let class_str_prefix = if ignore_prefix {
         classes_iter.next()
     } else {
@@ -215,7 +215,7 @@ pub fn get_sort_class_name_range(
     range: &TextRange,
     template_literal_space_context: &Option<TemplateLiteralSpaceContext>,
 ) -> Option<TextRange> {
-    let mut class_iter = class_name.split_whitespace();
+    let mut class_iter = class_name.text().split_whitespace();
     let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
     let last_class_len = class_iter.next_back().map_or(0, |s| s.len()) as u32;
 

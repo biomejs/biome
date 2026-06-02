@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: attributes/style.html
+---
+
+# Input
+
+```html
+<div
+  style="
+    background: #f3f4f6;
+    color: #111827;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: sans-serif;
+  "
+>
+  This element styles itself using the style attribute.
+</div>
+
+<div style="background: #f3f4f6; color: #111827">
+  This element styles itself using the style attribute.
+</div>
+
+<div style="background:           #f3f4f6;         color: #111827; padding: 16px; border-radius: 8px; font-family: sans-serif;">
+  This element styles itself using the style attribute.
+</div>
+
+<div style="background:           #f3f4f6;         color:#111827;">
+  This element styles itself using the style attribute.
+</div>
+
+```
+
+
+# Formatted
+
+```html
+<div
+	style="
+		background: #f3f4f6;
+		color: #111827;
+		padding: 16px;
+		border-radius: 8px;
+		font-family: sans-serif;
+	"
+>
+	This element styles itself using the style attribute.
+</div>
+
+<div style="background: #f3f4f6; color: #111827">
+	This element styles itself using the style attribute.
+</div>
+
+<div
+	style="
+		background: #f3f4f6;
+		color: #111827;
+		padding: 16px;
+		border-radius: 8px;
+		font-family: sans-serif;
+	"
+>
+	This element styles itself using the style attribute.
+</div>
+
+<div style="background: #f3f4f6; color: #111827">
+	This element styles itself using the style attribute.
+</div>
+
+```
