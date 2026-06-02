@@ -10,6 +10,10 @@ info: scss/at-rule/include-source-tight-function.scss
 @include transition(min-height($spacer/2) ease-in-out);
 @include transition(min-height ($spacer / 2) ease-in-out);
 @include transition(min-height($spacer / 2) ease-in-out);
+@include transition(min-height, $spacer/2, ease-in-out);
+@include transition(min-height, $spacer /2, ease-in-out);
+@include transition(min-height, $spacer/ 2, ease-in-out);
+@include transition(min-height, $spacer / 2, ease-in-out);
 
 ```
 
@@ -17,9 +21,13 @@ info: scss/at-rule/include-source-tight-function.scss
 # Formatted
 
 ```scss
+@include transition(min-height ($spacer/2) ease-in-out);
+@include transition(min-height($spacer/2) ease-in-out);
 @include transition(min-height ($spacer / 2) ease-in-out);
 @include transition(min-height($spacer / 2) ease-in-out);
-@include transition(min-height ($spacer / 2) ease-in-out);
-@include transition(min-height($spacer / 2) ease-in-out);
+@include transition(min-height, $spacer/2, ease-in-out);
+@include transition(min-height, $spacer / 2, ease-in-out);
+@include transition(min-height, $spacer/ 2, ease-in-out);
+@include transition(min-height, $spacer / 2, ease-in-out);
 
 ```
