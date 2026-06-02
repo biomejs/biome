@@ -745,12 +745,30 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
-    } else if Svelte.is_supported(p) && (p.at(T!['"']) || p.at(T!["'"])) {
-        // With the SvelteAttributeValue context, the opening quote is emitted as its own
-        // token (DOUBLE_QUOTE or SINGLE_QUOTE). Parse as a template attribute value that
-        // handles both interpolated (with {expr}) and plain text content.
-        let quote = if p.at(T!['"']) { b'"' } else { b'\'' };
-        parse_svelte_template_attribute_value(p, quote).or_add_diagnostic(p, expected_initializer);
+    } else if p.at(HTML_STRING_LITERAL) {
+        // In SvelteAttributeValue context the token includes the opening quote +
+        // text up to the first `{` (or the closing quote if there is no `{`).
+        // We do an O(1) last-byte check to decide whether it's interpolated.
+        let text = p.cur_text().as_bytes();
+        let svelte_quote = if Svelte.is_supported(p) {
+            text.first()
+                .copied()
+                .filter(|b| matches!(b, b'"' | b'\''))
+        } else {
+            None
+        };
+        let is_interpolated =
+            svelte_quote.is_some_and(|q| text.last() != Some(&q) || text.len() == 1);
+        if is_interpolated {
+            let quote = svelte_quote.unwrap();
+            // Re-lex the current HTML_STRING_LITERAL as just the opening quote
+            // so `parse_svelte_template_attribute_value` receives l_quote first.
+            p.re_lex(HtmlReLexContext::SvelteTemplateQuote);
+            parse_svelte_template_attribute_value(p, quote)
+                .or_add_diagnostic(p, expected_initializer);
+        } else {
+            parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+        }
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }

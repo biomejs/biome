@@ -411,27 +411,32 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
-        if matches!(current, b'"' | b'\'') && self.svelte_attribute_has_interpolation(current) {
+        if matches!(current, b'"' | b'\'') {
             self.advance(1);
-            if current == b'"' { T!['"'] } else { T!["'"] }
+            self.consume_svelte_attr_value_probe(current)
         } else {
             self.consume_token_attribute_value(current)
         }
     }
 
-    /// Peek ahead (without consuming) to check if a quoted attribute value
-    /// contains at least one `{` before the closing quote.
-    fn svelte_attribute_has_interpolation(&self, quote: u8) -> bool {
-        let rest = self.source[self.position + 1..].as_bytes();
-        for byte in rest {
-            if *byte == b'{' {
-                return true;
+    /// Consumes a quoted attribute value up to the first `{` or the closing
+    /// quote (inclusive). Returns `HTML_STRING_LITERAL`. The parser then does
+    /// an O(1) last-byte check to decide if it's interpolated.
+    fn consume_svelte_attr_value_probe(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' {
+                break;
             }
-            if *byte == quote {
-                return false;
+            if current == quote {
+                self.advance(1);
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
             }
         }
-        false
+        HTML_STRING_LITERAL
     }
 
     /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
@@ -1563,6 +1568,10 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteTemplateQuote => {
+                    self.advance(1);
+                    if current == b'"' { T!['"'] } else { T!["'"] }
+                }
             },
             None => EOF,
         };
