@@ -77,7 +77,8 @@ schema       = [
   "biome_rule_options/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
-  "lang_graphql"
+  "lang_graphql",
+  "plugins",
 ]
 test-utils   = []
 

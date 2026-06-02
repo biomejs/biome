@@ -49,8 +49,8 @@ $trailingBlockComment: (
 	a: b, /* end */
 );
 $multipleTrailingBlockComments: (
-	a: b, /* end */
-	/* more */
+	a: b,
+	/* end */ /* more */
 );
 $ownLineTrailingBlockComment: (
 	a: b,

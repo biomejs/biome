@@ -1,0 +1,16 @@
+$foo:('property1':(),'property2':1,/** comment 1 */
+/* comment 2 */
+);
+
+$bar:('property1':(),'property2':1,
+/** comment 1 */
+/* comment 2 */
+);
+
+$blank:('property1':(),'property2':1,/** comment 1 */
+
+/* comment 2 */
+);
+
+$nested:(outer:(inner:value,),/** one */
+/* two */);

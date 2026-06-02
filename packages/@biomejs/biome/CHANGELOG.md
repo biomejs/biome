@@ -1,5 +1,77 @@
 # @biomejs/biome
 
+## 2.4.16
+
+### Patch Changes
+
+- [#10329](https://github.com/biomejs/biome/pull/10329) [`ef764d5`](https://github.com/biomejs/biome/commit/ef764d51b9f5be18ec5a4f9b4dce732512e5d805) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed an issue where diagnostics showed an incorrect location in Astro files.
+
+- [#10363](https://github.com/biomejs/biome/pull/10363) [`50aa415`](https://github.com/biomejs/biome/commit/50aa4157599a1ac5c77c13bce81f5c87240beff0) Thanks [@dyc3](https://github.com/dyc3)! - Fixed HTML formatting for a case where comments could cause the formatter to split up a closing tag, which would cause the resulting HTML to be syntactically invalid.
+
+  Input:
+
+  ```html
+  <span
+    ><!-- 1
+  --><span>a</span
+    ><!-- 2
+  --><span>b</span
+    ><!-- 3
+  --></span>
+  ```
+
+  Output:
+
+  ```diff
+    <span
+  	  ><!-- 1
+  - --> <span>a</span<!-- 2
+  - --> ><span>b</span><!-- 3
+  + --><span>a</span><!-- 2
+  + --><span>b</span><!-- 3
+    --></span
+    >
+  ```
+
+- [#10465](https://github.com/biomejs/biome/pull/10465) [`0c718da`](https://github.com/biomejs/biome/commit/0c718da81770f47d65845bc1a006f99512d9359b) Thanks [@dfedoryshchev](https://github.com/dfedoryshchev)! - Fixed diagnostics emitted by the `noUntrustedLicenses` rule.
+
+- [#10358](https://github.com/biomejs/biome/pull/10358) [`05c2617`](https://github.com/biomejs/biome/commit/05c26176573534a0abfa92d454d244f9569bc77d) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10356](https://github.com/biomejs/biome/issues/10356): `biome rage --linter` now displays rules enabled through linter domains in the enabled rules list.
+
+- [#10300](https://github.com/biomejs/biome/pull/10300) [`950247c`](https://github.com/biomejs/biome/commit/950247c389e693c16b47d61d8ef0f1b85d1a1b02) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10265](https://github.com/biomejs/biome/issues/10265): Svelte function bindings such as `bind:value={get, set}` are now parsed more precisely, so [`noCommaOperator`](https://biomejs.dev/linter/rules/no-comma-operator/) won't emit false positives for that syntax anymore.
+
+- [#9786](https://github.com/biomejs/biome/pull/9786) [`e71f584`](https://github.com/biomejs/biome/commit/e71f58490f3121432d1bc24ae5330ecf96391a40) Thanks [@MeGaNeKoS](https://github.com/MeGaNeKoS)! - Fixed [#8480](https://github.com/biomejs/biome/issues/8480): [`useDestructuring`](https://biomejs.dev/linter/rules/use-destructuring/) now provides `variableDeclarator` and `assignmentExpression` options to control which contexts enforce destructuring, matching ESLint's `prefer-destructuring` configuration. Both default to `{array: true, object: true}`. The diagnostic for object destructuring in assignment expressions now instructs users to wrap the assignment in parentheses.
+
+- [#10425](https://github.com/biomejs/biome/pull/10425) [`1948b72`](https://github.com/biomejs/biome/commit/1948b7242e092ed0cfcf501ef6f119202b8ea93b) Thanks [@sjh9714](https://github.com/sjh9714)! - Fixed [#10244](https://github.com/biomejs/biome/issues/10244): The `useOptionalChain` rule now detects negated guard inequality chains like `!foo || foo.bar !== "x"`.
+
+- [#10442](https://github.com/biomejs/biome/pull/10442) [`001f94f`](https://github.com/biomejs/biome/commit/001f94f696d9baca3c231d39895a01d4dd528d52) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10411](https://github.com/biomejs/biome/issues/10411): [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/) no longer causes a stack overflow when a nested function returns an object with shorthand properties that shadow destructured variables from an outer scope.
+
+- [#10318](https://github.com/biomejs/biome/pull/10318) [`9b1577f`](https://github.com/biomejs/biome/commit/9b1577fa400279d9b0222cbc920cfa9ddcf1c9d6) Thanks [@dyc3](https://github.com/dyc3)! - Added support for `formatter.trailingCommas` in overrides. This option was previously available in the top-level formatter configuration but missing from formatter overrides.
+
+- [#10319](https://github.com/biomejs/biome/pull/10319) [`2e37709`](https://github.com/biomejs/biome/commit/2e3770923f9fb4e33606113e726014f7b63730d0) Thanks [@dyc3](https://github.com/dyc3)! - Fixed Vue and Svelte formatting for standalone interpolations in inline elements. Biome now preserves existing newlines in cases like:
+
+  ```diff
+  - <span> {{ value }} </span>
+  + <span>
+  +   {{ value }}
+  + </span>
+  ```
+
+- [#10365](https://github.com/biomejs/biome/pull/10365) [`0a58eb0`](https://github.com/biomejs/biome/commit/0a58eb0982460b757a26f94d958a7e40c0686227) Thanks [@Netail](https://github.com/Netail)! - Fixed [#10361](https://github.com/biomejs/biome/issues/10361): [`noUnusedFunctionParameters`](https://biomejs.dev/linter/rules/no-unused-function-parameters/) now mentions the parameter name in the diagnostic.
+
+- [#10439](https://github.com/biomejs/biome/pull/10439) [`df6b867`](https://github.com/biomejs/biome/commit/df6b867bb6fd210cc75ac03d832e7281eced5b61) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed CSS and SCSS formatting for comments around declaration colons so comments between property names, colons, and values stay at the same boundary as Prettier.
+
+  ```diff
+   .selector {
+  -  color: /* red, */
+  -    blue;
+  +  color: /* red, */ blue;
+   }
+  ```
+
+- [#10344](https://github.com/biomejs/biome/pull/10344) [`b30208c`](https://github.com/biomejs/biome/commit/b30208c06365907d6fb376f030bc75bbf5e3dea9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [`#10123`](https://github.com/biomejs/biome/issues/10123): Corrected the [`noReactNativeDeepImports`](https://biomejs.dev/linter/rules/no-react-native-deep-imports/) source rule to point to the proper upstream rule, so users can migrate from the original rule correctly.
+
+- [#10328](https://github.com/biomejs/biome/pull/10328) [`b59133f`](https://github.com/biomejs/biome/commit/b59133fd2a8afa33564914df531f7f752b48ecee) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10309](https://github.com/biomejs/biome/issues/10309): Biome no longer adds newlines to Astro frontmatter when linter or assist `--write` mode is enabled.
+
 ## 2.4.15
 
 ### Patch Changes

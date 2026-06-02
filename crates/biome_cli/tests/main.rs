@@ -337,17 +337,17 @@ pub(crate) fn run_cli_with_dyn_fs(
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
     use biome_service::{WorkspaceRef, workspace};
-    use tokio::{
-        io::{duplex, split},
-        runtime::Runtime,
-    };
+    use tokio::io::{duplex, split};
 
     let factory = ServerFactory::new_with_fs(Arc::new(OsFileSystem::new(
         fs.working_directory().unwrap_or_default(),
     )));
     let connection = factory.create();
 
-    let runtime = Runtime::new().expect("failed to create runtime");
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("failed to create runtime");
 
     let (client, server) = duplex(4096);
     let (stdin, stdout) = split(server);

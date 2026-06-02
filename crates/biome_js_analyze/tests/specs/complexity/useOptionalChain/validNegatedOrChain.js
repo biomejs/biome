@@ -13,3 +13,25 @@ a || !a.b;
 
 // Mixed operators
 !a || !a.b && !a.b.c;
+
+// Equality comparisons are not equivalent when the base is nullish
+!foo || foo.bar === "x";
+!foo || foo.bar == "x";
+
+// Ordering comparisons are not equivalent when the base is nullish
+!foo || foo.bar > 0;
+!foo || foo.bar <= 0;
+
+// Dynamic comparison values are outside the supported static-safe shape
+!foo || foo.bar !== baz;
+
+// Nullish comparison values are outside the supported static-safe shape
+!foo || foo.bar !== undefined;
+!foo || foo.bar !== null;
+!foo || foo.bar != null;
+
+// Mismatched chains are not equivalent
+!foo || bar.baz !== "x";
+
+// The guard must be a negated base
+foo || foo.bar !== "x";
