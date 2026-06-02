@@ -69,6 +69,20 @@ impl<'source> HtmlParser<'source> {
         // should be reset manually when the scope of their use is exited.
     }
 
+    /// Execute a lookahead operation without consuming tokens.
+    ///
+    /// Saves a checkpoint, executes the provided closure, then rewinds to
+    /// the checkpoint. The closure's return value is passed through.
+    pub fn lookahead<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let checkpoint = self.checkpoint();
+        let result = op(self);
+        self.rewind(checkpoint);
+        result
+    }
+
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {

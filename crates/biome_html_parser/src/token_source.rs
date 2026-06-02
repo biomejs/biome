@@ -110,12 +110,17 @@ pub(crate) enum RestrictedExpressionStopAt {
     ClosingParen,
     /// Stops at `then` or `catch` keywords
     ThenOrCatch,
+    /// Like `AsOrComma`, but skips the first occurrence of `as` and stops at
+    /// the second. Used when the parser has determined via lookahead that the
+    /// expression contains a TypeScript `as const` assertion before the Svelte
+    /// binding `as`.
+    AsOrCommaSkipFirstAs,
 }
 
 impl RestrictedExpressionStopAt {
     pub(crate) fn matches_punct(&self, byte: u8) -> bool {
         match self {
-            Self::AsOrComma | Self::Comma => byte == b',',
+            Self::AsOrComma | Self::Comma | Self::AsOrCommaSkipFirstAs => byte == b',',
             Self::ClosingParen => byte == b')',
             Self::ThenOrCatch => false,
         }
@@ -123,7 +128,7 @@ impl RestrictedExpressionStopAt {
 
     pub(crate) fn matches_keyword(&self, keyword: HtmlSyntaxKind) -> bool {
         match self {
-            Self::AsOrComma => keyword == AS_KW,
+            Self::AsOrComma | Self::AsOrCommaSkipFirstAs => keyword == AS_KW,
             Self::Comma => false,
             Self::ClosingParen => false,
             Self::ThenOrCatch => keyword == THEN_KW || keyword == CATCH_KW,

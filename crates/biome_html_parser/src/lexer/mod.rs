@@ -542,6 +542,9 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
+        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
+        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let mut first_stop_keyword_seen = false;
 
         let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
         let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
@@ -579,19 +582,22 @@ impl<'src> HtmlLexer<'src> {
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
-                        // `as const` is a TypeScript type assertion that can appear inside
-                        // a `{#each}` expression; keep scanning so the real binding `as`
-                        // (which follows it) is the one that stops us.
-                        let is_as_const = should_stop
-                            && keyword_kind == AS_KW
-                            && self.peek_keyword_after_space() == Some(CONST_KW);
-
-                        if should_stop && !is_as_const {
-                            // Rewind - don't consume the keyword
-                            self.position = checkpoint_pos;
-                            break;
+                        if should_stop {
+                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+                                && !first_stop_keyword_seen
+                            {
+                                // First `as` belongs to a TypeScript `as const` assertion;
+                                // the parser determined this via lookahead. Skip it and
+                                // continue scanning for the Svelte binding `as`.
+                                first_stop_keyword_seen = true;
+                            } else {
+                                // Rewind — don't consume the keyword
+                                self.position = checkpoint_pos;
+                                break;
+                            }
                         }
-                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                        // Not a stop keyword (or skipped), continue
+                        // (position already advanced by consume_language_identifier)
                     } else {
                         // Not a keyword, advance one byte (position was reset by consume_language_identifier)
                         self.advance_byte_or_char(current);
@@ -792,36 +798,6 @@ impl<'src> HtmlLexer<'src> {
     #[inline]
     fn assert_at_char_boundary(&self) {
         debug_assert!(self.source.is_char_boundary(self.position));
-    }
-
-    /// Executes `op` speculatively: saves the current byte position,
-    /// runs `op`, then restores it. Only `self.position` is saved and
-    /// restored — other lexer state is not affected. This is safe for
-    /// callers that only advance position (e.g. whitespace skipping and
-    /// `consume_language_identifier`), and avoids the overhead of a full
-    /// `checkpoint()`/`rewind()` in a hot inner loop.
-    #[inline]
-    fn lookahead<F, R>(&mut self, op: F) -> R
-    where
-        F: FnOnce(&mut Self) -> R,
-    {
-        let save = self.position;
-        let result = op(self);
-        self.position = save;
-        result
-    }
-
-    /// Peeks the next language keyword after whitespace, without
-    /// advancing the lexer position. Returns `None` if no keyword follows.
-    fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
-        self.lookahead(|this| {
-            while this.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
-                this.position += 1;
-            }
-            this.current_byte()
-                .filter(|b| is_at_start_identifier(*b))
-                .and_then(|b| this.consume_language_identifier(b))
-        })
     }
 
     /// Attempts to consume HTML-ish languages identifiers. If none is found, the function
