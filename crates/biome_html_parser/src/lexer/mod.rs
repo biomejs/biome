@@ -422,16 +422,17 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes a quoted attribute value up to the first `{` or the closing
     /// quote (inclusive). Returns `HTML_STRING_LITERAL`. The parser then does
     /// an O(1) last-byte check to decide if it's interpolated.
+    ///
+    /// Uses `lookup_byte` as the primary dispatch (same as `consume_string_literal`)
+    /// to avoid redundant comparisons in the hot path.
     fn consume_svelte_attr_value_probe(&mut self, quote: u8) -> HtmlSyntaxKind {
         while let Some(current) = self.current_byte() {
-            if current == b'{' {
-                break;
-            }
-            if current == quote {
-                self.advance(1);
-                break;
-            }
             match lookup_byte(current) {
+                BEO => break, // `{` — possible interpolation, stop here
+                QOT if current == quote => {
+                    self.advance(1);
+                    break;
+                }
                 UNI => self.advance_char_unchecked(),
                 _ => self.advance(1),
             }
