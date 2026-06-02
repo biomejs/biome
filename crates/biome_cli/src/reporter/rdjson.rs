@@ -1,10 +1,11 @@
 use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_console::fmt::{Display, Formatter};
-use biome_console::{MarkupBuf, markup};
-use biome_diagnostics::display::{SourceFile, markup_to_string};
-use biome_diagnostics::{Error, Location, LogCategory, PrintDescription, Visit};
+use biome_console::markup;
+use biome_diagnostics::display::SourceFile;
+use biome_diagnostics::{Error, Location, PrintDescription, Visit};
+use biome_rowan::{TextRange, TextSize};
+use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
@@ -138,58 +139,40 @@ fn to_rdjson_location(location: &Location<'_>) -> Option<RdJsonLocation> {
 
 struct SuggestionsVisitor {
     suggestions: Vec<RdJsonSuggestion>,
-    current_message: Option<String>,
-    last_diagnostic_length: usize,
 }
 
 impl Visit for SuggestionsVisitor {
-    fn record_log(&mut self, _category: LogCategory, text: &dyn Display) -> std::io::Result<()> {
-        let message = {
-            let mut message = MarkupBuf::default();
-            let mut fmt = Formatter::new(&mut message);
-            fmt.write_markup(markup!({ { text } }))?;
-            markup_to_string(&message).expect("Invalid markup")
+    fn record_code_suggestion(
+        &mut self,
+        location: Location<'_>,
+        diff: &TextEdit,
+    ) -> std::io::Result<()> {
+        let Some(source_code) = location.source_code else {
+            return Ok(());
         };
-        let current_diagnostic_length = self.suggestions.len();
-
-        if self.last_diagnostic_length != current_diagnostic_length {
-            let last_suggestion = self
-                .suggestions
-                .last_mut()
-                .expect("No suggestions to append to");
-            last_suggestion.text = message;
-        } else if let Some(current_message) = self.current_message.as_mut() {
-            current_message.push_str(&message);
-        } else {
-            self.current_message = Some(message);
-        }
-
-        Ok(())
-    }
-
-    fn record_frame(&mut self, location: Location<'_>) -> std::io::Result<()> {
-        let range = if let (Some(span), Some(source_code)) = (location.span, location.source_code) {
-            let source = SourceFile::new(source_code);
-            let start = source.location(span.start()).expect("Invalid span");
-            let end = source.location(span.end()).expect("Invalid span");
-
-            RdJsonRange {
-                end: RdJsonLineColumn {
-                    line: end.line_number.get(),
-                    column: end.column_number.get(),
-                },
-                start: RdJsonLineColumn {
-                    line: start.line_number.get(),
-                    column: start.column_number.get(),
-                },
-            }
-        } else {
-            RdJsonRange::default()
+        let Some(span) = location
+            .span
+            .or_else(|| changed_input_range(diff, source_code.text))
+        else {
+            return Ok(());
         };
 
-        self.last_diagnostic_length = self.suggestions.len();
+        let source = SourceFile::new(source_code);
+        let start = source.location(span.start()).expect("Invalid span");
+        let end = source.location(span.end()).expect("Invalid span");
+        let range = RdJsonRange {
+            end: RdJsonLineColumn {
+                line: end.line_number.get(),
+                column: end.column_number.get(),
+            },
+            start: RdJsonLineColumn {
+                line: start.line_number.get(),
+                column: start.column_number.get(),
+            },
+        };
+
         self.suggestions.push(RdJsonSuggestion {
-            text: self.current_message.take().unwrap_or_default(),
+            text: suggestion_text(diff, source_code.text, span),
             range,
         });
 
@@ -200,13 +183,91 @@ impl Visit for SuggestionsVisitor {
 fn to_rdjson_suggetions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
     let mut visitor = SuggestionsVisitor {
         suggestions: vec![],
-        last_diagnostic_length: 0,
-        current_message: None,
     };
 
     diagnostic.advices(&mut visitor).unwrap();
 
     visitor.suggestions
+}
+
+fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> String {
+    let mut output = String::new();
+    let mut input_position = TextSize::from(0);
+
+    for op in diff {
+        match op {
+            CompressedOp::DiffOp(DiffOp::Equal { range: diff_range }) => {
+                let text = diff.get_text(*diff_range);
+                append_overlap(&mut output, text, input_position, range);
+                input_position += diff_range.len();
+            }
+            CompressedOp::DiffOp(DiffOp::Insert { range: diff_range }) => {
+                if range.start() <= input_position && input_position <= range.end() {
+                    output.push_str(diff.get_text(*diff_range));
+                }
+            }
+            CompressedOp::DiffOp(DiffOp::Delete { range: diff_range }) => {
+                input_position += diff_range.len();
+            }
+            CompressedOp::EqualLines { line_count } => {
+                let text = equal_lines_text(source, input_position, line_count.get());
+                append_overlap(&mut output, text, input_position, range);
+                input_position += TextSize::of(text);
+            }
+        }
+    }
+
+    output
+}
+
+fn changed_input_range(diff: &TextEdit, source: &str) -> Option<TextRange> {
+    let mut input_position = TextSize::from(0);
+    let mut start = None;
+    let mut end = TextSize::from(0);
+
+    for op in diff {
+        match op {
+            CompressedOp::DiffOp(DiffOp::Equal { range }) => {
+                input_position += range.len();
+            }
+            CompressedOp::DiffOp(DiffOp::Insert { .. }) => {
+                start.get_or_insert(input_position);
+                end = input_position;
+            }
+            CompressedOp::DiffOp(DiffOp::Delete { range }) => {
+                start.get_or_insert(input_position);
+                input_position += range.len();
+                end = input_position;
+            }
+            CompressedOp::EqualLines { line_count } => {
+                let text = equal_lines_text(source, input_position, line_count.get());
+                input_position += TextSize::of(text);
+            }
+        }
+    }
+
+    start.map(|start| TextRange::new(start, end))
+}
+
+fn append_overlap(output: &mut String, text: &str, text_start: TextSize, range: TextRange) {
+    let text_range = TextRange::at(text_start, TextSize::of(text));
+    let Some(overlap) = text_range.intersect(range) else {
+        return;
+    };
+
+    let relative_range = overlap - text_start;
+    output.push_str(&text[relative_range]);
+}
+
+fn equal_lines_text(source: &str, start: TextSize, line_count: u32) -> &str {
+    let input = &source[usize::from(start)..];
+    let mut length = TextSize::from(0);
+
+    for line in input.split_inclusive('\n').take(line_count as usize + 1) {
+        length += TextSize::of(line);
+    }
+
+    &source[TextRange::at(start, length)]
 }
 
 #[derive(Serialize)]

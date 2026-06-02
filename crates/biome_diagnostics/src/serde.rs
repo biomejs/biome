@@ -219,6 +219,16 @@ impl Visit for Advices {
         Ok(())
     }
 
+    fn record_code_suggestion(
+        &mut self,
+        location: super::Location<'_>,
+        diff: &TextEdit,
+    ) -> io::Result<()> {
+        self.advices
+            .push(Advice::CodeSuggestion(location.into(), diff.clone()));
+        Ok(())
+    }
+
     fn record_backtrace(
         &mut self,
         title: &dyn fmt::Display,
@@ -273,6 +283,7 @@ enum Advice {
     List(Vec<MarkupBuf>),
     Frame(Location),
     Diff(TextEdit),
+    CodeSuggestion(Location, TextEdit),
     Backtrace(MarkupBuf, Backtrace),
     Command(String),
     Group(MarkupBuf, Advices),
@@ -286,7 +297,7 @@ impl Advice {
             | Self::Backtrace(_, _)
             | Self::Command(_)
             | Self::Diff(_) => {}
-            Self::Frame(location) => {
+            Self::Frame(location) | Self::CodeSuggestion(location, _) => {
                 location.offset_by(offset);
             }
             Self::Group(_, advices) => {
@@ -314,6 +325,17 @@ impl super::Advices for Advice {
                 }),
             }),
             Self::Diff(diff) => visitor.record_diff(diff),
+            Self::CodeSuggestion(location, diff) => visitor.record_code_suggestion(
+                super::Location {
+                    resource: location.path.as_ref().map(super::Resource::as_deref),
+                    span: location.span,
+                    source_code: location.source_code.as_deref().map(|text| SourceCode {
+                        text,
+                        line_starts: None,
+                    }),
+                },
+                diff,
+            ),
             Self::Backtrace(title, backtrace) => visitor.record_backtrace(title, backtrace),
             Self::Command(command) => visitor.record_command(command),
             Self::Group(title, advice) => visitor.record_group(title, advice),
