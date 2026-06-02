@@ -7,7 +7,7 @@ use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlFileSource, HtmlOpeningElement,
     element_ext::AnyHtmlTagElement, inner_string_text,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -77,11 +77,19 @@ impl Rule for NoScriptUrl {
         let initializer = attr.initializer()?;
         let value = initializer.value().ok()?;
 
-        if let AnyHtmlAttributeInitializer::HtmlString(html_string) = value
-            && let Ok(token) = html_string.value_token()
-        {
-            let inner = inner_string_text(&token);
-            if inner.trim().to_lowercase_cow().starts_with("javascript:") {
+        let string_text: Option<Text> = match &value {
+            AnyHtmlAttributeInitializer::HtmlString(html_string) => html_string
+                .value_token()
+                .ok()
+                .map(|token| inner_string_text(&token).into()),
+            // For Svelte template attribute values that contain only plain text
+            // (no interpolations), we can still extract the static string.
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => value.string_value(),
+            _ => None,
+        };
+
+        if let Some(text) = string_text {
+            if text.trim().to_lowercase_cow().starts_with("javascript:") {
                 return Some(initializer.range());
             }
         }

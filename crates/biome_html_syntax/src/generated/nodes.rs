@@ -2870,76 +2870,6 @@ pub struct SvelteInDirectiveFields {
     pub value: SyntaxResult<SvelteDirectiveValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteInterpolatedString {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteInterpolatedString {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteInterpolatedStringFields {
-        SvelteInterpolatedStringFields {
-            parts: self.parts(),
-        }
-    }
-    pub fn parts(&self) -> SvelteInterpolatedStringPartList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-impl Serialize for SvelteInterpolatedString {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteInterpolatedStringFields {
-    pub parts: SvelteInterpolatedStringPartList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct SvelteInterpolatedStringChunk {
-    pub(crate) syntax: SyntaxNode,
-}
-impl SvelteInterpolatedStringChunk {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> SvelteInterpolatedStringChunkFields {
-        SvelteInterpolatedStringChunkFields {
-            html_string_literal_token: self.html_string_literal_token(),
-        }
-    }
-    pub fn html_string_literal_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for SvelteInterpolatedStringChunk {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct SvelteInterpolatedStringChunkFields {
-    pub html_string_literal_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteKeyBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3593,6 +3523,86 @@ impl Serialize for SvelteStyleDirective {
 pub struct SvelteStyleDirectiveFields {
     pub style_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<SvelteDirectiveValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteTemplateAttributeValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteTemplateAttributeValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteTemplateAttributeValueFields {
+        SvelteTemplateAttributeValueFields {
+            l_quote: self.l_quote(),
+            elements: self.elements(),
+            r_quote: self.r_quote(),
+        }
+    }
+    pub fn l_quote(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn elements(&self) -> SvelteTemplateElementList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_quote(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for SvelteTemplateAttributeValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteTemplateAttributeValueFields {
+    pub l_quote: SyntaxResult<SyntaxToken>,
+    pub elements: SvelteTemplateElementList,
+    pub r_quote: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteTemplateChunkElement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteTemplateChunkElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteTemplateChunkElementFields {
+        SvelteTemplateChunkElementFields {
+            html_template_chunk_token: self.html_template_chunk_token(),
+        }
+    }
+    pub fn html_template_chunk_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for SvelteTemplateChunkElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteTemplateChunkElementFields {
+    pub html_template_chunk_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteTransitionDirective {
@@ -4601,7 +4611,7 @@ impl AnyHtmlAttribute {
 pub enum AnyHtmlAttributeInitializer {
     HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
     HtmlString(HtmlString),
-    SvelteInterpolatedString(SvelteInterpolatedString),
+    SvelteTemplateAttributeValue(SvelteTemplateAttributeValue),
     VueVForValue(VueVForValue),
 }
 impl AnyHtmlAttributeInitializer {
@@ -4619,9 +4629,9 @@ impl AnyHtmlAttributeInitializer {
             _ => None,
         }
     }
-    pub fn as_svelte_interpolated_string(&self) -> Option<&SvelteInterpolatedString> {
+    pub fn as_svelte_template_attribute_value(&self) -> Option<&SvelteTemplateAttributeValue> {
         match &self {
-            Self::SvelteInterpolatedString(item) => Some(item),
+            Self::SvelteTemplateAttributeValue(item) => Some(item),
             _ => None,
         }
     }
@@ -5090,27 +5100,6 @@ impl AnySvelteEachName {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnySvelteInterpolatedStringPart {
-    HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
-    SvelteInterpolatedStringChunk(SvelteInterpolatedStringChunk),
-}
-impl AnySvelteInterpolatedStringPart {
-    pub fn as_html_attribute_single_text_expression(
-        &self,
-    ) -> Option<&HtmlAttributeSingleTextExpression> {
-        match &self {
-            Self::HtmlAttributeSingleTextExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_svelte_interpolated_string_chunk(&self) -> Option<&SvelteInterpolatedStringChunk> {
-        match &self {
-            Self::SvelteInterpolatedStringChunk(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteMemberObject {
     SvelteMemberProperty(SvelteMemberProperty),
     SvelteName(SvelteName),
@@ -5125,6 +5114,27 @@ impl AnySvelteMemberObject {
     pub fn as_svelte_name(&self) -> Option<&SvelteName> {
         match &self {
             Self::SvelteName(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnySvelteTemplateElement {
+    HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression),
+    SvelteTemplateChunkElement(SvelteTemplateChunkElement),
+}
+impl AnySvelteTemplateElement {
+    pub fn as_html_attribute_single_text_expression(
+        &self,
+    ) -> Option<&HtmlAttributeSingleTextExpression> {
+        match &self {
+            Self::HtmlAttributeSingleTextExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_template_chunk_element(&self) -> Option<&SvelteTemplateChunkElement> {
+        match &self {
+            Self::SvelteTemplateChunkElement(item) => Some(item),
             _ => None,
         }
     }
@@ -8713,103 +8723,6 @@ impl From<SvelteInDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for SvelteInterpolatedString {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_INTERPOLATED_STRING as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_INTERPOLATED_STRING
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteInterpolatedString {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteInterpolatedString")
-                .field("parts", &self.parts())
-                .finish()
-        } else {
-            f.debug_struct("SvelteInterpolatedString").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<SvelteInterpolatedString> for SyntaxNode {
-    fn from(n: SvelteInterpolatedString) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteInterpolatedString> for SyntaxElement {
-    fn from(n: SvelteInterpolatedString) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for SvelteInterpolatedStringChunk {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_INTERPOLATED_STRING_CHUNK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_INTERPOLATED_STRING_CHUNK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for SvelteInterpolatedStringChunk {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteInterpolatedStringChunk")
-                .field(
-                    "html_string_literal_token",
-                    &support::DebugSyntaxResult(self.html_string_literal_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteInterpolatedStringChunk").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<SvelteInterpolatedStringChunk> for SyntaxNode {
-    fn from(n: SvelteInterpolatedStringChunk) -> Self {
-        n.syntax
-    }
-}
-impl From<SvelteInterpolatedStringChunk> for SyntaxElement {
-    fn from(n: SvelteInterpolatedStringChunk) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for SvelteKeyBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9610,6 +9523,105 @@ impl From<SvelteStyleDirective> for SyntaxNode {
 }
 impl From<SvelteStyleDirective> for SyntaxElement {
     fn from(n: SvelteStyleDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteTemplateAttributeValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_TEMPLATE_ATTRIBUTE_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_TEMPLATE_ATTRIBUTE_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteTemplateAttributeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteTemplateAttributeValue")
+                .field("l_quote", &support::DebugSyntaxResult(self.l_quote()))
+                .field("elements", &self.elements())
+                .field("r_quote", &support::DebugSyntaxResult(self.r_quote()))
+                .finish()
+        } else {
+            f.debug_struct("SvelteTemplateAttributeValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteTemplateAttributeValue> for SyntaxNode {
+    fn from(n: SvelteTemplateAttributeValue) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteTemplateAttributeValue> for SyntaxElement {
+    fn from(n: SvelteTemplateAttributeValue) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteTemplateChunkElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_TEMPLATE_CHUNK_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_TEMPLATE_CHUNK_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteTemplateChunkElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteTemplateChunkElement")
+                .field(
+                    "html_template_chunk_token",
+                    &support::DebugSyntaxResult(self.html_template_chunk_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteTemplateChunkElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteTemplateChunkElement> for SyntaxNode {
+    fn from(n: SvelteTemplateChunkElement) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteTemplateChunkElement> for SyntaxElement {
+    fn from(n: SvelteTemplateChunkElement) -> Self {
         n.syntax.into()
     }
 }
@@ -10983,9 +10995,9 @@ impl From<HtmlString> for AnyHtmlAttributeInitializer {
         Self::HtmlString(node)
     }
 }
-impl From<SvelteInterpolatedString> for AnyHtmlAttributeInitializer {
-    fn from(node: SvelteInterpolatedString) -> Self {
-        Self::SvelteInterpolatedString(node)
+impl From<SvelteTemplateAttributeValue> for AnyHtmlAttributeInitializer {
+    fn from(node: SvelteTemplateAttributeValue) -> Self {
+        Self::SvelteTemplateAttributeValue(node)
     }
 }
 impl From<VueVForValue> for AnyHtmlAttributeInitializer {
@@ -10997,14 +11009,14 @@ impl AstNode for AnyHtmlAttributeInitializer {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = HtmlAttributeSingleTextExpression::KIND_SET
         .union(HtmlString::KIND_SET)
-        .union(SvelteInterpolatedString::KIND_SET)
+        .union(SvelteTemplateAttributeValue::KIND_SET)
         .union(VueVForValue::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION
                 | HTML_STRING
-                | SVELTE_INTERPOLATED_STRING
+                | SVELTE_TEMPLATE_ATTRIBUTE_VALUE
                 | VUE_V_FOR_VALUE
         )
     }
@@ -11016,8 +11028,8 @@ impl AstNode for AnyHtmlAttributeInitializer {
                 })
             }
             HTML_STRING => Self::HtmlString(HtmlString { syntax }),
-            SVELTE_INTERPOLATED_STRING => {
-                Self::SvelteInterpolatedString(SvelteInterpolatedString { syntax })
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                Self::SvelteTemplateAttributeValue(SvelteTemplateAttributeValue { syntax })
             }
             VUE_V_FOR_VALUE => Self::VueVForValue(VueVForValue { syntax }),
             _ => return None,
@@ -11028,7 +11040,7 @@ impl AstNode for AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
             Self::HtmlString(it) => it.syntax(),
-            Self::SvelteInterpolatedString(it) => it.syntax(),
+            Self::SvelteTemplateAttributeValue(it) => it.syntax(),
             Self::VueVForValue(it) => it.syntax(),
         }
     }
@@ -11036,7 +11048,7 @@ impl AstNode for AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             Self::HtmlString(it) => it.into_syntax(),
-            Self::SvelteInterpolatedString(it) => it.into_syntax(),
+            Self::SvelteTemplateAttributeValue(it) => it.into_syntax(),
             Self::VueVForValue(it) => it.into_syntax(),
         }
     }
@@ -11046,7 +11058,7 @@ impl std::fmt::Debug for AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlString(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteTemplateAttributeValue(it) => std::fmt::Debug::fmt(it, f),
             Self::VueVForValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -11056,7 +11068,7 @@ impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
         match n {
             AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
             AnyHtmlAttributeInitializer::HtmlString(it) => it.into_syntax(),
-            AnyHtmlAttributeInitializer::SvelteInterpolatedString(it) => it.into_syntax(),
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(it) => it.into_syntax(),
             AnyHtmlAttributeInitializer::VueVForValue(it) => it.into_syntax(),
         }
     }
@@ -12290,77 +12302,6 @@ impl From<AnySvelteEachName> for SyntaxElement {
         node.into()
     }
 }
-impl From<HtmlAttributeSingleTextExpression> for AnySvelteInterpolatedStringPart {
-    fn from(node: HtmlAttributeSingleTextExpression) -> Self {
-        Self::HtmlAttributeSingleTextExpression(node)
-    }
-}
-impl From<SvelteInterpolatedStringChunk> for AnySvelteInterpolatedStringPart {
-    fn from(node: SvelteInterpolatedStringChunk) -> Self {
-        Self::SvelteInterpolatedStringChunk(node)
-    }
-}
-impl AstNode for AnySvelteInterpolatedStringPart {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        HtmlAttributeSingleTextExpression::KIND_SET.union(SvelteInterpolatedStringChunk::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION | SVELTE_INTERPOLATED_STRING_CHUNK
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => {
-                Self::HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression {
-                    syntax,
-                })
-            }
-            SVELTE_INTERPOLATED_STRING_CHUNK => {
-                Self::SvelteInterpolatedStringChunk(SvelteInterpolatedStringChunk { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
-            Self::SvelteInterpolatedStringChunk(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
-            Self::SvelteInterpolatedStringChunk(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnySvelteInterpolatedStringPart {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteInterpolatedStringChunk(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnySvelteInterpolatedStringPart> for SyntaxNode {
-    fn from(n: AnySvelteInterpolatedStringPart) -> Self {
-        match n {
-            AnySvelteInterpolatedStringPart::HtmlAttributeSingleTextExpression(it) => {
-                it.into_syntax()
-            }
-            AnySvelteInterpolatedStringPart::SvelteInterpolatedStringChunk(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnySvelteInterpolatedStringPart> for SyntaxElement {
-    fn from(n: AnySvelteInterpolatedStringPart) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<SvelteMemberProperty> for AnySvelteMemberObject {
     fn from(node: SvelteMemberProperty) -> Self {
         Self::SvelteMemberProperty(node)
@@ -12417,6 +12358,75 @@ impl From<AnySvelteMemberObject> for SyntaxNode {
 }
 impl From<AnySvelteMemberObject> for SyntaxElement {
     fn from(n: AnySvelteMemberObject) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<HtmlAttributeSingleTextExpression> for AnySvelteTemplateElement {
+    fn from(node: HtmlAttributeSingleTextExpression) -> Self {
+        Self::HtmlAttributeSingleTextExpression(node)
+    }
+}
+impl From<SvelteTemplateChunkElement> for AnySvelteTemplateElement {
+    fn from(node: SvelteTemplateChunkElement) -> Self {
+        Self::SvelteTemplateChunkElement(node)
+    }
+}
+impl AstNode for AnySvelteTemplateElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        HtmlAttributeSingleTextExpression::KIND_SET.union(SvelteTemplateChunkElement::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION | SVELTE_TEMPLATE_CHUNK_ELEMENT
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => {
+                Self::HtmlAttributeSingleTextExpression(HtmlAttributeSingleTextExpression {
+                    syntax,
+                })
+            }
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                Self::SvelteTemplateChunkElement(SvelteTemplateChunkElement { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlAttributeSingleTextExpression(it) => it.syntax(),
+            Self::SvelteTemplateChunkElement(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
+            Self::SvelteTemplateChunkElement(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnySvelteTemplateElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnySvelteTemplateElement> for SyntaxNode {
+    fn from(n: AnySvelteTemplateElement) -> Self {
+        match n {
+            AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(it) => it.into_syntax(),
+            AnySvelteTemplateElement::SvelteTemplateChunkElement(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnySvelteTemplateElement> for SyntaxElement {
+    fn from(n: AnySvelteTemplateElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -12988,12 +12998,12 @@ impl std::fmt::Display for AnySvelteEachName {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnySvelteInterpolatedStringPart {
+impl std::fmt::Display for AnySvelteMemberObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnySvelteMemberObject {
+impl std::fmt::Display for AnySvelteTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -13343,16 +13353,6 @@ impl std::fmt::Display for SvelteInDirective {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for SvelteInterpolatedString {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for SvelteInterpolatedStringChunk {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for SvelteKeyBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -13424,6 +13424,16 @@ impl std::fmt::Display for SvelteSquareDestructuredName {
     }
 }
 impl std::fmt::Display for SvelteStyleDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteTemplateAttributeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteTemplateChunkElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -14552,10 +14562,10 @@ impl IntoIterator for SvelteElseIfClauseList {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct SvelteInterpolatedStringPartList {
+pub struct SvelteTemplateElementList {
     syntax_list: SyntaxList,
 }
-impl SvelteInterpolatedStringPartList {
+impl SvelteTemplateElementList {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14568,12 +14578,12 @@ impl SvelteInterpolatedStringPartList {
         }
     }
 }
-impl AstNode for SvelteInterpolatedStringPartList {
+impl AstNode for SvelteTemplateElementList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_INTERPOLATED_STRING_PART_LIST as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_TEMPLATE_ELEMENT_LIST as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SVELTE_INTERPOLATED_STRING_PART_LIST
+        kind == SVELTE_TEMPLATE_ELEMENT_LIST
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -14591,7 +14601,7 @@ impl AstNode for SvelteInterpolatedStringPartList {
         self.syntax_list.into_node()
     }
 }
-impl Serialize for SvelteInterpolatedStringPartList {
+impl Serialize for SvelteTemplateElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -14603,9 +14613,9 @@ impl Serialize for SvelteInterpolatedStringPartList {
         seq.end()
     }
 }
-impl AstNodeList for SvelteInterpolatedStringPartList {
+impl AstNodeList for SvelteTemplateElementList {
     type Language = Language;
-    type Node = AnySvelteInterpolatedStringPart;
+    type Node = AnySvelteTemplateElement;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -14613,22 +14623,22 @@ impl AstNodeList for SvelteInterpolatedStringPartList {
         self.syntax_list
     }
 }
-impl Debug for SvelteInterpolatedStringPartList {
+impl Debug for SvelteTemplateElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteInterpolatedStringPartList ")?;
+        f.write_str("SvelteTemplateElementList ")?;
         f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for &SvelteInterpolatedStringPartList {
-    type Item = AnySvelteInterpolatedStringPart;
-    type IntoIter = AstNodeListIterator<Language, AnySvelteInterpolatedStringPart>;
+impl IntoIterator for &SvelteTemplateElementList {
+    type Item = AnySvelteTemplateElement;
+    type IntoIter = AstNodeListIterator<Language, AnySvelteTemplateElement>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for SvelteInterpolatedStringPartList {
-    type Item = AnySvelteInterpolatedStringPart;
-    type IntoIter = AstNodeListIterator<Language, AnySvelteInterpolatedStringPart>;
+impl IntoIterator for SvelteTemplateElementList {
+    type Item = AnySvelteTemplateElement;
+    type IntoIter = AstNodeListIterator<Language, AnySvelteTemplateElement>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

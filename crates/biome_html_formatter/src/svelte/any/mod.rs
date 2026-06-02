@@ -9,5 +9,5 @@ pub(crate) mod destructured_name;
 pub(crate) mod directive;
 pub(crate) mod directive_initializer_clause;
 pub(crate) mod each_name;
-pub(crate) mod interpolated_string_part;
 pub(crate) mod member_object;
+pub(crate) mod template_element;

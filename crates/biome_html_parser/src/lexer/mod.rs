@@ -411,34 +411,36 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
-        if matches!(current, b'"' | b'\'') {
+        if current == b'"' {
             self.advance(1);
-            self.consume_svelte_interpolated_string_chunk(current)
+            T!['"']
+        } else if current == b'\'' {
+            self.advance(1);
+            T!["'"]
         } else {
             self.consume_token_attribute_value(current)
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::SvelteInterpolatedStringChunk] context.
-    fn consume_token_svelte_interpolated_string_chunk(
+    /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
+    fn consume_token_svelte_template_chunk(
         &mut self,
         current: u8,
         quote: u8,
     ) -> HtmlSyntaxKind {
         if current == b'{' {
             self.consume_byte(T!['{'])
+        } else if current == quote {
+            self.advance(1);
+            if quote == b'"' { T!['"'] } else { T!["'"] }
         } else {
-            self.consume_svelte_interpolated_string_chunk(quote)
+            self.consume_svelte_template_chunk(quote)
         }
     }
 
-    fn consume_svelte_interpolated_string_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+    fn consume_svelte_template_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
         while let Some(current) = self.current_byte() {
-            if current == b'{' {
-                break;
-            }
-            if current == quote {
-                self.advance(1);
+            if current == b'{' || current == quote {
                 break;
             }
             match lookup_byte(current) {
@@ -447,7 +449,7 @@ impl<'src> HtmlLexer<'src> {
             }
         }
 
-        HTML_STRING_LITERAL
+        HTML_TEMPLATE_CHUNK
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
@@ -1451,8 +1453,8 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::SvelteAttributeValue => {
                         self.consume_token_svelte_attribute_value(current)
                     }
-                    HtmlLexContext::SvelteInterpolatedStringChunk { quote } => {
-                        self.consume_token_svelte_interpolated_string_chunk(current, quote)
+                    HtmlLexContext::SvelteTemplateChunk { quote } => {
+                        self.consume_token_svelte_template_chunk(current, quote)
                     }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {

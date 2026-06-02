@@ -44,8 +44,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@10..11 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@11..17 "\"200\"" [] [Whitespace(" ")],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@11..12 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@12..15 "200" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@15..17 "\"" [] [Whitespace(" ")],
                             },
                         },
                     },
@@ -55,8 +61,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@23..24 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@24..29 "\"150\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@24..25 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@25..28 "150" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@28..29 "\"" [] [],
                             },
                         },
                     },
@@ -66,8 +78,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@39..40 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@40..68 "\"http://www.w3.org/2000/svg\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@40..41 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@41..67 "http://www.w3.org/2000/svg" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@67..68 "\"" [] [],
                             },
                         },
                     },
@@ -77,8 +95,14 @@ HtmlRoot {
                         },
                         initializer: HtmlAttributeInitializerClause {
                             eq_token: EQ@84..85 "=" [] [],
-                            value: HtmlString {
-                                value_token: HTML_STRING_LITERAL@85..115 "\"http://www.w3.org/1999/xlink\"" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@85..86 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@86..114 "http://www.w3.org/1999/xlink" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@114..115 "\"" [] [],
                             },
                         },
                     },
@@ -108,8 +132,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@143..144 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@144..155 "\"myCircle\"" [] [Whitespace(" ")],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@144..145 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@145..153 "myCircle" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@153..155 "\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -119,8 +149,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@157..158 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@158..162 "\"0\"" [] [Whitespace(" ")],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@158..159 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@159..160 "0" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@160..162 "\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -130,8 +166,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@164..165 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@165..169 "\"0\"" [] [Whitespace(" ")],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@165..166 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@166..167 "0" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@167..169 "\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -141,8 +183,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@170..171 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@171..176 "\"30\"" [] [Whitespace(" ")],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@171..172 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@172..174 "30" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@174..176 "\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -152,8 +200,14 @@ HtmlRoot {
                                     },
                                     initializer: HtmlAttributeInitializerClause {
                                         eq_token: EQ@180..181 "=" [] [],
-                                        value: HtmlString {
-                                            value_token: HTML_STRING_LITERAL@181..190 "\"orange\"" [] [Whitespace(" ")],
+                                        value: SvelteTemplateAttributeValue {
+                                            l_quote: DOUBLE_QUOTE@181..182 "\"" [] [],
+                                            elements: SvelteTemplateElementList [
+                                                SvelteTemplateChunkElement {
+                                                    html_template_chunk_token: HTML_TEMPLATE_CHUNK@182..188 "orange" [] [],
+                                                },
+                                            ],
+                                            r_quote: DOUBLE_QUOTE@188..190 "\"" [] [Whitespace(" ")],
                                         },
                                     },
                                 },
@@ -183,8 +237,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@282..283 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@283..295 "\"#myCircle\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@283..284 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@284..293 "#myCircle" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@293..295 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -194,8 +254,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@296..297 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@297..302 "\"50\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@297..298 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@298..300 "50" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@300..302 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -205,8 +271,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@303..304 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@304..309 "\"50\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@304..305 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@305..307 "50" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@307..309 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -226,8 +298,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@329..330 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@330..342 "\"#myCircle\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@330..331 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@331..340 "#myCircle" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@340..342 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -237,8 +315,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@343..344 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@344..350 "\"150\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@344..345 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@345..348 "150" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@348..350 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -248,8 +332,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@351..352 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@352..358 "\"100\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@352..353 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@353..356 "100" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@356..358 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -259,8 +349,14 @@ HtmlRoot {
                             },
                             initializer: HtmlAttributeInitializerClause {
                                 eq_token: EQ@362..363 "=" [] [],
-                                value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@363..375 "\"steelblue\"" [] [Whitespace(" ")],
+                                value: SvelteTemplateAttributeValue {
+                                    l_quote: DOUBLE_QUOTE@363..364 "\"" [] [],
+                                    elements: SvelteTemplateElementList [
+                                        SvelteTemplateChunkElement {
+                                            html_template_chunk_token: HTML_TEMPLATE_CHUNK@364..373 "steelblue" [] [],
+                                        },
+                                    ],
+                                    r_quote: DOUBLE_QUOTE@373..375 "\"" [] [Whitespace(" ")],
                                 },
                             },
                         },
@@ -302,29 +398,45 @@ HtmlRoot {
               0: HTML_LITERAL@5..10 "width" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..17
               0: EQ@10..11 "=" [] []
-              1: HTML_STRING@11..17
-                0: HTML_STRING_LITERAL@11..17 "\"200\"" [] [Whitespace(" ")]
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@11..17
+                0: DOUBLE_QUOTE@11..12 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@12..15
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@12..15
+                    0: HTML_TEMPLATE_CHUNK@12..15 "200" [] []
+                2: DOUBLE_QUOTE@15..17 "\"" [] [Whitespace(" ")]
           1: HTML_ATTRIBUTE@17..29
             0: HTML_ATTRIBUTE_NAME@17..23
               0: HTML_LITERAL@17..23 "height" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..29
               0: EQ@23..24 "=" [] []
-              1: HTML_STRING@24..29
-                0: HTML_STRING_LITERAL@24..29 "\"150\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@24..29
+                0: DOUBLE_QUOTE@24..25 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@25..28
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@25..28
+                    0: HTML_TEMPLATE_CHUNK@25..28 "150" [] []
+                2: DOUBLE_QUOTE@28..29 "\"" [] []
           2: HTML_ATTRIBUTE@29..68
             0: HTML_ATTRIBUTE_NAME@29..39
               0: HTML_LITERAL@29..39 "xmlns" [Newline("\n"), Whitespace("    ")] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@39..68
               0: EQ@39..40 "=" [] []
-              1: HTML_STRING@40..68
-                0: HTML_STRING_LITERAL@40..68 "\"http://www.w3.org/2000/svg\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@40..68
+                0: DOUBLE_QUOTE@40..41 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@41..67
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@41..67
+                    0: HTML_TEMPLATE_CHUNK@41..67 "http://www.w3.org/2000/svg" [] []
+                2: DOUBLE_QUOTE@67..68 "\"" [] []
           3: HTML_ATTRIBUTE@68..115
             0: HTML_ATTRIBUTE_NAME@68..84
               0: HTML_LITERAL@68..84 "xmlns:xlink" [Newline("\n"), Whitespace("    ")] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@84..115
               0: EQ@84..85 "=" [] []
-              1: HTML_STRING@85..115
-                0: HTML_STRING_LITERAL@85..115 "\"http://www.w3.org/1999/xlink\"" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@85..115
+                0: DOUBLE_QUOTE@85..86 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@86..114
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@86..114
+                    0: HTML_TEMPLATE_CHUNK@86..114 "http://www.w3.org/1999/xlink" [] []
+                2: DOUBLE_QUOTE@114..115 "\"" [] []
         3: R_ANGLE@115..116 ">" [] []
       1: HTML_ELEMENT_LIST@116..377
         0: HTML_ELEMENT@116..202
@@ -345,36 +457,56 @@ HtmlRoot {
                     0: HTML_LITERAL@141..143 "id" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@143..155
                     0: EQ@143..144 "=" [] []
-                    1: HTML_STRING@144..155
-                      0: HTML_STRING_LITERAL@144..155 "\"myCircle\"" [] [Whitespace(" ")]
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@144..155
+                      0: DOUBLE_QUOTE@144..145 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@145..153
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@145..153
+                          0: HTML_TEMPLATE_CHUNK@145..153 "myCircle" [] []
+                      2: DOUBLE_QUOTE@153..155 "\"" [] [Whitespace(" ")]
                 1: HTML_ATTRIBUTE@155..162
                   0: HTML_ATTRIBUTE_NAME@155..157
                     0: HTML_LITERAL@155..157 "cx" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@157..162
                     0: EQ@157..158 "=" [] []
-                    1: HTML_STRING@158..162
-                      0: HTML_STRING_LITERAL@158..162 "\"0\"" [] [Whitespace(" ")]
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@158..162
+                      0: DOUBLE_QUOTE@158..159 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@159..160
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@159..160
+                          0: HTML_TEMPLATE_CHUNK@159..160 "0" [] []
+                      2: DOUBLE_QUOTE@160..162 "\"" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE@162..169
                   0: HTML_ATTRIBUTE_NAME@162..164
                     0: HTML_LITERAL@162..164 "cy" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@164..169
                     0: EQ@164..165 "=" [] []
-                    1: HTML_STRING@165..169
-                      0: HTML_STRING_LITERAL@165..169 "\"0\"" [] [Whitespace(" ")]
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@165..169
+                      0: DOUBLE_QUOTE@165..166 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@166..167
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@166..167
+                          0: HTML_TEMPLATE_CHUNK@166..167 "0" [] []
+                      2: DOUBLE_QUOTE@167..169 "\"" [] [Whitespace(" ")]
                 3: HTML_ATTRIBUTE@169..176
                   0: HTML_ATTRIBUTE_NAME@169..170
                     0: HTML_LITERAL@169..170 "r" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@170..176
                     0: EQ@170..171 "=" [] []
-                    1: HTML_STRING@171..176
-                      0: HTML_STRING_LITERAL@171..176 "\"30\"" [] [Whitespace(" ")]
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@171..176
+                      0: DOUBLE_QUOTE@171..172 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@172..174
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@172..174
+                          0: HTML_TEMPLATE_CHUNK@172..174 "30" [] []
+                      2: DOUBLE_QUOTE@174..176 "\"" [] [Whitespace(" ")]
                 4: HTML_ATTRIBUTE@176..190
                   0: HTML_ATTRIBUTE_NAME@176..180
                     0: HTML_LITERAL@176..180 "fill" [] []
                   1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@180..190
                     0: EQ@180..181 "=" [] []
-                    1: HTML_STRING@181..190
-                      0: HTML_STRING_LITERAL@181..190 "\"orange\"" [] [Whitespace(" ")]
+                    1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@181..190
+                      0: DOUBLE_QUOTE@181..182 "\"" [] []
+                      1: SVELTE_TEMPLATE_ELEMENT_LIST@182..188
+                        0: SVELTE_TEMPLATE_CHUNK_ELEMENT@182..188
+                          0: HTML_TEMPLATE_CHUNK@182..188 "orange" [] []
+                      2: DOUBLE_QUOTE@188..190 "\"" [] [Whitespace(" ")]
               3: SLASH@190..191 "/" [] []
               4: R_ANGLE@191..192 ">" [] []
           2: HTML_CLOSING_ELEMENT@192..202
@@ -393,22 +525,34 @@ HtmlRoot {
                 0: HTML_LITERAL@272..282 "xlink:href" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@282..295
                 0: EQ@282..283 "=" [] []
-                1: HTML_STRING@283..295
-                  0: HTML_STRING_LITERAL@283..295 "\"#myCircle\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@283..295
+                  0: DOUBLE_QUOTE@283..284 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@284..293
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@284..293
+                      0: HTML_TEMPLATE_CHUNK@284..293 "#myCircle" [] []
+                  2: DOUBLE_QUOTE@293..295 "\"" [] [Whitespace(" ")]
             1: HTML_ATTRIBUTE@295..302
               0: HTML_ATTRIBUTE_NAME@295..296
                 0: HTML_LITERAL@295..296 "x" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@296..302
                 0: EQ@296..297 "=" [] []
-                1: HTML_STRING@297..302
-                  0: HTML_STRING_LITERAL@297..302 "\"50\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@297..302
+                  0: DOUBLE_QUOTE@297..298 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@298..300
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@298..300
+                      0: HTML_TEMPLATE_CHUNK@298..300 "50" [] []
+                  2: DOUBLE_QUOTE@300..302 "\"" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE@302..309
               0: HTML_ATTRIBUTE_NAME@302..303
                 0: HTML_LITERAL@302..303 "y" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@303..309
                 0: EQ@303..304 "=" [] []
-                1: HTML_STRING@304..309
-                  0: HTML_STRING_LITERAL@304..309 "\"50\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@304..309
+                  0: DOUBLE_QUOTE@304..305 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@305..307
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@305..307
+                      0: HTML_TEMPLATE_CHUNK@305..307 "50" [] []
+                  2: DOUBLE_QUOTE@307..309 "\"" [] [Whitespace(" ")]
           3: SLASH@309..310 "/" [] []
           4: R_ANGLE@310..311 ">" [] []
         2: HTML_SELF_CLOSING_ELEMENT@311..377
@@ -421,29 +565,45 @@ HtmlRoot {
                 0: HTML_LITERAL@319..329 "xlink:href" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@329..342
                 0: EQ@329..330 "=" [] []
-                1: HTML_STRING@330..342
-                  0: HTML_STRING_LITERAL@330..342 "\"#myCircle\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@330..342
+                  0: DOUBLE_QUOTE@330..331 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@331..340
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@331..340
+                      0: HTML_TEMPLATE_CHUNK@331..340 "#myCircle" [] []
+                  2: DOUBLE_QUOTE@340..342 "\"" [] [Whitespace(" ")]
             1: HTML_ATTRIBUTE@342..350
               0: HTML_ATTRIBUTE_NAME@342..343
                 0: HTML_LITERAL@342..343 "x" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@343..350
                 0: EQ@343..344 "=" [] []
-                1: HTML_STRING@344..350
-                  0: HTML_STRING_LITERAL@344..350 "\"150\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@344..350
+                  0: DOUBLE_QUOTE@344..345 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@345..348
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@345..348
+                      0: HTML_TEMPLATE_CHUNK@345..348 "150" [] []
+                  2: DOUBLE_QUOTE@348..350 "\"" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE@350..358
               0: HTML_ATTRIBUTE_NAME@350..351
                 0: HTML_LITERAL@350..351 "y" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@351..358
                 0: EQ@351..352 "=" [] []
-                1: HTML_STRING@352..358
-                  0: HTML_STRING_LITERAL@352..358 "\"100\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@352..358
+                  0: DOUBLE_QUOTE@352..353 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@353..356
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@353..356
+                      0: HTML_TEMPLATE_CHUNK@353..356 "100" [] []
+                  2: DOUBLE_QUOTE@356..358 "\"" [] [Whitespace(" ")]
             3: HTML_ATTRIBUTE@358..375
               0: HTML_ATTRIBUTE_NAME@358..362
                 0: HTML_LITERAL@358..362 "fill" [] []
               1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@362..375
                 0: EQ@362..363 "=" [] []
-                1: HTML_STRING@363..375
-                  0: HTML_STRING_LITERAL@363..375 "\"steelblue\"" [] [Whitespace(" ")]
+                1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@363..375
+                  0: DOUBLE_QUOTE@363..364 "\"" [] []
+                  1: SVELTE_TEMPLATE_ELEMENT_LIST@364..373
+                    0: SVELTE_TEMPLATE_CHUNK_ELEMENT@364..373
+                      0: HTML_TEMPLATE_CHUNK@364..373 "steelblue" [] []
+                  2: DOUBLE_QUOTE@373..375 "\"" [] [Whitespace(" ")]
           3: SLASH@375..376 "/" [] []
           4: R_ANGLE@376..377 ">" [] []
       2: HTML_CLOSING_ELEMENT@377..385
