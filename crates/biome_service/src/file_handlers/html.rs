@@ -1056,11 +1056,11 @@ fn reindent_embedded_code(code: &str, indent: &str) -> String {
                     chars.next();
                 }
                 // Opening `/*` block comment (only outside template literals or inside ${}).
-                '/' if !in_template_literal || template_expr_depth > 0 => {
-                    if chars.peek() == Some(&'*') {
-                        chars.next();
-                        in_block_comment = true;
-                    }
+                '/' if (!in_template_literal || template_expr_depth > 0)
+                    && chars.peek() == Some(&'*') =>
+                {
+                    chars.next();
+                    in_block_comment = true;
                 }
                 // Open a template literal (only valid outside an existing one or inside ${}).
                 '`' if !in_template_literal => {
@@ -1072,11 +1072,9 @@ fn reindent_embedded_code(code: &str, indent: &str) -> String {
                     in_template_literal = false;
                 }
                 // Open a `${…}` expression inside a template literal.
-                '$' if in_template_literal => {
-                    if chars.peek() == Some(&'{') {
-                        chars.next();
-                        template_expr_depth += 1;
-                    }
+                '$' if in_template_literal && chars.peek() == Some(&'{') => {
+                    chars.next();
+                    template_expr_depth += 1;
                 }
                 // Extra `{` inside a `${…}` expression (e.g. object literals).
                 '{' if template_expr_depth > 0 => {
