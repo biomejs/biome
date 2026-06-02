@@ -88,10 +88,8 @@ impl Rule for NoScriptUrl {
             _ => None,
         };
 
-        if let Some(text) = string_text {
-            if text.trim().to_lowercase_cow().starts_with("javascript:") {
-                return Some(initializer.range());
-            }
+        if string_text.is_some_and(|text| text.trim().to_lowercase_cow().starts_with("javascript:")) {
+            return Some(initializer.range());
         }
 
         None
