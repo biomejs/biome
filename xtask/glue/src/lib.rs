@@ -79,8 +79,7 @@ pub fn ensure_rustfmt() -> Result<()> {
     }
 
     let out = run!("rustfmt --version")?;
-    // Allow non-stable rustfmt (e.g. Homebrew-installed) by checking for "stable" OR a version number
-    if !out.contains("stable") && !out.starts_with("rustfmt ") {
+    if !out.contains("stable") {
         bail!(
             "Failed to run rustfmt from toolchain 'stable'. \
              Please run `rustup component add rustfmt --toolchain stable` to install it.",
