@@ -579,9 +579,9 @@ impl<'src> HtmlLexer<'src> {
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
-                        // `as const` is a Svelte-specific TS assertion in `{#each}`;
-                        // keep scanning so the real binding `as` (which follows it)
-                        // is the one that stops us.
+                        // `as const` is a TypeScript type assertion that can appear inside
+                        // a `{#each}` expression; keep scanning so the real binding `as`
+                        // (which follows it) is the one that stops us.
                         let is_as_const = should_stop
                             && keyword_kind == AS_KW
                             && self.peek_keyword_after_space() == Some(CONST_KW);
@@ -794,10 +794,10 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
-    /// Peeks the next language keyword after horizontal whitespace, without
+    /// Peeks the next language keyword after whitespace, without
     /// advancing the lexer position. Returns `None` if no keyword follows.
     fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
-        let save = self.position;
+        let checkpoint = self.checkpoint();
         while self.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
             self.position += 1;
         }
@@ -805,7 +805,7 @@ impl<'src> HtmlLexer<'src> {
             .current_byte()
             .filter(|b| is_at_start_identifier(*b))
             .and_then(|b| self.consume_language_identifier(b));
-        self.position = save;
+        self.rewind(checkpoint);
         kind
     }
 

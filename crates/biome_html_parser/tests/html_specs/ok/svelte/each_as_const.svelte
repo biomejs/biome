@@ -9,3 +9,11 @@
 {#each getItems() as const as item, i}
   <p>{i}: {item}</p>
 {/each}
+
+{#each items as  const as item}
+  <p>{item}</p>
+{/each}
+
+{#each items as	const as item}
+  <p>{item}</p>
+{/each}
