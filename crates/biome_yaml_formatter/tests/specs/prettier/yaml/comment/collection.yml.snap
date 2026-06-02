@@ -52,23 +52,6 @@ reformat: output mismatch
  
  d:
    - 123
-@@ -10,6 +11,7 @@
- 
- e:
-   - 123
-+    
- 
- f:
-   - a
-@@ -17,7 +19,7 @@
-   - b
-     # b.endComments
-   - c
--
-+    
- # sequence.endComments
- # documentBody.children
- 
 
 IR differences:
 --- re-formatted IR
@@ -93,34 +76,5 @@ IR differences:
    ]),
    empty_line,
    "d:",
-@@ -15,7 +19,13 @@
-   "# sequence",
-   empty_line,
-   "e:",
--  indent([hard_line_break, verbatim(["- 123"])]),
-+  indent([
-+    hard_line_break,
-+    verbatim([
-+      "- 123
-+    "
-+    ])
-+  ]),
-   empty_line,
-   "f:",
-   indent([
-@@ -25,10 +35,11 @@
-   # b.leadingComments
-   - b
-     # b.endComments
--  - c"
-+  - c
-+    "
-     ])
-   ]),
--  empty_line,
-+  hard_line_break,
-   "# sequence.endComments",
-   hard_line_break,
-   "# documentBody.children",
 
 ```

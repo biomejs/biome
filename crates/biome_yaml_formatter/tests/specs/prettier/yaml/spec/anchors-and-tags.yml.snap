@@ -21,20 +21,17 @@ info: yaml/spec/anchors-and-tags.yml
 +++ Biome
 @@ -1,4 +1,4 @@
 -- !!str &a a
--- !!int 2
--- !!int &c 4
--- &d d
 +- &a !!str a
-+ - !!int 2
-+ - !!int &c 4
-+ - &d d
+ - !!int 2
+ - !!int &c 4
+ - &d d
 ```
 
 # Output
 
 ```yml
 - &a !!str a
- - !!int 2
- - !!int &c 4
- - &d d
+- !!int 2
+- !!int &c 4
+- &d d
 ```

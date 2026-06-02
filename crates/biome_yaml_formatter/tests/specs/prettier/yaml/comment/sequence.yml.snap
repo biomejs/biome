@@ -28,21 +28,9 @@ info: yaml/comment/sequence.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,13 @@
--- - a
-+-  - a
+@@ -8,6 +8,6 @@
  
--  # - b
-+   # - b
- 
--  # - c
-+   # - c
- 
--  - e
-+   - e
- 
--- - a
-+-  - a
+ - - a
  
 -  # - b
 +# - b
@@ -54,15 +42,15 @@ info: yaml/comment/sequence.yml
 # Output
 
 ```yml
--  - a
+- - a
 
-   # - b
+  # - b
 
-   # - c
+  # - c
 
-   - e
+  - e
 
--  - a
+- - a
 
 # - b
 

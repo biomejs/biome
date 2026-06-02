@@ -19,15 +19,9 @@ d:
 
 ```yaml
 a:
-- b
-- c
+  - b
+  - c
 d:
-- e
+  - e
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"a:\n- b\n- c\nd:\n- e\n" => 0..18

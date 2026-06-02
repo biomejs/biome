@@ -17,9 +17,3 @@ info: yaml/scalar/double_quoted.yaml
 "Double quoted"
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\"Double quoted\"" => 0..15

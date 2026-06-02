@@ -34,7 +34,7 @@ spec-example-6-1-indentation-spaces.yml:10:3 parse ━━━━━━━━━�
   > 10 │   Also by two,    # are neither
        │   
     11 │   	Still by two   # content nor
-    12 │     ] # indentation. # indentation.
+    12 │     ] # indentation.
   
 
 ```

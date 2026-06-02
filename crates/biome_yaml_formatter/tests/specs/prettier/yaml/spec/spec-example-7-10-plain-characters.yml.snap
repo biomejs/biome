@@ -27,16 +27,19 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,4 +5,8 @@
+@@ -3,6 +3,10 @@
+ - ": - ()"
+ - Up, up, and away!
  - -123
- - http://example.com/foo#bar
+-- http://example.com/foo#bar
++- http://example.com/foo #bar
  # Inside flow collection:
 -- [::vector, ": - ()", "Up, up and away!", -123, http://example.com/foo#bar]
 +- [ ::vector,
 +  ": - ()",
 +  "Up, up and away!",
 +  -123,
-+  http://example.com/foo
++  http://example.com/foo #bar ]
 ```
 
 # Output
@@ -47,13 +50,13 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 - ": - ()"
 - Up, up, and away!
 - -123
-- http://example.com/foo#bar
+- http://example.com/foo #bar
 # Inside flow collection:
 - [ ::vector,
   ": - ()",
   "Up, up and away!",
   -123,
-  http://example.com/foo
+  http://example.com/foo #bar ]
 ```
 
 # Errors
