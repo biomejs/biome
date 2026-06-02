@@ -158,8 +158,12 @@ impl Visit for SuggestionsVisitor {
         };
 
         let source = SourceFile::new(source_code);
-        let start = source.location(span.start()).expect("Invalid span");
-        let end = source.location(span.end()).expect("Invalid span");
+        let Ok(start) = source.location(span.start()) else {
+            return Ok(());
+        };
+        let Ok(end) = source.location(span.end()) else {
+            return Ok(());
+        };
         let range = RdJsonRange {
             end: RdJsonLineColumn {
                 line: end.line_number.get(),

@@ -298,6 +298,7 @@ impl Advice {
             | Self::Command(_)
             | Self::Diff(_) => {}
             Self::Frame(location) | Self::CodeSuggestion(location, _) => {
+                // CodeSuggestion locations are span-less today; offset the TextEdit too if that changes.
                 location.offset_by(offset);
             }
             Self::Group(_, advices) => {
@@ -430,11 +431,12 @@ impl schemars::JsonSchema for DiagnosticTags {
 mod tests {
     use std::io;
 
+    use biome_text_edit::TextEdit;
     use biome_text_size::{TextRange, TextSize};
     use serde_json::{Value, from_value, json, to_value};
 
     use crate::{
-        self as biome_diagnostics, {Advices, LogCategory, Visit},
+        self as biome_diagnostics, {Advices, LogCategory, Resource, Visit},
     };
     use biome_diagnostics_macros::Diagnostic;
 
@@ -552,5 +554,24 @@ mod tests {
         let expected = super::Diagnostic::new(expected);
 
         assert_eq!(diag, expected);
+    }
+
+    #[test]
+    fn test_code_suggestion_advice_round_trip() {
+        let advice = super::Advices {
+            advices: vec![super::Advice::CodeSuggestion(
+                super::Location {
+                    path: Some(Resource::File("path".to_string())),
+                    span: Some(TextRange::new(TextSize::from(0), TextSize::from(3))),
+                    source_code: Some("let".to_string()),
+                },
+                TextEdit::from_unicode_words("let", "const"),
+            )],
+        };
+
+        let json = to_value(&advice).unwrap();
+        let round_trip: super::Advices = from_value(json).unwrap();
+
+        assert_eq!(round_trip, advice);
     }
 }
