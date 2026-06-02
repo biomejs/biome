@@ -19,12 +19,20 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@0..5 "hover" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..5 "hover" [] [],
+                        },
+                    ],
                 },
                 COLON@5..6 ":" [] [],
-                TwStaticVariant {
-                    base_token: TW_BASE@6..11 "focus" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@6..11 "focus" [] [],
+                        },
+                    ],
                 },
                 COLON@11..12 ":" [] [],
             ],
@@ -52,11 +60,15 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..24
     0: TW_FULL_CANDIDATE@0..24
       0: TW_VARIANT_LIST@0..12
-        0: TW_STATIC_VARIANT@0..5
-          0: TW_BASE@0..5 "hover" [] []
+        0: TW_VARIANT_EXPRESSION@0..5
+          0: TW_VARIANT_SEGMENT_LIST@0..5
+            0: TW_NAMED_VARIANT_SEGMENT@0..5
+              0: TW_VARIANT_SEGMENT@0..5 "hover" [] []
         1: COLON@5..6 ":" [] []
-        2: TW_STATIC_VARIANT@6..11
-          0: TW_BASE@6..11 "focus" [] []
+        2: TW_VARIANT_EXPRESSION@6..11
+          0: TW_VARIANT_SEGMENT_LIST@6..11
+            0: TW_NAMED_VARIANT_SEGMENT@6..11
+              0: TW_VARIANT_SEGMENT@6..11 "focus" [] []
         3: COLON@11..12 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@12..24
