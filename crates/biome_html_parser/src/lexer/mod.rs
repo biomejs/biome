@@ -798,7 +798,7 @@ impl<'src> HtmlLexer<'src> {
     /// advancing the lexer position. Returns `None` if no keyword follows.
     fn peek_keyword_after_space(&mut self) -> Option<HtmlSyntaxKind> {
         let save = self.position;
-        while matches!(self.current_byte(), Some(b' ') | Some(b'\t')) {
+        while self.current_byte().is_some_and(|b| b.is_ascii_whitespace()) {
             self.position += 1;
         }
         let kind = self
