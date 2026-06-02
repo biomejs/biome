@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
-assertion_line: 1078
 expression: severity_only.jsonc
 ---
 ## ESLint Config
@@ -23,7 +22,7 @@ expression: severity_only.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"suspicious": {
 				"useIterableCallbackReturn": { "level": "error", "options": {} }
 			}
