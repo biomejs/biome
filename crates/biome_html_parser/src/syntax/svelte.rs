@@ -325,10 +325,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         RestrictedExpressionStopAt::AsOrComma
     };
 
-    p.bump_with_context(
-        T![each],
-        HtmlLexContext::restricted_expression(stop_at),
-    );
+    p.bump_with_context(T![each], HtmlLexContext::restricted_expression(stop_at));
     // Flags used to track possible errors so that the final block can be emitted as a bogus node
     let mut has_errors = false;
 
