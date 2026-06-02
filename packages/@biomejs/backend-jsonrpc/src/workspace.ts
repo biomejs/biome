@@ -9025,6 +9025,11 @@ export type UseGuardForInOptions = {};
 export type UseIsArrayOptions = {};
 export interface UseIterableCallbackReturnOptions {
 	/**
+	* When `true`, allows callbacks in methods that require a return value
+(e.g. `map`, `filter`) to implicitly return `undefined` via `return;`. 
+	 */
+	allowImplicit?: boolean;
+	/**
 	* When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).
 When `false` or unset, such callbacks are ignored. 
 	 */

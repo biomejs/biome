@@ -535,6 +535,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "array-callback-return" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ArrayCallbackReturn(conf));
+                            }
+                        }
                         "class-methods-use-this" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
@@ -691,6 +696,25 @@ impl From<MaxNestedCallbacksOptions>
 }
 
 #[derive(Debug, Default, Deserializable)]
+pub(crate) struct ArrayCallbackReturnOptions {
+    #[deserializable(rename = "allowImplicit")]
+    allow_implicit: Option<bool>,
+    #[deserializable(rename = "checkForEach")]
+    check_for_each: Option<bool>,
+}
+
+impl From<ArrayCallbackReturnOptions>
+    for biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions
+{
+    fn from(value: ArrayCallbackReturnOptions) -> Self {
+        Self {
+            allow_implicit: value.allow_implicit,
+            check_for_each: value.check_for_each,
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct ClassMethodsUseThisOptions {
     #[deserializable(rename = "exceptMethods")]
@@ -784,6 +808,7 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
@@ -807,6 +832,7 @@ impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Self::Any(name, _) => name.clone(),
+            Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
