@@ -5,7 +5,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor,
+    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
@@ -58,7 +58,7 @@ impl ServiceLanguage for YamlLanguage {
     }
 
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        todo!()
+        None
     }
 
     fn resolve_parse_options(
@@ -67,7 +67,6 @@ impl ServiceLanguage for YamlLanguage {
         _path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        todo!()
     }
 
     fn resolve_format_options(
@@ -111,19 +110,44 @@ impl ServiceLanguage for YamlLanguage {
         _file_source: &DocumentFileSource,
         _suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        todo!()
+        AnalyzerOptions::default()
     }
 
     fn linter_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
-        todo!()
+        // TODO: Linter support for YAML files
+        false
     }
 
-    fn formatter_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
-        todo!()
+    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.yaml.formatter.enabled,
+                        pattern.formatter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.yaml.formatter.enabled,
+                settings.formatter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
     }
 
     fn assist_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
-        todo!()
+        // TODO: Assist support for YAML files
+        false
     }
 }
 
