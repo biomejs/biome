@@ -1004,21 +1004,91 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
     }
 }
 
-/// Prefixes every line of `code` after the first with `indent`. Empty
-/// lines are left alone so no trailing whitespace sneaks in.
+/// Prefixes every line of `code` after the first with `indent`, but skips
+/// lines inside regions whose content is preserved verbatim by the
+/// embedded-language formatter:
+///
+/// * JavaScript/TypeScript **template literals** (backtick strings):
+///   continuation lines already carry their author-intended indentation, so
+///   adding the host indent again on every `check --write` pass would cause
+///   diverging indentation growth.
+/// * CSS/JS **block comments** (`/* … */`): same reasoning.
+///
+/// Empty lines are left alone so no trailing whitespace sneaks in.
 fn reindent_embedded_code(code: &str, indent: &str) -> String {
     if indent.is_empty() {
         return code.to_string();
     }
+
     let mut out = String::new();
+    // Verbatim-region tracking (state carries across lines).
+    let mut in_block_comment = false;
+    let mut in_template_literal = false;
+    let mut template_expr_depth: u32 = 0; // depth of `${…}` nesting inside a template literal
+
     for (i, line) in code.split('\n').enumerate() {
         if i > 0 {
             out.push('\n');
-            if !line.is_empty() {
+            // A continuation line is "verbatim" if we are inside a block
+            // comment, or inside a template literal but NOT inside a `${}`
+            // expression (which is regular code again).
+            let verbatim = in_block_comment || (in_template_literal && template_expr_depth == 0);
+            if !line.is_empty() && !verbatim {
                 out.push_str(indent);
             }
         }
         out.push_str(line);
+
+        // Scan the line to update state for the next iteration.
+        let mut chars = line.chars().peekable();
+        while let Some(ch) = chars.next() {
+            if in_block_comment {
+                // Only look for the closing `*/`.
+                if ch == '*' && chars.peek() == Some(&'/') {
+                    chars.next();
+                    in_block_comment = false;
+                }
+                continue;
+            }
+            match ch {
+                // Escape: skip the next character (handles `\`` inside template literals).
+                '\\' => {
+                    chars.next();
+                }
+                // Opening `/*` block comment (only outside template literals or inside ${}).
+                '/' if !in_template_literal || template_expr_depth > 0 => {
+                    if chars.peek() == Some(&'*') {
+                        chars.next();
+                        in_block_comment = true;
+                    }
+                }
+                // Open a template literal (only valid outside an existing one or inside ${}).
+                '`' if !in_template_literal => {
+                    in_template_literal = true;
+                    template_expr_depth = 0;
+                }
+                // Close a template literal.
+                '`' if in_template_literal && template_expr_depth == 0 => {
+                    in_template_literal = false;
+                }
+                // Open a `${…}` expression inside a template literal.
+                '$' if in_template_literal => {
+                    if chars.peek() == Some(&'{') {
+                        chars.next();
+                        template_expr_depth += 1;
+                    }
+                }
+                // Extra `{` inside a `${…}` expression (e.g. object literals).
+                '{' if template_expr_depth > 0 => {
+                    template_expr_depth += 1;
+                }
+                // Closing `}` — may close a `${…}` expression.
+                '}' if template_expr_depth > 0 => {
+                    template_expr_depth -= 1;
+                }
+                _ => {}
+            }
+        }
     }
     out
 }
@@ -1074,5 +1144,56 @@ mod tests {
     #[test]
     fn reindent_embedded_code_does_not_indent_empty_lines() {
         assert_eq!(reindent_embedded_code("a\n\nb", "  "), "a\n\n  b");
+    }
+
+    #[test]
+    fn reindent_embedded_code_skips_template_literal_continuation_lines() {
+        // The continuation line inside the backtick string must NOT receive
+        // the extra indent — it already carries its author-intended offset.
+        let code = "const x = `line one\n  line two`;";
+        assert_eq!(
+            reindent_embedded_code(code, "  "),
+            "const x = `line one\n  line two`;"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_resumes_indenting_after_template_literal() {
+        let code = "const x = `a\nb`;\nconst y = 1;";
+        assert_eq!(
+            reindent_embedded_code(code, "  "),
+            "const x = `a\nb`;\n  const y = 1;"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_handles_template_expression_with_nested_braces() {
+        // `${obj.method({ key: val })}` — the extra `{` and `}` inside `${}`
+        // must not prematurely close the expression tracker.
+        let code = "const s = `prefix\n${fn({ a: 1 })}\nsuffix`;";
+        // Line 0: no prefix.  Line 1: inside template literal → no prefix.
+        // Line 2: still inside template literal → no prefix.
+        assert_eq!(
+            reindent_embedded_code(code, "  "),
+            "const s = `prefix\n${fn({ a: 1 })}\nsuffix`;"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_skips_block_comment_continuation_lines() {
+        let code = "/* first line\n   continuation */\n.foo { color: red; }";
+        assert_eq!(
+            reindent_embedded_code(code, "  "),
+            "/* first line\n   continuation */\n  .foo { color: red; }"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_resumes_indenting_after_block_comment() {
+        let code = "/* open\n   close */\nnext line";
+        assert_eq!(
+            reindent_embedded_code(code, "\t"),
+            "/* open\n   close */\n\tnext line"
+        );
     }
 }
