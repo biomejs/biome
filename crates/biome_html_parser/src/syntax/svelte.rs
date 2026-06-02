@@ -300,7 +300,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         return (Absent, false);
     }
 
-    // Use parser-level lookahead to check whether the collection expression
+    // check whether the collection expression
     // contains a TypeScript `as const` assertion before the Svelte binding `as`.
     // If so, we use `AsOrCommaSkipFirstAs` so the lexer includes the TypeScript
     // `as const` in the expression token and stops only at the binding `as`.
