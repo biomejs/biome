@@ -466,6 +466,7 @@ pub mod use_spread;
 pub mod use_static_response_methods;
 pub mod use_strict_mode;
 pub mod use_string_starts_ends_with;
+pub mod use_svelte_require_each_key;
 pub mod use_symbol_description;
 pub mod use_template;
 pub mod use_test_hooks_in_order;

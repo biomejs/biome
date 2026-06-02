@@ -1079,6 +1079,7 @@ export type RuleDomain =
 	| "solid"
 	| "next"
 	| "qwik"
+	| "svelte"
 	| "vue"
 	| "project"
 	| "tailwind"
@@ -2655,6 +2656,11 @@ See https://biomejs.dev/linter/rules/use-spread
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Require keyed {#each} blocks in Svelte templates.
+See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
+	 */
+	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
@@ -4664,6 +4670,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteRequireEachKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteRequireEachKeyOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6582,6 +6591,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseSvelteRequireEachKeyOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteRequireEachKeyOptions;
+}
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksInOrderOptions;
@@ -8265,6 +8278,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteRequireEachKeyOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9325,6 +9339,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
