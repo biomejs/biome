@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed a non-idempotency bug in `biome check --write` where multi-line template literals in Svelte `<script>` blocks and block comments in `<style>` blocks would gain extra indentation on every run when an `overrides` entry in `biome.json` matched the file.
+Fixed [#10515](https://github.com/biomejs/biome/issues/10515): `biome check --write` was not idempotent on Svelte files — multi-line template literals in `<script>` blocks and block comments in `<style>` blocks gained an extra indent level on every run.
