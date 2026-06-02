@@ -751,9 +751,7 @@ fn parse_attribute_initializer(
         // We do an O(1) last-byte check to decide whether it's interpolated.
         let text = p.cur_text().as_bytes();
         let svelte_quote = if Svelte.is_supported(p) {
-            text.first()
-                .copied()
-                .filter(|b| matches!(b, b'"' | b'\''))
+            text.first().copied().filter(|b| matches!(b, b'"' | b'\''))
         } else {
             None
         };
