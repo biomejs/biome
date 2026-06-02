@@ -423,11 +423,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
-    fn consume_token_svelte_template_chunk(
-        &mut self,
-        current: u8,
-        quote: u8,
-    ) -> HtmlSyntaxKind {
+    fn consume_token_svelte_template_chunk(&mut self, current: u8, quote: u8) -> HtmlSyntaxKind {
         if current == b'{' {
             self.consume_byte(T!['{'])
         } else if current == quote {

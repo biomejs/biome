@@ -6,18 +6,12 @@ use biome_html_syntax::AnySvelteTemplateElement;
 pub(crate) struct FormatAnySvelteTemplateElement;
 impl FormatRule<AnySvelteTemplateElement> for FormatAnySvelteTemplateElement {
     type Context = HtmlFormatContext;
-    fn fmt(
-        &self,
-        node: &AnySvelteTemplateElement,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
+    fn fmt(&self, node: &AnySvelteTemplateElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
             AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(node) => {
                 node.format().fmt(f)
             }
-            AnySvelteTemplateElement::SvelteTemplateChunkElement(node) => {
-                node.format().fmt(f)
-            }
+            AnySvelteTemplateElement::SvelteTemplateChunkElement(node) => node.format().fmt(f),
         }
     }
 }
