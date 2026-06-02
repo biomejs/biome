@@ -655,6 +655,7 @@ pub const FUNCTION_KEYWORDS: &[&str] = &[
     "color-stop",
     "conic-gradient",
     "contrast",
+    "contrast-color",
     "cos",
     "counter",
     "counters",
