@@ -102,11 +102,14 @@ impl Rule for UseIncludes {
                 rule_category!(),
                 state.binary.range(),
                 markup! {
-                    "Use "<Emphasis>{preferred}</Emphasis>" instead of "<Emphasis>"indexOf()"</Emphasis>" to check for presence."
+                    "Checking the result of "<Emphasis>"indexOf()"</Emphasis>" against "<Emphasis>"-1"</Emphasis>" to test for presence."
                 },
             )
             .note(markup! {
-                <Emphasis>"includes()"</Emphasis>" is more readable and clearly expresses intent."
+                <Emphasis>"indexOf()"</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
+            })
+            .note(markup! {
+                "Use "<Emphasis>{preferred}</Emphasis>" instead, which directly expresses the intent and returns a boolean."
             }),
         )
     }
