@@ -751,8 +751,6 @@ fn parse_attribute_initializer(
         // handles both interpolated (with {expr}) and plain text content.
         let quote = if p.at(T!['"']) { b'"' } else { b'\'' };
         parse_svelte_template_attribute_value(p, quote).or_add_diagnostic(p, expected_initializer);
-    } else if p.at(HTML_STRING_LITERAL) {
-        parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
