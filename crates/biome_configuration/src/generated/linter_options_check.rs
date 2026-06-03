@@ -300,6 +300,21 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noDupeElseIfBlocks",
+        TypeId::of::<biome_rule_options::no_dupe_else_if_blocks::NoDupeElseIfBlocksOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noDupeStyleProperties",
+        TypeId::of::<biome_rule_options::no_dupe_style_properties::NoDupeStylePropertiesOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noDupeUseDirectives",
+        TypeId::of::<biome_rule_options::no_dupe_use_directives::NoDupeUseDirectivesOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noDuplicateArgumentNames",
         TypeId::of::<
             biome_rule_options::no_duplicate_argument_names::NoDuplicateArgumentNamesOptions,
