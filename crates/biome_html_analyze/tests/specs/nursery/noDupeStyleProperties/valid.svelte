@@ -1,0 +1,9 @@
+<!-- should not generate diagnostics -->
+
+<div style:color="red" style:background="blue"></div>
+
+<span style:font-size="12px" style:font-weight="bold"></span>
+
+<button style:background="green" style:color="white"></button>
+
+<div style:color></div>
