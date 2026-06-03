@@ -57,7 +57,7 @@ declare_lint_rule! {
     ///
     pub UseFunctionComponentDefinition {
         version: "next",
-        name: "useFunctionComponentDefinition",
+        name: "useReactFunctionComponentDefinition",
         language: "jsx",
         recommended: false,
         domains: &[RuleDomain::React],
