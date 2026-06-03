@@ -7962,8 +7962,23 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 	 */
 	drizzleObjectName?: string[];
 }
+/**
+	* Options for the `noDupeElseIfBlocks` rule.
+
+This rule currently has no configurable options. 
+	 */
 export type NoDupeElseIfBlocksOptions = {};
+/**
+	* Options for the `noDupeStyleProperties` rule.
+
+This rule currently has no configurable options. 
+	 */
 export type NoDupeStylePropertiesOptions = {};
+/**
+	* Options for the `noDupeUseDirectives` rule.
+
+This rule currently has no configurable options. 
+	 */
 export type NoDupeUseDirectivesOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};

@@ -3268,6 +3268,7 @@
 			]
 		},
 		"NoDupeElseIfBlocksOptions": {
+			"description": "Options for the `noDupeElseIfBlocks` rule.\n\nThis rule currently has no configurable options.",
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3278,6 +3279,7 @@
 			]
 		},
 		"NoDupeStylePropertiesOptions": {
+			"description": "Options for the `noDupeStyleProperties` rule.\n\nThis rule currently has no configurable options.",
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3288,6 +3290,7 @@
 			]
 		},
 		"NoDupeUseDirectivesOptions": {
+			"description": "Options for the `noDupeUseDirectives` rule.\n\nThis rule currently has no configurable options.",
 			"type": "object",
 			"additionalProperties": false
 		},
