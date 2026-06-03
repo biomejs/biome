@@ -3261,6 +3261,36 @@
 			},
 			"additionalProperties": false
 		},
+		"NoDupeElseIfBlocksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDupeElseIfBlocksOptions" }
+			]
+		},
+		"NoDupeElseIfBlocksOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDupeStylePropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDupeStylePropertiesOptions" }
+			]
+		},
+		"NoDupeStylePropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDupeUseDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDupeUseDirectivesOptions" }
+			]
+		},
+		"NoDupeUseDirectivesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateArgumentNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6210,6 +6240,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noDupeElseIfBlocks": {
+					"description": "Disallow duplicate conditions in Svelte {#if} / {:else if} chains.\nSee https://biomejs.dev/linter/rules/no-dupe-else-if-blocks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDupeElseIfBlocksConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDupeStyleProperties": {
+					"description": "Disallow duplicate style: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-dupe-style-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDupeStylePropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDupeUseDirectives": {
+					"description": "Disallow duplicate use: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-dupe-use-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDupeUseDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
@@ -8290,6 +8341,33 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDupeElseIfBlocksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDupeElseIfBlocksOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDupeStylePropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDupeStylePropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDupeUseDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDupeUseDirectivesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

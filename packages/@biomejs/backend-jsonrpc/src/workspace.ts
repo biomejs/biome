@@ -2093,6 +2093,21 @@ See https://biomejs.dev/linter/rules/no-drizzle-update-without-where
 	 */
 	noDrizzleUpdateWithoutWhere?: NoDrizzleUpdateWithoutWhereConfiguration;
 	/**
+	* Disallow duplicate conditions in Svelte {#if} / {:else if} chains.
+See https://biomejs.dev/linter/rules/no-dupe-else-if-blocks 
+	 */
+	noDupeElseIfBlocks?: NoDupeElseIfBlocksConfiguration;
+	/**
+	* Disallow duplicate style: directives on the same Svelte element.
+See https://biomejs.dev/linter/rules/no-dupe-style-properties 
+	 */
+	noDupeStyleProperties?: NoDupeStylePropertiesConfiguration;
+	/**
+	* Disallow duplicate use: directives on the same Svelte element.
+See https://biomejs.dev/linter/rules/no-dupe-use-directives 
+	 */
+	noDupeUseDirectives?: NoDupeUseDirectivesConfiguration;
+	/**
 	* Require all argument names for fields & directives to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-argument-names 
 	 */
@@ -4334,6 +4349,15 @@ export type NoDrizzleDeleteWithoutWhereConfiguration =
 export type NoDrizzleUpdateWithoutWhereConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDrizzleUpdateWithoutWhereOptions;
+export type NoDupeElseIfBlocksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDupeElseIfBlocksOptions;
+export type NoDupeStylePropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDupeStylePropertiesOptions;
+export type NoDupeUseDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDupeUseDirectivesOptions;
 export type NoDuplicateArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateArgumentNamesOptions;
@@ -6113,6 +6137,18 @@ export interface RuleWithNoDrizzleDeleteWithoutWhereOptions {
 export interface RuleWithNoDrizzleUpdateWithoutWhereOptions {
 	level: RulePlainConfiguration;
 	options?: NoDrizzleUpdateWithoutWhereOptions;
+}
+export interface RuleWithNoDupeElseIfBlocksOptions {
+	level: RulePlainConfiguration;
+	options?: NoDupeElseIfBlocksOptions;
+}
+export interface RuleWithNoDupeStylePropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDupeStylePropertiesOptions;
+}
+export interface RuleWithNoDupeUseDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDupeUseDirectivesOptions;
 }
 export interface RuleWithNoDuplicateArgumentNamesOptions {
 	level: RulePlainConfiguration;
@@ -7926,6 +7962,9 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 	 */
 	drizzleObjectName?: string[];
 }
+export type NoDupeElseIfBlocksOptions = {};
+export type NoDupeStylePropertiesOptions = {};
+export type NoDupeUseDirectivesOptions = {};
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateEnumValueNamesOptions = {};
@@ -9215,6 +9254,9 @@ export type Category =
 	| "lint/nursery/noDivRegex"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDupeElseIfBlocks"
+	| "lint/nursery/noDupeStyleProperties"
+	| "lint/nursery/noDupeUseDirectives"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateEnumValueNames"
