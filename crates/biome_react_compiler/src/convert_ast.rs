@@ -42,8 +42,8 @@ use react_compiler_ast::jsx::{
     JSXSpreadAttribute, JSXSpreadChild, JSXText,
 };
 use react_compiler_ast::literals::{
-    BigIntLiteral, BooleanLiteral, NullLiteral, NumericLiteral, RegExpLiteral, StringLiteral,
-    TemplateElement, TemplateElementValue,
+    BigIntLiteral, BooleanLiteral, NullLiteral, NumericLiteral, NumericLiteralExtra, RegExpLiteral,
+    StringLiteral, TemplateElement, TemplateElementValue,
 };
 use react_compiler_ast::operators::{
     AssignmentOperator, BinaryOperator, LogicalOperator, UnaryOperator, UpdateOperator,

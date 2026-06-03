@@ -27,8 +27,10 @@ function Component(props) {
         panic!("expected function declaration");
     };
     assert_eq!(function.id.as_ref().unwrap().name, "Component");
+    assert_eq!(function.id.as_ref().unwrap().base.node_id, Some(22));
     assert_eq!(function.params.len(), 1);
     assert_eq!(function.base.start, Some(12));
+    assert_eq!(function.base.node_id, Some(13));
 }
 
 #[test]

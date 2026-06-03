@@ -22,11 +22,14 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
             scope: ScopeId(0),
             declaration_type: declaration_type(&declaration),
             declaration_start: Some(declaration_start),
+            declaration_node_id: Some(node_id_from_start(declaration_start)),
             import: None,
         });
     }
 
     let mut node_to_scope = HashMap::new();
+    let mut node_to_scope_end = HashMap::new();
+    let mut node_id_to_scope = HashMap::new();
     for scope in model.scopes() {
         let id = ScopeId(scope.id().index() as u32);
         let parent = scope
@@ -44,7 +47,11 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
         }
 
         let syntax = scope.syntax();
-        node_to_scope.insert(syntax.text_trimmed_range().start().into(), id);
+        let range = syntax.text_trimmed_range();
+        let start = range.start().into();
+        node_to_scope.insert(start, id);
+        node_to_scope_end.insert(start, range.end().into());
+        node_id_to_scope.insert(node_id_from_start(start), id);
         scopes.push(ScopeData {
             id,
             parent,
@@ -54,6 +61,7 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
     }
 
     let mut reference_to_binding = IndexMap::new();
+    let mut ref_node_id_to_binding = IndexMap::new();
     for binding in model.all_bindings() {
         let declaration = binding.syntax();
         let declaration_start: u32 = declaration.text_trimmed_range().start().into();
@@ -63,10 +71,15 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
 
         if let Some(start) = bindings[binding_id.0 as usize].declaration_start {
             reference_to_binding.entry(start).or_insert(binding_id);
+            ref_node_id_to_binding
+                .entry(node_id_from_start(start))
+                .or_insert(binding_id);
         }
 
         for reference in binding.all_references() {
-            reference_to_binding.insert(reference.range_start().into(), binding_id);
+            let start = reference.range_start().into();
+            reference_to_binding.insert(start, binding_id);
+            ref_node_id_to_binding.insert(node_id_from_start(start), binding_id);
         }
     }
 
@@ -74,9 +87,16 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
         scopes,
         bindings,
         node_to_scope,
+        node_to_scope_end,
         reference_to_binding,
+        ref_node_id_to_binding,
+        node_id_to_scope,
         program_scope: ScopeId(model.global_scope().id().index() as u32),
     }
+}
+
+fn node_id_from_start(start: u32) -> u32 {
+    start.saturating_add(1)
 }
 
 fn binding_kind(kind: JsDeclarationKind) -> BindingKind {

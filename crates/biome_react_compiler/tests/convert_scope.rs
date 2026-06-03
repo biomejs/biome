@@ -25,5 +25,22 @@ fn converts_basic_bindings_and_references() {
             .iter()
             .any(|binding| binding.name == "props")
     );
+    let component = scope_info
+        .bindings
+        .iter()
+        .find(|binding| binding.name == "Component")
+        .expect("expected Component binding");
+    assert_eq!(component.declaration_start, Some(9));
+    assert_eq!(component.declaration_node_id, Some(10));
+    assert_eq!(
+        scope_info.ref_node_id_to_binding.get(&10).copied(),
+        Some(component.id)
+    );
     assert!(scope_info.reference_to_binding.contains_key(&35));
+    assert!(scope_info.ref_node_id_to_binding.contains_key(&36));
+    assert!(!scope_info.node_id_to_scope.is_empty());
+    assert_eq!(
+        scope_info.resolve_reference_by_node_id(36),
+        scope_info.reference_to_binding.get(&35).copied()
+    );
 }

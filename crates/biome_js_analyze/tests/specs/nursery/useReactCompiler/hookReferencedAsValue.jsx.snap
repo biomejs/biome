@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidHookOrder.jsx
+expression: hookReferencedAsValue.jsx
 ---
 # Input
 ```jsx
@@ -8,38 +8,25 @@ expression: invalidHookOrder.jsx
 
 import { useState } from "react";
 
-function Component(props) {
-    if (props.enabled) {
-        useState(0);
-    }
+function Component() {
+    const hook = useState;
 
-    return <div />;
-}
-
-function EarlyReturn(props) {
-    if (props.disabled) {
-        return null;
-    }
-
-    useState(0);
-
-    return <div />;
+    return <button onClick={hook}>Click</button>;
 }
 
 ```
 
 # Diagnostics
 ```
-invalidHookOrder.jsx:7:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookReferencedAsValue.jsx:6:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    5 │ function Component(props) {
-    6 │     if (props.enabled) {
-  > 7 │         useState(0);
-      │         ^^^^^^^^
-    8 │     }
-    9 │ 
+    5 │ function Component() {
+  > 6 │     const hook = useState;
+      │                  ^^^^^^^^
+    7 │ 
+    8 │     return <button onClick={hook}>Click</button>;
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   
@@ -51,16 +38,16 @@ invalidHookOrder.jsx:7:9 lint/nursery/useReactCompiler ━━━━━━━━�
 ```
 
 ```
-invalidHookOrder.jsx:18:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookReferencedAsValue.jsx:8:29 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    16 │     }
-    17 │ 
-  > 18 │     useState(0);
-       │     ^^^^^^^^
-    19 │ 
-    20 │     return <div />;
+     6 │     const hook = useState;
+     7 │ 
+   > 8 │     return <button onClick={hook}>Click</button>;
+       │                             ^^^^
+     9 │ }
+    10 │ 
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   
