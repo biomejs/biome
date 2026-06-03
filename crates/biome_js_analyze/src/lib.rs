@@ -63,7 +63,7 @@ impl
         ProjectDatabase,
         Arc<ProjectLayout>,
         JsFileSource,
-        Option<SemanticModel>,
+        SemanticModel,
     )> for JsAnalyzerServices
 {
     fn from(
@@ -71,7 +71,7 @@ impl
             ProjectDatabase,
             Arc<ProjectLayout>,
             JsFileSource,
-            Option<SemanticModel>,
+            SemanticModel,
         ),
     ) -> Self {
         Self {
@@ -80,7 +80,7 @@ impl
             source_type,
             embedded_bindings: Default::default(),
             embedded_value_references: Default::default(),
-            semantic_model,
+            semantic_model: Some(semantic_model),
         }
     }
 }

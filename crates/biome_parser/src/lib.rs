@@ -780,6 +780,20 @@ impl AnyParse {
         }
     }
 
+    /// Retrieves the root node of the parsed syntax tree.
+    ///
+    /// Returns `None` for [AnyParse::EmbeddedNode]
+    pub fn into_language_root<N>(self) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::Node(node) => node.root.clone().into_language_root::<N>(),
+            Self::EmbeddedNode(_) => None,
+        }
+    }
+
     pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
         match self {
             Self::Node(node) => node.into_serde_diagnostics(offset),
@@ -822,19 +836,6 @@ impl AnyParse {
                 panic!("Can't call embedded_syntax() on a non-embedded node. Use syntax() instead.")
             }
             Self::EmbeddedNode(node) => node.syntax(),
-        }
-    }
-
-    /// Returns a [SendNode] that can be sent across threads
-    ///
-    /// ## Panic
-    ///
-    /// It panics if this node is a [EmbeddedSendNode]
-    pub fn unwrap_into_send_node(self) -> SendNode {
-        if let Self::Node(node) = self {
-            node.into_root()
-        } else {
-            panic!("Calling unwrap_into_send_node on an embedded node isn't a valid operation")
         }
     }
 

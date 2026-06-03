@@ -1,12 +1,13 @@
-mod embeded_bindings;
+pub mod embedded;
 
-use crate::embeded_bindings::{BindingsDb, EmbeddedBinding};
+use crate::embedded::{EmbeddedBinding, EmbeddedDb, EmbeddedValueReference};
 use biome_css_semantic::db::CssSemanticDb;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_js_semantic::JsSemanticDb;
 use biome_languages::AnyFileSource;
 use biome_languages::db::LanguageDb;
 use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
+use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use salsa::Storage;
@@ -48,11 +49,15 @@ impl WorkspaceDb {
         }
     }
 
+    pub fn insert_bindings(&mut self, bindings: Vec<Vec<EmbeddedBinding>>) {
+        self.bindings = bindings;
+    }
+
     /// Inserts a file source so that it can be retrieved by index later.
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    fn insert_source(&mut self, document_file_source: AnyFileSource) -> usize {
+    pub fn insert_source(&mut self, document_file_source: AnyFileSource) -> usize {
         self.file_sources
             .iter()
             .position(|(_, file_source)| *file_source == document_file_source)
@@ -121,9 +126,13 @@ impl CssSemanticDb for WorkspaceDb {}
 impl JsSemanticDb for WorkspaceDb {}
 
 #[salsa::db]
-impl BindingsDb for WorkspaceDb {
+impl EmbeddedDb for WorkspaceDb {
     fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
         self.bindings.clone()
+    }
+
+    fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
+        self.references().clone()
     }
 }
 

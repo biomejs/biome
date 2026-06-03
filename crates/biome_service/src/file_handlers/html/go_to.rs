@@ -8,6 +8,8 @@ use biome_html_syntax::{
 use biome_module_graph::ModuleDb;
 use biome_rowan::{AstNode, TextRange, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
+use biome_workspace_db::embedded::EmbeddedDb;
+use biome_workspace_db::embedded::bindings::{InternedBinding, get_binding_with_source};
 use camino::Utf8Path;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
@@ -73,23 +75,26 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
         // This branch is responsible for resolving component names.
         if let Some(element) = HtmlComponentName::cast_ref(&ancestor)
             && let Some(element_value) = element.value_token().ok()
-            && let Some(binding) = get_binding_with_source(element_value.text_trimmed())
-            && let Some(source) = binding.source()
+            && let Some(binding) = get_binding_with_source(
+                &params.workspace_db,
+                InternedBinding::new(&params.workspace_db, element_value.token_text_trimmed()),
+            )
+            && let Some(source) = binding.source(&params.workspace_db)
         {
             return Some(DefinitionReference::HtmlComponent {
-                local_name: binding.token_text().to_string(),
+                local_name: binding.text(&params.workspace_db).to_string(),
                 source: source.to_string(),
             });
         }
 
         if let Some(element) = HtmlTextExpression::cast_ref(&ancestor)
-            && let Some(embedded_bindings) = params.services.embedded_bindings()
             && let Some(element_value) = element.html_literal_token().ok()
-            && let Some(binding) =
-                embedded_bindings.get_binding_by_name(element_value.text_trimmed())
+            && let Some(binding) = params
+                .workspace_db
+                .binding_by_name(element_value.text_trimmed())
         {
             return Some(DefinitionReference::LocalEmbedded {
-                range: *binding.range(),
+                range: binding.range(&params.workspace_db),
                 to_language: LocalEmbeddedLanguage::Js,
             });
         }

@@ -63,6 +63,7 @@ use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnost
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::AnyFileSource;
 use biome_module_graph::SerializedModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
@@ -92,6 +93,7 @@ pub use crate::{
     settings::Settings,
 };
 use biome_languages::DocumentFileSource;
+use biome_workspace_db::WorkspaceDb;
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 

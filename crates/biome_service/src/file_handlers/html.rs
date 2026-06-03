@@ -33,6 +33,7 @@ use biome_configuration::html::{
     HtmlParserConfiguration,
 };
 use biome_css_syntax::CssLanguage;
+use biome_db::AnyParsedSource;
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -56,6 +57,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_languages::{HtmlFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -430,9 +432,13 @@ struct EmbedParseContext<'a, 'b> {
     builder: &'a mut EmbeddedBuilder,
 }
 
-fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: HtmlSyntaxNode = parse.syntax();
-    let tree: HtmlRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: HtmlSyntaxNode = parse.syntax(&workspace_db);
+    let tree: HtmlRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -442,28 +448,30 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, false)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, true)?;
 
     match formatted.print() {
@@ -475,13 +483,14 @@ fn format(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     embedded_nodes: Vec<FormatEmbedNode>,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let indent_script_and_style = options.indent_script_and_style().value();
     let mut formatted = format_node(options, &tree, true)?;
     formatted.format_embedded(move |range| {
@@ -620,11 +629,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
-        action_offset,
-        document_services: _,
         working_directory,
         compute_actions,
-        snippet_services: _,
         analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
@@ -663,7 +669,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules: &disabled_rules,
         range,
     };
-
+    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let html_services = HtmlAnalyzerServices {
         module_db: Some(module_db),
         project_layout: Some(project_layout),
@@ -714,7 +720,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: HtmlRoot = params.parse.tree();
+    let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
     let rules = params

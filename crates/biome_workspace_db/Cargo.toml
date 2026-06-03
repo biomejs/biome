@@ -21,8 +21,10 @@ biome_resolver.workspace = true
 biome_rowan.workspace = true
 camino.workspace = true
 papaya.workspace = true
-salsa.workspace = true
+salsa = { workspace = true }
 biome_languages.workspace = true
 boxcar.workspace = true
+serde.workspace = true
+
 [lints]
 workspace = true

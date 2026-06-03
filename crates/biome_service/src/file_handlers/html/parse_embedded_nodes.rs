@@ -6,9 +6,7 @@ use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult};
 use crate::settings::SettingsWithEditor;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{
-    AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
-};
+use crate::workspace::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssLanguage, TextSize};
 use biome_fs::BiomePath;
@@ -1015,16 +1013,8 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level doesn't
-            let js_services = JsDocumentServices::from_js_snippet(
-                &snippet.tree(),
-                &js_source,
-                ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled(),
-            );
-
             Some(ParsedEmbed {
-                node: ((snippet, js_services).into(), doc_source),
+                node: (snippet.into(), doc_source),
                 // Only source-level embeds contribute to embedded_file_source capture
                 js_file_source: if is_source_level {
                     Some(js_source)

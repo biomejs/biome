@@ -14,35 +14,13 @@ use biome_js_syntax::{
 use biome_languages::HtmlFileSource;
 use biome_languages::html::HtmlVariant;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
+use biome_workspace_db::embedded::EmbeddedDb;
+use biome_workspace_db::embedded::bindings::EmbeddedBinding;
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedExportedBindings {
     pub bindings: Vec<Vec<EmbeddedBinding>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct EmbeddedBinding {
-    /// The range of the binding
-    pub(crate) range: TextRange,
-    /// The text of the binding
-    pub(crate) text: TokenText,
-    /// Optionally, the source of the binding. It represents the path of the import/dynamic import.
-    pub(crate) source: Option<TokenText>,
-}
-
-impl EmbeddedBinding {
-    pub(crate) fn range(&self) -> &TextRange {
-        &self.range
-    }
-
-    pub(crate) fn token_text(&self) -> &TokenText {
-        &self.text
-    }
-
-    pub(crate) fn source(&self) -> Option<&TokenText> {
-        self.source.as_ref()
-    }
 }
 
 #[derive(Debug)]
@@ -56,52 +34,14 @@ impl EmbeddedExportedBindings {
         EmbeddedBuilder::new()
     }
 
-    pub(crate) fn finish(&mut self, builder: EmbeddedBuilder) {
+    pub(crate) fn finish(&mut self, builder: EmbeddedBuilder, db: &dyn EmbeddedDb) {
         self.bindings.push(
             builder
                 .js_bindings
                 .into_iter()
-                .map(|(range, text, source)| EmbeddedBinding {
-                    range,
-                    text,
-                    source,
-                })
+                .map(|(range, text, source)| EmbeddedBinding::new(db, range, text, source))
                 .collect::<Vec<_>>(),
         );
-    }
-
-    pub(crate) fn get_binding_by_name(&self, binding_name: &str) -> Option<&EmbeddedBinding> {
-        for bindings in self.bindings.iter() {
-            for binding in bindings {
-                if binding.token_text().text() == binding_name {
-                    return Some(binding);
-                }
-            }
-        }
-        None
-    }
-
-    pub(crate) fn get_binding_with_source(&self, binding_name: &str) -> Option<&EmbeddedBinding> {
-        for bindings in self.bindings.iter() {
-            for binding in bindings {
-                if binding.token_text().text() == binding_name && binding.source().is_some() {
-                    return Some(binding);
-                }
-            }
-        }
-        None
-    }
-
-    pub(crate) fn bindings_without_source(self) -> Vec<Vec<(TextRange, TokenText)>> {
-        self.bindings
-            .into_iter()
-            .map(|bindings| {
-                bindings
-                    .into_iter()
-                    .map(|b| (b.range, b.text))
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>()
     }
 }
 impl EmbeddedBuilder {

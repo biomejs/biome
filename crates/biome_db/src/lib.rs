@@ -8,7 +8,7 @@ pub mod testing;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_rowan::{AstNode, Language, SendNode, SyntaxNode, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 
 #[salsa::db]
@@ -51,6 +51,10 @@ impl ParsedSource {
 
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
         self.parsed(db).clone().into_serde_diagnostics(None)
+    }
+
+    pub fn has_errors(&self, db: &dyn Db) -> bool {
+        self.errors(db) > 0
     }
 }
 
@@ -109,6 +113,27 @@ impl AnyParsedSource {
         }
     }
 
+    pub fn into_language_root<N>(self, db: &dyn Db) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.parsed(db).clone().into_language_root(),
+            Self::ParsedSnippet(_) => None,
+        }
+    }
+
+    pub fn syntax<L: Language>(&self, db: &dyn Db) -> SyntaxNode<L>
+    where
+        L: Language + 'static,
+    {
+        match self {
+            Self::ParsedSource(parsed) => parsed.parsed(db).syntax(),
+            Self::ParsedSnippet(parsed) => parsed.parsed(db).syntax(),
+        }
+    }
+
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
         match self {
             Self::ParsedSource(parsed) => parsed.serde_diagnostics(db),
@@ -136,6 +161,20 @@ impl AnyParsedSource {
             Self::ParsedSnippet(snippet) => snippet.document_source_index(db),
         }
     }
+
+    pub fn unwrap_as_send_node(&self, db: &dyn Db) -> SendNode {
+        match self {
+            Self::ParsedSource(source) => source.parsed(db).unwrap_as_send_node(),
+            Self::ParsedSnippet(_) => panic!("Cannot unwrap ParsedSnippet into SendNode"),
+        }
+    }
+
+    pub fn any_parse<'a>(&self, db: &'a dyn Db) -> &'a AnyParse {
+        match self {
+            Self::ParsedSource(source) => source.parsed(db),
+            Self::ParsedSnippet(snippet) => snippet.parsed(db),
+        }
+    }
 }
 
 impl From<ParsedSource> for AnyParsedSource {
@@ -147,5 +186,17 @@ impl From<ParsedSource> for AnyParsedSource {
 impl From<ParsedSnippet> for AnyParsedSource {
     fn from(snippet: ParsedSnippet) -> Self {
         AnyParsedSource::ParsedSnippet(snippet)
+    }
+}
+
+impl From<&ParsedSource> for AnyParsedSource {
+    fn from(source: &ParsedSource) -> Self {
+        AnyParsedSource::ParsedSource(source.clone())
+    }
+}
+
+impl From<&ParsedSnippet> for AnyParsedSource {
+    fn from(snippet: &ParsedSnippet) -> Self {
+        AnyParsedSource::ParsedSnippet(snippet.clone())
     }
 }

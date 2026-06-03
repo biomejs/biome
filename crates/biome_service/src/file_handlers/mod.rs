@@ -83,7 +83,7 @@ use std::sync::Arc;
 use tracing::trace;
 
 pub struct FixAllParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     /// Whether it should format the code action
@@ -98,7 +98,6 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     /// The initial indentation level to apply when printing formatted code.
     /// Used by embedded language handlers (Svelte, Vue) to preserve
@@ -147,18 +146,21 @@ pub struct ParserCapabilities {
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParse, TextSize) -> String;
+type DebugSyntaxTree = fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnyParsedSource, TextSize, WorkspaceDb) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
-    &DocumentFileSource,
-    AnyParse,
+    &AnyFileSource,
+    AnyParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
-    fn(&BiomePath, Option<AnyParse>, ProjectDatabase) -> Result<String, WorkspaceError>;
-type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
-type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, Option<AnyParsedSource>, ProjectDatabase) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes =
+    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugSemanticModel =
+    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -190,9 +192,6 @@ pub(crate) struct LintParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
-    pub(crate) diagnostic_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     pub(crate) max_diagnostics: Option<u32>,
     pub(crate) diagnostic_level: Severity,
@@ -753,13 +752,9 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
-    pub(crate) action_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
     pub(crate) compute_actions: bool,
-    // Services attached to the current embedded snippet, when actions are run on snippets.
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
     pub(crate) analyzer_cache: &'a AnalyzerVisitorCache,
 }
 
@@ -775,7 +770,13 @@ pub(crate) struct UpdateSnippetsNodes {
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
-type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type Rename = fn(
+    &BiomePath,
+    AnyParsedSource,
+    TextSize,
+    String,
+    WorkspaceDb,
+) -> Result<RenameResult, WorkspaceError>;
 type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
@@ -798,30 +799,34 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
     TextRange,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
     TextSize,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
     Vec<FormatEmbedNode>,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
 #[derive(Debug)]
@@ -848,10 +853,11 @@ type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
+    WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
