@@ -1905,6 +1905,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_imports_first::UseImportsFirstOptions>(),
     ));
     result.push((
+        "nursery",
+        "useIncludes",
+        TypeId::of::<biome_rule_options::use_includes::UseIncludesOptions>(),
+    ));
+    result.push((
         "complexity",
         "useIndexOf",
         TypeId::of::<biome_rule_options::use_index_of::UseIndexOfOptions>(),

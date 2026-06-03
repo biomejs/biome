@@ -6865,6 +6865,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIncludes": {
+					"description": "Prefer Array#includes() over Array#indexOf() checks.\nSee https://biomejs.dev/linter/rules/use-includes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseIncludesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useInlineScriptId": {
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
@@ -11506,6 +11513,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseIncludesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseIncludesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIndexOfOptions": {
 			"type": "object",
 			"properties": {
@@ -15046,6 +15063,17 @@
 			]
 		},
 		"UseImportsFirstOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseIncludesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseIncludesOptions" }
+			]
+		},
+		"UseIncludesOptions": {
+			"description": "Options for the `useIncludes` rule.",
 			"type": "object",
 			"additionalProperties": false
 		},
