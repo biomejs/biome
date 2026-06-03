@@ -1,6 +1,5 @@
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
@@ -66,7 +65,7 @@ declare_lint_rule! {
         language: "js",
         domains: &[RuleDomain::Svelte],
         sources: &[RuleSource::EslintSvelte("no-unnecessary-state-wrap").same()],
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -100,14 +99,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         let AnyJsExpression::JsIdentifierExpression(callee_ident) = call.callee().ok()? else {
             return None;
         };
-        if callee_ident
-            .name()
-            .ok()?
-            .value_token()
-            .ok()?
-            .text_trimmed()
-            != "$state"
-        {
+        if callee_ident.name().ok()?.value_token().ok()?.text_trimmed() != "$state" {
             return None;
         }
 
@@ -162,8 +154,10 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
 
         // If `allowReassign` is enabled, skip variables that are reassigned after declaration.
         if options.allow_reassign.unwrap_or(false)
-            && let Some(declarator) =
-                call.syntax().ancestors().find_map(JsVariableDeclarator::cast)
+            && let Some(declarator) = call
+                .syntax()
+                .ancestors()
+                .find_map(JsVariableDeclarator::cast)
             && let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 id_binding,
             ))) = declarator.id()
