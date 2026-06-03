@@ -19,17 +19,20 @@ pub(super) fn convert_literal(
             let token = literal
                 .value_token()
                 .map_err(|_| missing("JsNumberLiteralExpression", "value_token"))?;
-            let value =
-                token
-                    .text_trimmed()
-                    .parse()
-                    .map_err(|_| ReactCompilerError::InvalidLiteral {
-                        range: token.text_trimmed_range(),
-                        reason: "number literal is not supported yet",
-                    })?;
+            let raw = token.text_trimmed();
+            let value = raw
+                .parse()
+                .map_err(|_| ReactCompilerError::InvalidLiteral {
+                    range: token.text_trimmed_range(),
+                    reason: "number literal is not supported yet",
+                })?;
             Ok(Expression::NumericLiteral(NumericLiteral {
                 base: ctx.base(literal.syntax().text_trimmed_range()),
                 value,
+                extra: Some(NumericLiteralExtra {
+                    raw: raw.to_string(),
+                    raw_value: Some(value),
+                }),
             }))
         }
         AnyJsLiteralExpression::JsBooleanLiteralExpression(literal) => {

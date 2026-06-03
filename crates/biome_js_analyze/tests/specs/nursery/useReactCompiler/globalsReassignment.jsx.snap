@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: globalsReassignment.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+let shared = 0;
+
+function Component() {
+    shared = shared + 1;
+
+    return <div>{shared}</div>;
+}
+
+```
+
+# Diagnostics
+```
+globalsReassignment.jsx:6:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component reassigns a variable declared outside it.
+  
+    5 │ function Component() {
+  > 6 │     shared = shared + 1;
+      │     ^^^^^^
+    7 │ 
+    8 │     return <div>{shared}</div>;
+  
+  i Changing external variables during render makes component output depend on mutable shared state.
+  
+  i Keep render logic local and immutable, or move shared updates into state, refs, or event handlers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

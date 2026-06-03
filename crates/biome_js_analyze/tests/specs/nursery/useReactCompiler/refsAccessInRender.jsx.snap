@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: refsAccessInRender.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useRef } from "react";
+
+function Component() {
+    const ref = useRef(null);
+
+    return <div>{ref.current}</div>;
+}
+
+```
+
+# Diagnostics
+```
+refsAccessInRender.jsx:8:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This render reads or writes a ref.
+  
+     6 │     const ref = useRef(null);
+     7 │ 
+   > 8 │     return <div>{ref.current}</div>;
+       │                  ^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Refs are mutable escape hatches. Accessing them during render can make output depend on mutable state outside React's render model.
+  
+  i Read or write refs in effects, event handlers, or callbacks instead of during render.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

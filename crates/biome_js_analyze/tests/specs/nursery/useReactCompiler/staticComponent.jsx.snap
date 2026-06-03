@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: staticComponent.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+function Component() {
+    function Inner() {
+        return <span />;
+    }
+
+    return <Inner />;
+}
+
+```
+
+# Diagnostics
+```
+staticComponent.jsx:8:13 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component is created during render.
+  
+     6 │     }
+     7 │ 
+   > 8 │     return <Inner />;
+       │             ^^^^^
+     9 │ }
+    10 │ 
+  
+  i Components created during render are recreated on every render, which resets their state and prevents stable optimization.
+  
+  i Declare the component outside of the rendering component, or pass data through props instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidHookUsage.jsx
+expression: hookDynamicReference.jsx
 ---
 # Input
 ```jsx
@@ -8,17 +8,7 @@ expression: invalidHookUsage.jsx
 
 import { useEffect, useState } from "react";
 
-function HookInNestedFunction() {
-    function nested() {
-        useState(0);
-    }
-
-    nested();
-
-    return <div />;
-}
-
-function DynamicHookReference(props) {
+function Component(props) {
     const hook = props.enabled ? useState : useEffect;
 
     hook(0);
@@ -30,15 +20,15 @@ function DynamicHookReference(props) {
 
 # Diagnostics
 ```
-invalidHookUsage.jsx:16:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookDynamicReference.jsx:6:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    15 │ function DynamicHookReference(props) {
-  > 16 │     const hook = props.enabled ? useState : useEffect;
-       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    17 │ 
-    18 │     hook(0);
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │     hook(0);
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   
@@ -50,15 +40,15 @@ invalidHookUsage.jsx:16:18 lint/nursery/useReactCompiler ━━━━━━━�
 ```
 
 ```
-invalidHookUsage.jsx:16:34 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookDynamicReference.jsx:6:34 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    15 │ function DynamicHookReference(props) {
-  > 16 │     const hook = props.enabled ? useState : useEffect;
-       │                                  ^^^^^^^^
-    17 │ 
-    18 │     hook(0);
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                                  ^^^^^^^^
+    7 │ 
+    8 │     hook(0);
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   
@@ -70,15 +60,15 @@ invalidHookUsage.jsx:16:34 lint/nursery/useReactCompiler ━━━━━━━�
 ```
 
 ```
-invalidHookUsage.jsx:16:45 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookDynamicReference.jsx:6:45 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    15 │ function DynamicHookReference(props) {
-  > 16 │     const hook = props.enabled ? useState : useEffect;
-       │                                             ^^^^^^^^^
-    17 │ 
-    18 │     hook(0);
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                                             ^^^^^^^^^
+    7 │ 
+    8 │     hook(0);
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   
@@ -90,16 +80,16 @@ invalidHookUsage.jsx:16:45 lint/nursery/useReactCompiler ━━━━━━━�
 ```
 
 ```
-invalidHookUsage.jsx:18:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hookDynamicReference.jsx:8:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.
   
-    16 │     const hook = props.enabled ? useState : useEffect;
-    17 │ 
-  > 18 │     hook(0);
+     6 │     const hook = props.enabled ? useState : useEffect;
+     7 │ 
+   > 8 │     hook(0);
        │     ^^^^
-    19 │ 
-    20 │     return <div />;
+     9 │ 
+    10 │     return <div />;
   
   i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
   

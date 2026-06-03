@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: useMemoMissingReturn.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useMemo } from "react";
+
+function Component(props) {
+    const value = useMemo(() => {
+        props.value;
+    }, [props.value]);
+
+    return <div>{value}</div>;
+}
+
+```
+
+# Diagnostics
+```
+useMemoMissingReturn.jsx:6:27 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This useMemo callback does not return a value.
+  
+     5 │ function Component(props) {
+   > 6 │     const value = useMemo(() => {
+       │                           ^^^^^^^
+   > 7 │         props.value;
+   > 8 │     }, [props.value]);
+       │     ^
+     9 │ 
+    10 │     return <div>{value}</div>;
+  
+  i useMemo is for computing and caching a value, so its callback must return the value to memoize.
+  
+  i Return the computed value from the callback, or use useEffect if this code only performs a side effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
