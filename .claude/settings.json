@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(cargo insta:*)",
+      "Bash(cargo clippy:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(just:*)",
@@ -15,6 +16,21 @@
     "deny": [
       "Bash(cargo biome-cli-dev:*)",
       "Bash(cargo biome-cli:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/clippy-on-edit.sh",
+            "timeout": 60,
+            "statusMessage": "Running clippy..."
+          }
+        ]
+      }
     ]
   }
 }
