@@ -541,6 +541,9 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
+        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
+        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let mut first_stop_keyword_seen = false;
 
         let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
         let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
@@ -575,16 +578,25 @@ impl<'src> HtmlLexer<'src> {
                     let checkpoint_pos = self.position;
                     let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        // Check if this keyword is in our stop list
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
                         if should_stop {
-                            // Rewind - don't consume the keyword
-                            self.position = checkpoint_pos;
-                            break;
+                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+                                && !first_stop_keyword_seen
+                            {
+                                // First `as` belongs to a TypeScript `as const` assertion;
+                                // the parser determined this via lookahead. Skip it and
+                                // continue scanning for the Svelte binding `as`.
+                                first_stop_keyword_seen = true;
+                            } else {
+                                // Rewind — don't consume the keyword
+                                self.position = checkpoint_pos;
+                                break;
+                            }
                         }
-                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                        // Not a stop keyword (or skipped), continue
+                        // (position already advanced by consume_language_identifier)
                     } else {
                         // Not a keyword, advance one byte (position was reset by consume_language_identifier)
                         self.advance_byte_or_char(current);
