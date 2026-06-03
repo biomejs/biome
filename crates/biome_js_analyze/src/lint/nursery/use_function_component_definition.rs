@@ -1,15 +1,22 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsSyntaxToken};
-use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsStatement, JsSyntaxToken, JsVariableDeclaration, JsVariableStatement, T,
+};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind};
 use biome_rule_options::use_function_component_definition::{
     ComponentDefinitionStyle, UseFunctionComponentDefinitionOptions,
 };
 
-use crate::react::components::{
-    AnyPotentialReactComponentDeclaration, ReactComponentInfo, ReactComponentKind,
+use crate::{
+    JsRuleAction,
+    react::components::{
+        AnyPotentialReactComponentDeclaration, ReactComponentInfo, ReactComponentKind,
+    },
 };
 
 declare_lint_rule! {
@@ -55,6 +62,7 @@ declare_lint_rule! {
         recommended: false,
         domains: &[RuleDomain::React],
         sources: &[RuleSource::EslintReact("function-component-definition").same()],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -105,16 +113,78 @@ impl Rule for UseFunctionComponentDefinition {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Use " {state.preferred_style.label()} " for the React component " {state.component_name.text_trimmed()} "."
+                    "The React component " {state.component_name.text_trimmed()} " is defined as " {state.actual_style.label()} "."
                 },
             )
             .note(markup! {
-                "This component is currently defined as " {state.actual_style.label()} ". Mixing component definition styles makes component declarations harder to scan."
+                "Mixing component definition styles makes component declarations harder to scan."
             })
             .note(markup! {
                 "Rewrite this component as " {state.preferred_style.label()} " or configure `namedComponents` to allow " {state.actual_style.label()} "."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        if state.preferred_style != ComponentDefinitionStyle::FunctionDeclaration {
+            return None;
+        }
+
+        let node = ctx.query();
+        let AnyPotentialReactComponentDeclaration::JsVariableDeclarator(declarator) = node else {
+            return None;
+        };
+        if declarator.variable_annotation().is_some() {
+            return None;
+        }
+
+        let declaration = declarator.parent::<JsVariableDeclaration>()?;
+        if declaration.declarators().len() != 1 {
+            return None;
+        }
+
+        let statement = declaration.parent::<JsVariableStatement>()?;
+        let function = declarator
+            .initializer()?
+            .expression()
+            .ok()?
+            .as_js_function_expression()?
+            .clone();
+
+        let id = declarator.id().ok()?.as_any_js_binding()?.clone();
+        let mut function_declaration = make::js_function_declaration(
+            make::token(T![function]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            id,
+            function.parameters().ok()?,
+            function.body().ok()?,
+        );
+
+        if let Some(async_token) = function.async_token() {
+            function_declaration = function_declaration.with_async_token(async_token);
+        }
+        if let Some(star_token) = function.star_token() {
+            function_declaration = function_declaration.with_star_token(star_token);
+        }
+        if let Some(type_parameters) = function.type_parameters() {
+            function_declaration = function_declaration.with_type_parameters(type_parameters);
+        }
+        if let Some(return_type_annotation) = function.return_type_annotation() {
+            function_declaration =
+                function_declaration.with_return_type_annotation(return_type_annotation);
+        }
+
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(
+            AnyJsStatement::JsVariableStatement(statement),
+            AnyJsStatement::JsFunctionDeclaration(function_declaration.build()),
+        );
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Use a function declaration for this component." }.to_owned(),
+            mutation,
+        ))
     }
 }
 

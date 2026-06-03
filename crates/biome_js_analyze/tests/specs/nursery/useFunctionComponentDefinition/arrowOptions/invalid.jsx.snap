@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalid.jsx
 ---
 # Input
@@ -19,7 +20,7 @@ const FunctionExpressionComponent = function (props) {
 ```
 invalid.jsx:2:10 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use an arrow function for the React component FunctionDeclarationComponent.
+  i The React component FunctionDeclarationComponent is defined as a function declaration.
   
     1 │ /* should generate diagnostics */
   > 2 │ function FunctionDeclarationComponent(props) {
@@ -27,7 +28,7 @@ invalid.jsx:2:10 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     3 │     return <div>{props.name}</div>;
     4 │ }
   
-  i This component is currently defined as a function declaration. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as an arrow function or configure `namedComponents` to allow a function declaration.
   
@@ -39,7 +40,7 @@ invalid.jsx:2:10 lint/nursery/useFunctionComponentDefinition ━━━━━━�
 ```
 invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use an arrow function for the React component FunctionExpressionComponent.
+  i The React component FunctionExpressionComponent is defined as a function expression.
   
     4 │ }
     5 │ 
@@ -48,7 +49,7 @@ invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     7 │     return <div>{props.name}</div>;
     8 │ };
   
-  i This component is currently defined as a function expression. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as an arrow function or configure `namedComponents` to allow a function expression.
   

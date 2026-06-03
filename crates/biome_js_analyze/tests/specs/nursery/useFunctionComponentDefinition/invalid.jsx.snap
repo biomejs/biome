@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalid.jsx
 ---
 # Input
@@ -27,7 +28,7 @@ AssignedComponent = (props) => {
 ```
 invalid.jsx:2:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a function declaration for the React component ArrowComponent.
+  i The React component ArrowComponent is defined as an arrow function.
   
     1 │ /* should generate diagnostics */
   > 2 │ const ArrowComponent = (props) => {
@@ -35,7 +36,7 @@ invalid.jsx:2:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     3 │     return <div>{props.name}</div>;
     4 │ };
   
-  i This component is currently defined as an arrow function. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
   
@@ -47,7 +48,7 @@ invalid.jsx:2:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
 ```
 invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a function declaration for the React component ExpressionComponent.
+  i The React component ExpressionComponent is defined as a function expression.
   
     4 │ };
     5 │ 
@@ -56,7 +57,7 @@ invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     7 │     return <div>{props.name}</div>;
     8 │ };
   
-  i This component is currently defined as a function expression. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as a function declaration or configure `namedComponents` to allow a function expression.
   
@@ -68,7 +69,7 @@ invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
 ```
 invalid.jsx:10:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a function declaration for the React component MemoComponent.
+  i The React component MemoComponent is defined as an arrow function.
   
      8 │ };
      9 │ 
@@ -77,7 +78,7 @@ invalid.jsx:10:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     11 │     return <div>{props.name}</div>;
     12 │ });
   
-  i This component is currently defined as an arrow function. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
   
@@ -89,7 +90,7 @@ invalid.jsx:10:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
 ```
 invalid.jsx:14:1 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a function declaration for the React component AssignedComponent.
+  i The React component AssignedComponent is defined as an arrow function.
   
     12 │ });
     13 │ 
@@ -98,7 +99,7 @@ invalid.jsx:14:1 lint/nursery/useFunctionComponentDefinition ━━━━━━�
     15 │     return <div>{props.name}</div>;
     16 │ };
   
-  i This component is currently defined as an arrow function. Mixing component definition styles makes component declarations harder to scan.
+  i Mixing component definition styles makes component declarations harder to scan.
   
   i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
   
