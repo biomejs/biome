@@ -862,7 +862,7 @@ mod test {
                             return <div>Hello, world!</div>;
                         });
 
-                        const invalid2 = memo(() => {}, extraArg);
+                        const invalid2 = memo(() => {}, arg2, arg3);
                     }
                 "#,
             );
