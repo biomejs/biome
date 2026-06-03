@@ -18,6 +18,10 @@ const MemoComponent = memo((props) => {
     return <div>{props.name}</div>;
 });
 
+const MemoWithComparatorComponent = memo((props) => {
+    return <div>{props.name}</div>;
+}, areEqual);
+
 AssignedComponent = (props) => {
     return <div>{props.name}</div>;
 };
@@ -88,16 +92,37 @@ invalid.jsx:10:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
 ```
 
 ```
-invalid.jsx:14:1 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The React component AssignedComponent is defined as an arrow function.
+  i The React component MemoWithComparatorComponent is defined as an arrow function.
   
     12 │ });
     13 │ 
-  > 14 │ AssignedComponent = (props) => {
-       │ ^^^^^^^^^^^^^^^^^
+  > 14 │ const MemoWithComparatorComponent = memo((props) => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     15 │     return <div>{props.name}</div>;
-    16 │ };
+    16 │ }, areEqual);
+  
+  i Mixing component definition styles makes component declarations harder to scan.
+  
+  i Rewrite this component as a function declaration or configure `namedComponents` to allow an arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:1 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The React component AssignedComponent is defined as an arrow function.
+  
+    16 │ }, areEqual);
+    17 │ 
+  > 18 │ AssignedComponent = (props) => {
+       │ ^^^^^^^^^^^^^^^^^
+    19 │     return <div>{props.name}</div>;
+    20 │ };
   
   i Mixing component definition styles makes component declarations harder to scan.
   

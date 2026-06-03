@@ -11,6 +11,10 @@ const MemoComponent = memo((props) => {
     return <div>{props.name}</div>;
 });
 
+const MemoWithComparatorComponent = memo((props) => {
+    return <div>{props.name}</div>;
+}, areEqual);
+
 AssignedComponent = (props) => {
     return <div>{props.name}</div>;
 };

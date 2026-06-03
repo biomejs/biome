@@ -61,7 +61,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         domains: &[RuleDomain::React],
-        sources: &[RuleSource::EslintReact("function-component-definition").same()],
+        sources: &[RuleSource::EslintReact("function-component-definition").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -152,6 +152,18 @@ impl Rule for UseFunctionComponentDefinition {
             .clone();
 
         let id = declarator.id().ok()?.as_any_js_binding()?.clone();
+        let id_name = id.as_js_identifier_binding()?.name_token().ok()?;
+        if let Some(function_id) = function.id()
+            && function_id
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()?
+                .text_trimmed()
+                != id_name.text_trimmed()
+        {
+            return None;
+        }
+
         let mut function_declaration = make::js_function_declaration(
             make::token(T![function]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             id,
@@ -213,12 +225,15 @@ fn expression_definition_style(expression: &AnyJsExpression) -> Option<Component
         AnyJsExpression::JsCallExpression(call) => {
             let callee_name = call.callee().ok()?.get_callee_member_name()?;
             let callee_member_name = callee_name.text_trimmed();
-            if callee_member_name != "memo" && callee_member_name != "forwardRef" {
+            let is_memo = callee_member_name == "memo";
+            let is_forward_ref = callee_member_name == "forwardRef";
+            if !is_memo && !is_forward_ref {
                 return None;
             }
 
             let args = call.arguments().ok()?;
-            if args.args().len() != 1 {
+            let args_len = args.args().len();
+            if (is_memo && !(1..=2).contains(&args_len)) || (is_forward_ref && args_len != 1) {
                 return None;
             }
 
