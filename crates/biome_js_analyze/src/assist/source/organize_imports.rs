@@ -172,45 +172,6 @@ declare_source_rule! {
     /// - `:STYLE:`: paths ending with the following style extensions:
     ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
     ///
-    /// #### Kind matcher
-    ///
-    /// Use a kind matcher to filter imports by their syntactic kind.
-    /// Currently, the only supported kind is `bare`, which matches
-    /// bare (side-effect) imports such as `import "polyfill"`.
-    /// Prefix the kind with `!` to match everything except that kind.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "sortBareImports": true,
-    ///         "groups": [
-    ///             { "kind": "!bare" },
-    ///             ":BLANK_LINE:",
-    ///             { "kind": "bare" }
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// The kind matcher composes with the `source` field,
-    /// allowing patterns such as "only bare imports that import a CSS file":
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "sortBareImports": true,
-    ///         "groups": [
-    ///             { "kind": "bare", "source": "**/*.css" }
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// :::note
-    /// The `bare` kind requires [`sortBareImports`](#sortbareimports) to be `true`
-    /// for bare imports to participate in group matching.
-    /// :::
-    ///
     /// #### Type-only matcher
     ///
     /// Use a type-only matcher to separate `import type` from regular imports:
@@ -245,6 +206,86 @@ declare_source_rule! {
     /// ```
     ///
     /// The `source` field accepts predefined groups and glob patterns.
+    ///
+    /// #### Kind matcher
+    ///
+    /// Use a kind matcher to filter imports by their syntactic kind.
+    /// Currently, the only supported kind is `bare`, which matches
+    /// bare (side-effect) imports such as `import "polyfill"`.
+    /// The kind matcher composes with the `source` field,
+    /// allowing patterns such as "only bare imports that import a style file":
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "kind": "bare", "source": ":STYLE:" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./b.css";
+    /// import d from "./d.js";
+    /// import "./a.css";
+    /// ```
+    ///
+    /// If you don't set [`sortBareImports`](#sortbareimports) to `true`,
+    /// then bare imports that are not matched are not sorted with other imports.
+    /// Using the previous configuration, the following code...
+    ///
+    /// ```ts,ignore
+    /// import "./e.css";
+    /// import d from "./d.js";
+    /// import "./c.css";
+    /// import "./x.js";
+    /// import "./b.css";
+    /// import "./a.css";
+    /// ```
+    ///
+    /// ...is sorted as:
+    ///
+    /// ```ts,ignore
+    /// import "./c.css";
+    /// import "./e.css";
+    /// import d from "./d.js";
+    /// import "./x.js";
+    /// import "./a.css";
+    /// import "./b.css";
+    /// ```
+    ///
+    /// Another subtlety of not setting [`sortBareImports`](#sortbareimports) to `true`
+    /// is that the following configuration doesn't group bare imports at the end:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [{ "kind": "!bare" }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// If you want to group bare imports last,
+    /// you have to create a group that explicitly matches bare imports:
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "kind": "!bare" },
+    ///             ":BLANK_LINE:",
+    ///             { "kind": "bare" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./b.css";
+    /// import d from "./d.js";
+    /// import "./a.css";
+    /// ```
     ///
     /// ### `sortBareImports`
     ///
@@ -999,28 +1040,43 @@ impl Rule for OrganizeImports {
         let sort_order = options.identifier_order.unwrap_or_default();
         let sort_bare_imports = options.sort_bare_imports.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
-        let mut prev_kind: Option<JsSyntaxKind> = None;
-        let mut prev_is_bare_import = false;
+        let mut prev_stmt_kind: Option<JsSyntaxKind> = None;
+        let mut prev_is_unmatched_bare_import = false;
         let mut prev_group = None;
         for item in root.items() {
-            let current_kind = item.syntax().kind();
+            let current_stmt_kind = item.syntax().kind();
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
-                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != current_kind);
+                let key = ImportKey::new(info, groups);
+                let prev_is_distinct_stmt_kind =
+                    prev_stmt_kind.is_some_and(|kind| kind != current_stmt_kind);
+                // Is this a bare import that is explicitly matched by its group?
+                // Explicitly means that it is a bare import matcher such as `{ "kind": "bare" }`.
+                let is_matched_bare_import = if key.kind == ImportStatementKind::Bare
+                    && let Some(groups) = groups
+                    && let Some(import_group) = groups.get(key.group)
+                {
+                    import_group.matches_bare(&(&key).into())
+                } else {
+                    false
+                };
                 // switching of kind (import/statement/export) marks the start of a new chunk.
-                if prev_is_distinct
+                if prev_is_distinct_stmt_kind
                     // A detached comment marks the start of a new chunk
                     || has_detached_leading_comment(item.syntax())
                     // bare imports marks the start of a new chunk if they are ignored in the sort.
                     || (!sort_bare_imports && (
-                        prev_is_bare_import || info.kind == ImportStatementKind::Bare
+                        // bare imports that are explicitly matched are ignored.
+                        prev_is_unmatched_bare_import || (
+                            !is_matched_bare_import && key.kind == ImportStatementKind::Bare
+                        )
                     ))
                 {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = None;
                 }
-                prev_is_bare_import = info.kind == ImportStatementKind::Bare;
-                let key = ImportKey::new(info, groups);
+                prev_is_unmatched_bare_import =
+                    key.kind == ImportStatementKind::Bare && !is_matched_bare_import;
                 let blank_line_separated_groups = groups.is_some_and(|groups| {
                     prev_group.is_some_and(|prev_group| {
                         groups.separated_by_blank_line(prev_group, key.group)
@@ -1037,7 +1093,7 @@ impl Rule for OrganizeImports {
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
                     // if a distinct kind (import/statement/export) precedes it.
-                    && ((starts_chunk && prev_is_distinct) ||
+                    && ((starts_chunk && prev_is_distinct_stmt_kind) ||
                     // Some groups must be separated by a blank line
                     blank_line_separated_groups)
                 {
@@ -1096,9 +1152,9 @@ impl Rule for OrganizeImports {
                         slot_index: statement.syntax().index() as u32,
                     });
                 }
-                prev_is_bare_import = false;
+                prev_is_unmatched_bare_import = false;
             }
-            prev_kind = Some(current_kind);
+            prev_stmt_kind = Some(current_stmt_kind);
         }
         // Report the last chunk
         report_unsorted_chunk(chunk.take(), &mut result);
@@ -1233,8 +1289,8 @@ impl Rule for OrganizeImports {
                             .take(slot_indexes.len())
                             .filter_map(|item| {
                                 let info = ImportInfo::from_module_item(&item)?.0;
-                                let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 let key = ImportKey::new(info, groups);
+                                let item = organized_items.remove(&key.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
                                     key,
                                     was_merged: false,
