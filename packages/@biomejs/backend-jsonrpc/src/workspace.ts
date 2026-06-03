@@ -6715,6 +6715,7 @@ export interface RuleWithUseFindOptions {
 	options?: UseFindOptions;
 }
 export interface RuleWithUseFunctionComponentDefinitionOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseFunctionComponentDefinitionOptions;
 }

@@ -11399,6 +11399,7 @@
 		"RuleWithUseFunctionComponentDefinitionOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseFunctionComponentDefinitionOptions" }
 			},
