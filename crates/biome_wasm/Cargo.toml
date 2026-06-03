@@ -46,8 +46,9 @@ schemars           = { workspace = true }
 [features]
 default   = ["console_error_panic_hook"]
 lang_md   = ["biome_service/lang_md"]
+lang_scss = ["biome_service/lang_scss"]
 lang_yaml = ["biome_service/lang_yaml"]
-unstable  = ["lang_md", "lang_yaml"]
+unstable  = ["lang_md", "lang_scss", "lang_yaml"]
 
 [lints]
 workspace = true
