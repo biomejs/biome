@@ -20,7 +20,7 @@ implicit block key : [
 +++ Biome
 @@ -1 +1,3 @@
 -implicit block key: [implicit flow key: value]
-+implicit block key : [
++implicit block key: [
 +  implicit flow key : value,
 + ]
 ```
@@ -28,7 +28,7 @@ implicit block key : [
 # Output
 
 ```yml
-implicit block key : [
+implicit block key: [
   implicit flow key : value,
  ]
 ```

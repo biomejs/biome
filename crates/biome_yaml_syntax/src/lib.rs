@@ -2,6 +2,7 @@
 
 #[macro_use]
 mod generated;
+mod block_ext;
 mod file_source;
 mod syntax_node;
 

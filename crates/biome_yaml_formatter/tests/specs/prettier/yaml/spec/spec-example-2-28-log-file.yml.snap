@@ -97,34 +97,3 @@ Stack:
     code: |-
       foo = bar
 ```
-
-# Errors
-```
-spec-example-2-28-log-file.yml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found `Time`
-  
-     6 │   for the log file
-     7 │ ---
-   > 8 │ Time: 2001-11-23 15:02:31 -5
-       │ ^^^^
-     9 │ User: ed
-    10 │ Warning:
-  
-  i Remove Time
-  
-spec-example-2-28-log-file.yml:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found `Date`
-  
-    12 │   message.
-    13 │ ---
-  > 14 │ Date: 2001-11-23 15:03:17 -5
-       │ ^^^^
-    15 │ User: ed
-    16 │ Fatal:
-  
-  i Remove Date
-  
-
-```

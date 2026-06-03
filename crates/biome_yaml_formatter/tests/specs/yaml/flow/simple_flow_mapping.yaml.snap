@@ -22,4 +22,4 @@ info: yaml/flow/simple_flow_mapping.yaml
 
 ## Unimplemented nodes/tokens
 
-"{a: b, \"x\": y, 'z': w}\n" => 0..23
+"{a: b, \"x\": y, 'z': w}" => 0..22

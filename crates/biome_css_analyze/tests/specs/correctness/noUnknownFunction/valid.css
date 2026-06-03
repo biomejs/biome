@@ -21,3 +21,5 @@ a { animation-delay: calc(sibling-count() * 50ms); }
 @font-face {
 	src: url('/fonts/Obviously.woff2?v=1') format('woff2') tech('variations');
 }
+
+a { color: contrast-color(rebeccapurple); }

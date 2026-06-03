@@ -10,7 +10,6 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -962,8 +961,8 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
-    /// Consumes a quoted string literal token, handling escaped characters and unicode sequences.
-    /// Returns ERROR_TOKEN if the string is not properly terminated or contains invalid escapes.
+    /// Consumes a quoted string literal token.
+    /// Returns ERROR_TOKEN if the string is not properly terminated.
     fn consume_string_literal(&mut self, quote: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
         let start = self.text_position();
@@ -982,39 +981,6 @@ impl<'src> HtmlLexer<'src> {
                         state => state,
                     };
                     break;
-                }
-                // '\t' etc
-                BSL => {
-                    self.advance(1);
-
-                    match self.current_byte() {
-                        Some(b'\n' | b'\r') => self.advance(1),
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'\'') if quote == b'\'' => {
-                            self.advance(1);
-                        }
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'"') if quote == b'"' => {
-                            self.advance(1);
-                        }
-
-                        Some(b'u') => match (self.consume_unicode_escape(), state) {
-                            (Ok(_), _) => {}
-                            (Err(err), LexStringState::InString) => {
-                                self.diagnostics.push(err);
-                                state = LexStringState::InvalidEscapeSequence;
-                            }
-                            (Err(_), _) => {}
-                        },
-
-                        Some(chr) => {
-                            self.advance_byte_or_char(chr);
-                        }
-
-                        None => {}
-                    }
                 }
                 // we don't need to handle IDT because it's always len 1.
                 UNI => self.advance_char_unchecked(),
@@ -1036,7 +1002,6 @@ impl<'src> HtmlLexer<'src> {
 
                 ERROR_TOKEN
             }
-            LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }
     }
 
@@ -1268,54 +1233,6 @@ impl<'src> HtmlLexer<'src> {
 
         self.advance(3);
         T!["]]>"]
-    }
-
-    /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
-    ///
-    /// A unicode escape sequence must consist of 4 hex characters.
-    fn consume_unicode_escape(&mut self) -> Result<(), ParseDiagnostic> {
-        self.assert_byte(b'u');
-        self.assert_current_char_boundary();
-
-        let start = self.text_position();
-
-        let start = start
-            // Subtract 1 to get position of `\`
-            .checked_sub(TextSize::from(1))
-            .unwrap_or(start);
-
-        self.advance(1); // Advance over `u`
-
-        for _ in 0..4 {
-            match self.current_byte() {
-                Some(byte) if byte.is_ascii_hexdigit() => self.advance(1),
-                Some(_) => {
-                    let char = self.current_char_unchecked();
-                    // Reached a non-hex digit which is invalid
-                    return Err(ParseDiagnostic::new(
-
-                        "Invalid unicode sequence",
-                        start..self.text_position(),
-                    )
-                        .with_detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-                None => {
-                    // Reached the end of the file before processing 4 hex digits
-                    return Err(ParseDiagnostic::new(
-                        "Unicode escape sequence with two few hexadecimal numbers.",
-                        start..self.text_position(),
-                    )
-                        .with_detail(
-                            self.text_position()..self.text_position(),
-                            "reached the end of the file",
-                        )
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-            }
-        }
-
-        Ok(())
     }
 
     /// Consume a single block of HTML text outside of tags.
@@ -1664,9 +1581,6 @@ fn is_at_start_identifier(byte: u8) -> bool {
 
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
-    /// String that contains an invalid escape sequence
-    InvalidEscapeSequence,
-
     /// Between the opening `"` and closing `"` quotes.
     InString,
 

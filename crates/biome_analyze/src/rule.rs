@@ -170,6 +170,8 @@ pub enum RuleSource<'a> {
     EslintRegexp(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://github.com/sveltejs/eslint-plugin-svelte)
+    EslintSvelte(&'a str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
     EslintSonarJs(&'a str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
@@ -257,6 +259,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactRsc(_) => write!(f, "eslint-plugin-react-rsc"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "@stylistic/eslint-plugin"),
             Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
@@ -346,6 +349,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactRsc(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
+            | Self::EslintSvelte(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintTypeScript(rule_name)
@@ -409,6 +413,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(_) => "react-rsc",
             Self::EslintRegexp(_) => "regexp",
             Self::EslintSolid(_) => "solid",
+            Self::EslintSvelte(_) => "svelte",
             Self::EslintSonarJs(_) => "sonarjs",
             Self::EslintStylistic(_) => "@stylistic",
             Self::EslintTypeScript(_) => "@typescript-eslint",
@@ -476,6 +481,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
@@ -601,6 +607,8 @@ pub enum RuleDomain {
     Next,
     /// Qwik framework rules
     Qwik,
+    /// Svelte framework rules
+    Svelte,
     /// Vue.js framework rules
     Vue,
     /// For rules that require querying multiple files inside a project
@@ -626,6 +634,7 @@ impl Display for RuleDomain {
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
             Self::Qwik => fmt.write_str("qwik"),
+            Self::Svelte => fmt.write_str("svelte"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
@@ -669,6 +678,7 @@ impl RuleDomain {
                 &("@builder.io/qwik", ">=1.0.0"),
                 &("@qwik.dev/core", ">=2.0.0"),
             ],
+            Self::Svelte => &[&("svelte", ">=3.0.0")],
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
@@ -711,6 +721,7 @@ impl RuleDomain {
             Self::Solid => &[],
             Self::Next => &[],
             Self::Qwik => &[],
+            Self::Svelte => &[],
             Self::Vue => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
@@ -729,6 +740,7 @@ impl RuleDomain {
             Self::Solid => "solid",
             Self::Next => "next",
             Self::Qwik => "qwik",
+            Self::Svelte => "svelte",
             Self::Vue => "vue",
             Self::Project => "project",
             Self::Tailwind => "tailwind",
@@ -759,6 +771,9 @@ impl RuleDomain {
             }
             Self::Project => {
                 "This domain contains rules that perform project-level analysis. This includes our module graph for dependency resolution. When enabling rules that belong to this domain, Biome will scan the entire project. The scanning phase will have a performance impact on the linting process. See the documentation on our [scanner](/internals/architecture/#scanner) to learn more about the scanner."
+            }
+            Self::Svelte => {
+                "Use this domain inside Svelte projects. This domain enables rules that are specific to Svelte projects."
             }
             Self::Vue => {
                 "Use this domain inside Vue projects. This domain enables rules that are specific to Vue projects."
@@ -791,6 +806,7 @@ impl FromStr for RuleDomain {
             "solid" => Ok(Self::Solid),
             "next" => Ok(Self::Next),
             "qwik" => Ok(Self::Qwik),
+            "svelte" => Ok(Self::Svelte),
             "vue" => Ok(Self::Vue),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),

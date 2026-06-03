@@ -4,7 +4,7 @@ use biome_yaml_parser::parse_yaml;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "foo: bar\n";
+    let source = "foo:\n  bar: baz\n";
     let parse = parse_yaml(source);
 
     let options = YamlFormatOptions::default();

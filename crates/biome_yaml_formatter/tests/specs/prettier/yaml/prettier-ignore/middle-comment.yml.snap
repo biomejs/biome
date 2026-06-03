@@ -21,10 +21,9 @@ def:  !!str #   hello
 --- Prettier
 +++ Biome
 @@ -1,5 +1,5 @@
--abc: !!str #   hello
+ abc: !!str #   hello
 -  123
-+abc:  !!str #   hello
-+   123
++123
  # prettier-ignore
  def:  !!str #   hello
     456
@@ -33,8 +32,8 @@ def:  !!str #   hello
 # Output
 
 ```yml
-abc:  !!str #   hello
-   123
+abc: !!str #   hello
+123
 # prettier-ignore
 def:  !!str #   hello
    456

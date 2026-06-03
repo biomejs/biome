@@ -28,4 +28,5 @@ info: yaml/block_mapping/explicit_block_mapping.yaml
 
 ## Unimplemented nodes/tokens
 
-"? a\n: 10\n? b\n: 11\n" => 0..18
+"? a\n: 10" => 0..8
+"? b\n: 11\n" => 9..18

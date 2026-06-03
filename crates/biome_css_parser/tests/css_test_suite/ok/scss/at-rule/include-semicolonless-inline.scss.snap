@@ -1,0 +1,84 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@mixin button {}
+
+@include button
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@7..14 "button" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@14..15 "{" [] [],
+                    items: CssDeclarationOrRuleList [],
+                    r_curly_token: R_CURLY@15..16 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@16..19 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@19..27 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@27..33 "button" [] [],
+                },
+                arguments: missing (optional),
+                using_clause: missing (optional),
+                block: missing (optional),
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@33..34 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..34
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..33
+    0: CSS_AT_RULE@0..16
+      0: AT@0..1 "@" [] []
+      1: SCSS_MIXIN_AT_RULE@1..16
+        0: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@7..14
+          0: IDENT@7..14 "button" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@14..16
+          0: L_CURLY@14..15 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@15..15
+          2: R_CURLY@15..16 "}" [] []
+    1: CSS_AT_RULE@16..33
+      0: AT@16..19 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@19..33
+        0: INCLUDE_KW@19..27 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@27..33
+          0: IDENT@27..33 "button" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+        5: (empty)
+  2: EOF@33..34 "" [Newline("\n")] []
+
+```

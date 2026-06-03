@@ -30,4 +30,4 @@ info: yaml/flow/explicit_flow_mapping.yaml
 
 ## Unimplemented nodes/tokens
 
-"{\n  ? a: b,\n  ? : d,\n  ? :,\n}\n" => 0..30
+"{\n  ? a: b,\n  ? : d,\n  ? :,\n}" => 0..29

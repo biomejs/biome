@@ -1214,6 +1214,7 @@ export type RuleDomain =
 	| "solid"
 	| "next"
 	| "qwik"
+	| "svelte"
 	| "vue"
 	| "project"
 	| "tailwind"
@@ -2756,6 +2757,11 @@ See https://biomejs.dev/linter/rules/use-imports-first
 	 */
 	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
+	* Prefer Array#includes() over Array#indexOf() checks.
+See https://biomejs.dev/linter/rules/use-includes 
+	 */
+	useIncludes?: UseIncludesConfiguration;
+	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
@@ -2850,6 +2856,11 @@ See https://biomejs.dev/linter/rules/use-spread
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Require keyed {#each} blocks in Svelte templates.
+See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
+	 */
+	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
@@ -4840,6 +4851,9 @@ export type UseIframeSandboxConfiguration =
 export type UseImportsFirstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseImportsFirstOptions;
+export type UseIncludesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIncludesOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -4897,6 +4911,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteRequireEachKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteRequireEachKeyOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6753,6 +6770,11 @@ export interface RuleWithUseImportsFirstOptions {
 	level: RulePlainConfiguration;
 	options?: UseImportsFirstOptions;
 }
+export interface RuleWithUseIncludesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseIncludesOptions;
+}
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
@@ -6837,6 +6859,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseSvelteRequireEachKeyOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteRequireEachKeyOptions;
 }
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
@@ -8474,6 +8500,10 @@ export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
 export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
+/**
+ * Options for the `useIncludes` rule.
+ */
+export type UseIncludesOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -8539,6 +8569,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteRequireEachKeyOptions = {};
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9642,6 +9673,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
+	| "lint/nursery/useIncludes"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
@@ -9667,6 +9699,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
@@ -9971,6 +10004,7 @@ export type Advice =
 	| { list: MarkupBuf[] }
 	| { frame: Location }
 	| { diff: TextEdit }
+	| { codeSuggestion: [Location, TextEdit] }
 	| { backtrace: [MarkupBuf, Backtrace] }
 	| { command: string }
 	| { group: [MarkupBuf, Advices] };

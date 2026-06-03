@@ -480,12 +480,7 @@ fn parse_await_then_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    parse_single_text_expression_content(p).ok();
 
     Present(m.complete(p, SVELTE_AWAIT_THEN_CLAUSE))
 }
@@ -497,11 +492,8 @@ fn parse_await_catch_clause(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-    }
+    parse_single_text_expression_content(p).ok();
+
     Present(m.complete(p, SVELTE_AWAIT_CATCH_CLAUSE))
 }
 
@@ -634,13 +626,7 @@ fn parse_await_then_block(
     }
     p.bump_with_context(T![then], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'then'", p.cur_range()));
-    }
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
@@ -672,13 +658,7 @@ fn parse_await_catch_block(
     }
     p.bump_with_context(T![catch], HtmlLexContext::single_expression());
 
-    parse_single_text_expression_content(p)
-        .or_add_diagnostic(p, |p, range| expected_expression(p, range));
-
-    if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
-        p.error(p.err_builder("Expected an expression after 'catch'", p.cur_range()));
-    }
+    parse_single_text_expression_content(p).ok();
 
     p.expect(T!['}']);
 
@@ -1007,6 +987,48 @@ fn parse_rest_name(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, SVELTE_REST_BINDING))
 }
 
+/// Parses either a rename binding `key: alias` or a plain name.
+///
+/// In object destructuring patterns like `{ component: Filter }`, the `:` separates
+/// a property name (key) from a local binding name (alias). This function handles both
+/// cases: if a `:` follows the identifier, it emits a `SvelteRenameBinding` node;
+/// otherwise the wrapping marker is abandoned and the plain `SvelteName` is returned.
+fn parse_binding_assignment_element(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.at(T![...]) {
+        parse_rest_name(p)
+    } else if p.at(T!['{']) {
+        let result = parse_curly_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else if p.at(T!['[']) {
+        let result = parse_square_destructured_name(p);
+        p.re_lex(HtmlReLexContext::Svelte);
+        result
+    } else {
+        parse_rename_or_plain_name(p)
+    }
+}
+
+fn parse_rename_or_plain_name(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+    let result = parse_svelte_name(p);
+    if result.is_absent() {
+        m.abandon(p);
+        return Absent;
+    }
+    p.re_lex(HtmlReLexContext::Svelte);
+    if p.at(T![:]) {
+        p.bump_with_context(T![:], HtmlLexContext::Svelte);
+        parse_binding_assignment_element(p).or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a binding name after ':'", range)
+        });
+        Present(m.complete(p, SVELTE_RENAME_BINDING))
+    } else {
+        m.abandon(p);
+        result
+    }
+}
+
 #[derive(Default)]
 struct SvelteElementList {
     /// If `true`, the list parsing stops at `{:` too when calling [ParseNodeList::is_at_list_end]
@@ -1101,19 +1123,7 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     const LIST_KIND: Self::Kind = SVELTE_BINDING_ASSIGNMENT_BINDING_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if p.at(T![...]) {
-            parse_rest_name(p)
-        } else if p.at(T!['{']) {
-            let result = parse_curly_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else if p.at(T!['[']) {
-            let result = parse_square_destructured_name(p);
-            p.re_lex(HtmlReLexContext::Svelte);
-            result
-        } else {
-            parse_svelte_name(p)
-        }
+        parse_binding_assignment_element(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

@@ -120,6 +120,23 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    fn consume_token_variant_segment(&mut self, current: u8) -> TailwindSyntaxKind {
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            COL => self.consume_byte(T![:]),
+            MIN => self.consume_byte(T![-]),
+            EXL => self.consume_byte(T![!]),
+            SLH => self.consume_byte(T![/]),
+            IDT | ZER | DIG => self.consume_variant_segment_name(),
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
     fn consume_token_css_value(&mut self, current: u8) -> TailwindSyntaxKind {
         let dispatched = lookup_byte(current);
         match dispatched {
@@ -409,26 +426,43 @@ impl<'src> TailwindLexer<'src> {
         if numbers_only { TW_NUMBER } else { TW_VALUE }
     }
 
-    /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
-    /// and they are followed by another '-', this is a Tailwind data-attribute variant.
-    /// In that case, emit DATA_KW so the parser can recognize `TwDataAttribute`.
     fn consume_after_dash(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
-
-        let bytes = self.source.as_bytes();
-        let slice = &bytes[self.position..];
-
-        if slice.len() >= 5 && &slice[..4] == b"data" && slice[4] == b'-' {
-            // Advance past "data" only. The following '-' will be emitted as its own token.
-            self.advance(4);
-            return DATA_KW;
-        }
 
         if self.current_byte() == Some(b'[') {
             return self.consume_byte(T!['[']);
         }
 
         self.consume_named_value()
+    }
+
+    /// Consume a named variant segment in its own lexing context, so it does not
+    /// reuse utility base or value token kinds.
+    fn consume_variant_segment_name(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let bytes = self.source.as_bytes();
+        let slice = &bytes[self.position..];
+        let mut end = 0usize;
+        while end < slice.len() {
+            let byte = slice[end];
+            if is_variant_segment_name_boundary(byte) || !byte.is_ascii() {
+                break;
+            }
+            end += 1;
+        }
+        self.advance(end);
+
+        while let Some(byte) = self.current_byte() {
+            if is_variant_segment_name_boundary(byte) {
+                break;
+            }
+
+            let char = self.current_char_unchecked();
+            self.advance(char.len_utf8());
+        }
+
+        TW_VARIANT_SEGMENT
     }
 
     fn consume_modifier(&mut self) -> TailwindSyntaxKind {
@@ -548,6 +582,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
                     TailwindLexContext::ArbitraryCandidate => {
                         self.consume_token_arbitrary_candidate(current)
                     }
+                    TailwindLexContext::VariantSegment => {
+                        self.consume_token_variant_segment(current)
+                    }
                     TailwindLexContext::CssValue => self.consume_token_css_value(current),
                     TailwindLexContext::CssUrlRawValue => {
                         self.consume_token_css_url_raw_value(current)
@@ -648,4 +685,9 @@ fn is_css_identifier_start(byte: u8) -> bool {
 
 fn is_css_identifier_continue(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN | DIG | ZER)
+}
+
+#[inline]
+fn is_variant_segment_name_boundary(byte: u8) -> bool {
+    matches!(lookup_byte(byte), WHS | COL | MIN | SLH | EXL | BTC | PNC)
 }

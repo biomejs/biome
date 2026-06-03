@@ -1,6 +1,15 @@
+use crate::comments::CssCommentStyle;
 use crate::prelude::*;
-use biome_css_syntax::{CssLanguage, CssSyntaxNode};
-use biome_formatter::comments::{CommentKind, DecoratedComment};
+use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
+use biome_formatter::comments::{CommentKind, CommentStyle, DecoratedComment, SourceComment};
+use biome_rowan::{SyntaxResult, SyntaxTriviaPiece};
+
+/// Returns `true` for CSS `/* ... */` comments.
+pub(crate) fn is_block_style_comment(piece: &SyntaxTriviaPiece<CssLanguage>) -> bool {
+    piece
+        .as_comments()
+        .is_some_and(|comment| CssCommentStyle::get_comment_kind(&comment).is_inline())
+}
 
 /// Returns `true` when the last leading block comment stays with this node.
 pub(crate) fn has_same_group_leading_block_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
@@ -39,5 +48,47 @@ pub(crate) fn is_trailing_comment_on_node(
                 .trailing_trivia()
                 .text_range()
                 .contains_range(comment_piece.text_range())
+    })
+}
+
+/// Returns `true` for the gap before `:` in `a { color/* c */ : red; }`.
+pub(crate) fn has_source_gap_before_token(
+    comments: &[SourceComment<CssLanguage>],
+    token: &SyntaxResult<CssSyntaxToken>,
+) -> bool {
+    let (Some(last_comment), Ok(token)) = (comments.last(), token.as_ref()) else {
+        return false;
+    };
+
+    last_comment.piece().text_range().end() < token.text_trimmed_range().start()
+}
+
+/// Returns `true` for a pre-token block-comment gap.
+///
+/// Ignores SCSS line comments before `;` for idempotency:
+///
+/// ```text
+/// $x: red !default // c
+/// ;
+/// ```
+pub(crate) fn has_block_comment_gap_before_token(token: &CssSyntaxToken) -> bool {
+    let token_start = token.text_trimmed_range().start();
+
+    if let Some(comment) = token
+        .leading_trivia()
+        .pieces()
+        .filter(is_block_style_comment)
+        .last()
+    {
+        return comment.text_range().end() < token_start;
+    }
+
+    token.prev_token().is_some_and(|previous_token| {
+        previous_token
+            .trailing_trivia()
+            .pieces()
+            .filter(is_block_style_comment)
+            .last()
+            .is_some_and(|comment| comment.text_range().end() < token_start)
     })
 }

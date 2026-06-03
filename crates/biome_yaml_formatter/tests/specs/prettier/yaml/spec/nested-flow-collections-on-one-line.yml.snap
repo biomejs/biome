@@ -29,24 +29,3 @@ info: yaml/spec/nested-flow-collections-on-one-line.yml
 ---
 { a: [b, c, { d: [e, f] } ] }
 ```
-
-# Errors
-```
-nested-flow-collections-on-one-line.yml:2:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a block mapping entry but instead found '}'.
-  
-    1 │ ---
-  > 2 │ { a: [b, c, { d: [e, f] } ] }
-      │                             ^
-    3 │ 
-  
-  i Expected a block mapping entry here.
-  
-    1 │ ---
-  > 2 │ { a: [b, c, { d: [e, f] } ] }
-      │                             ^
-    3 │ 
-  
-
-```

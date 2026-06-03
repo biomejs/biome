@@ -36,17 +36,17 @@ foo2:
 ```diff
 --- Prettier
 +++ Biome
-@@ -12,5 +12,10 @@
+@@ -10,7 +10,7 @@
+ foo2:
+   - foo2
  
-   # - foo2
+-  # - foo2
++# - foo2
  
-+
-+
-+
-+  
-+
-   # - foo2
-   # - foo2
+-  # - foo2
+-  # - foo2
++# - foo2
++# - foo2
 ```
 
 # Output
@@ -64,13 +64,8 @@ foo1:
 foo2:
   - foo2
 
-  # - foo2
+# - foo2
 
-
-
-
-  
-
-  # - foo2
-  # - foo2
+# - foo2
+# - foo2
 ```
