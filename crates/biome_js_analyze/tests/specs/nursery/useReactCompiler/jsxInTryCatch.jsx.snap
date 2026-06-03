@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsxInTryCatch.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+function Component() {
+    try {
+        return <Child />;
+    } catch (error) {
+        return null;
+    }
+}
+
+function Child() {
+    return <div />;
+}
+
+```
+
+# Diagnostics
+```
+jsxInTryCatch.jsx:5:16 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code constructs JSX inside try/catch.
+  
+    3 │ function Component() {
+    4 │     try {
+  > 5 │         return <Child />;
+      │                ^^^^^^^^^
+    6 │     } catch (error) {
+    7 │         return null;
+  
+  i Creating JSX does not render the component immediately, so render errors from that JSX will not be caught by the surrounding try/catch.
+  
+  i Use an error boundary to catch render errors instead of wrapping JSX creation in try/catch.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

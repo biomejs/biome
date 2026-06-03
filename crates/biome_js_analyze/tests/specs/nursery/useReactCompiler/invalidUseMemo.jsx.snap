@@ -71,24 +71,3 @@ invalidUseMemo.jsx:12:5 lint/nursery/useReactCompiler ━━━━━━━━�
   
 
 ```
-
-```
-invalidUseMemo.jsx:20:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This hook dependency list is not an array literal.
-  
-    18 │     const value = useMemo(
-    19 │         () => props.text.toUpperCase(),
-  > 20 │         props.enabled ? [props.text] : null,
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │     );
-    22 │ 
-  
-  i A dynamic dependency list makes it unclear when React should reuse the previous value or compute a new one.
-  
-  i Pass an inline array literal as the dependency list, and move conditional logic outside of the dependency argument.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```

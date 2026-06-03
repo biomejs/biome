@@ -29,6 +29,7 @@ impl<'a> ConvertCtx<'a> {
             leading_comments: None,
             inner_comments: None,
             trailing_comments: None,
+            node_id: Some(node_id_from_range(range)),
         }
     }
 
@@ -53,4 +54,9 @@ impl<'a> ConvertCtx<'a> {
             index: Some(offset),
         }
     }
+}
+
+fn node_id_from_range(range: TextRange) -> u32 {
+    let start: u32 = range.start().into();
+    start.saturating_add(1)
 }

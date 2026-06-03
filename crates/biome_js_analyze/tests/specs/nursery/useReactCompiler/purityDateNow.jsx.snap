@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: purityDateNow.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+function Component() {
+    const now = Date.now();
+
+    return <div>{now}</div>;
+}
+
+```
+
+# Diagnostics
+```
+purityDateNow.jsx:4:17 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This render calls an impure function.
+  
+    3 │ function Component() {
+  > 4 │     const now = Date.now();
+      │                 ^^^^^^^^^^
+    5 │ 
+    6 │     return <div>{now}</div>;
+  
+  i Render should be pure so React can safely repeat, interrupt, and optimize it.
+  
+  i Move the impure work into an effect or event handler, or replace it with a pure calculation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
