@@ -426,7 +426,6 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
-            Self::EslintSvelte(_) => "svelte",
             Self::EslintAstro(_) => "astro",
             Self::EslintDrizzle(_) => "drizzle",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
