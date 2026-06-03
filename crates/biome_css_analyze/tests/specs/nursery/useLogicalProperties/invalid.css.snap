@@ -1,0 +1,142 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.card {
+	width: 100%;
+	min-width: 20rem;
+	max-width: 80rem;
+	height: 40vh;
+	min-height: 12rem;
+	max-height: 90vh;
+}
+```
+
+# Diagnostics
+```
+invalid.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .card {
+  > 3 │ 	width: 100%;
+      │ 	^^^^^
+    4 │ 	min-width: 20rem;
+    5 │ 	max-width: 80rem;
+  
+  i Replace width with inline-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    2 │ .card {
+    3 │ 	width: 100%;
+  > 4 │ 	min-width: 20rem;
+      │ 	^^^^^^^^^
+    5 │ 	max-width: 80rem;
+    6 │ 	height: 40vh;
+  
+  i Replace min-width with min-inline-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:5:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    3 │ 	width: 100%;
+    4 │ 	min-width: 20rem;
+  > 5 │ 	max-width: 80rem;
+      │ 	^^^^^^^^^
+    6 │ 	height: 40vh;
+    7 │ 	min-height: 12rem;
+  
+  i Replace max-width with max-inline-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:6:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    4 │ 	min-width: 20rem;
+    5 │ 	max-width: 80rem;
+  > 6 │ 	height: 40vh;
+      │ 	^^^^^^
+    7 │ 	min-height: 12rem;
+    8 │ 	max-height: 90vh;
+  
+  i Replace height with block-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:7:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    5 │ 	max-width: 80rem;
+    6 │ 	height: 40vh;
+  > 7 │ 	min-height: 12rem;
+      │ 	^^^^^^^^^^
+    8 │ 	max-height: 90vh;
+    9 │ }
+  
+  i Replace min-height with min-block-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    6 │ 	height: 40vh;
+    7 │ 	min-height: 12rem;
+  > 8 │ 	max-height: 90vh;
+      │ 	^^^^^^^^^^
+    9 │ }
+  
+  i Replace max-height with max-block-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

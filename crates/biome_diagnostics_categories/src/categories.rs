@@ -288,6 +288,7 @@ define_categories! {
     "lint/nursery/useInlineScriptId": "https://biomejs.dev/linter/rules/use-inline-script-id",
     "lint/nursery/useInputName": "https://biomejs.dev/linter/rules/use-input-name",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
+    "lint/nursery/useLogicalProperties": "https://biomejs.dev/linter/rules/use-logical-properties",
     "lint/nursery/useLoneAnonymousOperation": "https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
     "lint/nursery/useLoneExecutableDefinition": "https://biomejs.dev/linter/rules/use-lone-executable-definition",
     "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",

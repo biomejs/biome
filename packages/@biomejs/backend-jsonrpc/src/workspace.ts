@@ -2572,6 +2572,11 @@ See https://biomejs.dev/linter/rules/use-input-name
 	 */
 	useInputName?: UseInputNameConfiguration;
 	/**
+	* Enforce logical sizing properties over physical sizing properties.
+See https://biomejs.dev/linter/rules/use-logical-properties 
+	 */
+	useLogicalProperties?: UseLogicalPropertiesConfiguration;
+	/**
 	* Disallow anonymous operations when more than one operation specified in document.
 See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
 	 */
@@ -4619,6 +4624,9 @@ export type UseInlineScriptIdConfiguration =
 export type UseInputNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInputNameOptions;
+export type UseLogicalPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLogicalPropertiesOptions;
 export type UseLoneAnonymousOperationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneAnonymousOperationOptions;
@@ -6514,6 +6522,10 @@ export interface RuleWithUseInputNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseInputNameOptions;
 }
+export interface RuleWithUseLogicalPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: UseLogicalPropertiesOptions;
+}
 export interface RuleWithUseLoneAnonymousOperationOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneAnonymousOperationOptions;
@@ -8220,6 +8232,7 @@ export interface UseInputNameOptions {
 	 */
 	checkInputType?: CheckInputType;
 }
+export type UseLogicalPropertiesOptions = {};
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
 export type UseMathMinMaxOptions = {};
@@ -9319,6 +9332,7 @@ export type Category =
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useMathMinMax"

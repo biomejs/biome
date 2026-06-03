@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+.card {
+	inline-size: 100%;
+	min-inline-size: 20rem;
+	max-inline-size: 80rem;
+	block-size: 40vh;
+	min-block-size: 12rem;
+	max-block-size: 90vh;
+	color: red;
+}

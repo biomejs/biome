@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+.card {
+	width: 100%;
+	min-width: 20rem;
+	max-width: 80rem;
+	height: 40vh;
+	min-height: 12rem;
+	max-height: 90vh;
+}
