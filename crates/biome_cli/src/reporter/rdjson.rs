@@ -97,7 +97,7 @@ fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> Option<RdJsonDiagnostic<'a
     let location = diagnostic.location();
     let location = to_rdjson_location(&location);
 
-    let suggestions = to_rdjson_suggetions(diagnostic);
+    let suggestions = to_rdjson_suggestions(diagnostic);
     let category = diagnostic.category()?;
     let code = RdJsonCode {
         url: category.link().map(String::from),
@@ -150,10 +150,10 @@ impl Visit for SuggestionsVisitor {
         let Some(source_code) = location.source_code else {
             return Ok(());
         };
-        let Some(span) = location
-            .span
-            .or_else(|| changed_input_range(diff, source_code.text))
-        else {
+        let Some(span) = changed_input_range(diff, source_code.text).or(location.span) else {
+            return Ok(());
+        };
+        let Some(text) = suggestion_text(diff, source_code.text, span) else {
             return Ok(());
         };
 
@@ -175,16 +175,13 @@ impl Visit for SuggestionsVisitor {
             },
         };
 
-        self.suggestions.push(RdJsonSuggestion {
-            text: suggestion_text(diff, source_code.text, span),
-            range,
-        });
+        self.suggestions.push(RdJsonSuggestion { text, range });
 
         Ok(())
     }
 }
 
-fn to_rdjson_suggetions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
+fn to_rdjson_suggestions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
     let mut visitor = SuggestionsVisitor {
         suggestions: vec![],
     };
@@ -194,7 +191,8 @@ fn to_rdjson_suggetions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
     visitor.suggestions
 }
 
-fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> String {
+/// Computes the replacement text that should be applied to `range`.
+fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> Option<String> {
     let mut output = String::new();
     let mut input_position = TextSize::from(0);
 
@@ -202,7 +200,7 @@ fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> String {
         match op {
             CompressedOp::DiffOp(DiffOp::Equal { range: diff_range }) => {
                 let text = diff.get_text(*diff_range);
-                append_overlap(&mut output, text, input_position, range);
+                append_overlap(&mut output, text, input_position, range)?;
                 input_position += diff_range.len();
             }
             CompressedOp::DiffOp(DiffOp::Insert { range: diff_range }) => {
@@ -214,16 +212,17 @@ fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> String {
                 input_position += diff_range.len();
             }
             CompressedOp::EqualLines { line_count } => {
-                let text = equal_lines_text(source, input_position, line_count.get());
-                append_overlap(&mut output, text, input_position, range);
+                let text = equal_lines_text(source, input_position, line_count.get())?;
+                append_overlap(&mut output, text, input_position, range)?;
                 input_position += TextSize::of(text);
             }
         }
     }
 
-    output
+    Some(output)
 }
 
+/// Returns the input range touched by `diff`.
 fn changed_input_range(diff: &TextEdit, source: &str) -> Option<TextRange> {
     let mut input_position = TextSize::from(0);
     let mut start = None;
@@ -244,7 +243,7 @@ fn changed_input_range(diff: &TextEdit, source: &str) -> Option<TextRange> {
                 end = input_position;
             }
             CompressedOp::EqualLines { line_count } => {
-                let text = equal_lines_text(source, input_position, line_count.get());
+                let text = equal_lines_text(source, input_position, line_count.get())?;
                 input_position += TextSize::of(text);
             }
         }
@@ -253,25 +252,39 @@ fn changed_input_range(diff: &TextEdit, source: &str) -> Option<TextRange> {
     start.map(|start| TextRange::new(start, end))
 }
 
-fn append_overlap(output: &mut String, text: &str, text_start: TextSize, range: TextRange) {
+/// Appends the part of `text` that overlaps with `range`.
+fn append_overlap(
+    output: &mut String,
+    text: &str,
+    text_start: TextSize,
+    range: TextRange,
+) -> Option<()> {
     let text_range = TextRange::at(text_start, TextSize::of(text));
     let Some(overlap) = text_range.intersect(range) else {
-        return;
+        return Some(());
     };
 
     let relative_range = overlap - text_start;
-    output.push_str(&text[relative_range]);
+    let relative_range: std::ops::Range<usize> = relative_range.into();
+    output.push_str(text.get(relative_range)?);
+    Some(())
 }
 
-fn equal_lines_text(source: &str, start: TextSize, line_count: u32) -> &str {
-    let input = &source[usize::from(start)..];
+/// Replays the source text covered by a compressed equal-lines diff operation.
+fn equal_lines_text(source: &str, start: TextSize, line_count: u32) -> Option<&str> {
+    let input = source.get(usize::from(start)..)?;
     let mut length = TextSize::from(0);
 
+    // Keep the same line-count semantics as TextEdit::new_string. Splitting on
+    // '\n' preserves CRLF input because the preceding '\r' remains in each line.
     for line in input.split_inclusive('\n').take(line_count as usize + 1) {
         length += TextSize::of(line);
     }
 
-    &source[TextRange::at(start, length)]
+    let range = TextRange::at(start, length);
+    let range: std::ops::Range<usize> = range.into();
+    debug_assert!(range.end <= source.len());
+    source.get(range)
 }
 
 #[derive(Serialize)]
@@ -325,4 +338,50 @@ pub struct RdJsonSuggestion {
 pub struct RdJsonLineColumn {
     column: usize,
     line: usize,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{changed_input_range, equal_lines_text, suggestion_text};
+    use biome_rowan::{TextRange, TextSize};
+    use biome_text_edit::TextEdit;
+
+    #[test]
+    fn changed_input_range_uses_precise_replacement_range() {
+        let source = "let f;\n";
+        let diff = TextEdit::from_unicode_words(source, "let _f;\n");
+        let range = changed_input_range(&diff, source).unwrap();
+
+        assert_eq!(range, TextRange::new(TextSize::from(4), TextSize::from(5)));
+        assert_eq!(suggestion_text(&diff, source, range), Some("_f".into()));
+    }
+
+    #[test]
+    fn changed_input_range_handles_insertions() {
+        let source = "let f;\n";
+        let mut builder = TextEdit::builder();
+        builder.equal("let ");
+        builder.insert("_");
+        builder.equal("f;\n");
+        let diff = builder.finish();
+        let range = changed_input_range(&diff, source).unwrap();
+
+        assert_eq!(range, TextRange::empty(TextSize::from(4)));
+        assert_eq!(suggestion_text(&diff, source, range), Some("_".into()));
+    }
+
+    #[test]
+    fn equal_lines_text_preserves_crlf() {
+        let source = "a\r\nb\r\nc\r\n";
+
+        assert_eq!(
+            equal_lines_text(source, TextSize::from(0), 2),
+            Some("a\r\nb\r\nc\r\n")
+        );
+    }
+
+    #[test]
+    fn equal_lines_text_rejects_invalid_offsets() {
+        assert_eq!(equal_lines_text("abc", TextSize::from(99), 1), None);
+    }
 }
