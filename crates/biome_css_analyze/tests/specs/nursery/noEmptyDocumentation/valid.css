@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+
+/* Valid */
+.valid1 {
+	display: flex;
+}
+
+/* Valid */
+/* Valid */
+.valid2 {
+	display: flex;
+}
+
+.valid3 {
+	display: flex; /* Valid */
+}
+
+/*
+	Valid
+*/
+.valid4 {
+	display: flex;
+}

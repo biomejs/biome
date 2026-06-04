@@ -1,0 +1,139 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```jsonc
+{
+  //
+  "invalid1": 1,
+  /* */
+  "invalid2": 1,
+  /* */
+  /* */
+  "invalid3": 1,
+  "invalid4": 1, /* */
+  /*
+
+  */
+  "invalid5": 1
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    1 │ {
+  > 2 │   //
+      │   ^^
+    3 │   "invalid1": 1,
+    4 │   /* */
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:4:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    2 │   //
+    3 │   "invalid1": 1,
+  > 4 │   /* */
+      │   ^^^^^
+    5 │   "invalid2": 1,
+    6 │   /* */
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:6:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    4 │   /* */
+    5 │   "invalid2": 1,
+  > 6 │   /* */
+      │   ^^^^^
+    7 │   /* */
+    8 │   "invalid3": 1,
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:7:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    5 │   "invalid2": 1,
+    6 │   /* */
+  > 7 │   /* */
+      │   ^^^^^
+    8 │   "invalid3": 1,
+    9 │   "invalid4": 1, /* */
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:9:18 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     7 │   /* */
+     8 │   "invalid3": 1,
+   > 9 │   "invalid4": 1, /* */
+       │                  ^^^^^
+    10 │   /*
+    11 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:10:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     8 │   "invalid3": 1,
+     9 │   "invalid4": 1, /* */
+  > 10 │   /*
+       │   ^^
+  > 11 │ 
+  > 12 │   */
+       │   ^^
+    13 │   "invalid5": 1
+    14 │ }
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

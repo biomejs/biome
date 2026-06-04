@@ -1,0 +1,163 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+
+#
+enum Invalid1 {}
+
+#
+#
+enum Invalid2 {}
+
+enum Invalid3 {} #
+
+""
+enum Invalid4 {}
+
+""" """
+enum Invalid5 {}
+
+"""
+"""
+enum Invalid6 {}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    1 │ # should generate diagnostics
+    2 │ 
+  > 3 │ #
+      │ ^
+    4 │ enum Invalid1 {}
+    5 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:6:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    4 │ enum Invalid1 {}
+    5 │ 
+  > 6 │ #
+      │ ^
+    7 │ #
+    8 │ enum Invalid2 {}
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:7:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    6 │ #
+  > 7 │ #
+      │ ^
+    8 │ enum Invalid2 {}
+    9 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:10:18 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+     8 │ enum Invalid2 {}
+     9 │ 
+  > 10 │ enum Invalid3 {} #
+       │                  ^
+    11 │ 
+    12 │ ""
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:12:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    10 │ enum Invalid3 {} #
+    11 │ 
+  > 12 │ ""
+       │ ^^
+    13 │ enum Invalid4 {}
+    14 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:15:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    13 │ enum Invalid4 {}
+    14 │ 
+  > 15 │ """ """
+       │ ^^^^^^^
+    16 │ enum Invalid5 {}
+    17 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:18:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    16 │ enum Invalid5 {}
+    17 │ 
+  > 18 │ """
+       │ ^^^
+  > 19 │ """
+       │ ^^^
+    20 │ enum Invalid6 {}
+    21 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

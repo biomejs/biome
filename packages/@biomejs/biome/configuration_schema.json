@@ -3630,6 +3630,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptyDocumentationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEmptyDocumentationOptions" }
+			]
+		},
+		"NoEmptyDocumentationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyInterfaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6452,6 +6462,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyDocumentation": {
+					"description": "Disallow empty documentation.\nSee https://biomejs.dev/linter/rules/no-empty-documentation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyDocumentationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyObjectKeys": {
 					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
 					"anyOf": [
@@ -8815,6 +8832,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyCharacterClassInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEmptyDocumentationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEmptyDocumentationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

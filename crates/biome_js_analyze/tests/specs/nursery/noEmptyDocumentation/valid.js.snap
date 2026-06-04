@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Valid
+let Valid1 = 1;
+
+/* Valid */
+let Valid2 = 1;
+
+/* Valid */
+/* Valid */
+let Valid3 = 1;
+
+let Valid4 = 1; /* Valid */
+
+/*
+	Valid
+*/
+let Valid5 = 1;
+
+/** Valid */
+let Valid6 = 1;
+
+/**
+ * Valid
+ */
+let Valid7 = 1;
+
+```

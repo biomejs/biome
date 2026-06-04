@@ -1,0 +1,107 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+const Invalid1 = (
+	<div>
+		{/* */}
+		<input />
+	</div>
+);
+
+const Invalid2 = (
+	<div>
+		{/* */}
+		{/* */}
+		<input />
+	</div>
+);
+
+const Invalid3 = (
+	<div>
+		<input /> {/* */}
+	</div>
+);
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:4 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    3 │ const Invalid1 = (
+    4 │ 	<div>
+  > 5 │ 		{/* */}
+      │ 		 ^^^^^
+    6 │ 		<input />
+    7 │ 	</div>
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:4 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    10 │ const Invalid2 = (
+    11 │ 	<div>
+  > 12 │ 		{/* */}
+       │ 		 ^^^^^
+    13 │ 		{/* */}
+    14 │ 		<input />
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:4 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    11 │ 	<div>
+    12 │ 		{/* */}
+  > 13 │ 		{/* */}
+       │ 		 ^^^^^
+    14 │ 		<input />
+    15 │ 	</div>
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:14 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    18 │ const Invalid3 = (
+    19 │ 	<div>
+  > 20 │ 		<input /> {/* */}
+       │ 		           ^^^^^
+    21 │ 	</div>
+    22 │ );
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
