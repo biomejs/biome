@@ -106,12 +106,11 @@ const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
 
 fn is_env_from_process(binding: &biome_js_semantic::Binding) -> bool {
     binding.syntax().ancestors().skip(1).any(|n| {
-        AnyJsNamedImportSpecifier::cast(n.clone())?
-            .imported_name()
+        AnyJsNamedImportSpecifier::cast(n.clone())
+            .and_then(|s| s.imported_name())
             .is_some_and(|name| name.text_trimmed() == "env")
-            || JsImport::cast(n.clone())?
-                .source_text()
-                .ok()
+            || JsImport::cast(n.clone())
+                .and_then(|i| i.source_text().ok())
                 .is_some_and(|src| PROCESS_MODULE_NAMES.contains(&src.text()))
     })
 }
