@@ -1,1 +1,0 @@
-- [Svelte script-only embedding](svelte-script-only-embedding.md) — JS lint rules can't see Svelte template reassignments; only const/imports are reliably immutable
