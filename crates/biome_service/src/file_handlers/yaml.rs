@@ -1,7 +1,7 @@
 use crate::WorkspaceError;
 use crate::file_handlers::{
-    Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
@@ -183,6 +183,10 @@ impl ExtensionHandler for YamlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

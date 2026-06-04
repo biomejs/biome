@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCombinedCustomOptions.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+let foo;
+
+// Decimal: minimumDigits: 7 and groupLength: 2, so 7+ digits must use groups of 2
+foo = 1234567; // 1_23_45_67
+foo = 1_234_567; // 1_23_45_67
+
+```
+
+# Diagnostics
+```
+invalidCombinedCustomOptions.js:6:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    5 │ // Decimal: minimumDigits: 7 and groupLength: 2, so 7+ digits must use groups of 2
+  > 6 │ foo = 1234567; // 1_23_45_67
+      │       ^^^^^^^
+    7 │ foo = 1_234_567; // 1_23_45_67
+    8 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    4 4 │   
+    5 5 │   // Decimal: minimumDigits: 7 and groupLength: 2, so 7+ digits must use groups of 2
+    6   │ - foo·=·1234567;·//·1_23_45_67
+      6 │ + foo·=·1_23_45_67;·//·1_23_45_67
+    7 7 │   foo = 1_234_567; // 1_23_45_67
+    8 8 │   
+  
+
+```
+
+```
+invalidCombinedCustomOptions.js:7:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    5 │ // Decimal: minimumDigits: 7 and groupLength: 2, so 7+ digits must use groups of 2
+    6 │ foo = 1234567; // 1_23_45_67
+  > 7 │ foo = 1_234_567; // 1_23_45_67
+      │       ^^^^^^^^^
+    8 │ 
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    5 5 │   // Decimal: minimumDigits: 7 and groupLength: 2, so 7+ digits must use groups of 2
+    6 6 │   foo = 1234567; // 1_23_45_67
+    7   │ - foo·=·1_234_567;·//·1_23_45_67
+      7 │ + foo·=·1_23_45_67;·//·1_23_45_67
+    8 8 │   
+  
+
+```

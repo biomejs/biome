@@ -97,11 +97,28 @@ pub enum WorkspaceError {
     /// Error in the workspace watcher.
     WatchError(WatchError),
 
+    /// Go-to definition requires the linter or assist to be enabled.
+    GoToDefinitionDisabled(GoToDefinitionDisabled),
+
+    /// The database is not available or its lock is poisoned.
+    DbError(DbError),
+
     /// Emitted when the rust gate feature isn't enabled
     FeatureNotEnabled(FeatureNotEnabledDiagnostic),
 }
 
 impl WorkspaceError {
+    pub fn db_not_available() -> Self {
+        Self::DbError(DbError {
+            reason: "The database is not available for this workspace.".to_string(),
+        })
+    }
+
+    pub fn db_lock_poisoned() -> Self {
+        Self::DbError(DbError {
+            reason: "The database lock is poisoned. This is a bug in Biome.".to_string(),
+        })
+    }
     pub fn format_with_errors_disabled() -> Self {
         Self::FormatWithErrorsDisabled(FormatWithErrorsDisabled)
     }
@@ -163,6 +180,10 @@ impl WorkspaceError {
             file_path: file_path.into(),
             verbose_advice: ProtectedFileAdvice,
         })
+    }
+
+    pub fn go_to_definition_disabled() -> Self {
+        Self::GoToDefinitionDisabled(GoToDefinitionDisabled)
     }
 
     pub fn is_editor_config_error(&self) -> bool {
@@ -323,6 +344,14 @@ impl Panic {
     message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
 )]
 pub struct FormatWithErrorsDisabled;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    severity = Warning,
+    message = "Go-to definition is available only when linting or assist are enabled, or the editor setting is enabled."
+)]
+pub struct GoToDefinitionDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -732,6 +761,20 @@ pub struct ConfigurationOutsideProject {
     tags(INTERNAL)
 )]
 pub struct FeatureNotEnabledDiagnostic;
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "internalError/db",
+    severity = Error,
+    message(
+        message("Database error: "<Info>{self.reason}</Info>),
+        description = "Database error: {reason}",
+    ),
+    tags(INTERNAL)
+)]
+pub struct DbError {
+    pub reason: String,
+}
 
 #[cfg(test)]
 mod test {

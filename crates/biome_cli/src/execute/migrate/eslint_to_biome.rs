@@ -8,6 +8,7 @@ use super::{
 };
 use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
+use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
 use biome_console::fmt::Display;
 use biome_console::markup;
@@ -555,7 +556,7 @@ impl eslint_eslint::FlatConfigData {
             };
             biome_config.javascript = Some(js_config)
         }
-        rules.recommended = Some(false);
+        rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes =
             to_biome_includes(&global_config_object.files, &global_config_object.ignores);
@@ -582,7 +583,7 @@ impl eslint_eslint::LegacyConfigData {
         }
         let mut linter = biome_config::LinterConfiguration::default();
         let mut rules = self.rules.into_biome_rules(options, &mut results);
-        rules.recommended = Some(false);
+        rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes = to_biome_includes(&[] as &[&str], self.ignore_patterns.as_slice());
         linter.includes = (!includes.is_empty()).then_some(includes);
@@ -646,6 +647,20 @@ fn migrate_eslint_rule(
     match rule {
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
+        }
+        eslint_eslint::Rule::ArrayCallbackReturn(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_iterable_callback_return =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
         }
         eslint_eslint::Rule::ClassMethodsUseThis(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
@@ -864,6 +879,21 @@ fn migrate_eslint_rule(
                     ));
                 }
                 results.add(&name, RuleMigrationResult::Migrated);
+            }
+        }
+        eslint_eslint::Rule::UnicornNumericSeparatorsStyle(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_numeric_separators =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {

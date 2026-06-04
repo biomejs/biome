@@ -37,6 +37,7 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

@@ -4,8 +4,7 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- Vue invalid cases - should trigger the rule -->
-
+<!-- should generate diagnostics -->
 <template>
   <a href="javascript:void(0)">Void</a>
   <a href=" javascript:alert('XSS') ">Alert</a>
@@ -16,15 +15,37 @@ expression: invalid.vue
 
 # Diagnostics
 ```
+invalid.vue:3:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <a href="javascript:void(0)">Void</a>
+      │          ^^^^^^^^^^^^^^^^^^^^^
+    4 │   <a href=" javascript:alert('XSS') ">Alert</a>
+    5 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
 invalid.vue:4:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    3 │ <template>
-  > 4 │   <a href="javascript:void(0)">Void</a>
-      │          ^^^^^^^^^^^^^^^^^^^^^
-    5 │   <a href=" javascript:alert('XSS') ">Alert</a>
-    6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    2 │ <template>
+    3 │   <a href="javascript:void(0)">Void</a>
+  > 4 │   <a href=" javascript:alert('XSS') ">Alert</a>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    6 │ </template>
   
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   
@@ -40,33 +61,12 @@ invalid.vue:5:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    3 │ <template>
-    4 │   <a href="javascript:void(0)">Void</a>
-  > 5 │   <a href=" javascript:alert('XSS') ">Alert</a>
-      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
-    7 │ </template>
-  
-  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
-  
-  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.vue:6:10 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid using javascript: URLs, as they can be a security risk.
-  
-    4 │   <a href="javascript:void(0)">Void</a>
-    5 │   <a href=" javascript:alert('XSS') ">Alert</a>
-  > 6 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    3 │   <a href="javascript:void(0)">Void</a>
+    4 │   <a href=" javascript:alert('XSS') ">Alert</a>
+  > 5 │   <a href="JAVASCRIPT:doSomething()">Uppercase</a>
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ </template>
-    8 │ 
+    6 │ </template>
+    7 │ 
   
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   

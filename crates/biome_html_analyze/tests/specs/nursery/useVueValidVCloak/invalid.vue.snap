@@ -4,7 +4,7 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- invalid v-cloak cases -->
+<!-- should generate diagnostics -->
 <div v-cloak:arg></div>
 <div v-cloak.mod></div>
 <div v-cloak="value"></div>
@@ -17,7 +17,7 @@ invalid.vue:2:13 lint/nursery/useVueValidVCloak  FIXABLE  ━━━━━━━�
 
   i The v-cloak directive must not have an argument.
   
-    1 │ <!-- invalid v-cloak cases -->
+    1 │ <!-- should generate diagnostics -->
   > 2 │ <div v-cloak:arg></div>
       │             ^^^^
     3 │ <div v-cloak.mod></div>
@@ -39,7 +39,7 @@ invalid.vue:3:13 lint/nursery/useVueValidVCloak  FIXABLE  ━━━━━━━�
 
   i The v-cloak directive does not support modifiers.
   
-    1 │ <!-- invalid v-cloak cases -->
+    1 │ <!-- should generate diagnostics -->
     2 │ <div v-cloak:arg></div>
   > 3 │ <div v-cloak.mod></div>
       │             ^^^^

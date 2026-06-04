@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        "useNumericSeparators": {
+          "level": "error",
+          "options": {
+            "decimal": {
+              "minimumDigits": 7
+            },
+            "hexadecimal": {
+              "minimumDigits": 4
+            },
+            "binary": {
+              "groupLength": 2
+            },
+            "octal": {
+              "groupLength": 2
+            }
+          }
+        }
+      }
+    }
+  }
+}

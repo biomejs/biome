@@ -15,7 +15,10 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
+pub use file_source::{
+    CssFileLanguage, CssFileSource, CssVariant, EmbeddingHtmlKind, EmbeddingKind,
+    EmbeddingStyleApplicability,
+};
 pub use number_ext::{CssNumberScanOptions, scan_css_number};
 pub use scss_ext::{
     ScssMapContext, ScssMapPositionKind, ScssMapRole, is_in_scss_control_condition_sequence,

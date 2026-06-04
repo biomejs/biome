@@ -17,12 +17,21 @@ impl FormatNodeRule<CssKeyframesScopeFunction> for FormatCssKeyframesScopeFuncti
             r_paren_token,
         } = node.as_fields();
 
+        let maybe_space = format_with(|f: &mut CssFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
+
         write!(
             f,
             [
                 scope.format(),
                 l_paren_token.format(),
+                maybe_space,
                 name.format(),
+                maybe_space,
                 r_paren_token.format(),
             ]
         )

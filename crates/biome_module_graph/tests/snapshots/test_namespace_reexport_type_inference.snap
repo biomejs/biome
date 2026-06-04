@@ -62,6 +62,9 @@ Exports {
 Imports {
   No imports
 }
+Side-effect imports: [
+  "./source.ts" => /src/source.ts,
+]
 ```
 
 

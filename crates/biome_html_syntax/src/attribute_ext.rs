@@ -2,6 +2,7 @@ use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttribute, HtmlAttributeList,
     HtmlAttributeName, inner_string_text, static_value::StaticValue,
 };
+use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, Text, TokenText};
 
 impl AnyHtmlAttributeInitializer {
@@ -64,5 +65,45 @@ impl HtmlAttributeName {
         self.value_token()
             .ok()
             .map(|token| token.token_text_trimmed())
+    }
+}
+
+impl Attribute for AnyHtmlAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        self.name()
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        self.value()
+    }
+}
+
+impl AnyHtmlAttribute {
+    pub fn name(&self) -> Option<TokenText> {
+        match self {
+            Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::AnySvelteDirective(_)
+            | Self::AnyVueDirective(_)
+            | Self::HtmlAttributeDoubleTextExpression(_)
+            | Self::HtmlAttributeSingleTextExpression(_)
+            | Self::HtmlBogusAttribute(_)
+            | Self::HtmlSpreadAttribute(_)
+            | Self::AnyAstroDirective(_)
+            | Self::SvelteAttachAttribute(_) => None,
+        }
+    }
+
+    pub fn value(&self) -> Option<StaticValue> {
+        match self {
+            Self::HtmlAttribute(attr) => attr.initializer()?.value().ok()?.as_static_value(),
+            Self::AnySvelteDirective(_)
+            | Self::AnyVueDirective(_)
+            | Self::HtmlAttributeDoubleTextExpression(_)
+            | Self::HtmlAttributeSingleTextExpression(_)
+            | Self::HtmlBogusAttribute(_)
+            | Self::HtmlSpreadAttribute(_)
+            | Self::AnyAstroDirective(_)
+            | Self::SvelteAttachAttribute(_) => None,
+        }
     }
 }

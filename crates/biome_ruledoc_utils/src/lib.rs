@@ -8,9 +8,13 @@ use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsFileSource;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{
+    ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module, resolve_html_module,
+    resolve_js_module,
+};
 use biome_project_layout::ProjectLayout;
-use biome_test_utils::get_added_js_paths;
+use biome_service::workspace::DocumentFileSource;
+use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
 use camino::Utf8PathBuf;
 
 pub use codeblock::*;
@@ -20,7 +24,7 @@ pub use codeblock::*;
 /// The builder can be reused to create cheap instances of analyzer services
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
-    module_graph: Arc<ModuleGraph>,
+    module_db: ProjectDatabase,
     project_layout: Arc<ProjectLayout>,
 }
 
@@ -35,16 +39,20 @@ impl AnalyzerServicesBuilder {
     /// * `files` - A map of file paths to their contents.
     pub fn from_files<S: BuildHasher>(files: HashMap<String, String, S>) -> Self {
         if files.is_empty() {
+            let db = ProjectDatabase::default();
             return Self {
-                module_graph: Default::default(),
+                module_db: db,
                 project_layout: Default::default(),
             };
         }
 
         let fs = MemoryFileSystem::default();
         let layout = ProjectLayout::default();
+        let path_info_cache = PathInfoCache::default();
 
-        let mut added_paths = Vec::with_capacity(files.len());
+        let mut js_paths = Vec::new();
+        let mut css_paths = Vec::new();
+        let mut html_paths = Vec::new();
 
         for (path, src) in files {
             let path_buf = Utf8PathBuf::from(path);
@@ -73,25 +81,80 @@ impl AnalyzerServicesBuilder {
                     _ => unimplemented!("Unhandled manifest: {biome_path}"),
                 }
             } else {
-                added_paths.push(biome_path);
+                let document_file_source = DocumentFileSource::from_path(&path_buf, false);
+                match document_file_source {
+                    DocumentFileSource::Js(_) => js_paths.push(biome_path),
+                    DocumentFileSource::Css(_) => css_paths.push(biome_path),
+                    DocumentFileSource::Html(_) => html_paths.push(biome_path),
+                    _ => unimplemented!(
+                        "Unhandled file type: {biome_path}. Add a new branch once the module graph understands new module types"
+                    ),
+                }
             }
 
             fs.insert(path_buf, src);
         }
 
-        let module_graph = ModuleGraph::default();
-        let added_paths = get_added_js_paths(&fs, &added_paths);
-        module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, true);
+        let db = ProjectDatabase::default();
+
+        let js_added_paths = get_added_js_paths(&fs, &js_paths);
+        for (path, root, semantic_model) in js_added_paths {
+            let (module_info, _, _) = resolve_js_module(
+                root,
+                path,
+                &fs,
+                &layout,
+                semantic_model,
+                &path_info_cache,
+                true,
+            );
+            let md = biome_module_graph::ModuleInfo::new(
+                &db,
+                path.as_path().to_path_buf(),
+                ModuleInfoKind::Js(module_info),
+            );
+            db.insert_module(path.as_path().to_path_buf(), md);
+        }
+
+        let css_added_paths = get_css_added_paths(&fs, &css_paths);
+        for (path, root) in css_added_paths {
+            let (module_info, _, _) =
+                resolve_css_module(root, path, &fs, &layout, &path_info_cache);
+            let md = biome_module_graph::ModuleInfo::new(
+                &db,
+                path.as_path().to_path_buf(),
+                ModuleInfoKind::Css(module_info),
+            );
+            db.insert_module(path.as_path().to_path_buf(), md);
+        }
+
+        let html_added_paths = get_html_added_paths(&fs, &html_paths);
+        for (path, root, embedded_content) in html_added_paths {
+            let (module_info, _, _) = resolve_html_module(
+                root,
+                &embedded_content,
+                path,
+                &fs,
+                &layout,
+                &path_info_cache,
+            );
+            let md = biome_module_graph::ModuleInfo::new(
+                &db,
+                path.as_path().to_path_buf(),
+                ModuleInfoKind::Html(module_info),
+            );
+            db.insert_module(path.as_path().to_path_buf(), md);
+        }
 
         Self {
-            module_graph: Arc::new(module_graph),
+            module_db: db,
             project_layout: Arc::new(layout),
         }
     }
 
     pub fn build_for_js_file_source(&self, file_source: JsFileSource) -> JsAnalyzerServices {
         JsAnalyzerServices::from((
-            self.module_graph.clone(),
+            self.module_db.clone(),
             self.project_layout.clone(),
             file_source,
             None,

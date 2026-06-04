@@ -52,6 +52,7 @@ pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
 pub(crate) mod search;
+pub(crate) mod upgrade;
 pub(crate) mod version;
 
 #[derive(Debug, Clone, Bpaf)]
@@ -61,6 +62,22 @@ pub enum BiomeCommand {
     /// Shows the Biome version information and quit.
     #[bpaf(command)]
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+
+    /// Upgrade Biome to the latest version.
+    ///
+    /// This command upgrades the running Biome binary using different strategies depending
+    /// on the way Biome was installed:
+    ///
+    /// - **Standalone**: If Biome was installed manually as a standalone binary, this command will
+    ///   upgrade it in-place to the latest stable version.
+    /// - **Homebrew**: If Biome was installed with Homebrew, this command will shell out to `brew upgrade biome` to perform the upgrade.
+    ///
+    /// You can override the automatic detection by setting BIOME_DISTRIBUTION to either one of: npm, homebrew, or standalone
+    ///
+    /// This command doesn't work for Biome binaries distributed through NPM. Use
+    /// your package manager to upgrade the `@biomejs/biome ` package instead.
+    #[bpaf(command)]
+    Upgrade,
 
     #[bpaf(command)]
     /// Prints information for debugging.
@@ -210,6 +227,10 @@ pub enum BiomeCommand {
         #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
+        /// Enables the watch mode to re-run the check automatically when any non-excluded file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -308,14 +329,17 @@ pub enum BiomeCommand {
         /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
         /// will be linted.
         #[bpaf(long("staged"), switch)]
         staged: bool,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
         changed: bool,
+
         /// Use this to specify the base branch to compare against when you're using the --changed
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
@@ -324,6 +348,10 @@ pub enum BiomeCommand {
         /// Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
         #[bpaf(long("profile-rules"), switch)]
         profile_rules: bool,
+
+        /// Enables the watch mode to re-run the check automatically when any non-excluded file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
 
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
@@ -405,6 +433,10 @@ pub enum BiomeCommand {
         /// flag, and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// Enables the watch mode to re-run the check automatically when any non-excluded file in the workspace has changed.
+        #[bpaf(long("watch"), switch)]
+        watch: bool,
 
         /// Single file, single path or list of paths.
         #[bpaf(positional("PATH"), many)]
@@ -674,6 +706,7 @@ impl BiomeCommand {
             | Self::Migrate { cli_options, .. }
             | Self::Search { cli_options, .. } => Some(cli_options),
             Self::LspProxy { .. }
+            | Self::Upgrade
             | Self::Start { .. }
             | Self::Stop
             | Self::Init(_)
@@ -695,6 +728,7 @@ impl BiomeCommand {
             | Self::Rage(_, log_options, ..)
             | Self::Search { log_options, .. } => Some(log_options),
             Self::Version(_)
+            | Self::Upgrade
             | Self::LspProxy { .. }
             | Self::Start { .. }
             | Self::Stop

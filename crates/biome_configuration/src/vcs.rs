@@ -36,8 +36,8 @@ pub struct VcsConfiguration {
     #[deserializable(bail_on_error)]
     pub client_kind: Option<VcsClientKind>,
 
-    /// Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
-    /// specified in the ignore file.
+    /// Whether Biome should use VCS ignore files. When [true], Biome will ignore files
+    /// specified in `.gitignore`, `.ignore`, and Git's local exclude file.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("vcs-use-ignore-file"), argument("true|false"))

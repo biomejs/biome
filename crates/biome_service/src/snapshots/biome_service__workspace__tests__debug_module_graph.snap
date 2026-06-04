@@ -13,6 +13,7 @@ GetModuleGraphResult {
                     "debounce",
                     "filter",
                 },
+                referenced_classes: {},
             },
         ),
         "/project/dynamic.js": Js(
@@ -23,6 +24,7 @@ GetModuleGraphResult {
                 exports: {
                     "squash",
                 },
+                referenced_classes: {},
             },
         ),
         "/project/file.js": Js(
@@ -38,6 +40,7 @@ GetModuleGraphResult {
                     "./dynamic.js",
                 },
                 exports: {},
+                referenced_classes: {},
             },
         ),
     },

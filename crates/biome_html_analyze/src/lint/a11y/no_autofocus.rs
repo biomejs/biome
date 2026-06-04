@@ -58,7 +58,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noAutofocus",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-autofocus").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-autofocus").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
