@@ -920,7 +920,7 @@ fn named_import_type_fix(
     }
 }
 
-fn add_module_items(
+pub(crate) fn add_module_items(
     mutation: &mut BatchMutation<JsLanguage>,
     preceding_item: &JsSyntaxNode,
     new_items: impl IntoIterator<Item = AnyJsModuleItem>,
