@@ -63,8 +63,10 @@ declare_lint_rule! {
     ///
     /// ### `allowReassign`
     ///
-    /// When `true`, allows `$state()` wrapping for variables that are reassigned after declaration,
-    /// since `$state` is required to track reference changes.
+    /// When `true`, suppresses the autofix for variables that are reassigned after declaration.
+    /// Because reassigning a `$state`-wrapped value changes the binding itself, removing `$state`
+    /// would break reactivity for those reassignments. The diagnostic still fires — only the
+    /// unsafe autofix is withheld.
     ///
     /// Default: `false`
     ///
@@ -85,9 +87,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
-    /// #### Valid
-    ///
-    /// ```svelte,use_options
+    /// ```svelte,expect_diagnostic,use_options
     /// <script>
     /// import { SvelteMap } from "svelte/reactivity";
     /// let map = $state(new SvelteMap());
@@ -215,21 +215,6 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             }
         }
 
-        if options.allow_reassign()
-            && let Some(declarator) = call
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find_map(JsVariableDeclarator::cast)
-            && let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
-                id_binding,
-            ))) = declarator.id()
-            // Check whether the declared variable is ever reassigned after declaration.
-            && id_binding.all_writes(model).next().is_some()
-        {
-            return None;
-        }
-
         Some(RuleState {
             class_name: class_name_text,
             inner_expr: arg_expr,
@@ -254,6 +239,24 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let call = ctx.query();
+        let model = ctx.model();
+
+        // When allowReassign is enabled, withhold the fix for variables that are reassigned after
+        // declaration — removing $state would break reactivity for those reference changes.
+        if ctx.options().allow_reassign()
+            && let Some(declarator) = call
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsVariableDeclarator::cast)
+            && let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
+                id_binding,
+            ))) = declarator.id()
+            && id_binding.all_writes(model).next().is_some()
+        {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
         mutation.replace_node(
             AnyJsExpression::JsCallExpression(call.clone()),

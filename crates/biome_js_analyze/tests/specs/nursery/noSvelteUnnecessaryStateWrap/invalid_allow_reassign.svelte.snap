@@ -8,8 +8,12 @@ expression: invalid_allow_reassign.svelte
 <script>
 	import { SvelteMap } from "svelte/reactivity";
 
-	// allowReassign: true, but this variable is never reassigned — still flagged.
+	// allowReassign: true, but never reassigned — fix still offered.
 	const map = $state(new SvelteMap());
+
+	// allowReassign: true, variable is reassigned — diagnostic fires, but no fix offered.
+	let map2 = $state(new SvelteMap());
+	map2 = new SvelteMap([[1, "a"]]);
 </script>
 
 ```
@@ -20,11 +24,11 @@ invalid_allow_reassign.svelte:6:14 lint/nursery/noSvelteUnnecessaryStateWrap  FI
 
   × SvelteMap is already reactive, wrapping it in $state() is unnecessary.
   
-    5 │ 	// allowReassign: true, but this variable is never reassigned — still flagged.
+    5 │ 	// allowReassign: true, but never reassigned — fix still offered.
   > 6 │ 	const map = $state(new SvelteMap());
       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ </script>
-    8 │ 
+    7 │ 
+    8 │ 	// allowReassign: true, variable is reassigned — diagnostic fires, but no fix offered.
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
   
@@ -34,5 +38,23 @@ invalid_allow_reassign.svelte:6:14 lint/nursery/noSvelteUnnecessaryStateWrap  FI
   
     5 │ → const·map·=·$state(new·SvelteMap());
       │               -------              -  
+
+```
+
+```
+invalid_allow_reassign.svelte:9:13 lint/nursery/noSvelteUnnecessaryStateWrap ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SvelteMap is already reactive, wrapping it in $state() is unnecessary.
+  
+     8 │ 	// allowReassign: true, variable is reassigned — diagnostic fires, but no fix offered.
+   > 9 │ 	let map2 = $state(new SvelteMap());
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	map2 = new SvelteMap([[1, "a"]]);
+    11 │ </script>
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
