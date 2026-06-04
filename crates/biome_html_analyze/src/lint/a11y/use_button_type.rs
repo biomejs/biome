@@ -84,11 +84,7 @@ impl Rule for UseButtonType {
 
         let value = initializer.value().ok()?;
 
-        // Only validate the type when it is a plain static string. A Svelte template
-        // attribute value (e.g. type="{dynamicType}") is considered static only when
-        // string_value() can extract all of its text — meaning there are no {expression}
-        // interpolations. When interpolations are present we can't know the runtime value,
-        // so we skip validation to avoid false positives.
+        // Static string value - validate it
         let is_static_string = value.as_html_string().is_some()
             || (value.as_svelte_template_attribute_value().is_some()
                 && value.string_value().is_some());
