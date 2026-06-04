@@ -186,10 +186,9 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         let class_ref = class_ident.name().ok()?;
         let class_name_text = class_ref.value_token().ok()?.token_text_trimmed();
 
-        let options = ctx.options();
-
         let is_builtin = REACTIVE_CLASSES.contains(&class_name_text.text());
-        let is_additional = options
+        let is_additional = ctx
+            .options()
             .additional_reactive_classes
             .as_deref()
             .unwrap_or(&[])
