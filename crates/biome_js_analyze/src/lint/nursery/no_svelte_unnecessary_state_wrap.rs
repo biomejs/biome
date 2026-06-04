@@ -139,8 +139,6 @@ declare_lint_rule! {
 pub struct RuleState {
     /// Name of the reactive class being unnecessarily wrapped.
     class_name: TokenText,
-    /// The inner expression (the `new X()` / `X()` argument) to replace the call with.
-    inner_expr: AnyJsExpression,
 }
 
 impl Rule for NoSvelteUnnecessaryStateWrap {
@@ -216,7 +214,6 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
 
         Some(RuleState {
             class_name: class_name_text,
-            inner_expr: arg_expr,
         })
     }
 
@@ -236,7 +233,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let call = ctx.query();
         let model = ctx.model();
 
@@ -256,11 +253,11 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             return None;
         }
 
+        let arg = call.arguments().ok()?.args().first()?.ok()?;
+        let inner_expr = arg.as_any_js_expression()?.clone();
+
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(
-            AnyJsExpression::JsCallExpression(call.clone()),
-            state.inner_expr.clone(),
-        );
+        mutation.replace_node(AnyJsExpression::JsCallExpression(call.clone()), inner_expr);
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
