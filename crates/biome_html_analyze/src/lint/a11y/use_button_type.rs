@@ -84,11 +84,11 @@ impl Rule for UseButtonType {
 
         let value = initializer.value().ok()?;
 
-        // Static string value - validate it
         let is_static_string = value.as_html_string().is_some()
             || (value.as_svelte_template_attribute_value().is_some()
                 && value.string_value().is_some());
         if is_static_string {
+            // Static string value - validate it
             if let Some(string_value) = value.string_value()
                 && ALLOWED_BUTTON_TYPES.contains(&&*string_value)
             {
