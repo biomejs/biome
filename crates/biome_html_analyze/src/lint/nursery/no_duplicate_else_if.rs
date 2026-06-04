@@ -4,13 +4,15 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_syntax::SvelteIfBlock;
 use biome_rowan::{AstNode, AstNodeList, TextRange};
-use biome_rule_options::no_dupe_else_if_blocks::NoDupeElseIfBlocksOptions;
+use biome_rule_options::no_duplicate_else_if::NoDuplicateElseIfOptions;
 
 declare_lint_rule! {
     /// Disallow duplicate conditions in Svelte `{#if}` / `{:else if}` chains.
     ///
     /// If an `{:else if}` condition is textually identical to a previous condition in the same
     /// chain, it can never execute, making it dead code.
+    ///
+    /// This rule only applies to Svelte templates. It does not detect duplicate conditions in Vue or Astro templates.
     ///
     /// ## Examples
     ///
@@ -38,9 +40,9 @@ declare_lint_rule! {
     /// {/if}
     /// ```
     ///
-    pub NoDupeElseIfBlocks {
+    pub NoDuplicateElseIf {
         version: "next",
-        name: "noDupeElseIfBlocks",
+        name: "noDuplicateElseIf",
         language: "html",
         domains: &[RuleDomain::Svelte],
         recommended: true,
@@ -57,11 +59,11 @@ pub struct State {
     condition: String,
 }
 
-impl Rule for NoDupeElseIfBlocks {
+impl Rule for NoDuplicateElseIf {
     type Query = Ast<SvelteIfBlock>;
     type State = State;
     type Signals = Box<[Self::State]>;
-    type Options = NoDupeElseIfBlocksOptions;
+    type Options = NoDuplicateElseIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -120,7 +122,10 @@ impl Rule for NoDupeElseIfBlocks {
             .detail(
                 state.original_range,
                 "This is the first occurrence of the condition.",
-            ),
+            )
+            .note(markup! {
+                "Remove the duplicate "<Emphasis>"{:else if}"</Emphasis>" branch or change its condition to make it reachable."
+            }),
         )
     }
 }

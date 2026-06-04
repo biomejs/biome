@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::HtmlAttributeList;
-use biome_rowan::{AstNode, AstNodeList, TextRange};
-use biome_rule_options::no_dupe_use_directives::NoDupeUseDirectivesOptions;
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
+use biome_rule_options::no_svelte_duplicate_use_directives::NoSvelteDuplicateUseDirectivesOptions;
 
 declare_lint_rule! {
     /// Disallow duplicate `use:` directives on the same Svelte element.
@@ -26,9 +26,9 @@ declare_lint_rule! {
     /// <div use:tooltip use:focusTrap></div>
     /// ```
     ///
-    pub NoDupeUseDirectives {
+    pub NoSvelteDuplicateUseDirectives {
         version: "next",
-        name: "noDupeUseDirectives",
+        name: "noSvelteDuplicateUseDirectives",
         language: "html",
         domains: &[RuleDomain::Svelte],
         recommended: true,
@@ -40,7 +40,7 @@ pub struct State {
     /// Range of the duplicate directive.
     duplicate_range: TextRange,
     /// The action name.
-    name: String,
+    name: TokenText,
     /// Range of the first occurrence.
     original_range: TextRange,
 }
@@ -50,15 +50,15 @@ pub struct State {
 /// and the same optional initializer expression text.
 #[derive(PartialEq, Eq, Hash)]
 struct DirectiveKey {
-    name: String,
+    name: TokenText,
     initializer: Option<String>,
 }
 
-impl Rule for NoDupeUseDirectives {
+impl Rule for NoSvelteDuplicateUseDirectives {
     type Query = Ast<HtmlAttributeList>;
     type State = State;
     type Signals = Box<[Self::State]>;
-    type Options = NoDupeUseDirectivesOptions;
+    type Options = NoSvelteDuplicateUseDirectivesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -86,13 +86,13 @@ impl Rule for NoDupeUseDirectives {
                 continue;
             };
 
-            let name_text = ident.text_trimmed().to_string();
+            let name_text = ident.token_text_trimmed();
             let initializer_text = value
                 .initializer()
                 .map(|init| init.syntax().text_trimmed().to_string());
 
             let key = DirectiveKey {
-                name: name_text,
+                name: name_text.clone(),
                 initializer: initializer_text,
             };
 
@@ -101,7 +101,7 @@ impl Rule for NoDupeUseDirectives {
             {
                 violations.push(State {
                     duplicate_range: directive.range(),
-                    name: ident.text_trimmed().to_string(),
+                    name: name_text,
                     original_range: *original_range,
                 });
             } else {
@@ -113,7 +113,7 @@ impl Rule for NoDupeUseDirectives {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let name = state.name.as_str();
+        let name = state.name.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -125,7 +125,10 @@ impl Rule for NoDupeUseDirectives {
             .detail(
                 state.original_range,
                 "This is the first occurrence of the directive.",
-            ),
+            )
+            .note(markup! {
+                "Using the same action twice on an element is redundant. Remove the duplicate "<Emphasis>"use:"</Emphasis>" directive."
+            }),
         )
     }
 }

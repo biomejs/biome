@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::{AnySvelteBindingProperty, HtmlAttributeList};
-use biome_rowan::{AstNode, AstNodeList, TextRange};
-use biome_rule_options::no_dupe_style_properties::NoDupeStylePropertiesOptions;
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
+use biome_rule_options::no_svelte_duplicate_style_properties::NoSvelteDuplicateStylePropertiesOptions;
 
 declare_lint_rule! {
     /// Disallow duplicate `style:` directives on the same Svelte element.
@@ -26,9 +26,9 @@ declare_lint_rule! {
     /// <div style:color="red" style:background="blue"></div>
     /// ```
     ///
-    pub NoDupeStyleProperties {
+    pub NoSvelteDuplicateStyleProperties {
         version: "next",
-        name: "noDupeStyleProperties",
+        name: "noSvelteDuplicateStyleProperties",
         language: "html",
         domains: &[RuleDomain::Svelte],
         recommended: true,
@@ -40,20 +40,20 @@ pub struct State {
     /// Range of the duplicate directive.
     duplicate_range: TextRange,
     /// The property name.
-    name: String,
+    name: TokenText,
     /// Range of the first occurrence.
     original_range: TextRange,
 }
 
-impl Rule for NoDupeStyleProperties {
+impl Rule for NoSvelteDuplicateStyleProperties {
     type Query = Ast<HtmlAttributeList>;
     type State = State;
     type Signals = Box<[Self::State]>;
-    type Options = NoDupeStylePropertiesOptions;
+    type Options = NoSvelteDuplicateStylePropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut seen: Vec<(String, TextRange)> = Vec::new();
+        let mut seen: Vec<(TokenText, TextRange)> = Vec::new();
         let mut violations: Vec<State> = Vec::new();
 
         for attribute in node.iter() {
@@ -81,7 +81,7 @@ impl Rule for NoDupeStyleProperties {
             {
                 violations.push(State {
                     duplicate_range: directive.range(),
-                    name: name_text.clone(),
+                    name: name_text,
                     original_range: *original_range,
                 });
             } else {
@@ -93,7 +93,7 @@ impl Rule for NoDupeStyleProperties {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let name = state.name.as_str();
+        let name = state.name.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -105,21 +105,24 @@ impl Rule for NoDupeStyleProperties {
             .detail(
                 state.original_range,
                 "This is the first occurrence of the directive.",
-            ),
+            )
+            .note(markup! {
+                "Only the last "<Emphasis>"style:"</Emphasis>" directive for a property takes effect. Remove the duplicate directive or rename it to target a different property."
+            }),
         )
     }
 }
 
 /// Extract the property name text from an `AnySvelteBindingProperty`.
 /// Handles both `SvelteName` (simple identifier) and `SvelteLiteral` (hyphenated name).
-fn property_name_text(property: &AnySvelteBindingProperty) -> Option<String> {
+fn property_name_text(property: &AnySvelteBindingProperty) -> Option<TokenText> {
     if let Some(svelte_name) = property.as_svelte_name() {
         let token = svelte_name.ident_token().ok()?;
-        return Some(token.text_trimmed().to_string());
+        return Some(token.token_text_trimmed());
     }
     if let Some(svelte_literal) = property.as_svelte_literal() {
         let token = svelte_literal.value_token().ok()?;
-        return Some(token.text_trimmed().to_string());
+        return Some(token.token_text_trimmed());
     }
     None
 }

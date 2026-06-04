@@ -17,7 +17,7 @@ expression: invalid.svelte
 
 # Diagnostics
 ```
-invalid.svelte:3:18 lint/nursery/noDupeUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:3:18 lint/nursery/noSvelteDuplicateUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate use: directive tooltip.
   
@@ -37,13 +37,15 @@ invalid.svelte:3:18 lint/nursery/noDupeUseDirectives ━━━━━━━━━
     4 │ 
     5 │ <button use:focusTrap={options} use:focusTrap={options}></button>
   
+  i Using the same action twice on an element is redundant. Remove the duplicate use: directive.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:5:33 lint/nursery/noDupeUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:5:33 lint/nursery/noSvelteDuplicateUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate use: directive focusTrap.
   
@@ -63,13 +65,15 @@ invalid.svelte:5:33 lint/nursery/noDupeUseDirectives ━━━━━━━━━
     6 │ 
     7 │ <span use:animate use:resize use:animate></span>
   
+  i Using the same action twice on an element is redundant. Remove the duplicate use: directive.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:7:30 lint/nursery/noDupeUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:7:30 lint/nursery/noSvelteDuplicateUseDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate use: directive animate.
   
@@ -86,6 +90,8 @@ invalid.svelte:7:30 lint/nursery/noDupeUseDirectives ━━━━━━━━━
   > 7 │ <span use:animate use:resize use:animate></span>
       │       ^^^^^^^^^^^
     8 │ 
+  
+  i Using the same action twice on an element is redundant. Remove the duplicate use: directive.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

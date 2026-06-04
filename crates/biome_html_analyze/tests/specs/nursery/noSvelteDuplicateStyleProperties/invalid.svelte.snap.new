@@ -17,7 +17,7 @@ expression: invalid.svelte
 
 # Diagnostics
 ```
-invalid.svelte:3:24 lint/nursery/noDupeStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:3:24 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate style: directive for property color.
   
@@ -37,13 +37,15 @@ invalid.svelte:3:24 lint/nursery/noDupeStyleProperties ━━━━━━━━�
     4 │ 
     5 │ <span style:font-size="12px" style:font-size="16px"></span>
   
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:5:30 lint/nursery/noDupeStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:5:30 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate style: directive for property font-size.
   
@@ -63,13 +65,15 @@ invalid.svelte:5:30 lint/nursery/noDupeStyleProperties ━━━━━━━━�
     6 │ 
     7 │ <button style:background="green" style:color="white" style:background="red"></button>
   
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:7:54 lint/nursery/noDupeStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:7:54 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Duplicate style: directive for property background.
   
@@ -86,6 +90,8 @@ invalid.svelte:7:54 lint/nursery/noDupeStyleProperties ━━━━━━━━�
   > 7 │ <button style:background="green" style:color="white" style:background="red"></button>
       │         ^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
+  
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

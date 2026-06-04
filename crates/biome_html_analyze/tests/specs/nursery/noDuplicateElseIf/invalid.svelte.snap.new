@@ -37,7 +37,7 @@ expression: invalid.svelte
 
 # Diagnostics
 ```
-invalid.svelte:7:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:7:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This branch can never execute. Its condition a is a duplicate of a previous condition.
   
@@ -59,13 +59,15 @@ invalid.svelte:7:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━�
     4 │   <div>a</div>
     5 │ {:else if b}
   
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:15:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:15:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This branch can never execute. Its condition x === 1 is a duplicate of a previous condition.
   
@@ -87,13 +89,15 @@ invalid.svelte:15:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━�
     12 │   <div>one</div>
     13 │ {:else if x === 2}
   
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
+  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
 
 ```
-invalid.svelte:23:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:23:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This branch can never execute. Its condition foo is a duplicate of a previous condition.
   
@@ -114,6 +118,8 @@ invalid.svelte:23:1 lint/nursery/noDupeElseIfBlocks ━━━━━━━━━�
        │      ^^^
     20 │   <div>foo</div>
     21 │ {:else if bar}
+  
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

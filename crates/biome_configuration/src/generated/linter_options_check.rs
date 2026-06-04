@@ -300,21 +300,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
-        "noDupeElseIfBlocks",
-        TypeId::of::<biome_rule_options::no_dupe_else_if_blocks::NoDupeElseIfBlocksOptions>(),
-    ));
-    result.push((
-        "nursery",
-        "noDupeStyleProperties",
-        TypeId::of::<biome_rule_options::no_dupe_style_properties::NoDupeStylePropertiesOptions>(),
-    ));
-    result.push((
-        "nursery",
-        "noDupeUseDirectives",
-        TypeId::of::<biome_rule_options::no_dupe_use_directives::NoDupeUseDirectivesOptions>(),
-    ));
-    result.push((
-        "nursery",
         "noDuplicateArgumentNames",
         TypeId::of::<
             biome_rule_options::no_duplicate_argument_names::NoDuplicateArgumentNamesOptions,
@@ -352,7 +337,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
-        "suspicious",
+        "nursery",
         "noDuplicateElseIf",
         TypeId::of::<biome_rule_options::no_duplicate_else_if::NoDuplicateElseIfOptions>(),
     ));
@@ -1155,6 +1140,8 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_suspicious_semicolon_in_jsx::NoSuspiciousSemicolonInJsxOptions,
         >(),
     ));
+    result.push(("nursery", "noSvelteDuplicateStyleProperties", TypeId::of::<biome_rule_options::no_svelte_duplicate_style_properties::NoSvelteDuplicateStylePropertiesOptions>()));
+    result.push(("nursery", "noSvelteDuplicateUseDirectives", TypeId::of::<biome_rule_options::no_svelte_duplicate_use_directives::NoSvelteDuplicateUseDirectivesOptions>()));
     result.push((
         "a11y",
         "noSvgWithoutTitle",
