@@ -88,7 +88,7 @@ impl Rule for NoRedundantAlt {
                         AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => chunk
                             .html_template_chunk_token()
                             .ok()
-                            .map_or(false, |t| is_redundant_alt(t.text_trimmed())),
+                            .is_some_and(|t| is_redundant_alt(t.text_trimmed())),
                         AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => false,
                     })
                     .then_some(alt)
