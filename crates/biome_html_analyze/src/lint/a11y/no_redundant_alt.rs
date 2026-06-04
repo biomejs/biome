@@ -80,17 +80,16 @@ impl Rule for NoRedundantAlt {
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
             AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => {
-                // Check only the static text chunks; skip interpolation expressions.
                 value
                     .elements()
                     .iter()
-                    .any(|el| match el {
-                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => chunk
-                            .html_template_chunk_token()
-                            .ok()
-                            .is_some_and(|t| is_redundant_alt(t.text_trimmed())),
-                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => false,
+                    .filter_map(|el| match el {
+                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => {
+                            chunk.html_template_chunk_token().ok()
+                        }
+                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
                     })
+                    .any(|t| is_redundant_alt(t.text_trimmed()))
                     .then_some(alt)
             }
             AnyHtmlAttributeInitializer::VueVForValue(_) => None,
