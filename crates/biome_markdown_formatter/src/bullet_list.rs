@@ -361,8 +361,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
         if pending_breaks > 0 {
             match pending_breaks {
                 1 => write!(f, [hard_line_break()])?,
-                2 => write!(f, [empty_line()])?,
-                _ => (),
+                _ => write!(f, [empty_line()])?,
             }
         }
         Ok(())

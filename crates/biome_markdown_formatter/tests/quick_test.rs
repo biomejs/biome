@@ -4,9 +4,19 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"* Foo
-* * *
-* Bar
+    let source = r#"* Text
+
+ 	[title](link)
+
+* Text
+
+ 	- foo
+ 	- lreum
+ 	- bar
+
+* Text
+
+ 	# foo
 "#;
     let parse = parse_markdown(source);
 
