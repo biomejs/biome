@@ -15,34 +15,30 @@ pub const DEFAULT_TYPESCRIPT_TAG: &str = "v6.0.3";
 /// Commit SHA pinned alongside [`DEFAULT_TYPESCRIPT_TAG`].
 pub const DEFAULT_TYPESCRIPT_SHA: &str = "050880ce59e30b356b686bd3144efe24f875ebc8";
 
-pub use source_pin::SourcePin;
+/// A pinned TypeScript release: git tag + commit SHA.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SourcePin {
+    tag: String,
+    sha: String,
+}
 
-mod source_pin {
-    /// A pinned TypeScript release: git tag + commit SHA.
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    pub struct SourcePin {
-        tag: String,
-        sha: String,
+impl SourcePin {
+    /// Builds a TypeScript source pin from a tag and commit SHA.
+    pub fn new(tag: &str, sha: &str) -> Self {
+        Self {
+            tag: tag.to_owned(),
+            sha: sha.to_owned(),
+        }
     }
 
-    impl SourcePin {
-        /// Builds a TypeScript source pin from a tag and commit SHA.
-        pub fn new(tag: &str, sha: &str) -> Self {
-            Self {
-                tag: tag.to_owned(),
-                sha: sha.to_owned(),
-            }
-        }
+    /// Git tag of the TypeScript release, for example `v6.0.3`.
+    pub fn tag(&self) -> &str {
+        &self.tag
+    }
 
-        /// Git tag of the TypeScript release, for example `v6.0.3`.
-        pub fn tag(&self) -> &str {
-            &self.tag
-        }
-
-        /// Commit SHA the tag must resolve to.
-        pub fn sha(&self) -> &str {
-            &self.sha
-        }
+    /// Commit SHA the tag must resolve to.
+    pub fn sha(&self) -> &str {
+        &self.sha
     }
 }
 
