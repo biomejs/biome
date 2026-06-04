@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, JsCallExpression,
-    JsFileSource, JsImport, JsVariableDeclarator,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsCallExpression, JsFileSource, JsImport,
+    JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions;
@@ -59,6 +59,72 @@ declare_lint_rule! {
     /// </script>
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `allowReassign`
+    ///
+    /// When `true`, allows `$state()` wrapping for variables that are reassigned after declaration,
+    /// since `$state` is required to track reference changes.
+    ///
+    /// Default: `false`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowReassign": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```svelte,expect_diagnostic,use_options
+    /// <script>
+    /// import { SvelteMap } from "svelte/reactivity";
+    /// const map = $state(new SvelteMap());
+    /// </script>
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```svelte,use_options
+    /// <script>
+    /// import { SvelteMap } from "svelte/reactivity";
+    /// let map = $state(new SvelteMap());
+    /// map = new SvelteMap();
+    /// </script>
+    /// ```
+    ///
+    /// ### `additionalReactiveClasses`
+    ///
+    /// An array of additional class names to treat as already reactive (beyond the built-in
+    /// `svelte/reactivity` classes). Use this to extend the rule with custom reactive classes
+    /// from your own codebase.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "additionalReactiveClasses": ["MyReactiveStore"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```svelte,expect_diagnostic,use_options
+    /// <script>
+    /// const store = $state(new MyReactiveStore());
+    /// </script>
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```svelte,use_options
+    /// <script>
+    /// const store = new MyReactiveStore();
+    /// </script>
+    /// ```
+    ///
     pub NoSvelteUnnecessaryStateWrap {
         version: "next",
         name: "noSvelteUnnecessaryStateWrap",
@@ -108,9 +174,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         if args.len() != 1 {
             return None;
         }
-        let AnyJsCallArgument::AnyJsExpression(arg_expr) = args.first()?.ok()? else {
-            return None;
-        };
+        let arg_expr = args.first()?.ok()?.as_any_js_expression()?.clone();
 
         // Argument must be `new X(...)` or `X(...)`.
         let class_callee = match &arg_expr {
@@ -118,9 +182,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             AnyJsExpression::JsCallExpression(inner_call) => inner_call.callee().ok()?,
             _ => return None,
         };
-        let AnyJsExpression::JsIdentifierExpression(class_ident) = class_callee else {
-            return None;
-        };
+        let class_ident = class_callee.as_js_identifier_expression()?;
         let class_ref = class_ident.name().ok()?;
         let class_name_text = class_ref.value_token().ok()?.token_text_trimmed();
 
@@ -144,6 +206,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             let imported_from = binding
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(JsImport::cast)
                 .and_then(|import| import.source_text().ok());
             match imported_from {
@@ -152,15 +215,16 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             }
         }
 
-        // If `allowReassign` is enabled, skip variables that are reassigned after declaration.
-        if options.allow_reassign.unwrap_or(false)
+        if options.allow_reassign()
             && let Some(declarator) = call
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(JsVariableDeclarator::cast)
             && let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 id_binding,
             ))) = declarator.id()
+            // Check whether the declared variable is ever reassigned after declaration.
             && id_binding.all_writes(model).next().is_some()
         {
             return None;
@@ -184,9 +248,6 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             )
             .note(markup! {
                 "Classes from "<Emphasis>"svelte/reactivity"</Emphasis>" track their own mutations without needing a "<Emphasis>"$state"</Emphasis>" wrapper."
-            })
-            .note(markup! {
-                "Remove the "<Emphasis>"$state()"</Emphasis>" wrapper. If you need to reassign the variable itself, enable the "<Emphasis>"allowReassign"</Emphasis>" option."
             }),
         )
     }

@@ -13,3 +13,13 @@ pub struct NoSvelteUnnecessaryStateWrapOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_reassign: Option<bool>,
 }
+
+impl NoSvelteUnnecessaryStateWrapOptions {
+    pub const DEFAULT_ALLOW_REASSIGN: bool = false;
+
+    /// Returns [`Self::allow_reassign`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_ALLOW_REASSIGN`].
+    pub fn allow_reassign(&self) -> bool {
+        self.allow_reassign.unwrap_or(Self::DEFAULT_ALLOW_REASSIGN)
+    }
+}

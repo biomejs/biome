@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: invalid.svelte
 ---
 # Input
@@ -35,8 +34,6 @@ invalid.svelte:7:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
   
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the unnecessary $state() wrapper.
@@ -59,8 +56,6 @@ invalid.svelte:8:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
     10 │ 	const url = $state(new SvelteURL("https://example.com"));
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
-  
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -85,8 +80,6 @@ invalid.svelte:9:15 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
   
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the unnecessary $state() wrapper.
@@ -109,8 +102,6 @@ invalid.svelte:10:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
     12 │ 	const mq = $state(new MediaQuery("(min-width: 768px)"));
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
-  
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -135,8 +126,6 @@ invalid.svelte:11:17 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
   
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Remove the unnecessary $state() wrapper.
@@ -159,8 +148,6 @@ invalid.svelte:12:13 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━�
     14 │ 
   
   i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
-  
-  i Remove the $state() wrapper. If you need to reassign the variable itself, enable the allowReassign option.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
