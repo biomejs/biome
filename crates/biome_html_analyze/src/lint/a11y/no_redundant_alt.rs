@@ -80,9 +80,6 @@ impl Rule for NoRedundantAlt {
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
             AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => {
-                // Check only the static text chunks — interpolation expressions are skipped.
-                // If any chunk contains a redundant word the alt is flagged regardless of
-                // what the expressions evaluate to at runtime.
                 let static_text: String = value
                     .elements()
                     .iter()
