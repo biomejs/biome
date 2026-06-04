@@ -84,6 +84,9 @@ impl Rule for UseButtonType {
 
         let value = initializer.value().ok()?;
 
+        // If the value is a dynamic expression (e.g., {foo} in Svelte), we can't validate it,
+        // so we assume it's valid to avoid false positives.
+        // We only validate static string values.
         let is_static_string = value.as_html_string().is_some()
             || (value.as_svelte_template_attribute_value().is_some()
                 && value.string_value().is_some());
