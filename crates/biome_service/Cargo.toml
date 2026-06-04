@@ -114,6 +114,7 @@ lang_md      = [
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
+lang_scss    = ["biome_css_syntax/scss"]
 lang_yaml    = [
   "biome_configuration/lang_yaml",
   "dep:biome_yaml_formatter",
