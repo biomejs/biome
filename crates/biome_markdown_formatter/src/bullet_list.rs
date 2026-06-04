@@ -53,23 +53,12 @@ impl BulletListPrinter {
 
 impl Format<MarkdownFormatContext> for BulletListPrinter {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        let mut iter = self.bullets.iter().peekable();
         let mut joiner = f.join();
 
-        while let Some(item) = iter.next() {
-            // let needs_trailing_break = matches!(iter.peek(), Some(ListItem::Bullet(_)));
-            joiner.entry(&format_with(|f| {
-                write!(f, [item])?;
-                // If the next item is a bullet, we need to break on a new line
-                // if needs_trailing_break {
-                //     write!(f, [hard_line_break()])?;
-                // }
-                Ok(())
-            }));
+        for item in self.bullets.iter() {
+            joiner.entry(item);
         }
-
         joiner.finish()
-        // write!(f, [hard_line_break()])
     }
 }
 
@@ -253,9 +242,9 @@ impl ListBlockList {
 
 impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        let mut iter = BlockListIterator::new(self.content.iter()).enumerate();
+        let iter = BlockListIterator::new(self.content.iter());
         let mut pending_breaks: u8 = 0;
-        while let Some((index, item)) = iter.next() {
+        for item in iter {
             match item {
                 BlockListIteratorItem::WithContinuationIndent {
                     continuation,
@@ -417,12 +406,6 @@ enum BlockListIteratorItem {
         quote_prefix: Vec<MdQuotePrefix>,
     },
     Simple((AnyMdBlock, Vec<MdQuotePrefix>)),
-}
-
-impl BlockListIteratorItem {
-    fn is_newline(&self) -> bool {
-        matches!(self, BlockListIteratorItem::Simple(block) if block.0.is_newline())
-    }
 }
 
 impl Debug for BlockListIteratorItem {

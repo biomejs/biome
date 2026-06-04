@@ -6,8 +6,8 @@ impl AnyMdInline {
     /// or a textual token whose content is a newline character.
     fn is_line_break(&self) -> bool {
         match self {
-            AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => true,
-            AnyMdInline::MdTextual(node) => node.is_newline().unwrap_or(false),
+            Self::MdHardLine(_) | Self::MdSoftBreak(_) => true,
+            Self::MdTextual(node) => node.is_newline().unwrap_or(false),
             _ => false,
         }
     }
@@ -17,14 +17,14 @@ impl AnyMdInline {
     /// return `false`.
     fn has_content(&self) -> bool {
         match self {
-            AnyMdInline::MdTextual(node) => {
+            Self::MdTextual(node) => {
                 !node.is_newline().unwrap_or(false)
                     && !node.is_empty_and_not_newline().unwrap_or(false)
             }
-            AnyMdInline::MdHardLine(_)
-            | AnyMdInline::MdSoftBreak(_)
-            | AnyMdInline::MdIndentToken(_)
-            | AnyMdInline::MdQuotePrefix(_) => false,
+            Self::MdHardLine(_)
+            | Self::MdSoftBreak(_)
+            | Self::MdIndentToken(_)
+            | Self::MdQuotePrefix(_) => false,
             _ => true,
         }
     }
@@ -37,14 +37,14 @@ impl AnyMdInline {
     /// break classification at the flat level.
     pub fn will_break(&self) -> bool {
         match self {
-            AnyMdInline::MdAutolink(node) => node.value().will_break(),
-            AnyMdInline::MdInlineEmphasis(node) => node.content().will_break(),
-            AnyMdInline::MdInlineItalic(node) => node.content().will_break(),
-            AnyMdInline::MdInlineCode(node) => node.content().will_break(),
-            AnyMdInline::MdInlineLink(node) => node.text().will_break(),
-            AnyMdInline::MdInlineImage(node) => node.alt().will_break(),
-            AnyMdInline::MdReferenceLink(node) => node.text().will_break(),
-            AnyMdInline::MdReferenceImage(node) => node.alt().will_break(),
+            Self::MdAutolink(node) => node.value().will_break(),
+            Self::MdInlineEmphasis(node) => node.content().will_break(),
+            Self::MdInlineItalic(node) => node.content().will_break(),
+            Self::MdInlineCode(node) => node.content().will_break(),
+            Self::MdInlineLink(node) => node.text().will_break(),
+            Self::MdInlineImage(node) => node.alt().will_break(),
+            Self::MdReferenceLink(node) => node.text().will_break(),
+            Self::MdReferenceImage(node) => node.alt().will_break(),
             _ => false,
         }
     }

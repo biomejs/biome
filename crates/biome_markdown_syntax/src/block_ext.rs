@@ -47,10 +47,10 @@ impl AnyMdBlock {
 
     pub fn as_any_list_item(&self) -> Option<AnyListItem> {
         match self {
-            AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {
+            Self::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {
                 Some(AnyListItem::MdBulletListItem(item.clone()))
             }
-            AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdOrderedListItem(item)) => {
+            Self::AnyMdContainerBlock(AnyMdContainerBlock::MdOrderedListItem(item)) => {
                 Some(AnyListItem::MdOrderedListItem(item.clone()))
             }
             _ => None,

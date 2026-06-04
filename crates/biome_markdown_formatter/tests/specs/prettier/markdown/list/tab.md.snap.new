@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: markdown/list/tab.md
+---
+
+# Input
+
+```md
+* Text
+
+ 	[title](link)
+
+* Text
+
+ 	- foo
+ 	- foo
+ 	- bar
+
+* Text
+
+ 	# foo
+
+* Text
+
+ 	```
+ 	foo
+ 	```
+
+* Text
+
+ 	`foo`
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -5,7 +5,7 @@
+ - Text
+   - foo
+     - foo
+-      - bar
++    - bar
+ 
+ - Text
+ 
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -17,15 +17,10 @@
+     align(2, [
+       "foo",
+       hard_line_break,
++      "- foo",
++      hard_line_break,
++      "- bar",
+       hard_line_break,
+-      "- ",
+-      align(2, [
+-        "foo",
+-        hard_line_break,
+-        "- bar",
+-        hard_line_break,
+-        hard_line_break
+-      ]),
+       hard_line_break
+     ]),
+     empty_line
+
+```

@@ -26,8 +26,8 @@ declare_node_union! {
 impl AnyListItem {
     pub fn list(&self) -> MdBulletList {
         match self {
-            AnyListItem::MdBulletListItem(node) => node.md_bullet_list(),
-            AnyListItem::MdOrderedListItem(node) => node.md_bullet_list(),
+            Self::MdBulletListItem(node) => node.md_bullet_list(),
+            Self::MdOrderedListItem(node) => node.md_bullet_list(),
         }
     }
 }
@@ -35,16 +35,16 @@ impl AnyListItem {
 impl ListMarker {
     /// `true` if [ListMarker::Ordered] or [ListMarker::OrderedWithParen]
     pub const fn is_ordered(&self) -> bool {
-        matches!(self, ListMarker::Ordered | ListMarker::OrderedWithParen)
+        matches!(self, Self::Ordered | Self::OrderedWithParen)
     }
 
     /// Ordered marker that uses parentheses e.g. `1)`
     pub const fn is_ordered_with_paren(&self) -> bool {
-        matches!(self, ListMarker::OrderedWithParen)
+        matches!(self, Self::OrderedWithParen)
     }
 
     pub const fn is_minus(&self) -> bool {
-        matches!(self, ListMarker::Minus)
+        matches!(self, Self::Minus)
     }
 }
 
