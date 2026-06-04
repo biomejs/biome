@@ -180,10 +180,11 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
-    /// Re-tokenize the current `HTML_STRING_LITERAL` as just the opening quote
-    /// (`DOUBLE_QUOTE` or `SINGLE_QUOTE`), so the template attribute value
-    /// parser can treat it as `l_quote`.
-    SvelteTemplateQuote,
+    /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
+    /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
+    /// speculatively parsed as a template but turned out to have no
+    /// interpolations, so it can be parsed as a plain string instead.
+    SvelteAttributeString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

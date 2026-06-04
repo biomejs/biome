@@ -642,26 +642,29 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
-/// Parses a Svelte template attribute value that mixes literal text and `{expression}`
-/// interpolations, e.g. `style="top: {top}px"`.
-fn parse_svelte_template_attribute_value(p: &mut HtmlParser, quote: u8) -> ParsedSyntax {
-    let quote_kind = if quote == b'"' { T!['"'] } else { T!["'"] };
-    if !p.at(quote_kind) {
-        return Absent;
-    }
+/// Parses a quoted Svelte attribute value as a template that mixes literal text
+/// and `{expression}` interpolations, e.g. `style="top: {top}px"`. The opening
+/// quote token must be the current token.
+///
+/// Returns `true` if any interpolation was encountered. When it returns `false`
+/// the value is a plain string and the caller is expected to rewind and re-parse
+/// it as an `HtmlString`.
+fn parse_svelte_template_attribute_value(p: &mut HtmlParser) -> bool {
+    let quote_kind = p.cur();
+    let quote = if quote_kind == T!['"'] { b'"' } else { b'\'' };
     let chunk_context = HtmlLexContext::SvelteTemplateChunk { quote };
 
     let m = p.start();
-
-    // l_quote — already at DOUBLE_QUOTE or SINGLE_QUOTE
     p.bump_with_context(quote_kind, chunk_context);
 
+    let mut has_interpolation = false;
     let elements = p.start();
     loop {
         if p.at(T!['{']) {
             if parse_single_text_expression(p, chunk_context).is_absent() {
                 break;
             }
+            has_interpolation = true;
         } else if p.at(HTML_TEMPLATE_CHUNK) {
             let chunk = p.start();
             p.bump_with_context(HTML_TEMPLATE_CHUNK, chunk_context);
@@ -680,7 +683,8 @@ fn parse_svelte_template_attribute_value(p: &mut HtmlParser, quote: u8) -> Parse
         p.error(p.err_builder("Missing closing quote", p.cur_range()));
     }
 
-    Present(m.complete(p, SVELTE_TEMPLATE_ATTRIBUTE_VALUE))
+    m.complete(p, SVELTE_TEMPLATE_ATTRIBUTE_VALUE);
+    has_interpolation
 }
 
 fn parse_attribute_initializer(
@@ -745,20 +749,14 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
-    } else if p.at(HTML_STRING_LITERAL) && Svelte.is_supported(p) {
-        // SvelteAttributeValue context: the token holds the opening quote + text
-        // up to the first `{` (or the full string if there is no `{`). An O(1)
-        // last-byte check tells us which case we're in.
-        let text = p.cur_text().as_bytes();
-        let is_interpolated = text.first().is_some_and(|&q| {
-            matches!(q, b'"' | b'\'') && (text.last() != Some(&q) || text.len() == 1)
-        });
-        if is_interpolated {
-            let quote = text[0];
-            p.re_lex(HtmlReLexContext::SvelteTemplateQuote);
-            parse_svelte_template_attribute_value(p, quote)
-                .or_add_diagnostic(p, expected_initializer);
-        } else {
+    } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
+        // Speculatively parse as a template. If no interpolation is found the
+        // value is a plain string, so rewind and re-lex it as a single
+        // `HTML_STRING_LITERAL` to parse it as a normal `HtmlString`.
+        let checkpoint = p.checkpoint();
+        if !parse_svelte_template_attribute_value(p) {
+            p.rewind(checkpoint);
+            p.re_lex(HtmlReLexContext::SvelteAttributeString);
             parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
         }
     } else {
