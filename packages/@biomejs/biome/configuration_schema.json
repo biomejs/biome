@@ -3261,39 +3261,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoDupeElseIfBlocksConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDupeElseIfBlocksOptions" }
-			]
-		},
-		"NoDupeElseIfBlocksOptions": {
-			"description": "Options for the `noDupeElseIfBlocks` rule.\n\nThis rule currently has no configurable options.",
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDupeStylePropertiesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDupeStylePropertiesOptions" }
-			]
-		},
-		"NoDupeStylePropertiesOptions": {
-			"description": "Options for the `noDupeStyleProperties` rule.\n\nThis rule currently has no configurable options.",
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDupeUseDirectivesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoDupeUseDirectivesOptions" }
-			]
-		},
-		"NoDupeUseDirectivesOptions": {
-			"description": "Options for the `noDupeUseDirectives` rule.\n\nThis rule currently has no configurable options.",
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoDuplicateArgumentNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3393,6 +3360,7 @@
 			]
 		},
 		"NoDuplicateElseIfOptions": {
+			"description": "Options for the `noDuplicateElseIf` rule.\n\nThis rule currently has no configurable options.",
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5252,6 +5220,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteDuplicateStylePropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteDuplicateStylePropertiesOptions" }
+			]
+		},
+		"NoSvelteDuplicateStylePropertiesOptions": {
+			"description": "Options for the `noSvelteDuplicateStyleProperties` rule.\n\nThis rule currently has no configurable options.",
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoSvelteDuplicateUseDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteDuplicateUseDirectivesOptions" }
+			]
+		},
+		"NoSvelteDuplicateUseDirectivesOptions": {
+			"description": "Options for the `noSvelteDuplicateUseDirectives` rule.\n\nThis rule currently has no configurable options.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvgWithoutTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6243,27 +6233,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDupeElseIfBlocks": {
-					"description": "Disallow duplicate conditions in Svelte {#if} / {:else if} chains.\nSee https://biomejs.dev/linter/rules/no-dupe-else-if-blocks",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDupeElseIfBlocksConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDupeStyleProperties": {
-					"description": "Disallow duplicate style: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-dupe-style-properties",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDupeStylePropertiesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDupeUseDirectives": {
-					"description": "Disallow duplicate use: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-dupe-use-directives",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDupeUseDirectivesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
@@ -6275,6 +6244,13 @@
 					"description": "Disallow duplication of attributes.\nSee https://biomejs.dev/linter/rules/no-duplicate-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateAttributesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateElseIf": {
+					"description": "Disallow duplicate conditions in Svelte {#if} / {:else if} chains.\nSee https://biomejs.dev/linter/rules/no-duplicate-else-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateElseIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6646,6 +6622,20 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.\nSee https://biomejs.dev/linter/rules/no-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteDuplicateStyleProperties": {
+					"description": "Disallow duplicate style: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-svelte-duplicate-style-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteDuplicateStylePropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteDuplicateUseDirectives": {
+					"description": "Disallow duplicate use: directives on the same Svelte element.\nSee https://biomejs.dev/linter/rules/no-svelte-duplicate-use-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteDuplicateUseDirectivesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8348,33 +8338,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoDupeElseIfBlocksOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDupeElseIfBlocksOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDupeStylePropertiesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDupeStylePropertiesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoDupeUseDirectivesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoDupeUseDirectivesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoDuplicateArgumentNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -10048,6 +10011,24 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSuspiciousSemicolonInJsxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteDuplicateStylePropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteDuplicateStylePropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteDuplicateUseDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteDuplicateUseDirectivesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
