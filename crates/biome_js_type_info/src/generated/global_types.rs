@@ -1,16 +1,6 @@
 //! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.
 
-// Some generated metadata is emitted before every item has a runtime consumer.
-#![allow(dead_code)]
-
-/// TypeScript release tag the generated data was sourced from.
-pub(crate) const GENERATED_TYPESCRIPT_TAG: &str = "v6.0.3";
-
-/// Commit SHA the [`GENERATED_TYPESCRIPT_TAG`] resolves to.
-pub(crate) const GENERATED_TYPESCRIPT_SHA: &str = "050880ce59e30b356b686bd3144efe24f875ebc8";
-
-/// Number of predefined global slots populated by the generated module.
-pub(crate) const GENERATED_GLOBAL_TYPE_COUNT: usize = 0;
+// Generated from microsoft/TypeScript v6.0.3 (git commit 050880ce59e30b356b686bd3144efe24f875ebc8).
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[];

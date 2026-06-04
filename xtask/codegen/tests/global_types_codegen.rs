@@ -770,9 +770,6 @@ mod tests {
 
         for needle in [
             "//! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.",
-            "pub(crate) const GENERATED_TYPESCRIPT_TAG: &str =",
-            "pub(crate) const GENERATED_TYPESCRIPT_SHA: &str =",
-            "pub(crate) const GENERATED_GLOBAL_TYPE_COUNT: usize =",
             "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
             "pub(crate) fn set_generated_global_type_data(",
         ] {

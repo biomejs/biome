@@ -15,21 +15,10 @@ pub(super) fn emit_global_types(
     crate::update(&path, &formatted, &mode)
 }
 
-/// Renders the unformatted Rust body for the generated module, including the
-/// pinned tag/SHA and runtime scaffolding constants.
+/// Renders the unformatted Rust body for the generated module.
 fn generated_body(pin: &crate::generate_global_types::SourcePin) -> String {
     format!(
-        r#"// Some generated metadata is emitted before every item has a runtime consumer.
-#![allow(dead_code)]
-
-/// TypeScript release tag the generated data was sourced from.
-pub(crate) const GENERATED_TYPESCRIPT_TAG: &str = {typescript_tag:?};
-
-/// Commit SHA the [`GENERATED_TYPESCRIPT_TAG`] resolves to.
-pub(crate) const GENERATED_TYPESCRIPT_SHA: &str = {typescript_sha:?};
-
-/// Number of predefined global slots populated by the generated module.
-pub(crate) const GENERATED_GLOBAL_TYPE_COUNT: usize = 0;
+        r#"// Generated from microsoft/TypeScript {typescript_tag} (git commit {typescript_sha}).
 
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[];
