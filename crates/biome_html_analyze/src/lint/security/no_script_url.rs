@@ -82,8 +82,6 @@ impl Rule for NoScriptUrl {
                 .value_token()
                 .ok()
                 .map(|token| inner_string_text(&token).into()),
-            // For Svelte template attribute values that contain only plain text
-            // (no interpolations), we can still extract the static string.
             AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => value.string_value(),
             _ => None,
         };
