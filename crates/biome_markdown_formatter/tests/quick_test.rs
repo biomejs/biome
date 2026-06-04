@@ -4,17 +4,9 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"+ item with __bold__ and *italic*
-
-- item with __bold__ and *italic*
-
-* item with `code`
-
-* - - -
-
-* - - -
-
-__bold__
+    let source = r#"* Foo
+* * *
+* Bar
 "#;
     let parse = parse_markdown(source);
 

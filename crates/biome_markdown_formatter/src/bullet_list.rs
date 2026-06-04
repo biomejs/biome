@@ -10,11 +10,10 @@ use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, write};
-use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage,
-    MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
-    MdIndentCodeBlock, MdNewline, MdOrderedListItem, MdQuotePrefix,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
+    MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent, MdIndentCodeBlock,
+    MdOrderedListItem, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
 use std::collections::VecDeque;
@@ -23,11 +22,11 @@ use std::iter::FusedIterator;
 
 /// Thin wrapper around [AnyListItem]
 pub struct FmtAnyList {
-    node: AnyListItem,
+    node: MdBulletListItem,
 }
 
 impl FmtAnyList {
-    pub(crate) fn new(node: AnyListItem) -> Self {
+    pub(crate) fn new(node: MdBulletListItem) -> Self {
         Self { node }
     }
 }
@@ -35,30 +34,20 @@ impl FmtAnyList {
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         f.context().comments().is_suppressed(self.node.syntax());
-        let list = self.node.list();
+        let list = self.node.md_bullet_list();
         BulletListPrinter::new(&list).fmt(f)
     }
 }
 
 pub(crate) struct BulletListPrinter {
-    bullets: Vec<ListItem>,
+    bullets: Vec<ListBullet>,
 }
 
 impl BulletListPrinter {
     pub(crate) fn new(node: &MdBulletList) -> Self {
-        let mut bullets = Vec::new();
-        for item in node.iter() {
-            match item {
-                AnyMdBulletListMember::MdBullet(bullet) => {
-                    bullets.push(ListItem::Bullet(ListBullet { node: bullet }));
-                }
-                AnyMdBulletListMember::MdNewline(newline) => {
-                    bullets.push(ListItem::Newline(newline));
-                }
-            }
+        Self {
+            bullets: node.iter().map(|item| ListBullet { node: item }).collect(),
         }
-
-        Self { bullets }
     }
 }
 
@@ -68,33 +57,20 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
         let mut joiner = f.join();
 
         while let Some(item) = iter.next() {
-            match item {
-                ListItem::Bullet(bullet) => {
-                    let needs_trailing_break = matches!(iter.peek(), Some(ListItem::Bullet(_)));
-                    joiner.entry(&format_with(|f| {
-                        write!(f, [bullet])?;
-                        // If the next item is a bullet, we need to break on a new line
-                        if needs_trailing_break {
-                            write!(f, [hard_line_break()])?;
-                        }
-                        Ok(())
-                    }));
-                }
-
-                ListItem::Newline(newline) => {
-                    joiner.entry(&newline.format());
-                }
-            }
+            // let needs_trailing_break = matches!(iter.peek(), Some(ListItem::Bullet(_)));
+            joiner.entry(&format_with(|f| {
+                write!(f, [item])?;
+                // If the next item is a bullet, we need to break on a new line
+                // if needs_trailing_break {
+                //     write!(f, [hard_line_break()])?;
+                // }
+                Ok(())
+            }));
         }
 
         joiner.finish()
         // write!(f, [hard_line_break()])
     }
-}
-
-pub(crate) enum ListItem {
-    Bullet(ListBullet),
-    Newline(MdNewline),
 }
 
 pub(crate) struct ListBullet {
@@ -226,15 +202,27 @@ impl ListBlockList {
 
     fn fmt_list_content(content: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) = content {
+            let line_break = format_with(|f| {
+                if paragraph.ends_with_double_newline() {
+                    write!(f, [empty_line()])
+                } else {
+                    write!(f, [hard_line_break()])
+                }
+            });
             write!(
                 f,
-                [paragraph.format().with_options(FormatMdParagraphOptions {
-                    trim_mode: TextPrintMode::fill(),
-                    text_context: TextContext::List,
-                })]
+                [
+                    paragraph.format().with_options(FormatMdParagraphOptions {
+                        trim_mode: TextPrintMode::fill(),
+                        text_context: TextContext::List,
+                    }),
+                    line_break
+                ]
             )
-        } else if let Some(list_item) = content.as_any_list_item() {
-            FmtAnyList::new(list_item).fmt(f)
+        } else if let Some(list_item) = content.as_any_md_container_block()
+            && let Some(list_item) = list_item.as_md_bullet_list_item()
+        {
+            FmtAnyList::new(list_item.clone()).fmt(f)
         } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
             AnyMdCodeBlock::MdIndentCodeBlock(code_block),
         )) = content
@@ -265,7 +253,6 @@ impl ListBlockList {
 
 impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        let mut len = self.content.len();
         let mut iter = BlockListIterator::new(self.content.iter()).enumerate();
         let mut pending_breaks: u8 = 0;
         while let Some((index, item)) = iter.next() {
@@ -371,6 +358,13 @@ impl Format<MarkdownFormatContext> for ListBlockList {
             }
         }
 
+        if pending_breaks > 0 {
+            match pending_breaks {
+                1 => write!(f, [hard_line_break()])?,
+                2 => write!(f, [empty_line()])?,
+                _ => (),
+            }
+        }
         Ok(())
     }
 }

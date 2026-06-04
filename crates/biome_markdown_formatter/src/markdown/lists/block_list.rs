@@ -80,7 +80,9 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     _ => {
                         prev_content = PrevContentBlock::Other;
-                        if let Some(list_item) = node.as_any_list_item() {
+                        if let Some(list_item) = node.as_any_md_container_block()
+                            && let Some(list_item) = list_item.as_md_bullet_list_item()
+                        {
                             joiner
                                 .entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                         } else {
@@ -150,7 +152,6 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let content_count = self.node.len() - trailing_count;
         let mut iter = self.node.iter().enumerate().peekable();
         while let Some((index, node)) = iter.next() {
-            dbg!(node.syntax().kind());
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
                 let is_leading = still_leading;
                 let is_trailing = index >= content_count;
@@ -179,14 +180,16 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         should_remove: is_leading || is_trailing || next_is_bull_item,
                     }));
                     if next_is_bull_item {
-                        joiner.entry(&empty_line());
+                        joiner.entry(&hard_line_break());
                     }
                 }
                 prev_was_header = false;
             } else {
                 still_leading = false;
                 prev_was_header = node.is_any_header();
-                if let Some(list_item) = node.as_any_list_item() {
+                if let Some(list_item) = node.as_any_md_container_block()
+                    && let Some(list_item) = list_item.as_md_bullet_list_item()
+                {
                     joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                 } else {
                     joiner.entry(&node.format());
