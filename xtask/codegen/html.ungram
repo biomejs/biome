@@ -416,12 +416,20 @@ AnySvelteBindingAssignmentBinding =
 	SvelteName
 	| AnySvelteDestructuredName
 	| SvelteRestBinding
+	| SvelteRenameBinding
 
 /// { ...rest }
 ///   ^^^^^^^
 SvelteRestBinding =
  '...'
  name: SvelteName
+
+/// { component: Filter }
+///   ^^^^^^^^^^^^^^^^^^
+SvelteRenameBinding =
+ key: SvelteName
+ ':'
+ name: AnySvelteBindingAssignmentBinding
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^
@@ -478,20 +486,20 @@ AnySvelteAwaitClauses =
 //             ^^^^^^^^^^
 SvelteAwaitThenClause =
 	'then'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 
 // {#await ... catch value}
 //             ^^^^^^^^^^^
 SvelteAwaitCatchClause =
 	'catch'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 
 // {#await ... } {:then name} .. {:catch} {/await}
 //               ^^^^^^^^^^^^^^^
 SvelteAwaitThenBlock =
 	'{:'
 	'then'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 	'}'
 	children: HtmlElementList
 
@@ -501,7 +509,7 @@ SvelteAwaitThenBlock =
 SvelteAwaitCatchBlock =
 	'{:'
 	'catch'
-	name: HtmlTextExpression
+	name: HtmlTextExpression?
 	'}'
 	children: HtmlElementList
 

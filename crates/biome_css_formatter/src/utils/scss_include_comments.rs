@@ -3,7 +3,7 @@
 //! Separator comments are attached before formatting so renderers only need to
 //! print leading, trailing, or dangling comments.
 
-use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::comment_trivia::{is_block_style_comment, is_trailing_comment_on_node};
 use crate::utils::scss_expression::is_self_breaking_value;
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
@@ -311,8 +311,7 @@ fn is_block_group_before_map_closing(
         .pieces()
         .chain(closing_paren.leading_trivia().pieces())
         .filter(|piece| {
-            piece.is_comments()
-                && piece.text().starts_with("/*")
+            is_block_style_comment(piece)
                 && piece.text_range().start() >= comma.text_trimmed_range().end()
                 && piece.text_range().end() <= closing_paren.text_trimmed_range().start()
         })

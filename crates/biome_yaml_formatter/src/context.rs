@@ -59,7 +59,6 @@ impl CstFormatContext for YamlFormatContext {
 
 #[derive(Debug, Default, Clone)]
 pub struct YamlFormatOptions {
-    indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
@@ -69,15 +68,7 @@ pub struct YamlFormatOptions {
 
 impl YamlFormatOptions {
     pub fn new() -> Self {
-        Self {
-            trailing_newline: TrailingNewline::default(),
-            ..Default::default()
-        }
-    }
-
-    pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
-        self.indent_style = indent_style;
-        self
+        Self::default()
     }
 
     pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
@@ -100,10 +91,6 @@ impl YamlFormatOptions {
         self
     }
 
-    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
-        self.indent_style = indent_style;
-    }
-
     pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
         self.indent_width = indent_width;
     }
@@ -123,7 +110,7 @@ impl YamlFormatOptions {
 
 impl FormatOptions for YamlFormatOptions {
     fn indent_style(&self) -> IndentStyle {
-        self.indent_style
+        IndentStyle::Space
     }
 
     fn indent_width(&self) -> IndentWidth {
@@ -149,7 +136,6 @@ impl FormatOptions for YamlFormatOptions {
 
 impl fmt::Display for YamlFormatOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;

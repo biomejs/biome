@@ -52,8 +52,12 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@23..28 "hover" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@23..28 "hover" [] [],
+                        },
+                    ],
                 },
                 COLON@28..29 ":" [] [],
             ],
@@ -82,26 +86,38 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [
-                TwStaticVariant {
-                    base_token: TW_BASE@45..50 "hover" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@45..50 "hover" [] [],
+                        },
+                    ],
                 },
                 COLON@50..51 ":" [] [],
-                TwStaticVariant {
-                    base_token: TW_BASE@51..56 "focus" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@51..56 "focus" [] [],
+                        },
+                    ],
                 },
                 COLON@56..57 ":" [] [],
-                TwFunctionalVariant {
-                    base_token: TW_BASE@57..61 "aria" [] [],
-                    minus_token: DASH@61..62 "-" [] [],
-                    value: TwArbitraryValue {
-                        l_brack_token: L_BRACKET@62..63 "[" [] [],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                ident_token: IDENT@63..70 "checked" [] [],
-                            },
-                        ],
-                        r_brack_token: R_BRACKET@70..71 "]" [] [],
-                    },
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@57..61 "aria" [] [],
+                        },
+                        DASH@61..62 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@62..63 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    ident_token: IDENT@63..70 "checked" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@70..71 "]" [] [],
+                        },
+                    ],
                 },
                 COLON@71..72 ":" [] [],
             ],
@@ -152,21 +168,25 @@ TwRoot {
         },
         TwFullCandidate {
             variants: TwVariantList [
-                TwFunctionalVariant {
-                    base_token: TW_BASE@109..112 "has" [] [],
-                    minus_token: DASH@112..113 "-" [] [],
-                    value: TwArbitraryValue {
-                        l_brack_token: L_BRACKET@113..114 "[" [] [],
-                        value: CssGenericComponentValueList [
-                            CssGenericDelimiter {
-                                value: COLON@114..115 ":" [] [],
-                            },
-                            CssIdentifier {
-                                ident_token: IDENT@115..123 "disabled" [] [],
-                            },
-                        ],
-                        r_brack_token: R_BRACKET@123..124 "]" [] [],
-                    },
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@109..112 "has" [] [],
+                        },
+                        DASH@112..113 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@113..114 "[" [] [],
+                            value: CssGenericComponentValueList [
+                                CssGenericDelimiter {
+                                    value: COLON@114..115 ":" [] [],
+                                },
+                                CssIdentifier {
+                                    ident_token: IDENT@115..123 "disabled" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACKET@123..124 "]" [] [],
+                        },
+                    ],
                 },
                 COLON@124..125 ":" [] [],
             ],
@@ -189,8 +209,12 @@ TwRoot {
                     r_brack_token: R_BRACKET@144..145 "]" [] [],
                 },
                 COLON@145..146 ":" [] [],
-                TwStaticVariant {
-                    base_token: TW_BASE@146..154 "disabled" [] [],
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@146..154 "disabled" [] [],
+                        },
+                    ],
                 },
                 COLON@154..155 ":" [] [],
             ],
@@ -243,8 +267,10 @@ TwRoot {
       3: (empty)
     2: TW_FULL_CANDIDATE@23..45
       0: TW_VARIANT_LIST@23..29
-        0: TW_STATIC_VARIANT@23..28
-          0: TW_BASE@23..28 "hover" [] []
+        0: TW_VARIANT_EXPRESSION@23..28
+          0: TW_VARIANT_SEGMENT_LIST@23..28
+            0: TW_NAMED_VARIANT_SEGMENT@23..28
+              0: TW_VARIANT_SEGMENT@23..28 "hover" [] []
         1: COLON@28..29 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@29..45
@@ -264,21 +290,27 @@ TwRoot {
       3: (empty)
     3: TW_FULL_CANDIDATE@45..85
       0: TW_VARIANT_LIST@45..72
-        0: TW_STATIC_VARIANT@45..50
-          0: TW_BASE@45..50 "hover" [] []
+        0: TW_VARIANT_EXPRESSION@45..50
+          0: TW_VARIANT_SEGMENT_LIST@45..50
+            0: TW_NAMED_VARIANT_SEGMENT@45..50
+              0: TW_VARIANT_SEGMENT@45..50 "hover" [] []
         1: COLON@50..51 ":" [] []
-        2: TW_STATIC_VARIANT@51..56
-          0: TW_BASE@51..56 "focus" [] []
+        2: TW_VARIANT_EXPRESSION@51..56
+          0: TW_VARIANT_SEGMENT_LIST@51..56
+            0: TW_NAMED_VARIANT_SEGMENT@51..56
+              0: TW_VARIANT_SEGMENT@51..56 "focus" [] []
         3: COLON@56..57 ":" [] []
-        4: TW_FUNCTIONAL_VARIANT@57..71
-          0: TW_BASE@57..61 "aria" [] []
-          1: DASH@61..62 "-" [] []
-          2: TW_ARBITRARY_VALUE@62..71
-            0: L_BRACKET@62..63 "[" [] []
-            1: CSS_GENERIC_COMPONENT_VALUE_LIST@63..70
-              0: CSS_IDENTIFIER@63..70
-                0: IDENT@63..70 "checked" [] []
-            2: R_BRACKET@70..71 "]" [] []
+        4: TW_VARIANT_EXPRESSION@57..71
+          0: TW_VARIANT_SEGMENT_LIST@57..71
+            0: TW_NAMED_VARIANT_SEGMENT@57..61
+              0: TW_VARIANT_SEGMENT@57..61 "aria" [] []
+            1: DASH@61..62 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@62..71
+              0: L_BRACKET@62..63 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@63..70
+                0: CSS_IDENTIFIER@63..70
+                  0: IDENT@63..70 "checked" [] []
+              2: R_BRACKET@70..71 "]" [] []
         5: COLON@71..72 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@72..85
@@ -316,17 +348,19 @@ TwRoot {
       3: (empty)
     7: TW_FULL_CANDIDATE@109..136
       0: TW_VARIANT_LIST@109..125
-        0: TW_FUNCTIONAL_VARIANT@109..124
-          0: TW_BASE@109..112 "has" [] []
-          1: DASH@112..113 "-" [] []
-          2: TW_ARBITRARY_VALUE@113..124
-            0: L_BRACKET@113..114 "[" [] []
-            1: CSS_GENERIC_COMPONENT_VALUE_LIST@114..123
-              0: CSS_GENERIC_DELIMITER@114..115
-                0: COLON@114..115 ":" [] []
-              1: CSS_IDENTIFIER@115..123
-                0: IDENT@115..123 "disabled" [] []
-            2: R_BRACKET@123..124 "]" [] []
+        0: TW_VARIANT_EXPRESSION@109..124
+          0: TW_VARIANT_SEGMENT_LIST@109..124
+            0: TW_NAMED_VARIANT_SEGMENT@109..112
+              0: TW_VARIANT_SEGMENT@109..112 "has" [] []
+            1: DASH@112..113 "-" [] []
+            2: TW_ARBITRARY_VARIANT_SEGMENT@113..124
+              0: L_BRACKET@113..114 "[" [] []
+              1: CSS_GENERIC_COMPONENT_VALUE_LIST@114..123
+                0: CSS_GENERIC_DELIMITER@114..115
+                  0: COLON@114..115 ":" [] []
+                1: CSS_IDENTIFIER@115..123
+                  0: IDENT@115..123 "disabled" [] []
+              2: R_BRACKET@123..124 "]" [] []
         1: COLON@124..125 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@125..136
@@ -343,8 +377,10 @@ TwRoot {
           1: TW_SELECTOR@137..144 "&_input" [] []
           2: R_BRACKET@144..145 "]" [] []
         1: COLON@145..146 ":" [] []
-        2: TW_STATIC_VARIANT@146..154
-          0: TW_BASE@146..154 "disabled" [] []
+        2: TW_VARIANT_EXPRESSION@146..154
+          0: TW_VARIANT_SEGMENT_LIST@146..154
+            0: TW_NAMED_VARIANT_SEGMENT@146..154
+              0: TW_VARIANT_SEGMENT@146..154 "disabled" [] []
         3: COLON@154..155 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@155..173

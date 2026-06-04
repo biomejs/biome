@@ -140,6 +140,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useDisposables"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
+        RuleFilter::Rule("nursery", "useIncludes"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
         RuleFilter::Rule("nursery", "useStringStartsEndsWith"),

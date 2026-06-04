@@ -2594,6 +2594,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRestBinding {
         )
     }
 }
+impl FormatRule<biome_html_syntax::SvelteRenameBinding>
+    for crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::SvelteRenameBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::SvelteRenameBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenameBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::SvelteRenameBinding,
+        crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenameBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::SvelteRenameBinding,
+        crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::SvelteSnippetBlock>
     for crate::svelte::auxiliary::snippet_block::FormatSvelteSnippetBlock
 {

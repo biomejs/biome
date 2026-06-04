@@ -20,21 +20,20 @@ info: yaml/spec/tags-on-empty-scalars.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,4 @@
  - !!str
 -- !!null : a
-+-
-+  !!null : a
++- !!null: a
    b: !!str
- - !!str : !!null
+-- !!str : !!null
++- !!str: !!null
 ```
 
 # Output
 
 ```yml
 - !!str
--
-  !!null : a
+- !!null: a
   b: !!str
-- !!str : !!null
+- !!str: !!null
 ```

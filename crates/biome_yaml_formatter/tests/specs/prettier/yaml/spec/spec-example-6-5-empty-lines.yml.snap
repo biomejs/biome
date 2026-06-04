@@ -23,28 +23,21 @@ Chomping: |
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,8 @@
--Folding: "Empty line
+@@ -1,5 +1,5 @@
+ Folding: "Empty line
 -
-+Folding:
-+  "Empty line
 +   	
    as a line feed"
  Chomping: |
    Clipped empty lines
-+ 
-+
 ```
 
 # Output
 
 ```yml
-Folding:
-  "Empty line
+Folding: "Empty line
    	
   as a line feed"
 Chomping: |
   Clipped empty lines
- 
-
 ```

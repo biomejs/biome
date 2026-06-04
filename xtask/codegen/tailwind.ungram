@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 TwBogus = SyntaxElement*
 TwBogusCandidate = SyntaxElement*
 TwBogusVariant = SyntaxElement*
+TwBogusVariantSegment = SyntaxElement*
 TwBogusModifier = SyntaxElement*
 TwBogusValue = SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
@@ -102,9 +103,7 @@ TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
 AnyTwVariant = TwArbitraryVariant
-	| TwStaticVariant
-	| TwFunctionalVariant
-	| TwDataAttribute
+	| TwVariantExpression
 	| TwBogusVariant
 
 // Arbitrary variants are variants that take a selector and generate a variant on the fly.
@@ -115,21 +114,36 @@ TwArbitraryVariant =
 	selector: 'tw_selector'
 	']'
 
-// Static variants are variants that don't take any arguments.
+// Non-arbitrary variants are represented as syntax-level segment lists.
 //
 // hover:text-red-500
 // ^^^^^
-TwStaticVariant =
-	base: 'tw_base'
+// group-data-[state=open]:block
+// ^^^^^^^^^^^^^^^^^^^^^^^
+TwVariantExpression =
+	segments: TwVariantSegmentList
 
-// aria-disabled:text-red-500
-// ^^^^^^^^^^^^^
-// aria-[disabled]:text-red-500
-// ^^^^^^^^^^^^^^^
-TwFunctionalVariant =
-	base: 'tw_base'
-	'-'
-	value: AnyTwValue
+TwVariantSegmentList =
+	AnyTwVariantSegment ('-' AnyTwVariantSegment)*
+
+AnyTwVariantSegment =
+	TwNamedVariantSegment
+	| TwArbitraryVariantSegment
+	| TwCssVariableVariantSegment
+	| TwBogusVariantSegment
+
+TwNamedVariantSegment =
+	value: 'tw_variant_segment'
+
+TwArbitraryVariantSegment =
+	'['
+	value: CssGenericComponentValueList
+	']'
+
+TwCssVariableVariantSegment =
+	'('
+	value: 'tw_value'
+	')'
 
 
 AnyTwValue = TwNamedValue
@@ -137,7 +151,6 @@ AnyTwValue = TwNamedValue
 	| TwPercentageValue
 	| TwArbitraryValue
 	| TwCssVariableValue
-	| TwDataAttribute
 	| TwBogusValue
 
 // bg-red-500
@@ -179,29 +192,6 @@ AnyTwModifier = TwModifier | TwBogusModifier
 TwModifier =
 	'/'
 	value: AnyTwValue
-
-// data-[state=open]:hidden
-// ^^^^^^^^^^^^^^^^^
-// group-data-active:hidden
-//       ^^^^^^^^^^^
-TwDataAttribute =
-	'data'
-	'-'
-	value: AnyTwDataAttributeValue
-
-AnyTwDataAttributeValue =
-	TwNamedValue |
-	TwNumberValue |
-	TwArbitraryValue |
-	TwBogusValue
-
-// TODO: replace TwArbitraryValue in AnyTwDataAttributeValue with this
-// TwDataAttributeArbitraryValue =
-//	'['
-//	key: 'tw_value'
-//	'='
-//	value: 'tw_value'
-//	']'
 
 CssGenericComponentValueList = AnyCssGenericComponentValue*
 

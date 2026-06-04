@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: svelte/await_no_binding.svelte
+---
+
+# Input
+
+```svelte
+{#await promise}
+<p>Loading...</p>
+{:then}
+<p>Done</p>
+{:catch}
+<p>Something went wrong</p>
+{/await}
+
+{#await otherPromise}
+<p>Loading...</p>
+{:then}
+<p>Done</p>
+{/await}
+
+{#await thirdPromise}
+<p>Loading...</p>
+{:catch}
+<p>Something went wrong</p>
+{/await}
+
+{#await promise then}
+<p>Done</p>
+{/await}
+
+{#await promise catch}
+<p>Failed</p>
+{/await}
+
+```
+
+
+# Formatted
+
+```svelte
+{#await promise}
+	<p>Loading...</p>
+{:then}
+	<p>Done</p>
+{:catch}
+	<p>Something went wrong</p>
+{/await}
+
+{#await otherPromise}
+	<p>Loading...</p>
+{:then}
+	<p>Done</p>
+{/await}
+
+{#await thirdPromise}
+	<p>Loading...</p>
+{:catch}
+	<p>Something went wrong</p>
+{/await}
+
+{#await promise then}
+	<p>Done</p>
+{/await}
+
+{#await promise catch}
+	<p>Failed</p>
+{/await}
+
+```

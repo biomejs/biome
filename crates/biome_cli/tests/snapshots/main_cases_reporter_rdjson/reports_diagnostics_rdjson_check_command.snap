@@ -68,7 +68,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -88,7 +103,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -108,7 +138,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -128,7 +173,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -148,7 +208,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This import is unused."
+      "message": "This import is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 21,
+              "line": 1
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -168,7 +243,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Several of these imports are unused."
+      "message": "Several of these imports are unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 13,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 2
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -188,7 +278,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 6,
+              "line": 8
+            },
+            "start": {
+              "column": 5,
+              "line": 8
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -208,7 +313,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable f is unused."
+      "message": "This variable f is unused.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 8,
+              "line": 9
+            },
+            "start": {
+              "column": 7,
+              "line": 9
+            }
+          },
+          "text": "_f"
+        }
+      ]
     },
     {
       "code": {
@@ -228,7 +348,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Sort these imports."
+      "message": "Sort these imports.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 32,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "a, b , z } from \"lodash\"\nimport { z} from \"z"
+        }
+      ]
     },
     {
       "code": {
@@ -248,7 +383,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -268,7 +418,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -328,22 +493,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "message": "'z' is redeclared in the same scope."
     },
     {
       "code": {
@@ -363,22 +513,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "message": "'f' is redeclared in the same scope."
     },
     {
       "code": {
@@ -404,7 +539,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Sort these imports."
+      "message": "Sort these imports.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 32,
+              "line": 2
+            },
+            "start": {
+              "column": 10,
+              "line": 1
+            }
+          },
+          "text": "a, b , z } from \"lodash\"\nimport { z} from \"z"
+        }
+      ]
     },
     {
       "code": {
@@ -424,7 +574,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Using == may be unsafe if you are relying on type coercion."
+      "message": "Using == may be unsafe if you are relying on type coercion.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 5,
+              "line": 4
+            },
+            "start": {
+              "column": 5,
+              "line": 4
+            }
+          },
+          "text": "="
+        }
+      ]
     },
     {
       "code": {
@@ -444,7 +609,22 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This is an unexpected use of the debugger statement."
+      "message": "This is an unexpected use of the debugger statement.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 9,
+              "line": 6
+            },
+            "start": {
+              "column": 6,
+              "line": 4
+            }
+          },
+          "text": ""
+        }
+      ]
     },
     {
       "code": {
@@ -504,22 +684,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'z' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 11,
-              "line": 1
-            },
-            "start": {
-              "column": 10,
-              "line": 1
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "message": "'z' is redeclared in the same scope."
     },
     {
       "code": {
@@ -539,22 +704,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'f' is redeclared in the same scope.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 6,
-              "line": 8
-            },
-            "start": {
-              "column": 5,
-              "line": 8
-            }
-          },
-          "text": "Remove the duplicate declaration or rename one of the variables."
-        }
-      ]
+      "message": "'f' is redeclared in the same scope."
     },
     {
       "code": {

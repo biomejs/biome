@@ -42,56 +42,55 @@ info: yaml/comment/sequence-2.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -12,13 +12,17 @@
-   # none.comment
- - before(2 line)
+@@ -1,24 +1,13 @@
+-- before
++- before # before.comment
++- after # after.comment
  
-+
-   # before.comment
- - after(2 line)
-   # after.comment
+-  # before.comment
+-- after
+-  # after.comment
++- before-after # before-after.comment
  
-+
- - before-after(2 line)
- 
-+
-   # before-after.comment
- 
-+
- - none(2)
+-- before-after
+-
+-  # before-after.comment
+-
+ - none:
 -  # none.comment
-+  # none.comment
-\ No newline at end of file
+-- before(2 line)
+-
+-  # before.comment
+-- after(2 line)
+-  # after.comment
+-
+-- before-after(2 line)
++# none.comment
++- before(2 line) # before.comment
++- after(2 line) # after.comment
+ 
+-  # before-after.comment
++- before-after(2 line) # before-after.comment
+ 
+-- none(2)
+-  # none.comment
++- none(2) # none.comment
 ```
 
 # Output
 
 ```yml
-- before
+- before # before.comment
+- after # after.comment
 
-  # before.comment
-- after
-  # after.comment
-
-- before-after
-
-  # before-after.comment
+- before-after # before-after.comment
 
 - none:
-  # none.comment
-- before(2 line)
+# none.comment
+- before(2 line) # before.comment
+- after(2 line) # after.comment
 
+- before-after(2 line) # before-after.comment
 
-  # before.comment
-- after(2 line)
-  # after.comment
-
-
-- before-after(2 line)
-
-
-  # before-after.comment
-
-
-- none(2)
-  # none.comment```
+- none(2) # none.comment
+```

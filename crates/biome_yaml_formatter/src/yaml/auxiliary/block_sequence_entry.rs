@@ -1,10 +1,19 @@
 use crate::prelude::*;
-use biome_rowan::AstNode;
-use biome_yaml_syntax::YamlBlockSequenceEntry;
+use biome_formatter::write;
+use biome_yaml_syntax::{YamlBlockSequenceEntry, YamlBlockSequenceEntryFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockSequenceEntry;
 impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
     fn fmt_fields(&self, node: &YamlBlockSequenceEntry, f: &mut YamlFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let YamlBlockSequenceEntryFields { minus_token, value } = node.as_fields();
+
+        let minus_token = minus_token?;
+        write!(f, [minus_token.format()])?;
+
+        if let Some(value) = value {
+            write!(f, [space(), align(2, &value.format())])?;
+        }
+
+        Ok(())
     }
 }

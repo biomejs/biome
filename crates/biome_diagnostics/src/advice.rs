@@ -45,6 +45,16 @@ pub trait Visit {
         Ok(())
     }
 
+    /// Prints an applicable code suggestion at the provided source location.
+    fn record_code_suggestion(
+        &mut self,
+        location: Location<'_>,
+        diff: &TextEdit,
+    ) -> io::Result<()> {
+        let _ = location;
+        self.record_diff(diff)
+    }
+
     /// Prints a Rust backtrace.
     fn record_backtrace(
         &mut self,
@@ -227,6 +237,6 @@ where
             },
         )?;
 
-        visitor.record_diff(&self.suggestion)
+        visitor.record_code_suggestion(Location::builder().build(), &self.suggestion)
     }
 }

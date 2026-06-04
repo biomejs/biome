@@ -303,6 +303,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteOutDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_RENAME_BINDING => {
+                    let $pattern = unsafe { $crate::SvelteRenameBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_RENDER_BLOCK => {
                     let $pattern = unsafe { $crate::SvelteRenderBlock::new_unchecked(node) };
                     $body

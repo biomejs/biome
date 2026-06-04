@@ -1,0 +1,9 @@
+@use "theme" with ($primary: blue,);
+@forward "tokens" with ($radius: 2px,);
+
+@mixin button {}
+
+.button {
+  @include
+  button
+}

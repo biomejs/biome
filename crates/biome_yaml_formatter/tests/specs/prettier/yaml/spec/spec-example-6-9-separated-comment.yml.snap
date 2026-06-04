@@ -17,15 +17,14 @@ key:    # Comment
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,2 @@
+@@ -1,2 +1 @@
 -key: # Comment
-+key:    # Comment
-   value
+-  value
++key: value # Comment
 ```
 
 # Output
 
 ```yml
-key:    # Comment
-  value
+key: value # Comment
 ```

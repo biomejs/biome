@@ -1,10 +1,8 @@
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
-use biome_css_syntax::{
-    AnyCssRoot, CssClassSelector, CssFileSource, CssPseudoClassFunctionSelector,
-    EmbeddingStyleApplicability,
-};
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssFileSource, EmbeddingStyleApplicability};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
@@ -320,7 +318,7 @@ pub(crate) fn collect_css_classes(
     for event in css_root.syntax().preorder() {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node.clone()) {
+                if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node.clone()) {
                     if pseudo_fn.is_global_pseudo() {
                         global_depth += 1;
                     }
@@ -345,7 +343,7 @@ pub(crate) fn collect_css_classes(
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
+                if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node)
                     && pseudo_fn.is_global_pseudo()
                 {
                     global_depth = global_depth.saturating_sub(1);
