@@ -36,7 +36,7 @@ fn quick_test() {
     let first_ir = formatted.document();
     let output = formatted.print().unwrap();
     eprintln!("Formatted:\n{}", output.as_code());
-    eprintln!("IR:\n{}", first_ir.to_string());
+    eprintln!("IR:\n{}", first_ir);
 
     // Idempotency
     // Now re-parse the formatted output and show its CST
@@ -48,7 +48,7 @@ fn quick_test() {
         biome_formatter::format_node(&reparse.syntax(), MdFormatLanguage::new(options), false);
     let output2 = result2.unwrap();
     let second_ir = output2.document();
-    eprintln!("Re-IR:\n{}", second_ir.to_string());
+    eprintln!("Re-IR:\n{}", second_ir);
 
     similar_asserts::assert_eq!(
         output2.print().unwrap().as_code(),
