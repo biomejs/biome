@@ -1,8 +1,7 @@
 use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
-use biome_css_syntax::{
-    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector,
-};
+use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
+use biome_css_syntax::{AnyCssImportUrl, AnyCssRoot, CssClassSelector};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, Text, TextRange, TokenText, WalkEvent};
 use camino::Utf8Path;
@@ -44,7 +43,7 @@ impl<'a> CssModuleVisitor<'a> {
                     if let Some(node) = AnyCssImportUrl::cast(node.clone()) {
                         self.visit_any_css_import_url(node, &mut imports);
                     } else if let Some(pseudo_fn) =
-                        CssPseudoClassFunctionSelector::cast(node.clone())
+                        AnyCssPseudoClassFunctionSelector::cast(node.clone())
                     {
                         if pseudo_fn.is_global_pseudo() {
                             global_depth += 1;
@@ -56,7 +55,7 @@ impl<'a> CssModuleVisitor<'a> {
                     }
                 }
                 WalkEvent::Leave(node) => {
-                    if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
+                    if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node)
                         && pseudo_fn.is_global_pseudo()
                     {
                         global_depth = global_depth.saturating_sub(1);

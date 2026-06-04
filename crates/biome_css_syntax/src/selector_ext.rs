@@ -1,4 +1,8 @@
-use crate::{CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector};
+use crate::{
+    CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector,
+    CssPseudoClassFunctionSelectorList,
+};
+use biome_rowan::declare_node_union;
 
 impl CssComplexSelector {
     ///
@@ -38,15 +42,18 @@ impl Iterator for CssComplexSelectorIterator {
     }
 }
 
-impl CssPseudoClassFunctionSelector {
+declare_node_union! {
+    pub AnyCssPseudoClassFunctionSelector = CssPseudoClassFunctionSelector | CssPseudoClassFunctionSelectorList
+}
+
+impl AnyCssPseudoClassFunctionSelector {
     /// Returns `true` if the given pseudo-class function selector is `:global(...)`.
-    ///
-    /// This is used by CSS and HTML module visitors to skip class selectors that
-    /// are globally scoped and cannot be traced to specific `class="..."` attribute
-    /// references.
     pub fn is_global_pseudo(&self) -> bool {
-        self.name()
-            .ok()
+        let name = match self {
+            Self::CssPseudoClassFunctionSelector(node) => node.name(),
+            Self::CssPseudoClassFunctionSelectorList(node) => node.name(),
+        };
+        name.ok()
             .and_then(|name| name.value_token().ok())
             .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("global"))
     }
