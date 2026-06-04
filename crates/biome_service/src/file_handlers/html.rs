@@ -49,13 +49,15 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_js_syntax::JsLanguage;
+use biome_js_parser::{JsParserOptions, parse as parse_js};
+use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 use biome_json_syntax::JsonLanguage;
-use biome_languages::{HtmlFileSource, JsFileSource};
+use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
+use biome_rowan::{AstNode, BatchMutation, Direction, NodeCache, SendNode, TextRange, TextSize};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -910,7 +912,11 @@ pub(crate) fn update_snippets(
                 let leading_trivia = read_leading_trivia(old_text);
                 let trailing_trivia = read_trailing_trivia(old_text);
                 let indent_prefix = content_indent_prefix(&leading_trivia);
-                let reindented = reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
+                let reindented = reindent_embedded_code(
+                    snippet.new_code.trim(),
+                    indent_prefix,
+                    &snippet.verbatim_ranges,
+                );
                 format!("{}{}{}", leading_trivia, reindented, trailing_trivia)
             } else {
                 snippet.new_code.clone()
@@ -1004,81 +1010,90 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
     }
 }
 
-/// Prefixes every line of `code` after the first with `indent`, skipping
-/// lines inside template literals and block comments (whose content the
-/// formatter preserves verbatim). Empty lines are left alone.
-fn reindent_embedded_code(code: &str, indent: &str) -> String {
+/// Returns byte ranges in `code` whose content must not receive an extra
+/// indentation prefix during re-indentation: template literal bodies and
+/// multi-line block comments in JS/TS source.
+pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
+    let parsed = parse_js(code, JsFileSource::js_module(), JsParserOptions::default());
+    let root = parsed.syntax();
+    let mut ranges = Vec::new();
+
+    for descendant in root.descendants() {
+        if let Some(chunk) = JsTemplateChunkElement::cast(descendant) {
+            if let Ok(token) = chunk.template_chunk_token() {
+                if token.text().contains('\n') {
+                    ranges.push(token.text_range());
+                }
+            }
+        }
+    }
+
+    for token in root.descendants_tokens(Direction::Next) {
+        for piece in token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+        {
+            if let Some(comment) = piece.as_comments() {
+                if comment.text().starts_with("/*") && comment.has_newline() {
+                    ranges.push(piece.text_range());
+                }
+            }
+        }
+    }
+
+    ranges
+}
+
+/// Returns byte ranges in `code` whose content must not receive an extra
+/// indentation prefix during re-indentation: multi-line block comments in
+/// CSS source.
+pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
+    let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
+    let root = parsed.syntax();
+    let mut ranges = Vec::new();
+
+    for token in root.descendants_tokens(Direction::Next) {
+        for piece in token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+        {
+            if let Some(comment) = piece.as_comments() {
+                if comment.text().starts_with("/*") && comment.has_newline() {
+                    ranges.push(piece.text_range());
+                }
+            }
+        }
+    }
+
+    ranges
+}
+
+/// Prefixes every line of `code` after the first with `indent`. Lines whose
+/// starting byte position falls inside one of the `verbatim_ranges` (template
+/// literal bodies, block comments) are left untouched. Empty lines are also
+/// left alone so no trailing whitespace sneaks in.
+fn reindent_embedded_code(code: &str, indent: &str, verbatim_ranges: &[TextRange]) -> String {
     if indent.is_empty() {
         return code.to_string();
     }
 
     let mut out = String::new();
-    // Verbatim-region tracking (state carries across lines).
-    let mut in_block_comment = false;
-    let mut in_template_literal = false;
-    let mut template_expr_depth: u32 = 0; // depth of `${…}` nesting inside a template literal
-
+    let mut byte_offset: u32 = 0;
     for (i, line) in code.split('\n').enumerate() {
         if i > 0 {
             out.push('\n');
-            // A continuation line is "verbatim" if we are inside a block
-            // comment, or inside a template literal but NOT inside a `${}`
-            // expression (which is regular code again).
-            let verbatim = in_block_comment || (in_template_literal && template_expr_depth == 0);
-            if !line.is_empty() && !verbatim {
+            let line_start = TextSize::from(byte_offset);
+            let in_verbatim = verbatim_ranges
+                .iter()
+                .any(|r| r.start() < line_start && line_start < r.end());
+            if !line.is_empty() && !in_verbatim {
                 out.push_str(indent);
             }
         }
         out.push_str(line);
-
-        // Scan the line to update state for the next iteration.
-        let mut chars = line.chars().peekable();
-        while let Some(ch) = chars.next() {
-            if in_block_comment {
-                // Only look for the closing `*/`.
-                if ch == '*' && chars.peek() == Some(&'/') {
-                    chars.next();
-                    in_block_comment = false;
-                }
-                continue;
-            }
-            match ch {
-                // Escape: skip the next character (handles `\`` inside template literals).
-                '\\' => {
-                    chars.next();
-                }
-                // Opening `/*` block comment (only outside template literals or inside ${}).
-                '/' if (!in_template_literal || template_expr_depth > 0)
-                    && chars.peek() == Some(&'*') =>
-                {
-                    chars.next();
-                    in_block_comment = true;
-                }
-                // Open a template literal (only valid outside an existing one or inside ${}).
-                '`' if !in_template_literal => {
-                    in_template_literal = true;
-                    template_expr_depth = 0;
-                }
-                // Close a template literal.
-                '`' if in_template_literal && template_expr_depth == 0 => {
-                    in_template_literal = false;
-                }
-                // Open a `${…}` expression inside a template literal.
-                '$' if in_template_literal && chars.peek() == Some(&'{') => {
-                    chars.next();
-                    template_expr_depth += 1;
-                }
-                // Extra `{` inside a `${…}` expression (e.g. object literals).
-                '{' if template_expr_depth > 0 => {
-                    template_expr_depth += 1;
-                }
-                // Closing `}` — may close a `${…}` expression.
-                '}' if template_expr_depth > 0 => {
-                    template_expr_depth -= 1;
-                }
-                _ => {}
-            }
-        }
+        byte_offset += line.len() as u32 + 1; // +1 for the '\n' separator
     }
     out
 }
@@ -1098,7 +1113,9 @@ fn is_component_element(attr: &HtmlAttribute) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{content_indent_prefix, reindent_embedded_code};
+    use super::{
+        content_indent_prefix, css_verbatim_ranges, js_verbatim_ranges, reindent_embedded_code,
+    };
 
     #[test]
     fn content_indent_prefix_reads_indent_after_last_newline() {
@@ -1116,74 +1133,53 @@ mod tests {
     #[test]
     fn reindent_embedded_code_prefixes_every_line_after_the_first() {
         assert_eq!(
-            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t"),
+            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t", &[]),
             "p {\n\t\t\t\tcolor: red;\n\t\t\t}"
         );
     }
 
     #[test]
     fn reindent_embedded_code_is_a_noop_when_indent_is_empty() {
-        assert_eq!(reindent_embedded_code("a\nb\nc", ""), "a\nb\nc");
+        assert_eq!(reindent_embedded_code("a\nb\nc", "", &[]), "a\nb\nc");
     }
 
     #[test]
     fn reindent_embedded_code_leaves_single_line_input_unchanged() {
-        assert_eq!(reindent_embedded_code("oneline", "\t\t"), "oneline");
+        assert_eq!(reindent_embedded_code("oneline", "\t\t", &[]), "oneline");
     }
 
     #[test]
     fn reindent_embedded_code_does_not_indent_empty_lines() {
-        assert_eq!(reindent_embedded_code("a\n\nb", "  "), "a\n\n  b");
+        assert_eq!(reindent_embedded_code("a\n\nb", "  ", &[]), "a\n\n  b");
     }
 
     #[test]
-    fn reindent_embedded_code_skips_template_literal_continuation_lines() {
-        // The continuation line inside the backtick string must NOT receive
-        // the extra indent — it already carries its author-intended offset.
-        let code = "const x = `line one\n  line two`;";
+    fn reindent_skips_js_template_literal_continuation_lines() {
+        let code = "const x = `line one\n  line two`;\nconst y = 1;";
+        let ranges = js_verbatim_ranges(code);
         assert_eq!(
-            reindent_embedded_code(code, "  "),
-            "const x = `line one\n  line two`;"
+            reindent_embedded_code(code, "  ", &ranges),
+            "const x = `line one\n  line two`;\n  const y = 1;"
         );
     }
 
     #[test]
-    fn reindent_embedded_code_resumes_indenting_after_template_literal() {
-        let code = "const x = `a\nb`;\nconst y = 1;";
-        assert_eq!(
-            reindent_embedded_code(code, "  "),
-            "const x = `a\nb`;\n  const y = 1;"
-        );
-    }
-
-    #[test]
-    fn reindent_embedded_code_handles_template_expression_with_nested_braces() {
-        // `${obj.method({ key: val })}` — the extra `{` and `}` inside `${}`
-        // must not prematurely close the expression tracker.
-        let code = "const s = `prefix\n${fn({ a: 1 })}\nsuffix`;";
-        // Line 0: no prefix.  Line 1: inside template literal → no prefix.
-        // Line 2: still inside template literal → no prefix.
-        assert_eq!(
-            reindent_embedded_code(code, "  "),
-            "const s = `prefix\n${fn({ a: 1 })}\nsuffix`;"
-        );
-    }
-
-    #[test]
-    fn reindent_embedded_code_skips_block_comment_continuation_lines() {
+    fn reindent_skips_js_block_comment_continuation_lines() {
         let code = "/* first line\n   continuation */\n.foo { color: red; }";
+        let ranges = js_verbatim_ranges(code);
         assert_eq!(
-            reindent_embedded_code(code, "  "),
+            reindent_embedded_code(code, "  ", &ranges),
             "/* first line\n   continuation */\n  .foo { color: red; }"
         );
     }
 
     #[test]
-    fn reindent_embedded_code_resumes_indenting_after_block_comment() {
-        let code = "/* open\n   close */\nnext line";
+    fn reindent_skips_css_block_comment_continuation_lines() {
+        let code = "/* first line\n   continuation */\n.foo { color: red; }";
+        let ranges = css_verbatim_ranges(code);
         assert_eq!(
-            reindent_embedded_code(code, "\t"),
-            "/* open\n   close */\n\tnext line"
+            reindent_embedded_code(code, "  ", &ranges),
+            "/* first line\n   continuation */\n  .foo { color: red; }"
         );
     }
 }

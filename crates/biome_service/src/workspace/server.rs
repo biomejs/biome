@@ -2846,10 +2846,22 @@ impl Workspace for WorkspaceServer {
                 errors += results.errors;
                 skipped_suggested_fixes += results.skipped_suggested_fixes;
 
+                let verbatim_ranges = if should_format {
+                    if embedded_snippet.is_js() {
+                        crate::file_handlers::html::js_verbatim_ranges(&results.code)
+                    } else if embedded_snippet.is_css() {
+                        crate::file_handlers::html::css_verbatim_ranges(&results.code)
+                    } else {
+                        vec![]
+                    }
+                } else {
+                    vec![]
+                };
                 new_snippets.push(UpdateSnippetsNodes {
                     range: embedded_snippet.element_range(),
                     new_code: results.code,
                     needs_reindent: should_format,
+                    verbatim_ranges,
                 });
             }
 

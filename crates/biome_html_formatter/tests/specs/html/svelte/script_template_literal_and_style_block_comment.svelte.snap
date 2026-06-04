@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/script_template_literal_and_style_block_comment.svelte
+---
+
+# Input
+
+```svelte
+<script>
+	const sql = `
+		SELECT *
+		FROM users
+	`;
+</script>
+<style>
+	/*
+	 * A block comment.
+	 */
+	.foo {
+		color: red;
+	}
+</style>
+
+```
+
+
+# Formatted
+
+```svelte
+<script></script>
+<style></style>
+
+```
