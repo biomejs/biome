@@ -22,7 +22,7 @@ const b: number = 1;
 ```
 invalid.vue:3:1 lint/performance/useVueVapor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This <script setup> is missing the vapor attribute.
+  ! This <script setup> is missing the vapor attribute.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -43,7 +43,7 @@ invalid.vue:3:1 lint/performance/useVueVapor  FIXABLE  ━━━━━━━━�
 ```
 invalid.vue:7:1 lint/performance/useVueVapor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This <script setup> is missing the vapor attribute.
+  ! This <script setup> is missing the vapor attribute.
   
     5 │ </script>
     6 │ 

@@ -13,7 +13,7 @@ expression: invalid.html
 ```
 invalid.html:2:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i No ambiguous anchor descriptions allowed.
+  × No ambiguous anchor descriptions allowed.
   
     1 │ /* should generate diagnostics */
   > 2 │ <a>a disallowed word</a>

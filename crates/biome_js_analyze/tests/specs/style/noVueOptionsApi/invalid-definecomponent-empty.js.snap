@@ -16,7 +16,7 @@ export default defineComponent({});
 ```
 invalid-definecomponent-empty.js:5:32 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
     3 │ import { defineComponent } from "vue";
     4 │ 

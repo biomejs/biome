@@ -14,7 +14,7 @@ expression: invalid.vue
 ```
 invalid.vue:2:1 lint/correctness/useVueValidTemplateRoot  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The root `<template>` with a src attribute must be empty.
+  × The root `<template>` with a src attribute must be empty.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <template src="./foo.html">content</template>

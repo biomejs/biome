@@ -22,7 +22,7 @@ createApp({
 ```
 invalid-createapp-data.vue:6:11 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
      4 │ import { createApp } from "vue";
      5 │ 

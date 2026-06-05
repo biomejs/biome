@@ -22,7 +22,7 @@ export default defineComponent({
 ```
 invalid-definecomponent-data.vue:6:32 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
      4 │ import { defineComponent } from "vue";
      5 │ 

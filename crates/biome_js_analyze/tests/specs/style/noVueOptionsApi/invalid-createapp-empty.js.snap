@@ -16,7 +16,7 @@ createApp({}).mount("#app");
 ```
 invalid-createapp-empty.js:5:11 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
     3 │ import { createApp } from "vue";
     4 │ 

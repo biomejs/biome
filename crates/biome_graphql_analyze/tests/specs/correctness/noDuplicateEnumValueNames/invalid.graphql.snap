@@ -19,7 +19,7 @@ enum A {
 ```
 invalid.graphql:4:7 lint/correctness/noDuplicateEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate enum value name.
+  × Duplicate enum value name.
   
     2 │ enum A {
     3 │ 	TEST

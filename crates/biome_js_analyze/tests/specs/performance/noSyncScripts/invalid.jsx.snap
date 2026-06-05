@@ -18,7 +18,7 @@ const Invalid2 = () => {
 ```
 invalid.jsx:2:9 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected synchronous script.
+  ! Unexpected synchronous script.
   
     1 │ const Invalid1 = () => {
   > 2 │ 	return <script src="" />
@@ -34,7 +34,7 @@ invalid.jsx:2:9 lint/performance/noSyncScripts ━━━━━━━━━━━
 ```
 invalid.jsx:6:9 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected synchronous script.
+  ! Unexpected synchronous script.
   
     5 │ const Invalid2 = () => {
   > 6 │ 	return <script src="" type="" />

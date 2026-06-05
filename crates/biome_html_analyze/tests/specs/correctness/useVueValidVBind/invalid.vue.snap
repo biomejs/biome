@@ -39,7 +39,7 @@ expression: invalid.vue
 ```
 invalid.vue:5:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive is missing a value.
+  × This v-bind directive is missing a value.
   
     3 │ <template>
     4 │   <!-- Missing value -->
@@ -58,7 +58,7 @@ invalid.vue:5:8 lint/correctness/useVueValidVBind ━━━━━━━━━━
 ```
 invalid.vue:6:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive is missing a value.
+  × This v-bind directive is missing a value.
   
     4 │   <!-- Missing value -->
     5 │   <Foo v-bind:foo />
@@ -77,7 +77,7 @@ invalid.vue:6:8 lint/correctness/useVueValidVBind ━━━━━━━━━━
 ```
 invalid.vue:9:8 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive is missing a value.
+  × This v-bind directive is missing a value.
   
      8 │   <!-- Missing value with modifier -->
    > 9 │   <div v-bind.prop></div>
@@ -95,7 +95,7 @@ invalid.vue:9:8 lint/correctness/useVueValidVBind ━━━━━━━━━━
 ```
 invalid.vue:12:18 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     11 │   <!-- Invalid single modifier on long-form -->
   > 12 │   <div v-bind:foo.invalid="bar"></div>
@@ -113,7 +113,7 @@ invalid.vue:12:18 lint/correctness/useVueValidVBind ━━━━━━━━━�
 ```
 invalid.vue:15:13 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     14 │   <!-- Invalid modifier on shorthand -->
   > 15 │   <span :bar.badModifier="baz"></span>
@@ -131,7 +131,7 @@ invalid.vue:15:13 lint/correctness/useVueValidVBind ━━━━━━━━━�
 ```
 invalid.vue:18:15 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     17 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
   > 18 │   <p :baz.prop.wrong="value"></p>
@@ -149,7 +149,7 @@ invalid.vue:18:15 lint/correctness/useVueValidVBind ━━━━━━━━━�
 ```
 invalid.vue:21:22 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     20 │   <!-- Dynamic argument is present but modifier is invalid -->
   > 21 │   <p v-bind:[dynamic].notAValidModifier="value"></p>
@@ -167,7 +167,7 @@ invalid.vue:21:22 lint/correctness/useVueValidVBind ━━━━━━━━━�
 ```
 invalid.vue:24:20 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     23 │   <!-- Multiple invalid modifiers -->
   > 24 │   <button :disabled.once="true"></button>
@@ -185,7 +185,7 @@ invalid.vue:24:20 lint/correctness/useVueValidVBind ━━━━━━━━━�
 ```
 invalid.vue:27:31 lint/correctness/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This v-bind directive has an invalid modifier.
+  × This v-bind directive has an invalid modifier.
   
     26 │   <!-- Component binding with unknown modifier -->
   > 27 │   <MyComponent v-bind:propName.weird="someValue"></MyComponent>

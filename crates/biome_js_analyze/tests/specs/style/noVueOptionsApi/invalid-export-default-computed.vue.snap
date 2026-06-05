@@ -22,7 +22,7 @@ export default {
 ```
 invalid-export-default-computed.vue:4:16 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
      2 │ // should generate diagnostics
      3 │ // Options API: computed is not supported in Vapor Mode

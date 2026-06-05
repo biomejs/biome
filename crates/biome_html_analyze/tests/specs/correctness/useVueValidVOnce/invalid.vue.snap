@@ -21,7 +21,7 @@ expression: invalid.vue
 ```
 invalid.vue:4:12 lint/correctness/useVueValidVOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-once directive must not have an argument.
+  × The v-once directive must not have an argument.
   
     3 │ <!-- argument not allowed -->
   > 4 │ <div v-once:arg></div>
@@ -41,7 +41,7 @@ invalid.vue:4:12 lint/correctness/useVueValidVOnce  FIXABLE  ━━━━━━�
 ```
 invalid.vue:7:12 lint/correctness/useVueValidVOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-once directive does not support modifiers.
+  × The v-once directive does not support modifiers.
   
     6 │ <!-- modifier not allowed -->
   > 7 │ <div v-once.mod></div>
@@ -61,7 +61,7 @@ invalid.vue:7:12 lint/correctness/useVueValidVOnce  FIXABLE  ━━━━━━�
 ```
 invalid.vue:10:12 lint/correctness/useVueValidVOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-once directive must not have a value.
+  × The v-once directive must not have a value.
   
      9 │ <!-- value not allowed -->
   > 10 │ <div v-once="value"></div>

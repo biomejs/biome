@@ -17,7 +17,7 @@ groups["b"].toSorted();
 ```
 recordInvalid.ts:5:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     3 │ // Record with array values sorted without a comparator
     4 │ const groups: Record<string, number[]> = {};
@@ -36,7 +36,7 @@ recordInvalid.ts:5:1 lint/suspicious/useArraySortCompare ━━━━━━━�
 ```
 recordInvalid.ts:6:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     4 │ const groups: Record<string, number[]> = {};
     5 │ groups["a"].sort();

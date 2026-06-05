@@ -21,7 +21,7 @@ expression: invalid.vue
 ```
 invalid.vue:3:7 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This element is using v-for, but the key attribute is missing.
+  × This element is using v-for, but the key attribute is missing.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <ul>
@@ -40,7 +40,7 @@ invalid.vue:3:7 lint/correctness/useVueVForKey ━━━━━━━━━━━
 ```
 invalid.vue:6:22 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This element is using v-for, but the key attribute is missing.
+  × This element is using v-for, but the key attribute is missing.
   
     4 │ </ul>
     5 │ 
@@ -59,7 +59,7 @@ invalid.vue:6:22 lint/correctness/useVueVForKey ━━━━━━━━━━�
 ```
 invalid.vue:8:11 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This element is using v-for, but the key attribute is missing.
+  × This element is using v-for, but the key attribute is missing.
   
      6 │ <div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
      7 │ 

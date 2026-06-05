@@ -26,7 +26,7 @@ export default {
 ```
 invalid-multiple-options.vue:4:16 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
      2 │ // should generate diagnostics
      3 │ // Multiple Options API properties - all should be flagged

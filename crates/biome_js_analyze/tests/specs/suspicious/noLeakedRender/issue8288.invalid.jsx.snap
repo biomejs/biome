@@ -19,7 +19,7 @@ const Component1 = () => {
 ```
 issue8288.invalid.jsx:5:19 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     3 │ 	return (
     4 │ 		<Nested>

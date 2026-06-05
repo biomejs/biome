@@ -97,7 +97,7 @@ const MyComponent7 = () => {
 ```
 invalid.jsx:6:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     4 │ 	return (
     5 │ 		<>
@@ -116,7 +116,7 @@ invalid.jsx:6:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:7:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     5 │ 		<>
     6 │ 			{0 && <Something />}
@@ -135,7 +135,7 @@ invalid.jsx:7:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:8:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
      6 │ 			{0 && <Something />}
      7 │ 			{0.0 && <Something />}
@@ -154,7 +154,7 @@ invalid.jsx:8:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:9:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
      7 │ 			{0.0 && <Something />}
      8 │ 			{-0 && <Something />}
@@ -173,7 +173,7 @@ invalid.jsx:9:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━
 ```
 invalid.jsx:10:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
      8 │ 			{-0 && <Something />}
      9 │ 			{-0.0 && <Something />}
@@ -192,7 +192,7 @@ invalid.jsx:10:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:11:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
      9 │ 			{-0.0 && <Something />}
     10 │ 			{0n && <Something />}
@@ -211,7 +211,7 @@ invalid.jsx:11:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:12:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     10 │ 			{0n && <Something />}
     11 │ 			{-0n && <Something />}
@@ -230,7 +230,7 @@ invalid.jsx:12:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:13:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     11 │ 			{-0n && <Something />}
     12 │ 			{'' && <Something />}
@@ -249,7 +249,7 @@ invalid.jsx:13:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:19:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     18 │ const Component1 = ({ count, title }) => {
   > 19 │ 	return <div>{count && title}</div>;
@@ -267,7 +267,7 @@ invalid.jsx:19:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:23:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     22 │ const Component2 = ({ count }) => {
   > 23 │ 	return <div>{count && <span>There are {count} results</span>}</div>;
@@ -285,7 +285,7 @@ invalid.jsx:23:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:27:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     26 │ const Component3 = ({ elements }) => {
   > 27 │ 	return <div>{elements.length && <List elements={elements} />}</div>;
@@ -303,7 +303,7 @@ invalid.jsx:27:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:32:9 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     30 │ const Component4 = ({ nestedCollection }) => {
     31 │ 	return (
@@ -322,7 +322,7 @@ invalid.jsx:32:9 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:37:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     36 │ const Component5 = ({ elements }) => {
   > 37 │ 	return <div>{elements[0] && <List elements={elements} />}</div>;
@@ -340,7 +340,7 @@ invalid.jsx:37:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:41:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     40 │ const Component6 = ({ numberA, numberB }) => {
   > 41 │ 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
@@ -358,7 +358,7 @@ invalid.jsx:41:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:47:5 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     45 │ 	return (
     46 │ 		<>
@@ -382,7 +382,7 @@ invalid.jsx:47:5 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:57:12 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     56 │ const MyComponent2 = () => {
   > 57 │ 	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
@@ -400,7 +400,7 @@ invalid.jsx:57:12 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:61:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     60 │ const MyComponent3 = () => {
   > 61 │ 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
@@ -418,7 +418,7 @@ invalid.jsx:61:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:65:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     64 │ const MyComponent4 = ({ count, title }) => {
   > 65 │ 	return <div>{(((((count))))) && ((title))}</div>;
@@ -436,7 +436,7 @@ invalid.jsx:65:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:73:15 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     72 │ const MyComponent6 = ({ value }) => {
   > 73 │ 	return <div>{(((value))) && <Item />}</div>;
@@ -454,7 +454,7 @@ invalid.jsx:73:15 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:81:10 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     79 │ const MyComponent7 = () => {
     80 │ 	return <>
@@ -473,7 +473,7 @@ invalid.jsx:81:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:82:10 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     80 │ 	return <>
     81 │ 		<div> {isNan && 'NaN'} </div>
@@ -492,7 +492,7 @@ invalid.jsx:82:10 lint/suspicious/noLeakedRender ━━━━━━━━━━�
 ```
 invalid.jsx:83:9 lint/suspicious/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Potential leaked value that might cause unintended rendering.
+  ! Potential leaked value that might cause unintended rendering.
   
     81 │ 		<div> {isNan && 'NaN'} </div>
     82 │ 		<div> {isZero && 'Zero'} </div>

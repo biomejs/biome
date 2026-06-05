@@ -14,7 +14,7 @@ foo != null;
 ```
 invalid.js:2:5 lint/suspicious/noEqualsToNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × null comparison with == is disallowed.
+  ! null comparison with == is disallowed.
   
     1 │ /* should generate diagnostics */
   > 2 │ foo == null;
@@ -32,7 +32,7 @@ invalid.js:2:5 lint/suspicious/noEqualsToNull  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:5 lint/suspicious/noEqualsToNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × null comparison with != is disallowed.
+  ! null comparison with != is disallowed.
   
     1 │ /* should generate diagnostics */
     2 │ foo == null;

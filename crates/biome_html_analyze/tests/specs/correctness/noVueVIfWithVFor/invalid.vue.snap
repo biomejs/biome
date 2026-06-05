@@ -24,7 +24,7 @@ expression: invalid.vue
 ```
 invalid.vue:5:3 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Using v-if and v-for on the same element is discouraged.
+  × Using v-if and v-for on the same element is discouraged.
   
     3 │ <TodoItem
     4 │   v-if="complete"
@@ -49,7 +49,7 @@ invalid.vue:5:3 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━
 ```
 invalid.vue:10:3 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Using v-if and v-for on the same element is discouraged.
+  × Using v-if and v-for on the same element is discouraged.
   
      9 │ <TodoItem
   > 10 │   v-for="todo in todos"

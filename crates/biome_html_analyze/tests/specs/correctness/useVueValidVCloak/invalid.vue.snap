@@ -15,7 +15,7 @@ expression: invalid.vue
 ```
 invalid.vue:2:13 lint/correctness/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-cloak directive must not have an argument.
+  × The v-cloak directive must not have an argument.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div v-cloak:arg></div>
@@ -35,7 +35,7 @@ invalid.vue:2:13 lint/correctness/useVueValidVCloak  FIXABLE  ━━━━━━
 ```
 invalid.vue:3:13 lint/correctness/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-cloak directive does not support modifiers.
+  × The v-cloak directive does not support modifiers.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div v-cloak:arg></div>
@@ -56,7 +56,7 @@ invalid.vue:3:13 lint/correctness/useVueValidVCloak  FIXABLE  ━━━━━━
 ```
 invalid.vue:4:13 lint/correctness/useVueValidVCloak  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-cloak directive must not have a value.
+  × The v-cloak directive must not have a value.
   
     2 │ <div v-cloak:arg></div>
     3 │ <div v-cloak.mod></div>

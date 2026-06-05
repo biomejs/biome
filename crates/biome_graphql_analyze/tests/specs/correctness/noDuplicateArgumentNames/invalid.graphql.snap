@@ -24,7 +24,7 @@ query D {
 ```
 invalid.graphql:3:7 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate argument name.
+  × Duplicate argument name.
   
     1 │ # should generate diagnostics
     2 │ query A {
@@ -41,7 +41,7 @@ invalid.graphql:3:7 lint/correctness/noDuplicateArgumentNames ━━━━━━
 ```
 invalid.graphql:6:7 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate argument name.
+  × Duplicate argument name.
   
     4 │ }
     5 │ query B {
@@ -58,7 +58,7 @@ invalid.graphql:6:7 lint/correctness/noDuplicateArgumentNames ━━━━━━
 ```
 invalid.graphql:9:18 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate argument name.
+  × Duplicate argument name.
   
      7 │ }
      8 │ query C {
@@ -75,7 +75,7 @@ invalid.graphql:9:18 lint/correctness/noDuplicateArgumentNames ━━━━━�
 ```
 invalid.graphql:12:18 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate argument name.
+  × Duplicate argument name.
   
     10 │ }
     11 │ query D {

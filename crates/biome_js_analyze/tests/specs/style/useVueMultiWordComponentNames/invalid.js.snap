@@ -24,7 +24,7 @@ createApp({ name: "Foo" })
 ```
 invalid.js:5:8 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This Component's name "Header" only contains one word.
+  i This Component's name "Header" only contains one word.
   
     3 │ /* Invalid: single-word name "Header" (not ignored, not builtin) */
     4 │ defineComponent({
@@ -43,7 +43,7 @@ invalid.js:5:8 lint/style/useVueMultiWordComponentNames ━━━━━━━━
 ```
 invalid.js:13:19 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This Component's name "Foo" only contains one word.
+  i This Component's name "Foo" only contains one word.
   
     11 │ };
     12 │ 

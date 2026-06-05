@@ -26,7 +26,7 @@ export default {
 ```
 invalid-ts.vue:5:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     3 │ export default {
     4 │   watch: {
@@ -55,7 +55,7 @@ invalid-ts.vue:5:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━
 ```
 invalid-ts.vue:9:16 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
      7 │     },
      8 │     bar: {

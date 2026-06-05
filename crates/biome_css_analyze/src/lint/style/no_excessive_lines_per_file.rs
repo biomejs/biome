@@ -47,11 +47,71 @@ declare_lint_rule! {
     ///
     /// Default: `300`
     ///
+    /// #### Examples
+    ///
+    /// The default value for `maxLines` is `300`. The following example shows how to set the
+    /// `maxLines` option to a smaller value. It reports a diagnostic because the file has more
+    /// than 4 lines:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 4
+    ///     }
+    /// }
+    /// ```
+    /// ```css,expect_diagnostic,use_options
+    /// .a { color: red; }
+    /// .b { color: blue; }
+    /// .c { color: green; }
+    /// .d { color: yellow; }
+    /// .e { color: purple; }
+    /// ```
+    ///
     /// ### `skipBlankLines`
     ///
     /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
     ///
     /// Default: `false`
+    ///
+    /// #### Examples
+    ///
+    /// The following example shows how `skipBlankLines` can prevent a diagnostic by excluding blank
+    /// lines from the total count:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2,
+    ///         "skipBlankLines": true
+    ///     }
+    /// }
+    /// ```
+    /// ```css,use_options
+    /// .a { color: red; }
+    ///
+    ///
+    /// .b { color: blue; }
+    /// ```
+    ///
+    /// ## Suppressions
+    ///
+    /// If you need to exceed the line limit in a specific file, you can suppress this rule
+    /// at the top of the file:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2
+    ///     }
+    /// }
+    /// ```
+    /// ```css,use_options
+    /// /* biome-ignore-all lint/style/noExcessiveLinesPerFile: generated file */
+    /// .a { color: red; }
+    /// .b { color: blue; }
+    /// .c { color: green; }
+    /// ```
     ///
     pub NoExcessiveLinesPerFile {
         version: "2.3.12",

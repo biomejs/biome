@@ -16,7 +16,7 @@ expression: invalid.vue
 ```
 invalid.vue:2:10 lint/correctness/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-if cannot have an argument.
+  × v-if cannot have an argument.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div v-if:aaa="foo"></div>
@@ -32,7 +32,7 @@ invalid.vue:2:10 lint/correctness/useVueValidVIf ━━━━━━━━━━�
 ```
 invalid.vue:3:10 lint/correctness/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-if cannot have modifiers.
+  × v-if cannot have modifiers.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div v-if:aaa="foo"></div>
@@ -49,7 +49,7 @@ invalid.vue:3:10 lint/correctness/useVueValidVIf ━━━━━━━━━━�
 ```
 invalid.vue:4:6 lint/correctness/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-if requires a value expression.
+  × v-if requires a value expression.
   
     2 │ <div v-if:aaa="foo"></div>
     3 │ <div v-if.mod="foo"></div>
@@ -66,7 +66,7 @@ invalid.vue:4:6 lint/correctness/useVueValidVIf ━━━━━━━━━━�
 ```
 invalid.vue:5:17 lint/correctness/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-if cannot be used on an element that also has v-else or v-else-if.
+  × v-if cannot be used on an element that also has v-else or v-else-if.
   
     3 │ <div v-if.mod="foo"></div>
     4 │ <div v-if></div>
@@ -82,7 +82,7 @@ invalid.vue:5:17 lint/correctness/useVueValidVIf ━━━━━━━━━━�
 ```
 invalid.vue:6:17 lint/correctness/useVueValidVIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-if cannot be used on an element that also has v-else or v-else-if.
+  × v-if cannot be used on an element that also has v-else or v-else-if.
   
     4 │ <div v-if></div>
     5 │ <div v-if="foo" v-else></div>

@@ -46,7 +46,7 @@ invalid-define.vue:15:5 parse ━━━━━━━━━━━━━━━━�
 ```
 invalid-define.vue:7:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
      5 │ export default defineComponent({
      6 │   watch: {
@@ -75,7 +75,7 @@ invalid-define.vue:7:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━�
 ```
 invalid-define.vue:11:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
      9 │     },
     10 │     bar: {
@@ -104,7 +104,7 @@ invalid-define.vue:11:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━�
 ```
 invalid-define.vue:15:12 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     13 │ 			}
     14 │     }

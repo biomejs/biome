@@ -15,7 +15,7 @@ const d = obj["__proto__"];
 ```
 invalid.js:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid use of the deprecated __proto__ accessor.
+  ! Avoid use of the deprecated __proto__ accessor.
   
   > 1 │ obj.__proto__ = a;
       │ ^^^^^^^^^^^^^
@@ -33,7 +33,7 @@ invalid.js:1:1 lint/suspicious/noProto ━━━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid use of the deprecated __proto__ accessor.
+  ! Avoid use of the deprecated __proto__ accessor.
   
     1 │ obj.__proto__ = a;
   > 2 │ obj["__proto__"] = b;
@@ -52,7 +52,7 @@ invalid.js:2:1 lint/suspicious/noProto ━━━━━━━━━━━━━�
 ```
 invalid.js:3:11 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid use of the deprecated __proto__ accessor.
+  ! Avoid use of the deprecated __proto__ accessor.
   
     1 │ obj.__proto__ = a;
     2 │ obj["__proto__"] = b;
@@ -72,7 +72,7 @@ invalid.js:3:11 lint/suspicious/noProto ━━━━━━━━━━━━━�
 ```
 invalid.js:4:11 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid use of the deprecated __proto__ accessor.
+  ! Avoid use of the deprecated __proto__ accessor.
   
     2 │ obj["__proto__"] = b;
     3 │ const c = obj.__proto__;

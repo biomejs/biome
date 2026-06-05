@@ -15,7 +15,7 @@ expression: invalid.css
 ```
 invalid.css:2:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected deprecated media type: tv
+  ! Unexpected deprecated media type: tv
   
     1 │ /* should generate diagnostics */
   > 2 │ @media tv {}
@@ -37,7 +37,7 @@ invalid.css:2:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━�
 ```
 invalid.css:3:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected deprecated media type: handheld
+  ! Unexpected deprecated media type: handheld
   
     1 │ /* should generate diagnostics */
     2 │ @media tv {}
@@ -60,7 +60,7 @@ invalid.css:3:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━�
 ```
 invalid.css:4:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected deprecated media type: speech
+  ! Unexpected deprecated media type: speech
   
     2 │ @media tv {}
     3 │ @media handheld and (min-width: 480px) {}

@@ -23,7 +23,7 @@ expression: invalid.html
 ```
 invalid.html:3:14 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'foo'.
+  × Duplicate attribute 'foo'.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -51,7 +51,7 @@ invalid.html:3:14 lint/correctness/noDuplicateAttributes ━━━━━━━�
 ```
 invalid.html:5:10 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'Foo'.
+  × Duplicate attribute 'Foo'.
   
     3 │ <div foo="a" foo="b"></div>
     4 │ 
@@ -79,7 +79,7 @@ invalid.html:5:10 lint/correctness/noDuplicateAttributes ━━━━━━━�
 ```
 invalid.html:10:12 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'class'.
+  × Duplicate attribute 'class'.
   
      8 │ <div foo Foo></div>
      9 │ 
@@ -107,7 +107,7 @@ invalid.html:10:12 lint/correctness/noDuplicateAttributes ━━━━━━━�
 ```
 invalid.html:11:12 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'style'.
+  × Duplicate attribute 'style'.
   
     10 │ <div class class></div>
   > 11 │ <div style style></div>

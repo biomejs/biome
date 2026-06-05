@@ -13,9 +13,9 @@ Line 2";
 
 # Diagnostics
 ```
-invalid.js:3:2 lint/suspicious/noMultilineString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:2 lint/style/noMultilineString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This string escapes a newline to span multiple lines.
+  i This string escapes a newline to span multiple lines.
   
     1 │ /* should generate diagnostics */
     2 │ const foo =

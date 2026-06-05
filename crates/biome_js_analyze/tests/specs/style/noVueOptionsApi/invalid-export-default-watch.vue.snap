@@ -23,7 +23,7 @@ export default {
 ```
 invalid-export-default-watch.vue:4:16 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the Options API is not allowed.
+  i Using the Options API is not allowed.
   
      2 │ // should generate diagnostics
      3 │ // Options API: watch is not supported in Vapor Mode

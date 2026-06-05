@@ -13,7 +13,7 @@ new Date()
 ```
 invalid.js:2:1 lint/correctness/noUnusedInstantiation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Using the `new` operator outside of assignments or comparisons is not allowed.
+  × Using the `new` operator outside of assignments or comparisons is not allowed.
   
     1 │ /* should generate diagnostics */
   > 2 │ new Date()

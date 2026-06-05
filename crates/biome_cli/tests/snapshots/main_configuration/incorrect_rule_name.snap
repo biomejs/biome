@@ -185,6 +185,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noJsxLiterals
   - noMagicNumbers
   - noMultiAssign
+  - noMultilineString
   - noNamespace
   - noNegationElse
   - noNestedTernary

@@ -21,7 +21,7 @@ expression: invalid.vue
 ```
 invalid.vue:4:11 lint/correctness/useVueValidVPre  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-pre directive must not have an argument.
+  × The v-pre directive must not have an argument.
   
     3 │ <!-- argument not allowed -->
   > 4 │ <div v-pre:arg></div>
@@ -41,7 +41,7 @@ invalid.vue:4:11 lint/correctness/useVueValidVPre  FIXABLE  ━━━━━━�
 ```
 invalid.vue:7:11 lint/correctness/useVueValidVPre  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-pre directive does not support modifiers.
+  × The v-pre directive does not support modifiers.
   
     6 │ <!-- modifier not allowed -->
   > 7 │ <div v-pre.mod></div>
@@ -61,7 +61,7 @@ invalid.vue:7:11 lint/correctness/useVueValidVPre  FIXABLE  ━━━━━━�
 ```
 invalid.vue:10:11 lint/correctness/useVueValidVPre  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The v-pre directive must not have a value.
+  × The v-pre directive must not have a value.
   
      9 │ <!-- value not allowed -->
   > 10 │ <div v-pre="value"></div>

@@ -21,7 +21,7 @@ query C {
 ```
 invalid.graphql:3:13 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate input field name.
+  × Duplicate input field name.
   
     1 │ # should generate diagnostics
     2 │ query A {
@@ -38,7 +38,7 @@ invalid.graphql:3:13 lint/correctness/noDuplicateInputFieldNames ━━━━━
 ```
 invalid.graphql:6:13 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate input field name.
+  × Duplicate input field name.
   
     4 │ }
     5 │ query B {
@@ -55,7 +55,7 @@ invalid.graphql:6:13 lint/correctness/noDuplicateInputFieldNames ━━━━━
 ```
 invalid.graphql:9:19 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate input field name.
+  × Duplicate input field name.
   
      7 │ }
      8 │ query C {

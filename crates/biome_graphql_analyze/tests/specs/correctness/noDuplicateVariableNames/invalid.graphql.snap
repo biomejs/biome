@@ -15,7 +15,7 @@ query C($x: Int, $x: Int) { __typename }
 ```
 invalid.graphql:2:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate variable name.
+  × Duplicate variable name.
   
     1 │ # should generate diagnostics
   > 2 │ query A($x: Int, $x: Int, $x: String) { __typename }
@@ -31,7 +31,7 @@ invalid.graphql:2:8 lint/correctness/noDuplicateVariableNames ━━━━━━
 ```
 invalid.graphql:3:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate variable name.
+  × Duplicate variable name.
   
     1 │ # should generate diagnostics
     2 │ query A($x: Int, $x: Int, $x: String) { __typename }
@@ -48,7 +48,7 @@ invalid.graphql:3:8 lint/correctness/noDuplicateVariableNames ━━━━━━
 ```
 invalid.graphql:4:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate variable name.
+  × Duplicate variable name.
   
     2 │ query A($x: Int, $x: Int, $x: String) { __typename }
     3 │ query B($x: String, $x: Int) { __typename }

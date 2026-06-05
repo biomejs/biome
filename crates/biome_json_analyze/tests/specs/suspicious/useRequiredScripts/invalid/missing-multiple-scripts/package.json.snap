@@ -17,7 +17,7 @@ expression: package.json
 ```
 package.json:3:3 lint/suspicious/useRequiredScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The required scripts build, lint are missing from package.json.
+  ! The required scripts build, lint are missing from package.json.
   
     1 │ {
     2 │   "name": "test-package",

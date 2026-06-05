@@ -32,7 +32,7 @@ export default {
 ```
 invalid.vue:5:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     3 │ export default {
     4 │   watch: {
@@ -61,7 +61,7 @@ invalid.vue:5:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━
 ```
 invalid.vue:9:16 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
      7 │     },
      8 │     bar: {
@@ -90,7 +90,7 @@ invalid.vue:9:16 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━
 ```
 invalid.vue:13:12 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     11 │       }
     12 │     },
@@ -118,7 +118,7 @@ invalid.vue:13:12 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━�
 ```
 invalid.vue:14:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     12 │     },
     13 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
@@ -146,7 +146,7 @@ invalid.vue:14:10 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━�
 ```
 invalid.vue:15:12 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     13 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
     14 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
@@ -172,7 +172,7 @@ invalid.vue:15:12 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━�
 ```
 invalid.vue:16:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     14 │     qux: async (val, oldVal) => console.log('new: %s, old: %s', val, oldVal),
     15 │     empty: () => { },
@@ -200,7 +200,7 @@ invalid.vue:16:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━�
 ```
 invalid.vue:17:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     15 │     empty: () => { },
     16 │     nobody: () => (foo++),
@@ -226,7 +226,7 @@ invalid.vue:17:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━�
 ```
 invalid.vue:18:13 lint/suspicious/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Found arrow function in Vue watcher definition.
+  ! Found arrow function in Vue watcher definition.
   
     16 │     nobody: () => (foo++),
     17 │     single: x => { /* body */ },

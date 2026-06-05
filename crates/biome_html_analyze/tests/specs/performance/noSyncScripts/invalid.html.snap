@@ -15,7 +15,7 @@ expression: invalid.html
 ```
 invalid.html:2:1 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected synchronous script.
+  ! Unexpected synchronous script.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <script src=""></script>
@@ -31,7 +31,7 @@ invalid.html:2:1 lint/performance/noSyncScripts ━━━━━━━━━━�
 ```
 invalid.html:4:1 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected synchronous script.
+  ! Unexpected synchronous script.
   
     2 │ <script src=""></script>
     3 │ 

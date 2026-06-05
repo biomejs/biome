@@ -31,7 +31,7 @@ function sortRo(x: Readonly<{arr: number[]}>) { x.arr.sort(); }
 ```
 invalid.ts:2:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     1 │ const anyArray: any[] = [];
   > 2 │ anyArray.sort();
@@ -49,7 +49,7 @@ invalid.ts:2:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:3:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     1 │ const anyArray: any[] = [];
     2 │ anyArray.sort();
@@ -68,7 +68,7 @@ invalid.ts:3:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:5:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     3 │ anyArray.toSorted();
     4 │ 
@@ -87,7 +87,7 @@ invalid.ts:5:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:6:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     5 │ anyArray.sort(undefined);
   > 6 │ anyArray.toSorted(undefined);
@@ -105,7 +105,7 @@ invalid.ts:6:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:9:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
      8 │ const stringArray: string[] = [];
    > 9 │ stringArray.sort();
@@ -123,7 +123,7 @@ invalid.ts:9:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:10:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
      8 │ const stringArray: string[] = [];
      9 │ stringArray.sort();
@@ -142,7 +142,7 @@ invalid.ts:10:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:13:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     12 │ declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
   > 13 │ pickedNums.nums.sort();
@@ -160,7 +160,7 @@ invalid.ts:13:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:14:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     12 │ declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
     13 │ pickedNums.nums.sort();
@@ -179,7 +179,7 @@ invalid.ts:14:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:17:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     16 │ declare const omittedNums: Omit<{ nums: number[]; label: string }, "label">;
   > 17 │ omittedNums.nums.sort();
@@ -197,7 +197,7 @@ invalid.ts:17:1 lint/suspicious/useArraySortCompare ━━━━━━━━━�
 ```
 invalid.ts:19:51 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     17 │ omittedNums.nums.sort();
     18 │ 
@@ -216,7 +216,7 @@ invalid.ts:19:51 lint/suspicious/useArraySortCompare ━━━━━━━━━
 ```
 invalid.ts:20:49 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     19 │ function sortReq(x: Required<{arr?: number[]}>) { x.arr.sort(); }
   > 20 │ function sortRo(x: Readonly<{arr: number[]}>) { x.arr.sort(); }

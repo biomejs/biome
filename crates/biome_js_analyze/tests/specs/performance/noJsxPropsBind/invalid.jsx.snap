@@ -36,7 +36,7 @@ function Foo() {
 ```
 invalid.jsx:3:12 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
     1 │ <>
     2 │ 	<Foo
@@ -58,7 +58,7 @@ invalid.jsx:3:12 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:7:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
     5 │ 		}}
     6 │ 	/>
@@ -77,7 +77,7 @@ invalid.jsx:7:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:8:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
      6 │ 	/>
      7 │ 	<Foo onClick={handleClick.bind(this)} />
@@ -96,7 +96,7 @@ invalid.jsx:8:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:9:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
      7 │ 	<Foo onClick={handleClick.bind(this)} />
      8 │ 	<Foo onClick={this._handleClick.bind(this)} />
@@ -115,7 +115,7 @@ invalid.jsx:9:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:14:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
     12 │ function Foo() {
     13 │ 	function onClick() {}
@@ -134,7 +134,7 @@ invalid.jsx:14:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
 ```
 invalid.jsx:19:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
     17 │ function Foo() {
     18 │ 	const onClick = () => {};
@@ -153,7 +153,7 @@ invalid.jsx:19:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
 ```
 invalid.jsx:24:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
   
     22 │ function Foo() {
     23 │ 	const onClick = function () {};

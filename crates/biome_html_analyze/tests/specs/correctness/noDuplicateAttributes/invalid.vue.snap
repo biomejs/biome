@@ -27,7 +27,7 @@ expression: invalid.vue
 ```
 invalid.vue:4:11 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'foo'.
+  × Duplicate attribute 'foo'.
   
     3 │ <template>
   > 4 │ 	<div foo :foo="bar" />
@@ -53,7 +53,7 @@ invalid.vue:4:11 lint/correctness/noDuplicateAttributes ━━━━━━━━
 ```
 invalid.vue:5:22 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'foo'.
+  × Duplicate attribute 'foo'.
   
     3 │ <template>
     4 │ 	<div foo :foo="bar" />
@@ -81,7 +81,7 @@ invalid.vue:5:22 lint/correctness/noDuplicateAttributes ━━━━━━━━
 ```
 invalid.vue:10:13 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'class'.
+  × Duplicate attribute 'class'.
   
      8 │ 	<div v-on:click="a" @click="b" />
      9 │ 
@@ -109,7 +109,7 @@ invalid.vue:10:13 lint/correctness/noDuplicateAttributes ━━━━━━━�
 ```
 invalid.vue:11:13 lint/correctness/noDuplicateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Duplicate attribute 'style'.
+  × Duplicate attribute 'style'.
   
     10 │ 	<div class class :class="a" />
   > 11 │ 	<div style style :style="a" />

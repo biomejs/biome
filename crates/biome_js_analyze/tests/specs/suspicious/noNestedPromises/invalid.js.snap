@@ -40,7 +40,7 @@ doThing()
 ```
 invalid.js:3:31 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     1 │ /* should generate diagnostics */
     2 │ 
@@ -59,7 +59,7 @@ invalid.js:3:31 lint/suspicious/noNestedPromises ━━━━━━━━━━�
 ```
 invalid.js:5:31 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     3 │ doThing().then(function() { a.then() })
     4 │ 
@@ -78,7 +78,7 @@ invalid.js:5:31 lint/suspicious/noNestedPromises ━━━━━━━━━━�
 ```
 invalid.js:7:38 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     5 │ doThing().then(function() { b.catch() })
     6 │ 
@@ -97,7 +97,7 @@ invalid.js:7:38 lint/suspicious/noNestedPromises ━━━━━━━━━━�
 ```
 invalid.js:9:38 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
      7 │ doThing().then(function() { return a.then() })
      8 │ 
@@ -116,7 +116,7 @@ invalid.js:9:38 lint/suspicious/noNestedPromises ━━━━━━━━━━�
 ```
 invalid.js:11:26 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
      9 │ doThing().then(function() { return b.catch() })
     10 │ 
@@ -135,7 +135,7 @@ invalid.js:11:26 lint/suspicious/noNestedPromises ━━━━━━━━━━
 ```
 invalid.js:13:26 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     11 │ doThing().then(() => { a.then() })
     12 │ 
@@ -154,7 +154,7 @@ invalid.js:13:26 lint/suspicious/noNestedPromises ━━━━━━━━━━
 ```
 invalid.js:15:24 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     13 │ doThing().then(() => { b.catch() })
     14 │ 
@@ -173,7 +173,7 @@ invalid.js:15:24 lint/suspicious/noNestedPromises ━━━━━━━━━━
 ```
 invalid.js:17:24 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     15 │ doThing().then(() => a.then())
     16 │ 
@@ -192,7 +192,7 @@ invalid.js:17:24 lint/suspicious/noNestedPromises ━━━━━━━━━━
 ```
 invalid.js:22:6 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     20 │ doThing()
     21 │   .then(a => getB(a)
@@ -211,7 +211,7 @@ invalid.js:22:6 lint/suspicious/noNestedPromises ━━━━━━━━━━�
 ```
 invalid.js:28:8 lint/suspicious/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Avoid nesting promises.
+  ! Avoid nesting promises.
   
     26 │   .then(a => getB(a)
     27 │     .then(b => getC(a, b)

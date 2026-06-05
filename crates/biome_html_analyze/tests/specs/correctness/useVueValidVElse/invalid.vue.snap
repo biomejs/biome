@@ -40,7 +40,7 @@ expression: invalid.vue
 ```
 invalid.vue:5:14 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else must not have an argument.
+  × v-else must not have an argument.
   
     3 │ <template>
     4 │   <!-- v-else with argument -->
@@ -57,7 +57,7 @@ invalid.vue:5:14 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:8:14 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else must not have modifiers.
+  × v-else must not have modifiers.
   
      7 │   <!-- v-else with modifier -->
    > 8 │   <div v-else.mod></div>
@@ -73,7 +73,7 @@ invalid.vue:8:14 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:11:14 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else must not have a value.
+  × v-else must not have a value.
   
     10 │   <!-- v-else with value -->
   > 11 │   <div v-else="value"></div>
@@ -89,7 +89,7 @@ invalid.vue:11:14 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:14:8 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else requires a previous sibling element with v-if or v-else-if.
+  × v-else requires a previous sibling element with v-if or v-else-if.
   
     13 │   <!-- v-else without previous sibling having v-if/v-else-if -->
   > 14 │   <div v-else></div>
@@ -105,7 +105,7 @@ invalid.vue:14:8 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:18:8 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else requires a previous sibling element with v-if or v-else-if.
+  × v-else requires a previous sibling element with v-if or v-else-if.
   
     16 │   <!-- v-else after element without v-if/v-else-if -->
     17 │   <div></div>
@@ -122,7 +122,7 @@ invalid.vue:18:8 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:21:25 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else cannot be used on the same element as v-if or v-else-if.
+  × v-else cannot be used on the same element as v-if or v-else-if.
   
     20 │   <!-- v-else on same element as v-if -->
   > 21 │   <div v-if="condition" v-else></div>
@@ -138,7 +138,7 @@ invalid.vue:21:25 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:24:30 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else cannot be used on the same element as v-if or v-else-if.
+  × v-else cannot be used on the same element as v-if or v-else-if.
   
     23 │   <!-- v-else on same element as v-else-if -->
   > 24 │   <div v-else-if="condition" v-else></div>
@@ -154,7 +154,7 @@ invalid.vue:24:30 lint/correctness/useVueValidVElse ━━━━━━━━━�
 ```
 invalid.vue:29:8 lint/correctness/useVueValidVElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i v-else requires a previous sibling element with v-if or v-else-if.
+  × v-else requires a previous sibling element with v-if or v-else-if.
   
     27 │   <div>Some content</div>
     28 │   

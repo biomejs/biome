@@ -15,7 +15,7 @@ export default {}
 ```
 invalid.vue:3:8 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This Component's name "invalid" only contains one word.
+  i This Component's name "invalid" only contains one word.
   
     1 │ <script>
     2 │ // does not define component name, should grab the name from the file name

@@ -40,7 +40,7 @@ mutation updateUser {
 ```
 invalid.graphql:7:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Operation named "user" is already defined.
+  ! Operation named "user" is already defined.
   
      5 │ }
      6 │ 
@@ -64,7 +64,7 @@ invalid.graphql:7:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━
 ```
 invalid.graphql:19:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Operation named "updateUser" is already defined.
+  ! Operation named "updateUser" is already defined.
   
     17 │ }
     18 │ 
@@ -88,7 +88,7 @@ invalid.graphql:19:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━�
 ```
 invalid.graphql:25:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Operation named "updateUser" is already defined.
+  ! Operation named "updateUser" is already defined.
   
     23 │ }
     24 │ 

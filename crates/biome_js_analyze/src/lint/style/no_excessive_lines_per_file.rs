@@ -10,9 +10,8 @@ use biome_rule_options::no_excessive_lines_per_file::NoExcessiveLinesPerFileOpti
 declare_lint_rule! {
     /// Restrict the number of lines in a file.
     ///
-    /// This rule checks the number of lines in a file and reports a diagnostic if it exceeds a specified limit.
-    /// Some people consider large files a code smell. Large files tend to do many things and can make it hard to follow what's going on.
-    /// Many coding style guides dictate a limit of the number of lines that a file can comprise of. This rule can help enforce that style.
+    /// Large files tend to do many things and can make it hard to follow what's going on.
+    /// This rule can help enforce a limit on the number of lines in a file.
     ///
     /// ## Examples
     ///
@@ -42,8 +41,6 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The following options are available:
-    ///
     /// ### `maxLines`
     ///
     /// This option sets the maximum number of lines allowed in a file.
@@ -51,11 +48,16 @@ declare_lint_rule! {
     ///
     /// Default: `300`
     ///
-    /// When `maxLines: 2`, the following file will be considered invalid:
+    /// #### Examples
+    ///
+    /// The default value for `maxLines` is `300`. The following example shows how to set the
+    /// `maxLines` option to a smaller value. It reports a diagnostic because the file has more
+    /// than 4 lines:
+    ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///        "maxLines": 2
+    ///         "maxLines": 4
     ///     }
     /// }
     /// ```
@@ -63,31 +65,34 @@ declare_lint_rule! {
     /// const a = 1;
     /// const b = 2;
     /// const c = 3;
+    /// const d = 4;
+    /// const e = 5;
     /// ```
     ///
     /// ### `skipBlankLines`
     ///
     /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
-    /// This means that only lines with actual code or comments will be counted.
     ///
     /// Default: `false`
     ///
-    /// When `maxLines: 3` and `skipBlankLines: true`, the following file will be considered valid
-    /// even though it has 5 total lines, because only 3 lines contain code:
+    /// #### Examples
+    ///
+    /// The following example shows how `skipBlankLines` can prevent a diagnostic by excluding blank
+    /// lines from the total count:
+    ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///        "maxLines": 3,
-    ///        "skipBlankLines": true
+    ///         "maxLines": 2,
+    ///         "skipBlankLines": true
     ///     }
     /// }
     /// ```
     /// ```js,use_options
     /// const a = 1;
     ///
-    /// const b = 2;
     ///
-    /// const c = 3;
+    /// const b = 2;
     /// ```
     ///
     /// ## Suppressions
@@ -103,7 +108,7 @@ declare_lint_rule! {
     /// }
     /// ```
     /// ```js,use_options
-    /// // biome-ignore lint/style/noExcessiveLinesPerFile: generated file
+    /// // biome-ignore-all lint/style/noExcessiveLinesPerFile: generated file
     /// const a = 1;
     /// const b = 2;
     /// const c = 3;

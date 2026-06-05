@@ -19,7 +19,7 @@ function test() {
 ```
 index.ts:7:5 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Compare function missing.
+  ! Compare function missing.
   
     5 │ function test() {
     6 │     // Invalid: Number array sorted without compare function

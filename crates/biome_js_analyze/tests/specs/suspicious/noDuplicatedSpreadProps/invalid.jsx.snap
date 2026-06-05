@@ -34,7 +34,7 @@ const Invalid6 = () => {
 ```
 invalid.jsx:2:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
     1 │ const Invalid1 = () => {
   > 2 │ 	return <div {...props} something="else" {...props}></div>
@@ -50,7 +50,7 @@ invalid.jsx:2:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━
 ```
 invalid.jsx:6:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
     5 │ const Invalid2 = () => {
   > 6 │ 	return <div {...foo.bar} {...props} {...props}></div>
@@ -66,7 +66,7 @@ invalid.jsx:6:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━
 ```
 invalid.jsx:10:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
      9 │ const Invalid3 = () => {
   > 10 │ 	return <div {...{}} {...props} {...props}></div>
@@ -82,7 +82,7 @@ invalid.jsx:10:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━�
 ```
 invalid.jsx:14:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
     13 │ const Invalid4 = () => {
   > 14 │ 	return <div {...props} something="else" {...props} />
@@ -98,7 +98,7 @@ invalid.jsx:14:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━�
 ```
 invalid.jsx:18:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
     17 │ const Invalid5 = () => {
   > 18 │ 	return <div {...foo.bar} {...props} {...props} />
@@ -114,7 +114,7 @@ invalid.jsx:18:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━�
 ```
 invalid.jsx:22:9 lint/suspicious/noDuplicatedSpreadProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The expression props has spread more than once.
+  ! The expression props has spread more than once.
   
     21 │ const Invalid6 = () => {
   > 22 │ 	return <div {...{}} {...props} {...props} />
