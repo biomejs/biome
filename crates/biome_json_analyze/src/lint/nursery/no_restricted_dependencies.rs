@@ -71,13 +71,13 @@ impl Rule for NoRestrictedDependencies {
             .skip(1)
             .find_map(JsonMember::cast)?;
         let parent_member_name = parent_member.name().ok()?;
-        let parent_member_name_text = parent_member_name.inner_string_text()?.ok()?;
+        let parent_member_name_text = parent_member_name.inner_string_text()?;
         if !DEPENDENCY_KEYS.contains(&parent_member_name_text.text()) {
             return None;
         }
 
         let name = node.name().ok()?;
-        let name_text = name.inner_string_text()?.ok()?;
+        let name_text = name.inner_string_text()?;
         if find_mapping(name_text.text()).is_some() {
             return Some(());
         }
@@ -88,7 +88,7 @@ impl Rule for NoRestrictedDependencies {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let name = node.name().ok()?;
-        let name_text = name.inner_string_text()?.ok()?;
+        let name_text = name.inner_string_text()?;
         let mapping = find_mapping(name_text.text())?;
 
         let mut diagnostic = RuleDiagnostic::new(
