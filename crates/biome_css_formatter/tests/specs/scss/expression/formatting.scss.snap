@@ -6,6 +6,7 @@ info: scss/expression/formatting.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $map	:(
 a:1 , b:2	);
 	$list:1,
@@ -80,6 +81,7 @@ size:12px;
 # Formatted
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $map: (
 	a: 1,
 	b: 2,
@@ -108,7 +110,7 @@ $list-mixed: 1 2, 3 4;
 
 $paren-nested: ((1 + 2) * 3);
 
-$comparison: $a<=$b and $c>= $d;
+$comparison: $a <= $b and $c >= $d;
 
 $logic: not($a or $b);
 

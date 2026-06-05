@@ -6,6 +6,7 @@ info: scss/parens/parens.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 a {
     prop1: func(1px,1px,1px,func(1px,1px,1px,func(1px,1px,1px)));
     prop2: func( 1px ,1px ,1px ,func( 1px ,1px ,1px ,func( 1px ,1px ,1px ) ) );
@@ -309,7 +310,12 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -67,7 +67,7 @@
+@@ -1,3 +1,4 @@
++// Biome intentionally normalizes spaces around SCSS binary operators.
+ a {
+   prop1: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+   prop2: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+@@ -67,7 +68,7 @@
    content: attr(data-title);
    color: var(--main-bg-color);
    background-color: rgb(255, 0, 0);
@@ -318,7 +324,7 @@ a {
    width: calc(100% - (#{var(--g-spacing)} - #{$iframe-x-padding}) * 2);
    padding-bottom: (
      100% * $image-height /
-@@ -75,7 +75,7 @@
+@@ -75,7 +76,7 @@
    );
    padding-top: var(--paddingC);
    margin: 1 * 1 (1) * 1 1 * (1) (1) * (1);
@@ -327,7 +333,7 @@ a {
    prop1: #{($m) * (10)};
    prop2: #{$m * 10};
    prop3: #{-(-$m) * -(-10)};
-@@ -83,23 +83,23 @@
+@@ -83,50 +84,51 @@
    prop5: -1;
    prop6: word + 1; /* word1 */
    prop7: word - 1; /* word-1 */
@@ -352,16 +358,21 @@ a {
 -  prop22: 2 / @width 2 / @width 2 / @width 2 / @width;
 -  prop23: (@width / 2) (@width / 2) (@width / 2) (@width / 2);
 -  prop24: (2 / @width) (2 / @width) (2 / @width) (2 / @width);
+-  prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
 +  prop21: @width/2 @width /2 @width/ 2 @width / 2;
 +  prop22: 2/@width 2 /@width 2/ @width 2 / @width;
 +  prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
 +  prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
++  prop25-1: #{$width} / #{$width} #{$width} / #{$width} #{$width} / #{$width}
      #{$width} / #{$width};
-   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
-@@ -108,25 +108,25 @@
+-  prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
++  prop25-2: #{$width} * #{$width} #{$width} * #{$width} #{$width} * #{$width}
+     #{$width} * #{$width};
+-  prop25-3: #{$width}+#{$width} #{$width} +#{$width} #{$width}+ #{$width}
++  prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
      #{$width} + #{$width};
-   prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
+-  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
++  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
      #{$width} - #{$width};
 -  prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
 -  prop27: 8px/2px 8px/1 1/2px 1/2;
@@ -371,9 +382,11 @@ a {
 -  prop29: (8px/2px) (8px/1) (1/2px) (1/2);
 +  prop29: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
    prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
-   prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
+-  prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
 -  prop32: func(8px/2);
 -  prop33: 5px + 8px/2px;
++  prop31: (#{$width} / 2px) (8px / #{$width}) (#{$width} / 2px)
++    (8px / #{$width});
 +  prop32: func(8px / 2);
 +  prop33: 5px + 8px / 2px;
    prop34: func(+20px, +20px);
@@ -394,7 +407,7 @@ a {
    prop45: round(1.5) * 2 round(1.5) * 2 round(1.5) * 2 round(1.5) * 2;
    prop46: 2 * round(1.5) 2 * round(1.5) 2 * round(1.5) 2 * round(1.5);
    prop47: (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2);
-@@ -143,14 +143,14 @@
+@@ -143,14 +145,14 @@
    prop62: 2 + $width 2 + $width 2 + $width 2 + $width;
    prop63: ($width + 2) ($width + 2) ($width + 2) ($width + 2);
    prop64: (2 + $width) (2 + $width) (2 + $width) (2 + $width);
@@ -420,6 +433,7 @@ a {
 # Output
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 a {
   prop1: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
   prop2: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
@@ -522,20 +536,21 @@ a {
   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-  prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width}
+  prop25-1: #{$width} / #{$width} #{$width} / #{$width} #{$width} / #{$width}
     #{$width} / #{$width};
-  prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width}
+  prop25-2: #{$width} * #{$width} #{$width} * #{$width} #{$width} * #{$width}
     #{$width} * #{$width};
-  prop25-3: #{$width}+#{$width} #{$width} +#{$width} #{$width}+ #{$width}
+  prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
     #{$width} + #{$width};
-  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
+  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
     #{$width} - #{$width};
   prop26: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop27: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop29: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
-  prop31: (#{$width}/ 2px) (8px /#{$width}) (#{$width} / 2px) (8px / #{$width});
+  prop31: (#{$width} / 2px) (8px / #{$width}) (#{$width} / 2px)
+    (8px / #{$width});
   prop32: func(8px / 2);
   prop33: 5px + 8px / 2px;
   prop34: func(+20px, +20px);
@@ -627,47 +642,47 @@ a {
 
 # Errors
 ```
-parens.scss:119:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:120:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid color
   
-    117 │   color: var(  --main-bg-color  );
-    118 │   background-color: rgb(  255,  0,  0  );
-  > 119 │   background: element(  #css-source  );
+    118 │   color: var(  --main-bg-color  );
+    119 │   background-color: rgb(  255,  0,  0  );
+  > 120 │   background: element(  #css-source  );
         │                          ^
-    120 │   width: calc(  100%  -  (  #{var(--g-spacing)}  -  #{$iframe-x-padding}  )  *  2  );
-    121 │   padding-bottom:
+    121 │   width: calc(  100%  -  (  #{var(--g-spacing)}  -  #{$iframe-x-padding}  )  *  2  );
+    122 │   padding-bottom:
   
-parens.scss:149:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:150:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width/2 @width /2 @width/ 2 @width / 2'.
   
-    147 │   prop19: ($width/2) ($width /2) ($width/ 2) ($width / 2);
-    148 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
-  > 149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    148 │   prop19: ($width/2) ($width /2) ($width/ 2) ($width / 2);
+    149 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
+  > 150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
         │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
   
   i Expected a SCSS expression here.
   
-    147 │   prop19: ($width/2) ($width /2) ($width/ 2) ($width / 2);
-    148 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
-  > 149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    148 │   prop19: ($width/2) ($width /2) ($width/ 2) ($width / 2);
+    149 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
+  > 150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
         │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
   
-parens.scss:150:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:151:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    148 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-  > 150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    149 │   prop20: (2/$width) (2 /$width) (2/ $width) (2 / $width);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+  > 151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
         │             ^
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
   
   i Expected one of:
   
@@ -679,96 +694,96 @@ parens.scss:150:13 parse ━━━━━━━━━━━━━━━━━━�
   - custom property
   - function
   
-parens.scss:151:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:152:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width/2'.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │            ^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
   i Expected a SCSS expression here.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │            ^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
-parens.scss:151:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:152:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width /2'.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                       ^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
   i Expected a SCSS expression here.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                       ^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
-parens.scss:151:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:152:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width/ 2'.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                                   ^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
   i Expected a SCSS expression here.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                                   ^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
-parens.scss:151:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:152:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width / 2'.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                                               ^^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
   i Expected a SCSS expression here.
   
-    149 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-  > 151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+    150 │   prop21: @width/2 @width /2 @width/ 2 @width / 2;
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+  > 152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
         │                                               ^^^^^^^^^^
-    152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
   
-parens.scss:152:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:153:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
-  > 152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+  > 153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
         │              ^
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
-    154 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    155 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
   
   i Expected one of:
   
@@ -780,16 +795,16 @@ parens.scss:152:14 parse ━━━━━━━━━━━━━━━━━━�
   - custom property
   - function
   
-parens.scss:152:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:153:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
-  > 152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+  > 153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
         │                          ^
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
-    154 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    155 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
   
   i Expected one of:
   
@@ -801,16 +816,16 @@ parens.scss:152:26 parse ━━━━━━━━━━━━━━━━━━�
   - custom property
   - function
   
-parens.scss:152:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:153:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
-  > 152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+  > 153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
         │                                      ^
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
-    154 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    155 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
   
   i Expected one of:
   
@@ -822,16 +837,16 @@ parens.scss:152:38 parse ━━━━━━━━━━━━━━━━━━�
   - custom property
   - function
   
-parens.scss:152:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:153:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    150 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
-    151 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
-  > 152 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
+    151 │   prop22: 2/@width 2 /@width 2/ @width 2 / @width;
+    152 │   prop23: (@width/2) (@width /2) (@width/ 2) (@width / 2);
+  > 153 │   prop24: (2/@width) (2 /@width) (2/ @width) (2 / @width);
         │                                                   ^
-    153 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
-    154 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
+    154 │   prop25-1: #{$width}/#{$width} #{$width} /#{$width} #{$width}/ #{$width} #{$width} / #{$width};
+    155 │   prop25-2: #{$width}*#{$width} #{$width} *#{$width} #{$width}* #{$width} #{$width} * #{$width};
   
   i Expected one of:
   
@@ -842,167 +857,167 @@ parens.scss:152:51 parse ━━━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
-parens.scss:281:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.gradient(enabled='false''.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-  
-  i Expected a SCSS expression here.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-  
-parens.scss:281:85 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a SCSS expression but instead found '='#fff''.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                                                                                     ^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-  
-  i Expected a SCSS expression here.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                                                                                     ^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-  
-parens.scss:281:104 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a SCSS expression but instead found '='#000')'.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                                                                                                        ^^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-  
-  i Expected a SCSS expression here.
-  
-    280 │ .bar {
-  > 281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-        │                                                                                                        ^^^^^^^^
-    282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
   
 parens.scss:282:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.Shadow(color='#042b47''.
+  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.gradient(enabled='false''.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
   
   i Expected a SCSS expression here.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
   
-parens.scss:282:80 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:282:85 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '='#fff''.
+  
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                                                                                     ^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  
+  i Expected a SCSS expression here.
+  
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                                                                                     ^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  
+parens.scss:282:104 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '='#000')'.
+  
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                                                                                                        ^^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  
+  i Expected a SCSS expression here.
+  
+    281 │ .bar {
+  > 282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                                                                                                        ^^^^^^^^
+    283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  
+parens.scss:283:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.Shadow(color='#042b47''.
+  
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
+  
+  i Expected a SCSS expression here.
+  
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
+  
+parens.scss:283:80 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '=45'.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                ^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
   i Expected a SCSS expression here.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                ^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
-parens.scss:282:93 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:283:93 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47''.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
   i Expected a SCSS expression here.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
-parens.scss:282:164 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:283:164 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '=135'.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                                                                                                    ^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
   i Expected a SCSS expression here.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                                                                                                    ^^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
-parens.scss:282:178 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parens.scss:283:178 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '=6)'.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                                                                                                                  ^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
   i Expected a SCSS expression here.
   
-    280 │ .bar {
-    281 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  > 282 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    281 │ .bar {
+    282 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 283 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
         │                                                                                                                                                                                  ^^^
-    283 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
-    284 │ }
+    284 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    285 │ }
   
 
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-  191:   filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
-  192:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
-  193:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  193:   filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  194:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+  195:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
 ```
