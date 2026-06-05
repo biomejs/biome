@@ -13564,12 +13564,19 @@ impl AnyCssAttributeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssBracketedValueItem {
     AnyCssCustomIdentifier(AnyCssCustomIdentifier),
+    AnyScssExpression(AnyScssExpression),
     CssGenericDelimiter(CssGenericDelimiter),
 }
 impl AnyCssBracketedValueItem {
     pub fn as_any_css_custom_identifier(&self) -> Option<&AnyCssCustomIdentifier> {
         match &self {
             Self::AnyCssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_scss_expression(&self) -> Option<&AnyScssExpression> {
+        match &self {
+            Self::AnyScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -34176,12 +34183,14 @@ impl From<CssGenericDelimiter> for AnyCssBracketedValueItem {
 }
 impl AstNode for AnyCssBracketedValueItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssCustomIdentifier::KIND_SET.union(CssGenericDelimiter::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssCustomIdentifier::KIND_SET
+        .union(AnyScssExpression::KIND_SET)
+        .union(CssGenericDelimiter::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_GENERIC_DELIMITER => true,
             k if AnyCssCustomIdentifier::can_cast(k) => true,
+            k if AnyScssExpression::can_cast(k) => true,
             _ => false,
         }
     }
@@ -34189,8 +34198,14 @@ impl AstNode for AnyCssBracketedValueItem {
         let res = match syntax.kind() {
             CSS_GENERIC_DELIMITER => Self::CssGenericDelimiter(CssGenericDelimiter { syntax }),
             _ => {
-                if let Some(any_css_custom_identifier) = AnyCssCustomIdentifier::cast(syntax) {
-                    return Some(Self::AnyCssCustomIdentifier(any_css_custom_identifier));
+                let syntax = match AnyCssCustomIdentifier::try_cast(syntax) {
+                    Ok(any_css_custom_identifier) => {
+                        return Some(Self::AnyCssCustomIdentifier(any_css_custom_identifier));
+                    }
+                    Err(syntax) => syntax,
+                };
+                if let Some(any_scss_expression) = AnyScssExpression::cast(syntax) {
+                    return Some(Self::AnyScssExpression(any_scss_expression));
                 }
                 return None;
             }
@@ -34201,12 +34216,14 @@ impl AstNode for AnyCssBracketedValueItem {
         match self {
             Self::CssGenericDelimiter(it) => it.syntax(),
             Self::AnyCssCustomIdentifier(it) => it.syntax(),
+            Self::AnyScssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssGenericDelimiter(it) => it.into_syntax(),
             Self::AnyCssCustomIdentifier(it) => it.into_syntax(),
+            Self::AnyScssExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -34214,6 +34231,7 @@ impl std::fmt::Debug for AnyCssBracketedValueItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34222,6 +34240,7 @@ impl From<AnyCssBracketedValueItem> for SyntaxNode {
     fn from(n: AnyCssBracketedValueItem) -> Self {
         match n {
             AnyCssBracketedValueItem::AnyCssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssBracketedValueItem::AnyScssExpression(it) => it.into_syntax(),
             AnyCssBracketedValueItem::CssGenericDelimiter(it) => it.into_syntax(),
         }
     }

@@ -52,7 +52,13 @@ pub(super) fn parse_scss_binary_expression(
         Absent => return Absent,
     };
 
-    while let Some(prec) = scss_binary_precedence(p) {
+    // `[a / 1 / b]` uses `/` as the bracketed-list separator. Honor caller
+    // delimiters before treating the same token as an infix operator.
+    while !p.at_ts(options.end_ts) {
+        let Some(prec) = scss_binary_precedence(p) else {
+            break;
+        };
+
         if prec < min_prec {
             break;
         }
