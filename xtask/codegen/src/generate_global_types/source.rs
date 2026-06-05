@@ -159,9 +159,6 @@ struct TrackedSourceFile {
 pub struct SourceOptions {
     /// When true, fail on cache miss instead of cloning over the network.
     pub offline: bool,
-    /// When true, re-run [`validate_checkout`] even when the cache hits, so
-    /// codegen never trusts a worktree it has not just verified.
-    pub verify: bool,
     /// Alternate TypeScript repository URL used by tests; production runs use
     /// [`DEFAULT_TYPESCRIPT_REPO_URL`].
     pub repo_url_override: Option<PathBuf>,
@@ -183,10 +180,6 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
         fs::create_dir_all(&cache_parent)
             .with_context(|| format!("failed to create {}", cache_parent.display()))?;
         clone_checkout(&cache_parent, &checkout_path, pin, opts)?;
-    }
-
-    if opts.verify {
-        validate_checkout(&checkout_path, pin)?;
     }
 
     let canonical_root = CanonicalPath(

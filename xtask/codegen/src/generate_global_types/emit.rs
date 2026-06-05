@@ -6,13 +6,12 @@ const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/glob
 /// Emits the global types module with LF-normalized output.
 pub(super) fn emit_global_types(
     pin: &crate::generate_global_types::SourcePin,
-    mode: xtask_glue::Mode,
     workspace_root: &Path,
 ) -> anyhow::Result<crate::UpdateResult> {
     let path = workspace_root.join(OUTPUT_RELATIVE_PATH);
     let formatted =
         xtask_glue::reformat_with_command(generated_body(pin), "just gen-global-types")?;
-    crate::update(&path, &formatted, &mode)
+    crate::update(&path, &formatted, &xtask_glue::Mode::Overwrite)
 }
 
 /// Renders the unformatted Rust body for the generated module.

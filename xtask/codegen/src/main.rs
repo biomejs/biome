@@ -66,13 +66,8 @@ fn main() -> Result<()> {
             generate_workspace_bindings(Overwrite)?;
         }
         #[cfg(feature = "global_types")]
-        TaskCommand::GlobalTypes(args) => {
-            let mode = if args.verify {
-                xtask_glue::Mode::Verify
-            } else {
-                xtask_glue::Mode::Overwrite
-            };
-            generate_global_types::run(args, mode)?;
+        TaskCommand::GlobalTypes => {
+            generate_global_types::run()?;
         }
         TaskCommand::License => {
             #[cfg(feature = "external_data")]

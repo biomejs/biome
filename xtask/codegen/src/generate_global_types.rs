@@ -1,8 +1,6 @@
 //! Code-generator that downloads the TypeScript standard library and emits
 //! Biome's built-in global type declarations.
 
-use crate::GlobalTypesArgs;
-
 use anyhow::bail;
 use std::path::Path;
 
@@ -44,26 +42,24 @@ impl SourcePin {
 
 /// Acquires the pinned TypeScript checkout, parses `libEntries`, walks the
 /// reference closure, and emits `crates/biome_js_type_info/src/generated/global_types.rs`.
-pub fn run(args: GlobalTypesArgs, mode: xtask_glue::Mode) -> anyhow::Result<()> {
+pub fn run() -> anyhow::Result<()> {
     let workspace_root = xtask_glue::project_root();
     let pin = SourcePin::new(DEFAULT_TYPESCRIPT_TAG, DEFAULT_TYPESCRIPT_SHA);
     let opts = source::SourceOptions {
         offline: false,
-        verify: args.verify,
         repo_url_override: None,
     };
-    run_with_workspace_root(&pin, &opts, mode, &workspace_root)
+    run_with_workspace_root(&pin, &opts, &workspace_root)
 }
 
 /// Runs global-types codegen for an explicit source pin and options, writing the
 /// generated module under `workspace_root`.
 ///
-/// Tests drive the real acquire/emit/verify path through this entry point with a
+/// Tests drive the real acquire/emit path through this entry point with a
 /// fixture pin and an isolated output tree.
 pub fn run_with_workspace_root(
     pin: &SourcePin,
     opts: &source::SourceOptions,
-    mode: xtask_glue::Mode,
     workspace_root: &Path,
 ) -> anyhow::Result<()> {
     let checkout = source::acquire(pin, opts)?;
@@ -71,7 +67,7 @@ pub fn run_with_workspace_root(
     let source_files = source::discover(&checkout, &libs, source::PROFILE_ROOTS)?;
     collect_discovered_sources(&source_files)?;
 
-    emit::emit_global_types(checkout.pin(), mode, workspace_root)?;
+    emit::emit_global_types(checkout.pin(), workspace_root)?;
     Ok(())
 }
 

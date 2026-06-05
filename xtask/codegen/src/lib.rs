@@ -87,15 +87,6 @@ pub fn to_capitalized(s: &str) -> String {
     }
 }
 
-/// Arguments for the `global-types` subcommand.
-#[cfg(feature = "global_types")]
-#[derive(Debug, Clone, Bpaf)]
-pub struct GlobalTypesArgs {
-    /// Only verify that the generated file is up-to-date; do not write.
-    #[bpaf(long("verify"), switch)]
-    pub verify: bool,
-}
-
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options)]
 pub enum TaskCommand {
@@ -125,7 +116,7 @@ pub enum TaskCommand {
     /// Generates the built-in global type declarations from the TypeScript standard library.
     #[cfg(feature = "global_types")]
     #[bpaf(command, long("global-types"))]
-    GlobalTypes(#[bpaf(external(global_types_args))] GlobalTypesArgs),
+    GlobalTypes,
     /// It updates the file that contains licenses
     #[bpaf(command)]
     License,

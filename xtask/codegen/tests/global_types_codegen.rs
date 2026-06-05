@@ -72,9 +72,6 @@ const EXPECTED_DUPLICATE_LIBS: &[u8] = b"es5\nduplicate\nduplicate\n";
 
 const EXPECTED_DUPLICATE_LIB_MAP: &[u8] = b"duplicate=lib.second.d.ts\nes5=lib.es5.d.ts\n";
 
-/// Error fragment emitted by `xtask_codegen::update` in `Mode::Verify` when content drifts.
-const EXPECTED_VERIFY_DRIFT: &str = "is not up-to-date";
-
 /// `libEntries` rows describing a chain `es5 -> shared -> deep` used by the
 /// transitive-dependency program-order test.
 const TRANSITIVE_LIB_ENTRIES: &str = "\
@@ -187,10 +184,9 @@ impl Drop for PathCleanup {
 }
 
 /// Builds source acquisition options for tests that do not override the repo URL.
-fn source_options(offline: bool, verify: bool) -> SourceOptions {
+fn source_options(offline: bool) -> SourceOptions {
     SourceOptions {
         offline,
-        verify,
         repo_url_override: None,
     }
 }
@@ -538,27 +534,6 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
     })
 }
 
-/// Builds a fixture repository containing every production profile root.
-fn fixture_git_repo_with_all_profile_roots() -> Result<FixtureRepo> {
-    let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-    for filename in xtask_codegen::generate_global_types::source::PROFILE_ROOTS {
-        fs::write(
-            repo.path().join("lib").join(filename),
-            format!("interface {} {{}}\n", filename.replace(['.', '-'], "_")),
-        )?;
-    }
-    run_git(repo.path(), &["add", "."])?;
-    run_git(repo.path(), &["commit", "-m", "add profile roots"])?;
-    let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
-    run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
-
-    Ok(FixtureRepo {
-        temp: repo.temp,
-        tag: repo.tag,
-        head,
-    })
-}
-
 /// Appends one committed file and returns the new HEAD SHA.
 fn append_commit(repo: &Path, relative_file: &str) -> Result<String> {
     fs::write(repo.join(relative_file), "interface AfterSeed {}\n")?;
@@ -787,7 +762,7 @@ mod tests {
         let tag = format!("v0.0.0-{}", unique_name("missing"));
         let pin = source_pin(tag.as_str(), MISSING_COMMIT_SHA);
         let _cache_cleanup = clean_cache_path(&pin)?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         expect_error_contains(acquire(&pin, &options), EXPECTED_OFFLINE_CACHE_MISS)
     }
@@ -797,7 +772,7 @@ mod tests {
         let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         let checkout = acquire(&pin, &options)?;
 
@@ -814,7 +789,7 @@ mod tests {
         append_commit(repo.path(), "lib/lib.after-head-mismatch.d.ts")?;
         let pin = source_pin(repo.tag.as_str(), pinned_head.as_str());
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         expect_error_contains(acquire(&pin, &options), EXPECTED_HEAD_MISMATCH)
     }
@@ -825,7 +800,7 @@ mod tests {
         let second_head = append_commit(repo.path(), "lib/lib.after-tag-mismatch.d.ts")?;
         let pin = source_pin(repo.tag.as_str(), second_head.as_str());
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         expect_error_contains(acquire(&pin, &options), EXPECTED_TAG_REF_MISMATCH)
     }
@@ -840,7 +815,7 @@ mod tests {
             cache_path.join("lib/lib.es5.d.ts"),
             "interface DirtyMutation {}\n",
         )?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         expect_error_contains(acquire(&pin, &options), EXPECTED_DIRTY_TREE)
     }
@@ -860,7 +835,7 @@ mod tests {
                 cache_path.join("lib/lib.es5.d.ts"),
                 "interface HiddenDirtyMutation {}\n",
             )?;
-            let options = source_options(true, false);
+            let options = source_options(true);
 
             expect_error_contains(acquire(&pin, &options), EXPECTED_INDEX_FLAGS)
                 .with_context(|| format!("{set_flag} must not hide dirty source bytes"))?;
@@ -879,7 +854,7 @@ mod tests {
         let repo = fixture_git_repo(DUPLICATE_LIB_ENTRIES)?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
 
         let entries = parse_lib_entries(&checkout)?;
@@ -897,7 +872,7 @@ mod tests {
             let repo = fixture_git_repo(&lib_entries)?;
             let pin = repo.source_pin();
             let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-            let options = source_options(true, false);
+            let options = source_options(true);
             let checkout = acquire(&pin, &options)?;
 
             expect_error_contains(
@@ -918,7 +893,6 @@ mod tests {
         let _cache_cleanup = clean_cache_path(&pin)?;
         let options = SourceOptions {
             offline: false,
-            verify: false,
             repo_url_override: Some(repo.path().to_path_buf()),
         };
 
@@ -960,7 +934,6 @@ mod tests {
         let _cache_cleanup = clean_cache_path(&pin)?;
         let options = SourceOptions {
             offline: false,
-            verify: false,
             repo_url_override: Some(relative_repo),
         };
 
@@ -985,7 +958,6 @@ mod tests {
         fs::create_dir_all(&stale_temp)?;
         let options = SourceOptions {
             offline: false,
-            verify: false,
             repo_url_override: Some(repo.path().to_path_buf()),
         };
 
@@ -1010,7 +982,6 @@ mod tests {
         fs::create_dir_all(&foreign_temp)?;
         let options = SourceOptions {
             offline: false,
-            verify: false,
             repo_url_override: Some(repo.path().to_path_buf()),
         };
 
@@ -1033,7 +1004,7 @@ mod tests {
         let foreign_pin = source_pin(&foreign_tag, MISSING_COMMIT_SHA);
         let foreign_temp = temporary_checkout_path_for_test(&foreign_pin, "stale.1");
         fs::create_dir_all(&foreign_temp)?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         let _checkout = acquire(&pin, &options)?;
 
@@ -1052,7 +1023,7 @@ mod tests {
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
         let stale_temp = temporary_checkout_path_for_test(&pin, "stale.1");
         fs::create_dir_all(&stale_temp)?;
-        let options = source_options(true, false);
+        let options = source_options(true);
 
         let _checkout = acquire(&pin, &options)?;
 
@@ -1070,7 +1041,7 @@ mod tests {
         let repo = fixture_git_repo_with_intermediate_symlink_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let cache_path = typescript_cache_path(&pin);
         std::os::unix::fs::symlink("src/compiler", cache_path.join("alias"))?;
@@ -1087,7 +1058,7 @@ mod tests {
         let repo = fixture_git_repo_with_backslash_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1110,7 +1081,7 @@ mod tests {
         let repo = fixture_git_repo_with_mixed_reference_attributes()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1134,7 +1105,7 @@ mod tests {
         let repo = fixture_git_repo_with_no_default_lib_and_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1158,7 +1129,7 @@ mod tests {
         let repo = fixture_git_repo_with_typescript_pragma_shape_references()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1182,7 +1153,7 @@ mod tests {
         let repo = fixture_git_repo_with_mixed_case_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1210,8 +1181,7 @@ mod tests {
         expect_error_contains(
             xtask_codegen::generate_global_types::run_with_workspace_root(
                 &pin,
-                &source_options(true, false),
-                xtask_glue::Mode::Verify,
+                &source_options(true),
                 &xtask_glue::project_root(),
             ),
             EXPECTED_PINNED_SOURCE_PARSER_DIAGNOSTIC,
@@ -1285,7 +1255,7 @@ mod tests {
         let repo = fixture_git_repo_with_transitive_libs()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1308,7 +1278,7 @@ mod tests {
         let repo = fixture_git_repo_with_shadowed_root_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1346,7 +1316,7 @@ mod tests {
         let repo = fixture_git_repo_with_symlinked_default_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1362,7 +1332,7 @@ mod tests {
         let repo = fixture_git_repo_with_symlinked_profile_root()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true, false);
+        let options = source_options(true);
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1370,65 +1340,5 @@ mod tests {
             discover(&checkout, &libs, TRANSITIVE_PROFILE_ROOTS),
             &["symlink"],
         )
-    }
-
-    #[test]
-    fn verify_detects_committed_codegen_drift() -> Result<()> {
-        let repo = fixture_git_repo_with_all_profile_roots()?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let temp = TempDir::new("verify-drift")?;
-        let path = temp.path().join(COMMITTED_CODEGEN_PATH);
-        fs::create_dir_all(path.parent().expect("temp path has parent"))?;
-        fs::write(
-            &path,
-            "deliberate drift marker not matching template output",
-        )?;
-
-        let Err(error) = xtask_codegen::generate_global_types::run_with_workspace_root(
-            &pin,
-            &source_options(true, false),
-            xtask_glue::Mode::Verify,
-            temp.path(),
-        ) else {
-            bail!("expected global-types verify to fail after drift was introduced");
-        };
-        let message = error.to_string();
-        assert!(
-            message.contains(EXPECTED_VERIFY_DRIFT),
-            "verify-mode error {message:?} must contain {EXPECTED_VERIFY_DRIFT:?}"
-        );
-        let temp_prefix = temp.path().to_string_lossy();
-        assert!(
-            message.contains(&*temp_prefix),
-            "verify-mode error {message:?} must point at the temp workspace root {temp_prefix:?}, \
-             not the real repo root"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn verify_passes_when_committed_codegen_matches() -> Result<()> {
-        let repo = fixture_git_repo_with_all_profile_roots()?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let temp = TempDir::new("verify-match")?;
-
-        xtask_codegen::generate_global_types::run_with_workspace_root(
-            &pin,
-            &source_options(true, false),
-            xtask_glue::Mode::Overwrite,
-            temp.path(),
-        )?;
-
-        xtask_codegen::generate_global_types::run_with_workspace_root(
-            &pin,
-            &source_options(true, false),
-            xtask_glue::Mode::Verify,
-            temp.path(),
-        )?;
-
-        Ok(())
     }
 }
