@@ -24,6 +24,7 @@ declare_lint_rule! {
     ///
     /// ```vue
     /// <div :foo="bar" />
+    /// <div v-bind="props" />
     /// ```
     ///
     /// ## Options
@@ -78,8 +79,8 @@ impl Rule for UseVueConsistentVBindStyle {
                 if dir.name_token().ok()?.text_trimmed() != "v-bind" {
                     return None;
                 }
-                // If prefer shorthand, normal form is invalid
-                if style == VueDirectiveStyle::Shorthand {
+                // Argument-less v-bind cannot be represented with shorthand syntax.
+                if style == VueDirectiveStyle::Shorthand && dir.arg().is_some() {
                     return Some(node.clone());
                 }
                 None
