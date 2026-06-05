@@ -868,7 +868,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::TypeScriptNoShadow(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.suspicious.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     let options = conf.option_or_default();
                     group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(

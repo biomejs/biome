@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: function_declaration.js
+---
+# Input
+```js
+export function foo() {}
+export default foo;
+```
+
+# Diagnostics
+```
+function_declaration.js:2:16 lint/complexity/noRedundantDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default export exports the same symbol as a named export.
+  
+    1 │ export function foo() {}
+  > 2 │ export default foo;
+      │                ^^^
+  
+  i Exporting the same identifier as both a named export and a default export is redundant.
+  
+  i Remove either the default export or the named export to avoid redundancy.
+  
+
+```

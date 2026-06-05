@@ -49,6 +49,25 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+test1.jsx:10:29 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  
+     8 │     }, []);
+     9 │ 
+  > 10 │     return <button onClick={() => setLocal(1)}>increment</button>;
+       │                             ^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i JSX props should not use arrow functions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+
+```
+
+```block
 test1.jsx:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook does not specify its dependency on local.
@@ -84,4 +103,5 @@ test1.jsx:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```
