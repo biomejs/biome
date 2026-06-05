@@ -29,6 +29,12 @@ expression: valid.vue
   <!-- Additional valid attributes -->
   <input type="text" aria-label="user-name" data-user-id="123" />
 
+  <!-- SVG attributes are not Vue props -->
+  <svg version="1" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#">
+    <rect strokeWidth="2"></rect>
+    <linearGradient gradientUnits="userSpaceOnUse"></linearGradient>
+  </svg>
+
   <!-- Should not apply to other directives -->
   <MyComp v-foo:bar="asdf"></MyComp>
 </template>
