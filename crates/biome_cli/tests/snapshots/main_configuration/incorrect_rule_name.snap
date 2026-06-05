@@ -49,11 +49,17 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   
   - recommended
   - preset
+  - noBeforeInteractiveScriptOutsideDocument
   - noChildrenProp
   - noConstAssign
   - noConstantCondition
   - noConstantMathMinMaxClamp
   - noConstructorReturn
+  - noDuplicateArgumentNames
+  - noDuplicateAttributes
+  - noDuplicateEnumValueNames
+  - noDuplicateInputFieldNames
+  - noDuplicateVariableNames
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
   - noGlobalDirnameFilename
@@ -99,6 +105,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnsafeOptionalChaining
   - noUnusedFunctionParameters
   - noUnusedImports
+  - noUnusedInstantiation
   - noUnusedLabels
   - noUnusedPrivateClassMembers
   - noUnusedVariables
@@ -109,14 +116,17 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noVueReservedKeys
   - noVueReservedProps
   - noVueSetupPropsReactivityLoss
+  - noVueVIfWithVFor
   - useExhaustiveDependencies
   - useGraphqlNamedOperations
   - useHookAtTopLevel
   - useImageSize
   - useImportExtensions
+  - useInlineScriptId
   - useIsNan
   - useJsonImportAttributes
   - useJsxKeyInIterable
+  - useLoneAnonymousOperation
   - useParseIntRadix
   - useQwikClasslist
   - useQwikMethodUsage
@@ -125,6 +135,18 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useUniqueElementIds
   - useValidForDirection
   - useValidTypeof
+  - useVueVForKey
+  - useVueValidTemplateRoot
+  - useVueValidVBind
+  - useVueValidVCloak
+  - useVueValidVElse
+  - useVueValidVElseIf
+  - useVueValidVHtml
+  - useVueValidVIf
+  - useVueValidVOn
+  - useVueValidVOnce
+  - useVueValidVPre
+  - useVueValidVText
   - useYield
   
 
@@ -147,16 +169,22 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - recommended
   - preset
   - noCommonJs
+  - noContinue
   - noDefaultExport
   - noDescendingSpecificity
   - noDoneCallback
   - noEnum
+  - noExcessiveClassesPerFile
+  - noExcessiveLinesPerFile
   - noExportedImports
   - noHeadElement
+  - noHexColors
   - noImplicitBoolean
+  - noIncrementDecrement
   - noInferrableTypes
   - noJsxLiterals
   - noMagicNumbers
+  - noMultiAssign
   - noNamespace
   - noNegationElse
   - noNestedTernary
@@ -167,11 +195,14 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
+  - noRootType
   - noShoutyConstants
   - noSubstr
+  - noTernary
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
+  - noVueOptionsApi
   - noYodaExpression
   - useArrayLiterals
   - useAsConstAssertion
@@ -184,14 +215,19 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
+  - useConsistentEnumValueType
+  - useConsistentGraphqlDescriptions
   - useConsistentMemberAccessibility
+  - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
+  - useDestructuring
   - useEnumInitializers
+  - useErrorCause
   - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
@@ -199,10 +235,13 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
+  - useGlobalThis
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useInputName
   - useLiteralEnumMembers
+  - useLoneExecutableDefinition
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -215,12 +254,18 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useShorthandAssign
   - useShorthandFunctionType
   - useSingleVarDeclarator
+  - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
   - useUnifiedTypeSignatures
+  - useVueConsistentVBindStyle
+  - useVueConsistentVOnStyle
+  - useVueDefineMacrosOrder
+  - useVueHyphenatedAttributes
+  - useVueMultiWordComponentNames
   
 
 ```

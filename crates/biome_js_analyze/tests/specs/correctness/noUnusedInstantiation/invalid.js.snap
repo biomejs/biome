@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+new Date()
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/correctness/noUnusedInstantiation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Using the `new` operator outside of assignments or comparisons is not allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Date()
+      │ ^^^^^^^^^^
+    3 │ 
+  
+  i The created object is thrown away because its reference isn't stored anywhere. Assign the object to a variable or replace with a function that doesn't require `new` to be used.
+  
+
+```

@@ -1,0 +1,46 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: multi-shorthand.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+{
+	fieldA
+}
+{
+	fieldB
+}
+
+```
+
+# Diagnostics
+```
+multi-shorthand.graphql:2:1 lint/correctness/useLoneAnonymousOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Document contains an anonymous operation while defining more than one operation. This anonymous operation must be the only defined operation in this document or turned into a named operation.
+  
+    1 │ # should generate diagnostics
+  > 2 │ {
+      │ ^
+  > 3 │ 	fieldA
+  > 4 │ }
+      │ ^
+    5 │ {
+    6 │ 	fieldB
+  
+  i Another anonymous operation.
+  
+    3 │ 	fieldA
+    4 │ }
+  > 5 │ {
+      │ ^
+  > 6 │ 	fieldB
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i A GraphQL document that contains an anonymous operation (the query short-hand) is only valid if it contains only that one operation definition.
+  
+
+```

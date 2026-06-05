@@ -1,0 +1,181 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed: ${err.message}`);
+}
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  if (true) {
+    throw err;
+  }
+}
+
+try {
+	doSomething();
+} catch {
+	throw new TypeError("Something went wrong");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch ({ message }) {
+  throw new Error(message);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+}
+
+try {
+    doSomething();
+} catch (error) {
+    if (whatever) {
+        const error = anotherError; // This declaration is the problem.
+        throw new Error("Something went wrong", { cause: error });
+    }
+}
+
+try {
+    doSomething();
+} catch (err) {
+	throw new Error("", { cause: otherVar });
+}
+
+
+```
+
+# Diagnostics
+```
+invalid.js:6:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    4 │   throw new Error("Original error");
+    5 │ } catch (err) {
+  > 6 │   throw new Error("Wrapper error");
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+
+```
+
+```
+invalid.js:13:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    11 │   throw new Error("Original error");
+    12 │ } catch (err) {
+  > 13 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+
+```
+
+```
+invalid.js:27:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
+  
+    25 │ 	doSomething();
+    26 │ } catch {
+  > 27 │ 	throw new TypeError("Something went wrong");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+
+```
+
+```
+invalid.js:33:10 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  
+    31 │ try {
+    32 │   throw new Error("Original error");
+  > 33 │ } catch ({ message }) {
+       │          ^^^^^^^^^^^
+    34 │   throw new Error(message);
+    35 │ }
+  
+
+```
+
+```
+invalid.js:41:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    39 │   throw new Error("Original error");
+    40 │ } catch (err) {
+  > 41 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ }
+    43 │ 
+  
+
+```
+
+```
+invalid.js:49:58 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The `cause` property is shadowing the original error from the `catch` clause.
+  
+    47 │     if (whatever) {
+    48 │         const error = anotherError; // This declaration is the problem.
+  > 49 │         throw new Error("Something went wrong", { cause: error });
+       │                                                          ^^^^^
+    50 │     }
+    51 │ }
+  
+  i The original error is declared here.
+  
+    44 │ try {
+    45 │     doSomething();
+  > 46 │ } catch (error) {
+       │          ^^^^^
+    47 │     if (whatever) {
+    48 │         const error = anotherError; // This declaration is the problem.
+  
+
+```
+
+```
+invalid.js:56:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    54 │     doSomething();
+    55 │ } catch (err) {
+  > 56 │ 	throw new Error("", { cause: otherVar });
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ }
+    58 │ 
+  
+
+```

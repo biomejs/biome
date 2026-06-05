@@ -52,16 +52,22 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - recommended
   - preset
   - noCommonJs
+  - noContinue
   - noDefaultExport
   - noDescendingSpecificity
   - noDoneCallback
   - noEnum
+  - noExcessiveClassesPerFile
+  - noExcessiveLinesPerFile
   - noExportedImports
   - noHeadElement
+  - noHexColors
   - noImplicitBoolean
+  - noIncrementDecrement
   - noInferrableTypes
   - noJsxLiterals
   - noMagicNumbers
+  - noMultiAssign
   - noNamespace
   - noNegationElse
   - noNestedTernary
@@ -72,11 +78,14 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
+  - noRootType
   - noShoutyConstants
   - noSubstr
+  - noTernary
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
+  - noVueOptionsApi
   - noYodaExpression
   - useArrayLiterals
   - useAsConstAssertion
@@ -89,14 +98,19 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentArrowReturn
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
+  - useConsistentEnumValueType
+  - useConsistentGraphqlDescriptions
   - useConsistentMemberAccessibility
+  - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
+  - useDestructuring
   - useEnumInitializers
+  - useErrorCause
   - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
@@ -104,10 +118,13 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
+  - useGlobalThis
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useInputName
   - useLiteralEnumMembers
+  - useLoneExecutableDefinition
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -120,12 +137,18 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useShorthandAssign
   - useShorthandFunctionType
   - useSingleVarDeclarator
+  - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
   - useUnifiedTypeSignatures
+  - useVueConsistentVBindStyle
+  - useVueConsistentVOnStyle
+  - useVueDefineMacrosOrder
+  - useVueHyphenatedAttributes
+  - useVueMultiWordComponentNames
   
 
 ```

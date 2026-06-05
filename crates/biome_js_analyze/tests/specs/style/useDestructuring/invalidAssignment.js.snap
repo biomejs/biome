@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssignment.js
+---
+# Input
+```js
+/* should generate diagnostics */
+/* assignment expressions fire by default */
+{
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+{
+	foo = object['foo'];
+}
+
+```
+
+# Diagnostics
+```
+invalidAssignment.js:4:2 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+    2 │ /* assignment expressions fire by default */
+    3 │ {
+  > 4 │ 	foo = array[0];
+      │ 	^^^^^^^^^^^^^^
+    5 │ }
+    6 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+
+```
+
+```
+invalidAssignment.js:7:2 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    5 │ }
+    6 │ {
+  > 7 │ 	foo = object.foo;
+      │ 	^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Wrap the assignment in parentheses to use object destructuring: ({ prop } = object).
+  
+
+```
