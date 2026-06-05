@@ -6,6 +6,7 @@ info: scss/at-rule/while.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
 @while $i>0{
 $i:$i - 1;
 }
@@ -42,7 +43,8 @@ color: red;
 # Formatted
 
 ```scss
-@while $i>0 {
+// Biome intentionally normalizes SCSS comparison operator spacing.
+@while $i > 0 {
 	$i: $i - 1;
 }
 
@@ -99,5 +101,5 @@ color: red;
 
 # Lines exceeding max width of 80 characters
 ```
-   12: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   13: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
 ```
