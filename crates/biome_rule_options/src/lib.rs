@@ -217,6 +217,7 @@ pub mod no_redundant_default_export;
 pub mod no_redundant_roles;
 pub mod no_redundant_use_strict;
 pub mod no_render_return_value;
+pub mod no_restricted_dependencies;
 pub mod no_restricted_elements;
 pub mod no_restricted_globals;
 pub mod no_restricted_imports;

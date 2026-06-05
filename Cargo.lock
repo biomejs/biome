@@ -966,6 +966,7 @@ dependencies = [
  "biome_js_type_info",
  "biome_jsdoc_comment",
  "biome_module_graph",
+ "biome_module_replacements",
  "biome_package",
  "biome_plugin_loader",
  "biome_project_layout",
@@ -1193,6 +1194,7 @@ dependencies = [
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_module_replacements",
  "biome_package",
  "biome_project_layout",
  "biome_rowan",
@@ -1502,6 +1504,13 @@ dependencies = [
  "static_assertions",
  "tikv-jemallocator",
  "walkdir",
+]
+
+[[package]]
+name = "biome_module_replacements"
+version = "0.5.7"
+dependencies = [
+ "phf 0.13.1",
 ]
 
 [[package]]

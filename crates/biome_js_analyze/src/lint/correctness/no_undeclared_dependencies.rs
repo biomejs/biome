@@ -1,4 +1,4 @@
-use crate::services::manifest::Manifest;
+use crate::{services::manifest::Manifest, utils::parse_package_name};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -284,80 +284,9 @@ impl Rule for NoUndeclaredDependencies {
     }
 }
 
-fn parse_package_name(path: &str) -> Option<&str> {
-    let mut in_scope = false;
-    for (i, c) in path.bytes().enumerate() {
-        match c {
-            b'@' if i == 0 => {
-                in_scope = true;
-            }
-            // uppercase characters are not allowed in package name
-            // Here we are more tolerant and accept them.
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
-            b'.' if i != 0 => {}
-            b'/' => {
-                if in_scope {
-                    if i == 1 {
-                        // Invalid empty scope
-                        // `@/`
-                        return None;
-                    } else {
-                        // We consumed the scope.
-                        // `@scope/`
-                        in_scope = false;
-                    }
-                } else if i == 0 {
-                    // absolute path
-                    return None;
-                } else {
-                    // We consumed the package name
-                    return Some(&path[..i]);
-                }
-            }
-            _ => {
-                return None;
-            }
-        }
-    }
-    // Handle cases where only the scope is given. e.g. `@scope/`
-    (!path.ends_with('/')).then_some(path)
-}
-
 fn is_type_import(import: &AnyJsImportLike) -> bool {
     match import.parent::<AnyJsImportClause>() {
         Some(clause) => clause.type_token().is_some(),
         _ => false,
     }
-}
-
-#[test]
-fn test() {
-    assert_eq!(
-        parse_package_name("@scope/package-name"),
-        Some("@scope/package-name")
-    );
-    assert_eq!(
-        parse_package_name("@scope/package-name/path"),
-        Some("@scope/package-name")
-    );
-    assert_eq!(parse_package_name("package_"), Some("package_"));
-    assert_eq!(parse_package_name("package/path"), Some("package"));
-    assert_eq!(parse_package_name("0"), Some("0"));
-    assert_eq!(parse_package_name("0/path"), Some("0"));
-    assert_eq!(parse_package_name("-"), Some("-"));
-    assert_eq!(parse_package_name("-/path"), Some("-"));
-    assert_eq!(parse_package_name("a.js"), Some("a.js"));
-    assert_eq!(parse_package_name("@././file"), Some("@./."));
-
-    // Invalid package names that we accept
-    assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));
-    assert_eq!(parse_package_name("_"), Some("_"));
-
-    // Invalid package names that we reject
-    assert_eq!(parse_package_name("@/path"), None);
-    assert_eq!(parse_package_name("."), None);
-    assert_eq!(parse_package_name("./path"), None);
-    assert_eq!(parse_package_name("#path"), None);
-    assert_eq!(parse_package_name("/path"), None);
-    assert_eq!(parse_package_name("p@ckage/name"), None);
 }

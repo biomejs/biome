@@ -1027,6 +1027,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noRenderReturnValue",
         TypeId::of::<biome_rule_options::no_render_return_value::NoRenderReturnValueOptions>(),
     ));
+    result.push(("nursery", "noRestrictedDependencies", TypeId::of::<biome_rule_options::no_restricted_dependencies::NoRestrictedDependenciesOptions>()));
     result.push((
         "correctness",
         "noRestrictedElements",
