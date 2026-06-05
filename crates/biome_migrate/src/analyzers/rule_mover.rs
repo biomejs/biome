@@ -52,6 +52,10 @@ const RULE_RENAMING: &[(&str, RuleName)] = &[
     ("useUniqueGraphqlOperationName", RuleName::NoDuplicateGraphqlOperationName),
     ("useUniqueInputFieldNames", RuleName::NoDuplicateInputFieldNames),
     ("useUniqueVariableNames", RuleName::NoDuplicateVariableNames),
+    ("noFloatingClasses", RuleName::NoUnusedInstantiation),
+    ("noMultiStr", RuleName::NoMultilineString),
+    ("useFind", RuleName::UseArrayFind),
+    ("useSpread", RuleName::UseSpreadOverApply)
 ];
 
 /// Assist actions that have been renamed.
