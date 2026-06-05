@@ -9189,18 +9189,14 @@ export type Accessibility = "noPublic" | "explicit" | "none";
 export type MethodSignatureStyle = "property" | "method";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentTypeDefinition = "interface" | "type";
-<<<<<<< HEAD
 export interface DestructuringConfig {
 	array?: boolean;
 	object?: boolean;
 }
-||||||| parent of a235772ea3 ([autofix.ci] apply automated fixes)
-=======
 /**
  * The style to apply when exporting types.
  */
 export type UseExportTypeStyle = "auto" | "inlineType" | "separatedType";
->>>>>>> a235772ea3 ([autofix.ci] apply automated fixes)
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
 /**
