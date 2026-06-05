@@ -2524,6 +2524,11 @@ See https://biomejs.dev/linter/rules/no-react-string-refs
 	 */
 	noReactStringRefs?: NoReactStringRefsConfiguration;
 	/**
+	* Disallow dependencies that are known to have better alternatives.
+See https://biomejs.dev/linter/rules/no-restricted-dependencies 
+	 */
+	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
+	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
 	 */
@@ -4716,6 +4721,9 @@ export type NoReactNativeRawTextConfiguration =
 export type NoReactStringRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactStringRefsOptions;
+export type NoRestrictedDependenciesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRestrictedDependenciesOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6583,6 +6591,10 @@ export interface RuleWithNoReactStringRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactStringRefsOptions;
 }
+export interface RuleWithNoRestrictedDependenciesOptions {
+	level: RulePlainConfiguration;
+	options?: NoRestrictedDependenciesOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -8276,6 +8288,7 @@ export interface NoReactNativeRawTextOptions {
 	skip?: string[];
 }
 export type NoReactStringRefsOptions = {};
+export type NoRestrictedDependenciesOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -9588,6 +9601,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
