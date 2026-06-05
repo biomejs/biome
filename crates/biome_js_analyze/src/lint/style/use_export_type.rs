@@ -789,6 +789,7 @@ fn new_named_exports(
     (export_type, export_value)
 }
 
+#[expect(clippy::too_many_arguments)]
 fn new_named_from_exports(
     export_token: JsSyntaxToken,
     named_type_specifiers: JsExportNamedFromSpecifierList,
