@@ -2284,6 +2284,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-attributes
 	 */
 	noDuplicateAttributes?: NoDuplicateAttributesConfiguration;
 	/**
+	* Disallow duplicate conditions in Svelte {#if} / {:else if} chains.
+See https://biomejs.dev/linter/rules/no-duplicate-else-if 
+	 */
+	noDuplicateElseIf?: NoDuplicateElseIfConfiguration;
+	/**
 	* Require all enum value names to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-enum-value-names 
 	 */
@@ -2548,6 +2553,16 @@ See https://biomejs.dev/linter/rules/no-script-url
 See https://biomejs.dev/linter/rules/no-shadow 
 	 */
 	noShadow?: NoShadowConfiguration;
+	/**
+	* Disallow duplicate style: directives on the same Svelte element.
+See https://biomejs.dev/linter/rules/no-svelte-duplicate-style-properties 
+	 */
+	noSvelteDuplicateStyleProperties?: NoSvelteDuplicateStylePropertiesConfiguration;
+	/**
+	* Disallow duplicate use: directives on the same Svelte element.
+See https://biomejs.dev/linter/rules/no-svelte-duplicate-use-directives 
+	 */
+	noSvelteDuplicateUseDirectives?: NoSvelteDuplicateUseDirectivesConfiguration;
 	/**
 	* Prevent the usage of synchronous scripts.
 See https://biomejs.dev/linter/rules/no-sync-scripts 
@@ -4572,6 +4587,9 @@ export type NoDuplicateArgumentNamesConfiguration =
 export type NoDuplicateAttributesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateAttributesOptions;
+export type NoDuplicateElseIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateElseIfOptions;
 export type NoDuplicateEnumValueNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateEnumValueNamesOptions;
@@ -4731,6 +4749,12 @@ export type NoScriptUrlConfiguration =
 export type NoShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShadowOptions;
+export type NoSvelteDuplicateStylePropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteDuplicateStylePropertiesOptions;
+export type NoSvelteDuplicateUseDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteDuplicateUseDirectivesOptions;
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
@@ -5349,9 +5373,6 @@ export type NoDuplicateCustomPropertiesConfiguration =
 export type NoDuplicateDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateDependenciesOptions;
-export type NoDuplicateElseIfConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoDuplicateElseIfOptions;
 export type NoDuplicateFieldsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateFieldsOptions;
@@ -6378,6 +6399,10 @@ export interface RuleWithNoDuplicateAttributesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateAttributesOptions;
 }
+export interface RuleWithNoDuplicateElseIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateElseIfOptions;
+}
 export interface RuleWithNoDuplicateEnumValueNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateEnumValueNamesOptions;
@@ -6599,6 +6624,14 @@ export interface RuleWithNoScriptUrlOptions {
 export interface RuleWithNoShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoShadowOptions;
+}
+export interface RuleWithNoSvelteDuplicateStylePropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteDuplicateStylePropertiesOptions;
+}
+export interface RuleWithNoSvelteDuplicateUseDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteDuplicateUseDirectivesOptions;
 }
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
@@ -7511,10 +7544,6 @@ export interface RuleWithNoDuplicateDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateDependenciesOptions;
 }
-export interface RuleWithNoDuplicateElseIfOptions {
-	level: RulePlainConfiguration;
-	options?: NoDuplicateElseIfOptions;
-}
 export interface RuleWithNoDuplicateFieldsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateFieldsOptions;
@@ -8210,6 +8239,12 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 }
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
+/**
+	* Options for the `noDuplicateElseIf` rule.
+
+This rule currently has no configurable options. 
+	 */
+export type NoDuplicateElseIfOptions = {};
 export type NoDuplicateEnumValueNamesOptions = {};
 export type NoDuplicateEnumValuesOptions = {};
 export type NoDuplicateFieldDefinitionNamesOptions = {};
@@ -8325,6 +8360,18 @@ Defaults to `true`.
 	 */
 	ignoreTypeValueShadow?: boolean;
 }
+/**
+	* Options for the `noSvelteDuplicateStyleProperties` rule.
+
+This rule currently has no configurable options. 
+	 */
+export type NoSvelteDuplicateStylePropertiesOptions = {};
+/**
+	* Options for the `noSvelteDuplicateUseDirectives` rule.
+
+This rule currently has no configurable options. 
+	 */
+export type NoSvelteDuplicateUseDirectivesOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -8959,7 +9006,6 @@ export type NoDuplicateCaseOptions = {};
 export type NoDuplicateClassMembersOptions = {};
 export type NoDuplicateCustomPropertiesOptions = {};
 export type NoDuplicateDependenciesOptions = {};
-export type NoDuplicateElseIfOptions = {};
 export type NoDuplicateFieldsOptions = {};
 export type NoDuplicateFontNamesOptions = {};
 export type NoDuplicateJsxPropsOptions = {};
@@ -9572,6 +9618,9 @@ export type Category =
 	| "lint/nursery/noDivRegex"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noSvelteDuplicateStyleProperties"
+	| "lint/nursery/noSvelteDuplicateUseDirectives"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateEnumValueNames"

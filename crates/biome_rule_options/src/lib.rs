@@ -240,6 +240,8 @@ pub mod no_static_only_class;
 pub mod no_string_case_mismatch;
 pub mod no_substr;
 pub mod no_suspicious_semicolon_in_jsx;
+pub mod no_svelte_duplicate_style_properties;
+pub mod no_svelte_duplicate_use_directives;
 pub mod no_svg_without_title;
 pub mod no_switch_declarations;
 pub mod no_sync_scripts;

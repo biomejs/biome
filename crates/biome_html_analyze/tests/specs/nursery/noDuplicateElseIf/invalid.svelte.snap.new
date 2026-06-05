@@ -1,0 +1,127 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 77
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+{#if a}
+  <div>a</div>
+{:else if b}
+  <div>b</div>
+{:else if a}
+  <div>a again</div>
+{/if}
+
+{#if x === 1}
+  <div>one</div>
+{:else if x === 2}
+  <div>two</div>
+{:else if x === 1}
+  <div>one again</div>
+{/if}
+
+{#if foo}
+  <div>foo</div>
+{:else if bar}
+  <div>bar</div>
+{:else if foo}
+  <div>foo again</div>
+{:else if baz}
+  <div>baz</div>
+{/if}
+
+```
+
+# Diagnostics
+```
+invalid.svelte:7:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This branch can never execute. Its condition a is a duplicate of a previous condition.
+  
+     5 │ {:else if b}
+     6 │   <div>b</div>
+   > 7 │ {:else if a}
+       │ ^^^^^^^^^^^^
+   > 8 │   <div>a again</div>
+       │   ^^^^^^^^^^^^^^^^^^
+     9 │ {/if}
+    10 │ 
+  
+  i This is the first occurrence of the condition.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ {#if a}
+      │      ^
+    4 │   <div>a</div>
+    5 │ {:else if b}
+  
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This branch can never execute. Its condition x === 1 is a duplicate of a previous condition.
+  
+    13 │ {:else if x === 2}
+    14 │   <div>two</div>
+  > 15 │ {:else if x === 1}
+       │ ^^^^^^^^^^^^^^^^^^
+  > 16 │   <div>one again</div>
+       │   ^^^^^^^^^^^^^^^^^^^^
+    17 │ {/if}
+    18 │ 
+  
+  i This is the first occurrence of the condition.
+  
+     9 │ {/if}
+    10 │ 
+  > 11 │ {#if x === 1}
+       │      ^^^^^^^
+    12 │   <div>one</div>
+    13 │ {:else if x === 2}
+  
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:23:1 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This branch can never execute. Its condition foo is a duplicate of a previous condition.
+  
+    21 │ {:else if bar}
+    22 │   <div>bar</div>
+  > 23 │ {:else if foo}
+       │ ^^^^^^^^^^^^^^
+  > 24 │   <div>foo again</div>
+       │   ^^^^^^^^^^^^^^^^^^^^
+    25 │ {:else if baz}
+    26 │   <div>baz</div>
+  
+  i This is the first occurrence of the condition.
+  
+    17 │ {/if}
+    18 │ 
+  > 19 │ {#if foo}
+       │      ^^^
+    20 │   <div>foo</div>
+    21 │ {:else if bar}
+  
+  i Remove the duplicate {:else if} branch or change its condition to make it reachable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

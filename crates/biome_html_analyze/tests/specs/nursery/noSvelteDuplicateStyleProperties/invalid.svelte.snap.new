@@ -1,0 +1,99 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 77
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<div style:color="red" style:color="blue"></div>
+
+<span style:font-size="12px" style:font-size="16px"></span>
+
+<button style:background="green" style:color="white" style:background="red"></button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:24 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate style: directive for property color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div style:color="red" style:color="blue"></div>
+      │                        ^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <span style:font-size="12px" style:font-size="16px"></span>
+  
+  i This is the first occurrence of the directive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <div style:color="red" style:color="blue"></div>
+      │      ^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <span style:font-size="12px" style:font-size="16px"></span>
+  
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:30 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate style: directive for property font-size.
+  
+    3 │ <div style:color="red" style:color="blue"></div>
+    4 │ 
+  > 5 │ <span style:font-size="12px" style:font-size="16px"></span>
+      │                              ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <button style:background="green" style:color="white" style:background="red"></button>
+  
+  i This is the first occurrence of the directive.
+  
+    3 │ <div style:color="red" style:color="blue"></div>
+    4 │ 
+  > 5 │ <span style:font-size="12px" style:font-size="16px"></span>
+      │       ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <button style:background="green" style:color="white" style:background="red"></button>
+  
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:54 lint/nursery/noSvelteDuplicateStyleProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Duplicate style: directive for property background.
+  
+    5 │ <span style:font-size="12px" style:font-size="16px"></span>
+    6 │ 
+  > 7 │ <button style:background="green" style:color="white" style:background="red"></button>
+      │                                                      ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i This is the first occurrence of the directive.
+  
+    5 │ <span style:font-size="12px" style:font-size="16px"></span>
+    6 │ 
+  > 7 │ <button style:background="green" style:color="white" style:background="red"></button>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Only the last style: directive for a property takes effect. Remove the duplicate directive or rename it to target a different property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
