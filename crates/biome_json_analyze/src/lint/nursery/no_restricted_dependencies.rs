@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue};
+use biome_json_syntax::JsonMember;
 use biome_module_replacements::{
     ModuleReplacement, find_mapping, find_replacement, resolve_doc_url,
 };
@@ -65,9 +65,11 @@ impl Rule for NoRestrictedDependencies {
 
         let node = ctx.query();
 
-        let parent_member_list = JsonMemberList::cast(node.syntax().parent()?)?;
-        let parent_object = JsonObjectValue::cast(parent_member_list.syntax().parent()?)?;
-        let parent_member = JsonMember::cast(parent_object.syntax().parent()?)?;
+        let parent_member = node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsonMember::cast)?;
         let parent_member_name = parent_member.name().ok()?;
         let parent_member_name_text = parent_member_name.inner_string_text()?.ok()?;
         if !DEPENDENCY_KEYS.contains(&parent_member_name_text.text()) {
@@ -96,7 +98,7 @@ impl Rule for NoRestrictedDependencies {
                 "Use of the restricted dependency "<Emphasis>{mapping.module_name}</Emphasis>" detected."
             },
         ).note(markup! {
-            "The dependency can be replaced with a modern, native, or more maintainable alternative."
+            "The dependency might be old, not actively maintained, or there's a native alternative."
         });
 
         let mut replacement_text = if mapping.replacements.len() > 1 {

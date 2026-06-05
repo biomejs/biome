@@ -96,7 +96,7 @@ impl Rule for NoRestrictedDependencies {
                 "Use of the restricted dependency "<Emphasis>{mapping.module_name}</Emphasis>" detected."
             },
         ).note(markup! {
-            "The dependency can be replaced with a modern, native, or more maintainable alternative."
+            "The dependency might be old, not actively maintained, or there's a native alternative."
         });
 
         let mut replacement_text = if mapping.replacements.len() > 1 {

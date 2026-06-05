@@ -20,7 +20,7 @@ invalid.ts:2:26 lint/nursery/noRestrictedDependencies ━━━━━━━━�
       │                          ^^^^^^^^^^^
     3 │ 
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.

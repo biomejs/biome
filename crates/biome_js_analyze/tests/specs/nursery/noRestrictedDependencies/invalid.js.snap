@@ -36,7 +36,7 @@ invalid.js:4:26 lint/nursery/noRestrictedDependencies ━━━━━━━━�
     5 │ 
     6 │ import invalid2 from 'is-number';
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -58,7 +58,7 @@ invalid.js:6:22 lint/nursery/noRestrictedDependencies ━━━━━━━━�
     7 │ 
     8 │ const invalid3 = await import('is-number');
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -80,7 +80,7 @@ invalid.js:8:31 lint/nursery/noRestrictedDependencies ━━━━━━━━�
      9 │ 
     10 │ // Native
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacement is suggested:
     - Replace with inline or local logic. You can check if a value is a number by using `typeof` or coercing it to a number and using `Number.isFinite`.
@@ -101,7 +101,7 @@ invalid.js:11:22 lint/nursery/noRestrictedDependencies ━━━━━━━━�
     12 │ 
     13 │ // Documented
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacement is suggested:
     - Remove the dependency in favor of a native implementation Object.entries.
@@ -122,7 +122,7 @@ invalid.js:14:22 lint/nursery/noRestrictedDependencies ━━━━━━━━�
     15 │ 
     16 │ // Removal
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacements are suggested:
     - Replace with the alternative: npm-run-all2.
@@ -146,7 +146,7 @@ invalid.js:17:22 lint/nursery/noRestrictedDependencies ━━━━━━━━�
        │                      ^^^^^^^^^^^^^
     18 │ 
   
-  i The dependency can be replaced with a modern, native, or more maintainable alternative.
+  i The dependency might be old, not actively maintained, or there's a native alternative.
   
   i The following replacements are suggested:
     - Remove the dependency as it's no longer needed. `Object.entries` and `Array.prototype.sort` can be used to sort object keys.
