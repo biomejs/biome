@@ -25,24 +25,6 @@ const TEMP_REPO_PREFIX: &str = "bgt";
 
 const FIXTURE_TAG_PREFIX: &str = "v0.0.0";
 
-/// A non-existent commit-like value used to isolate cache-miss tests.
-const MISSING_COMMIT_SHA: &str = "0000000000000000000000000000000000000000";
-
-/// Error text expected when offline mode cannot use a populated cache.
-const EXPECTED_OFFLINE_CACHE_MISS: &str = "offline";
-
-/// Error text expected when the cached checkout HEAD differs from the pin.
-const EXPECTED_HEAD_MISMATCH: &str = "HEAD mismatch";
-
-/// Error text expected when the cached checkout tag ref differs from the pin.
-const EXPECTED_TAG_REF_MISMATCH: &str = "tag-ref mismatch";
-
-/// Error text expected when the cached checkout has uncommitted modifications.
-const EXPECTED_DIRTY_TREE: &str = "uncommitted modifications";
-
-/// Error text expected when local git index flags would hide worktree changes.
-const EXPECTED_INDEX_FLAGS: &str = "index flags";
-
 /// Error text expected when `libEntries` contains a non-basename declaration filename.
 const EXPECTED_INVALID_LIB_ENTRY_FILENAME: &str = "libEntries filename";
 
@@ -182,15 +164,6 @@ impl Drop for PathCleanup {
         let _ = fs::remove_dir_all(&self.path);
     }
 }
-
-/// Builds source acquisition options for tests that do not override the repo URL.
-fn source_options(offline: bool) -> SourceOptions {
-    SourceOptions {
-        offline,
-        repo_url_override: None,
-    }
-}
-
 /// Builds a source pin from fixture tag/SHA values.
 fn source_pin(tag: &str, sha: &str) -> SourcePin {
     SourcePin::new(tag, sha)
@@ -533,15 +506,6 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
         head,
     })
 }
-
-/// Appends one committed file and returns the new HEAD SHA.
-fn append_commit(repo: &Path, relative_file: &str) -> Result<String> {
-    fs::write(repo.join(relative_file), "interface AfterSeed {}\n")?;
-    run_git(repo, &["add", "."])?;
-    run_git(repo, &["commit", "-m", "append fixture commit"])?;
-    git_stdout_trimmed(repo, &["rev-parse", "HEAD"])
-}
-
 /// Seeds the TypeScript cache from a fixture repository using a real git clone.
 fn seed_cache_from_repo(pin: &SourcePin, repo: &Path) -> Result<PathCleanup> {
     let cache_path = typescript_cache_path(pin);
@@ -576,24 +540,6 @@ fn typescript_cache_path(pin: &SourcePin) -> PathBuf {
         .join("biome-global-types")
         .join(format!("{}-{}", pin.tag(), pin.sha()))
 }
-
-/// Returns a production-shaped temporary checkout path for stale-cleanup tests.
-fn temporary_checkout_path_for_test(pin: &SourcePin, filename: &str) -> PathBuf {
-    let cache_path = typescript_cache_path(pin);
-    let cache_parent = cache_path
-        .parent()
-        .expect("cache path should have a parent");
-    cache_parent
-        .join(".tmp")
-        .join(temporary_checkout_namespace_for_test(pin))
-        .join(filename)
-}
-
-/// Mirrors production's cache-key namespace for temporary checkout directories.
-fn temporary_checkout_namespace_for_test(pin: &SourcePin) -> String {
-    format!("{}-{}", pin.tag(), pin.sha())
-}
-
 /// Runs git in `cwd` and returns stdout bytes on success.
 fn run_git(cwd: &Path, args: &[&str]) -> Result<Vec<u8>> {
     let output = Command::new("git").args(args).current_dir(cwd).output()?;
@@ -756,105 +702,12 @@ mod tests {
 
         Ok(())
     }
-
-    #[test]
-    fn offline_cache_miss_fails() -> Result<()> {
-        let tag = format!("v0.0.0-{}", unique_name("missing"));
-        let pin = source_pin(tag.as_str(), MISSING_COMMIT_SHA);
-        let _cache_cleanup = clean_cache_path(&pin)?;
-        let options = source_options(true);
-
-        expect_error_contains(acquire(&pin, &options), EXPECTED_OFFLINE_CACHE_MISS)
-    }
-
-    #[test]
-    fn seeded_offline_cache_succeeds() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
-
-        let checkout = acquire(&pin, &options)?;
-
-        assert_eq!(checkout.pin().tag().as_bytes(), repo.tag.as_bytes());
-        assert_eq!(checkout.pin().sha().as_bytes(), repo.head.as_bytes());
-
-        Ok(())
-    }
-
-    #[test]
-    fn cache_hit_head_mismatch_fails() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pinned_head = repo.head.clone();
-        append_commit(repo.path(), "lib/lib.after-head-mismatch.d.ts")?;
-        let pin = source_pin(repo.tag.as_str(), pinned_head.as_str());
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
-
-        expect_error_contains(acquire(&pin, &options), EXPECTED_HEAD_MISMATCH)
-    }
-
-    #[test]
-    fn tag_commit_mismatch_fails() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let second_head = append_commit(repo.path(), "lib/lib.after-tag-mismatch.d.ts")?;
-        let pin = source_pin(repo.tag.as_str(), second_head.as_str());
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
-
-        expect_error_contains(acquire(&pin, &options), EXPECTED_TAG_REF_MISMATCH)
-    }
-
-    #[test]
-    fn cache_hit_dirty_tree_fails() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = source_pin(repo.tag.as_str(), repo.head.as_str());
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let cache_path = typescript_cache_path(&pin);
-        fs::write(
-            cache_path.join("lib/lib.es5.d.ts"),
-            "interface DirtyMutation {}\n",
-        )?;
-        let options = source_options(true);
-
-        expect_error_contains(acquire(&pin, &options), EXPECTED_DIRTY_TREE)
-    }
-
-    #[test]
-    fn cache_hit_index_flags_do_not_hide_dirty_tree() -> Result<()> {
-        for (set_flag, clear_flag) in [
-            ("--assume-unchanged", "--no-assume-unchanged"),
-            ("--skip-worktree", "--no-skip-worktree"),
-        ] {
-            let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-            let pin = source_pin(repo.tag.as_str(), repo.head.as_str());
-            let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-            let cache_path = typescript_cache_path(&pin);
-            run_git(&cache_path, &["update-index", set_flag, "lib/lib.es5.d.ts"])?;
-            fs::write(
-                cache_path.join("lib/lib.es5.d.ts"),
-                "interface HiddenDirtyMutation {}\n",
-            )?;
-            let options = source_options(true);
-
-            expect_error_contains(acquire(&pin, &options), EXPECTED_INDEX_FLAGS)
-                .with_context(|| format!("{set_flag} must not hide dirty source bytes"))?;
-
-            let _ = run_git(
-                &cache_path,
-                &["update-index", clear_flag, "lib/lib.es5.d.ts"],
-            );
-        }
-
-        Ok(())
-    }
-
     #[test]
     fn duplicate_lib_entries_preserve_order_and_last_write_wins() -> Result<()> {
         let repo = fixture_git_repo(DUPLICATE_LIB_ENTRIES)?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
 
         let entries = parse_lib_entries(&checkout)?;
@@ -872,7 +725,7 @@ mod tests {
             let repo = fixture_git_repo(&lib_entries)?;
             let pin = repo.source_pin();
             let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-            let options = source_options(true);
+            let options = SourceOptions::default();
             let checkout = acquire(&pin, &options)?;
 
             expect_error_contains(
@@ -884,27 +737,6 @@ mod tests {
 
         Ok(())
     }
-
-    #[test]
-    fn failed_clone_validation_does_not_poison_cache() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let second_head = append_commit(repo.path(), "lib/lib.after-clone-validation.d.ts")?;
-        let pin = source_pin(repo.tag.as_str(), second_head.as_str());
-        let _cache_cleanup = clean_cache_path(&pin)?;
-        let options = SourceOptions {
-            offline: false,
-            repo_url_override: Some(repo.path().to_path_buf()),
-        };
-
-        expect_error_contains(acquire(&pin, &options), EXPECTED_HEAD_MISMATCH)?;
-        assert!(
-            !typescript_cache_path(&pin).exists(),
-            "failed temp validation must not leave a poisoned cache directory behind"
-        );
-
-        Ok(())
-    }
-
     #[test]
     fn repo_url_override_accepts_dash_prefixed_relative_paths() -> Result<()> {
         let relative_repo = PathBuf::from(unique_name("-bgt"));
@@ -933,7 +765,6 @@ mod tests {
         let pin = source_pin(tag.as_str(), head.as_str());
         let _cache_cleanup = clean_cache_path(&pin)?;
         let options = SourceOptions {
-            offline: false,
             repo_url_override: Some(relative_repo),
         };
 
@@ -943,105 +774,13 @@ mod tests {
 
         Ok(())
     }
-
-    #[test]
-    fn acquire_removes_stale_temporary_checkouts_for_pin() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = clean_cache_path(&pin)?;
-        let cache_path = typescript_cache_path(&pin);
-        let cache_parent = cache_path
-            .parent()
-            .context("cache path should have a parent")?;
-        fs::create_dir_all(cache_parent)?;
-        let stale_temp = temporary_checkout_path_for_test(&pin, "stale.0");
-        fs::create_dir_all(&stale_temp)?;
-        let options = SourceOptions {
-            offline: false,
-            repo_url_override: Some(repo.path().to_path_buf()),
-        };
-
-        let _checkout = acquire(&pin, &options)?;
-
-        assert!(
-            !stale_temp.exists(),
-            "acquire should remove stale temp checkout dirs for the same pin"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn acquire_keeps_temporary_checkouts_for_other_pins() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = clean_cache_path(&pin)?;
-        let foreign_tag = format!("{}-{}.extra", pin.tag(), pin.sha());
-        let foreign_pin = source_pin(&foreign_tag, MISSING_COMMIT_SHA);
-        let foreign_temp = temporary_checkout_path_for_test(&foreign_pin, "stale.0");
-        fs::create_dir_all(&foreign_temp)?;
-        let options = SourceOptions {
-            offline: false,
-            repo_url_override: Some(repo.path().to_path_buf()),
-        };
-
-        let _checkout = acquire(&pin, &options)?;
-
-        assert!(
-            foreign_temp.exists(),
-            "acquire must not remove temporary checkout dirs owned by another pin"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn cache_hit_keeps_temporary_checkouts_for_other_pins() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let foreign_tag = format!("{}-{}.extra", pin.tag(), pin.sha());
-        let foreign_pin = source_pin(&foreign_tag, MISSING_COMMIT_SHA);
-        let foreign_temp = temporary_checkout_path_for_test(&foreign_pin, "stale.1");
-        fs::create_dir_all(&foreign_temp)?;
-        let options = source_options(true);
-
-        let _checkout = acquire(&pin, &options)?;
-
-        assert!(
-            foreign_temp.exists(),
-            "cache hits must not remove temporary checkout dirs owned by another pin"
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn acquire_removes_stale_temporary_checkouts_on_cache_hit() -> Result<()> {
-        let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
-        let pin = repo.source_pin();
-        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let stale_temp = temporary_checkout_path_for_test(&pin, "stale.1");
-        fs::create_dir_all(&stale_temp)?;
-        let options = source_options(true);
-
-        let _checkout = acquire(&pin, &options)?;
-
-        assert!(
-            !stale_temp.exists(),
-            "cache hits should also remove stale temp checkout dirs for the same pin"
-        );
-
-        Ok(())
-    }
-
     #[cfg(unix)]
     #[test]
     fn path_references_reject_untracked_intermediate_symlink_dirs() -> Result<()> {
         let repo = fixture_git_repo_with_intermediate_symlink_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let cache_path = typescript_cache_path(&pin);
         std::os::unix::fs::symlink("src/compiler", cache_path.join("alias"))?;
@@ -1058,7 +797,7 @@ mod tests {
         let repo = fixture_git_repo_with_backslash_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1081,7 +820,7 @@ mod tests {
         let repo = fixture_git_repo_with_mixed_reference_attributes()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1105,7 +844,7 @@ mod tests {
         let repo = fixture_git_repo_with_no_default_lib_and_path_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1129,7 +868,7 @@ mod tests {
         let repo = fixture_git_repo_with_typescript_pragma_shape_references()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1153,7 +892,7 @@ mod tests {
         let repo = fixture_git_repo_with_mixed_case_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1181,7 +920,7 @@ mod tests {
         expect_error_contains(
             xtask_codegen::generate_global_types::run_with_workspace_root(
                 &pin,
-                &source_options(true),
+                &SourceOptions::default(),
                 &xtask_glue::project_root(),
             ),
             EXPECTED_PINNED_SOURCE_PARSER_DIAGNOSTIC,
@@ -1255,7 +994,7 @@ mod tests {
         let repo = fixture_git_repo_with_transitive_libs()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1278,7 +1017,7 @@ mod tests {
         let repo = fixture_git_repo_with_shadowed_root_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1316,7 +1055,7 @@ mod tests {
         let repo = fixture_git_repo_with_symlinked_default_lib_reference()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 
@@ -1332,7 +1071,7 @@ mod tests {
         let repo = fixture_git_repo_with_symlinked_profile_root()?;
         let pin = repo.source_pin();
         let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
-        let options = source_options(true);
+        let options = SourceOptions::default();
         let checkout = acquire(&pin, &options)?;
         let libs = parse_lib_entries(&checkout)?;
 

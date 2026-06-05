@@ -45,10 +45,7 @@ impl SourcePin {
 pub fn run() -> anyhow::Result<()> {
     let workspace_root = xtask_glue::project_root();
     let pin = SourcePin::new(DEFAULT_TYPESCRIPT_TAG, DEFAULT_TYPESCRIPT_SHA);
-    let opts = source::SourceOptions {
-        offline: false,
-        repo_url_override: None,
-    };
+    let opts = source::SourceOptions::default();
     run_with_workspace_root(&pin, &opts, &workspace_root)
 }
 

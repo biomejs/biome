@@ -2,8 +2,8 @@
 
 use std::collections::{BTreeMap, HashSet};
 use std::env;
+use std::ffi::OsStr;
 use std::fs;
-use std::io::ErrorKind;
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
@@ -23,9 +23,6 @@ const DEFAULT_TYPESCRIPT_REPO_URL: &str = "https://github.com/microsoft/TypeScri
 
 /// Subdirectory under the OS temporary directory used as the per-pin checkout cache.
 const TYPESCRIPT_CACHE_DIR_NAME: &str = "biome-global-types";
-
-/// Directory containing per-pin temporary checkout namespaces.
-const TEMP_CHECKOUT_DIR: &str = ".tmp";
 
 /// TypeScript command line parser path relative to a checkout root.
 const COMMAND_LINE_PARSER_RELATIVE_PATH: &str = "src/compiler/commandLineParser.ts";
@@ -90,9 +87,6 @@ const DEFAULT_LIBRARY_PRIORITY_OFFSET: usize = 1;
 /// Priority offset TypeScript uses for files outside default-library ordering.
 const OUTSIDE_DEFAULT_LIBRARY_PRIORITY_OFFSET: usize = 2;
 
-/// Maximum number of unique temporary checkout names to try for one acquisition.
-const MAX_TEMP_CHECKOUT_ATTEMPTS: u32 = 4;
-
 /// A canonical filesystem path that has been proven to stay within a root.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CanonicalPath(PathBuf);
@@ -156,9 +150,8 @@ struct TrackedSourceFile {
 }
 
 /// Options controlling TypeScript source acquisition.
+#[derive(Default)]
 pub struct SourceOptions {
-    /// When true, fail on cache miss instead of cloning over the network.
-    pub offline: bool,
     /// Alternate TypeScript repository URL used by tests; production runs use
     /// [`DEFAULT_TYPESCRIPT_REPO_URL`].
     pub repo_url_override: Option<PathBuf>,
@@ -166,20 +159,12 @@ pub struct SourceOptions {
 
 /// Acquires a pinned TypeScript checkout in the per-OS temporary cache.
 pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<AcquiredCheckout> {
-    let cache_parent = env::temp_dir().join(TYPESCRIPT_CACHE_DIR_NAME);
-    let checkout_path = cache_parent.join(cache_key(pin));
+    let checkout_path = env::temp_dir()
+        .join(TYPESCRIPT_CACHE_DIR_NAME)
+        .join(cache_key(pin));
 
-    if checkout_path.exists() {
-        remove_stale_temporary_checkouts(&cache_parent, pin)?;
-        validate_checkout(&checkout_path, pin)?;
-    } else {
-        if opts.offline {
-            bail!("offline: cache miss at {}", checkout_path.display());
-        }
-
-        fs::create_dir_all(&cache_parent)
-            .with_context(|| format!("failed to create {}", cache_parent.display()))?;
-        clone_checkout(&cache_parent, &checkout_path, pin, opts)?;
+    if !checkout_path.exists() {
+        clone_checkout(&checkout_path, pin, opts)?;
     }
 
     let canonical_root = CanonicalPath(
@@ -349,292 +334,60 @@ enum TripleSlashReference {
     Lib(String),
 }
 
-/// Builds a fresh `git` [`Command`] with environment variables that could
-/// redirect plumbing to a different repository removed. Every git invocation
-/// passes through this helper so a stray `GIT_DIR` / `GIT_WORK_TREE` /
-/// `GIT_INDEX_FILE` in the caller's environment cannot silently make
-/// validation read from the wrong index.
-fn new_git_command() -> Command {
-    let mut command = Command::new("git");
-    command
-        .env_remove("GIT_DIR")
-        .env_remove("GIT_WORK_TREE")
-        .env_remove("GIT_INDEX_FILE")
-        .env_remove("GIT_OBJECT_DIRECTORY")
-        .env_remove("GIT_ALTERNATE_OBJECT_DIRECTORIES")
-        .env_remove("GIT_COMMON_DIR")
-        .env_remove("GIT_NAMESPACE");
-    command
-}
-
 /// Returns the per-pin cache directory basename `"<tag>-<sha>"` used to
-/// namespace acquired checkouts and lock paths.
+/// namespace acquired checkouts.
 fn cache_key(pin: &SourcePin) -> String {
     format!("{}-{}", pin.tag(), pin.sha())
 }
 
-/// Asserts that the checkout's HEAD/tag match the pin and that the worktree
-/// is clean (no diff, no untracked, no hidden index flags).
-fn validate_checkout(root: &Path, pin: &SourcePin) -> anyhow::Result<()> {
-    let head = git_rev_parse(root, "HEAD")?;
-    if head != pin.sha() {
-        bail!(
-            "cached TypeScript checkout HEAD mismatch at {}: got {head}, expected {}",
-            root.display(),
-            pin.sha()
-        );
-    }
-
-    let tag_ref = format!("refs/tags/{}^{{commit}}", pin.tag());
-    let tag_commit = git_rev_parse(root, &tag_ref)?;
-    if tag_commit != pin.sha() {
-        bail!(
-            "cached TypeScript checkout tag-ref mismatch at {}: refs/tags/{} resolves to {tag_commit}, expected {}",
-            root.display(),
-            pin.tag(),
-            pin.sha()
-        );
-    }
-
-    validate_no_hidden_index_flags(root)?;
-
-    let mut diff = new_git_command();
-    diff.arg("-C")
-        .arg(root)
-        .args(["diff-index", "--quiet", "HEAD", "--"]);
-    let status = diff
-        .status()
-        .with_context(|| format!("failed to run git diff-index in {}", root.display()))?;
-    if !status.success() {
-        bail!(
-            "cached TypeScript checkout has uncommitted modifications at {}; remove the cache and rerun",
-            root.display()
-        );
-    }
-
-    // `--exclude-standard` keeps files covered by the pinned `.gitignore`
-    // out of the listing; anything else untracked aborts the run.
-    let mut untracked = new_git_command();
-    untracked
-        .arg("-C")
-        .arg(root)
-        .args(["ls-files", "--others", "--exclude-standard"]);
-    let untracked_stdout = command_stdout(&mut untracked, "git ls-files --others")?;
-    if !untracked_stdout.trim().is_empty() {
-        bail!(
-            "cached TypeScript checkout has untracked files at {}; remove the cache and rerun:\n{}",
-            root.display(),
-            untracked_stdout.trim()
-        );
-    }
-
-    Ok(())
-}
-
-/// Bails when any tracked `lib` or `src/compiler` entry carries an
-/// `assume-unchanged` / `skip-worktree` index flag, which would let a dirty
-/// worktree slip past `git diff-index`.
-fn validate_no_hidden_index_flags(root: &Path) -> anyhow::Result<()> {
-    let mut ls_files = new_git_command();
-    ls_files
-        .arg("-C")
-        .arg(root)
-        .args(["ls-files", "-v", "-z", "--"])
-        .arg(DEFAULT_LIBRARY_RELATIVE_DIR)
-        .arg("src/compiler");
-    let stdout = command_stdout(&mut ls_files, "git ls-files -v")?;
-    for entry in stdout.split('\0').filter(|entry| !entry.is_empty()) {
-        let Some(status) = entry.as_bytes().first().copied() else {
-            continue;
-        };
-        if status == b'S' || status.is_ascii_lowercase() {
-            let path = entry.get(2..).unwrap_or(entry);
-            bail!(
-                "cached TypeScript checkout has hidden git index flags at {}: {path}; clear assume-unchanged/skip-worktree flags or remove the cache and rerun",
-                root.display()
-            );
-        }
-    }
-
-    Ok(())
-}
-
-/// Resolves a revision spec via `git rev-parse` and returns the trimmed output.
-fn git_rev_parse(root: &Path, revision: &str) -> anyhow::Result<String> {
-    let mut command = new_git_command();
-    command.arg("-C").arg(root).arg("rev-parse").arg(revision);
-    let stdout = command_stdout(&mut command, &format!("git rev-parse {revision}"))?;
-    Ok(stdout.trim().to_owned())
-}
-
-/// Decodes the stdout captured by [`command_stdout_bytes`] as UTF-8, bailing
-/// with `description` when the bytes are not valid UTF-8.
-fn command_stdout(command: &mut Command, description: &str) -> anyhow::Result<String> {
-    let stdout = command_stdout_bytes(command, description)?;
-    String::from_utf8(stdout).with_context(|| format!("{description} wrote non-UTF-8 stdout"))
-}
-
-/// Runs `command` and returns its raw stdout, bailing with `description` and
-/// the captured stderr on a non-zero exit status.
-fn command_stdout_bytes(command: &mut Command, description: &str) -> anyhow::Result<Vec<u8>> {
-    let output = command
-        .output()
-        .with_context(|| format!("failed to run {description}"))?;
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        bail!("{description} failed: {}", stderr.trim());
-    }
-
-    Ok(output.stdout)
-}
-
-/// Sparse-checks out `lib` and `src/compiler` from the pinned TypeScript tag,
-/// validates the result, and atomically renames the temporary checkout into the
-/// cache slot.
+/// Shallow-clones the pinned TypeScript tag into `checkout_path` and resets it
+/// to the pinned commit.
 fn clone_checkout(
-    cache_parent: &Path,
     checkout_path: &Path,
     pin: &SourcePin,
     opts: &SourceOptions,
 ) -> anyhow::Result<()> {
-    if checkout_path.exists() {
-        return validate_checkout(checkout_path, pin);
+    if let Some(parent) = checkout_path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create {}", parent.display()))?;
     }
-    remove_stale_temporary_checkouts(cache_parent, pin)?;
 
-    let temporary_checkout =
-        TemporaryCheckout::new(unique_temporary_checkout_path(cache_parent, pin)?);
-
-    let mut clone = new_git_command();
-    clone
-        .arg("clone")
-        .arg("--depth=1")
-        .arg("--branch")
-        .arg(pin.tag())
-        .arg("--filter=blob:none")
-        .arg("--no-checkout")
-        .arg("--");
-    match opts.repo_url_override.as_deref() {
-        Some(path) => clone.arg(path),
-        None => clone.arg(DEFAULT_TYPESCRIPT_REPO_URL),
+    let repo_url: &OsStr = match opts.repo_url_override.as_deref() {
+        Some(path) => path.as_os_str(),
+        None => OsStr::new(DEFAULT_TYPESCRIPT_REPO_URL),
     };
-    clone.arg(temporary_checkout.path());
-    command_stdout(&mut clone, "git clone TypeScript")?;
 
-    let mut sparse_init = new_git_command();
-    sparse_init
-        .arg("-C")
-        .arg(temporary_checkout.path())
-        .arg("sparse-checkout")
-        .arg("init")
-        .arg("--cone");
-    command_stdout(&mut sparse_init, "git sparse-checkout init")?;
+    run_git(
+        Command::new("git")
+            .args(["clone", "--depth", "1", "--branch", pin.tag(), "--"])
+            .arg(repo_url)
+            .arg(checkout_path),
+        "git clone TypeScript",
+    )?;
+    run_git(
+        Command::new("git")
+            .arg("-C")
+            .arg(checkout_path)
+            .args(["reset", "--hard", pin.sha()]),
+        "git reset TypeScript",
+    )?;
 
-    let mut sparse_set = new_git_command();
-    sparse_set
-        .arg("-C")
-        .arg(temporary_checkout.path())
-        .arg("sparse-checkout")
-        .arg("set")
-        .arg("lib")
-        .arg("src/compiler");
-    command_stdout(&mut sparse_set, "git sparse-checkout set")?;
-
-    let mut checkout = new_git_command();
-    checkout
-        .arg("-C")
-        .arg(temporary_checkout.path())
-        .arg("checkout");
-    command_stdout(&mut checkout, "git checkout TypeScript")?;
-    validate_checkout(temporary_checkout.path(), pin)?;
-
-    match fs::rename(temporary_checkout.path(), checkout_path) {
-        Ok(()) => validate_checkout(checkout_path, pin),
-        Err(rename_error) if checkout_path.exists() => {
-            validate_checkout(checkout_path, pin).with_context(|| {
-                format!(
-                    "failed to validate concurrently-created checkout after rename failed: {rename_error}"
-                )
-            })
-        }
-        Err(rename_error) => {
-            Err(rename_error).with_context(|| {
-                format!(
-                    "failed to move {} to {}",
-                    temporary_checkout.path().display(),
-                    checkout_path.display()
-                )
-            })
-        }
-    }
+    Ok(())
 }
 
-/// RAII guard that owns a temporary checkout directory and removes it on drop.
-struct TemporaryCheckout {
-    path: PathBuf,
-}
-
-impl TemporaryCheckout {
-    /// Wraps `path` so its directory tree is removed when the guard drops.
-    fn new(path: PathBuf) -> Self {
-        Self { path }
+/// Runs a git command and bails with its captured stderr on a non-zero exit.
+fn run_git(command: &mut Command, description: &str) -> anyhow::Result<()> {
+    let output = command
+        .output()
+        .with_context(|| format!("failed to run {description}"))?;
+    if !output.status.success() {
+        bail!(
+            "{description} failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
     }
 
-    /// Borrows the temporary checkout's filesystem path.
-    fn path(&self) -> &Path {
-        &self.path
-    }
-}
-
-impl Drop for TemporaryCheckout {
-    /// Best-effort recursive removal of the temporary checkout directory.
-    fn drop(&mut self) {
-        let _ = fs::remove_dir_all(&self.path);
-    }
-}
-
-/// Removes every leftover temporary checkout directory belonging to `pin`.
-fn remove_stale_temporary_checkouts(cache_parent: &Path, pin: &SourcePin) -> anyhow::Result<()> {
-    let namespace = temporary_checkout_namespace_path(cache_parent, pin);
-    match fs::remove_dir_all(&namespace) {
-        Ok(()) => Ok(()),
-        Err(error) if error.kind() == ErrorKind::NotFound => Ok(()),
-        Err(error) => Err(error)
-            .with_context(|| format!("failed to remove stale checkout {}", namespace.display())),
-    }
-}
-
-/// Allocates a fresh temporary checkout path inside the pin's namespace,
-/// retrying with monotonic counters when a previous path still exists.
-fn unique_temporary_checkout_path(cache_parent: &Path, pin: &SourcePin) -> anyhow::Result<PathBuf> {
-    let pid = std::process::id();
-    let namespace = temporary_checkout_namespace_path(cache_parent, pin);
-    fs::create_dir_all(&namespace)
-        .with_context(|| format!("failed to create {}", namespace.display()))?;
-    for counter in 0..MAX_TEMP_CHECKOUT_ATTEMPTS {
-        let temporary_path = namespace.join(format!("{pid}.{counter}"));
-        if !temporary_path.exists() {
-            return Ok(temporary_path);
-        }
-    }
-
-    bail!(
-        "failed to find an unused temporary checkout path in {}",
-        cache_parent.display()
-    );
-}
-
-/// Returns the per-pin namespace directory `<cache_parent>/.tmp/<tag>-<sha>`
-/// under which temporary checkouts for `pin` are isolated.
-fn temporary_checkout_namespace_path(cache_parent: &Path, pin: &SourcePin) -> PathBuf {
-    cache_parent
-        .join(TEMP_CHECKOUT_DIR)
-        .join(temporary_checkout_namespace(pin))
-}
-
-/// Reuses the per-pin cache key as the temporary checkout namespace directory.
-fn temporary_checkout_namespace(pin: &SourcePin) -> String {
-    cache_key(pin)
+    Ok(())
 }
 
 /// Canonicalizes `path` and bails if the result escapes `root`.
