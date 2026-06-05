@@ -3,7 +3,9 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttribute, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::{
+    AnyHtmlAttribute, HtmlFileSource, SVG_EXCLUSIVE_ELEMENTS, element_ext::AnyHtmlTagElement,
+};
 use biome_rowan::{AstNode, AstNodeList, TokenText};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
 use biome_string_case::Case;
@@ -105,6 +107,15 @@ impl Rule for UseVueHyphenatedAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
+
+        if !source_type.is_vue() {
+            return Box::new([]);
+        }
+
+        if is_svg_element(node) {
+            return Box::new([]);
+        }
 
         if let Some(ignore_tags) = ctx.options().ignore_tags.as_ref()
             && let Ok(tag_name) = node.name()
@@ -268,4 +279,14 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
 fn is_hyphenated(name: &str) -> bool {
     // Treat pure lowercase and kebab-case as valid.
     matches!(Case::identify(name, true), Case::Kebab | Case::Lower)
+}
+
+fn is_svg_element(element: &AnyHtmlTagElement) -> bool {
+    let Some(tag_name) = element.tag_name() else {
+        return false;
+    };
+
+    SVG_EXCLUSIVE_ELEMENTS
+        .binary_search(&tag_name.text())
+        .is_ok()
 }
