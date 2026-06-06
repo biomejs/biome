@@ -32,6 +32,13 @@ div {
 		40px /* third comment */
 		2fr /* fourth comment */
 }
+
+.custom-grid-property {
+	grid-templatefoo:
+		alpha beta
+		gamma delta;
+}
+
 ```
 
 
@@ -62,6 +69,10 @@ div {
 		auto /* second comment */
 		40px /* third comment */
 		2fr; /* fourth comment */
+}
+
+.custom-grid-property {
+	grid-templatefoo: alpha beta gamma delta;
 }
 
 ```
