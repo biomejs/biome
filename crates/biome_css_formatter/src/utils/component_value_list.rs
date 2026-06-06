@@ -3,12 +3,11 @@ use crate::comments::CssComments;
 use crate::prelude::*;
 use biome_css_syntax::{
     CssFunction, CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind,
-    ScssExpression, ScssIncludeArgumentList,
+    ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
 };
 use biome_formatter::{CstFormatContext, format_args, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
-use biome_string_case::StrLikeExtension;
 use std::cmp;
 
 /// Returns `true` if the node is a top-level comma delimiter in a component value list.
@@ -415,7 +414,7 @@ where
         .or(scss_parent_property.as_ref())
         .and_then(property_name)
         .as_ref()
-        .is_some_and(is_grid_property_name);
+        .is_some_and(is_grid_template_property_name);
 
     let text_size: TextSize = list
         .iter()
@@ -469,10 +468,8 @@ fn property_name(property: &CssGenericProperty) -> Option<Text> {
         .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()))
 }
 
-fn is_grid_property_name(name: &Text) -> bool {
-    let name = name.to_ascii_lowercase_cow();
-
-    name.starts_with("grid-template") || name == "grid"
+fn is_grid_template_property_name(name: &Text) -> bool {
+    css_grid_template_property(name.text()).is_some()
 }
 
 fn has_list_comments<N, I>(list: &N, comments: &CssComments) -> bool

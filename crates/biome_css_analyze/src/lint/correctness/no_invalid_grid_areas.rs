@@ -2,7 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssGenericPropertyValueOrExpression, CssDeclarationOrRuleList};
+use biome_css_syntax::{
+    AnyCssGenericPropertyValueOrExpression, CssDeclarationOrRuleList, css_grid_template_property,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
 use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
@@ -63,8 +65,6 @@ declare_lint_rule! {
 type GridAreasProp = (String, TextRange);
 type GridAreasProps = Vec<(TokenText, TextRange)>;
 
-const GRID_AREA_PROPERTIES: [&str; 3] = ["grid", "grid-template", "grid-template-areas"];
-
 #[derive(Debug)]
 enum GridAreaValidationError {
     EmptyGridArea,
@@ -86,7 +86,8 @@ impl Rule for NoInvalidGridAreas {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        // Extracting the property values of grid-template-areas
+        // Extract named grid-area strings from `grid`, `grid-template`, and
+        // `grid-template-areas` declarations.
         let plain_grid_areas_props = node
             .into_iter()
             .filter_map(|item| {
@@ -100,7 +101,9 @@ impl Rule for NoInvalidGridAreas {
                 let decl = binding.as_css_generic_property()?;
                 let name = decl.name().ok()?.as_css_identifier()?.value_token().ok()?;
 
-                if GRID_AREA_PROPERTIES.contains(&name.text()) {
+                if css_grid_template_property(name.text())
+                    .is_some_and(|property| property.is_grid_area_property())
+                {
                     let grid_props = decl.value();
                     return Some(grid_props);
                 }
