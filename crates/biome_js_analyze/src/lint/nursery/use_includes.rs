@@ -12,11 +12,12 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use crate::services::typed::Typed;
 
 declare_lint_rule! {
-    /// Prefer `Array#includes()` over `Array#indexOf()` checks.
+    /// Prefer `Array#includes()` over `Array#indexOf()` and `Array#lastIndexOf()` checks.
     ///
-    /// `Array#indexOf()` returns a numeric index and is commonly compared against `-1` to check
-    /// for the presence of an element. `Array#includes()` is more readable and expressive for
-    /// this purpose, and avoids off-by-one mistakes with the comparison operator.
+    /// `Array#indexOf()` and `Array#lastIndexOf()` return a numeric index and are commonly
+    /// compared against `-1` to check for the presence of an element. `Array#includes()` is
+    /// more readable and expressive for this purpose, and avoids off-by-one mistakes with the
+    /// comparison operator.
     ///
     /// ## Examples
     ///
@@ -37,6 +38,16 @@ declare_lint_rule! {
     /// arr.indexOf(1) === -1;
     /// ```
     ///
+    /// ```ts,expect_diagnostic,file=invalid4.ts
+    /// const arr = [1, 2, 3];
+    /// arr.lastIndexOf(1) !== -1;
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,file=invalid5.ts
+    /// const arr = [1, 2, 3];
+    /// arr.lastIndexOf(1) === -1;
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -48,6 +59,12 @@ declare_lint_rule! {
     /// const arr = [1, 2, 3];
     /// // Positional use of indexOf is fine
     /// const pos = arr.indexOf(1);
+    /// ```
+    ///
+    /// ```ts
+    /// const arr = [1, 2, 3];
+    /// // Positional use of lastIndexOf is fine
+    /// const pos = arr.lastIndexOf(1);
     /// ```
     ///
     pub UseIncludes {
@@ -97,16 +114,22 @@ impl Rule for UseIncludes {
             CheckKind::NotIncludes => "!...includes()",
         };
 
+        let callee = state.index_of_call.callee().ok()?;
+        let member = callee.as_js_static_member_expression()?;
+        let method_name = member.member().ok()?;
+        let method_text = method_name.as_js_name()?.value_token().ok()?;
+        let method = method_text.text_trimmed();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.binary.range(),
                 markup! {
-                    "Checking the result of "<Emphasis>"indexOf()"</Emphasis>" against "<Emphasis>"-1"</Emphasis>" to test for presence."
+                    "Checking the result of "<Emphasis>{method}"()"</Emphasis>" against "<Emphasis>"-1"</Emphasis>" to test for presence."
                 },
             )
             .note(markup! {
-                <Emphasis>"indexOf()"</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
+                <Emphasis>{method}"()"</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
             })
             .note(markup! {
                 "Use "<Emphasis>{preferred}</Emphasis>" instead, which directly expresses the intent and returns a boolean."
@@ -202,7 +225,8 @@ fn detect_index_of_pattern(
     None
 }
 
-/// Returns `Some(call)` when `expr` is a call to `something.indexOf(...)`.
+/// Returns `Some(call)` when `expr` is a call to `something.indexOf(...)` or
+/// `something.lastIndexOf(...)`.
 fn as_index_of_call(expr: &AnyJsExpression) -> Option<JsCallExpression> {
     let binding = expr.clone().omit_parentheses();
     let call = binding.as_js_call_expression()?.clone();
@@ -210,7 +234,9 @@ fn as_index_of_call(expr: &AnyJsExpression) -> Option<JsCallExpression> {
     let member = callee.as_js_static_member_expression()?;
     let name = member.member().ok()?;
     let js_name = name.as_js_name()?;
-    if js_name.value_token().ok()?.text_trimmed() != "indexOf" {
+    let method_name = js_name.value_token().ok()?;
+    let text = method_name.text_trimmed();
+    if text != "indexOf" && text != "lastIndexOf" {
         return None;
     }
     // Must have exactly one argument (the search value). If a `fromIndex` is

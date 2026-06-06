@@ -25,3 +25,20 @@ arr.indexOf(1) + 1;
 
 // not a member call at all
 indexOf(1) !== -1;
+
+// positional use of lastIndexOf — result stored, not compared
+const lastPos = arr.lastIndexOf(1);
+
+// lastIndexOf with fromIndex argument — semantics differ, leave alone
+arr.lastIndexOf(1, 2) !== -1;
+
+// unrelated comparisons that happen to use lastIndexOf result
+arr.lastIndexOf(1) > 0;
+arr.lastIndexOf(1) >= 1;
+arr.lastIndexOf(1) === 0;
+
+// lastIndexOf result used in arithmetic
+arr.lastIndexOf(1) + 1;
+
+// not a member call at all
+lastIndexOf(1) !== -1;
