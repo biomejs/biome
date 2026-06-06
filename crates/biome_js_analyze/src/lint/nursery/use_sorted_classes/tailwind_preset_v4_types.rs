@@ -97,6 +97,33 @@ impl ThemeNamespace {
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantKind {
+    Static,
+    Functional,
+    Compound,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum VariantCompare {
+    Default,
+    BreakpointAsc,
+    BreakpointDesc,
+    ContainerAsc,
+    ContainerDesc,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct VariantEntry {
+    pub kind: VariantKind,
+    pub order: u16,
+    pub compare: VariantCompare,
+    pub compounds: u8,
+    pub compounds_with: u8,
+}
+
 #[derive(Copy, Clone)]
 pub struct UtilityEntry {
     /// Index into `SIGNATURE_POOL` — the ascending property-order
