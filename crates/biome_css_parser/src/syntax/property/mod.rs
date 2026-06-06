@@ -110,31 +110,44 @@ fn parse_composes_property_with_value_end_set(
     p.bump(T![:]);
 
     {
-        let m = p.start();
+        let list_m = p.start();
+        let class_list_end_set = value_end_set.union(token_set!(T![from], T![,]));
 
-        let class_list_end_set = value_end_set.union(token_set!(T![from]));
-        let classes = ComposesClassList::new(class_list_end_set, recovery_end_set).parse_list(p);
-
-        // If the list of classes is empty, generate a diagnostic error.
-        if classes.range(p).is_empty() {
-            p.error(expected_classes_list(p, p.cur_range()));
-        }
-
-        if p.at(T![from]) {
+        loop {
             let m = p.start();
-            p.bump(T![from]);
 
-            if is_at_identifier(p) {
-                parse_regular_identifier(p).ok();
-            } else if is_at_string(p) {
-                parse_string(p).ok();
-            } else {
-                p.error(expected_composes_import_source(p, p.cur_range()));
+            let classes =
+                ComposesClassList::new(class_list_end_set, recovery_end_set).parse_list(p);
+
+            // If the list of classes is empty, generate a diagnostic error.
+            if classes.range(p).is_empty() {
+                p.error(expected_classes_list(p, p.cur_range()));
             }
 
-            m.complete(p, CSS_COMPOSES_IMPORT_SPECIFIER);
+            if p.at(T![from]) {
+                let m = p.start();
+                p.bump(T![from]);
+
+                if is_at_identifier(p) {
+                    parse_regular_identifier(p).ok();
+                } else if is_at_string(p) {
+                    parse_string(p).ok();
+                } else {
+                    p.error(expected_composes_import_source(p, p.cur_range()));
+                }
+
+                m.complete(p, CSS_COMPOSES_IMPORT_SPECIFIER);
+            }
+            m.complete(p, CSS_COMPOSES_PROPERTY_VALUE);
+
+            if p.at(T![,]) {
+                p.bump(T![,]);
+            } else {
+                break;
+            }
         }
-        m.complete(p, CSS_COMPOSES_PROPERTY_VALUE);
+
+        list_m.complete(p, CSS_COMPOSES_PROPERTY_VALUE_LIST);
     }
 
     Present(m.complete(p, CSS_COMPOSES_PROPERTY))
