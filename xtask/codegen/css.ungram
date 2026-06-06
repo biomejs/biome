@@ -738,7 +738,9 @@ AnyCssGenericPropertyValueOrExpression =
 CssComposesProperty =
 	name: CssIdentifier
 	':'
-	value: CssComposesPropertyValue
+	values: CssComposesPropertyValueList
+
+CssComposesPropertyValueList = CssComposesPropertyValue (',' CssComposesPropertyValue)*
 
 CssComposesPropertyValue =
 	classes: CssComposesClassList
