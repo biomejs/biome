@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/bracketed-values.scss
+info: scss/expression/bracketed-values.scss
 ---
 
 # Input
@@ -9,6 +9,11 @@ info: css/scss/expression/bracketed-values.scss
 $lines:[full-start  ,  main-start
 /  main-end,
   full-end];
+$value: 2;
+$list:[1,$value,  []];
+$keywords:[inherit,initial,unset];
+$nested:[[c] [d]];
+$paren:[(c) (d e)];
 $columns:[col-start] minmax(200px,  1fr
 ) [col-end];
  $rows:[header-start] auto [header-end
@@ -30,6 +35,11 @@ grid-template-columns:[wide-start]/[wide-end];
 
 ```scss
 $lines: [full-start, main-start / main-end, full-end];
+$value: 2;
+$list: [1, $value, []];
+$keywords: [inherit, initial, unset];
+$nested: [[c] [d]];
+$paren: [(c) (d e)];
 $columns: [col-start] minmax(200px, 1fr) [col-end];
 $rows: [header-start] auto [header-end body-start] 1fr [body-end];
 .grid {
