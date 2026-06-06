@@ -187,7 +187,7 @@ enum FormatCallArgument {
 
     /// The argument has been formatted because a caller inspected if it [Self::will_break].
     ///
-    /// Allows to re-use the formatted output rather than having to call into the formatting again.
+    /// Allows reusing the formatted output rather than having to call into the formatting again.
     Inspected {
         /// The formatted element
         content: FormatResult<Option<FormatElement>>,
