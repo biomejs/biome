@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
     /// then you can disable this rule, as TSC can remove imports only used as types.
     /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
-    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// In that case, it's recommended to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
     /// This configuration ensures that TSC preserves imports not marked with the `type` keyword.
     ///
     /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.

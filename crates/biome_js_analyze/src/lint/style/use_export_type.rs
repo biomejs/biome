@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
     /// then you can disable this rule, as TSC can remove exports only used as types.
     /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
-    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// In that case, it's recommended to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
     /// This configuration ensures that TSC preserves exports not marked with the `type` keyword.
     ///
     /// ## Examples
