@@ -78,7 +78,7 @@ impl Rule for UseAriaPropsForRole {
             .flat_map(|role| role.required_attributes().iter())
             .filter_map(|attribute| {
                 let attribute_name = attribute.as_str();
-                node.find_attribute_by_name(attribute_name)
+                node.find_attribute_or_vue_binding(attribute_name)
                     .is_none()
                     .then_some(attribute_name)
             })
