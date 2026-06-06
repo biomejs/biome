@@ -11,9 +11,9 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsModuleSource, JsExport, JsExportNamedClause,
-    JsExportNamedFromClause, JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList,
-    JsExportNamedSpecifierList, JsFileSource, JsSyntaxToken, T,
+    AnyJsExportNamedSpecifier, JsExport, JsExportNamedClause, JsExportNamedFromClause,
+    JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList, JsExportNamedSpecifierList,
+    JsFileSource, JsSyntaxToken, T,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
@@ -24,11 +24,17 @@ use biome_rule_options::use_export_type::{Style, UseExportTypeOptions};
 declare_lint_rule! {
     /// Promotes the use of `export type` for types.
     ///
-    /// _TypeScript_ allows adding the `type` keyword on an `export` to indicate that the `export` doesn't exist at runtime.
+    /// _TypeScript_ allows specifying a `type` keyword on an `export` to indicate that the `export` doesn't exist at runtime.
     /// This allows compilers to safely drop exports of types without looking for their definition.
     ///
-    /// The rule ensures that types are exported using a type-only `export`.
+    /// The rule ensures that all exports used only as a type use a type-only `export`.
     /// It also groups inline type exports into a grouped `export type`.
+    ///
+    /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
+    /// then you can disable this rule, as TSC can remove exports only used as types.
+    /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
+    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// This configuration ensures that TSC preserves exports not marked with the `type` keyword.
     ///
     /// ## Examples
     ///
@@ -77,7 +83,7 @@ declare_lint_rule! {
     ///
     /// - `inlineType`: always use `export { type T }` instead of `export type { T }`
     /// - `separatedType`: always use `export type { T }` instead of `export { type T }`
-    /// - `auto`: use both `export type { T }` and `export { type T }` (default)
+    /// - `auto`: use `export type { T }` or `export { type T, V }` when values are exported alongside types (default)
     ///
     /// ```jsonc,options
     /// {
@@ -487,14 +493,8 @@ impl Rule for UseExportType {
                             &specifiers,
                             specifiers_requiring_type_marker,
                         )?;
-                        let (export_named_type, export_named_value) = new_named_exports(
-                            export_token,
-                            named_type,
-                            named_value,
-                            clause.l_curly_token().ok()?,
-                            clause.r_curly_token().ok()?,
-                            clause.semicolon_token(),
-                        );
+                        let (export_named_type, export_named_value) =
+                            new_named_exports(export_token, clause, named_type, named_value)?;
                         add_module_items(
                             &mut mutation,
                             export.syntax(),
@@ -525,16 +525,8 @@ impl Rule for UseExportType {
                             &specifiers,
                             specifiers_requiring_type_marker,
                         )?;
-                        let (export_named_type, export_named_value) = new_named_from_exports(
-                            export_token,
-                            named_type,
-                            named_value,
-                            clause.l_curly_token().ok()?,
-                            clause.r_curly_token().ok()?,
-                            clause.from_token().ok()?,
-                            clause.source().ok()?,
-                            clause.semicolon_token(),
-                        );
+                        let (export_named_type, export_named_value) =
+                            new_named_from_exports(export_token, clause, named_type, named_value)?;
                         add_module_items(
                             &mut mutation,
                             export.syntax(),
@@ -658,6 +650,8 @@ fn split_export_named_specifiers(
     specifiers: &JsExportNamedSpecifierList,
     specifiers_requiring_type_keyword: &[AnyJsExportNamedSpecifier],
 ) -> Option<(JsExportNamedSpecifierList, JsExportNamedSpecifierList)> {
+    // There is at least one expprt that is not a type.
+    // Thus there is at most `len - 1` type-only exports.
     let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
     let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
     let mut value_specifiers =
@@ -708,6 +702,8 @@ fn split_export_named_from_specifiers(
     JsExportNamedFromSpecifierList,
     JsExportNamedFromSpecifierList,
 )> {
+    // There is at least one expprt that is not a type.
+    // Thus there is at most `len - 1` type-only exports.
     let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
     let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
     let mut value_specifiers =
@@ -753,12 +749,13 @@ fn split_export_named_from_specifiers(
 
 fn new_named_exports(
     export_token: JsSyntaxToken,
+    export_clause: &JsExportNamedClause,
     named_type_specifiers: JsExportNamedSpecifierList,
     named_value_specifiers: JsExportNamedSpecifierList,
-    l_curly_token: JsSyntaxToken,
-    r_curly_token: JsSyntaxToken,
-    semicolon_token: Option<JsSyntaxToken>,
-) -> (JsExport, JsExport) {
+) -> Option<(JsExport, JsExport)> {
+    let l_curly_token = export_clause.l_curly_token().ok()?;
+    let r_curly_token = export_clause.r_curly_token().ok()?;
+    let semicolon_token = export_clause.semicolon_token();
     let type_export_clause = make::js_export_named_clause(
         l_curly_token.clone(),
         named_type_specifiers,
@@ -786,20 +783,20 @@ fn new_named_exports(
         new_export_token,
         value_export_clause.into(),
     );
-    (export_type, export_value)
+    Some((export_type, export_value))
 }
 
-#[expect(clippy::too_many_arguments)]
 fn new_named_from_exports(
     export_token: JsSyntaxToken,
+    export_clause: &JsExportNamedFromClause,
     named_type_specifiers: JsExportNamedFromSpecifierList,
     named_value_specifiers: JsExportNamedFromSpecifierList,
-    l_curly_token: JsSyntaxToken,
-    r_curly_token: JsSyntaxToken,
-    from_token: JsSyntaxToken,
-    source: AnyJsModuleSource,
-    semicolon_token: Option<JsSyntaxToken>,
-) -> (JsExport, JsExport) {
+) -> Option<(JsExport, JsExport)> {
+    let l_curly_token = export_clause.l_curly_token().ok()?;
+    let r_curly_token = export_clause.r_curly_token().ok()?;
+    let from_token = export_clause.from_token().ok()?;
+    let source = export_clause.source().ok()?;
+    let semicolon_token = export_clause.semicolon_token();
     let type_export_clause = make::js_export_named_from_clause(
         l_curly_token.clone(),
         named_type_specifiers,
@@ -834,5 +831,5 @@ fn new_named_from_exports(
         new_export_token,
         value_export_clause.into(),
     );
-    (export_type, export_value)
+    Some((export_type, export_value))
 }

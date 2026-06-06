@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseExportTypeOptions {
-    /// The style to apply when exporting types. Default to "auto"
+    /// The style to apply when exporting types. Default to "auto".
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub style: Option<Style>,
 }
@@ -24,12 +24,12 @@ pub struct UseExportTypeOptions {
 )]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum Style {
-    /// Use the best fitting style according to the situation
+    /// Use the best fitting style according to the situation.
     #[default]
     Auto,
-    /// Always use inline type keywords
+    /// Always use inline type keywords.
     InlineType,
-    /// Always separate types in a dedicated `export type`
+    /// Always separate types in a dedicated `export type`.
     SeparatedType,
 }
 

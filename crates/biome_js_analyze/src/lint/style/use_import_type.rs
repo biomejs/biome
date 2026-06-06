@@ -120,7 +120,7 @@ declare_lint_rule! {
     ///
     /// - `inlineType`: always use `import { type T }` instead of `import type { T }`
     /// - `separatedType`: always use `import type { T }` instead of `import { type T }`
-    /// - `auto`: use both `import type { T }` and `import { type T }` (default)
+    /// - `auto`: use `import type { T }` or `import { type T, V }` when values are imported alongside types (default)
     ///
     /// ```jsonc,options
     /// {
@@ -1067,6 +1067,8 @@ fn split_named_import_specifiers(
     specifiers_requiring_type_marker: &[AnyJsNamedImportSpecifier],
 ) -> Option<(JsNamedImportSpecifiers, JsNamedImportSpecifiers)> {
     let specifiers = named_specifiers.specifiers();
+    // There is at least one import that is not a type.
+    // Thus there is at most `len - 1` type-only imports.
     let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
     let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
     let mut value_specifiers =
