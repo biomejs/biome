@@ -15154,7 +15154,7 @@
 			"type": "object",
 			"properties": {
 				"style": {
-					"description": "The style to apply when exporting types. Default to \"auto\"",
+					"description": "The style to apply when exporting types. Default to \"auto\".",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExportTypeStyle" },
 						{ "type": "null" }
@@ -15417,7 +15417,7 @@
 			"type": "object",
 			"properties": {
 				"style": {
-					"description": "The style to apply when import types. Default to \"auto\"",
+					"description": "The style to apply when importing types. Default to \"auto\".",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseImportTypeStyle" },
 						{ "type": "null" }

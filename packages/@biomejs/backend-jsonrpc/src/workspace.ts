@@ -8722,7 +8722,7 @@ export type UseExplicitLengthCheckOptions = {};
 export type UseExponentiationOperatorOptions = {};
 export interface UseExportTypeOptions {
 	/**
-	 * The style to apply when exporting types. Default to "auto"
+	 * The style to apply when exporting types. Default to "auto".
 	 */
 	style?: UseExportTypeStyle;
 }
@@ -8753,7 +8753,7 @@ export type UseGraphqlNamingConventionOptions = {};
 export type UseGroupedAccessorPairsOptions = {};
 export interface UseImportTypeOptions {
 	/**
-	 * The style to apply when import types. Default to "auto"
+	 * The style to apply when importing types. Default to "auto".
 	 */
 	style?: UseImportTypeStyle;
 }
