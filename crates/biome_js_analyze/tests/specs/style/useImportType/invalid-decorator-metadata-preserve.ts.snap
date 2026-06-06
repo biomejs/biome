@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid-decorator-metadata-preserve.ts
+---
+# Input
+```ts
+import { Controller } from "./decorators";
+import { MethodService } from "./service";
+
+@Controller()
+class AppController {
+	method(service: MethodService) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid-decorator-metadata-preserve.ts:2:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ import { Controller } from "./decorators";
+  > 2 │ import { MethodService } from "./service";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ @Controller()
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    2 │ import·type·{·MethodService·}·from·"./service";
+      │        +++++                                   
+
+```

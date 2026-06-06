@@ -8748,6 +8748,10 @@ export type UseGraphqlNamingConventionOptions = {};
 export type UseGroupedAccessorPairsOptions = {};
 export interface UseImportTypeOptions {
 	/**
+	 * Preserve value imports used in TypeScript decorator metadata.
+	 */
+	preserveDecoratorMetadata?: boolean;
+	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
 	style?: UseImportTypeStyle;

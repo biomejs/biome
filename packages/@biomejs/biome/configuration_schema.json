@@ -15399,6 +15399,10 @@
 		"UseImportTypeOptions": {
 			"type": "object",
 			"properties": {
+				"preserveDecoratorMetadata": {
+					"description": "Preserve value imports used in TypeScript decorator metadata.",
+					"type": ["boolean", "null"]
+				},
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
 					"anyOf": [
