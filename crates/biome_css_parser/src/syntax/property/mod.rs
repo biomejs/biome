@@ -22,6 +22,7 @@ use crate::syntax::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{
     ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
 };
@@ -109,19 +110,54 @@ fn parse_composes_property_with_value_end_set(
     parse_regular_identifier(p).ok();
     p.bump(T![:]);
 
-    {
+    ComposesPropertyValueList::new(value_end_set, recovery_end_set).parse_list(p);
+
+    Present(m.complete(p, CSS_COMPOSES_PROPERTY))
+}
+
+/// A list of comma-separated `composes` property values.
+///
+/// Each element is a `CSS_COMPOSES_PROPERTY_VALUE`: one or more class names with
+/// an optional `from <source>` import specifier, e.g.:
+/// ```css
+/// composes: a b, c from './other.css';
+/// ```
+struct ComposesPropertyValueList {
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+}
+
+impl ComposesPropertyValueList {
+    fn new(
+        value_end_set: TokenSet<CssSyntaxKind>,
+        recovery_end_set: TokenSet<CssSyntaxKind>,
+    ) -> Self {
+        Self {
+            value_end_set,
+            recovery_end_set,
+        }
+    }
+}
+
+impl ParseSeparatedList for ComposesPropertyValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+
+    const LIST_KIND: Self::Kind = CSS_COMPOSES_PROPERTY_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
         let m = p.start();
 
-        let class_list_end_set = value_end_set.union(token_set!(T![from]));
-        let classes = ComposesClassList::new(class_list_end_set, recovery_end_set).parse_list(p);
+        let class_list_end_set = self.value_end_set.union(token_set!(T![from], T![,]));
+        let classes =
+            ComposesClassList::new(class_list_end_set, self.recovery_end_set).parse_list(p);
 
-        // If the list of classes is empty, generate a diagnostic error.
         if classes.range(p).is_empty() {
             p.error(expected_classes_list(p, p.cur_range()));
         }
 
         if p.at(T![from]) {
-            let m = p.start();
+            let import_m = p.start();
             p.bump(T![from]);
 
             if is_at_identifier(p) {
@@ -132,12 +168,28 @@ fn parse_composes_property_with_value_end_set(
                 p.error(expected_composes_import_source(p, p.cur_range()));
             }
 
-            m.complete(p, CSS_COMPOSES_IMPORT_SPECIFIER);
+            import_m.complete(p, CSS_COMPOSES_IMPORT_SPECIFIER);
         }
-        m.complete(p, CSS_COMPOSES_PROPERTY_VALUE);
+
+        Present(m.complete(p, CSS_COMPOSES_PROPERTY_VALUE))
     }
 
-    Present(m.complete(p, CSS_COMPOSES_PROPERTY))
+    fn is_at_list_end(&self, p: &mut CssParser) -> bool {
+        p.at_ts(self.value_end_set)
+    }
+
+    fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, self.value_end_set.union(token_set!(T![,])))
+                .enable_recovery_on_line_break(),
+            expected_classes_list,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> CssSyntaxKind {
+        T![,]
+    }
 }
 
 /// A struct representing a list of classes in a `composes` property.

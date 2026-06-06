@@ -3,7 +3,7 @@ use biome_css_syntax::{
     AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule, CssRelativeSelector,
     CssSyntaxKind::*,
 };
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -110,14 +110,14 @@ impl SemanticEventExtractor {
                             let Ok(property_name) = property.name() else {
                                 return;
                             };
-                            let Ok(property_value) = property.value() else {
-                                return;
-                            };
-                            self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                node: declaration,
-                                property: property_name.into(),
-                                value: CssPropertyInitialValue::from(property_value),
-                            });
+                            let values = property.values();
+                            for property_value in values.iter().filter_map(|v| v.ok()) {
+                                self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                    node: declaration.clone(),
+                                    property: property_name.clone().into(),
+                                    value: CssPropertyInitialValue::from(property_value),
+                                });
+                            }
                         }
                         AnyCssProperty::CssGenericProperty(generic) => {
                             let Ok(name) = generic.name() else {

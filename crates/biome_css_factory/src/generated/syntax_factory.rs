@@ -638,7 +638,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssComposesPropertyValue::can_cast(element.kind())
+                    && CssComposesPropertyValueList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -9168,6 +9168,13 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_COMPOSES_CLASS_LIST => {
                 Self::make_node_list_syntax(kind, children, CssCustomIdentifier::can_cast)
             }
+            CSS_COMPOSES_PROPERTY_VALUE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssComposesPropertyValue::can_cast,
+                T ! [,],
+                false,
+            ),
             CSS_COMPOUND_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

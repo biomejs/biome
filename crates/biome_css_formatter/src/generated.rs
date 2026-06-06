@@ -10390,6 +10390,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComposesClassList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssComposesPropertyValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssComposesPropertyValueList,
+        crate::css::lists::composes_property_value_list::FormatCssComposesPropertyValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: composes_property_value_list :: FormatCssComposesPropertyValueList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComposesPropertyValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssComposesPropertyValueList,
+        crate::css::lists::composes_property_value_list::FormatCssComposesPropertyValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: composes_property_value_list :: FormatCssComposesPropertyValueList :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssCompoundSelectorList {
     type Format<'a> = FormatRefWithRule<
         'a,

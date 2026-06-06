@@ -8,12 +8,17 @@ impl FormatNodeRule<CssComposesProperty> for FormatCssComposesProperty {
         let CssComposesPropertyFields {
             name,
             colon_token,
-            value,
+            values,
         } = node.as_fields();
 
         write!(
             f,
-            [name.format(), colon_token.format(), space(), value.format()]
+            [
+                name.format(),
+                colon_token.format(),
+                space(),
+                values.format()
+            ]
         )
     }
 }
