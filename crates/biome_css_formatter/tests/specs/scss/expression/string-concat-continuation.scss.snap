@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/string-concat-continuation.scss
+---
+
+# Input
+
+```scss
+$description:"Lorem ipsum dolor sit \"amet\", consectetur adipiscing elit, "+
+"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+```
+
+
+# Formatted
+
+```scss
+$description: 'Lorem ipsum dolor sit "amet", consectetur adipiscing elit, ' +
+	"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+```

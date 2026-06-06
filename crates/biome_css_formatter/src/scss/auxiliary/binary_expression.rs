@@ -23,8 +23,7 @@ impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
 
 /// Formats the operator and right side of a SCSS binary expression.
 ///
-/// Biome normalizes source-tight operators to `left <op> right`, even when
-/// Prettier preserves them because of parser token shapes.
+/// Broken grouped expressions indent the right operand, as in `$x: "a" +\n  "b";`.
 struct FormatScssBinaryRightSide<'a> {
     node: &'a ScssBinaryExpression,
 }
@@ -35,6 +34,10 @@ impl<'a> FormatScssBinaryRightSide<'a> {
     }
 
     fn should_indent(&self) -> bool {
+        if !is_in_scss_control_condition_sequence(self.node) {
+            return true;
+        }
+
         let ScssBinaryExpressionFields { right, .. } = self.node.as_fields();
 
         is_in_scss_parenthesized_expression(self.node)
@@ -47,27 +50,19 @@ impl Format<CssFormatContext> for FormatScssBinaryRightSide<'_> {
         let ScssBinaryExpressionFields {
             operator, right, ..
         } = self.node.as_fields();
-        let should_indent = self.should_indent();
 
-        if should_indent {
+        write!(f, [space(), operator.format()])?;
+
+        if self.should_indent() {
             write!(
                 f,
-                [
-                    space(),
-                    operator.format(),
-                    indent(&format_args![soft_line_break_or_space(), right.format()])
-                ]
-            )
-        } else {
-            write!(
-                f,
-                [
-                    space(),
-                    operator.format(),
+                [indent(&format_args![
                     soft_line_break_or_space(),
                     right.format()
-                ]
+                ])]
             )
+        } else {
+            write!(f, [soft_line_break_or_space(), right.format()])
         }
     }
 }
