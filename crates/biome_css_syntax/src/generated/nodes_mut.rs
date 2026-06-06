@@ -1750,7 +1750,7 @@ impl CssMarginAtRule {
     }
 }
 impl CssMediaAndCondition {
-    pub fn with_left(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_left(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -1872,7 +1872,7 @@ impl CssMediaNotCondition {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_condition(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_condition(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1880,7 +1880,7 @@ impl CssMediaNotCondition {
     }
 }
 impl CssMediaOrCondition {
-    pub fn with_left(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_left(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

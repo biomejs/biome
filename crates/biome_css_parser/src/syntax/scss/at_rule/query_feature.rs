@@ -9,11 +9,13 @@ use crate::syntax::scss::{
     parse_scss_interpolation_or_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST, SCSS_INTERPOLATION,
+    CSS_STRING_LITERAL, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+    SCSS_INTERPOLATION,
 };
-use biome_parser::Parser;
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::{Parser, TokenSet, token_set};
 
 /// Parses an interpolation-led query feature.
 ///
@@ -54,6 +56,16 @@ pub(crate) fn parse_scss_interpolated_query_feature(p: &mut CssParser) -> Parsed
 
     parse_query_feature_from_name(p, m)
 }
+
+#[inline]
+pub(crate) fn is_at_scss_interpolated_query_feature(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+        && (!p.nth_at(2, CSS_STRING_LITERAL)
+            || p.nth_at_ts(4, SCSS_INTERPOLATED_QUERY_FEATURE_CONTINUATION_SET))
+}
+
+const SCSS_INTERPOLATED_QUERY_FEATURE_CONTINUATION_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![:], T![>], T![<], T![>=], T![<=], T![=]];
 
 #[inline]
 fn is_at_query_feature_name_after_comparison(p: &mut CssParser) -> bool {

@@ -1512,7 +1512,7 @@ pub fn css_margin_at_rule(
     ))
 }
 pub fn css_media_and_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     and_token: SyntaxToken,
     right: AnyCssMediaAndCombinableCondition,
 ) -> CssMediaAndCondition {
@@ -1599,7 +1599,7 @@ pub fn css_media_feature_in_parens(
 }
 pub fn css_media_not_condition(
     not_token: SyntaxToken,
-    condition: AnyCssMediaInParens,
+    condition: AnyCssMediaConditionOperand,
 ) -> CssMediaNotCondition {
     CssMediaNotCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_NOT_CONDITION,
@@ -1610,7 +1610,7 @@ pub fn css_media_not_condition(
     ))
 }
 pub fn css_media_or_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     or_token: SyntaxToken,
     right: AnyCssMediaOrCombinableCondition,
 ) -> CssMediaOrCondition {
