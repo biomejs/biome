@@ -15150,7 +15150,24 @@
 				{ "$ref": "#/$defs/RuleWithUseExportTypeOptions" }
 			]
 		},
-		"UseExportTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseExportTypeOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The style to apply when exporting types. Default to \"auto\"",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExportTypeStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseExportTypeStyle": {
+			"description": "The style to apply when exporting types.",
+			"type": "string",
+			"enum": ["auto", "inlineType", "separatedType"]
+		},
 		"UseExportsLastConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

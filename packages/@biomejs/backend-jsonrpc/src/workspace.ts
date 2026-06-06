@@ -8720,7 +8720,12 @@ export interface UseErrorCauseOptions {
 }
 export type UseExplicitLengthCheckOptions = {};
 export type UseExponentiationOperatorOptions = {};
-export type UseExportTypeOptions = {};
+export interface UseExportTypeOptions {
+	/**
+	 * The style to apply when exporting types. Default to "auto"
+	 */
+	style?: UseExportTypeStyle;
+}
 export type UseExportsLastOptions = {};
 export interface UseFilenamingConventionOptions {
 	/**
@@ -9188,6 +9193,10 @@ export interface DestructuringConfig {
 	array?: boolean;
 	object?: boolean;
 }
+/**
+ * The style to apply when exporting types.
+ */
+export type UseExportTypeStyle = "auto" | "inlineType" | "separatedType";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
 /**
