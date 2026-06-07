@@ -22,6 +22,12 @@
   }
 }
 
+@media (#{$query} and not (color)) {
+  x {
+    y: z;
+  }
+}
+
 @media not #{"(a)"} {
   x {
     y: z;

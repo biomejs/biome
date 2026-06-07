@@ -4,7 +4,8 @@ use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensPa
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::scss::{
-    is_at_scss_interpolated_query_feature, is_at_scss_media_query, parse_scss_media_query,
+    is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
+    parse_scss_interpolated_media_in_parens, parse_scss_media_condition, parse_scss_media_query,
     parse_scss_media_query_or_condition_query,
 };
 use crate::syntax::util::skip_possible_tailwind_syntax;
@@ -162,6 +163,8 @@ pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_media_not_condition(p) {
         parse_media_not_condition(p)
+    } else if is_at_scss_media_condition(p) {
+        parse_scss_media_condition(p)
     } else {
         parse_any_media_condition_operand(p).map(|lhs| match p.cur() {
             T![and] => parse_media_and_condition(p, lhs),
@@ -354,6 +357,10 @@ fn is_at_any_media_in_parens(p: &mut CssParser) -> bool {
 /// `(not (color))` and media features such as `(width <= 500px)`.
 #[inline]
 pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_interpolated_media_in_parens(p) {
+        return parse_scss_interpolated_media_in_parens(p);
+    }
+
     if !is_at_any_media_in_parens(p) {
         return Absent;
     }
@@ -361,9 +368,7 @@ pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    // Keep interpolated SCSS query features in the feature branch instead of
-    // treating `#{...}` as a nested media condition.
-    let kind = if is_at_any_media_condition(p) && !is_at_scss_interpolated_query_feature(p) {
+    let kind = if is_at_any_media_condition(p) {
         parse_any_media_condition(p)
             .or_recover(p, &AnyInParensParseRecovery, expected_any_media_condition)
             .ok();
