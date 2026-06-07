@@ -4298,7 +4298,7 @@ impl CssMediaAndCondition {
             right: self.right(),
         }
     }
-    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4318,7 +4318,7 @@ impl Serialize for CssMediaAndCondition {
 }
 #[derive(Serialize)]
 pub struct CssMediaAndConditionFields {
-    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub left: SyntaxResult<AnyCssMediaConditionOperand>,
     pub and_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssMediaAndCombinableCondition>,
 }
@@ -4595,7 +4595,7 @@ impl CssMediaNotCondition {
     pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn condition(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn condition(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -4610,7 +4610,7 @@ impl Serialize for CssMediaNotCondition {
 #[derive(Serialize)]
 pub struct CssMediaNotConditionFields {
     pub not_token: SyntaxResult<SyntaxToken>,
-    pub condition: SyntaxResult<AnyCssMediaInParens>,
+    pub condition: SyntaxResult<AnyCssMediaConditionOperand>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaOrCondition {
@@ -4633,7 +4633,7 @@ impl CssMediaOrCondition {
             right: self.right(),
         }
     }
-    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4653,7 +4653,7 @@ impl Serialize for CssMediaOrCondition {
 }
 #[derive(Serialize)]
 pub struct CssMediaOrConditionFields {
-    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub left: SyntaxResult<AnyCssMediaConditionOperand>,
     pub or_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssMediaOrCombinableCondition>,
 }
@@ -14962,13 +14962,14 @@ impl AnyCssLayer {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaAndCombinableCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
+    CssMediaNotCondition(CssMediaNotCondition),
 }
 impl AnyCssMediaAndCombinableCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -14978,18 +14979,24 @@ impl AnyCssMediaAndCombinableCondition {
             _ => None,
         }
     }
+    pub fn as_css_media_not_condition(&self) -> Option<&CssMediaNotCondition> {
+        match &self {
+            Self::CssMediaNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
     CssMediaNotCondition(CssMediaNotCondition),
     CssMediaOrCondition(CssMediaOrCondition),
 }
 impl AnyCssMediaCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -15008,6 +15015,25 @@ impl AnyCssMediaCondition {
     pub fn as_css_media_or_condition(&self) -> Option<&CssMediaOrCondition> {
         match &self {
             Self::CssMediaOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssMediaConditionOperand {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    ScssMediaQuery(ScssMediaQuery),
+}
+impl AnyCssMediaConditionOperand {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+        match &self {
+            Self::AnyCssMediaInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_media_query(&self) -> Option<&ScssMediaQuery> {
+        match &self {
+            Self::ScssMediaQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -15033,13 +15059,13 @@ impl AnyCssMediaInParens {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaOrCombinableCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaOrCondition(CssMediaOrCondition),
 }
 impl AnyCssMediaOrCombinableCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -15092,14 +15118,14 @@ impl AnyCssMediaQuery {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaTypeCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
     CssMediaNotCondition(CssMediaNotCondition),
 }
 impl AnyCssMediaTypeCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -38340,23 +38366,34 @@ impl From<CssMediaAndCondition> for AnyCssMediaAndCombinableCondition {
         Self::CssMediaAndCondition(node)
     }
 }
+impl From<CssMediaNotCondition> for AnyCssMediaAndCombinableCondition {
+    fn from(node: CssMediaNotCondition) -> Self {
+        Self::CssMediaNotCondition(node)
+    }
+}
 impl AstNode for AnyCssMediaAndCombinableCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssMediaInParens::KIND_SET.union(CssMediaAndCondition::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
+        .union(CssMediaAndCondition::KIND_SET)
+        .union(CssMediaNotCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_MEDIA_AND_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_MEDIA_AND_CONDITION => Self::CssMediaAndCondition(CssMediaAndCondition { syntax }),
+            CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38366,29 +38403,33 @@ impl AstNode for AnyCssMediaAndCombinableCondition {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::CssMediaNotCondition(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::CssMediaNotCondition(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssMediaAndCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaAndCombinableCondition) -> Self {
         match n {
-            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.into_syntax(),
+            AnyCssMediaAndCombinableCondition::CssMediaNotCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -38415,14 +38456,14 @@ impl From<CssMediaOrCondition> for AnyCssMediaCondition {
 }
 impl AstNode for AnyCssMediaCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
         .union(CssMediaAndCondition::KIND_SET)
         .union(CssMediaNotCondition::KIND_SET)
         .union(CssMediaOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION | CSS_MEDIA_OR_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38432,8 +38473,12 @@ impl AstNode for AnyCssMediaCondition {
             CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             CSS_MEDIA_OR_CONDITION => Self::CssMediaOrCondition(CssMediaOrCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38445,7 +38490,7 @@ impl AstNode for AnyCssMediaCondition {
             Self::CssMediaAndCondition(it) => it.syntax(),
             Self::CssMediaNotCondition(it) => it.syntax(),
             Self::CssMediaOrCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -38453,14 +38498,14 @@ impl AstNode for AnyCssMediaCondition {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
             Self::CssMediaNotCondition(it) => it.into_syntax(),
             Self::CssMediaOrCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaOrCondition(it) => std::fmt::Debug::fmt(it, f),
@@ -38470,7 +38515,7 @@ impl std::fmt::Debug for AnyCssMediaCondition {
 impl From<AnyCssMediaCondition> for SyntaxNode {
     fn from(n: AnyCssMediaCondition) -> Self {
         match n {
-            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaAndCondition(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaNotCondition(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaOrCondition(it) => it.into_syntax(),
@@ -38479,6 +38524,69 @@ impl From<AnyCssMediaCondition> for SyntaxNode {
 }
 impl From<AnyCssMediaCondition> for SyntaxElement {
     fn from(n: AnyCssMediaCondition) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<ScssMediaQuery> for AnyCssMediaConditionOperand {
+    fn from(node: ScssMediaQuery) -> Self {
+        Self::ScssMediaQuery(node)
+    }
+}
+impl AstNode for AnyCssMediaConditionOperand {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssMediaInParens::KIND_SET.union(ScssMediaQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            SCSS_MEDIA_QUERY => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_MEDIA_QUERY => Self::ScssMediaQuery(ScssMediaQuery { syntax }),
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssMediaQuery(it) => it.syntax(),
+            Self::AnyCssMediaInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssMediaQuery(it) => it.into_syntax(),
+            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaConditionOperand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaConditionOperand> for SyntaxNode {
+    fn from(n: AnyCssMediaConditionOperand) -> Self {
+        match n {
+            AnyCssMediaConditionOperand::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaConditionOperand::ScssMediaQuery(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssMediaConditionOperand> for SyntaxElement {
+    fn from(n: AnyCssMediaConditionOperand) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -38558,11 +38666,11 @@ impl From<CssMediaOrCondition> for AnyCssMediaOrCombinableCondition {
 impl AstNode for AnyCssMediaOrCombinableCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssMediaInParens::KIND_SET.union(CssMediaOrCondition::KIND_SET);
+        AnyCssMediaConditionOperand::KIND_SET.union(CssMediaOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_OR_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38570,8 +38678,12 @@ impl AstNode for AnyCssMediaOrCombinableCondition {
         let res = match syntax.kind() {
             CSS_MEDIA_OR_CONDITION => Self::CssMediaOrCondition(CssMediaOrCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38581,20 +38693,20 @@ impl AstNode for AnyCssMediaOrCombinableCondition {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssMediaOrCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaOrCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaOrCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -38602,7 +38714,7 @@ impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
 impl From<AnyCssMediaOrCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaOrCombinableCondition) -> Self {
         match n {
-            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaOrCombinableCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.into_syntax(),
         }
     }
@@ -38726,13 +38838,13 @@ impl From<CssMediaNotCondition> for AnyCssMediaTypeCondition {
 }
 impl AstNode for AnyCssMediaTypeCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
         .union(CssMediaAndCondition::KIND_SET)
         .union(CssMediaNotCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38741,8 +38853,12 @@ impl AstNode for AnyCssMediaTypeCondition {
             CSS_MEDIA_AND_CONDITION => Self::CssMediaAndCondition(CssMediaAndCondition { syntax }),
             CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38753,21 +38869,21 @@ impl AstNode for AnyCssMediaTypeCondition {
         match self {
             Self::CssMediaAndCondition(it) => it.syntax(),
             Self::CssMediaNotCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
             Self::CssMediaNotCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaTypeCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38776,7 +38892,7 @@ impl std::fmt::Debug for AnyCssMediaTypeCondition {
 impl From<AnyCssMediaTypeCondition> for SyntaxNode {
     fn from(n: AnyCssMediaTypeCondition) -> Self {
         match n {
-            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaTypeCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.into_syntax(),
             AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.into_syntax(),
         }
@@ -44843,6 +44959,11 @@ impl std::fmt::Display for AnyCssMediaAndCombinableCondition {
     }
 }
 impl std::fmt::Display for AnyCssMediaCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaConditionOperand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -3,10 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssMediaAndCombinableCondition, AnyCssMediaCondition, AnyCssMediaInParens,
-    AnyCssMediaOrCombinableCondition, AnyCssMediaQuery, AnyCssMediaTypeCondition,
-    AnyCssMediaTypeQuery, AnyCssQueryFeature, AnyCssQueryFeatureName, CssMediaAndCondition,
-    CssMediaConditionQuery, CssMediaOrCondition, CssMediaQueryList,
+    AnyCssMediaAndCombinableCondition, AnyCssMediaCondition, AnyCssMediaConditionOperand,
+    AnyCssMediaInParens, AnyCssMediaOrCombinableCondition, AnyCssMediaQuery,
+    AnyCssMediaTypeCondition, AnyCssMediaTypeQuery, AnyCssQueryFeature, AnyCssQueryFeatureName,
+    CssMediaAndCondition, CssMediaConditionQuery, CssMediaOrCondition, CssMediaQueryList,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TokenText};
@@ -131,8 +131,8 @@ fn is_invalid_feature_name_included_in_css_media_condition_query(
     css_media_condition_query: CssMediaConditionQuery,
 ) -> Option<bool> {
     match css_media_condition_query.condition().ok()? {
-        AnyCssMediaCondition::AnyCssMediaInParens(any_css_media_in_parens) => {
-            has_invalid_media_feature_name(any_css_media_in_parens)
+        AnyCssMediaCondition::AnyCssMediaConditionOperand(any_css_media_condition_operand) => {
+            has_invalid_media_condition_operand(any_css_media_condition_operand)
         }
         AnyCssMediaCondition::CssMediaAndCondition(css_media_and_condition) => {
             is_css_media_and_condition_invalid(css_media_and_condition)
@@ -141,7 +141,7 @@ fn is_invalid_feature_name_included_in_css_media_condition_query(
             is_css_media_or_condition_invalid(css_media_or_condition)
         }
         AnyCssMediaCondition::CssMediaNotCondition(css_media_not_condition) => {
-            has_invalid_media_feature_name(css_media_not_condition.condition().ok()?)
+            has_invalid_media_condition_operand(css_media_not_condition.condition().ok()?)
         }
     }
 }
@@ -153,14 +153,16 @@ fn is_invalid_feature_name_included_in_css_media_type_query(
         AnyCssMediaTypeQuery::CssMediaTypeQuery(_) => Some(false),
         AnyCssMediaTypeQuery::CssMediaAndTypeQuery(css_media_and_type_query) => {
             match css_media_and_type_query.right().ok()? {
-                AnyCssMediaTypeCondition::AnyCssMediaInParens(any_css_media_in_parens) => {
-                    has_invalid_media_feature_name(any_css_media_in_parens)
+                AnyCssMediaTypeCondition::AnyCssMediaConditionOperand(
+                    any_css_media_condition_operand,
+                ) => {
+                    has_invalid_media_condition_operand(any_css_media_condition_operand)
                 }
                 AnyCssMediaTypeCondition::CssMediaAndCondition(css_media_and_condition) => {
                     is_css_media_and_condition_invalid(css_media_and_condition)
                 }
                 AnyCssMediaTypeCondition::CssMediaNotCondition(css_media_not_condition) => {
-                    has_invalid_media_feature_name(css_media_not_condition.condition().ok()?)
+                    has_invalid_media_condition_operand(css_media_not_condition.condition().ok()?)
                 }
             }
         }
@@ -170,23 +172,30 @@ fn is_invalid_feature_name_included_in_css_media_type_query(
 fn is_css_media_and_condition_invalid(
     css_media_and_condition: CssMediaAndCondition,
 ) -> Option<bool> {
-    if has_invalid_media_feature_name(css_media_and_condition.left().ok()?)? {
+    if has_invalid_media_condition_operand(css_media_and_condition.left().ok()?)? {
         return Some(true);
     }
     let mut stack = vec![css_media_and_condition.right().ok()?];
     while !stack.is_empty() {
         let element = stack.pop()?;
         match element {
-            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(any_css_media_in_parens) => {
-                if has_invalid_media_feature_name(any_css_media_in_parens)? {
+            AnyCssMediaAndCombinableCondition::AnyCssMediaConditionOperand(
+                any_css_media_condition_operand,
+            ) => {
+                if has_invalid_media_condition_operand(any_css_media_condition_operand)? {
                     return Some(true);
                 }
             }
             AnyCssMediaAndCombinableCondition::CssMediaAndCondition(css_media_and_condition) => {
-                if has_invalid_media_feature_name(css_media_and_condition.left().ok()?)? {
+                if has_invalid_media_condition_operand(css_media_and_condition.left().ok()?)? {
                     return Some(true);
                 }
                 stack.push(css_media_and_condition.right().ok()?);
+            }
+            AnyCssMediaAndCombinableCondition::CssMediaNotCondition(css_media_not_condition) => {
+                if has_invalid_media_condition_operand(css_media_not_condition.condition().ok()?)? {
+                    return Some(true);
+                }
             }
         }
     }
@@ -194,20 +203,22 @@ fn is_css_media_and_condition_invalid(
 }
 
 fn is_css_media_or_condition_invalid(css_media_or_condition: CssMediaOrCondition) -> Option<bool> {
-    if has_invalid_media_feature_name(css_media_or_condition.left().ok()?)? {
+    if has_invalid_media_condition_operand(css_media_or_condition.left().ok()?)? {
         return Some(true);
     }
     let mut stack = vec![css_media_or_condition.right().ok()?];
     while !stack.is_empty() {
         let element = stack.pop()?;
         match element {
-            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(any_css_media_in_parens) => {
-                if has_invalid_media_feature_name(any_css_media_in_parens)? {
+            AnyCssMediaOrCombinableCondition::AnyCssMediaConditionOperand(
+                any_css_media_condition_operand,
+            ) => {
+                if has_invalid_media_condition_operand(any_css_media_condition_operand)? {
                     return Some(true);
                 }
             }
             AnyCssMediaOrCombinableCondition::CssMediaOrCondition(css_media_or_condition) => {
-                if has_invalid_media_feature_name(css_media_or_condition.left().ok()?)? {
+                if has_invalid_media_condition_operand(css_media_or_condition.left().ok()?)? {
                     return Some(true);
                 }
                 stack.push(css_media_or_condition.right().ok()?);
@@ -215,6 +226,17 @@ fn is_css_media_or_condition_invalid(css_media_or_condition: CssMediaOrCondition
         }
     }
     Some(false)
+}
+
+fn has_invalid_media_condition_operand(
+    any_css_media_condition_operand: AnyCssMediaConditionOperand,
+) -> Option<bool> {
+    match any_css_media_condition_operand {
+        AnyCssMediaConditionOperand::AnyCssMediaInParens(any_css_media_in_parens) => {
+            has_invalid_media_feature_name(any_css_media_in_parens)
+        }
+        AnyCssMediaConditionOperand::ScssMediaQuery(_) => Some(false),
+    }
 }
 
 fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) -> Option<bool> {
@@ -235,49 +257,83 @@ fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) 
             }
             AnyCssMediaInParens::CssMediaConditionInParens(css_media_condition_in_parens) => {
                 match css_media_condition_in_parens.condition().ok()? {
-                    AnyCssMediaCondition::AnyCssMediaInParens(any_css_media_in_parens) => {
-                        any_css_media_in_parens_stack.push(any_css_media_in_parens);
+                    AnyCssMediaCondition::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ) => {
+                        if has_invalid_media_condition_operand(any_css_media_condition_operand)? {
+                            return Some(true);
+                        }
                     }
                     AnyCssMediaCondition::CssMediaAndCondition(css_media_and_condition) => {
-                        any_css_media_in_parens_stack.push(css_media_and_condition.left().ok()?);
+                        if has_invalid_media_condition_operand(
+                            css_media_and_condition.left().ok()?,
+                        )? {
+                            return Some(true);
+                        }
                         let mut css_media_and_condition_stack =
                             vec![css_media_and_condition.right().ok()?];
                         while !css_media_and_condition_stack.is_empty() {
                             let element = css_media_and_condition_stack.pop()?;
                             match element {
-                                AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(
-                                    any_css_media_in_parens,
+                                AnyCssMediaAndCombinableCondition::AnyCssMediaConditionOperand(
+                                    any_css_media_condition_operand,
                                 ) => {
-                                    any_css_media_in_parens_stack.push(any_css_media_in_parens);
+                                    if has_invalid_media_condition_operand(
+                                        any_css_media_condition_operand,
+                                    )? {
+                                        return Some(true);
+                                    }
                                 }
                                 AnyCssMediaAndCombinableCondition::CssMediaAndCondition(
                                     css_media_and_condition,
                                 ) => {
-                                    any_css_media_in_parens_stack
-                                        .push(css_media_and_condition.left().ok()?);
+                                    if has_invalid_media_condition_operand(
+                                        css_media_and_condition.left().ok()?,
+                                    )? {
+                                        return Some(true);
+                                    }
                                     css_media_and_condition_stack
                                         .push(css_media_and_condition.right().ok()?);
+                                }
+                                AnyCssMediaAndCombinableCondition::CssMediaNotCondition(
+                                    css_media_not_condition,
+                                ) => {
+                                    if has_invalid_media_condition_operand(
+                                        css_media_not_condition.condition().ok()?,
+                                    )? {
+                                        return Some(true);
+                                    }
                                 }
                             }
                         }
                     }
                     AnyCssMediaCondition::CssMediaOrCondition(css_media_or_condition) => {
-                        any_css_media_in_parens_stack.push(css_media_or_condition.left().ok()?);
+                        if has_invalid_media_condition_operand(css_media_or_condition.left().ok()?)?
+                        {
+                            return Some(true);
+                        }
                         let mut css_media_or_condition_stack =
                             vec![css_media_or_condition.right().ok()?];
                         while !css_media_or_condition_stack.is_empty() {
                             let element = css_media_or_condition_stack.pop()?;
                             match element {
-                                AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(
-                                    any_css_media_in_parens,
+                                AnyCssMediaOrCombinableCondition::AnyCssMediaConditionOperand(
+                                    any_css_media_condition_operand,
                                 ) => {
-                                    any_css_media_in_parens_stack.push(any_css_media_in_parens);
+                                    if has_invalid_media_condition_operand(
+                                        any_css_media_condition_operand,
+                                    )? {
+                                        return Some(true);
+                                    }
                                 }
                                 AnyCssMediaOrCombinableCondition::CssMediaOrCondition(
                                     css_media_or_condition,
                                 ) => {
-                                    any_css_media_in_parens_stack
-                                        .push(css_media_or_condition.left().ok()?);
+                                    if has_invalid_media_condition_operand(
+                                        css_media_or_condition.left().ok()?,
+                                    )? {
+                                        return Some(true);
+                                    }
                                     css_media_or_condition_stack
                                         .push(css_media_or_condition.right().ok()?);
                                 }
@@ -285,8 +341,11 @@ fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) 
                         }
                     }
                     AnyCssMediaCondition::CssMediaNotCondition(css_media_not_condition) => {
-                        any_css_media_in_parens_stack
-                            .push(css_media_not_condition.condition().ok()?);
+                        if has_invalid_media_condition_operand(
+                            css_media_not_condition.condition().ok()?,
+                        )? {
+                            return Some(true);
+                        }
                     }
                 }
             }

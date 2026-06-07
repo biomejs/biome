@@ -12,6 +12,7 @@ mod if_at_rule;
 mod import_at_rule;
 mod include_at_rule;
 mod keyframes;
+mod media;
 mod mixin_at_rule;
 mod module_clauses;
 mod parameter;
@@ -43,6 +44,11 @@ pub(crate) use if_at_rule::parse_scss_if_at_rule;
 pub(crate) use import_at_rule::parse_scss_import_at_rule;
 pub(crate) use include_at_rule::parse_scss_include_at_rule;
 pub(crate) use keyframes::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
+pub(crate) use media::{
+    is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
+    parse_scss_interpolated_media_in_parens, parse_scss_media_condition, parse_scss_media_query,
+    parse_scss_media_query_or_condition_query,
+};
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
 pub(crate) use query_feature::parse_scss_interpolated_query_feature;
 pub(crate) use return_at_rule::parse_scss_return_at_rule;
