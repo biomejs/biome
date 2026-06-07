@@ -4,8 +4,9 @@ use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
-    ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
-    ScssModuleConfiguration, ScssParenthesizedExpression, is_in_scss_include_arguments,
+    ScssExpression, ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
+    ScssListExpressionElementList, ScssListExpressionFields, ScssModuleConfiguration,
+    ScssParenthesizedExpression, ScssVariableDeclaration, is_in_scss_include_arguments,
     is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
@@ -69,6 +70,19 @@ impl<'a> ScssListLayout<'a> {
         if is_parenthesized_list(self.node) {
             // In `(a, b)`, the parentheses own the line break and indent.
             return write!(f, [group(&format_args![elements.format()])]);
+        }
+
+        if is_compound_variable_list(self.node, &elements) {
+            // Print `$buttonConfig:
+            //   "save" 50px,
+            //   "cancel" 50px;`.
+            return write!(
+                f,
+                [
+                    group(&indent(&format_args![soft_line_break(), elements.format()]))
+                        .should_expand(true)
+                ]
+            );
         }
 
         write!(
@@ -231,6 +245,38 @@ fn is_include_keyword_list_value_expanded_by_comments(
         .has_dangling_comments(keyword_argument.syntax());
 
     has_trailing_comment || has_keyword_closing_comments
+}
+
+/// Detects `$buttonConfig: "save" 50px, "cancel" 50px;`.
+fn is_compound_variable_list(
+    node: &ScssListExpression,
+    elements: &ScssListExpressionElementList,
+) -> bool {
+    is_scss_variable_value_list(node) && elements.len() > 1 && has_compound_list_element(elements)
+}
+
+/// Checks that the list is the value in `$buttonConfig: "save" 50px, "cancel" 50px;`.
+fn is_scss_variable_value_list(node: &ScssListExpression) -> bool {
+    node.parent::<ScssExpressionItemList>()
+        .and_then(|items| items.parent::<ScssExpression>())
+        .and_then(|expression| expression.parent::<ScssVariableDeclaration>())
+        .is_some()
+}
+
+/// Checks for list items like `"save" 50px`.
+fn has_compound_list_element(elements: &ScssListExpressionElementList) -> bool {
+    elements
+        .iter()
+        .any(|element| element.as_ref().is_ok_and(is_compound_list_element))
+}
+
+/// Checks whether `"save" 50px` has multiple values.
+fn is_compound_list_element(element: &ScssListExpressionElement) -> bool {
+    element.value().ok().is_some_and(|value| {
+        value
+            .as_scss_expression()
+            .is_some_and(|expression| expression.items().len() > 1)
+    })
 }
 
 /// Detects the list in `@use "x" with ($family: (a, b))`.

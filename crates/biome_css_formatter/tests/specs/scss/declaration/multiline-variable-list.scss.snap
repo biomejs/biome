@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/declaration/multiline-variable-list.scss
+---
+
+# Input
+
+```scss
+$button-config:
+"save" 50px,
+"cancel" 50px,
+"help" 100px;
+
+$simple-list:
+"item-1",
+"item-2",
+"item-3";
+
+$single-compound: hotpink deepskyblue firebrick,;
+
+$inline-config: "save" 50px, "cancel" 50px, "help" 100px;
+
+$buttonConfig: "save" 50px, 'cancel' 50px, "help" 100PX;
+
+```
+
+
+# Formatted
+
+```scss
+$button-config:
+	"save" 50px,
+	"cancel" 50px,
+	"help" 100px;
+
+$simple-list: "item-1", "item-2", "item-3";
+
+$single-compound: hotpink deepskyblue firebrick;
+
+$inline-config:
+	"save" 50px,
+	"cancel" 50px,
+	"help" 100px;
+
+$buttonConfig:
+	"save" 50px,
+	"cancel" 50px,
+	"help" 100px;
+
+```

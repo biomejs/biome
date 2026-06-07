@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/interpolation/3943.scss
 ---
 
@@ -149,18 +150,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
    content: "I have #{8 + 2} books on SASS!";
    border: #{$var} #{$var} #{$var};
    filter: #{$var}#{$var}#{$var};
-@@ -66,10 +67,7 @@
-   }
- }
- 
--$icons:
--  wifi "\600",
--  wifi-hotspot "\601",
--  weather "\602";
-+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
- 
- @each $icon in $icons {
-   .icon-#{nth($icon, 1)},
 ```
 
 # Output
@@ -235,7 +224,10 @@ $foundation-dir: "foundation";
   }
 }
 
-$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+$icons:
+  wifi "\600",
+  wifi-hotspot "\601",
+  weather "\602";
 
 @each $icon in $icons {
   .icon-#{nth($icon, 1)},
