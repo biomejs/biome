@@ -453,7 +453,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssCommaSeparatedValue" => &[("items", 1)],
         "CssComplexSelector" => &[("left", 0), ("right", 2)],
         "CssComposesImportSpecifier" => &[("source", 1)],
-        "CssComposesProperty" => &[("name", 0), ("value", 2)],
+        "CssComposesProperty" => &[("name", 0), ("values", 2)],
         "CssComposesPropertyValue" => &[("classes", 0), ("specifier", 1)],
         "CssCompoundSelector" => &[
             ("nesting_selectors", 0),
