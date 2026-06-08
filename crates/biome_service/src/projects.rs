@@ -1,10 +1,9 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::{Settings, SettingsWithEditor};
-use crate::workspace::{
-    DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
-};
+use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
 use biome_fs::{ConfigName, FileSystem};
+use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;

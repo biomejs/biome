@@ -5,11 +5,12 @@ use crate::file_handlers::{
     ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};

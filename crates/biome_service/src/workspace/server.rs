@@ -4,9 +4,9 @@ use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
-    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
-    DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
-    ParseResult, ResolveBindingParams, ResolveDefinitionParams, UpdateSnippetsNodes,
+    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
+    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, ResolveBindingParams,
+    ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -55,6 +55,7 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
+use biome_languages::DocumentFileSource;
 use biome_module_graph::{
     HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, ProjectDatabase, resolve_css_module, resolve_html_module, resolve_js_module,

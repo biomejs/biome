@@ -1,4 +1,4 @@
-use crate::workspace::{DocumentFileSource, FeatureKind, ScanKind};
+use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
@@ -46,6 +46,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_languages::DocumentFileSource;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};

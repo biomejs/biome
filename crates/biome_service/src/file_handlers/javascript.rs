@@ -21,8 +21,7 @@ use crate::settings::{
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    DocumentFileSource, DocumentServices, EmbeddedSnippet, PatternId,
-    PullDiagnosticsAndActionsResult,
+    DocumentServices, EmbeddedSnippet, PatternId, PullDiagnosticsAndActionsResult,
 };
 use crate::workspace::{FixFileMode, SearchQuery};
 use crate::{
@@ -50,6 +49,7 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
+use biome_languages::DocumentFileSource;
 // TODO: js_embeds feature when ready
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;

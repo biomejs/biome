@@ -1,4 +1,4 @@
-use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
+use crate::workspace::CheckFileSizeResult;
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{
     CantResolve, ConfigurationDiagnostic, EditorConfigDiagnostic,
@@ -16,6 +16,7 @@ use biome_fs::{BiomePath, FileSystemDiagnostic};
 #[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+use biome_languages::DocumentFileSource;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;

@@ -1733,6 +1733,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_languages",
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
