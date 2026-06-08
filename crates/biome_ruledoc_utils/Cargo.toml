@@ -22,7 +22,7 @@ biome_json_parser    = { workspace = true }
 biome_languages      = { workspace = true, features = ["all"] }
 biome_module_graph   = { workspace = true }
 biome_project_layout = { workspace = true }
-biome_service        = { workspace = true }
+biome_service        = { workspace = true, features = ["lang_md", "lang_yaml"] }
 biome_test_utils     = { workspace = true }
 camino               = { workspace = true }
 
