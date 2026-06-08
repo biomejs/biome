@@ -35,7 +35,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -65,7 +64,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@14..15 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -95,7 +93,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -126,7 +123,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@2..7 "outer" [] []
             1: MD_TEXTUAL@7..8
               0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@8..10
           0: MD_QUOTE_INDENT_LIST@8..8
           1: R_ANGLE@8..9 ">" [] []
@@ -148,7 +144,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@13..14 "a" [] []
                     1: MD_TEXTUAL@14..15
                       0: MD_TEXTUAL_LITERAL@14..15 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@15..17
                   0: MD_QUOTE_INDENT_LIST@15..15
                   1: R_ANGLE@15..16 ">" [] []
@@ -168,7 +163,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@20..21 "b" [] []
                     1: MD_TEXTUAL@21..22
                       0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
-                  1: (empty)
   2: EOF@22..22 "" [] []
 
 ```

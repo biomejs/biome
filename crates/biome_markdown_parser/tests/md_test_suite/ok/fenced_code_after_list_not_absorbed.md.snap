@@ -40,7 +40,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -61,7 +60,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@11..12 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -114,7 +112,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "one" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-              1: (empty)
         1: MD_BULLET@6..12
           0: MD_LIST_MARKER_PREFIX@6..8
             0: MD_INDENT_TOKEN_LIST@6..6
@@ -128,7 +125,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@8..11 "two" [] []
                 1: MD_TEXTUAL@11..12
                   0: MD_TEXTUAL_LITERAL@11..12 "\n" [] []
-              1: (empty)
     1: MD_FENCED_CODE_BLOCK@12..29
       0: MD_INDENT_TOKEN_LIST@12..12
       1: TRIPLE_BACKTICK@12..15 "```" [] []

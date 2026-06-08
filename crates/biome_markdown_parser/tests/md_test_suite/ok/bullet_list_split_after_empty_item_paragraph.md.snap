@@ -39,7 +39,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -70,7 +69,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@11..11 "" [] [],
@@ -98,7 +96,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..3 "a" [] []
                 1: MD_TEXTUAL@3..4
                   0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
-              1: (empty)
         1: MD_BULLET@4..6
           0: MD_LIST_MARKER_PREFIX@4..5
             0: MD_INDENT_TOKEN_LIST@4..4
@@ -116,7 +113,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@7..10 "foo" [] []
         1: MD_TEXTUAL@10..11
           0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
-      1: (empty)
   2: EOF@11..11 "" [] []
 
 ```

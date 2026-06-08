@@ -35,7 +35,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@26..26 "" [] [],
@@ -60,7 +59,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] []
         4: MD_TEXTUAL@25..26
           0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
-      1: (empty)
   2: EOF@26..26 "" [] []
 
 ```

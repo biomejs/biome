@@ -40,7 +40,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -66,7 +65,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -93,7 +91,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@52..53 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -119,7 +116,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@72..73 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -157,7 +153,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@108..109 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -184,7 +179,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@2..16 "paragraph line" [] []
             1: MD_TEXTUAL@16..17
               0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@17..19
           0: MD_QUOTE_INDENT_LIST@17..17
           1: R_ANGLE@17..18 ">" [] []
@@ -204,7 +198,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@21..34 "nested bullet" [] []
                     1: MD_TEXTUAL@34..35
                       0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
-                  1: (empty)
     1: MD_NEWLINE@35..36
       0: NEWLINE@35..36 "\n" [] []
     2: MD_QUOTE@36..73
@@ -219,7 +212,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@38..52 "paragraph line" [] []
             1: MD_TEXTUAL@52..53
               0: MD_TEXTUAL_LITERAL@52..53 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@53..55
           0: MD_QUOTE_INDENT_LIST@53..53
           1: R_ANGLE@53..54 ">" [] []
@@ -239,7 +231,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@58..72 "nested ordered" [] []
                     1: MD_TEXTUAL@72..73
                       0: MD_TEXTUAL_LITERAL@72..73 "\n" [] []
-                  1: (empty)
     3: MD_NEWLINE@73..74
       0: NEWLINE@73..74 "\n" [] []
     4: MD_QUOTE@74..109
@@ -262,7 +253,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@93..108 "still paragraph" [] []
             4: MD_TEXTUAL@108..109
               0: MD_TEXTUAL_LITERAL@108..109 "\n" [] []
-          1: (empty)
   2: EOF@109..109 "" [] []
 
 ```

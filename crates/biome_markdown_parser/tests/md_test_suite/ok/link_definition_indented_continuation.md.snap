@@ -70,7 +70,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@26..27 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@27..28 "\n" [] [],
@@ -94,7 +93,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -137,7 +135,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@58..59 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -190,7 +187,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@18..26 "indented" [] []
         5: MD_TEXTUAL@26..27
           0: MD_TEXTUAL_LITERAL@26..27 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@27..28
       0: NEWLINE@27..28 "\n" [] []
     4: MD_BULLET_LIST_ITEM@28..59
@@ -208,7 +204,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@30..35 "outer" [] []
                 1: MD_TEXTUAL@35..36
                   0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@36..38
               0: MD_INDENT_TOKEN_LIST@36..38
                 0: MD_INDENT_TOKEN@36..37
@@ -238,7 +233,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@49..58 "lazy line" [] []
                         5: MD_TEXTUAL@58..59
                           0: MD_TEXTUAL_LITERAL@58..59 "\n" [] []
-                      1: (empty)
   2: EOF@59..59 "" [] []
 
 ```

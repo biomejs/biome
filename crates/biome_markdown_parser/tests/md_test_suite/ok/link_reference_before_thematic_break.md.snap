@@ -59,7 +59,6 @@ MdDocument {
         },
         MdParagraph {
             list: MdInlineItemList [],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@27..28 "\n" [] [],
@@ -118,7 +117,6 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@20..27 "\"title\"" [] []
     1: MD_PARAGRAPH@27..27
       0: MD_INLINE_ITEM_LIST@27..27
-      1: (empty)
     2: MD_NEWLINE@27..28
       0: NEWLINE@27..28 "\n" [] []
     3: MD_THEMATIC_BREAK_BLOCK@28..31

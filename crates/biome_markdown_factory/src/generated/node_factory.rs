@@ -455,31 +455,11 @@ pub fn md_ordered_list_item(md_bullet_list: MdBulletList) -> MdOrderedListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
-pub fn md_paragraph(list: MdInlineItemList) -> MdParagraphBuilder {
-    MdParagraphBuilder {
-        list,
-        hard_line: None,
-    }
-}
-pub struct MdParagraphBuilder {
-    list: MdInlineItemList,
-    hard_line: Option<MdHardLine>,
-}
-impl MdParagraphBuilder {
-    pub fn with_hard_line(mut self, hard_line: MdHardLine) -> Self {
-        self.hard_line = Some(hard_line);
-        self
-    }
-    pub fn build(self) -> MdParagraph {
-        MdParagraph::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_PARAGRAPH,
-            [
-                Some(SyntaxElement::Node(self.list.into_syntax())),
-                self.hard_line
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
+pub fn md_paragraph(list: MdInlineItemList) -> MdParagraph {
+    MdParagraph::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_PARAGRAPH,
+        [Some(SyntaxElement::Node(list.into_syntax()))],
+    ))
 }
 pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
