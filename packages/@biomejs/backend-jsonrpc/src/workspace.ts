@@ -17,7 +17,7 @@ export type FeatureName = FeatureKind[];
  */
 export interface Configuration {
 	/**
-	 * A field for the [JSON schema](https://json-schema.org/) specification
+	 * A field for the JSON schema specification: https://json-schema.org/
 	 */
 	$schema?: Schema;
 	/**
