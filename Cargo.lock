@@ -731,8 +731,6 @@ name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -834,8 +832,6 @@ name = "biome_grit_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -1302,9 +1298,6 @@ name = "biome_json_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
- "directories",
  "schemars",
  "serde",
 ]
@@ -1457,8 +1450,6 @@ name = "biome_markdown_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]
@@ -2017,8 +2008,6 @@ name = "biome_yaml_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
- "camino",
  "schemars",
  "serde",
 ]

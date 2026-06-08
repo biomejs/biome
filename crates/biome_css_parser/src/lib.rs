@@ -70,7 +70,8 @@ impl CssParse {
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
-    /// use biome_css_syntax::{CssFileSource, CssSyntaxKind};
+    /// use biome_css_syntax::CssSyntaxKind;
+    /// use biome_languages::CssFileSource;
     /// use biome_css_parser::CssParserOptions;
     /// let parse = parse_css(r#""#, CssFileSource::css(), CssParserOptions::default());
     ///
@@ -203,7 +204,7 @@ impl From<CssOffsetParse> for AnyParse {
 /// # Examples
 /// ```
 /// use biome_css_parser::{CssParserOptions, parse_css_with_offset};
-/// use biome_css_syntax::CssFileSource;
+/// use biome_languages::CssFileSource;
 /// use biome_rowan::TextSize;
 ///
 /// // Parsing embedded CSS starting at position 50 in an HTML document
