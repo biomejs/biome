@@ -107,6 +107,7 @@ biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version =
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
+biome_languages              = { path = "./crates/biome_languages/", version = "0.1.0" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.26", features = ["derive"] }

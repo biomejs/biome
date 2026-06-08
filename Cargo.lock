@@ -1301,6 +1301,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_languages"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_rowan",
+ "biome_string_case",
+ "camino",
+ "directories",
+ "schemars",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "biome_line_index"
 version = "0.1.0"
 dependencies = [
