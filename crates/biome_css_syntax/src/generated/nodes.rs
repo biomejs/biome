@@ -10768,6 +10768,39 @@ pub struct ScssInterpolationFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssKeyframesName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssKeyframesName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssKeyframesNameFields {
+        ScssKeyframesNameFields { name: self.name() }
+    }
+    pub fn name(&self) -> SyntaxResult<AnyScssKeyframesName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssKeyframesName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssKeyframesNameFields {
+    pub name: SyntaxResult<AnyScssKeyframesName>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeyframesSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -14854,6 +14887,7 @@ pub enum AnyCssKeyframesName {
     AnyCssKeyframesIdentifier(AnyCssKeyframesIdentifier),
     CssBogusKeyframesName(CssBogusKeyframesName),
     CssKeyframesScopedName(CssKeyframesScopedName),
+    ScssKeyframesName(ScssKeyframesName),
 }
 impl AnyCssKeyframesName {
     pub fn as_any_css_keyframes_identifier(&self) -> Option<&AnyCssKeyframesIdentifier> {
@@ -14871,6 +14905,12 @@ impl AnyCssKeyframesName {
     pub fn as_css_keyframes_scoped_name(&self) -> Option<&CssKeyframesScopedName> {
         match &self {
             Self::CssKeyframesScopedName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_keyframes_name(&self) -> Option<&ScssKeyframesName> {
+        match &self {
+            Self::ScssKeyframesName(item) => Some(item),
             _ => None,
         }
     }
@@ -17013,6 +17053,25 @@ impl AnyScssInterpolatedValuePart {
     pub fn as_scss_namespaced_variable(&self) -> Option<&ScssNamespacedVariable> {
         match &self {
             Self::ScssNamespacedVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssKeyframesName {
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssVariable(ScssVariable),
+}
+impl AnyScssKeyframesName {
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -30271,6 +30330,53 @@ impl From<ScssInterpolation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssKeyframesName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_KEYFRAMES_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_KEYFRAMES_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssKeyframesName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssKeyframesName")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("ScssKeyframesName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssKeyframesName> for SyntaxNode {
+    fn from(n: ScssKeyframesName) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssKeyframesName> for SyntaxElement {
+    fn from(n: ScssKeyframesName) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssKeyframesSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -38041,14 +38147,20 @@ impl From<CssKeyframesScopedName> for AnyCssKeyframesName {
         Self::CssKeyframesScopedName(node)
     }
 }
+impl From<ScssKeyframesName> for AnyCssKeyframesName {
+    fn from(node: ScssKeyframesName) -> Self {
+        Self::ScssKeyframesName(node)
+    }
+}
 impl AstNode for AnyCssKeyframesName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssKeyframesIdentifier::KIND_SET
         .union(CssBogusKeyframesName::KIND_SET)
-        .union(CssKeyframesScopedName::KIND_SET);
+        .union(CssKeyframesScopedName::KIND_SET)
+        .union(ScssKeyframesName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_KEYFRAMES_NAME | CSS_KEYFRAMES_SCOPED_NAME => true,
+            CSS_BOGUS_KEYFRAMES_NAME | CSS_KEYFRAMES_SCOPED_NAME | SCSS_KEYFRAMES_NAME => true,
             k if AnyCssKeyframesIdentifier::can_cast(k) => true,
             _ => false,
         }
@@ -38061,6 +38173,7 @@ impl AstNode for AnyCssKeyframesName {
             CSS_KEYFRAMES_SCOPED_NAME => {
                 Self::CssKeyframesScopedName(CssKeyframesScopedName { syntax })
             }
+            SCSS_KEYFRAMES_NAME => Self::ScssKeyframesName(ScssKeyframesName { syntax }),
             _ => {
                 if let Some(any_css_keyframes_identifier) = AnyCssKeyframesIdentifier::cast(syntax)
                 {
@@ -38077,6 +38190,7 @@ impl AstNode for AnyCssKeyframesName {
         match self {
             Self::CssBogusKeyframesName(it) => it.syntax(),
             Self::CssKeyframesScopedName(it) => it.syntax(),
+            Self::ScssKeyframesName(it) => it.syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.syntax(),
         }
     }
@@ -38084,6 +38198,7 @@ impl AstNode for AnyCssKeyframesName {
         match self {
             Self::CssBogusKeyframesName(it) => it.into_syntax(),
             Self::CssKeyframesScopedName(it) => it.into_syntax(),
+            Self::ScssKeyframesName(it) => it.into_syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
         }
     }
@@ -38094,6 +38209,7 @@ impl std::fmt::Debug for AnyCssKeyframesName {
             Self::AnyCssKeyframesIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogusKeyframesName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesScopedName(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssKeyframesName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38103,6 +38219,7 @@ impl From<AnyCssKeyframesName> for SyntaxNode {
             AnyCssKeyframesName::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
             AnyCssKeyframesName::CssBogusKeyframesName(it) => it.into_syntax(),
             AnyCssKeyframesName::CssKeyframesScopedName(it) => it.into_syntax(),
+            AnyCssKeyframesName::ScssKeyframesName(it) => it.into_syntax(),
         }
     }
 }
@@ -44002,6 +44119,68 @@ impl From<AnyScssInterpolatedValuePart> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyScssKeyframesName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl From<ScssVariable> for AnyScssKeyframesName {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
+impl AstNode for AnyScssKeyframesName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssInterpolatedIdentifier::KIND_SET.union(ScssVariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssKeyframesName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssKeyframesName> for SyntaxNode {
+    fn from(n: AnyScssKeyframesName) -> Self {
+        match n {
+            AnyScssKeyframesName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyScssKeyframesName::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssKeyframesName> for SyntaxElement {
+    fn from(n: AnyScssKeyframesName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusParameter> for AnyScssModuleConfiguration {
     fn from(node: CssBogusParameter) -> Self {
         Self::CssBogusParameter(node)
@@ -45279,6 +45458,11 @@ impl std::fmt::Display for AnyScssInterpolatedStringPart {
     }
 }
 impl std::fmt::Display for AnyScssInterpolatedValuePart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssKeyframesName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -46594,6 +46778,11 @@ impl std::fmt::Display for ScssInterpolatedValue {
     }
 }
 impl std::fmt::Display for ScssInterpolation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssKeyframesName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
