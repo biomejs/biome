@@ -10,7 +10,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssSelectorIdentifier, CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
+    AnyCssSelectorIdentifier, CssBogusPseudoClass, CssPageSelectorPseudo,
     CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
     CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
@@ -18,6 +18,7 @@ use biome_css_syntax::{
     CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
 };
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;

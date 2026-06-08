@@ -6,7 +6,8 @@ use biome_formatter::{
 };
 
 use crate::comments::{FormatGraphqlLeadingComment, GraphqlComments};
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
+use biome_languages::GraphqlFileSource;
 use std::fmt;
 use std::rc::Rc;
 

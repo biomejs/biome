@@ -20,6 +20,7 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
+use biome_languages::DocumentFileSource;
 use biome_module_graph::{
     HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module,
     resolve_js_module,
@@ -28,7 +29,6 @@ use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{
     ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,

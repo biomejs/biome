@@ -133,7 +133,8 @@ pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
 mod test {
     use crate::utils::{VariablePosition, find_variable_position, parse_package_name};
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::{JsBinaryExpression, JsFileSource};
+    use biome_js_syntax::JsBinaryExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::AstNode;
 
     #[test]

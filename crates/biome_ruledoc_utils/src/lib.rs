@@ -1,21 +1,19 @@
 mod codeblock;
 
-use std::collections::HashMap;
-use std::hash::BuildHasher;
-use std::sync::Arc;
-
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_parser::JsFileSource;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module, resolve_html_module,
     resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
-use biome_service::workspace::DocumentFileSource;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
 use camino::Utf8PathBuf;
+use std::collections::HashMap;
+use std::hash::BuildHasher;
+use std::sync::Arc;
 
 pub use codeblock::*;
 

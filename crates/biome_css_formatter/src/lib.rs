@@ -429,11 +429,12 @@ mod tests {
     use crate::format_node;
     use crate::{CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::{CssFileSource, CssRoot};
+    use biome_css_syntax::CssRoot;
     use biome_formatter::prelude::token;
     use biome_formatter::{
         Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule, write,
     };
+    use biome_languages::CssFileSource;
     use biome_rowan::AstNode;
 
     #[test]

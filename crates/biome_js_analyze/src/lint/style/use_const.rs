@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_const::UseConstOptions;
 

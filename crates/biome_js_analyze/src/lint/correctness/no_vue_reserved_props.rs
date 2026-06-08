@@ -7,7 +7,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rule_options::no_vue_reserved_props::NoVueReservedPropsOptions;
 use enumflags2::make_bitflags;
 

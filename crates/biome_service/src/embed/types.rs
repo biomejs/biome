@@ -1,10 +1,8 @@
-use crate::workspace::DocumentFileSource;
-use biome_css_syntax::CssFileSource;
-#[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::GraphqlFileSource;
 use biome_html_syntax::AnySvelteBlock;
-use biome_js_syntax::{JsFileSource, Language};
-use biome_json_syntax::JsonFileSource;
+#[cfg(feature = "lang_graphql")]
+use biome_languages::GraphqlFileSource;
+use biome_languages::javascript::Language;
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// Language that can host embeds.

@@ -589,7 +589,8 @@ mod tests {
     };
     use biome_formatter::comments::Comments;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::{JsFileSource, JsxChildList, JsxText};
+    use biome_js_syntax::{JsxChildList, JsxText};
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, TextSize};
 
     #[test]

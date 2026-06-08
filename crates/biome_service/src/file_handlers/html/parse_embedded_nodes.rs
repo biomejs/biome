@@ -10,24 +10,24 @@ use crate::workspace::{
     AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{
-    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
-    EmbeddingStyleApplicability, TextSize,
-};
+use biome_css_syntax::{CssLanguage, TextSize};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
-    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
-    HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
-    SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
+    HtmlSingleTextExpression, HtmlTextExpression, SvelteName, VueDirective,
+    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
+use biome_js_syntax::JsLanguage;
 use biome_json_parser::parse_json_with_offset_and_cache;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
 use std::collections::VecDeque;
@@ -896,7 +896,7 @@ fn parse_matched_embed(
             // Configure EmbeddingKind based on framework + candidate type
             let is_source_level = match candidate {
                 EmbedCandidate::Frontmatter { .. } => {
-                    js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                    js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
                         frontmatter: true,
                         is_class_attribute: false,
                     });
@@ -904,14 +904,14 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
                             is_const_block: false,
                         });
                     } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                             setup: candidate.has_attribute("setup"),
                             is_source: true,
                             event_handler: false,
@@ -923,14 +923,14 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::TextExpression { block_kind, .. } => {
                     if ctx.host_file_source.is_astro() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
                             frontmatter: false,
                             is_class_attribute: false,
                         });
                     } else if ctx.host_file_source.is_svelte() {
                         let is_function_signature =
                             matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                             is_source: false,
                             is_function_signature,
                             kind: SvelteFileKind::Component,
@@ -940,7 +940,7 @@ fn parse_matched_embed(
                             ),
                         });
                     } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
                             event_handler: false,
@@ -957,13 +957,13 @@ fn parse_matched_embed(
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
                                 frontmatter: false,
                                 is_class_attribute: *is_class_attribute,
                             });
                         }
                         HtmlVariant::Vue => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                                 setup: false,
                                 is_source: false,
                                 event_handler: *is_event_handler,
@@ -971,7 +971,7 @@ fn parse_matched_embed(
                             });
                         }
                         HtmlVariant::Svelte => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                                 is_source: false,
                                 is_function_signature: false,
                                 kind: SvelteFileKind::Component,

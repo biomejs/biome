@@ -8,7 +8,8 @@ use biome_formatter::{
     FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
+use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
+use biome_languages::JsFileSource;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;

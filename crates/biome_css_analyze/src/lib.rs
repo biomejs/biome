@@ -18,8 +18,9 @@ use biome_analyze::{
     BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
     PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
-use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
+use biome_css_syntax::{CssLanguage, TextRange};
 use biome_diagnostics::Error;
+use biome_languages::CssFileSource;
 use biome_module_graph::ProjectDatabase;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -219,11 +220,12 @@ mod tests {
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_semantic::semantic_model;
-    use biome_css_syntax::{CssFileSource, TextRange};
+    use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{
         Diagnostic, DiagnosticExt, PrintDiagnostic, Severity, category, print_diagnostic_to_string,
     };
+    use biome_languages::CssFileSource;
     use std::slice;
 
     #[ignore]

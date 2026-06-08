@@ -7,12 +7,13 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::BindingExtensions;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
-    JsFunctionBody, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, JsModule, JsReferenceIdentifier, JsScript, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
+    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
+    JsReferenceIdentifier, JsScript, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
     WalkEvent, declare_node_union,

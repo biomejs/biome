@@ -5,7 +5,8 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
-use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
+use biome_languages::CssFileSource;
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
@@ -252,7 +253,7 @@ pub fn parse_css_with_offset_and_cache(
 mod tests {
     use crate::{CssParserOptions, parse_css};
     use crate::{parse_css_with_cache, parse_css_with_offset};
-    use biome_css_syntax::{CssFileSource, EmbeddingKind};
+    use biome_languages::{CssFileSource, css::CssEmbeddingKind};
     use biome_rowan::TextSize;
 
     #[test]
@@ -341,7 +342,7 @@ mod tests {
         ] {
             let parse = parse_css(
                 css,
-                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
                 CssParserOptions::default(),
             );
 
@@ -364,7 +365,7 @@ background: black;
 
         let parse = parse_css(
             css_code,
-            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
             CssParserOptions::default(),
         );
 

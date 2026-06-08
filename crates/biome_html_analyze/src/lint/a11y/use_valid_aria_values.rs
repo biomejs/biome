@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
 use biome_string_case::StrLikeExtension;

@@ -1,8 +1,9 @@
 mod visitor;
 
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
-use biome_css_syntax::{AnyCssRoot, CssFileSource};
+use biome_css_syntax::AnyCssRoot;
 use biome_js_syntax::AnyJsRoot;
+use biome_languages::CssFileSource;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextSize};
 use indexmap::IndexMap;

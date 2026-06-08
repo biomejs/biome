@@ -15,10 +15,11 @@ use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause, AnyJsModuleItem,
-    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource, JsIdentifierBinding,
-    JsImport, JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
+    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsIdentifierBinding, JsImport,
+    JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
     JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
     TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,

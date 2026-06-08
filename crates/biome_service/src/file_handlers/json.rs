@@ -38,7 +38,8 @@ use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, ana
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
+use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
+use biome_languages::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};

@@ -137,7 +137,7 @@ pub enum SvelteFileKind {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub enum EmbeddingKind {
+pub enum JsEmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
@@ -176,7 +176,7 @@ pub enum EmbeddingKind {
     None,
 }
 
-impl EmbeddingKind {
+impl JsEmbeddingKind {
     pub const fn is_astro(&self) -> bool {
         matches!(self, Self::Astro { .. })
     }
@@ -265,7 +265,7 @@ pub struct JsFileSource {
     version: LanguageVersion,
     /// Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
     /// For example, if inside an Astro file, a top-level return statement is allowed.
-    embedding_kind: EmbeddingKind,
+    embedding_kind: JsEmbeddingKind,
 }
 
 impl JsFileSource {
@@ -316,7 +316,7 @@ impl JsFileSource {
     }
 
     pub fn astro() -> Self {
-        Self::ts().with_embedding_kind(EmbeddingKind::Astro {
+        Self::ts().with_embedding_kind(JsEmbeddingKind::Astro {
             frontmatter: true,
             is_class_attribute: false,
         })
@@ -324,7 +324,7 @@ impl JsFileSource {
 
     /// Vue file definition
     pub fn vue() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+        Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: false,
             is_source: true,
             event_handler: false,
@@ -334,7 +334,7 @@ impl JsFileSource {
 
     /// Vue file definition with setup attribute
     pub fn vue_setup() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+        Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
             setup: true,
             is_source: true,
             event_handler: false,
@@ -344,7 +344,7 @@ impl JsFileSource {
 
     /// Svelte file definition
     pub fn svelte() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
+        Self::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
             is_source: true,
             is_function_signature: false,
             kind: SvelteFileKind::Component,
@@ -375,7 +375,7 @@ impl JsFileSource {
         self
     }
 
-    pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
+    pub const fn with_embedding_kind(mut self, kind: JsEmbeddingKind) -> Self {
         self.embedding_kind = kind;
         self
     }
@@ -415,7 +415,9 @@ impl JsFileSource {
     pub const fn is_embedded(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte { .. } | EmbeddingKind::Vue { .. } | EmbeddingKind::Astro { .. }
+            JsEmbeddingKind::Svelte { .. }
+                | JsEmbeddingKind::Vue { .. }
+                | JsEmbeddingKind::Astro { .. }
         )
     }
 
@@ -423,13 +425,13 @@ impl JsFileSource {
     pub const fn is_embedded_source(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte {
+            JsEmbeddingKind::Svelte {
                 is_source: true,
                 ..
-            } | EmbeddingKind::Vue {
+            } | JsEmbeddingKind::Vue {
                 is_source: true,
                 ..
-            } | EmbeddingKind::Astro {
+            } | JsEmbeddingKind::Astro {
                 frontmatter: true,
                 ..
             }
@@ -443,13 +445,13 @@ impl JsFileSource {
     pub const fn is_template_expression(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte {
+            JsEmbeddingKind::Svelte {
                 is_source: false,
                 ..
-            } | EmbeddingKind::Vue {
+            } | JsEmbeddingKind::Vue {
                 allow_statements: false,
                 ..
-            } | EmbeddingKind::Astro {
+            } | JsEmbeddingKind::Astro {
                 frontmatter: false,
                 ..
             }
@@ -466,7 +468,7 @@ impl JsFileSource {
         self.embedding_kind.is_svelte_const_block()
     }
 
-    pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
+    pub const fn as_embedding_kind(&self) -> &JsEmbeddingKind {
         &self.embedding_kind
     }
 
@@ -551,7 +553,7 @@ impl JsFileSource {
                 Self::js_module()
             };
 
-            return Ok(source.with_embedding_kind(EmbeddingKind::Svelte {
+            return Ok(source.with_embedding_kind(JsEmbeddingKind::Svelte {
                 is_source: true,
                 is_function_signature: false,
                 kind: SvelteFileKind::SourceModule,

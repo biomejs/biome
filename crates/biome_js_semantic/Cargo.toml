@@ -15,6 +15,7 @@ publish              = true
 biome_formatter     = { workspace = true }
 biome_js_syntax     = { workspace = true }
 biome_jsdoc_comment = { workspace = true }
+biome_languages     = { workspace = true, features = ["lang_js"] }
 biome_rowan         = { workspace = true }
 rust-lapper         = { workspace = true }
 rustc-hash          = { workspace = true }

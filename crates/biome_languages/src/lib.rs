@@ -344,7 +344,7 @@ impl DocumentFileSource {
     /// # Examples
     ///
     /// ```
-    /// use biome_js_syntax::JsFileSource;
+    /// use biome_languages::JsFileSource;
     /// use biome_json_syntax::JsonFileSource;
     /// use biome_service::workspace::DocumentFileSource;
     /// let x = DocumentFileSource::from(JsFileSource::js_module());

@@ -13,8 +13,9 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, JsExport, JsExportNamedClause, JsExportNamedFromClause,
     JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList, JsExportNamedSpecifierList,
-    JsFileSource, JsSyntaxToken, T,
+    JsSyntaxToken, T,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,

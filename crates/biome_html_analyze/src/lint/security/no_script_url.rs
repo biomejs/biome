@@ -4,9 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlFileSource, HtmlOpeningElement,
-    element_ext::AnyHtmlTagElement, inner_string_text,
+    AnyHtmlAttributeInitializer, HtmlOpeningElement, element_ext::AnyHtmlTagElement,
+    inner_string_text,
 };
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
 use biome_string_case::StrOnlyExtension;

@@ -158,7 +158,8 @@ mod tests {
     use super::*;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
-    use biome_js_parser::{JsFileSource, JsParserOptions};
+    use biome_js_parser::JsParserOptions;
+    use biome_languages::JsFileSource;
 
     fn snap_diagnostics(test_name: &str, diagnostics: Vec<Error>) {
         let content = diagnostics

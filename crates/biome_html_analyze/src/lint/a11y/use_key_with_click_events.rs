@@ -3,8 +3,9 @@ use crate::{Aria, utils::is_html_tag};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlFileSource;
+
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 

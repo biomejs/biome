@@ -1,7 +1,8 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 

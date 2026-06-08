@@ -41,7 +41,7 @@ use biome_configuration::javascript::{
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
 use biome_css_parser::parse_css_with_offset_and_cache;
-use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
+use biome_css_syntax::CssLanguage;
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
@@ -49,12 +49,12 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_languages::DocumentFileSource;
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource};
 // TODO: js_embeds feature when ready
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
@@ -69,11 +69,14 @@ use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
-    TextRange, TextSize, TokenAtOffset,
+    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFunctionDeclaration, JsLanguage,
+    JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator, TextRange,
+    TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
+#[cfg(feature = "lang_graphql")]
+use biome_languages::GraphqlFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_parser::AnyParse;
 use biome_rowan::{
@@ -727,7 +730,7 @@ fn parse_js_matched_embed(
     match embed_match.guest {
         GuestLanguage::Css => {
             let file_source = DocumentFileSource::Css(
-                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
             );
             let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
             let parse = parse_css_with_offset_and_cache(

@@ -30,7 +30,11 @@ lang_md      = []
 lang_yaml    = []
 scss         = ["lang_css"]
 
-schema = ["dep:schemars"]
+# This is used only for testing purpose. It enables ALL languages
+all = ["lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json", "lang_md", "lang_yaml"]
+
+# Insert here only languages that are **exposed to the user** or enabled via feature flags
+schema = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
 
 [lints]
 workspace = true

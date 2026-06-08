@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsFileSource, JsObjectExpression, T};
+use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsObjectExpression, T};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
 use biome_rowan::{BatchMutationExt, SyntaxNodeCast};
 use biome_rule_options::no_vue_data_object_declaration::NoVueDataObjectDeclarationOptions;

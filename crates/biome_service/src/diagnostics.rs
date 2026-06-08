@@ -780,11 +780,11 @@ pub struct DbError {
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
-    use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use biome_languages::DocumentFileSource;
     use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
     use std::ffi::OsString;
 

@@ -43,33 +43,32 @@ use biome_analyze::{
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
-use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
-use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
 #[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
-    AnyJsModuleItem, EmbeddingKind, JsFileSource, JsLanguage, JsxAttribute, JsxAttributeList,
-    Language, LanguageVariant, SvelteFileKind, TextRange, TextSize,
+    AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList, TextRange, TextSize,
 };
 use biome_json_analyze::METADATA as json_metadata;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
+use biome_languages::javascript::{
+    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
+};
 use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
-use biome_string_case::StrLikeExtension;
+use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use either::Either;
@@ -81,7 +80,7 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use tracing::{instrument, trace};
+use tracing::trace;
 
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
@@ -957,19 +956,19 @@ impl Features {
     ) -> Capabilities {
         match language_hint {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
-                EmbeddingKind::Vue { .. } => self.vue.capabilities(),
+                JsEmbeddingKind::Astro { .. } => self.astro.capabilities(),
+                JsEmbeddingKind::Vue { .. } => self.vue.capabilities(),
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
-                EmbeddingKind::Svelte {
+                JsEmbeddingKind::Svelte {
                     kind: SvelteFileKind::SourceModule,
                     ..
                 } => self.js.capabilities(),
-                EmbeddingKind::Svelte {
+                JsEmbeddingKind::Svelte {
                     kind: SvelteFileKind::Component,
                     ..
                 } => self.svelte.capabilities(),
-                EmbeddingKind::None => self.js.capabilities(),
+                JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),

@@ -2,8 +2,9 @@
 pub(crate) mod tests {
     use crate::transform;
     use biome_js_parser::JsParserOptions;
+    use biome_js_syntax::JsLanguage;
     use biome_js_syntax::parentheses::NeedsParentheses;
-    use biome_js_syntax::{JsFileSource, JsLanguage};
+    use biome_languages::JsFileSource;
     use biome_rowan::AstNode;
 
     pub(crate) fn assert_needs_parentheses_impl<
@@ -118,13 +119,13 @@ pub(crate) mod tests {
     /// Asserts that [NeedsParentheses.needs_parentheses()] returns true for the second (in pre-order) [JsStaticMemberExpression] in the program.
     #[macro_export]
     macro_rules! assert_needs_parentheses {
-        ($input:expr, $Node:ident) => {{ $crate::assert_needs_parentheses!($input, $Node, biome_js_syntax::JsFileSource::ts()) }};
+        ($input:expr, $Node:ident) => {{ $crate::assert_needs_parentheses!($input, $Node, biome_languages::JsFileSource::ts()) }};
 
         ($input:expr, $Node:ident[$index:expr]) => {{
             $crate::assert_needs_parentheses!(
                 $input,
                 $Node[$index],
-                biome_js_syntax::JsFileSource::ts()
+                biome_languages::JsFileSource::ts()
             )
         }};
 
@@ -173,7 +174,7 @@ pub(crate) mod tests {
             $crate::assert_not_needs_parentheses!(
                 $input,
                 $Node,
-                biome_js_syntax::JsFileSource::ts()
+                biome_languages::JsFileSource::ts()
             )
         }};
 
@@ -181,7 +182,7 @@ pub(crate) mod tests {
             $crate::assert_not_needs_parentheses!(
                 $input,
                 $Node[$index],
-                biome_js_syntax::JsFileSource::ts()
+                biome_languages::JsFileSource::ts()
             )
         }};
 

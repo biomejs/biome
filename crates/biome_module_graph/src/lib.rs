@@ -9,7 +9,6 @@ pub mod js_module_info;
 mod module_graph;
 mod path_info_cache;
 
-pub use biome_css_syntax::EmbeddingStyleApplicability;
 pub use biome_js_type_info::ImportSymbol;
 pub use biome_resolver::ResolvedPath;
 pub use css_module_info::{

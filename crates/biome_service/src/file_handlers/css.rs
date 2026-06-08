@@ -930,7 +930,7 @@ fn search(
 #[cfg(test)]
 mod test {
     use super::*;
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     #[test]
     fn inherit_global_format_settings() {

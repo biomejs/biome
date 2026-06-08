@@ -6,7 +6,8 @@ use biome_formatter::{
 use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
+use biome_languages::CssFileSource;
 use std::fmt;
 use std::rc::Rc;
 

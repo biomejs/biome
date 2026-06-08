@@ -656,7 +656,7 @@ mod tests {
     use crate::context::JsFormatOptions;
     use biome_formatter::IndentStyle;
     use biome_js_parser::{JsParserOptions, parse, parse_script};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
 
     #[test]

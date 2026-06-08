@@ -33,7 +33,7 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
 #[cfg(test)]
 mod tests {
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
     use biome_rowan::TextRange;
 
     #[test]
@@ -303,7 +303,7 @@ mod tests {
 mod specificity_tests {
     use crate::model::{SemanticModel, Specificity};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     fn to_semantic_model(source: &str) -> SemanticModel {
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
