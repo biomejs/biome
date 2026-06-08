@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// const glob = await import("tinyglobby");
     /// ```
     ///
-    /// See <https://e18e.dev/docs/replacements/> for the full list of replacements.
+    /// See [the e18e docs](https://e18e.dev/docs/replacements/) for the full list of replacements.
     ///
     pub NoRestrictedDependencies {
         version: "next",
