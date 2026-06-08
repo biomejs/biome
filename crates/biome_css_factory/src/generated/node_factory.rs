@@ -3833,6 +3833,12 @@ pub fn scss_interpolation(
         ],
     ))
 }
+pub fn scss_keyframes_name(name: AnyScssKeyframesName) -> ScssKeyframesName {
+    ScssKeyframesName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_NAME,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
 pub fn scss_keyframes_selector(selector: ScssInterpolation) -> ScssKeyframesSelectorBuilder {
     ScssKeyframesSelectorBuilder {
         selector,

@@ -1272,6 +1272,7 @@ CssKeyframesAtRule =
 AnyCssKeyframesName =
 	CssKeyframesScopedName
 	| AnyCssKeyframesIdentifier
+	| ScssKeyframesName
 	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
@@ -1309,6 +1310,13 @@ CssKeyframesScopePrefix =
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^
 AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
+
+ScssKeyframesName =
+	name: AnyScssKeyframesName
+
+AnyScssKeyframesName =
+	ScssInterpolatedIdentifier
+	| ScssVariable
 
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^

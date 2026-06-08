@@ -9,7 +9,10 @@ use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
-use crate::syntax::scss::{is_at_scss_keyframes_selector, parse_scss_keyframes_selector};
+use crate::syntax::scss::{
+    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, parse_scss_keyframes_name,
+    parse_scss_keyframes_selector,
+};
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier,
@@ -79,8 +82,7 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
         // is_at_keyframes_scoped_name guaranties that it will parse a keyframes scoped name
         parse_keyframes_scoped_name(p).ok();
     } else {
-        parse_keyframes_identifier(p)
-            .or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
+        parse_keyframes_name(p).or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
     };
 
     KeyframesBlock.parse_block_body(p);
@@ -179,6 +181,18 @@ fn parse_keyframes_identifier(p: &mut CssParser) -> ParsedSyntax {
         parse_custom_identifier(p, CssLexContext::Regular)
     } else {
         parse_string(p)
+    }
+}
+
+/// Parses a keyframes name in the top-level `@keyframes` name slot.
+///
+/// This accepts standard CSS names and SCSS dynamic names such as
+/// `@keyframes $name`, `@keyframes #{$name}`, and `@keyframes fade-#{$name}`.
+fn parse_keyframes_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_keyframes_name(p) {
+        parse_scss_keyframes_name(p)
+    } else {
+        parse_keyframes_identifier(p)
     }
 }
 

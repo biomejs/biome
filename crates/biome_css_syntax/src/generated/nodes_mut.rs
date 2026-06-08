@@ -4319,6 +4319,14 @@ impl ScssInterpolation {
         )
     }
 }
+impl ScssKeyframesName {
+    pub fn with_name(self, element: AnyScssKeyframesName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssKeyframesSelector {
     pub fn with_selector(self, element: ScssInterpolation) -> Self {
         Self::unwrap_cast(
