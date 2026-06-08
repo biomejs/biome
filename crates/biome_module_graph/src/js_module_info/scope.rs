@@ -18,10 +18,16 @@ impl TsBindingReferenceExt for TsBindingReference {
             match self {
                 Self::Type(binding_id)
                 | Self::ValueType(binding_id)
+                | Self::FunctionValue(binding_id)
                 | Self::TypeAndValueType(binding_id)
                 | Self::NamespaceAndValueType(binding_id) => {
                     (binding_id != excluded_binding_id).then_some(binding_id)
                 }
+                Self::Overloaded(set) => set
+                    .iter()
+                    .rev()
+                    .copied()
+                    .find(|id| *id != excluded_binding_id),
                 Self::Merged {
                     ty,
                     value_ty,
@@ -154,6 +160,7 @@ impl FusedIterator for ScopeBindingsIter {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_js_semantic::JsDeclarationKind;
 
     #[test]
     fn binding_reference_merging() {
@@ -211,6 +218,66 @@ mod tests {
             TsBindingReference::ValueType(BindingId::new(0))
                 .union_with(TsBindingReference::NamespaceAndValueType(BindingId::new(0))),
             TsBindingReference::NamespaceAndValueType(BindingId::new(0))
+        );
+    }
+
+    #[test]
+    fn function_declarations_become_overloadable_value_references() {
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::Function,
+            ),
+            TsBindingReference::FunctionValue(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::HoistedValue,
+            ),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::from_binding_and_declaration_kind(
+                BindingId::new(0),
+                JsDeclarationKind::Value,
+            ),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+    }
+
+    #[test]
+    fn function_overloads_merge_into_a_set() {
+        assert_eq!(
+            TsBindingReference::FunctionValue(BindingId::new(0))
+                .union_with(TsBindingReference::FunctionValue(BindingId::new(1))),
+            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
+        );
+        assert_eq!(
+            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
+                .union_with(TsBindingReference::FunctionValue(BindingId::new(2))),
+            TsBindingReference::Overloaded(Box::new([
+                BindingId::new(0),
+                BindingId::new(1),
+                BindingId::new(2),
+            ]))
+        );
+        assert_eq!(
+            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
+                .value_ty_or_ty(),
+            BindingId::new(1)
+        );
+
+        // A single function merges with a type the way a plain value would
+        // (declaration merging of `function f` + `type f`).
+        assert_eq!(
+            TsBindingReference::FunctionValue(BindingId::new(0))
+                .union_with(TsBindingReference::Type(BindingId::new(1))),
+            TsBindingReference::Merged {
+                ty: Some(BindingId::new(1)),
+                value_ty: Some(BindingId::new(0)),
+                namespace_ty: None,
+            }
         );
     }
 }

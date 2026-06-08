@@ -896,9 +896,15 @@ impl JsModuleInfoCollector {
             }
             TsBindingReference::Type(binding_id)
             | TsBindingReference::ValueType(binding_id)
+            | TsBindingReference::FunctionValue(binding_id)
             | TsBindingReference::TypeAndValueType(binding_id)
             | TsBindingReference::NamespaceAndValueType(binding_id) => {
                 // Get the binding range instead of storing the BindingId
+                let binding_range = self.bindings[binding_id.index()].range;
+                JsOwnExport::Binding(binding_range)
+            }
+            TsBindingReference::Overloaded(set) => {
+                let binding_id = set.last().expect("overload set is never empty");
                 let binding_range = self.bindings[binding_id.index()].range;
                 JsOwnExport::Binding(binding_range)
             }

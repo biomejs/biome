@@ -25,6 +25,11 @@ pub enum JsDeclarationKind {
     /// Declares both a type and a value.
     Enum,
 
+    /// A `function` declaration or a `declare function` overload signature.
+    ///
+    /// Declares only a value, and is hoisted to the function scope.
+    Function,
+
     /// A generic type parameter, declared in angle brackets.
     ///
     /// For example: `<T>`.
@@ -32,7 +37,7 @@ pub enum JsDeclarationKind {
     /// Declares only a type.
     Generic,
 
-    /// A `function` or `var` declaration.
+    /// A `var` declaration.
     ///
     /// Declares only a value, and is hoisted to the function scope.
     HoistedValue,
@@ -110,6 +115,7 @@ impl JsDeclarationKind {
             self,
             Self::Class
                 | Self::Enum
+                | Self::Function
                 | Self::HoistedValue
                 | Self::Import
                 | Self::Namespace
@@ -129,14 +135,14 @@ impl JsDeclarationKind {
             if let Some(declaration) = AnyJsDeclaration::cast_ref(&ancestor) {
                 return match declaration {
                     AnyJsDeclaration::JsClassDeclaration(_) => Self::Class,
-                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::JsFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::JsVariableDeclaration(decl) => match decl.variable_kind() {
                         Ok(JsVariableKind::Const | JsVariableKind::Let) => Self::Value,
                         Ok(JsVariableKind::Using) => Self::Using,
                         Ok(JsVariableKind::Var) => Self::HoistedValue,
                         Err(_) => Self::Unknown,
                     },
-                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::HoistedValue,
+                    AnyJsDeclaration::TsDeclareFunctionDeclaration(_) => Self::Function,
                     AnyJsDeclaration::TsEnumDeclaration(_) => Self::Enum,
                     AnyJsDeclaration::TsExternalModuleDeclaration(_) => Self::Module,
                     AnyJsDeclaration::TsInterfaceDeclaration(_) => Self::Interface,
@@ -188,7 +194,7 @@ impl JsDeclarationKind {
 /// For example, a `class` declaration creates both a type and a value.
 /// Declaration merging (e.g., `interface Foo` + `const Foo`) creates
 /// separate bindings for the type and value slots.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TsBindingReference {
     /// The binding only declares a type.
     Type(BindingId),
@@ -198,6 +204,10 @@ pub enum TsBindingReference {
     TypeAndValueType(BindingId),
     /// The binding declares both a namespace and a value.
     NamespaceAndValueType(BindingId),
+    /// A single `function` declaration; two of these merge into [`Self::Overloaded`].
+    FunctionValue(BindingId),
+    /// Two or more same-named `function` declarations, in source order.
+    Overloaded(Box<[BindingId]>),
     /// The binding results from declaration merging, with separate
     /// binding IDs for the type, value, and namespace slots.
     Merged {
@@ -213,6 +223,10 @@ impl TsBindingReference {
         binding_id: BindingId,
         declaration_kind: JsDeclarationKind,
     ) -> Self {
+        if matches!(declaration_kind, JsDeclarationKind::Function) {
+            return Self::FunctionValue(binding_id);
+        }
+
         match (
             declaration_kind.declares_namespace(),
             declaration_kind.declares_type(),
@@ -245,8 +259,10 @@ impl TsBindingReference {
     pub fn value_ty_or_ty(self) -> BindingId {
         match self {
             Self::ValueType(binding_id)
+            | Self::FunctionValue(binding_id)
             | Self::TypeAndValueType(binding_id)
             | Self::NamespaceAndValueType(binding_id) => binding_id,
+            Self::Overloaded(set) => *set.last().expect("overload set is never empty"),
             Self::Merged {
                 ty,
                 value_ty,
@@ -262,9 +278,45 @@ impl TsBindingReference {
     /// Creates a union from this binding reference with another.
     ///
     /// If both bindings refer to the same kind of type, the binding ID(s) from
-    /// `other` takes precedence.
+    /// `other` takes precedence. `other` is always a single, freshly-constructed
+    /// reference; composite kinds (`Overloaded`, `Merged`) only appear as `self`.
     pub fn union_with(self, other: Self) -> Self {
         match (self, other) {
+            (Self::FunctionValue(own_binding_id), Self::FunctionValue(other_binding_id)) => {
+                Self::Overloaded(Box::new([own_binding_id, other_binding_id]))
+            }
+            (Self::Overloaded(set), Self::FunctionValue(other_binding_id)) => {
+                let mut bindings = set.into_vec();
+                bindings.push(other_binding_id);
+                Self::Overloaded(bindings.into_boxed_slice())
+            }
+            (Self::FunctionValue(own_binding_id), Self::Overloaded(set)) => {
+                let mut bindings = Vec::with_capacity(set.len() + 1);
+                bindings.push(own_binding_id);
+                bindings.extend_from_slice(&set);
+                Self::Overloaded(bindings.into_boxed_slice())
+            }
+            (Self::Overloaded(own_set), Self::Overloaded(other_set)) => {
+                let mut bindings = own_set.into_vec();
+                bindings.extend_from_slice(&other_set);
+                Self::Overloaded(bindings.into_boxed_slice())
+            }
+            // Any other combination degrades to a plain value via the existing rules.
+            (Self::FunctionValue(own_binding_id), other) => {
+                Self::ValueType(own_binding_id).union_with(other)
+            }
+            (this, Self::FunctionValue(other_binding_id)) => {
+                this.union_with(Self::ValueType(other_binding_id))
+            }
+            (Self::Overloaded(set), other) => {
+                let last = *set.last().expect("overload set is never empty");
+                Self::ValueType(last).union_with(other)
+            }
+            (this, Self::Overloaded(set)) => {
+                let last = *set.last().expect("overload set is never empty");
+                this.union_with(Self::ValueType(last))
+            }
+
             (Self::Type(own_binding_id), Self::ValueType(other_binding_id)) => {
                 if own_binding_id == other_binding_id {
                     Self::TypeAndValueType(other_binding_id)

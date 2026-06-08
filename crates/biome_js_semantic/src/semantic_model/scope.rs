@@ -112,7 +112,7 @@ impl Scope {
 
         let name = name.as_ref();
         let binding_ref = data.bindings_by_name.get(name)?;
-        let id = binding_ref.value_ty_or_ty();
+        let id = binding_ref.clone().value_ty_or_ty();
 
         Some(Binding {
             data: self.data.clone(),
@@ -128,7 +128,7 @@ impl Scope {
     pub fn get_binding_reference(&self, name: impl AsRef<str>) -> Option<TsBindingReference> {
         let data = &self.data.scopes[self.id.index()];
         let name = name.as_ref();
-        data.bindings_by_name.get(name).copied()
+        data.bindings_by_name.get(name).cloned()
     }
 
     /// Checks if the current scope is one of the ancestor of "other". Given

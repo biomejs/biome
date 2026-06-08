@@ -239,7 +239,7 @@ impl SemanticModelBuilder {
                             .bindings_by_name
                             .entry(name)
                             .and_modify(|existing| {
-                                *existing = existing.union_with(binding_reference);
+                                *existing = existing.clone().union_with(binding_reference.clone());
                             })
                             .or_insert(binding_reference);
                     }
