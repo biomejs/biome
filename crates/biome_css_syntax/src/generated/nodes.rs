@@ -10841,6 +10841,41 @@ pub struct ScssKeyframesSelectorFields {
     pub percent_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssKeyframesVariableDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssKeyframesVariableDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssKeyframesVariableDeclarationFields {
+        ScssKeyframesVariableDeclarationFields {
+            declaration: self.declaration(),
+        }
+    }
+    pub fn declaration(&self) -> SyntaxResult<ScssVariableDeclaration> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssKeyframesVariableDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssKeyframesVariableDeclarationFields {
+    pub declaration: SyntaxResult<ScssVariableDeclaration>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeywordArgument {
     pub(crate) syntax: SyntaxNode,
 }
@@ -14867,7 +14902,7 @@ impl AnyCssKeyframesIdentifier {
 pub enum AnyCssKeyframesItem {
     CssBogusKeyframesItem(CssBogusKeyframesItem),
     CssKeyframesItem(CssKeyframesItem),
-    ScssVariableDeclaration(ScssVariableDeclaration),
+    ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration),
 }
 impl AnyCssKeyframesItem {
     pub fn as_css_bogus_keyframes_item(&self) -> Option<&CssBogusKeyframesItem> {
@@ -14882,9 +14917,11 @@ impl AnyCssKeyframesItem {
             _ => None,
         }
     }
-    pub fn as_scss_variable_declaration(&self) -> Option<&ScssVariableDeclaration> {
+    pub fn as_scss_keyframes_variable_declaration(
+        &self,
+    ) -> Option<&ScssKeyframesVariableDeclaration> {
         match &self {
-            Self::ScssVariableDeclaration(item) => Some(item),
+            Self::ScssKeyframesVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -30435,6 +30472,56 @@ impl From<ScssKeyframesSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssKeyframesVariableDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_KEYFRAMES_VARIABLE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_KEYFRAMES_VARIABLE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssKeyframesVariableDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssKeyframesVariableDeclaration")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssKeyframesVariableDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssKeyframesVariableDeclaration> for SyntaxNode {
+    fn from(n: ScssKeyframesVariableDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssKeyframesVariableDeclaration> for SyntaxElement {
+    fn from(n: ScssKeyframesVariableDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssKeywordArgument {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -38092,20 +38179,20 @@ impl From<CssKeyframesItem> for AnyCssKeyframesItem {
         Self::CssKeyframesItem(node)
     }
 }
-impl From<ScssVariableDeclaration> for AnyCssKeyframesItem {
-    fn from(node: ScssVariableDeclaration) -> Self {
-        Self::ScssVariableDeclaration(node)
+impl From<ScssKeyframesVariableDeclaration> for AnyCssKeyframesItem {
+    fn from(node: ScssKeyframesVariableDeclaration) -> Self {
+        Self::ScssKeyframesVariableDeclaration(node)
     }
 }
 impl AstNode for AnyCssKeyframesItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusKeyframesItem::KIND_SET
         .union(CssKeyframesItem::KIND_SET)
-        .union(ScssVariableDeclaration::KIND_SET);
+        .union(ScssKeyframesVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM | SCSS_VARIABLE_DECLARATION
+            CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM | SCSS_KEYFRAMES_VARIABLE_DECLARATION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -38114,8 +38201,8 @@ impl AstNode for AnyCssKeyframesItem {
                 Self::CssBogusKeyframesItem(CssBogusKeyframesItem { syntax })
             }
             CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
-            SCSS_VARIABLE_DECLARATION => {
-                Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
+            SCSS_KEYFRAMES_VARIABLE_DECLARATION => {
+                Self::ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration { syntax })
             }
             _ => return None,
         };
@@ -38125,14 +38212,14 @@ impl AstNode for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => it.syntax(),
             Self::CssKeyframesItem(it) => it.syntax(),
-            Self::ScssVariableDeclaration(it) => it.syntax(),
+            Self::ScssKeyframesVariableDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusKeyframesItem(it) => it.into_syntax(),
             Self::CssKeyframesItem(it) => it.into_syntax(),
-            Self::ScssVariableDeclaration(it) => it.into_syntax(),
+            Self::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -38141,7 +38228,7 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssKeyframesVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38150,7 +38237,7 @@ impl From<AnyCssKeyframesItem> for SyntaxNode {
         match n {
             AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
-            AnyCssKeyframesItem::ScssVariableDeclaration(it) => it.into_syntax(),
+            AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -46811,6 +46898,11 @@ impl std::fmt::Display for ScssKeyframesName {
     }
 }
 impl std::fmt::Display for ScssKeyframesSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssKeyframesVariableDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

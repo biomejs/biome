@@ -3864,6 +3864,14 @@ impl ScssKeyframesSelectorBuilder {
         ))
     }
 }
+pub fn scss_keyframes_variable_declaration(
+    declaration: ScssVariableDeclaration,
+) -> ScssKeyframesVariableDeclaration {
+    ScssKeyframesVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_VARIABLE_DECLARATION,
+        [Some(SyntaxElement::Node(declaration.into_syntax()))],
+    ))
+}
 pub fn scss_keyword_argument(
     name: ScssVariable,
     colon_token: SyntaxToken,

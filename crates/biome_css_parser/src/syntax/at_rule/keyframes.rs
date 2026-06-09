@@ -256,14 +256,27 @@ fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
 #[inline]
 fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_variable_declaration(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-            p,
-            parse_scss_variable_declaration,
-            |p, marker| scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p)),
-        )
+        parse_scss_keyframes_variable_declaration(p)
     } else {
         parse_keyframes_item(p)
     }
+}
+
+#[inline]
+fn parse_scss_keyframes_variable_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_variable_declaration(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    CssSyntaxFeatures::Scss
+        .parse_exclusive_syntax(p, parse_scss_variable_declaration, |p, marker| {
+            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+        })
+        .ok();
+
+    Present(m.complete(p, SCSS_KEYFRAMES_VARIABLE_DECLARATION))
 }
 
 #[inline]

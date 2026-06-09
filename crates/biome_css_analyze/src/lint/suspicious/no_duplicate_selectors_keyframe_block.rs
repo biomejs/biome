@@ -71,7 +71,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
                         return Some(keyframe_selector);
                     }
                 }
-                AnyCssKeyframesItem::ScssVariableDeclaration(_) => {}
+                AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => {}
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             }
         }

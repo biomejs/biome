@@ -35,23 +35,27 @@ CssRoot {
                     items: CssKeyframesItemList [
                         CssBogusKeyframesItem {
                             items: [
-                                ScssVariable {
-                                    dollar_token: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] [],
-                                    name: CssIdentifier {
-                                        value_token: IDENT@21..25 "stop" [] [],
-                                    },
-                                },
-                                COLON@25..27 ":" [] [Whitespace(" ")],
-                                ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssPercentage {
-                                            value_token: CSS_NUMBER_LITERAL@27..29 "50" [] [],
-                                            percent_token: PERCENT@29..30 "%" [] [],
+                                CssBogus {
+                                    items: [
+                                        ScssVariable {
+                                            dollar_token: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@21..25 "stop" [] [],
+                                            },
                                         },
+                                        COLON@25..27 ":" [] [Whitespace(" ")],
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssPercentage {
+                                                    value_token: CSS_NUMBER_LITERAL@27..29 "50" [] [],
+                                                    percent_token: PERCENT@29..30 "%" [] [],
+                                                },
+                                            ],
+                                        },
+                                        ScssVariableModifierList [],
+                                        SEMICOLON@30..31 ";" [] [],
                                     ],
                                 },
-                                ScssVariableModifierList [],
-                                SEMICOLON@30..31 ";" [] [],
                             ],
                         },
                         CssKeyframesItem {
@@ -110,18 +114,19 @@ CssRoot {
           0: L_CURLY@16..17 "{" [] []
           1: CSS_KEYFRAMES_ITEM_LIST@17..59
             0: CSS_BOGUS_KEYFRAMES_ITEM@17..31
-              0: SCSS_VARIABLE@17..25
-                0: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] []
-                1: CSS_IDENTIFIER@21..25
-                  0: IDENT@21..25 "stop" [] []
-              1: COLON@25..27 ":" [] [Whitespace(" ")]
-              2: SCSS_EXPRESSION@27..30
-                0: SCSS_EXPRESSION_ITEM_LIST@27..30
-                  0: CSS_PERCENTAGE@27..30
-                    0: CSS_NUMBER_LITERAL@27..29 "50" [] []
-                    1: PERCENT@29..30 "%" [] []
-              3: SCSS_VARIABLE_MODIFIER_LIST@30..30
-              4: SEMICOLON@30..31 ";" [] []
+              0: CSS_BOGUS@17..31
+                0: SCSS_VARIABLE@17..25
+                  0: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] []
+                  1: CSS_IDENTIFIER@21..25
+                    0: IDENT@21..25 "stop" [] []
+                1: COLON@25..27 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@27..30
+                  0: SCSS_EXPRESSION_ITEM_LIST@27..30
+                    0: CSS_PERCENTAGE@27..30
+                      0: CSS_NUMBER_LITERAL@27..29 "50" [] []
+                      1: PERCENT@29..30 "%" [] []
+                3: SCSS_VARIABLE_MODIFIER_LIST@30..30
+                4: SEMICOLON@30..31 ";" [] []
             1: CSS_KEYFRAMES_ITEM@31..59
               0: CSS_KEYFRAMES_SELECTOR_LIST@31..38
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@31..38

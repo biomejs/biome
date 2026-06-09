@@ -63,7 +63,7 @@ impl Rule for NoImportantInKeyframe {
         for item in node.items() {
             let keyframe_item = match item {
                 AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) => keyframe_item,
-                AnyCssKeyframesItem::ScssVariableDeclaration(_) => continue,
+                AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => continue,
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };
             let AnyCssDeclarationBlock::CssDeclarationBlock(block_declaration) =
