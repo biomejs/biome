@@ -36,7 +36,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@19..20 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@20..21 "\n" [] [],
@@ -56,7 +55,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@43..43 "" [] [],
@@ -79,7 +77,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@11..19 "Line two" [] []
         3: MD_TEXTUAL@19..20
           0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@20..21
       0: NEWLINE@20..21 "\n" [] []
     2: MD_PARAGRAPH@21..43
@@ -92,7 +89,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@32..42 "line break" [] []
         3: MD_TEXTUAL@42..43
           0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
-      1: (empty)
   2: EOF@43..43 "" [] []
 
 ```

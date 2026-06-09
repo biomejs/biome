@@ -51,7 +51,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@8..9 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -120,7 +119,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -212,7 +210,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@5..8 "foo" [] []
                     1: MD_TEXTUAL@8..9
                       0: MD_TEXTUAL_LITERAL@8..9 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@9..11
                   0: MD_QUOTE_INDENT_LIST@9..9
                   1: R_ANGLE@9..10 ">" [] []
@@ -258,7 +255,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@27..30 "Bar" [] []
                     4: MD_TEXTUAL@30..31
                       0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@31..33
                   0: MD_QUOTE_INDENT_LIST@31..31
                   1: R_ANGLE@31..32 ">" [] []

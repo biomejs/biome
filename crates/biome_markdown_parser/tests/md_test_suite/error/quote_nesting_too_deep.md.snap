@@ -171,7 +171,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@110..111 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@111..111 "" [] [],
@@ -793,7 +792,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@102..110 "Too deep" [] []
         1: MD_TEXTUAL@110..111
           0: MD_TEXTUAL_LITERAL@110..111 "\n" [] []
-      1: (empty)
   2: EOF@111..111 "" [] []
 
 ```

@@ -44,7 +44,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@7..8 "\n" [] [],
@@ -99,7 +98,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@41..42 "\n" [] [],
@@ -123,7 +121,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@51..52 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@52..53 "\n" [] [],
@@ -186,7 +183,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
                 1: MD_TEXTUAL@6..7
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
             2: MD_INDENT_CODE_BLOCK@8..25
@@ -221,7 +217,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@28..40 "continuation" [] []
                 1: MD_TEXTUAL@40..41
                   0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
-              1: (empty)
             6: MD_NEWLINE@41..42
               0: NEWLINE@41..42 "\n" [] []
         1: MD_BULLET@42..69
@@ -237,7 +232,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@44..51 "another" [] []
                 1: MD_TEXTUAL@51..52
                   0: MD_TEXTUAL_LITERAL@51..52 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@52..53
               0: NEWLINE@52..53 "\n" [] []
             2: MD_INDENT_CODE_BLOCK@53..69
