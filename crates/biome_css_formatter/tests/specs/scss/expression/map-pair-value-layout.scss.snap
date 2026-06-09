@@ -52,9 +52,7 @@ $map: (
 		"list",
 		"list",
 		"list",
-	): (
-			"list",
-		),
+	): ("list"),
 	(
 		"list",
 		"long long long long long long long long long long long long long list",

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/at-rule/include-arguments.scss
 ---
 
@@ -56,22 +57,13 @@ $arg2:10,
 		a,
 	)
 );
-@include single-item-list(
-	$arg: (
-		a,
-	)
-);
+@include single-item-list($arg: (a));
 @include nested-parenthesized(
 	$arg: (
 		(a),
 	)
 );
-@include container(
-	$foo: 2 *
-		(
-			$bar,
-		)
-);
+@include container($foo: 2 * ($bar));
 @include container(
 	$foo: (
 		$bar,
