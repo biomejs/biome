@@ -175,12 +175,6 @@ pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> Md
         ],
     ))
 }
-pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
-    MdIndent::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
@@ -607,12 +601,6 @@ pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken)
         ],
     ))
 }
-pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
-    MdSoftBreak::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_SOFT_BREAK,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
     MdTextual::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_TEXTUAL,
@@ -744,6 +732,16 @@ where
 {
     MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BOGUS_BLOCK,
+        slots,
+    ))
+}
+pub fn md_bogus_bullet<I>(slots: I) -> MdBogusBullet
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBullet::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BULLET,
         slots,
     ))
 }

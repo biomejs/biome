@@ -175,14 +175,6 @@ impl MdHtmlBlock {
         )
     }
 }
-impl MdIndent {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl MdIndentCodeBlock {
     pub fn with_content(self, element: MdInlineItemList) -> Self {
         Self::unwrap_cast(
@@ -610,14 +602,6 @@ impl MdSetextHeader {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MdSoftBreak {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

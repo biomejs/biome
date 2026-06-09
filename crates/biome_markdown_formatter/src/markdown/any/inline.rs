@@ -22,7 +22,6 @@ impl FormatRule<AnyMdInline> for FormatAnyMdInline {
             AnyMdInline::MdQuotePrefix(node) => node.format().fmt(f),
             AnyMdInline::MdReferenceImage(node) => node.format().fmt(f),
             AnyMdInline::MdReferenceLink(node) => node.format().fmt(f),
-            AnyMdInline::MdSoftBreak(node) => node.format().fmt(f),
             AnyMdInline::MdTextual(node) => node.format().fmt(f),
         }
     }

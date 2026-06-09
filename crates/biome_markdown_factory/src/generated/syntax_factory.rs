@@ -14,7 +14,9 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            MD_BOGUS | MD_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            MD_BOGUS | MD_BOGUS_BLOCK | MD_BOGUS_BULLET => {
+                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            }
             MD_AUTOLINK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -318,25 +320,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_HTML_BLOCK, children)
-            }
-            MD_INDENT => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == MD_INDENT_CHUNK_LITERAL
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_INDENT.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_INDENT, children)
             }
             MD_INDENT_CODE_BLOCK => {
                 let mut elements = (&children).into_iter();
@@ -1061,25 +1044,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_SETEXT_HEADER, children)
-            }
-            MD_SOFT_BREAK => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && element.kind() == MD_SOFT_BREAK_LITERAL
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_SOFT_BREAK.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_SOFT_BREAK, children)
             }
             MD_TEXTUAL => {
                 let mut elements = (&children).into_iter();
