@@ -21,9 +21,12 @@ impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
     }
 }
 
-/// Formats the operator and right side of a SCSS binary expression.
+/// Formats the operator and right side, indenting grouped line breaks.
 ///
-/// Broken grouped expressions indent the right operand, as in `$x: "a" +\n  "b";`.
+/// ```scss
+/// $x: "a" +
+///   "b";
+/// ```
 struct FormatScssBinaryRightSide<'a> {
     node: &'a ScssBinaryExpression,
 }
