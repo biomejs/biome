@@ -61,8 +61,10 @@ impl Rule for NoImportantInKeyframe {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         for item in node.items() {
-            let AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) = item else {
-                return None;
+            let keyframe_item = match item {
+                AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) => keyframe_item,
+                AnyCssKeyframesItem::ScssVariableDeclaration(_) => continue,
+                AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };
             let AnyCssDeclarationBlock::CssDeclarationBlock(block_declaration) =
                 keyframe_item.block().ok()?

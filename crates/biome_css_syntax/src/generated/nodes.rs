@@ -14867,6 +14867,7 @@ impl AnyCssKeyframesIdentifier {
 pub enum AnyCssKeyframesItem {
     CssBogusKeyframesItem(CssBogusKeyframesItem),
     CssKeyframesItem(CssKeyframesItem),
+    ScssVariableDeclaration(ScssVariableDeclaration),
 }
 impl AnyCssKeyframesItem {
     pub fn as_css_bogus_keyframes_item(&self) -> Option<&CssBogusKeyframesItem> {
@@ -14878,6 +14879,12 @@ impl AnyCssKeyframesItem {
     pub fn as_css_keyframes_item(&self) -> Option<&CssKeyframesItem> {
         match &self {
             Self::CssKeyframesItem(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable_declaration(&self) -> Option<&ScssVariableDeclaration> {
+        match &self {
+            Self::ScssVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -38085,12 +38092,21 @@ impl From<CssKeyframesItem> for AnyCssKeyframesItem {
         Self::CssKeyframesItem(node)
     }
 }
+impl From<ScssVariableDeclaration> for AnyCssKeyframesItem {
+    fn from(node: ScssVariableDeclaration) -> Self {
+        Self::ScssVariableDeclaration(node)
+    }
+}
 impl AstNode for AnyCssKeyframesItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusKeyframesItem::KIND_SET.union(CssKeyframesItem::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusKeyframesItem::KIND_SET
+        .union(CssKeyframesItem::KIND_SET)
+        .union(ScssVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM)
+        matches!(
+            kind,
+            CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM | SCSS_VARIABLE_DECLARATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -38098,6 +38114,9 @@ impl AstNode for AnyCssKeyframesItem {
                 Self::CssBogusKeyframesItem(CssBogusKeyframesItem { syntax })
             }
             CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
+            SCSS_VARIABLE_DECLARATION => {
+                Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -38106,12 +38125,14 @@ impl AstNode for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => it.syntax(),
             Self::CssKeyframesItem(it) => it.syntax(),
+            Self::ScssVariableDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusKeyframesItem(it) => it.into_syntax(),
             Self::CssKeyframesItem(it) => it.into_syntax(),
+            Self::ScssVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -38120,6 +38141,7 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38128,6 +38150,7 @@ impl From<AnyCssKeyframesItem> for SyntaxNode {
         match n {
             AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
+            AnyCssKeyframesItem::ScssVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }

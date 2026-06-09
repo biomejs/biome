@@ -1329,6 +1329,7 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| ScssVariableDeclaration
 	| CssBogusKeyframesItem
 
 // @keyframes "something" { 30%, 60% {} }
