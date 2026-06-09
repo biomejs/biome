@@ -126,7 +126,7 @@ impl ServiceLanguage for GraphqlLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -155,18 +155,14 @@ impl ServiceLanguage for GraphqlLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
 
-        let mut options = GraphqlFormatOptions::new(
-            document_file_source
-                .to_graphql_file_source()
-                .unwrap_or_default(),
-        )
-        .with_indent_style(indent_style)
-        .with_indent_width(indent_width)
-        .with_line_width(line_width)
-        .with_line_ending(line_ending)
-        .with_bracket_spacing(bracket_spacing)
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_trailing_newline(trailing_newline);
+        let mut options = GraphqlFormatOptions::new()
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending)
+            .with_bracket_spacing(bracket_spacing)
+            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_graphql_format_options(path, &mut options);
 

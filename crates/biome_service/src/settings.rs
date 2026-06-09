@@ -1665,7 +1665,7 @@ impl OverrideSettings {
         }
     }
 
-    /// Scans and aggregates all the overrides into a single [GraphqlFormatOptions]
+    /// Scans and aggregates all the overrides into a single [biome_graphql_formatter::GraphqlFormatOptions]
     #[cfg(feature = "lang_graphql")]
     pub fn apply_override_graphql_format_options(
         &self,

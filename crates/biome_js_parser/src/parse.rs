@@ -157,7 +157,8 @@ fn parse_common(
 ///
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse_script};
-/// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
+/// use biome_js_syntax::{JsSyntaxToken, JsSyntaxList, JsComputedMemberExpression};
+/// use biome_languages::JsFileSource;
 /// use biome_rowan::{AstNode, Direction};
 ///
 /// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
@@ -241,7 +242,7 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 ///
 /// ```
 /// use biome_js_parser::{JsParserOptions, parse};
-/// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
+/// use biome_languages::{javascript::{LanguageVariant, LanguageVersion, ModuleKind}, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
 /// let mut parsed = parse("type F = {}", module, JsParserOptions::default());

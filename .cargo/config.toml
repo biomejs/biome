@@ -2,12 +2,10 @@
 biome-cli             = "run -p biome_cli --release --"
 biome-cli-dev         = "run -p biome_cli --"
 codegen               = "run -p xtask_codegen --"
-codegen-bindings      = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
 # updates a newly created crate
 codegen-license       = "run -p xtask_codegen --features license -- license"
 codegen-migrate       = "run -p xtask_codegen --features configuration -- migrate-eslint"
-codegen-schema        = "run -p xtask_codegen --features schema -- schema"
 contributors          = "run -p xtask_contributors --"
 coverage              = "run -p xtask_coverage --profile=release-with-debug --"
 documentation         = """

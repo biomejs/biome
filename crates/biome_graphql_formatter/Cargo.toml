@@ -25,7 +25,6 @@ name    = "graphql_formatter"
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_graphql_syntax = { workspace = true }
-biome_languages      = { workspace = true, features = ["lang_graphql"] }
 biome_rowan          = { workspace = true }
 biome_suppression    = { workspace = true }
 
@@ -34,6 +33,7 @@ biome_configuration  = { path = "../biome_configuration" }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
 biome_graphql_parser = { path = "../biome_graphql_parser" }
+biome_languages      = { path = "../biome_languages", features = ["lang_graphql"] }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_graphql"] }
 biome_test_utils     = { path = "../biome_test_utils" }
