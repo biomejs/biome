@@ -95,16 +95,17 @@ impl Rule for NoProcessEnv {
     }
 }
 
+const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
+
+/// Whether the `process` `binding` is imported from the `process`/`node:process`
+/// module through an `import` statement.
 fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
-    const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
     binding
         .syntax()
         .ancestors()
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }
-
-const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
 
 /// Returns `true` when `binding` is the `env` binding of the `process` (or
 /// `node:process`) module, regardless of whether it is imported or required.
@@ -132,32 +133,39 @@ fn is_env_named_binding(binding: &biome_js_semantic::Binding) -> bool {
 /// either through an `import` statement, a `require(...)` call, or a dynamic
 /// `import(...)` call.
 fn is_from_process_module(binding: &biome_js_semantic::Binding) -> bool {
-    binding.syntax().ancestors().skip(1).any(|n| {
-        if let Some(import) = JsImport::cast(n.clone()) {
-            return import
-                .source_text()
-                .ok()
-                .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()));
-        }
-        JsVariableDeclarator::cast(n)
-            .and_then(|declarator| process_module_specifier(&declarator))
-            .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
-    })
-}
-
-/// Returns the module specifier of a `require(...)` or dynamic `import(...)`
-/// call used to initialize `declarator`, if any.
-fn process_module_specifier(declarator: &JsVariableDeclarator) -> Option<biome_rowan::TokenText> {
-    let expression = match declarator.initializer()?.expression().ok()? {
-        AnyJsExpression::JsAwaitExpression(await_expression) => await_expression.argument().ok()?,
-        expression => expression,
-    };
-    let import_like = match expression {
-        AnyJsExpression::JsCallExpression(call) => AnyJsImportLike::JsCallExpression(call),
-        AnyJsExpression::JsImportCallExpression(call) => {
-            AnyJsImportLike::JsImportCallExpression(call)
-        }
-        _ => return None,
-    };
-    import_like.inner_string_text()
+    binding
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(|node| {
+            if let Some(import) = JsImport::cast(node.clone()) {
+                return import
+                    .import_clause()
+                    .ok()?
+                    .source()
+                    .ok()
+                    .map(AnyJsImportLike::JsModuleSource);
+            }
+            let expression = match JsVariableDeclarator::cast(node)?
+                .initializer()?
+                .expression()
+                .ok()?
+            {
+                AnyJsExpression::JsAwaitExpression(await_expression) => {
+                    await_expression.argument().ok()?
+                }
+                expression => expression,
+            };
+            match expression {
+                AnyJsExpression::JsCallExpression(call) => {
+                    Some(AnyJsImportLike::JsCallExpression(call))
+                }
+                AnyJsExpression::JsImportCallExpression(call) => {
+                    Some(AnyJsImportLike::JsImportCallExpression(call))
+                }
+                _ => None,
+            }
+        })
+        .and_then(|import_like| import_like.inner_string_text())
+        .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }
