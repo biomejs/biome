@@ -4341,6 +4341,14 @@ impl ScssKeyframesSelector {
         )
     }
 }
+impl ScssKeyframesVariableDeclaration {
+    pub fn with_declaration(self, element: ScssVariableDeclaration) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssKeywordArgument {
     pub fn with_name(self, element: ScssVariable) -> Self {
         Self::unwrap_cast(

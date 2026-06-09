@@ -8480,6 +8480,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesSelector {
         )
     }
 }
+impl FormatRule < biome_css_syntax :: ScssKeyframesVariableDeclaration > for crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: ScssKeyframesVariableDeclaration , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: ScssKeyframesVariableDeclaration > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesVariableDeclaration {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssKeyframesVariableDeclaration , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesVariableDeclaration {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssKeyframesVariableDeclaration , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssKeywordArgument>
     for crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument
 {

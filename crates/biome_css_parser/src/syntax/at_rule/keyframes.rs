@@ -8,10 +8,12 @@ use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
-use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::parse_error::{
+    expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
+};
 use crate::syntax::scss::{
-    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, parse_scss_keyframes_name,
-    parse_scss_keyframes_selector,
+    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_variable_declaration,
+    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_variable_declaration,
 };
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
@@ -202,7 +204,7 @@ impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        is_at_keyframes_item_selector(p)
+        is_at_any_keyframes_item(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -218,7 +220,7 @@ impl ParseRecovery for KeyframesItemListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_KEYFRAMES_ITEM;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || is_at_keyframes_item_selector(p)
+        p.at(T!['}']) || is_at_any_keyframes_item(p)
     }
 }
 
@@ -230,7 +232,7 @@ impl ParseNodeList for KeyframesItemList {
     const LIST_KIND: Self::Kind = CSS_KEYFRAMES_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_keyframes_item(p)
+        parse_any_keyframes_item(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -244,6 +246,37 @@ impl ParseNodeList for KeyframesItemList {
     ) -> RecoveryResult {
         parsed_element.or_recover(p, &KeyframesItemListParseRecovery, expected_keyframes_item)
     }
+}
+
+#[inline]
+fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
+    is_at_scss_variable_declaration(p) || is_at_keyframes_item_selector(p)
+}
+
+#[inline]
+fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_scss_variable_declaration(p) {
+        parse_scss_keyframes_variable_declaration(p)
+    } else {
+        parse_keyframes_item(p)
+    }
+}
+
+#[inline]
+fn parse_scss_keyframes_variable_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_variable_declaration(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    CssSyntaxFeatures::Scss
+        .parse_exclusive_syntax(p, parse_scss_variable_declaration, |p, marker| {
+            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+        })
+        .ok();
+
+    Present(m.complete(p, SCSS_KEYFRAMES_VARIABLE_DECLARATION))
 }
 
 #[inline]
