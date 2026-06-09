@@ -95,7 +95,7 @@ $icons: (
 		$key: (
 				$theme-name: $value,
 			),
-	)
+	);
 }
 
 @for $i from 1 through 2 {

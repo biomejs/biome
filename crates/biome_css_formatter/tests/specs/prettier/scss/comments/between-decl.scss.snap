@@ -95,17 +95,7 @@ value;
  
    grid-template-areas: "header header header" //
      "sidebar content content" //
-@@ -20,8 +20,7 @@
- }
- 
- // #8052
--$font-family-rich:
--  // custom
-+$font-family-rich: // custom
-   "Noto Sans TC",
-   "Noto Sans SC",
-   "Noto Sans JP",
-@@ -42,8 +41,8 @@
+@@ -42,8 +42,8 @@
  // #7109
  .test {
    background:
@@ -143,7 +133,8 @@ selector {
 }
 
 // #8052
-$font-family-rich: // custom
+$font-family-rich:
+  // custom
   "Noto Sans TC",
   "Noto Sans SC",
   "Noto Sans JP",

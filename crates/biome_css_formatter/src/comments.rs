@@ -314,7 +314,14 @@ fn handle_function_comment(
     }
 }
 
-/// Places `$color/* c */: red;` comments on the variable name/colon boundary.
+/// Attaches comments that belong to SCSS variable boundaries:
+///
+/// ```scss
+/// $color/* c */: red;
+/// $font:
+///   // c
+///   Arial;
+/// ```
 fn handle_scss_variable_declaration_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -332,6 +339,17 @@ fn handle_scss_variable_declaration_comment(
 
     let comment_piece = comment.piece();
 
+    if comment
+        .preceding_node()
+        .is_some_and(|preceding| preceding == name.syntax())
+        && is_between_variable_colon_and_value(
+            &variable_declaration,
+            comment_piece.text_range().start(),
+        )
+    {
+        return CommentPlacement::dangling(variable_declaration.into_syntax(), comment);
+    }
+
     if let Some(name_token) = name.syntax().last_token() {
         for piece in name_token.trailing_trivia().pieces() {
             if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
@@ -342,6 +360,27 @@ fn handle_scss_variable_declaration_comment(
     }
 
     CommentPlacement::Default(comment)
+}
+
+/// Returns `true` for comments between `:` and the variable value.
+fn is_between_variable_colon_and_value(
+    variable_declaration: &ScssVariableDeclaration,
+    comment_start: TextSize,
+) -> bool {
+    let Ok(colon) = variable_declaration.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = variable_declaration
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
 }
 
 fn handle_generic_property_comment(

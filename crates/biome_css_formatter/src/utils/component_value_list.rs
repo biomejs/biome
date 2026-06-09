@@ -181,7 +181,11 @@ where
         } else {
             // Prefer breaking at top-level commas in declaration values (Prettier-like)
             // by filling comma-separated groups instead of individual tokens.
-            // This prevents line wraps inside groups like `0px 8px\n16px` for `box-shadow`-like values.
+            // This keeps each box-shadow-like group intact:
+            //
+            // box-shadow:
+            //   0px 8px 16px,
+            //   0px 4px 8px;
             if let Some(result) = try_write_fill_comma_groups(node, layout, f) {
                 return result;
             }
