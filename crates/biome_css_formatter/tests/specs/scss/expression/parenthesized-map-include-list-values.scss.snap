@@ -27,18 +27,8 @@ $key-values:(
 # Formatted
 
 ```scss
-@include container(
-	$foo: 2 *
-		(
-			$bar,
-		)
-);
-@include container(
-	$foo: 2 *
-		(
-			$bar + $baz,
-		)
-);
+@include container($foo: 2 * ($bar));
+@include container($foo: 2 * ($bar + $baz));
 @include container(
 	$foo: (
 		$bar,
@@ -53,9 +43,7 @@ $key-values:(
 );
 
 $map: (
-	key: (
-		value,
-	),
+	key: (value),
 	other-key: (
 		key: other-other-value,
 	),
@@ -68,9 +56,7 @@ $key-values: (
 		"key": "value",
 		"key": "value",
 		"key": "value",
-	): (
-			"list",
-		),
+	): ("list"),
 	(
 		"list",
 		"list",
@@ -82,9 +68,7 @@ $key-values: (
 		"list",
 		"list",
 		"list",
-	): (
-			"list",
-		),
+	): ("list"),
 );
 
 ```
