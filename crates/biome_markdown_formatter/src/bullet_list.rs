@@ -46,8 +46,20 @@ pub(crate) struct BulletListPrinter {
 
 impl BulletListPrinter {
     pub(crate) fn new(node: &MdBulletList) -> Self {
+        // The marker decision must be the same for every bullet of the list:
+        // normalizing only some markers changes the marker mid-list, which
+        // splits the list in two per CommonMark.
+        let keep_marker = node
+            .iter()
+            .any(|bullet| first_block_is_dash_thematic_break(&bullet.content()));
         Self {
-            bullets: node.iter().map(|item| ListBullet { node: item }).collect(),
+            bullets: node
+                .iter()
+                .map(|item| ListBullet {
+                    node: item,
+                    keep_marker,
+                })
+                .collect(),
         }
     }
 }
@@ -65,6 +77,9 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
 
 pub(crate) struct ListBullet {
     node: MdBullet,
+    /// When true, the original list marker is preserved instead of being
+    /// normalized to `-`. Computed once per list by [BulletListPrinter].
+    keep_marker: bool,
 }
 
 impl ListBullet {
@@ -112,9 +127,7 @@ impl Format<MarkdownFormatContext> for ListBullet {
         // to `-` produces `- - - -` which CommonMark 4.1 parses as a thematic
         // break, not a list item. Same for `+ - - -`. Skip normalization for marker
         // but still format content through child formatters.
-        let target_marker = if list_marker.is_minus()
-            || first_block_is_dash_thematic_break(&content)
-            || list_marker.is_ordered()
+        let target_marker = if list_marker.is_minus() || self.keep_marker || list_marker.is_ordered()
         {
             None
         } else {

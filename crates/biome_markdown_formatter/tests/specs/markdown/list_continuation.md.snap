@@ -81,6 +81,7 @@ info: markdown/list_continuation.md
 
 4. Two or more extra spaces are preserved (intentional alignment).
    deeply indented continuation
+
 - a
   b
 
@@ -90,6 +91,7 @@ info: markdown/list_continuation.md
 
 - item with hard line break  
   normal continuation after hard break
+
 1. loose list paragraph with single-space excess
 
    exactly one extra space before this paragraph

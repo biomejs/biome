@@ -22,11 +22,10 @@ info: markdown/list/separate.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,6 @@
+@@ -2,6 +2,6 @@
  - 123
  - 123
- - 123
--
+ 
 -* 123
 -* 123
 -* 123
@@ -41,6 +40,7 @@ info: markdown/list/separate.md
 - 123
 - 123
 - 123
+
 - 123
 - 123
 - 123

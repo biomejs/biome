@@ -25,7 +25,7 @@ info: markdown/list/issue-7846.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,10 @@
+@@ -1,11 +1,11 @@
  - a a  
 -   b b  
 -   c c  
@@ -34,7 +34,7 @@ info: markdown/list/issue-7846.md
 +  c c  
 +  d d  
    e e
--
+ 
  1.  a a a  
 -     b b b  
 +    b b b  
@@ -53,6 +53,7 @@ info: markdown/list/issue-7846.md
   c c  
   d d  
   e e
+
 1.  a a a  
     b b b  
     c c c  

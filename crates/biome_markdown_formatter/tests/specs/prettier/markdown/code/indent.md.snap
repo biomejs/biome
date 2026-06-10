@@ -33,47 +33,59 @@ info: markdown/code/indent.md
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -12,7 +12,6 @@
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,6 @@
+     Indented Code Block
+     Indented Code Block
+     Indented Code Block
+-
+ - ```
+   Fenced Code Block
+   Fenced Code Block
+@@ -13,11 +12,10 @@
    ```
  
- 
--
  <!-- prettier/prettier#3459 -->
- 1. Change to your home directory:
++1. Change to your home directory:
  
-
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -4,7 +4,9 @@
-     Indented Code Block
-     Indented Code Block
-     Indented Code Block
--- ",
-+",
-+  hard_line_break,
-+  "- ",
-   align(2, [
-     "```",
-     hard_line_break,
-@@ -23,10 +25,11 @@
-     hard_line_break
-   ]),
-   "
+-1.  Change to your home directory:
++       cd
+ 
+-        cd
 -
+-2.  List the contents:
++2. List the contents:
  
- <!-- prettier/prettier#3459 -->
--1. ",
-+",
-+  hard_line_break,
-+  "1. ",
-   align(3, [
-     "Change to your home directory:",
-     hard_line_break,
+-        ls -l
++       ls -l
+```
 
+# Output
+
+```md
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+- ```
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  ```
+
+<!-- prettier/prettier#3459 -->
+1. Change to your home directory:
+
+       cd
+
+2. List the contents:
+
+       ls -l
 ```

@@ -5,6 +5,7 @@ use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
+use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBlockList, MdBullet};
 
 #[derive(Debug, Clone, Default)]
@@ -147,6 +148,8 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         // Single forward pass in document order
         let mut still_leading = true;
         let mut prev_was_header = false;
+        let mut prev_was_list = false;
+        let mut prev_ends_with_line_break = false;
         let content_count = self.node.len() - trailing_count;
         let mut iter = self.node.iter().enumerate().peekable();
         while let Some((index, node)) = iter.next() {
@@ -173,6 +176,54 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     if prev_was_header {
                         joiner.entry(&empty_line());
                     }
+                } else if prev_was_list && !is_leading && !is_trailing {
+                    // A list always flushes its own trailing line break, so
+                    // the newlines that follow it at this level must be
+                    // re-evaluated as a whole run: printing them one by one
+                    // double-counts the line ending when the last block of
+                    // the list (e.g. a thematic break) doesn't swallow it.
+                    let mut run = vec![newline.clone()];
+                    while iter
+                        .peek()
+                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
+                    {
+                        if let Some((_, AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)))) =
+                            iter.next()
+                        {
+                            run.push(nl);
+                        }
+                    }
+                    let next_is_list = iter.peek().is_some_and(|(_, next)| next.is_list());
+                    if next_is_list {
+                        // Sibling lists always need exactly one blank line to
+                        // stay separate lists.
+                        for nl in &run {
+                            joiner.entry(&nl.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true,
+                            }));
+                        }
+                        joiner.entry(&empty_line());
+                    } else {
+                        let mut blank_lines = run.iter();
+                        if !prev_ends_with_line_break {
+                            // The first newline is the line terminator of the
+                            // list itself: the list has already flushed its own
+                            // line break, so printing it would create a
+                            // spurious blank line.
+                            if let Some(line_terminator) = blank_lines.next() {
+                                joiner.entry(&line_terminator.format().with_options(
+                                    FormatMdNewlineOptions {
+                                        should_remove: true,
+                                    },
+                                ));
+                            }
+                        }
+                        // The remaining newlines are real blank lines, kept as
+                        // they are.
+                        for blank_line in blank_lines {
+                            joiner.entry(&blank_line.format());
+                        }
+                    }
                 } else {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         should_remove: is_leading || is_trailing || next_is_bull_item,
@@ -185,6 +236,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
             } else {
                 still_leading = false;
                 prev_was_header = node.is_any_header();
+                prev_was_list = node.is_list();
+                prev_ends_with_line_break = node
+                    .as_any_list_item()
+                    .is_some_and(|item| list_ends_with_line_break(&item));
                 if let Some(list_item) = node.as_any_list_item() {
                     joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                 } else {
@@ -194,5 +249,38 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         }
 
         joiner.finish()
+    }
+}
+
+/// Whether the list terminates its own line.
+///
+/// This is the case when the last block of its last bullet carries the line
+/// ending: a paragraph ending with a newline, or a blank line swallowed by
+/// the bullet as [MdNewline]. Blocks that end with their last visible
+/// character, like a thematic break, leave the line terminator to the
+/// enclosing block list.
+///
+/// [MdNewline]: biome_markdown_syntax::MdNewline
+fn list_ends_with_line_break(item: &AnyListItem) -> bool {
+    let Some(last_bullet) = item.list().iter().last() else {
+        return false;
+    };
+    let mut content = last_bullet.content();
+    loop {
+        match content.iter().last() {
+            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))) => return true,
+            Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))) => {
+                return paragraph.ends_with_newline();
+            }
+            Some(block) => match block
+                .as_any_list_item()
+                .and_then(|nested| nested.list().iter().last())
+            {
+                // Nested list: the line ending is carried by its last bullet.
+                Some(bullet) => content = bullet.content(),
+                None => return false,
+            },
+            None => return false,
+        }
     }
 }

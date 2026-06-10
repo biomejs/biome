@@ -261,15 +261,13 @@ IR differences:
  ",
    hard_line_break,
    "- ",
-@@ -99,13 +104,19 @@
+@@ -99,13 +104,15 @@
    "- ",
    align(2, ["Green", hard_line_break, hard_line_break]),
    "- ",
 -  align(2, ["Blue", hard_line_break, empty_line]),
 +  align(2, ["Blue", hard_line_break, hard_line_break]),
-+  "
-+",
-+  hard_line_break,
++  empty_line,
    "- ",
    align(2, ["Red", hard_line_break, hard_line_break]),
    "- ",
@@ -277,13 +275,11 @@ IR differences:
    "- ",
 -  align(2, ["Blue", hard_line_break, empty_line]),
 +  align(2, ["Blue", hard_line_break, hard_line_break]),
-+  "
-+",
-+  hard_line_break,
++  empty_line,
    "- ",
    align(2, ["Red", hard_line_break, hard_line_break]),
    "- ",
-@@ -129,6 +140,7 @@
+@@ -129,6 +136,7 @@
  * Blue
  ```
  
