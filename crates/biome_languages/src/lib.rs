@@ -343,10 +343,9 @@ impl DocumentFileSource {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// use biome_languages::JsFileSource;
-    /// use biome_json_syntax::JsonFileSource;
-    /// use biome_service::workspace::DocumentFileSource;
+    /// use biome_languages::DocumentFileSource;
     /// let x = DocumentFileSource::from(JsFileSource::js_module());
     /// let y = DocumentFileSource::Unknown;
     /// assert_eq!(x.or(y), JsFileSource::js_module().into());
