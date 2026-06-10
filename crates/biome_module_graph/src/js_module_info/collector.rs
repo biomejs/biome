@@ -409,6 +409,29 @@ impl JsModuleInfoCollector {
                 self.bindings[index].ty = ty;
             }
         }
+
+        // A set of same-name function overloads becomes an object with one call
+        // signature per declaration, placed on the binding that name resolution
+        // returns for the set (its last one) so a call site can select among them.
+        let carriers: Vec<(usize, Vec<TypeMember>)> = semantic_model
+            .scopes()
+            .flat_map(|scope| scope.overload_sets())
+            .map(|set| {
+                let signatures = set
+                    .iter()
+                    .map(|id| TypeMember {
+                        kind: TypeMemberKind::CallSignature,
+                        ty: self.bindings[id.index()].ty.clone(),
+                    })
+                    .collect();
+                let representative = set.last().expect("overload set has 2+ entries").index();
+                (representative, signatures)
+            })
+            .collect();
+        for (representative, signatures) in carriers {
+            let ty = self.reference_to_owned_data(TypeData::object_with_members(signatures.into()));
+            self.bindings[representative].ty = ty;
+        }
     }
 
     fn has_writable_reference(&self, semantic_model: &SemanticModel, range: TextRange) -> bool {
@@ -896,15 +919,9 @@ impl JsModuleInfoCollector {
             }
             TsBindingReference::Type(binding_id)
             | TsBindingReference::ValueType(binding_id)
-            | TsBindingReference::FunctionValue(binding_id)
             | TsBindingReference::TypeAndValueType(binding_id)
             | TsBindingReference::NamespaceAndValueType(binding_id) => {
                 // Get the binding range instead of storing the BindingId
-                let binding_range = self.bindings[binding_id.index()].range;
-                JsOwnExport::Binding(binding_range)
-            }
-            TsBindingReference::Overloaded(set) => {
-                let binding_id = set.last().expect("overload set is never empty");
                 let binding_range = self.bindings[binding_id.index()].range;
                 JsOwnExport::Binding(binding_range)
             }

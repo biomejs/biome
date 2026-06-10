@@ -18,16 +18,10 @@ impl TsBindingReferenceExt for TsBindingReference {
             match self {
                 Self::Type(binding_id)
                 | Self::ValueType(binding_id)
-                | Self::FunctionValue(binding_id)
                 | Self::TypeAndValueType(binding_id)
                 | Self::NamespaceAndValueType(binding_id) => {
                     (binding_id != excluded_binding_id).then_some(binding_id)
                 }
-                Self::Overloaded(set) => set
-                    .iter()
-                    .rev()
-                    .copied()
-                    .find(|id| *id != excluded_binding_id),
                 Self::Merged {
                     ty,
                     value_ty,
@@ -222,13 +216,16 @@ mod tests {
     }
 
     #[test]
-    fn function_declarations_become_overloadable_value_references() {
+    fn function_declarations_are_plain_value_references() {
+        // Functions are ordinary value references here; same-name overloads are
+        // accumulated separately in the scope's `overloads_by_name` map, so the
+        // `TsBindingReference` itself stays a small, `Copy` POD enum.
         assert_eq!(
             TsBindingReference::from_binding_and_declaration_kind(
                 BindingId::new(0),
                 JsDeclarationKind::Function,
             ),
-            TsBindingReference::FunctionValue(BindingId::new(0))
+            TsBindingReference::ValueType(BindingId::new(0))
         );
         assert_eq!(
             TsBindingReference::from_binding_and_declaration_kind(
@@ -247,31 +244,20 @@ mod tests {
     }
 
     #[test]
-    fn function_overloads_merge_into_a_set() {
+    fn same_name_functions_merge_last_wins() {
+        // Two same-name functions collapse to the last (implementation) signature
+        // in `bindings_by_name`; the full overload set lives in `overloads_by_name`.
         assert_eq!(
-            TsBindingReference::FunctionValue(BindingId::new(0))
-                .union_with(TsBindingReference::FunctionValue(BindingId::new(1))),
-            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
-        );
-        assert_eq!(
-            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
-                .union_with(TsBindingReference::FunctionValue(BindingId::new(2))),
-            TsBindingReference::Overloaded(Box::new([
-                BindingId::new(0),
-                BindingId::new(1),
-                BindingId::new(2),
-            ]))
-        );
-        assert_eq!(
-            TsBindingReference::Overloaded(Box::new([BindingId::new(0), BindingId::new(1)]))
-                .value_ty_or_ty(),
-            BindingId::new(1)
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(1))),
+            TsBindingReference::ValueType(BindingId::new(1))
         );
 
-        // A single function merges with a type the way a plain value would
-        // (declaration merging of `function f` + `type f`).
+        // A function merging with a same-name type still produces a `Merged`
+        // reference, so name resolution keeps both the value and the type slot
+        // even though the overload set is tracked elsewhere.
         assert_eq!(
-            TsBindingReference::FunctionValue(BindingId::new(0))
+            TsBindingReference::ValueType(BindingId::new(0))
                 .union_with(TsBindingReference::Type(BindingId::new(1))),
             TsBindingReference::Merged {
                 ty: Some(BindingId::new(1)),

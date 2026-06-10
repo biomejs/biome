@@ -2,7 +2,7 @@
 mod test {
     use crate::{
         BindingExtensions, CanBeImportedExported, SemanticFlavor, SemanticModelOptions,
-        SemanticScopeExtensions, semantic_model,
+        SemanticScopeExtensions, TsBindingReference, semantic_model,
     };
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{
@@ -16,6 +16,51 @@ mod test {
             flavor: SemanticFlavor::Svelte,
             ..SemanticModelOptions::default()
         }
+    }
+
+    /// Regression: same-name function overloads must keep their full set even
+    /// when a same-name type/interface/namespace merges into the value's name.
+    /// Previously the overload set lived inside `TsBindingReference` and was
+    /// collapsed to the last signature the moment a type merged in.
+    #[test]
+    pub fn overload_sets_survive_declaration_merging() {
+        let r = biome_js_parser::parse(
+            "function f(a: number): number;\n\
+             function f(a: string): string;\n\
+             function f(a: number | string): number | string { return a; }\n\
+             type f = number;\n",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+        let scope = model.global_scope();
+
+        // The full overload set (three signatures) is preserved.
+        let overload_sets = scope.overload_sets();
+        assert_eq!(overload_sets.len(), 1);
+        assert_eq!(overload_sets[0].len(), 3);
+
+        // Name resolution still merges the value slot with the type slot.
+        assert!(matches!(
+            scope.get_binding_reference("f"),
+            Some(TsBindingReference::Merged {
+                ty: Some(_),
+                value_ty: Some(_),
+                ..
+            })
+        ));
+    }
+
+    /// A single function is not an overload set.
+    #[test]
+    pub fn single_function_is_not_an_overload_set() {
+        let r = biome_js_parser::parse(
+            "function f(a: number): number { return a; }\n",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+        assert!(model.global_scope().overload_sets().is_empty());
     }
 
     #[test]
