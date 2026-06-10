@@ -6922,7 +6922,7 @@
 					]
 				},
 				"useIncludes": {
-					"description": "Prefer Array#includes() over Array#indexOf() checks.\nSee https://biomejs.dev/linter/rules/use-includes",
+					"description": "Prefer Array#includes() over Array#indexOf() and Array#lastIndexOf() checks.\nSee https://biomejs.dev/linter/rules/use-includes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseIncludesConfiguration" },
 						{ "type": "null" }
