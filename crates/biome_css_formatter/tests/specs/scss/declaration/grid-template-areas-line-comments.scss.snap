@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/declaration/grid-template-areas-line-comments.scss
+---
+
+# Input
+
+```scss
+.grid{grid-template-areas: //
+"header header header" //
+"sidebar content content" //
+"footer footer footer";}
+
+```
+
+
+# Formatted
+
+```scss
+.grid {
+	grid-template-areas: //
+		"header header header" //
+		"sidebar content content" //
+		"footer footer footer";
+}
+
+```
