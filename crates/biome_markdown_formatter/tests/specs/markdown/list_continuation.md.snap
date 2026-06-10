@@ -80,13 +80,13 @@ info: markdown/list_continuation.md
    one-extra-space line
 
 4. Two or more extra spaces are preserved (intentional alignment).
-     deeply indented continuation
+   deeply indented continuation
 
 - a
   b
 
 - outer
-    - nested sub item
+  - nested sub item
     - another nested sub
 
 - item with hard line break  
@@ -103,7 +103,7 @@ info: markdown/list_continuation.md
 10. Multi-digit marker: required continuation indent is 4.
     aligned at 4 spaces
     one-extra-space continuation gets stripped
-      two-extra-space preserved
+    two-extra-space preserved
 
     loose paragraph aligned at 4
 
@@ -114,7 +114,7 @@ info: markdown/list_continuation.md
 100. Triple-digit marker: required continuation indent is 5.
      aligned at 5 spaces
      one-extra-space continuation gets stripped
-       two-extra-space preserved
+     two-extra-space preserved
 
      loose paragraph aligned at 5
 

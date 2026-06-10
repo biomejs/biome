@@ -22,8 +22,8 @@ info: markdown/spec/example-265.md
 +++ Biome
 @@ -1,5 +1,5 @@
  - foo
++  
  
-+
    bar
 -
  - baz
@@ -33,7 +33,7 @@ info: markdown/spec/example-265.md
 
 ```md
 - foo
-
+  
 
   bar
 - baz

@@ -61,3 +61,20 @@ markdown/spec/example-440.md
 markdown/spec/example-17.md
 markdown/spec/example-39.md
 markdown/spec/example-55.md
+
+
+# Incorrect normalisation
+# https://github.com/prettier/prettier/issues/19146
+markdown/spec/example-5.md
+markdown/spec/example-9.md
+
+# Break setext header https://github.com/prettier/prettier/issues/19148
+markdown/spec/example-63.md
+
+# Here "two" is an inline code block, prettier botches it
+markdown/spec/example-217.md
+markdown/spec/example-218.md
+
+# It's inline code, it should be change
+# https://github.com/prettier/prettier/issues/19152
+markdown/spec/example-7.md

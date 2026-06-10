@@ -108,159 +108,185 @@ info: markdown/list/start.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -5,8 +5,8 @@
- ---
- 
- 0. abc
--1. def
--2. ghi
-+0. def
-+0. ghi
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -63,6 +63,7 @@
+ 2. def
  
  ---
- 
-@@ -17,8 +17,8 @@
- ---
- 
- 2. abc
--3. def
--4. ghi
-+2. def
-+2. ghi
- 
- ---
- 
-@@ -47,8 +47,8 @@
- ---
- 
- 999. abc
--1000. def
--1001. ghi
-+145. def
-+69. ghi
- 
- ---
- 
-@@ -78,6 +78,7 @@
- 
- ---
- 
 +
  1. abc
  1. def
  
-@@ -94,4 +95,4 @@
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -6,7 +6,8 @@
+   "7. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "0. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -15,7 +16,8 @@
+   "0. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "1. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -24,7 +26,8 @@
+   "1. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "2. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -33,7 +36,8 @@
+   "2. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "0. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -42,7 +46,8 @@
+   "2. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "0. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -51,7 +56,8 @@
+   "1. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "1. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -60,7 +66,8 @@
+   "3. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "2. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -69,7 +76,8 @@
+   "4. ",
+   align(3, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "999. ",
+   align(5, ["abc", hard_line_break, hard_line_break]),
+@@ -78,34 +86,40 @@
+   "69. ",
+   align(4, ["ghi", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "0. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "1. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "2. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "999. ",
+   align(5, ["abc", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "0. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+   "1. ",
+   align(3, ["def", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "1. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+@@ -113,6 +127,7 @@
+   align(3, ["def", hard_line_break, hard_line_break]),
+   "
  ---
- 
- 999. abc
--1000. def
-+2. def
-```
++
+ ",
+   hard_line_break,
+   "1. ",
+@@ -120,21 +135,24 @@
+   "1. ",
+   align(3, ["def", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "2. ",
+   align(3, ["abc", hard_line_break, hard_line_break]),
+   "3. ",
+   align(3, ["def", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "999. ",
+   align(5, ["abc", hard_line_break, hard_line_break]),
+   "1. ",
+   align(3, ["def", hard_line_break, hard_line_break]),
+   "
+----",
++---
++",
+   hard_line_break,
+   "999. ",
+   align(5, ["abc", hard_line_break, hard_line_break]),
 
-# Output
-
-```md
-5. abc
-6. def
-7. ghi
-
----
-
-0. abc
-0. def
-0. ghi
-
----
-
-1. abc
-1. def
-1. ghi
-
----
-
-2. abc
-2. def
-2. ghi
-
----
-
-0. abc
-1. def
-2. ghi
-
----
-
-0. abc
-1. def
-1. ghi
-
----
-
-1. abc
-2. def
-3. ghi
-
----
-
-2. abc
-3. def
-4. ghi
-
----
-
-999. abc
-145. def
-69. ghi
-
----
-
-0. abc
-
----
-
-1. abc
-
----
-
-2. abc
-
----
-
-999. abc
-
----
-
-0. abc
-1. def
-
----
-
-1. abc
-2. def
-
----
-
-
-1. abc
-1. def
-
----
-
-2. abc
-3. def
-
----
-
-999. abc
-1. def
-
----
-
-999. abc
-2. def
 ```
