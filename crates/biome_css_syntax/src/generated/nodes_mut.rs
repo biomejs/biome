@@ -342,7 +342,7 @@ impl CssComposesProperty {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssComposesPropertyValue) -> Self {
+    pub fn with_values(self, element: CssComposesPropertyValueList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -4319,6 +4319,14 @@ impl ScssInterpolation {
         )
     }
 }
+impl ScssKeyframesName {
+    pub fn with_name(self, element: AnyScssKeyframesName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssKeyframesSelector {
     pub fn with_selector(self, element: ScssInterpolation) -> Self {
         Self::unwrap_cast(
@@ -4330,6 +4338,14 @@ impl ScssKeyframesSelector {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+}
+impl ScssKeyframesVariableDeclaration {
+    pub fn with_declaration(self, element: ScssVariableDeclaration) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

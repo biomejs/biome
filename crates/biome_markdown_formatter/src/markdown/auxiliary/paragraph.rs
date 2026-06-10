@@ -20,7 +20,7 @@ impl Default for FormatMdParagraph {
 }
 impl FormatNodeRule<MdParagraph> for FormatMdParagraph {
     fn fmt_fields(&self, node: &MdParagraph, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let MdParagraphFields { list, hard_line } = node.as_fields();
+        let MdParagraphFields { list } = node.as_fields();
         write!(
             f,
             [list
@@ -31,9 +31,6 @@ impl FormatNodeRule<MdParagraph> for FormatMdParagraph {
                     inside_list: self.inside_list,
                 })]
         )?;
-        if let Some(hard_line) = hard_line {
-            write!(f, [hard_line.format()])?;
-        }
         Ok(())
     }
 }

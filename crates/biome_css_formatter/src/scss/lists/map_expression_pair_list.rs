@@ -145,7 +145,13 @@ fn has_block_trailing_separator_comments(
 
 /// Returns `true` for a source blank line inside the trailing comment group.
 ///
-/// Example: `(key: value, /* c1 */\n\n/* c2 */)`.
+/// ```scss
+/// $map: (
+///   key: value, /* c1 */
+///
+///   /* c2 */
+/// );
+/// ```
 fn has_blank_line_before_trailing_separator_comments(
     node: &ScssMapExpressionPairList,
     f: &CssFormatter,

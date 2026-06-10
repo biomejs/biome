@@ -116,9 +116,6 @@ fn flush_word_group(stream: &mut Vec<ProseItem>, current: &mut Vec<ProseAtom>) {
 ///   internal layout and fence normalization.
 /// - Any run of whitespace inside an `MdTextual` token collapses into a
 ///   single `Space`, ending the current group.
-/// - `MdSoftBreak` tokens are removed from the output (`format_removed`) and
-///   replaced with a `SoftBreak` item. The fill infrastructure re-emits
-///   the actual line break later.
 /// - A newline `MdTextual` token emits a `SoftBreak`, ending the current
 ///   group. (The token is tracked but not removed — it's already a no-op
 ///   in the output since it has no visible content.)
@@ -189,19 +186,6 @@ fn build_word_stream(
                 // using its own formatter which handles token tracking internally.
                 flush_word_group(&mut stream, &mut current_word_group);
                 stream.push(ProseItem::HardBreak(hard_line.clone()));
-            }
-
-            AnyMdInline::MdSoftBreak(soft_break) => {
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(soft_break.syntax());
-                let token = soft_break.value_token()?;
-                // Mark the original token as removed so the formatter's
-                // source-map accounts for it; the actual line break is
-                // re-emitted later by the fill infrastructure.
-                format_removed(&token).fmt(f).ok();
-                flush_word_group(&mut stream, &mut current_word_group);
-                stream.push(ProseItem::SoftBreak);
             }
 
             // Atomic inline elements — never broken internally.

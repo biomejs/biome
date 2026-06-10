@@ -72,7 +72,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -159,7 +158,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@12..13 "x" [] []
                     1: MD_TEXTUAL@13..14
                       0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@14..16
                   0: MD_QUOTE_INDENT_LIST@14..14
                   1: R_ANGLE@14..15 ">" [] []

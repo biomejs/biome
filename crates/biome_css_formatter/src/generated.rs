@@ -8404,6 +8404,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolation {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssKeyframesName>
+    for crate::scss::auxiliary::keyframes_name::FormatScssKeyframesName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssKeyframesName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssKeyframesName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssKeyframesName,
+        crate::scss::auxiliary::keyframes_name::FormatScssKeyframesName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::keyframes_name::FormatScssKeyframesName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssKeyframesName,
+        crate::scss::auxiliary::keyframes_name::FormatScssKeyframesName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::keyframes_name::FormatScssKeyframesName::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssKeyframesSelector>
     for crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector
 {
@@ -8440,6 +8478,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesSelector {
             self,
             crate::scss::selectors::keyframes_selector::FormatScssKeyframesSelector::default(),
         )
+    }
+}
+impl FormatRule < biome_css_syntax :: ScssKeyframesVariableDeclaration > for crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: ScssKeyframesVariableDeclaration , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: ScssKeyframesVariableDeclaration > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesVariableDeclaration {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssKeyframesVariableDeclaration , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeyframesVariableDeclaration {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssKeyframesVariableDeclaration , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: keyframes_variable_declaration :: FormatScssKeyframesVariableDeclaration :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::ScssKeywordArgument>
@@ -10350,6 +10401,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComposesClassList {
             self,
             crate::css::lists::composes_class_list::FormatCssComposesClassList::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssComposesPropertyValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssComposesPropertyValueList,
+        crate::css::lists::composes_property_value_list::FormatCssComposesPropertyValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: composes_property_value_list :: FormatCssComposesPropertyValueList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComposesPropertyValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssComposesPropertyValueList,
+        crate::css::lists::composes_property_value_list::FormatCssComposesPropertyValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: composes_property_value_list :: FormatCssComposesPropertyValueList :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssCompoundSelectorList {
@@ -15635,6 +15705,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssInterpolatedValue
             self,
             crate::scss::any::interpolated_value_part::FormatAnyScssInterpolatedValuePart::default(
             ),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssKeyframesName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssKeyframesName,
+        crate::scss::any::keyframes_name::FormatAnyScssKeyframesName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::keyframes_name::FormatAnyScssKeyframesName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssKeyframesName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssKeyframesName,
+        crate::scss::any::keyframes_name::FormatAnyScssKeyframesName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::keyframes_name::FormatAnyScssKeyframesName::default(),
         )
     }
 }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 192
 expression: snapshot
 ---
 
@@ -58,7 +57,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@31..32 "\n" [] [],
@@ -115,7 +113,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@75..76 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@76..77 "\n" [] [],
@@ -574,7 +571,6 @@ MdDocument {
                     value_token: MD_HARD_LINE_LITERAL@435..439 "   \n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@439..440 "\n" [] [],
@@ -606,7 +602,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@472..473 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@473..474 "\n" [] [],
@@ -654,7 +649,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@506..507 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@507..507 "" [] [],
@@ -673,7 +667,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@0..30 "Some text with trailing spaces" [] []
         1: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@31..32
       0: NEWLINE@31..32 "\n" [] []
     2: MD_LINK_REFERENCE_DEFINITION@32..56
@@ -710,7 +703,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@58..75 "Another paragraph" [] []
         1: MD_TEXTUAL@75..76
           0: MD_TEXTUAL_LITERAL@75..76 "\n" [] []
-      1: (empty)
     6: MD_NEWLINE@76..77
       0: NEWLINE@76..77 "\n" [] []
     7: MD_LINK_REFERENCE_DEFINITION@77..100
@@ -1011,7 +1003,6 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@435..439
         0: MD_HARD_LINE@435..439
           0: MD_HARD_LINE_LITERAL@435..439 "   \n" [] []
-      1: (empty)
     36: MD_NEWLINE@439..440
       0: NEWLINE@439..440 "\n" [] []
     37: MD_PARAGRAPH@440..473
@@ -1032,7 +1023,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@459..472 " /url invalid" [] []
         7: MD_TEXTUAL@472..473
           0: MD_TEXTUAL_LITERAL@472..473 "\n" [] []
-      1: (empty)
     38: MD_NEWLINE@473..474
       0: NEWLINE@473..474 "\n" [] []
     39: MD_PARAGRAPH@474..507
@@ -1063,7 +1053,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@498..506 " invalid" [] []
         9: MD_TEXTUAL@506..507
           0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
-      1: (empty)
   2: EOF@507..507 "" [] []
 
 ```

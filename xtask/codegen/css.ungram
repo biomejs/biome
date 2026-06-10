@@ -738,7 +738,9 @@ AnyCssGenericPropertyValueOrExpression =
 CssComposesProperty =
 	name: CssIdentifier
 	':'
-	value: CssComposesPropertyValue
+	values: CssComposesPropertyValueList
+
+CssComposesPropertyValueList = CssComposesPropertyValue (',' CssComposesPropertyValue)*
 
 CssComposesPropertyValue =
 	classes: CssComposesClassList
@@ -1272,6 +1274,7 @@ CssKeyframesAtRule =
 AnyCssKeyframesName =
 	CssKeyframesScopedName
 	| AnyCssKeyframesIdentifier
+	| ScssKeyframesName
 	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
@@ -1310,6 +1313,13 @@ CssKeyframesScopePrefix =
 //            ^^^^^^^^^^^
 AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
 
+ScssKeyframesName =
+	name: AnyScssKeyframesName
+
+AnyScssKeyframesName =
+	ScssInterpolatedIdentifier
+	| ScssVariable
+
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
 CssKeyframesBlock =
@@ -1321,7 +1331,11 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| ScssKeyframesVariableDeclaration
 	| CssBogusKeyframesItem
+
+ScssKeyframesVariableDeclaration =
+	declaration: ScssVariableDeclaration
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^

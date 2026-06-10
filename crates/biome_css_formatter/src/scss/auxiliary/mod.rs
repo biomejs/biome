@@ -16,6 +16,8 @@ pub(crate) mod interpolated_nth_value;
 pub(crate) mod interpolated_string;
 pub(crate) mod interpolated_value;
 pub(crate) mod interpolation;
+pub(crate) mod keyframes_name;
+pub(crate) mod keyframes_variable_declaration;
 pub(crate) mod keyword_argument;
 pub(crate) mod list_expression;
 pub(crate) mod list_expression_element;

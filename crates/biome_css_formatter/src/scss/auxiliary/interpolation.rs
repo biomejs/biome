@@ -94,7 +94,12 @@ fn should_preserve_identifier_interpolation_spacing(node: &ScssInterpolation) ->
 
 /// Detects spacing after `{`.
 ///
-/// Examples: `#{ $name}` and `#{\n$name}` keep a gap after `{`.
+/// Examples: `$value: #{ $name};` and:
+///
+/// ```scss
+/// $value: #{
+///   $name};
+/// ```
 fn has_source_gap_after_opening_curly(
     l_curly_token: &CssSyntaxToken,
     value: &AnyScssExpression,
@@ -108,7 +113,12 @@ fn has_source_gap_after_opening_curly(
 
 /// Detects spacing before `}`.
 ///
-/// Examples: `#{$name }` and `#{$name\n}` keep a gap before `}`.
+/// Examples: `$value: #{$name };` and:
+///
+/// ```scss
+/// $value: #{$name
+/// };
+/// ```
 fn has_source_gap_before_closing_curly(
     value: &AnyScssExpression,
     r_curly_token: &CssSyntaxToken,

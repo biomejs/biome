@@ -87,7 +87,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@1..13 " Tight Lists" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -106,7 +105,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@61..62 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@62..63 "\n" [] [],
@@ -130,7 +128,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -151,7 +148,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@80..81 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -172,7 +168,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@89..90 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -190,7 +185,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@110..111 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@111..112 "\n" [] [],
@@ -214,7 +208,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@120..121 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -235,7 +228,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@130..131 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -256,7 +248,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@139..140 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -278,7 +269,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@142..154 " Loose Lists" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -297,7 +287,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@199..200 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@200..201 "\n" [] [],
@@ -321,7 +310,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@215..216 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@216..217 "\n" [] [],
@@ -345,7 +333,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@231..232 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@232..233 "\n" [] [],
@@ -369,7 +356,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@247..248 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -387,7 +373,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@268..269 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@269..270 "\n" [] [],
@@ -411,7 +396,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@284..285 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@285..286 "\n" [] [],
@@ -435,7 +419,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@301..302 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@302..303 "\n" [] [],
@@ -459,7 +442,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@317..318 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -493,7 +475,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@346..358 "line Content" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -524,7 +505,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@417..418 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@418..419 "\n" [] [],
@@ -560,7 +540,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@446..447 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -593,7 +572,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@474..475 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -621,7 +599,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -640,7 +617,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@535..536 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@536..537 "\n" [] [],
@@ -664,7 +640,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@546..547 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -695,7 +670,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@558..559 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                         MdNewline {
                                             value_token: NEWLINE@559..560 "\n" [] [],
@@ -726,7 +700,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@571..572 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -751,7 +724,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@581..582 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -769,7 +741,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@608..609 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@609..610 "\n" [] [],
@@ -793,7 +764,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@619..620 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@620..621 "\n" [] [],
@@ -817,7 +787,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@630..631 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -848,7 +817,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@642..643 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -876,7 +844,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@654..655 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -906,7 +873,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@1..13
           0: MD_TEXTUAL@1..13
             0: MD_TEXTUAL_LITERAL@1..13 " Tight Lists" [] []
-        1: (empty)
       3: MD_HASH_LIST@13..13
     1: MD_NEWLINE@13..14
       0: NEWLINE@13..14 "\n" [] []
@@ -918,7 +884,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@15..61 "A tight list has no blank lines between items:" [] []
         1: MD_TEXTUAL@61..62
           0: MD_TEXTUAL_LITERAL@61..62 "\n" [] []
-      1: (empty)
     4: MD_NEWLINE@62..63
       0: NEWLINE@62..63 "\n" [] []
     5: MD_BULLET_LIST_ITEM@63..90
@@ -936,7 +901,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@65..71 "Item 1" [] []
                 1: MD_TEXTUAL@71..72
                   0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
-              1: (empty)
         1: MD_BULLET@72..81
           0: MD_LIST_MARKER_PREFIX@72..74
             0: MD_INDENT_TOKEN_LIST@72..72
@@ -950,7 +914,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@74..80 "Item 2" [] []
                 1: MD_TEXTUAL@80..81
                   0: MD_TEXTUAL_LITERAL@80..81 "\n" [] []
-              1: (empty)
         2: MD_BULLET@81..90
           0: MD_LIST_MARKER_PREFIX@81..83
             0: MD_INDENT_TOKEN_LIST@81..81
@@ -964,7 +927,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@83..89 "Item 3" [] []
                 1: MD_TEXTUAL@89..90
                   0: MD_TEXTUAL_LITERAL@89..90 "\n" [] []
-              1: (empty)
     6: MD_NEWLINE@90..91
       0: NEWLINE@90..91 "\n" [] []
     7: MD_PARAGRAPH@91..111
@@ -973,7 +935,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@91..110 "Ordered tight list:" [] []
         1: MD_TEXTUAL@110..111
           0: MD_TEXTUAL_LITERAL@110..111 "\n" [] []
-      1: (empty)
     8: MD_NEWLINE@111..112
       0: NEWLINE@111..112 "\n" [] []
     9: MD_ORDERED_LIST_ITEM@112..140
@@ -991,7 +952,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@115..120 "First" [] []
                 1: MD_TEXTUAL@120..121
                   0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
-              1: (empty)
         1: MD_BULLET@121..131
           0: MD_LIST_MARKER_PREFIX@121..124
             0: MD_INDENT_TOKEN_LIST@121..121
@@ -1005,7 +965,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@124..130 "Second" [] []
                 1: MD_TEXTUAL@130..131
                   0: MD_TEXTUAL_LITERAL@130..131 "\n" [] []
-              1: (empty)
         2: MD_BULLET@131..140
           0: MD_LIST_MARKER_PREFIX@131..134
             0: MD_INDENT_TOKEN_LIST@131..131
@@ -1019,7 +978,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@134..139 "Third" [] []
                 1: MD_TEXTUAL@139..140
                   0: MD_TEXTUAL_LITERAL@139..140 "\n" [] []
-              1: (empty)
     10: MD_NEWLINE@140..141
       0: NEWLINE@140..141 "\n" [] []
     11: MD_HEADER@141..154
@@ -1031,7 +989,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@142..154
           0: MD_TEXTUAL@142..154
             0: MD_TEXTUAL_LITERAL@142..154 " Loose Lists" [] []
-        1: (empty)
       3: MD_HASH_LIST@154..154
     12: MD_NEWLINE@154..155
       0: NEWLINE@154..155 "\n" [] []
@@ -1043,7 +1000,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@156..199 "A loose list has blank lines between items:" [] []
         1: MD_TEXTUAL@199..200
           0: MD_TEXTUAL_LITERAL@199..200 "\n" [] []
-      1: (empty)
     15: MD_NEWLINE@200..201
       0: NEWLINE@200..201 "\n" [] []
     16: MD_BULLET_LIST_ITEM@201..248
@@ -1061,7 +1017,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@203..215 "Loose item 1" [] []
                 1: MD_TEXTUAL@215..216
                   0: MD_TEXTUAL_LITERAL@215..216 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@216..217
               0: NEWLINE@216..217 "\n" [] []
         1: MD_BULLET@217..233
@@ -1077,7 +1032,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@219..231 "Loose item 2" [] []
                 1: MD_TEXTUAL@231..232
                   0: MD_TEXTUAL_LITERAL@231..232 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@232..233
               0: NEWLINE@232..233 "\n" [] []
         2: MD_BULLET@233..248
@@ -1093,7 +1047,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@235..247 "Loose item 3" [] []
                 1: MD_TEXTUAL@247..248
                   0: MD_TEXTUAL_LITERAL@247..248 "\n" [] []
-              1: (empty)
     17: MD_NEWLINE@248..249
       0: NEWLINE@248..249 "\n" [] []
     18: MD_PARAGRAPH@249..269
@@ -1102,7 +1055,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@249..268 "Ordered loose list:" [] []
         1: MD_TEXTUAL@268..269
           0: MD_TEXTUAL_LITERAL@268..269 "\n" [] []
-      1: (empty)
     19: MD_NEWLINE@269..270
       0: NEWLINE@269..270 "\n" [] []
     20: MD_ORDERED_LIST_ITEM@270..318
@@ -1120,7 +1072,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@273..284 "First loose" [] []
                 1: MD_TEXTUAL@284..285
                   0: MD_TEXTUAL_LITERAL@284..285 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@285..286
               0: NEWLINE@285..286 "\n" [] []
         1: MD_BULLET@286..303
@@ -1136,7 +1087,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@289..301 "Second loose" [] []
                 1: MD_TEXTUAL@301..302
                   0: MD_TEXTUAL_LITERAL@301..302 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@302..303
               0: NEWLINE@302..303 "\n" [] []
         2: MD_BULLET@303..318
@@ -1152,7 +1102,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@306..317 "Third loose" [] []
                 1: MD_TEXTUAL@317..318
                   0: MD_TEXTUAL_LITERAL@317..318 "\n" [] []
-              1: (empty)
     21: MD_NEWLINE@318..319
       0: NEWLINE@318..319 "\n" [] []
     22: MD_HEADER@319..358
@@ -1172,7 +1121,6 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@345..346 "-" [] []
           4: MD_TEXTUAL@346..358
             0: MD_TEXTUAL_LITERAL@346..358 "line Content" [] []
-        1: (empty)
       3: MD_HASH_LIST@358..358
     23: MD_NEWLINE@358..359
       0: NEWLINE@358..359 "\n" [] []
@@ -1192,7 +1140,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@416..417 ":" [] []
         5: MD_TEXTUAL@417..418
           0: MD_TEXTUAL_LITERAL@417..418 "\n" [] []
-      1: (empty)
     26: MD_NEWLINE@418..419
       0: NEWLINE@418..419 "\n" [] []
     27: MD_BULLET_LIST_ITEM@419..475
@@ -1218,7 +1165,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@432..446 "continues here" [] []
                 5: MD_TEXTUAL@446..447
                   0: MD_TEXTUAL_LITERAL@446..447 "\n" [] []
-              1: (empty)
         1: MD_BULLET@447..475
           0: MD_LIST_MARKER_PREFIX@447..449
             0: MD_INDENT_TOKEN_LIST@447..447
@@ -1240,7 +1186,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@460..474 "also continues" [] []
                 5: MD_TEXTUAL@474..475
                   0: MD_TEXTUAL_LITERAL@474..475 "\n" [] []
-              1: (empty)
     28: MD_NEWLINE@475..476
       0: NEWLINE@475..476 "\n" [] []
     29: MD_HEADER@476..508
@@ -1256,7 +1201,6 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@491..492 "-" [] []
           2: MD_TEXTUAL@492..508
             0: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] []
-        1: (empty)
       3: MD_HASH_LIST@508..508
     30: MD_NEWLINE@508..509
       0: NEWLINE@508..509 "\n" [] []
@@ -1268,7 +1212,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@510..535 "Outer tight, inner loose:" [] []
         1: MD_TEXTUAL@535..536
           0: MD_TEXTUAL_LITERAL@535..536 "\n" [] []
-      1: (empty)
     33: MD_NEWLINE@536..537
       0: NEWLINE@536..537 "\n" [] []
     34: MD_BULLET_LIST_ITEM@537..582
@@ -1286,7 +1229,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@539..546 "Outer 1" [] []
                 1: MD_TEXTUAL@546..547
                   0: MD_TEXTUAL_LITERAL@546..547 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@547..549
               0: MD_INDENT_TOKEN_LIST@547..549
                 0: MD_INDENT_TOKEN@547..548
@@ -1308,7 +1250,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@551..558 "Inner 1" [] []
                         1: MD_TEXTUAL@558..559
                           0: MD_TEXTUAL_LITERAL@558..559 "\n" [] []
-                      1: (empty)
                     1: MD_NEWLINE@559..560
                       0: NEWLINE@559..560 "\n" [] []
                 1: MD_BULLET@560..572
@@ -1328,7 +1269,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@564..571 "Inner 2" [] []
                         1: MD_TEXTUAL@571..572
                           0: MD_TEXTUAL_LITERAL@571..572 "\n" [] []
-                      1: (empty)
         1: MD_BULLET@572..582
           0: MD_LIST_MARKER_PREFIX@572..574
             0: MD_INDENT_TOKEN_LIST@572..572
@@ -1342,7 +1282,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@574..581 "Outer 2" [] []
                 1: MD_TEXTUAL@581..582
                   0: MD_TEXTUAL_LITERAL@581..582 "\n" [] []
-              1: (empty)
     35: MD_NEWLINE@582..583
       0: NEWLINE@582..583 "\n" [] []
     36: MD_PARAGRAPH@583..609
@@ -1351,7 +1290,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@583..608 "Outer loose, inner tight:" [] []
         1: MD_TEXTUAL@608..609
           0: MD_TEXTUAL_LITERAL@608..609 "\n" [] []
-      1: (empty)
     37: MD_NEWLINE@609..610
       0: NEWLINE@609..610 "\n" [] []
     38: MD_BULLET_LIST_ITEM@610..655
@@ -1369,7 +1307,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@612..619 "Outer A" [] []
                 1: MD_TEXTUAL@619..620
                   0: MD_TEXTUAL_LITERAL@619..620 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@620..621
               0: NEWLINE@620..621 "\n" [] []
         1: MD_BULLET@621..655
@@ -1385,7 +1322,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@623..630 "Outer B" [] []
                 1: MD_TEXTUAL@630..631
                   0: MD_TEXTUAL_LITERAL@630..631 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@631..633
               0: MD_INDENT_TOKEN_LIST@631..633
                 0: MD_INDENT_TOKEN@631..632
@@ -1407,7 +1343,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@635..642 "Inner A" [] []
                         1: MD_TEXTUAL@642..643
                           0: MD_TEXTUAL_LITERAL@642..643 "\n" [] []
-                      1: (empty)
                 1: MD_BULLET@643..655
                   0: MD_LIST_MARKER_PREFIX@643..647
                     0: MD_INDENT_TOKEN_LIST@643..645
@@ -1425,7 +1360,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@647..654 "Inner B" [] []
                         1: MD_TEXTUAL@654..655
                           0: MD_TEXTUAL_LITERAL@654..655 "\n" [] []
-                      1: (empty)
   2: EOF@655..655 "" [] []
 
 ```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 131
 expression: snapshot
 ---
 
@@ -50,7 +49,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@36..37 "\n" [] [],
@@ -73,7 +71,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@72..73 "\n" [] [],
@@ -111,7 +108,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@115..116 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@116..117 "\n" [] [],
@@ -143,7 +139,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@167..168 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@168..169 "\n" [] [],
@@ -187,7 +182,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@216..217 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@217..218 "\n" [] [],
@@ -228,7 +222,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@266..267 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@267..268 "\n" [] [],
@@ -266,7 +259,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@314..315 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@315..316 "\n" [] [],
@@ -304,7 +296,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@425..426 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@426..426 "" [] [],
@@ -329,7 +320,6 @@ MdDocument {
           2: R_ANGLE@34..35 ">" [] []
         2: MD_TEXTUAL@35..36
           0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@36..37
       0: NEWLINE@36..37 "\n" [] []
     2: MD_PARAGRAPH@37..72
@@ -344,7 +334,6 @@ MdDocument {
           2: R_ANGLE@70..71 ">" [] []
         2: MD_TEXTUAL@71..72
           0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@72..73
       0: NEWLINE@72..73 "\n" [] []
     4: MD_PARAGRAPH@73..116
@@ -369,7 +358,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@114..115 ">" [] []
         9: MD_TEXTUAL@115..116
           0: MD_TEXTUAL_LITERAL@115..116 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@116..117
       0: NEWLINE@116..117 "\n" [] []
     6: MD_PARAGRAPH@117..168
@@ -390,7 +378,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@157..167 " for more." [] []
         3: MD_TEXTUAL@167..168
           0: MD_TEXTUAL_LITERAL@167..168 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@168..169
       0: NEWLINE@168..169 "\n" [] []
     8: MD_PARAGRAPH@169..217
@@ -419,7 +406,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@215..216 ">" [] []
         11: MD_TEXTUAL@216..217
           0: MD_TEXTUAL_LITERAL@216..217 "\n" [] []
-      1: (empty)
     9: MD_NEWLINE@217..218
       0: NEWLINE@217..218 "\n" [] []
     10: MD_PARAGRAPH@218..267
@@ -446,7 +432,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@265..266 ">" [] []
         10: MD_TEXTUAL@266..267
           0: MD_TEXTUAL_LITERAL@266..267 "\n" [] []
-      1: (empty)
     11: MD_NEWLINE@267..268
       0: NEWLINE@267..268 "\n" [] []
     12: MD_PARAGRAPH@268..315
@@ -471,7 +456,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@313..314 ">" [] []
         9: MD_TEXTUAL@314..315
           0: MD_TEXTUAL_LITERAL@314..315 "\n" [] []
-      1: (empty)
     13: MD_NEWLINE@315..316
       0: NEWLINE@315..316 "\n" [] []
     14: MD_PARAGRAPH@316..426
@@ -496,7 +480,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@424..425 ">" [] []
         9: MD_TEXTUAL@425..426
           0: MD_TEXTUAL_LITERAL@425..426 "\n" [] []
-      1: (empty)
   2: EOF@426..426 "" [] []
 
 ```

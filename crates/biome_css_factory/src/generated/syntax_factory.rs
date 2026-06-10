@@ -638,7 +638,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssComposesPropertyValue::can_cast(element.kind())
+                    && CssComposesPropertyValueList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7588,6 +7588,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(SCSS_INTERPOLATION, children)
             }
+            SCSS_KEYFRAMES_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyScssKeyframesName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_KEYFRAMES_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_KEYFRAMES_NAME, children)
+            }
             SCSS_KEYFRAMES_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -7613,6 +7632,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_KEYFRAMES_SELECTOR, children)
+            }
+            SCSS_KEYFRAMES_VARIABLE_DECLARATION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssVariableDeclaration::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_KEYFRAMES_VARIABLE_DECLARATION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_KEYFRAMES_VARIABLE_DECLARATION, children)
             }
             SCSS_KEYWORD_ARGUMENT => {
                 let mut elements = (&children).into_iter();
@@ -9149,6 +9187,13 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_COMPOSES_CLASS_LIST => {
                 Self::make_node_list_syntax(kind, children, CssCustomIdentifier::can_cast)
             }
+            CSS_COMPOSES_PROPERTY_VALUE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssComposesPropertyValue::can_cast,
+                T ! [,],
+                false,
+            ),
             CSS_COMPOUND_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

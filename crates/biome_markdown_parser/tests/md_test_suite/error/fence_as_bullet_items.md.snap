@@ -60,7 +60,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@9..10 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -130,7 +129,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@8..9 "x" [] []
                 1: MD_TEXTUAL@9..10
                   0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
-              1: (empty)
         2: MD_BULLET@10..16
           0: MD_LIST_MARKER_PREFIX@10..12
             0: MD_INDENT_TOKEN_LIST@10..10
