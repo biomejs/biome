@@ -6,7 +6,7 @@ impl AnyMdInline {
     /// or a textual token whose content is a newline character.
     fn is_line_break(&self) -> bool {
         match self {
-            Self::MdHardLine(_) | Self::MdSoftBreak(_) => true,
+            Self::MdHardLine(_) => true,
             Self::MdTextual(node) => node.is_newline().unwrap_or(false),
             _ => false,
         }
@@ -21,10 +21,7 @@ impl AnyMdInline {
                 !node.is_newline().unwrap_or(false)
                     && !node.is_empty_and_not_newline().unwrap_or(false)
             }
-            Self::MdHardLine(_)
-            | Self::MdSoftBreak(_)
-            | Self::MdIndentToken(_)
-            | Self::MdQuotePrefix(_) => false,
+            Self::MdHardLine(_) | Self::MdIndentToken(_) | Self::MdQuotePrefix(_) => false,
             _ => true,
         }
     }
