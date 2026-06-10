@@ -77,13 +77,18 @@ impl Rule for NoScriptUrl {
         let initializer = attr.initializer()?;
         let value = initializer.value().ok()?;
 
-        if let AnyHtmlAttributeInitializer::HtmlString(html_string) = value
-            && let Ok(token) = html_string.value_token()
-        {
-            let inner = inner_string_text(&token);
-            if inner.trim().to_lowercase_cow().starts_with("javascript:") {
-                return Some(initializer.range());
-            }
+        let string_text = match &value {
+            AnyHtmlAttributeInitializer::HtmlString(html_string) => html_string
+                .value_token()
+                .ok()
+                .map(|token| inner_string_text(&token).into()),
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => value.string_value(),
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)
+            | AnyHtmlAttributeInitializer::VueVForValue(_) => None,
+        };
+
+        if string_text.is_some_and(|text| text.trim().to_lowercase_cow().starts_with("javascript:")) {
+            return Some(initializer.range());
         }
 
         None

@@ -338,6 +338,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteStyleDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateAttributeValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateChunkElement::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_TRANSITION_DIRECTIVE => {
                     let $pattern =
                         unsafe { $crate::SvelteTransitionDirective::new_unchecked(node) };
@@ -483,6 +493,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEMPLATE_ELEMENT_LIST => {
+                    let $pattern =
+                        unsafe { $crate::SvelteTemplateElementList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {

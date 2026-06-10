@@ -410,6 +410,40 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'"' => self.consume_byte(T!['"']),
+            b'\'' => self.consume_byte(T!["'"]),
+            _ => self.consume_token_attribute_value(current),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
+    fn consume_token_svelte_template_chunk(&mut self, current: u8, quote: u8) -> HtmlSyntaxKind {
+        if current == b'{' {
+            self.consume_byte(T!['{'])
+        } else if current == quote {
+            self.advance(1);
+            if quote == b'"' { T!['"'] } else { T!["'"] }
+        } else {
+            self.consume_svelte_template_chunk(quote)
+        }
+    }
+
+    fn consume_svelte_template_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' || current == quote {
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
+            }
+        }
+
+        HTML_TEMPLATE_CHUNK
+    }
+
     /// Consume a token in the [HtmlLexContext::Doctype] context.
     fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
@@ -1408,6 +1442,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_vue_v_for_expression(current, quote)
                     }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::SvelteAttributeValue => {
+                        self.consume_token_svelte_attribute_value(current)
+                    }
+                    HtmlLexContext::SvelteTemplateChunk { quote } => {
+                        self.consume_token_svelte_template_chunk(current, quote)
+                    }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
@@ -1507,6 +1547,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,
         };

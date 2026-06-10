@@ -49,6 +49,15 @@ pub(crate) enum HtmlLexContext {
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
 
+    /// Like [AttributeValue] but for quoted values stops at `{` instead of consuming
+    /// the whole string, so the parser can detect interpolations without a pre-scan.
+    SvelteAttributeValue,
+
+    /// Lexes literal chunks of a Svelte template attribute value (e.g. `top: ` and
+    /// `px` in `style="top: {top}px"`). Emits `{` as its own token; everything else
+    /// runs until the next `{` or the closing quote.
+    SvelteTemplateChunk { quote: u8 },
+
     /// Context to be used when parsing the contents of Svelte blocks. Svelte blocks usually start with `{@`, `{:`, `{/` or `{#`.
     /// When lexing using this context, specific tokens are emitted such as `if`, `else`, `debug`, etc.
     ///
@@ -171,6 +180,11 @@ pub(crate) enum HtmlReLexContext {
     InsideTagAstro,
     /// Relex tokens as if the parser was inside a tag in a Svelte file.
     InsideTagSvelte,
+    /// Re-tokenize the current quote token (`DOUBLE_QUOTE` or `SINGLE_QUOTE`)
+    /// as a full `HTML_STRING_LITERAL`. Used when a Svelte attribute value was
+    /// speculatively parsed as a template but turned out to have no
+    /// interpolations, so it can be parsed as a plain string instead.
+    SvelteAttributeString,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

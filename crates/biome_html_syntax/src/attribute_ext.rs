@@ -1,6 +1,6 @@
 use crate::{
-    AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttribute, HtmlAttributeList,
-    HtmlAttributeName, inner_string_text, static_value::StaticValue,
+    AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, HtmlAttribute,
+    HtmlAttributeList, HtmlAttributeName, inner_string_text, static_value::StaticValue,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, Text, TokenText};
@@ -16,6 +16,24 @@ impl AnyHtmlAttributeInitializer {
                     .map(|token| inner_string_text(&token).into())
                     .unwrap_or_default(),
             ),
+            // When all elements are plain text chunks (no {expression} interpolations),
+            // the static text can be recovered by concatenating the chunk tokens.
+            Self::SvelteTemplateAttributeValue(value) => {
+                let elements = value.elements();
+                let mut text = String::new();
+                for element in elements.iter() {
+                    match element {
+                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => {
+                            text.push_str(chunk.html_template_chunk_token().ok()?.text_trimmed());
+                        }
+                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => {
+                            // Dynamic interpolation — no static value available.
+                            return None;
+                        }
+                    }
+                }
+                Some(Text::from(text))
+            }
             Self::VueVForValue(_) => None,
         }
     }
@@ -24,6 +42,8 @@ impl AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(_) => None,
             Self::HtmlString(value) => Some(StaticValue::String(value.value_token().ok()?)),
+            // No single token to wrap — static values with interpolations are not representable.
+            Self::SvelteTemplateAttributeValue(_) => None,
             Self::VueVForValue(_) => None,
         }
     }

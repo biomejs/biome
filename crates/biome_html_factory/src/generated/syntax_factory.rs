@@ -2591,6 +2591,58 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(SVELTE_STYLE_DIRECTIVE, children)
             }
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && SvelteTemplateElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T!['"'] | T!["'"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_ATTRIBUTE_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_ATTRIBUTE_VALUE, children)
+            }
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_TEMPLATE_CHUNK
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SVELTE_TEMPLATE_CHUNK_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SVELTE_TEMPLATE_CHUNK_ELEMENT, children)
+            }
             SVELTE_TRANSITION_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -3230,6 +3282,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             SVELTE_ELSE_IF_CLAUSE_LIST => {
                 Self::make_node_list_syntax(kind, children, SvelteElseIfClause::can_cast)
+            }
+            SVELTE_TEMPLATE_ELEMENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnySvelteTemplateElement::can_cast)
             }
             VUE_MODIFIER_LIST => Self::make_node_list_syntax(kind, children, VueModifier::can_cast),
             VUE_V_FOR_BINDING_LIST => Self::make_separated_list_syntax(
