@@ -69,7 +69,7 @@ declare_lint_rule! {
         version: "2.3.15",
         name: "noNestedPromises",
         language: "js",
-        recommended: true,
+        recommended: false,
         severity: Severity::Warning,
         sources: &[RuleSource::EslintPromise("no-nesting").same()],
     }
