@@ -127,12 +127,12 @@ impl Format<MarkdownFormatContext> for ListBullet {
         // to `-` produces `- - - -` which CommonMark 4.1 parses as a thematic
         // break, not a list item. Same for `+ - - -`. Skip normalization for marker
         // but still format content through child formatters.
-        let target_marker = if list_marker.is_minus() || self.keep_marker || list_marker.is_ordered()
-        {
-            None
-        } else {
-            Some("-")
-        };
+        let target_marker =
+            if list_marker.is_minus() || self.keep_marker || list_marker.is_ordered() {
+                None
+            } else {
+                Some("-")
+            };
 
         let keep_pre_marker = self.keep_pre_marker();
         let pre_marker_width = if keep_pre_marker {

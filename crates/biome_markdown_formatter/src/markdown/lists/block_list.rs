@@ -187,8 +187,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         .peek()
                         .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
                     {
-                        if let Some((_, AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)))) =
-                            iter.next()
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)),
+                        )) = iter.next()
                         {
                             run.push(nl);
                         }
