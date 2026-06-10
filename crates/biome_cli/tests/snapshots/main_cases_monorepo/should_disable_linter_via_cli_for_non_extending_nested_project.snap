@@ -1,0 +1,60 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `packages/non-extending/biome.json`
+
+```json
+{
+  "root": false,
+  "formatter": {
+    "enabled": false
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+## `packages/extending/biome.json`
+
+```json
+{
+  "root": false,
+  "extends": "//"
+}
+```
+
+## `packages/extending/file.js`
+
+```js
+const abc = 123;
+
+```
+
+## `packages/non-extending/file.js`
+
+```js
+const abc = 123;
+
+```
+
+# Emitted Messages
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+```

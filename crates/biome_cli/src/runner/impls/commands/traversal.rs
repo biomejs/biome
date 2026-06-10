@@ -103,6 +103,11 @@ pub(crate) trait TraversalCommand {
     /// Alias of [CommandRunner::minimal_scan_kind]
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
+    /// Alias of [CommandRunner::invocation_configuration]
+    fn invocation_configuration(&self) -> Option<Configuration> {
+        None
+    }
+
     /// Alias of [CommandRunner::get_execution]
     fn get_execution(
         &self,
@@ -162,6 +167,10 @@ where
     /// The [ScanKind] to use for this command
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
         self.deref().minimal_scan_kind()
+    }
+
+    fn invocation_configuration(&self) -> Option<Configuration> {
+        self.deref().invocation_configuration()
     }
 
     fn collector(

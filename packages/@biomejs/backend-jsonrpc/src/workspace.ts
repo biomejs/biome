@@ -9394,6 +9394,7 @@ export type SupportKind =
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	extendedConfigurations?: [BiomePath, Configuration][];
+	invocationConfiguration?: Configuration;
 	moduleGraphResolutionKind?: ModuleGraphResolutionKind;
 	projectKey: ProjectKey;
 	workspaceDirectory?: BiomePath;

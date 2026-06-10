@@ -1152,6 +1152,7 @@ pub fn analyze_with_workspace(
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: config,
             workspace_directory: Some(BiomePath::new(&project_root)),
             extended_configurations: vec![],

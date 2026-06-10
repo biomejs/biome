@@ -4,6 +4,7 @@ use crate::settings::{Settings, SettingsWithEditor};
 use crate::workspace::{
     DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
 };
+use biome_configuration::Configuration;
 use biome_fs::{ConfigName, FileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -42,6 +43,10 @@ struct ProjectData {
     /// Optional nested settings, usually populated in monorepo
     /// projects.
     nested_settings: BTreeMap<Utf8PathBuf, Settings>,
+
+    /// Invocation-level configuration applied across the project, such as CLI
+    /// feature toggles.
+    invocation_configuration: Option<Configuration>,
 }
 
 /// Type that holds all the settings and information for different projects
@@ -79,6 +84,7 @@ impl Projects {
                 path,
                 root_settings: Settings::default(),
                 nested_settings: Default::default(),
+                invocation_configuration: None,
             },
         );
         key
@@ -153,6 +159,13 @@ impl Projects {
             .pin()
             .get(&project_key)
             .map(|data| data.root_settings.clone())
+    }
+
+    pub fn get_invocation_configuration(&self, project_key: ProjectKey) -> Option<Configuration> {
+        self.0
+            .pin()
+            .get(&project_key)
+            .and_then(|data| data.invocation_configuration.clone())
     }
 
     /// Returns whether a path is force-ignored using a forced negation (`!!`)
@@ -321,6 +334,20 @@ impl Projects {
             path: data.path.clone(),
             root_settings: settings.clone(),
             nested_settings: data.nested_settings.clone(),
+            invocation_configuration: data.invocation_configuration.clone(),
+        });
+    }
+
+    pub fn set_invocation_configuration(
+        &self,
+        project_key: ProjectKey,
+        configuration: Option<Configuration>,
+    ) {
+        self.0.pin().update(project_key, |data| ProjectData {
+            path: data.path.clone(),
+            root_settings: data.root_settings.clone(),
+            nested_settings: data.nested_settings.clone(),
+            invocation_configuration: configuration.clone(),
         });
     }
 
@@ -342,6 +369,7 @@ impl Projects {
                 path: data.path.clone(),
                 root_settings: data.root_settings.clone(),
                 nested_settings,
+                invocation_configuration: data.invocation_configuration.clone(),
             }
         });
     }

@@ -386,6 +386,198 @@ fn should_not_lint_when_root_is_disabled_but_nested_is_enabled() {
     ));
 }
 
+/// `--linter-enabled=false` should disable linting for nested projects too, even
+/// when a nested `biome.json` uses `"root": false` without `"extends": "//"`.
+///
+/// Regression test for issue #7677:
+/// https://github.com/biomejs/biome/issues/7677
+#[test]
+fn should_disable_linter_via_cli_for_non_extending_nested_project() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_disable_linter_via_cli_for_non_extending_nested_project");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "formatter": {
+        "enabled": false
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "packages/extending/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//"
+}"#,
+    );
+
+    fs.create_file(
+        "packages/non-extending/biome.json",
+        r#"{
+    "root": false,
+    "formatter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    fs.create_file("packages/extending/file.js", "const abc = 123;\n");
+    fs.create_file("packages/non-extending/file.js", "const abc = 123;\n");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--linter-enabled=false", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_disable_linter_via_cli_for_non_extending_nested_project",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// `--formatter-enabled=false` should disable formatting for nested projects too,
+/// even when a nested `biome.json` uses `"root": false` without `"extends": "//"`.
+///
+/// Regression test for issue #7677:
+/// https://github.com/biomejs/biome/issues/7677
+#[test]
+fn should_disable_formatter_via_cli_for_non_extending_nested_project() {
+    let mut console = BufferConsole::default();
+    let mut fs =
+        TemporaryFs::new("should_disable_formatter_via_cli_for_non_extending_nested_project");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "formatter": {
+        "enabled": true
+    },
+    "linter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "packages/extending/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//"
+}"#,
+    );
+
+    fs.create_file(
+        "packages/non-extending/biome.json",
+        r#"{
+    "root": false,
+    "linter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    fs.create_file("packages/extending/file.js", "let  abc  = 123 ;\n");
+    fs.create_file("packages/non-extending/file.js", "let  abc  = 123 ;\n");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--formatter-enabled=false", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_disable_formatter_via_cli_for_non_extending_nested_project",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// `--assist-enabled=false` should disable assists for nested projects too,
+/// even when a nested `biome.json` uses `"root": false` without `"extends": "//"`.
+///
+/// Regression test for issue #7677:
+/// https://github.com/biomejs/biome/issues/7677
+#[test]
+fn should_disable_assist_via_cli_for_non_extending_nested_project() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_disable_assist_via_cli_for_non_extending_nested_project");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "assist": {
+        "enabled": true
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "packages/extending/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//"
+}"#,
+    );
+
+    fs.create_file(
+        "packages/non-extending/biome.json",
+        r#"{
+    "root": false
+}"#,
+    );
+
+    fs.create_file(
+        "packages/extending/file.js",
+        "import * as something from \"../something\";\nimport { lorem, foom, bar } from \"foo\";\n",
+    );
+    fs.create_file(
+        "packages/non-extending/file.js",
+        "import * as something from \"../something\";\nimport { lorem, foom, bar } from \"foo\";\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--assist-enabled=false",
+                &format!("{}/packages/extending/file.js", fs.cli_path()),
+                &format!("{}/packages/non-extending/file.js", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_disable_assist_via_cli_for_non_extending_nested_project",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
 #[test]
 fn should_find_settings_when_run_from_nested_dir() {
     let mut console = BufferConsole::default();

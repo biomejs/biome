@@ -1658,7 +1658,8 @@ impl Workspace for WorkspaceServer {
     ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let UpdateSettingsParams {
             workspace_directory,
-            configuration,
+            mut configuration,
+            invocation_configuration,
             project_key,
             extended_configurations,
             module_graph_resolution_kind,
@@ -1684,6 +1685,10 @@ impl Workspace for WorkspaceServer {
                 .ok_or_else(WorkspaceError::no_project)?
         };
         settings.module_graph_resolution_kind = module_graph_resolution_kind;
+
+        if let Some(invocation_configuration) = invocation_configuration.clone() {
+            configuration.merge_with(invocation_configuration);
+        }
 
         settings.merge_with_configuration(
             configuration,
@@ -1728,6 +1733,8 @@ impl Workspace for WorkspaceServer {
                 nested_workspace_directory.as_path(),
             );
         } else {
+            self.projects
+                .set_invocation_configuration(project_key, invocation_configuration);
             // If the configuration is a root one, we also load the ignore files
             if settings.is_vcs_enabled() && settings.vcs_settings.should_use_ignore_file() {
                 let directory = settings
@@ -3296,12 +3303,20 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 nested_configuration
             };
 
-            let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
+            let mut scan_configuration = nested_configuration.clone();
+            if let Some(invocation_configuration) =
+                self.projects.get_invocation_configuration(project_key)
+            {
+                scan_configuration.merge_with(invocation_configuration);
+            }
+
+            let scan_kind = ProjectScanComputer::new(&scan_configuration).compute();
 
             let result = self.update_settings(UpdateSettingsParams {
                 project_key,
                 workspace_directory: nested_directory_path.map(BiomePath::from),
                 configuration: nested_configuration,
+                invocation_configuration: self.projects.get_invocation_configuration(project_key),
                 extended_configurations: extended_configurations
                     .into_iter()
                     .map(|(path, config)| (BiomePath::from(path), config))

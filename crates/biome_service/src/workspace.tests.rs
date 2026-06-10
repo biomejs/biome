@@ -480,6 +480,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Configuration {
                 files: Some(FilesConfiguration {
                     max_size: Some(NonZeroU64::new(10).unwrap().into()),
@@ -543,6 +544,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![PluginConfiguration::Path(
                     "./plugin.grit".to_string(),
@@ -618,6 +620,7 @@ language css;
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![PluginConfiguration::Path(
                     "./plugin.grit".to_string(),
@@ -689,6 +692,7 @@ fn plugins_may_use_invalid_span() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![PluginConfiguration::Path(
                     "./plugin.grit".to_string(),
@@ -794,6 +798,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Configuration {
                 plugins: Some(Plugins(vec![PluginConfiguration::Path(
                     "./plugin_a.grit".to_string(),
