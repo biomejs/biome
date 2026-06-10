@@ -1780,7 +1780,13 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
+
+// @supports #{"(display: grid)"} {}
+//           ^^^^^^^^^^^^^^^^^^^^
+ScssSupportsInterpolatedCondition =
+	condition: ScssInterpolation
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}
 //                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^

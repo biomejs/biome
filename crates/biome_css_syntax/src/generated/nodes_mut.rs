@@ -4765,6 +4765,14 @@ impl ScssStringText {
         )
     }
 }
+impl ScssSupportsInterpolatedCondition {
+    pub fn with_condition(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssUnaryExpression {
     pub fn with_operator_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

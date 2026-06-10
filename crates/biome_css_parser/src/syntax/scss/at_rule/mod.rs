@@ -18,6 +18,7 @@ mod module_clauses;
 mod parameter;
 mod query_feature;
 mod return_at_rule;
+mod supports;
 mod use_at_rule;
 mod warn;
 mod while_at_rule;
@@ -55,6 +56,9 @@ pub(crate) use media::{
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
 pub(crate) use query_feature::parse_scss_interpolated_query_feature;
 pub(crate) use return_at_rule::parse_scss_return_at_rule;
+pub(crate) use supports::{
+    is_at_scss_supports_interpolated_condition, parse_scss_supports_interpolated_condition,
+};
 pub(crate) use use_at_rule::parse_scss_use_at_rule;
 pub(crate) use warn::parse_scss_warn_at_rule;
 pub(crate) use while_at_rule::parse_scss_while_at_rule;

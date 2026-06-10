@@ -11931,6 +11931,41 @@ pub struct ScssStringTextFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssSupportsInterpolatedCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssSupportsInterpolatedCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssSupportsInterpolatedConditionFields {
+        ScssSupportsInterpolatedConditionFields {
+            condition: self.condition(),
+        }
+    }
+    pub fn condition(&self) -> SyntaxResult<ScssInterpolation> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssSupportsInterpolatedCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssSupportsInterpolatedConditionFields {
+    pub condition: SyntaxResult<ScssInterpolation>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssUnaryExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -16188,6 +16223,7 @@ pub enum AnyCssSupportsInParens {
     CssSupportsConditionInParens(CssSupportsConditionInParens),
     CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
     CssSupportsFeatureSelector(CssSupportsFeatureSelector),
+    ScssSupportsInterpolatedCondition(ScssSupportsInterpolatedCondition),
 }
 impl AnyCssSupportsInParens {
     pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
@@ -16211,6 +16247,14 @@ impl AnyCssSupportsInParens {
     pub fn as_css_supports_feature_selector(&self) -> Option<&CssSupportsFeatureSelector> {
         match &self {
             Self::CssSupportsFeatureSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_supports_interpolated_condition(
+        &self,
+    ) -> Option<&ScssSupportsInterpolatedCondition> {
+        match &self {
+            Self::ScssSupportsInterpolatedCondition(item) => Some(item),
             _ => None,
         }
     }
@@ -31799,6 +31843,53 @@ impl From<ScssStringText> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssSupportsInterpolatedCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_SUPPORTS_INTERPOLATED_CONDITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_SUPPORTS_INTERPOLATED_CONDITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssSupportsInterpolatedCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssSupportsInterpolatedCondition")
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .finish()
+        } else {
+            f.debug_struct("ScssSupportsInterpolatedCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssSupportsInterpolatedCondition> for SyntaxNode {
+    fn from(n: ScssSupportsInterpolatedCondition) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssSupportsInterpolatedCondition> for SyntaxElement {
+    fn from(n: ScssSupportsInterpolatedCondition) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssUnaryExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -41762,17 +41853,24 @@ impl From<CssSupportsFeatureSelector> for AnyCssSupportsInParens {
         Self::CssSupportsFeatureSelector(node)
     }
 }
+impl From<ScssSupportsInterpolatedCondition> for AnyCssSupportsInParens {
+    fn from(node: ScssSupportsInterpolatedCondition) -> Self {
+        Self::ScssSupportsInterpolatedCondition(node)
+    }
+}
 impl AstNode for AnyCssSupportsInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
         .union(CssSupportsConditionInParens::KIND_SET)
         .union(CssSupportsFeatureDeclaration::KIND_SET)
-        .union(CssSupportsFeatureSelector::KIND_SET);
+        .union(CssSupportsFeatureSelector::KIND_SET)
+        .union(ScssSupportsInterpolatedCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_SUPPORTS_CONDITION_IN_PARENS
             | CSS_SUPPORTS_FEATURE_DECLARATION
-            | CSS_SUPPORTS_FEATURE_SELECTOR => true,
+            | CSS_SUPPORTS_FEATURE_SELECTOR
+            | SCSS_SUPPORTS_INTERPOLATED_CONDITION => true,
             k if AnyCssValue::can_cast(k) => true,
             _ => false,
         }
@@ -41788,6 +41886,11 @@ impl AstNode for AnyCssSupportsInParens {
             CSS_SUPPORTS_FEATURE_SELECTOR => {
                 Self::CssSupportsFeatureSelector(CssSupportsFeatureSelector { syntax })
             }
+            SCSS_SUPPORTS_INTERPOLATED_CONDITION => {
+                Self::ScssSupportsInterpolatedCondition(ScssSupportsInterpolatedCondition {
+                    syntax,
+                })
+            }
             _ => {
                 if let Some(any_css_value) = AnyCssValue::cast(syntax) {
                     return Some(Self::AnyCssValue(any_css_value));
@@ -41802,6 +41905,7 @@ impl AstNode for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => it.syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.syntax(),
             Self::CssSupportsFeatureSelector(it) => it.syntax(),
+            Self::ScssSupportsInterpolatedCondition(it) => it.syntax(),
             Self::AnyCssValue(it) => it.syntax(),
         }
     }
@@ -41810,6 +41914,7 @@ impl AstNode for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => it.into_syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             Self::CssSupportsFeatureSelector(it) => it.into_syntax(),
+            Self::ScssSupportsInterpolatedCondition(it) => it.into_syntax(),
             Self::AnyCssValue(it) => it.into_syntax(),
         }
     }
@@ -41821,6 +41926,7 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssSupportsInterpolatedCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -41831,6 +41937,7 @@ impl From<AnyCssSupportsInParens> for SyntaxNode {
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into_syntax(),
+            AnyCssSupportsInParens::ScssSupportsInterpolatedCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -47028,6 +47135,11 @@ impl std::fmt::Display for ScssShowClause {
     }
 }
 impl std::fmt::Display for ScssStringText {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssSupportsInterpolatedCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

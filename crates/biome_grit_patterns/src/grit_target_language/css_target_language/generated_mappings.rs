@@ -400,6 +400,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),
         "ScssShowClause" => lang::ScssShowClause::KIND_SET.iter().next(),
         "ScssStringText" => lang::ScssStringText::KIND_SET.iter().next(),
+        "ScssSupportsInterpolatedCondition" => lang::ScssSupportsInterpolatedCondition::KIND_SET
+            .iter()
+            .next(),
         "ScssUnaryExpression" => lang::ScssUnaryExpression::KIND_SET.iter().next(),
         "ScssUseAllNamespace" => lang::ScssUseAllNamespace::KIND_SET.iter().next(),
         "ScssUseAsClause" => lang::ScssUseAsClause::KIND_SET.iter().next(),
@@ -690,6 +693,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],
         "ScssReturnAtRule" => &[("value", 1)],
         "ScssShowClause" => &[("members", 1)],
+        "ScssSupportsInterpolatedCondition" => &[("condition", 0)],
         "ScssUnaryExpression" => &[("expression", 1)],
         "ScssUseAsClause" => &[("namespace", 1)],
         "ScssUseAtRule" => &[("url", 1), ("as_clause", 2), ("with_clause", 3)],

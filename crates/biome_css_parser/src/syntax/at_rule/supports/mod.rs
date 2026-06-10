@@ -7,14 +7,17 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_any_css_value;
-use crate::syntax::parse_error::{expected_declaration, expected_selector};
+use crate::syntax::parse_error::{expected_declaration, expected_selector, scss_only_syntax_error};
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
     parse_generic_property_name, parse_property_value_with_end_set,
 };
-use crate::syntax::scss::is_nth_at_scss_interpolated_property;
+use crate::syntax::scss::{
+    is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property,
+    parse_scss_supports_interpolated_condition,
+};
 use crate::syntax::selector::parse_selector;
+use crate::syntax::{CssSyntaxFeatures, parse_any_css_value};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -227,6 +230,16 @@ fn parse_any_supports_condition_in_parens(
         parse_supports_feature_declaration(p)
     } else if is_at_supports_condition_in_parens(p) {
         parse_supports_condition_in_parens(p)
+    } else if is_at_scss_supports_interpolated_condition(p) {
+        // TODO(#10456): Add CSS-mode error fixtures for this SCSS-exclusive
+        // branch after the shared SCSS interpolation gating lands.
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_supports_interpolated_condition,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated supports conditions", marker.range(p))
+            },
+        )
     } else {
         // Here we're inside a <general-enclosed> branch,
         // which means that the parser is at unknown syntax.

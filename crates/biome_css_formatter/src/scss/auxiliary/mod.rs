@@ -39,6 +39,7 @@ pub(crate) mod parenthesized_expression;
 pub(crate) mod plain_import;
 pub(crate) mod show_clause;
 pub(crate) mod string_text;
+pub(crate) mod supports_interpolated_condition;
 pub(crate) mod unary_expression;
 pub(crate) mod use_all_namespace;
 pub(crate) mod use_as_clause;
