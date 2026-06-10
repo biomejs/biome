@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+
+function bestEffort(cb: () => Promise<number>): Promise<number>;
+function bestEffort(cb: () => number): number;
+function bestEffort(cb: () => number | Promise<number>): Promise<number> | number {
+	return cb() as Promise<number> | number;
+}
+
+function syncWork(): number {
+	return 42;
+}
+
+// Resolves to the second overload (sync callback) -> returns `number`,
+// which is not a promise, so this must NOT be flagged.
+bestEffort(syncWork);
