@@ -36,7 +36,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -9,7 +9,7 @@
+@@ -10,7 +10,7 @@
      hard_line_break,
      hard_line_break,
      "```",

@@ -64,33 +64,46 @@ info: markdown/blockquote/ignore-code.md
 
 # Error
 ```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -22,7 +22,6 @@
-   ```
- 
- 
--
- ````md
- > ```md
- > <!-- biome-ignore format: prettier ignore -->
+reformat: formatter output had syntax errors where input had none:
+ignore-code.md:16:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -31,12 +31,10 @@
-     hard_line_break,
-     "> ",
-     hard_line_break,
--    hard_line_break,
-     "```"
-   ]),
-   hard_line_break,
-   "
--
- 
- ````md",
-   hard_line_break,
+  × Unterminated fenced code block, expected closing triple backticks (```).
+  
+    15 │ > - test
+  > 16 │   ```md
+       │   ^^^
+    17 │   > <!-- biome-ignore format: prettier ignore -->
+    18 │   > - This is a long long
+  
+  i code block started here
+  
+    15 │ > - test
+  > 16 │   ```md
+       │   ^^^
+    17 │   > <!-- biome-ignore format: prettier ignore -->
+    18 │   > - This is a long long
+  
+  i Add closing triple backticks (```) at the start of a new line.
+  
+ignore-code.md:22:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated fenced code block, expected closing triple backticks (```).
+  
+    20 │   >     long long paragraph.
+    21 │   >·
+  > 22 │   ```
+       │   ^^^
+    23 │ 
+  
+  i code block started here
+  
+    20 │   >     long long paragraph.
+    21 │   >·
+  > 22 │   ```
+       │   ^^^
+    23 │ 
+  
+  i Add closing triple backticks (```) at the start of a new line.
+  
 
 ```

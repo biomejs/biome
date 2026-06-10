@@ -9,9 +9,10 @@ impl FormatNodeRule<MdOrderedListItem> for FormatMdOrderedListItem {
         _node: &MdOrderedListItem,
         _f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
+        // let backtrace = Backtrace::force_capture();
         debug_assert!(
             false,
-            "This node should be formatted via FmtAnyList. Match AnyMdBlock and use as_any_list_item."
+            "This node should be formatted via FmtAnyList. Match AnyMdBlock and use as_any_list_item.",
         );
 
         Ok(())

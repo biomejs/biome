@@ -38,25 +38,42 @@ info: markdown/code/indent.md
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -13,7 +13,6 @@
+@@ -12,7 +12,6 @@
    ```
  
  
 -
  <!-- prettier/prettier#3459 -->
- 
  1. Change to your home directory:
+ 
 
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -25,7 +25,6 @@
-   hard_line_break,
+@@ -4,7 +4,9 @@
+     Indented Code Block
+     Indented Code Block
+     Indented Code Block
+-- ",
++",
++  hard_line_break,
++  "- ",
+   align(2, [
+     "```",
+     hard_line_break,
+@@ -23,10 +25,11 @@
+     hard_line_break
+   ]),
    "
- 
 -
- <!-- prettier/prettier#3459 -->
  
- 1. ",
+ <!-- prettier/prettier#3459 -->
+-1. ",
++",
++  hard_line_break,
++  "1. ",
+   align(3, [
+     "Change to your home directory:",
+     hard_line_break,
 
 ```

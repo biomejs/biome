@@ -41,8 +41,8 @@ IR differences:
      empty_line,
 -    " paragraph",
 +    "paragraph",
+     hard_line_break,
      empty_line,
      align(4, [
-       "    more code
 
 ```

@@ -10,6 +10,7 @@ use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, write};
+use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
     MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent, MdIndentCodeBlock,
@@ -22,11 +23,11 @@ use std::iter::FusedIterator;
 
 /// Thin wrapper around [AnyListItem]
 pub struct FmtAnyList {
-    node: MdBulletListItem,
+    node: AnyListItem,
 }
 
 impl FmtAnyList {
-    pub(crate) fn new(node: MdBulletListItem) -> Self {
+    pub(crate) fn new(node: AnyListItem) -> Self {
         Self { node }
     }
 }
@@ -34,7 +35,7 @@ impl FmtAnyList {
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         f.context().comments().is_suppressed(self.node.syntax());
-        let list = self.node.md_bullet_list();
+        let list = self.node.list();
         BulletListPrinter::new(&list).fmt(f)
     }
 }
@@ -208,9 +209,7 @@ impl ListBlockList {
                     line_break
                 ]
             )
-        } else if let Some(list_item) = content.as_any_md_container_block()
-            && let Some(list_item) = list_item.as_md_bullet_list_item()
-        {
+        } else if let Some(list_item) = content.as_any_list_item() {
             FmtAnyList::new(list_item.clone()).fmt(f)
         } else if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
             AnyMdCodeBlock::MdIndentCodeBlock(code_block),

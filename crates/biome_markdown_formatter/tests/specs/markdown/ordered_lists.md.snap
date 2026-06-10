@@ -51,7 +51,6 @@ info: markdown/ordered_lists.md
 1. Foo
 2. Bar
 
-
 1. Foo
    Bar
 
@@ -60,10 +59,9 @@ info: markdown/ordered_lists.md
       1. Lorem
          Ipsum
 
-
 1. Foo
    With some
-     Space
+   Space
 
 1. Mixed with sub-bullet
    - bullet sub-item

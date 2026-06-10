@@ -38,33 +38,37 @@ info: markdown/list/tab.md
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -4,7 +4,7 @@
+@@ -5,7 +5,7 @@
  - Text
    - foo
      - foo
 -      - bar
 +    - bar
+ 
  - Text
  
-   # foo
 
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -7,13 +7,7 @@
-     "Text",
-     hard_line_break,
-     "- ",
--    align(2, [
--      "foo",
--      hard_line_break,
+@@ -17,15 +17,10 @@
+     align(2, [
+       "foo",
+       hard_line_break,
++      "- foo",
++      hard_line_break,
++      "- bar",
+       hard_line_break,
 -      "- ",
--      align(2, ["foo", hard_line_break, "- bar"]),
--      hard_line_break
--    ]),
-+    align(2, ["foo", hard_line_break, "- foo", hard_line_break, "- bar"]),
-     hard_line_break
-   ]),
-   hard_line_break,
+-      align(2, [
+-        "foo",
+-        hard_line_break,
+-        "- bar",
+-        hard_line_break,
+-        hard_line_break
+-      ]),
+       hard_line_break
+     ]),
+     empty_line
 
 ```

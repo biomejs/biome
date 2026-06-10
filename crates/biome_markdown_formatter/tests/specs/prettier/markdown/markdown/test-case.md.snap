@@ -220,19 +220,22 @@ This paragraph has some `code` in it.
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -89,10 +89,12 @@
- - Green
- - Blue
+@@ -83,6 +83,7 @@
+     >     Markdown.generate();
+ 
  
 +
  - Red
  - Green
  - Blue
+@@ -110,6 +111,7 @@
+ * Blue
+ ```
  
 +
- - Red
- - Green
- - Blue
+ 1. Buy flour and salt
+ 1. Mix together with water
+ 1. Bake
 
 IR differences:
 --- re-formatted IR
@@ -250,31 +253,43 @@ IR differences:
    empty_line,
    "    Header 1
      ========
-@@ -104,8 +108,10 @@
-   hard_line_break,
-   "- ",
-   align(2, ["Blue"]),
--  empty_line,
--  "- ",
-+  hard_line_break,
-+  "
+@@ -92,6 +96,7 @@
+     >     Markdown.generate();
+ 
+ 
 +
-+- ",
-   align(2, ["Red"]),
+ ",
    hard_line_break,
    "- ",
-@@ -113,8 +119,10 @@
-   hard_line_break,
+@@ -99,13 +104,19 @@
    "- ",
-   align(2, ["Blue"]),
--  empty_line,
--  "- ",
-+  hard_line_break,
+   align(2, ["Green", hard_line_break, hard_line_break]),
+   "- ",
+-  align(2, ["Blue", hard_line_break, empty_line]),
++  align(2, ["Blue", hard_line_break, hard_line_break]),
 +  "
-+
-+- ",
-   align(2, ["Red"]),
-   hard_line_break,
++",
++  hard_line_break,
    "- ",
+   align(2, ["Red", hard_line_break, hard_line_break]),
+   "- ",
+   align(2, ["Green", hard_line_break, hard_line_break]),
+   "- ",
+-  align(2, ["Blue", hard_line_break, empty_line]),
++  align(2, ["Blue", hard_line_break, hard_line_break]),
++  "
++",
++  hard_line_break,
+   "- ",
+   align(2, ["Red", hard_line_break, hard_line_break]),
+   "- ",
+@@ -129,6 +140,7 @@
+ * Blue
+ ```
+ 
++
+ ",
+   hard_line_break,
+   "1. ",
 
 ```

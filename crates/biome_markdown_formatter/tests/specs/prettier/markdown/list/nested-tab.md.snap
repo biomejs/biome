@@ -49,32 +49,33 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -16,11 +16,10 @@
-       "Nested List item 2",
+@@ -16,13 +16,9 @@
+       hard_line_break,
        hard_line_break,
        "- ",
 -      align(2, [
 -        "Sub-Nested List item 1",
 -        hard_line_break,
--        "- Sub-Nested List item 2"
+-        "- Sub-Nested List item 2",
+-        hard_line_break,
+-        hard_line_break
 -      ]),
-+      align(2, ["Sub-Nested List item 1"]),
-+      hard_line_break,
++      align(2, ["Sub-Nested List item 1", hard_line_break, hard_line_break]),
 +      "- ",
-+      align(2, ["Sub-Nested List item 2"]),
++      align(2, ["Sub-Nested List item 2", hard_line_break, hard_line_break]),
        hard_line_break
      ]),
      hard_line_break
-@@ -47,9 +46,7 @@
+@@ -48,9 +44,8 @@
        align(2, [
          "Sub-Nested List item 1",
          hard_line_break,
++        "* Sub-Nested List item 2",
+         hard_line_break,
 -        "- ",
--        align(2, ["Sub-Nested List item 2"]),
--        hard_line_break
-+        "* Sub-Nested List item 2"
+-        align(2, ["Sub-Nested List item 2", hard_line_break, hard_line_break]),
+         hard_line_break
        ]),
        hard_line_break
-     ]),
 
 ```

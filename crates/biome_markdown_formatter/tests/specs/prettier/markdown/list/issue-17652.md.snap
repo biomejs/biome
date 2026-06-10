@@ -38,7 +38,7 @@ info: markdown/list/issue-17652.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,18 +4,18 @@
+@@ -4,18 +4,19 @@
     ---
     foo: bar
     ```
@@ -46,7 +46,7 @@ info: markdown/list/issue-17652.md
 +   
     1. Another
     2. List
--
+ 
  1. Some text, and code block below, with newline after code block
     1. Another
     2. List
@@ -74,6 +74,7 @@ info: markdown/list/issue-17652.md
    
    1. Another
    2. List
+
 1. Some text, and code block below, with newline after code block
    1. Another
    2. List
