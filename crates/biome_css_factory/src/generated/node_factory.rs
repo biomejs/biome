@@ -323,14 +323,14 @@ pub fn css_composes_import_specifier(
 pub fn css_composes_property(
     name: CssIdentifier,
     colon_token: SyntaxToken,
-    value: CssComposesPropertyValue,
+    values: CssComposesPropertyValueList,
 ) -> CssComposesProperty {
     CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPOSES_PROPERTY,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(values.into_syntax())),
         ],
     ))
 }
@@ -4785,6 +4785,30 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_property_value_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssComposesPropertyValueList
+where
+    I: IntoIterator<Item = CssComposesPropertyValue>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssComposesPropertyValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_compound_selector_list<I, S>(items: I, separators: S) -> CssCompoundSelectorList

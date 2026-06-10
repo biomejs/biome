@@ -845,7 +845,7 @@ impl CssComposesProperty {
         CssComposesPropertyFields {
             name: self.name(),
             colon_token: self.colon_token(),
-            value: self.value(),
+            values: self.values(),
         }
     }
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
@@ -854,8 +854,8 @@ impl CssComposesProperty {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<CssComposesPropertyValue> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn values(&self) -> CssComposesPropertyValueList {
+        support::list(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssComposesProperty {
@@ -870,7 +870,7 @@ impl Serialize for CssComposesProperty {
 pub struct CssComposesPropertyFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<CssComposesPropertyValue>,
+    pub values: CssComposesPropertyValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssComposesPropertyValue {
@@ -18333,7 +18333,7 @@ impl std::fmt::Debug for CssComposesProperty {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("values", &self.values())
                 .finish()
         } else {
             f.debug_struct("CssComposesProperty").finish()
@@ -49325,6 +49325,88 @@ impl IntoIterator for &CssComposesClassList {
 impl IntoIterator for CssComposesClassList {
     type Item = CssCustomIdentifier;
     type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssComposesPropertyValueList {
+    syntax_list: SyntaxList,
+}
+impl CssComposesPropertyValueList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssComposesPropertyValueList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_PROPERTY_VALUE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_PROPERTY_VALUE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssComposesPropertyValueList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssComposesPropertyValueList {
+    type Language = Language;
+    type Node = CssComposesPropertyValue;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssComposesPropertyValueList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssComposesPropertyValueList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssComposesPropertyValueList {
+    type Item = SyntaxResult<CssComposesPropertyValue>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssComposesPropertyValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssComposesPropertyValueList {
+    type Item = SyntaxResult<CssComposesPropertyValue>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssComposesPropertyValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
