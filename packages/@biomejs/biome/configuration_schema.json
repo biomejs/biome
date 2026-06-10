@@ -5,7 +5,7 @@
 	"type": "object",
 	"properties": {
 		"$schema": {
-			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
+			"description": "A field for the JSON schema specification: https://json-schema.org/",
 			"anyOf": [{ "$ref": "#/$defs/Schema" }, { "type": "null" }]
 		},
 		"assist": {
