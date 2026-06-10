@@ -37,14 +37,10 @@ pub enum MarkdownSyntaxKind {
     COLON,
     NULL_KW,
     MD_HARD_LINE_LITERAL,
-    MD_SOFT_BREAK_LITERAL,
     MD_TEXTUAL_LITERAL,
-    MD_STRING_LITERAL,
-    MD_INDENT_CHUNK_LITERAL,
     MD_THEMATIC_BREAK_LITERAL,
     MD_SETEXT_UNDERLINE_LITERAL,
     MD_ORDERED_LIST_MARKER,
-    MD_ERROR_LITERAL,
     MD_ENTITY_LITERAL,
     MD_QUOTE_PRE_MARKER_INDENT,
     MD_QUOTE_POST_MARKER_SPACE,
@@ -92,17 +88,9 @@ pub enum MarkdownSyntaxKind {
     MD_AUTOLINK,
     MD_INLINE_HTML,
     MD_ENTITY_REFERENCE,
-    MD_INLINE_IMAGE_ALT,
-    MD_INDENTED_CODE_LINE,
-    MD_INLINE_IMAGE_LINK,
-    MD_INLINE_IMAGE_SOURCE,
-    MD_INDENTED_CODE_LINE_LIST,
     MD_HARD_LINE,
-    MD_SOFT_BREAK,
     MD_TEXTUAL,
     MD_SETEXT_HEADER,
-    MD_STRING,
-    MD_INDENT,
     MD_THEMATIC_BREAK_BLOCK,
     MD_NEWLINE,
     MD_INDENT_TOKEN,
@@ -148,14 +136,10 @@ impl MarkdownSyntaxKind {
         matches!(
             self,
             MD_HARD_LINE_LITERAL
-                | MD_SOFT_BREAK_LITERAL
                 | MD_TEXTUAL_LITERAL
-                | MD_STRING_LITERAL
-                | MD_INDENT_CHUNK_LITERAL
                 | MD_THEMATIC_BREAK_LITERAL
                 | MD_SETEXT_UNDERLINE_LITERAL
                 | MD_ORDERED_LIST_MARKER
-                | MD_ERROR_LITERAL
                 | MD_ENTITY_LITERAL
                 | MD_QUOTE_PRE_MARKER_INDENT
                 | MD_QUOTE_POST_MARKER_SPACE
@@ -172,7 +156,6 @@ impl MarkdownSyntaxKind {
                 | MD_QUOTE_INDENT_LIST
                 | MD_BULLET_LIST
                 | MD_INLINE_ITEM_LIST
-                | MD_INDENTED_CODE_LINE_LIST
                 | MD_INDENT_TOKEN_LIST
                 | MD_THEMATIC_BREAK_PART_LIST
         )
