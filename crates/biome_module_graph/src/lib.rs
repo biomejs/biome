@@ -17,7 +17,7 @@ pub use css_module_info::{
     ImportTreeDisplay, ImportTreeNode,
 };
 pub use db::ModuleDb;
-pub use db::project_database::ProjectDatabase;
+pub use db::project_database::{ProjectDatabase, ProjectDatabaseHandle};
 pub use db::queries::*;
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};

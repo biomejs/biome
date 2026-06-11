@@ -8,7 +8,7 @@ use biome_fs::BiomePath;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SymbolName, find_jsdoc_for_exported_symbol,
+    JsImportPath, ModuleDb, ModuleInfo, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
 };
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
@@ -292,8 +292,7 @@ fn get_restricted_import_visibility(
 ) -> Option<Visibility> {
     let visibility = find_jsdoc_for_exported_symbol(
         options.module_db,
-        options.target_info,
-        SymbolName::new(options.module_db, import_name.text()),
+        SymbolFromModuleInfo::new(options.module_db, import_name.text(), options.target_info),
     )
     .as_ref()
     .and_then(parse_visibility)
