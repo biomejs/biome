@@ -2847,10 +2847,13 @@ impl Workspace for WorkspaceServer {
                 skipped_suggested_fixes += results.skipped_suggested_fixes;
 
                 let verbatim_ranges = if should_format {
+                    // Use the trimmed code — the same slice passed to
+                    // reindent_embedded_code — so byte offsets match.
+                    let trimmed = results.code.trim();
                     if embedded_snippet.is_js() {
-                        crate::file_handlers::html::js_verbatim_ranges(&results.code)
+                        crate::file_handlers::html::js_verbatim_ranges(trimmed)
                     } else if embedded_snippet.is_css() {
-                        crate::file_handlers::html::css_verbatim_ranges(&results.code)
+                        crate::file_handlers::html::css_verbatim_ranges(trimmed)
                     } else {
                         vec![]
                     }
