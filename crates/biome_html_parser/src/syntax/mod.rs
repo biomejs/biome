@@ -244,9 +244,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
         && !is_possible_component(p, opening_tag_name.as_str());
+    // In Svelte files, <pre> must be parsed as a regular element so that
+    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
+    // nodes for variable-reference tracking.  The HTML formatter's
+    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
+    // printed verbatim, so removing <pre> from the embedded-language path
+    // here has no effect on formatting output.
+    let is_pre = opening_tag_name.to_ascii_lowercase() == "pre";
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !(is_pre && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 

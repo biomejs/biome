@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: valid-svelte-at-html.svelte
 ---
 # Input
@@ -11,12 +10,24 @@ expression: valid-svelte-at-html.svelte
     html: string;
     content: string;
     markup: string;
+    preContent: string;
+    preInline: string;
+    preNested: string;
   }
-  const { html, content, markup }: Props = $props();
+  const { html, content, markup, preContent, preInline, preNested }: Props = $props();
 </script>
 
 {@html html}
 {@html content.trim()}
 {@html markup}
+
+<!-- {@html expr} inside <pre> should also mark the variable as used -->
+<pre>{@html preContent}</pre>
+
+<!-- inline usage inside <pre> -->
+<pre class="code">{@html preInline}</pre>
+
+<!-- regular interpolation inside <pre> should also work -->
+<pre>{preNested}</pre>
 
 ```
