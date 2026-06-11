@@ -130,32 +130,6 @@ fn svelte_each_with_incorrect_method_call_key() {
 }
 
 #[test]
-fn svelte_interpolation_ranges_are_brace_and_string_aware() {
-    use super::svelte_interpolation_ranges;
-    use biome_rowan::{TextRange, TextSize};
-
-    fn slices(input: &str) -> Vec<&str> {
-        svelte_interpolation_ranges(input)
-            .into_iter()
-            .map(|r| &input[r])
-            .collect()
-    }
-
-    assert_eq!(slices("top: {top}px"), vec!["top"]);
-    assert_eq!(slices("a {x} b {y} c"), vec!["x", "y"]);
-    // A `}` inside a string doesn't end the group.
-    assert_eq!(slices("{ ok ? 'a}b' : c }"), vec![" ok ? 'a}b' : c "]);
-    // Nested braces.
-    assert_eq!(slices("{ {x: 1} }"), vec![" {x: 1} "]);
-    assert!(slices("plain text").is_empty());
-    // Ranges point at the inner expression, not the braces.
-    assert_eq!(
-        svelte_interpolation_ranges("ab{cd}"),
-        vec![TextRange::new(TextSize::from(3), TextSize::from(5))]
-    );
-}
-
-#[test]
 fn vue_v_on_accepts_inline_statements_and_expression_handlers() {
     // Mirrors Vue's v-on handler cases:
     // https://github.com/vuejs/core/blob/86ad0764fd9f7b01cef75b4fc941b03419306bf8/packages/compiler-core/__tests__/transforms/vOn.spec.ts#L148-L161

@@ -20,7 +20,7 @@ use biome_html_syntax::{
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
-    HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlString, HtmlTextExpression,
+    HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
     HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective, VueVBindShorthandDirective,
     VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
@@ -29,7 +29,7 @@ use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
 use std::collections::VecDeque;
 
 pub(crate) fn parse_embedded_nodes(
@@ -373,113 +373,11 @@ pub(crate) fn parse_embedded_nodes(
                         &mut nodes,
                     );
                 }
-
-                // Interpolations inside a quoted attribute value:
-                // `style="top: {top}px"`, `class="card {cls}"`.
-                if let Some(string) = HtmlString::cast_ref(&element) {
-                    for candidate in build_svelte_string_interpolation_candidates(&string) {
-                        ctx.parse_and_push(
-                            &candidate,
-                            &doc_file_source,
-                            Some(embedded_file_source),
-                            &mut nodes,
-                        );
-                    }
-                }
             }
         }
     }
 
     ParseEmbedResult { nodes }
-}
-
-/// Svelte allows `{expr}` inside a quoted attribute value, but the parser keeps
-/// the whole value in one string token. Scan it for balanced `{...}` groups and
-/// turn each into a text-expression candidate so it is parsed and tracked like
-/// any other interpolation.
-fn build_svelte_string_interpolation_candidates(string: &HtmlString) -> Vec<EmbedCandidate> {
-    let Ok(token) = string.value_token() else {
-        return Vec::new();
-    };
-    let token_text = token.token_text();
-    let token_start = token.text_range().start();
-
-    svelte_interpolation_ranges(token_text.text())
-        .into_iter()
-        .map(|range| {
-            let inner = token_text.clone().slice(range);
-            let content_offset = token_start + range.start();
-            EmbedCandidate::TextExpression {
-                content: EmbedContent {
-                    element_range: token.text_range(),
-                    content_range: TextRange::new(
-                        token_start + range.start(),
-                        token_start + range.end(),
-                    ),
-                    content_offset,
-                    text: inner,
-                },
-                block_kind: EmbedBlockKind::Neutral,
-            }
-        })
-        .collect()
-}
-
-/// Returns the range of each `{...}` interpolation's inner expression within
-/// `input`. Brace counting is aware of JS string and template literals, so a
-/// `}` inside a string (`{ok ? 'a}b' : c}`) or a nested object (`{ {x: 1} }`)
-/// does not end the group early.
-fn svelte_interpolation_ranges(input: &str) -> Vec<TextRange> {
-    let bytes = input.as_bytes();
-    let mut ranges = Vec::new();
-    let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] != b'{' {
-            i += 1;
-            continue;
-        }
-        let start = i + 1;
-        let mut depth = 1usize;
-        let mut quote: Option<u8> = None;
-        let mut j = start;
-        while j < bytes.len() {
-            let c = bytes[j];
-            if let Some(q) = quote {
-                if c == b'\\' {
-                    j += 2;
-                    continue;
-                }
-                if c == q {
-                    quote = None;
-                }
-                j += 1;
-                continue;
-            }
-            match c {
-                b'\'' | b'"' | b'`' => quote = Some(c),
-                b'{' => depth += 1,
-                b'}' => {
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                }
-                _ => {}
-            }
-            j += 1;
-        }
-        if depth != 0 {
-            break;
-        }
-        if j > start {
-            ranges.push(TextRange::new(
-                TextSize::from(start as u32),
-                TextSize::from(j as u32),
-            ));
-        }
-        i = j + 1;
-    }
-    ranges
 }
 
 // Pass 3: control flow blocks via registry

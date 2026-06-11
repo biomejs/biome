@@ -75,10 +75,10 @@ impl EmbeddedValueReferencesBuilder {
     /// - `<Component />` → tracks `Component`
     /// - `<AvatarPrimitive.Fallback>` → tracks `AvatarPrimitive`
     ///
-    /// When `file_source` is Svelte, also extracts references from Svelte-only
-    /// constructs the parser leaves opaque or unattached: directive names
-    /// (`use:action`) and `{expr}` interpolations embedded inside quoted
-    /// attribute values (`style="top: {top}px"`).
+    /// For Svelte, it also tracks directive names that read a local binding,
+    /// such as `use:action` or the `bind:open` shorthand. Interpolations like
+    /// `style="top: {top}px"` are parsed as embedded JavaScript snippets, so
+    /// their references are collected through the normal snippet path.
     pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
         let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
