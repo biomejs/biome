@@ -151,6 +151,9 @@ fn collect_embedded_references(
     file: ParsedSource,
 ) -> Option<EmbeddedReferencesBuilder> {
     let host_source = db.source_from_index(file.document_source_index(db))?;
+    let is_svelte = host_source
+        .to_html_file_source()
+        .is_some_and(|s| s.is_svelte());
 
     let mut builder = EmbeddedReferencesBuilder::new();
 
@@ -161,7 +164,11 @@ fn collect_embedded_references(
         let Some(js_file_source) = file_source.to_js_file_source() else {
             continue;
         };
-        if !js_file_source.is_embedded_source() {
+        // Templates always; for Svelte also the sibling `<script>` blocks.
+        // A Svelte component's `<script module>` and `<script>` compile to
+        // one module and share a top-level scope, so a binding used only in
+        // the other block must still count as used.
+        if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parsed(db).tree());
         }
     }

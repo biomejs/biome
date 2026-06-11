@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-cross-script-imports.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module lang="ts">
+import { tick } from "svelte";
+
+// `Snippet` is imported in the instance <script> below, but referenced here.
+export interface Props {
+  row?: Snippet;
+}
+</script>
+
+<script lang="ts">
+import type { Snippet } from "svelte";
+
+const { row }: Props = $props();
+
+// `tick` is imported in the module <script> above, but used only here.
+async function refresh() {
+  await tick();
+}
+
+refresh();
+</script>
+
+<div>{row}</div>
+
+```
