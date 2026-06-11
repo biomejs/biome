@@ -2,12 +2,13 @@
 "@biomejs/biome": patch
 ---
 
-Fixed CSS and SCSS formatting for comments around declaration colons so comments between property names, colons, and values stay at the same boundary as Prettier.
+CSS declarations with comments before `:` or after `!important` now preserve spaces before `:` and `;`.
 
 ```diff
  .selector {
--  color: /* red, */
--    blue;
-+  color: /* red, */ blue;
+-  padding/* name */: 1px;
+-  color: red !important /* note */;
++  padding/* name */ : 1px;
++  color: red !important /* note */ ;
  }
 ```

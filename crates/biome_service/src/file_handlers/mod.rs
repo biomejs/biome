@@ -31,10 +31,11 @@ use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
-    GetSyntaxTreeResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
-    RenameResult, SearchQuery,
+    AnyEmbeddedSnippet, CodeAction, DefinitionReference, DocumentServices, FixAction, FixFileMode,
+    FixFileResult, GetSyntaxTreeResult, GoToDefinitionResult, PatternId, PullActionsResult,
+    PullDiagnosticsAndActionsResult, RenameResult, SearchQuery,
 };
+use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
     AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
@@ -62,21 +63,24 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use either::Either;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use rustc_hash::FxHashSet;
+use papaya::HashMap;
+use rustc_hash::{FxHashSet, FxHasher};
 use std::borrow::Cow;
 use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use tracing::instrument;
+use tracing::{instrument, trace};
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -264,7 +268,10 @@ impl DocumentFileSource {
     }
 
     #[instrument(level = "debug", fields(result))]
-    fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+    fn try_from_language_id(
+        language_id: &str,
+        extension: Option<&str>,
+    ) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -278,7 +285,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id, extension) {
             return Ok(file_source.into());
         }
         #[cfg(feature = "lang_grit")]
@@ -303,14 +310,15 @@ impl DocumentFileSource {
         Err(FileSourceError::UnknownLanguageId)
     }
 
-    /// Returns the document file source corresponding to this language ID
+    /// Returns the document file source corresponding to this language ID. It accepts an optional extension
+    /// to be used to narrow down the expected language to enable.
     ///
     /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
     ///
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
-    pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
+    pub fn from_language_id(language_id: &str, extension: Option<&str>) -> Self {
+        Self::try_from_language_id(language_id, extension).unwrap_or(Self::Unknown)
     }
 
     pub(crate) fn try_from_path(
@@ -554,7 +562,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -564,6 +572,7 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     /// The initial indentation level to apply when printing formatted code.
     /// Used by embedded language handlers (Svelte, Vue) to preserve
     /// `indentScriptAndStyle` indentation during fix-all operations.
@@ -579,6 +588,7 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
     pub(crate) search: SearchCapabilities,
     pub(crate) enabled_for_path: EnabledForPath,
+    pub(crate) editors: EditorCapabilities,
 }
 
 #[derive(Clone)]
@@ -619,7 +629,7 @@ type DebugFormatterIR = fn(
     &SettingsWithEditor,
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
-    fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, Option<AnyParse>, ProjectDatabase) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
@@ -639,7 +649,6 @@ pub struct DebugCapabilities {
     pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
-#[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
@@ -648,7 +657,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
@@ -657,10 +666,13 @@ pub(crate) struct LintParams<'a> {
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     pub(crate) max_diagnostics: Option<u32>,
     pub(crate) diagnostic_level: Severity,
     /// When true, promote assist diagnostics (`assist/*`) to error severity.
     pub(crate) enforce_assist: bool,
+    /// Cached rules for the current analyzer pass.
+    pub(crate) analyzer_cache: &'a AnalyzerVisitorCache,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
@@ -671,13 +683,14 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     // Services attached to the current embedded snippet, when diagnostics are run on snippets.
     pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
@@ -1061,6 +1074,54 @@ impl<'a> ProcessFixAll<'a> {
         Ok(Some(()))
     }
 
+    /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
+    /// applied outside of the normal mutation path.
+    pub(crate) fn record_text_edit_fix(
+        &mut self,
+        range: TextRange,
+        new_text_len: u32,
+        rule_name: Option<(&'static str, &'static str)>,
+    ) -> Result<(), WorkspaceError> {
+        self.actions.push(FixAction {
+            rule_name: rule_name.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+            range,
+        });
+        if !self.growth_guard.check(new_text_len) {
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: self
+                        .actions
+                        .iter()
+                        .rev()
+                        .take(10)
+                        .filter_map(|action| action.rule_name.clone())
+                        .collect::<HashSet<_>>()
+                        .into_iter()
+                        .collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    /// Apply a plugin text edit if present and the text actually changed.
+    /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
+    pub(crate) fn apply_plugin_text_edit(
+        &mut self,
+        text_edit: Option<(TextRange, TextEdit)>,
+        current_text: &str,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let Some((range, edit)) = text_edit else {
+            return Ok(None);
+        };
+        let new_text = edit.new_string(current_text);
+        if new_text == current_text {
+            return Ok(None);
+        }
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        Ok(Some(new_text))
+    }
+
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
     ///
@@ -1156,7 +1217,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
-    pub(crate) module_graph: Arc<ModuleGraph>,
+    pub(crate) module_db: ProjectDatabase,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -1167,10 +1228,12 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) action_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
     /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
     pub(crate) compute_actions: bool,
     // Services attached to the current embedded snippet, when actions are run on snippets.
     pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) analyzer_cache: &'a AnalyzerVisitorCache,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -1278,6 +1341,29 @@ pub(crate) struct EnabledForPath {
     pub(crate) search: Option<Enabled>,
 }
 
+#[derive(Default)]
+pub(crate) struct EditorCapabilities {
+    pub(crate) resolve_binding: Option<ResolveBinding>,
+    pub(crate) resolve_definition: Option<ResolveDefinition>,
+}
+
+pub(crate) struct ResolveBindingParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) cursor_offset: TextSize,
+    pub(crate) services: &'a DocumentServices,
+}
+
+pub(crate) struct ResolveDefinitionParams<'a> {
+    pub(crate) path: &'a BiomePath,
+    pub(crate) definition_ref: &'a DefinitionReference,
+    pub(crate) module_db: &'a dyn ModuleDb,
+    pub(crate) offset: Option<TextSize>,
+    pub(crate) services: &'a DocumentServices,
+}
+
+type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;
+type ResolveDefinition = fn(ResolveDefinitionParams) -> Option<GoToDefinitionResult>;
+
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
     /// Capabilities that can applied to a file
@@ -1331,9 +1417,17 @@ impl Features {
     }
 
     /// Returns the [Capabilities] associated with a document source.
-    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+    ///
+    /// ## Warning
+    ///
+    /// This method is deprecated and shouldn't be used unless you're working on a feature for the deprecated
+    /// partial support of vue/svelte/astro
+    // TODO: remove match once we remove vue/astro/svelte handlers
+    pub(crate) fn get_deprecated_capabilities(
+        &self,
+        language_hint: DocumentFileSource,
+    ) -> Capabilities {
         match language_hint {
-            // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
@@ -1349,6 +1443,26 @@ impl Features {
                 } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
+            DocumentFileSource::Json(_) => self.json.capabilities(),
+            DocumentFileSource::Css(_) => self.css.capabilities(),
+            #[cfg(feature = "lang_graphql")]
+            DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            DocumentFileSource::Html(_) => self.html.capabilities(),
+            #[cfg(feature = "lang_grit")]
+            DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            #[cfg(feature = "lang_md")]
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            #[cfg(feature = "lang_yaml")]
+            DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
+            DocumentFileSource::Ignore => self.ignore.capabilities(),
+            DocumentFileSource::Unknown => self.unknown.capabilities(),
+        }
+    }
+
+    /// Returns the [Capabilities] associated with a document source.
+    pub(crate) fn get_real_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
+            DocumentFileSource::Js(_) => self.js.capabilities(),
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
             #[cfg(feature = "lang_graphql")]
@@ -2132,12 +2246,12 @@ impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
 }
 
 /// Result of building the analyzer visitor: the resolved rule filters and options.
-pub(crate) struct AnalyzerVisitorResult<'a> {
-    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
-    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
+pub(crate) struct AnalyzerVisitorResult {
+    pub(crate) enabled_rules: Vec<RuleFilter<'static>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'static>>,
     pub(crate) analyzer_options: AnalyzerOptions,
     /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
-    pub(crate) fixable_rules: Vec<RuleFilter<'a>>,
+    pub(crate) fixable_rules: Vec<RuleFilter<'static>>,
 }
 
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
@@ -2148,6 +2262,7 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     enabled_selectors: Option<&'a [AnalyzerSelector]>,
     project_layout: Arc<ProjectLayout>,
     analyzer_options: AnalyzerOptions,
+    cache: Option<&'a AnalyzerVisitorCache>,
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
@@ -2160,6 +2275,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             enabled_selectors: None,
             project_layout: Default::default(),
             analyzer_options,
+            cache: None,
         }
     }
 
@@ -2194,7 +2310,114 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> AnalyzerVisitorResult<'b> {
+    pub(crate) fn with_cache(mut self, cache: &'b AnalyzerVisitorCache) -> Self {
+        self.cache = Some(cache);
+        self
+    }
+
+    fn compute_cache_key(&self) -> Option<AnalyzerCacheKey> {
+        let path = self.path?;
+
+        // 1. override_indices: which override patterns match this file.
+        let override_indices: Vec<_> = self
+            .settings
+            .override_settings
+            .patterns
+            .iter()
+            .enumerate()
+            .filter_map(|(i, pattern)| pattern.is_file_included(path).then_some(i))
+            .collect();
+
+        // 2. manifest_id: identity of the nearest package.json.
+        let manifest_id =
+            self.project_layout
+                .find_node_manifest_for_path(path)
+                .map(|(manifest_path, _)| {
+                    let mut h = FxHasher::default();
+                    manifest_path.hash(&mut h);
+                    h.finish()
+                });
+
+        // 3. jsx_factory_hash: JSX factory/fragment from tsconfig.
+        let jsx_factory_hash =
+            if self.analyzer_options.jsx_runtime() == Some(JsxRuntime::ReactClassic) {
+                let mut h = FxHasher::default();
+                // Query tsconfig for the jsx factory — same lookup as finish() does later.
+                let factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                    })
+                    .flatten();
+                let fragment_factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig
+                            .jsx_fragment_factory_identifier()
+                            .map(|s| s.to_string())
+                    })
+                    .flatten();
+                factory.hash(&mut h);
+                fragment_factory.hash(&mut h);
+                h.finish()
+            } else {
+                0
+            };
+
+        // 4. filter_hash: only/skip/enabled_selectors from the command invocation.
+        let filter_hash = {
+            let mut h = FxHasher::default();
+            if let Some(only) = self.only {
+                for selector in only {
+                    selector.hash(&mut h);
+                }
+            }
+            if let Some(skip) = self.skip {
+                for selector in skip {
+                    selector.hash(&mut h);
+                }
+            }
+            if let Some(enabled) = self.enabled_selectors {
+                for selector in enabled {
+                    selector.hash(&mut h);
+                }
+            }
+            h.finish()
+        };
+
+        Some(AnalyzerCacheKey {
+            override_indices,
+            manifest_id,
+            jsx_factory_hash,
+            filter_hash,
+        })
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> AnalyzerVisitorResult {
+        let key = self.compute_cache_key();
+        // 1. Try cache hit
+        if let Some(cache) = &self.cache
+            && let Some(key) = key.clone()
+            && let Some(cached) = cache.get_entry(&key)
+        {
+            // Cache HIT: apply stored mutations to the builder's owned AnalyzerOptions
+            let mut opts = self.analyzer_options;
+            opts.push_globals(cached.globals.iter().cloned());
+            if let Some(f) = &cached.jsx_factory {
+                opts.set_jsx_factory(Some(f.clone()));
+            }
+            if let Some(f) = &cached.jsx_fragment_factory {
+                opts.set_jsx_fragment_factory(Some(f.clone()));
+            }
+            return AnalyzerVisitorResult {
+                enabled_rules: cached.enabled_rules.clone(),
+                disabled_rules: cached.disabled_rules.clone(),
+                fixable_rules: cached.fixable_rules.clone(),
+                analyzer_options: opts,
+            };
+        }
+
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules = vec![];
@@ -2289,24 +2512,430 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         let mut fixable_rules = linter_fixable_rules;
         fixable_rules.extend(assists_fixable_rules);
 
-        AnalyzerVisitorResult {
+        let result = AnalyzerVisitorResult {
             enabled_rules,
             disabled_rules,
             analyzer_options,
             fixable_rules,
+        };
+
+        if let Some(key) = key.as_ref()
+            && let Some(cache) = self.cache.as_ref()
+        {
+            let cached = CachedRuleSet::extract_from(&result);
+            cache.insert_entry(key.clone(), cached);
+        }
+
+        result
+    }
+}
+
+/// Reusable cache when building the [AnalysisFilter]
+#[derive(Debug, Default)]
+pub(crate) struct AnalyzerVisitorCache(HashMap<AnalyzerCacheKey, Arc<CachedRuleSet>>);
+
+impl AnalyzerVisitorCache {
+    // NOTE: for now, we want to have a more conservative approach.
+    // We don't know what's the effect of the cache on the daemon, considering that it can hold multiple projects.
+    /// Max entries for the current cache
+    const MAX_ENTRIES: usize = 256;
+
+    /// Evicts all entries from the current cache
+    pub(crate) fn evict_cache(&self) {
+        self.0.pin().clear();
+    }
+
+    pub(crate) fn get_entry(&self, key: &AnalyzerCacheKey) -> Option<Arc<CachedRuleSet>> {
+        self.0.pin().get(key).cloned()
+    }
+    pub(crate) fn insert_entry(&self, key: AnalyzerCacheKey, entry: CachedRuleSet) {
+        if self.0.len() > Self::MAX_ENTRIES {
+            trace!("Evicted cache entry: {:?}", key);
+            self.evict_cache();
+        }
+
+        self.0.pin().insert(key, Arc::new(entry));
+    }
+}
+
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
+pub(crate) struct AnalyzerCacheKey {
+    /// Which override patterns matched (indices into settings overrides).
+    override_indices: Vec<usize>,
+    /// Identity of the nearest package.json (path hash, or None).
+    manifest_id: Option<u64>,
+    /// JSX factory + fragment factory from tsconfig (if ReactClassic).
+    jsx_factory_hash: u64,
+    /// Hash of only/skip/enabled_selectors (constant within a batch).
+    filter_hash: u64,
+}
+
+/// The cacheable output
+#[derive(Debug, Clone)]
+pub(crate) struct CachedRuleSet {
+    pub(crate) enabled_rules: Vec<RuleFilter<'static>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'static>>,
+    pub(crate) fixable_rules: Vec<RuleFilter<'static>>,
+    /// Globals added during domain/manifest resolution.
+    pub(crate) globals: Vec<Box<str>>,
+    /// JSX factory from tsconfig (None if not ReactClassic or not resolved).
+    pub(crate) jsx_factory: Option<Box<str>>,
+    pub(crate) jsx_fragment_factory: Option<Box<str>>,
+}
+
+impl CachedRuleSet {
+    fn extract_from(result: &AnalyzerVisitorResult) -> Self {
+        Self {
+            enabled_rules: result.enabled_rules.clone(),
+            disabled_rules: result.disabled_rules.clone(),
+            fixable_rules: result.fixable_rules.clone(),
+            globals: result
+                .analyzer_options
+                .globals()
+                .iter()
+                .map(|s| s.to_string().into_boxed_str())
+                .collect::<Vec<_>>(),
+            jsx_factory: result
+                .analyzer_options
+                .jsx_factory()
+                .map(|s| s.to_string().into_boxed_str()),
+            jsx_fragment_factory: result
+                .analyzer_options
+                .jsx_fragment_factory()
+                .map(|s| s.to_string().into_boxed_str()),
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::{DocumentFileSource, Features};
     use camino::Utf8Path;
 
+    mod analyzer_cache {
+        use super::super::{
+            AnalyzerCacheKey, AnalyzerVisitorBuilder, AnalyzerVisitorCache, CachedRuleSet,
+        };
+        use biome_analyze::{AnalyzerOptions, RuleFilter};
+        use biome_project_layout::ProjectLayout;
+        use camino::Utf8Path;
+        use std::sync::Arc;
+
+        use crate::settings::Settings;
+
+        #[test]
+        fn insert_and_retrieve_entry() {
+            let cache = AnalyzerVisitorCache::default();
+            let key = AnalyzerCacheKey {
+                override_indices: vec![],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            let entry = CachedRuleSet {
+                enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
+                disabled_rules: vec![],
+                fixable_rules: vec![],
+                globals: vec![],
+                jsx_factory: None,
+                jsx_fragment_factory: None,
+            };
+
+            cache.insert_entry(key.clone(), entry);
+
+            let retrieved = cache.get_entry(&key);
+            assert!(retrieved.is_some());
+            let retrieved = retrieved.unwrap();
+            assert_eq!(retrieved.enabled_rules.len(), 1);
+            assert_eq!(
+                retrieved.enabled_rules[0],
+                RuleFilter::Rule("style", "noVar")
+            );
+        }
+
+        #[test]
+        fn different_keys_produce_separate_entries() {
+            let cache = AnalyzerVisitorCache::default();
+            let key_a = AnalyzerCacheKey {
+                override_indices: vec![0],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            let key_b = AnalyzerCacheKey {
+                override_indices: vec![1],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+
+            cache.insert_entry(
+                key_a.clone(),
+                CachedRuleSet {
+                    enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
+                    disabled_rules: vec![],
+                    fixable_rules: vec![],
+                    globals: vec![],
+                    jsx_factory: None,
+                    jsx_fragment_factory: None,
+                },
+            );
+            cache.insert_entry(
+                key_b.clone(),
+                CachedRuleSet {
+                    enabled_rules: vec![RuleFilter::Rule("correctness", "noUnusedVariables")],
+                    disabled_rules: vec![],
+                    fixable_rules: vec![],
+                    globals: vec![],
+                    jsx_factory: None,
+                    jsx_fragment_factory: None,
+                },
+            );
+
+            let a = cache.get_entry(&key_a).unwrap();
+            let b = cache.get_entry(&key_b).unwrap();
+            assert_eq!(a.enabled_rules[0], RuleFilter::Rule("style", "noVar"));
+            assert_eq!(
+                b.enabled_rules[0],
+                RuleFilter::Rule("correctness", "noUnusedVariables")
+            );
+        }
+
+        #[test]
+        fn evict_cache_clears_all_entries() {
+            let cache = AnalyzerVisitorCache::default();
+            let key = AnalyzerCacheKey {
+                override_indices: vec![],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            cache.insert_entry(
+                key.clone(),
+                CachedRuleSet {
+                    enabled_rules: vec![],
+                    disabled_rules: vec![],
+                    fixable_rules: vec![],
+                    globals: vec![],
+                    jsx_factory: None,
+                    jsx_fragment_factory: None,
+                },
+            );
+
+            assert!(cache.get_entry(&key).is_some());
+            cache.evict_cache();
+            assert!(cache.get_entry(&key).is_none());
+        }
+
+        #[test]
+        fn max_entries_triggers_eviction() {
+            let cache = AnalyzerVisitorCache::default();
+
+            // Insert MAX_ENTRIES + 2 entries. Eviction triggers on the (MAX_ENTRIES+2)th
+            // insert because `len() > MAX_ENTRIES` is checked before each insert.
+            for i in 0..=(AnalyzerVisitorCache::MAX_ENTRIES + 1) {
+                let key = AnalyzerCacheKey {
+                    override_indices: vec![i],
+                    manifest_id: None,
+                    jsx_factory_hash: 0,
+                    filter_hash: 0,
+                };
+                cache.insert_entry(
+                    key,
+                    CachedRuleSet {
+                        enabled_rules: vec![],
+                        disabled_rules: vec![],
+                        fixable_rules: vec![],
+                        globals: vec![],
+                        jsx_factory: None,
+                        jsx_fragment_factory: None,
+                    },
+                );
+            }
+
+            // After eviction, only the last inserted entry should remain.
+            let first_key = AnalyzerCacheKey {
+                override_indices: vec![0],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            assert!(
+                cache.get_entry(&first_key).is_none(),
+                "early entries should be evicted after exceeding MAX_ENTRIES"
+            );
+
+            // The last entry (inserted after the clear) should exist.
+            let last_key = AnalyzerCacheKey {
+                override_indices: vec![AnalyzerVisitorCache::MAX_ENTRIES + 1],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            assert!(
+                cache.get_entry(&last_key).is_some(),
+                "entry inserted after eviction should be present"
+            );
+        }
+
+        #[test]
+        fn same_path_produces_same_cache_key() {
+            let settings = Settings::default();
+            let project_layout = Arc::new(ProjectLayout::default());
+            let options = AnalyzerOptions::default();
+            let path = Utf8Path::new("src/index.ts");
+
+            let builder_a = AnalyzerVisitorBuilder::new(&settings, options.clone())
+                .with_path(path)
+                .with_project_layout(project_layout.clone());
+            let key_a = builder_a.compute_cache_key();
+
+            let builder_b = AnalyzerVisitorBuilder::new(&settings, options)
+                .with_path(path)
+                .with_project_layout(project_layout);
+            let key_b = builder_b.compute_cache_key();
+
+            assert_eq!(key_a, key_b);
+        }
+
+        #[test]
+        fn different_only_filters_produce_different_keys() {
+            use biome_configuration::analyzer::AnalyzerSelector;
+            use std::str::FromStr;
+
+            let settings = Settings::default();
+            let project_layout = Arc::new(ProjectLayout::default());
+            let path = Utf8Path::new("src/index.ts");
+
+            let only_a: Vec<AnalyzerSelector> = vec![];
+            let builder_a = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                .with_path(path)
+                .with_only(&only_a)
+                .with_project_layout(project_layout.clone());
+            let key_a = builder_a.compute_cache_key();
+
+            let only_b = vec![AnalyzerSelector::from_str("lint/suspicious/noVar").unwrap()];
+            let builder_b = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                .with_path(path)
+                .with_only(&only_b)
+                .with_project_layout(project_layout);
+            let key_b = builder_b.compute_cache_key();
+
+            assert_ne!(key_a, key_b);
+        }
+
+        #[test]
+        fn no_path_returns_none_key() {
+            let settings = Settings::default();
+            let builder = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default());
+            assert!(builder.compute_cache_key().is_none());
+        }
+
+        #[test]
+        fn cache_hit_applies_globals_from_cached_entry() {
+            let cache = AnalyzerVisitorCache::default();
+            let settings = Settings::default();
+            let project_layout = Arc::new(ProjectLayout::default());
+            let path = Utf8Path::new("src/index.ts");
+
+            let key = AnalyzerCacheKey {
+                override_indices: vec![],
+                manifest_id: None,
+                jsx_factory_hash: 0,
+                filter_hash: 0,
+            };
+            cache.insert_entry(
+                key,
+                CachedRuleSet {
+                    enabled_rules: vec![RuleFilter::Rule("style", "noVar")],
+                    disabled_rules: vec![],
+                    fixable_rules: vec![],
+                    globals: vec!["React".into(), "JSX".into()],
+                    jsx_factory: Some("h".into()),
+                    jsx_fragment_factory: Some("Fragment".into()),
+                },
+            );
+
+            let result = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                .with_path(path)
+                .with_project_layout(project_layout)
+                .with_cache(&cache)
+                .finish();
+
+            assert_eq!(
+                result.enabled_rules,
+                vec![RuleFilter::Rule("style", "noVar")]
+            );
+            assert!(result.analyzer_options.globals().contains(&"React".into()));
+            assert!(result.analyzer_options.globals().contains(&"JSX".into()));
+            assert_eq!(result.analyzer_options.jsx_factory(), Some("h"));
+            assert_eq!(
+                result.analyzer_options.jsx_fragment_factory(),
+                Some("Fragment")
+            );
+        }
+
+        #[test]
+        fn cache_miss_populates_cache_for_next_call() {
+            let cache = AnalyzerVisitorCache::default();
+            let settings = Settings::default();
+            let project_layout = Arc::new(ProjectLayout::default());
+            let path = Utf8Path::new("src/index.ts");
+
+            // First call — cache miss, populates the cache
+            let result_a = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                .with_path(path)
+                .with_project_layout(project_layout.clone())
+                .with_cache(&cache)
+                .finish();
+
+            // Second call — should be a cache hit with identical result
+            let result_b = AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                .with_path(path)
+                .with_project_layout(project_layout)
+                .with_cache(&cache)
+                .finish();
+
+            assert_eq!(result_a.enabled_rules, result_b.enabled_rules);
+            assert_eq!(result_a.disabled_rules, result_b.disabled_rules);
+            assert_eq!(result_a.fixable_rules, result_b.fixable_rules);
+        }
+
+        #[test]
+        fn filter_hash_distinguishes_skip_from_empty() {
+            use biome_configuration::analyzer::AnalyzerSelector;
+            use std::str::FromStr;
+
+            let settings = Settings::default();
+            let project_layout = Arc::new(ProjectLayout::default());
+            let path = Utf8Path::new("src/index.ts");
+
+            let empty: Vec<AnalyzerSelector> = vec![];
+            let builder_no_skip =
+                AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                    .with_path(path)
+                    .with_skip(&empty)
+                    .with_project_layout(project_layout.clone());
+            let key_no_skip = builder_no_skip.compute_cache_key();
+
+            let skip = vec![AnalyzerSelector::from_str("lint/suspicious/noVar").unwrap()];
+            let builder_with_skip =
+                AnalyzerVisitorBuilder::new(&settings, AnalyzerOptions::default())
+                    .with_path(path)
+                    .with_skip(&skip)
+                    .with_project_layout(project_layout);
+            let key_with_skip = builder_with_skip.compute_cache_key();
+
+            assert_ne!(key_no_skip, key_with_skip);
+        }
+    }
+
     #[test]
     fn svelte_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.js");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2316,7 +2945,8 @@ mod tests {
     fn svelte_typescript_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.ts");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2326,7 +2956,8 @@ mod tests {
     fn svelte_component_files_keep_svelte_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_none());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_none());

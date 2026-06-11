@@ -1,0 +1,540 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<article role="article"></article>
+<button role="button"></button>
+<h1 role="heading" aria-level="1">title</h1>
+<dialog role="dialog"></dialog>
+<input type="checkbox" role="checkbox" />
+<figure role="figure"></figure>
+<form role="form"></form>
+<fieldset role="group"></fieldset>
+<img src="foo" alt="bar" role="img" />
+<img alt="" role="presentation" />
+<a href="#" role="link"></a>
+<ol role="list"></ol>
+<ul role="list"></ul>
+<select name="name" role="combobox"></select>
+<select name="name" multiple size="4" role="listbox"></select>
+<li role="listitem"></li>
+<nav role="navigation"></nav>
+<tr role="row"></tr>
+<tbody role="rowgroup"></tbody>
+<tfoot role="rowgroup"></tfoot>
+<thead role="rowgroup"></thead>
+<input type="search" role="searchbox" />
+<table role="table"></table>
+<textarea role="textbox"></textarea>
+<input type="text" role="textbox" />
+<button role="button presentation"></button>
+<nav role="navigation link"></nav>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <article role="article"></article>
+      │          ^^^^^^^^^^^^^^
+    3 │ <button role="button"></button>
+    4 │ <h1 role="heading" aria-level="1">title</h1>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    2 │ <article·role="article"></article>
+      │          --------------           
+
+```
+
+```
+invalid.html:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <article role="article"></article>
+  > 3 │ <button role="button"></button>
+      │         ^^^^^^^^^^^^^
+    4 │ <h1 role="heading" aria-level="1">title</h1>
+    5 │ <dialog role="dialog"></dialog>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ <button·role="button"></button>
+      │         -------------          
+
+```
+
+```
+invalid.html:4:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'heading' on the 'h1' element is redundant, because it is implied by its semantics.
+  
+    2 │ <article role="article"></article>
+    3 │ <button role="button"></button>
+  > 4 │ <h1 role="heading" aria-level="1">title</h1>
+      │     ^^^^^^^^^^^^^^
+    5 │ <dialog role="dialog"></dialog>
+    6 │ <input type="checkbox" role="checkbox" />
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ <h1·role="heading"·aria-level="1">title</h1>
+      │     ---------------                         
+
+```
+
+```
+invalid.html:5:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'dialog' on the 'dialog' element is redundant, because it is implied by its semantics.
+  
+    3 │ <button role="button"></button>
+    4 │ <h1 role="heading" aria-level="1">title</h1>
+  > 5 │ <dialog role="dialog"></dialog>
+      │         ^^^^^^^^^^^^^
+    6 │ <input type="checkbox" role="checkbox" />
+    7 │ <figure role="figure"></figure>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ <dialog·role="dialog"></dialog>
+      │         -------------          
+
+```
+
+```
+invalid.html:6:24 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'checkbox' on the 'input' element is redundant, because it is implied by its semantics.
+  
+    4 │ <h1 role="heading" aria-level="1">title</h1>
+    5 │ <dialog role="dialog"></dialog>
+  > 6 │ <input type="checkbox" role="checkbox" />
+      │                        ^^^^^^^^^^^^^^^
+    7 │ <figure role="figure"></figure>
+    8 │ <form role="form"></form>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    6 │ <input·type="checkbox"·role="checkbox"·/>
+      │                        ----------------  
+
+```
+
+```
+invalid.html:7:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'figure' on the 'figure' element is redundant, because it is implied by its semantics.
+  
+    5 │ <dialog role="dialog"></dialog>
+    6 │ <input type="checkbox" role="checkbox" />
+  > 7 │ <figure role="figure"></figure>
+      │         ^^^^^^^^^^^^^
+    8 │ <form role="form"></form>
+    9 │ <fieldset role="group"></fieldset>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    7 │ <figure·role="figure"></figure>
+      │         -------------          
+
+```
+
+```
+invalid.html:8:7 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'form' on the 'form' element is redundant, because it is implied by its semantics.
+  
+     6 │ <input type="checkbox" role="checkbox" />
+     7 │ <figure role="figure"></figure>
+   > 8 │ <form role="form"></form>
+       │       ^^^^^^^^^^^
+     9 │ <fieldset role="group"></fieldset>
+    10 │ <img src="foo" alt="bar" role="img" />
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    8 │ <form·role="form"></form>
+      │       -----------        
+
+```
+
+```
+invalid.html:9:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'group' on the 'fieldset' element is redundant, because it is implied by its semantics.
+  
+     7 │ <figure role="figure"></figure>
+     8 │ <form role="form"></form>
+   > 9 │ <fieldset role="group"></fieldset>
+       │           ^^^^^^^^^^^^
+    10 │ <img src="foo" alt="bar" role="img" />
+    11 │ <img alt="" role="presentation" />
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    9 │ <fieldset·role="group"></fieldset>
+      │           ------------            
+
+```
+
+```
+invalid.html:10:26 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'img' on the 'img' element is redundant, because it is implied by its semantics.
+  
+     8 │ <form role="form"></form>
+     9 │ <fieldset role="group"></fieldset>
+  > 10 │ <img src="foo" alt="bar" role="img" />
+       │                          ^^^^^^^^^^
+    11 │ <img alt="" role="presentation" />
+    12 │ <a href="#" role="link"></a>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    10 │ <img·src="foo"·alt="bar"·role="img"·/>
+       │                          -----------  
+
+```
+
+```
+invalid.html:11:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'presentation' on the 'img' element is redundant, because it is implied by its semantics.
+  
+     9 │ <fieldset role="group"></fieldset>
+    10 │ <img src="foo" alt="bar" role="img" />
+  > 11 │ <img alt="" role="presentation" />
+       │             ^^^^^^^^^^^^^^^^^^^
+    12 │ <a href="#" role="link"></a>
+    13 │ <ol role="list"></ol>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    11 │ <img·alt=""·role="presentation"·/>
+       │             --------------------  
+
+```
+
+```
+invalid.html:12:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'link' on the 'a' element is redundant, because it is implied by its semantics.
+  
+    10 │ <img src="foo" alt="bar" role="img" />
+    11 │ <img alt="" role="presentation" />
+  > 12 │ <a href="#" role="link"></a>
+       │             ^^^^^^^^^^^
+    13 │ <ol role="list"></ol>
+    14 │ <ul role="list"></ul>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    12 │ <a·href="#"·role="link"></a>
+       │             -----------     
+
+```
+
+```
+invalid.html:13:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'list' on the 'ol' element is redundant, because it is implied by its semantics.
+  
+    11 │ <img alt="" role="presentation" />
+    12 │ <a href="#" role="link"></a>
+  > 13 │ <ol role="list"></ol>
+       │     ^^^^^^^^^^^
+    14 │ <ul role="list"></ul>
+    15 │ <select name="name" role="combobox"></select>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    13 │ <ol·role="list"></ol>
+       │     -----------      
+
+```
+
+```
+invalid.html:14:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'list' on the 'ul' element is redundant, because it is implied by its semantics.
+  
+    12 │ <a href="#" role="link"></a>
+    13 │ <ol role="list"></ol>
+  > 14 │ <ul role="list"></ul>
+       │     ^^^^^^^^^^^
+    15 │ <select name="name" role="combobox"></select>
+    16 │ <select name="name" multiple size="4" role="listbox"></select>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    14 │ <ul·role="list"></ul>
+       │     -----------      
+
+```
+
+```
+invalid.html:15:21 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'combobox' on the 'select' element is redundant, because it is implied by its semantics.
+  
+    13 │ <ol role="list"></ol>
+    14 │ <ul role="list"></ul>
+  > 15 │ <select name="name" role="combobox"></select>
+       │                     ^^^^^^^^^^^^^^^
+    16 │ <select name="name" multiple size="4" role="listbox"></select>
+    17 │ <li role="listitem"></li>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    15 │ <select·name="name"·role="combobox"></select>
+       │                     ---------------          
+
+```
+
+```
+invalid.html:16:39 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'listbox' on the 'select' element is redundant, because it is implied by its semantics.
+  
+    14 │ <ul role="list"></ul>
+    15 │ <select name="name" role="combobox"></select>
+  > 16 │ <select name="name" multiple size="4" role="listbox"></select>
+       │                                       ^^^^^^^^^^^^^^
+    17 │ <li role="listitem"></li>
+    18 │ <nav role="navigation"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    16 │ <select·name="name"·multiple·size="4"·role="listbox"></select>
+       │                                       --------------          
+
+```
+
+```
+invalid.html:17:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'listitem' on the 'li' element is redundant, because it is implied by its semantics.
+  
+    15 │ <select name="name" role="combobox"></select>
+    16 │ <select name="name" multiple size="4" role="listbox"></select>
+  > 17 │ <li role="listitem"></li>
+       │     ^^^^^^^^^^^^^^^
+    18 │ <nav role="navigation"></nav>
+    19 │ <tr role="row"></tr>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    17 │ <li·role="listitem"></li>
+       │     ---------------      
+
+```
+
+```
+invalid.html:18:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantics.
+  
+    16 │ <select name="name" multiple size="4" role="listbox"></select>
+    17 │ <li role="listitem"></li>
+  > 18 │ <nav role="navigation"></nav>
+       │      ^^^^^^^^^^^^^^^^^
+    19 │ <tr role="row"></tr>
+    20 │ <tbody role="rowgroup"></tbody>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    18 │ <nav·role="navigation"></nav>
+       │      -----------------       
+
+```
+
+```
+invalid.html:19:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'row' on the 'tr' element is redundant, because it is implied by its semantics.
+  
+    17 │ <li role="listitem"></li>
+    18 │ <nav role="navigation"></nav>
+  > 19 │ <tr role="row"></tr>
+       │     ^^^^^^^^^^
+    20 │ <tbody role="rowgroup"></tbody>
+    21 │ <tfoot role="rowgroup"></tfoot>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    19 │ <tr·role="row"></tr>
+       │     ----------      
+
+```
+
+```
+invalid.html:20:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'rowgroup' on the 'tbody' element is redundant, because it is implied by its semantics.
+  
+    18 │ <nav role="navigation"></nav>
+    19 │ <tr role="row"></tr>
+  > 20 │ <tbody role="rowgroup"></tbody>
+       │        ^^^^^^^^^^^^^^^
+    21 │ <tfoot role="rowgroup"></tfoot>
+    22 │ <thead role="rowgroup"></thead>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    20 │ <tbody·role="rowgroup"></tbody>
+       │        ---------------         
+
+```
+
+```
+invalid.html:21:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'rowgroup' on the 'tfoot' element is redundant, because it is implied by its semantics.
+  
+    19 │ <tr role="row"></tr>
+    20 │ <tbody role="rowgroup"></tbody>
+  > 21 │ <tfoot role="rowgroup"></tfoot>
+       │        ^^^^^^^^^^^^^^^
+    22 │ <thead role="rowgroup"></thead>
+    23 │ <input type="search" role="searchbox" />
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    21 │ <tfoot·role="rowgroup"></tfoot>
+       │        ---------------         
+
+```
+
+```
+invalid.html:22:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'rowgroup' on the 'thead' element is redundant, because it is implied by its semantics.
+  
+    20 │ <tbody role="rowgroup"></tbody>
+    21 │ <tfoot role="rowgroup"></tfoot>
+  > 22 │ <thead role="rowgroup"></thead>
+       │        ^^^^^^^^^^^^^^^
+    23 │ <input type="search" role="searchbox" />
+    24 │ <table role="table"></table>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    22 │ <thead·role="rowgroup"></thead>
+       │        ---------------         
+
+```
+
+```
+invalid.html:23:22 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'searchbox' on the 'input' element is redundant, because it is implied by its semantics.
+  
+    21 │ <tfoot role="rowgroup"></tfoot>
+    22 │ <thead role="rowgroup"></thead>
+  > 23 │ <input type="search" role="searchbox" />
+       │                      ^^^^^^^^^^^^^^^^
+    24 │ <table role="table"></table>
+    25 │ <textarea role="textbox"></textarea>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    23 │ <input·type="search"·role="searchbox"·/>
+       │                      -----------------  
+
+```
+
+```
+invalid.html:24:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'table' on the 'table' element is redundant, because it is implied by its semantics.
+  
+    22 │ <thead role="rowgroup"></thead>
+    23 │ <input type="search" role="searchbox" />
+  > 24 │ <table role="table"></table>
+       │        ^^^^^^^^^^^^
+    25 │ <textarea role="textbox"></textarea>
+    26 │ <input type="text" role="textbox" />
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    24 │ <table·role="table"></table>
+       │        ------------         
+
+```
+
+```
+invalid.html:25:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'textbox' on the 'textarea' element is redundant, because it is implied by its semantics.
+  
+    23 │ <input type="search" role="searchbox" />
+    24 │ <table role="table"></table>
+  > 25 │ <textarea role="textbox"></textarea>
+       │           ^^^^^^^^^^^^^^
+    26 │ <input type="text" role="textbox" />
+    27 │ <button role="button presentation"></button>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    25 │ <textarea·role="textbox"></textarea>
+       │           --------------            
+
+```
+
+```
+invalid.html:26:20 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'textbox' on the 'input' element is redundant, because it is implied by its semantics.
+  
+    24 │ <table role="table"></table>
+    25 │ <textarea role="textbox"></textarea>
+  > 26 │ <input type="text" role="textbox" />
+       │                    ^^^^^^^^^^^^^^
+    27 │ <button role="button presentation"></button>
+    28 │ <nav role="navigation link"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    26 │ <input·type="text"·role="textbox"·/>
+       │                    ---------------  
+
+```
+
+```
+invalid.html:27:9 lint/a11y/noRedundantRoles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button presentation' on the 'button' element is redundant, because it is implied by its semantics.
+  
+    25 │ <textarea role="textbox"></textarea>
+    26 │ <input type="text" role="textbox" />
+  > 27 │ <button role="button presentation"></button>
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ <nav role="navigation link"></nav>
+    29 │ 
+  
+
+```
+
+```
+invalid.html:28:6 lint/a11y/noRedundantRoles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation link' on the 'nav' element is redundant, because it is implied by its semantics.
+  
+    26 │ <input type="text" role="textbox" />
+    27 │ <button role="button presentation"></button>
+  > 28 │ <nav role="navigation link"></nav>
+       │      ^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+  
+
+```

@@ -21,9 +21,3 @@ info: yaml/block_sequence/mapping_in_sequence.yaml
 - e: f
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"- a: b\n  c: d\n- e: f\n" => 0..21

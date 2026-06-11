@@ -140,3 +140,15 @@
 {"markdown":"[ref]: /url\n1. item\n","html":"<ol>\n<li>item</li>\n</ol>\n"}
 {"markdown":"> a\n  2. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"2\">\n<li>item</li>\n</ol>\n"}
 {"markdown":"> a\n  10. item\n","html":"<blockquote>\n<p>a</p>\n</blockquote>\n<ol start=\"10\">\n<li>item</li>\n</ol>\n"}
+{"markdown":"- ```\n- x\n- ```\n","html":"<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n"}
+{"markdown":"> - ```\n> - x\n> - ```\n","html":"<blockquote>\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</blockquote>\n"}
+{"markdown":"- a\n  - ```\n  - x\n  - ```\n","html":"<ul>\n<li>a\n<ul>\n<li>\n<pre><code></code></pre>\n</li>\n<li>x</li>\n<li>\n<pre><code></code></pre>\n</li>\n</ul>\n</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\n* c\n","html":"<ul>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"*\n\n* c\n","html":"<ul>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"1. a\n2.\n\n3. c\n","html":"<ol>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ol>\n"}
+{"markdown":"* a\n*\n\n\n* c\n","html":"<ul>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\n- c\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<ul>\n<li>c</li>\n</ul>\n"}
+{"markdown":"* a\n*\n\nfoo\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<p>foo</p>\n"}
+{"markdown":"[x]: /url\n> 2. q\n","html":"<blockquote>\n<ol start=\"2\">\n<li>q</li>\n</ol>\n</blockquote>\n"}
+{"markdown":"> [x]: /url\n> 2. q\n","html":"<blockquote>\n<p>2. q</p>\n</blockquote>\n"}
+{"markdown":"> [x]: /url\n> > 2. q\n","html":"<blockquote>\n<blockquote>\n<ol start=\"2\">\n<li>q</li>\n</ol>\n</blockquote>\n</blockquote>\n"}

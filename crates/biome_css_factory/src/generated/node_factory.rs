@@ -323,14 +323,14 @@ pub fn css_composes_import_specifier(
 pub fn css_composes_property(
     name: CssIdentifier,
     colon_token: SyntaxToken,
-    value: CssComposesPropertyValue,
+    values: CssComposesPropertyValueList,
 ) -> CssComposesProperty {
     CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPOSES_PROPERTY,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(values.into_syntax())),
         ],
     ))
 }
@@ -974,7 +974,7 @@ pub fn css_function_at_rule(
 }
 pub fn css_function_at_rule_declarator(
     function_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
@@ -990,7 +990,7 @@ pub fn css_function_at_rule_declarator(
 }
 pub struct CssFunctionAtRuleDeclaratorBuilder {
     function_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
     l_paren_token: SyntaxToken,
     parameters: CssFunctionParameterList,
     r_paren_token: SyntaxToken,
@@ -1512,7 +1512,7 @@ pub fn css_margin_at_rule(
     ))
 }
 pub fn css_media_and_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     and_token: SyntaxToken,
     right: AnyCssMediaAndCombinableCondition,
 ) -> CssMediaAndCondition {
@@ -1599,7 +1599,7 @@ pub fn css_media_feature_in_parens(
 }
 pub fn css_media_not_condition(
     not_token: SyntaxToken,
-    condition: AnyCssMediaInParens,
+    condition: AnyCssMediaConditionOperand,
 ) -> CssMediaNotCondition {
     CssMediaNotCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_NOT_CONDITION,
@@ -1610,7 +1610,7 @@ pub fn css_media_not_condition(
     ))
 }
 pub fn css_media_or_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     or_token: SyntaxToken,
     right: AnyCssMediaOrCombinableCondition,
 ) -> CssMediaOrCondition {
@@ -3406,24 +3406,23 @@ pub fn scss_forward_as_clause(
 pub fn scss_forward_at_rule(
     forward_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
 ) -> ScssForwardAtRuleBuilder {
     ScssForwardAtRuleBuilder {
         forward_token,
         url,
-        semicolon_token,
         as_clause: None,
         visibility_clause: None,
         with_clause: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssForwardAtRuleBuilder {
     forward_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
     as_clause: Option<ScssForwardAsClause>,
     visibility_clause: Option<AnyScssForwardVisibilityClause>,
     with_clause: Option<ScssWithClause>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssForwardAtRuleBuilder {
     pub fn with_as_clause(mut self, as_clause: ScssForwardAsClause) -> Self {
@@ -3441,6 +3440,10 @@ impl ScssForwardAtRuleBuilder {
         self.with_clause = Some(with_clause);
         self
     }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
     pub fn build(self) -> ScssForwardAtRule {
         ScssForwardAtRule::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::SCSS_FORWARD_AT_RULE,
@@ -3453,7 +3456,8 @@ impl ScssForwardAtRuleBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.with_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -3829,6 +3833,12 @@ pub fn scss_interpolation(
         ],
     ))
 }
+pub fn scss_keyframes_name(name: AnyScssKeyframesName) -> ScssKeyframesName {
+    ScssKeyframesName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_NAME,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
 pub fn scss_keyframes_selector(selector: ScssInterpolation) -> ScssKeyframesSelectorBuilder {
     ScssKeyframesSelectorBuilder {
         selector,
@@ -3853,6 +3863,14 @@ impl ScssKeyframesSelectorBuilder {
             ],
         ))
     }
+}
+pub fn scss_keyframes_variable_declaration(
+    declaration: ScssVariableDeclaration,
+) -> ScssKeyframesVariableDeclaration {
+    ScssKeyframesVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_VARIABLE_DECLARATION,
+        [Some(SyntaxElement::Node(declaration.into_syntax()))],
+    ))
 }
 pub fn scss_keyword_argument(
     name: ScssVariable,
@@ -4277,25 +4295,21 @@ pub fn scss_use_as_clause(
         ],
     ))
 }
-pub fn scss_use_at_rule(
-    use_token: SyntaxToken,
-    url: CssString,
-    semicolon_token: SyntaxToken,
-) -> ScssUseAtRuleBuilder {
+pub fn scss_use_at_rule(use_token: SyntaxToken, url: CssString) -> ScssUseAtRuleBuilder {
     ScssUseAtRuleBuilder {
         use_token,
         url,
-        semicolon_token,
         as_clause: None,
         with_clause: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssUseAtRuleBuilder {
     use_token: SyntaxToken,
     url: CssString,
-    semicolon_token: SyntaxToken,
     as_clause: Option<ScssUseAsClause>,
     with_clause: Option<ScssWithClause>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssUseAtRuleBuilder {
     pub fn with_as_clause(mut self, as_clause: ScssUseAsClause) -> Self {
@@ -4304,6 +4318,10 @@ impl ScssUseAtRuleBuilder {
     }
     pub fn with_with_clause(mut self, with_clause: ScssWithClause) -> Self {
         self.with_clause = Some(with_clause);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
         self
     }
     pub fn build(self) -> ScssUseAtRule {
@@ -4316,7 +4334,8 @@ impl ScssUseAtRuleBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.with_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -4766,6 +4785,30 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_property_value_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssComposesPropertyValueList
+where
+    I: IntoIterator<Item = CssComposesPropertyValue>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssComposesPropertyValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_compound_selector_list<I, S>(items: I, separators: S) -> CssCompoundSelectorList

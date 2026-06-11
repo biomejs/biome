@@ -9,6 +9,7 @@ mod generated;
 mod script_type;
 pub mod static_value;
 mod string_ext;
+mod svg;
 mod syntax_node;
 mod text_ext;
 
@@ -16,6 +17,7 @@ pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKi
 pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
 pub use generated::*;
 pub use script_type::*;
+pub use svg::*;
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{

@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noLoopFunc": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
+}
+shared = 100;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:4:16 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This function declared in a loop contains unsafe references to outer variables.
+  
+    2 │ let shared = 0;
+    3 │ for (let i = 0; i < 10; i += 1) {
+  > 4 │     queue.push(() => shared);
+      │                ^^^^^^^^^^^^
+    5 │ }
+    6 │ shared = 100;
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: shared
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

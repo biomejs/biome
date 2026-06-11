@@ -13,6 +13,9 @@ publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.cargo-udeps.ignore]
+development = ["biome_service"]
+
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_configuration      = { workspace = true }
@@ -22,6 +25,7 @@ biome_css_formatter      = { workspace = true }
 biome_css_parser         = { workspace = true }
 biome_css_semantic       = { workspace = true }
 biome_css_syntax         = { workspace = true }
+biome_db                 = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_diagnostics        = { workspace = true, features = ["camino"] }
 biome_formatter          = { workspace = true, features = ["serde"] }
@@ -63,6 +67,7 @@ biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
+biome_unicode_table      = { workspace = true }
 biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
 biome_yaml_parser        = { workspace = true, optional = true }
 biome_yaml_syntax        = { workspace = true, optional = true }
@@ -74,11 +79,12 @@ either                   = { workspace = true }
 enumflags2               = { workspace = true, features = ["serde"] }
 getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
-notify                   = { version = "8.2.0", features = ["crossbeam-channel"] }
+notify                   = { workspace = true, features = ["crossbeam-channel"] }
 papaya                   = { workspace = true }
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
+salsa                    = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
@@ -89,6 +95,7 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
+biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]
@@ -114,6 +121,7 @@ lang_md      = [
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
+lang_scss    = ["biome_css_syntax/scss"]
 lang_yaml    = [
   "biome_configuration/lang_yaml",
   "dep:biome_yaml_formatter",
@@ -140,8 +148,9 @@ schema       = [
   "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
-  "lang_grit",
+  "lang_grit"
 ]
+testing      = []
 
 [lints]
 workspace = true

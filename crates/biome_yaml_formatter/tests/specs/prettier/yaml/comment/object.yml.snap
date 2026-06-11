@@ -31,21 +31,15 @@ obj:
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,10 +3,14 @@
- obj:
-   # before
+@@ -7,6 +7,6 @@
  
-+
-   # before
- 
-+
    key: value
  
-+
-   # after
+-  # after
++# after
  
-+
-   # after
+-  # after
++# after
 ```
 
 # Output
@@ -56,15 +50,11 @@ obj:
 obj:
   # before
 
-
   # before
-
 
   key: value
 
+# after
 
-  # after
-
-
-  # after
+# after
 ```

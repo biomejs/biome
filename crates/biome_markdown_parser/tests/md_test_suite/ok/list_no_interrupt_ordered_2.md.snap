@@ -36,7 +36,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@96..97 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@97..97 "" [] [],
@@ -61,7 +60,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@44..96 " This stays in paragraph because 2 cannot interrupt." [] []
         4: MD_TEXTUAL@96..97
           0: MD_TEXTUAL_LITERAL@96..97 "\n" [] []
-      1: (empty)
   2: EOF@97..97 "" [] []
 
 ```

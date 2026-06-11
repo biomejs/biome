@@ -25,56 +25,57 @@ info: markdown/list/nested-tab.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -2,16 +2,16 @@
- 
- - Top level list item 1
- - Top level list item 2
--  - Nested List item 1
--  - Nested List item 2
--    - Sub-Nested List item 1
--    - Sub-Nested List item 2
-+	- Nested List item 1
-+	- Nested List item 2
-+		- Sub-Nested List item 1
-+		- Sub-Nested List item 2
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -5,7 +5,7 @@
+   - Nested List item 1
+   - Nested List item 2
+     - Sub-Nested List item 1
+-      - Sub-Nested List item 2
++    - Sub-Nested List item 2
  
  # List with 1 tab indentation and `*`
  
- - Top level list item 1
- - Top level list item 2
--  - Nested List item 1
--  - Nested List item 2
--    _ Sub-Nested List item 1
--    _ Sub-Nested List item 2
-+	- Nested List item 1
-+	- Nested List item 2
-+    	- Sub-Nested List item 1
-+    	* Sub-Nested List item 2
-```
+@@ -14,4 +14,4 @@
+   - Nested List item 1
+   - Nested List item 2
+     - Sub-Nested List item 1
+-      - Sub-Nested List item 2
++      * Sub-Nested List item 2
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -16,13 +16,9 @@
+       hard_line_break,
+       hard_line_break,
+       "- ",
+-      align(2, [
+-        "Sub-Nested List item 1",
+-        hard_line_break,
+-        "- Sub-Nested List item 2",
+-        hard_line_break,
+-        hard_line_break
+-      ]),
++      align(2, ["Sub-Nested List item 1", hard_line_break, hard_line_break]),
++      "- ",
++      align(2, ["Sub-Nested List item 2", hard_line_break, hard_line_break]),
+       hard_line_break
+     ]),
+     hard_line_break
+@@ -48,9 +44,8 @@
+       align(2, [
+         "Sub-Nested List item 1",
+         hard_line_break,
++        "* Sub-Nested List item 2",
+         hard_line_break,
+-        "- ",
+-        align(2, ["Sub-Nested List item 2", hard_line_break, hard_line_break]),
+         hard_line_break
+       ]),
+       hard_line_break
 
-```md
-# List with 1 tab indentation and `-`
-
-- Top level list item 1
-- Top level list item 2
-	- Nested List item 1
-	- Nested List item 2
-		- Sub-Nested List item 1
-		- Sub-Nested List item 2
-
-# List with 1 tab indentation and `*`
-
-- Top level list item 1
-- Top level list item 2
-	- Nested List item 1
-	- Nested List item 2
-    	- Sub-Nested List item 1
-    	* Sub-Nested List item 2
 ```

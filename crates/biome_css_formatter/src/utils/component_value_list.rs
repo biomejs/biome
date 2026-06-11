@@ -3,12 +3,11 @@ use crate::comments::CssComments;
 use crate::prelude::*;
 use biome_css_syntax::{
     CssFunction, CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind,
-    ScssIncludeArgumentList,
+    ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
 };
 use biome_formatter::{CstFormatContext, format_args, write};
 use biome_formatter::{FormatOptions, FormatResult};
-use biome_rowan::{AstNode, AstNodeList, TextSize};
-use biome_string_case::StrLikeExtension;
+use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
 use std::cmp;
 
 /// Returns `true` if the node is a top-level comma delimiter in a component value list.
@@ -182,7 +181,11 @@ where
         } else {
             // Prefer breaking at top-level commas in declaration values (Prettier-like)
             // by filling comma-separated groups instead of individual tokens.
-            // This prevents line wraps inside groups like `0px 8px\n16px` for `box-shadow`-like values.
+            // This keeps each box-shadow-like group intact:
+            //
+            // box-shadow:
+            //   0px 8px 16px,
+            //   0px 4px 8px;
             if let Some(result) = try_write_fill_comma_groups(node, layout, f) {
                 return result;
             }
@@ -407,15 +410,15 @@ where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
-    let css_property = list
-        .parent::<CssGenericProperty>()
-        .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()));
-    let is_grid_property = css_property.as_ref().is_some_and(|name| {
-        let name = name.to_ascii_lowercase_cow();
-
-        name.starts_with("grid-template") || name == "grid"
-    });
+    let parent_property = list.parent::<CssGenericProperty>();
+    let scss_parent_property = find_scss_parent_property(list);
+    let css_property = parent_property.as_ref().and_then(property_name);
+    let is_grid_property = parent_property
+        .as_ref()
+        .or(scss_parent_property.as_ref())
+        .and_then(property_name)
+        .as_ref()
+        .is_some_and(is_grid_template_property_name);
 
     let text_size: TextSize = list
         .iter()
@@ -431,18 +434,18 @@ where
         .iter()
         .any(|x| CssGenericDelimiter::cast_ref(x.syntax()).is_some());
 
-    // Check if the property name has trailing comments (comments between name and values)
-    // If so, we don't need to change the layout since the comments will be formatted
-    // inline with the property name, outside the value indent block
-
-    // Check if the parent property has trailing comments (comments between colon and values)
-    let parent_property = list.parent::<CssGenericProperty>();
+    // Comments between `:` and values need the dedicated group layout below.
     let has_trailing_comments = parent_property
         .as_ref()
         .is_some_and(|prop| !comments.trailing_comments(prop.syntax()).is_empty());
+    let has_scss_trailing_comments = scss_parent_property
+        .as_ref()
+        .is_some_and(|prop| !comments.trailing_comments(prop.syntax()).is_empty());
+    let has_scss_list_comments =
+        scss_parent_property.is_some() && has_list_comments(list, comments);
 
-    // TODO: Check for comments, check for the types of elements in the list, etc.
-    if is_grid_property {
+    // Comment-bearing SCSS grid rows are tracked as a separate layout gap.
+    if is_grid_property && !(has_scss_trailing_comments || has_scss_list_comments) {
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
@@ -460,6 +463,37 @@ where
     } else {
         ValueListLayout::Fill
     }
+}
+
+fn property_name(property: &CssGenericProperty) -> Option<Text> {
+    property
+        .name()
+        .ok()
+        .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()))
+}
+
+fn is_grid_template_property_name(name: &Text) -> bool {
+    css_grid_template_property(name.text()).is_some()
+}
+
+fn has_list_comments<N, I>(list: &N, comments: &CssComments) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    list.iter().any(|element| {
+        comments.has_comments(element.syntax()) || comments.has_dangling_comments(element.syntax())
+    })
+}
+
+/// Finds `property: <scss expression item list>`.
+fn find_scss_parent_property<N, I>(list: &N) -> Option<CssGenericProperty>
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    list.parent::<ScssExpression>()
+        .and_then(|expression| expression.parent::<CssGenericProperty>())
 }
 
 pub(crate) fn use_one_group_per_line<N, I>(css_property: Option<&str>, list: &N) -> bool

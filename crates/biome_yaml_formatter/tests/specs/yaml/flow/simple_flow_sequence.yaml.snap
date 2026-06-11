@@ -22,4 +22,4 @@ info: yaml/flow/simple_flow_sequence.yaml
 
 ## Unimplemented nodes/tokens
 
-"[1, 'abc', \"xyz\", plain]\n" => 0..25
+"[1, 'abc', \"xyz\", plain]" => 0..24

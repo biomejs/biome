@@ -24,10 +24,10 @@ use crate::syntax::scss::{
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
     is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
-    parse_scss_function, parse_scss_interpolated_dashed_identifier,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
-    parse_scss_variable_declaration,
+    parse_scss_bracketed_value_expression_item, parse_scss_function,
+    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string, parse_scss_module_member_access,
+    parse_scss_parent_selector_value, parse_scss_variable, parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -797,7 +797,7 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
 
 /// The list parser for bracketed values.
 ///
-/// This parser is responsible for parsing a list of identifiers inside a bracketed value.
+/// This parser is responsible for parsing values and Sass separators inside a bracketed value.
 #[derive(Default)]
 pub(crate) struct BracketedValueList {
     separator: Option<BracketedValueSeparator>,
@@ -856,6 +856,10 @@ impl ParseNodeList for BracketedValueList {
 
         if let Some(separator) = BracketedValueSeparator::from_current_token(p) {
             return self.parse_scss_bracketed_value_delimiter(p, separator);
+        }
+
+        if let Present(expression) = parse_scss_bracketed_value_expression_item(p) {
+            return Present(expression);
         }
 
         parse_custom_identifier(p, CssLexContext::Regular)

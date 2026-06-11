@@ -1,0 +1,253 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreMixedLogicalExpressionsDisabled.ts
+---
+# Input
+```ts
+// Tests for ignoreMixedLogicalExpressions: false
+// Mixed || + && expressions SHOULD generate diagnostics
+
+declare const a: string | null;
+declare const b: string;
+declare const c: string;
+
+// || as child of &&
+const r1 = (a || 'default') && b;
+
+// || with && child
+const r2 = a || (b && c);
+
+// || as left operand of &&
+const r3 = (a || b) && c;
+
+// Nested: || inside && inside another &&
+const r4 = (a || b) && c && b;
+
+// ||= mixed with &&
+declare let assignMixed: string | null;
+assignMixed ||= b && c;
+
+// Chained || with && sibling
+declare const x: string | null;
+declare const y: string;
+declare const z: string;
+declare const w: string;
+const r5 = x || y || (z && w);
+
+// Nested ||= where the inner ||= contains && in its RHS.
+// With the option disabled, both ||= operations should be diagnosed.
+declare let outerAssign: string | null;
+declare let innerAssign: string | null;
+outerAssign ||= innerAssign ||= b && c;
+
+// Same nested ||= shape with explicit parens around the inner assignment.
+declare let parenOuter: string | null;
+declare let parenInner: string | null;
+parenOuter ||= (parenInner ||= b && c);
+
+```
+
+# Diagnostics
+```
+ignoreMixedLogicalExpressionsDisabled.ts:9:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     8 │ // || as child of &&
+   > 9 │ const r1 = (a || 'default') && b;
+       │               ^^
+    10 │ 
+    11 │ // || with && child
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:12:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    11 │ // || with && child
+  > 12 │ const r2 = a || (b && c);
+       │              ^^
+    13 │ 
+    14 │ // || as left operand of &&
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:15:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    14 │ // || as left operand of &&
+  > 15 │ const r3 = (a || b) && c;
+       │               ^^
+    16 │ 
+    17 │ // Nested: || inside && inside another &&
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:18:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    17 │ // Nested: || inside && inside another &&
+  > 18 │ const r4 = (a || b) && c && b;
+       │               ^^
+    19 │ 
+    20 │ // ||= mixed with &&
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:22:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    20 │ // ||= mixed with &&
+    21 │ declare let assignMixed: string | null;
+  > 22 │ assignMixed ||= b && c;
+       │             ^^^
+    23 │ 
+    24 │ // Chained || with && sibling
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:29:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    27 │ declare const z: string;
+    28 │ declare const w: string;
+  > 29 │ const r5 = x || y || (z && w);
+       │              ^^
+    30 │ 
+    31 │ // Nested ||= where the inner ||= contains && in its RHS.
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:35:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    33 │ declare let outerAssign: string | null;
+    34 │ declare let innerAssign: string | null;
+  > 35 │ outerAssign ||= innerAssign ||= b && c;
+       │             ^^^
+    36 │ 
+    37 │ // Same nested ||= shape with explicit parens around the inner assignment.
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:35:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    33 │ declare let outerAssign: string | null;
+    34 │ declare let innerAssign: string | null;
+  > 35 │ outerAssign ||= innerAssign ||= b && c;
+       │                             ^^^
+    36 │ 
+    37 │ // Same nested ||= shape with explicit parens around the inner assignment.
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:40:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    38 │ declare let parenOuter: string | null;
+    39 │ declare let parenInner: string | null;
+  > 40 │ parenOuter ||= (parenInner ||= b && c);
+       │            ^^^
+    41 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDisabled.ts:40:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    38 │ declare let parenOuter: string | null;
+    39 │ declare let parenInner: string | null;
+  > 40 │ parenOuter ||= (parenInner ||= b && c);
+       │                            ^^^
+    41 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

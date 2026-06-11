@@ -34,7 +34,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useButtonType",
         language: "html",
-        sources: &[RuleSource::EslintReact("button-has-type").same(), RuleSource::HtmlEslint("require-button-type").same()],
+        sources: &[RuleSource::EslintReact("button-has-type").inspired(), RuleSource::EslintReactDom("no-missing-button-type").inspired(), RuleSource::EslintReactXyz("dom-no-missing-button-type").inspired(), RuleSource::HtmlEslint("require-button-type").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -84,17 +84,15 @@ impl Rule for UseButtonType {
 
         let value = initializer.value().ok()?;
 
-        // If the value is a dynamic expression (e.g., {foo} in Svelte), we can't validate it,
-        // so we assume it's valid to avoid false positives.
-        // We only validate static string values.
-        if value.as_html_string().is_some() {
-            // Static string value - validate it
+        let is_static_string = value.as_html_string().is_some()
+            || (value.as_svelte_template_attribute_value().is_some()
+                && value.string_value().is_some());
+        if is_static_string {
             if let Some(string_value) = value.string_value()
                 && ALLOWED_BUTTON_TYPES.contains(&&*string_value)
             {
                 return None;
             }
-            // Invalid static value
             return Some(UseButtonTypeState {
                 missing_prop: false,
             });

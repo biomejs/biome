@@ -1,0 +1,31 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div></div>
+<span></span>
+<p></p>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This file has too many lines (4). Maximum allowed is 2.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div></div>
+      │ ^^^^^^^^^^^
+  > 3 │ <span></span>
+  > 4 │ <p></p>
+      │ ^^^^^^^
+    5 │ 
+  
+  i Consider splitting this file into smaller files.
+  
+
+```

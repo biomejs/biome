@@ -1,4 +1,4 @@
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth};
 use biome_formatter_test::TestFormatLanguage;
 use biome_parser::AnyParse;
 use biome_service::settings::Settings;
@@ -40,23 +40,6 @@ impl TestFormatLanguage for YamlTestFormatLanguage {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
-pub enum YamlSerializableIndentStyle {
-    /// Tab
-    Tab,
-    /// Space
-    Space,
-}
-
-impl From<YamlSerializableIndentStyle> for IndentStyle {
-    fn from(test: YamlSerializableIndentStyle) -> Self {
-        match test {
-            YamlSerializableIndentStyle::Tab => Self::Tab,
-            YamlSerializableIndentStyle::Space => Self::Space,
-        }
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum YamlSerializableLineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
     Lf,
@@ -80,9 +63,6 @@ impl From<YamlSerializableLineEnding> for LineEnding {
 
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct YamlSerializableFormatOptions {
-    /// The indent style.
-    pub indent_style: Option<YamlSerializableIndentStyle>,
-
     /// The indent width.
     pub indent_width: Option<u8>,
 
@@ -96,7 +76,6 @@ pub struct YamlSerializableFormatOptions {
 impl From<YamlSerializableFormatOptions> for YamlFormatOptions {
     fn from(test: YamlSerializableFormatOptions) -> Self {
         Self::default()
-            .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
             .with_indent_width(
                 test.indent_width
                     .and_then(|width| IndentWidth::try_from(width).ok())

@@ -22,4 +22,4 @@ info: yaml/property/anchor_and_alias.yaml
 
 ## Unimplemented nodes/tokens
 
-"&anchor key: value\n" => 0..19
+"&anchor key" => 0..11

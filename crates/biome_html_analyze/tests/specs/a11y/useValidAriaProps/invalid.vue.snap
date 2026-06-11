@@ -1,0 +1,66 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<div :aria-labell="value"></div>
+<div v-bind:aria-lorem="value"></div>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div :aria-labell="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    3 │ <div v-bind:aria-lorem="value"></div>
+    4 │ 
+  
+  i aria-labell is not a valid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div :aria-labell="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    3 │ <div v-bind:aria-lorem="value"></div>
+    4 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    2 │ <div·:aria-labell="value"></div>
+      │      --------------------       
+
+```
+
+```
+invalid.vue:3:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div :aria-labell="value"></div>
+  > 3 │ <div v-bind:aria-lorem="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i aria-lorem is not a valid ARIA attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div :aria-labell="value"></div>
+  > 3 │ <div v-bind:aria-lorem="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    3 │ <div·v-bind:aria-lorem="value"></div>
+      │      -------------------------       
+
+```

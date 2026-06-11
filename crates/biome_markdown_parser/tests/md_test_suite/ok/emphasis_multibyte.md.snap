@@ -59,7 +59,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@167..168 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -104,7 +103,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@113..167 "と同様のアプローチを採用しています。" [] []
             3: MD_TEXTUAL@167..168
               0: MD_TEXTUAL_LITERAL@167..168 "\n" [] []
-          1: (empty)
   2: EOF@168..168 "" [] []
 
 ```

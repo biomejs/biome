@@ -83,7 +83,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAnchorContent",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],
+        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

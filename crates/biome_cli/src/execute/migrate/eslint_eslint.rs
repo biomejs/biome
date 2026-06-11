@@ -535,6 +535,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "array-callback-return" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ArrayCallbackReturn(conf));
+                            }
+                        }
                         "class-methods-use-this" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
@@ -599,6 +604,11 @@ impl Deserializable for Rules {
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
+                            }
+                        }
+                        "unicorn/numeric-separators-style" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornNumericSeparatorsStyle(conf));
                             }
                         }
                         // Other rules
@@ -681,6 +691,25 @@ impl From<MaxNestedCallbacksOptions>
                     .max
                     .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
             ),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct ArrayCallbackReturnOptions {
+    #[deserializable(rename = "allowImplicit")]
+    allow_implicit: Option<bool>,
+    #[deserializable(rename = "checkForEach")]
+    check_for_each: Option<bool>,
+}
+
+impl From<ArrayCallbackReturnOptions>
+    for biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions
+{
+    fn from(value: ArrayCallbackReturnOptions) -> Self {
+        Self {
+            allow_implicit: value.allow_implicit,
+            check_for_each: value.check_for_each,
         }
     }
 }
@@ -779,6 +808,7 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
@@ -795,12 +825,14 @@ pub(crate) enum Rule {
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
+    UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Self::Any(name, _) => name.clone(),
+            Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
@@ -822,6 +854,9 @@ impl Rule {
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
+            Self::UnicornNumericSeparatorsStyle(_) => {
+                Cow::Borrowed("unicorn/numeric-separators-style")
+            }
         }
     }
 }

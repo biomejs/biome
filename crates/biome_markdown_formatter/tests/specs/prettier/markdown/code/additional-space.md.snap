@@ -31,75 +31,53 @@ info: markdown/code/additional-space.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,26 +1,22 @@
- 1. Fork the repo and create your branch from `master`.
- 
-    Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
--
-    ```sh
-    git clone https://github.com/<your_username>/jest
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -6,7 +6,6 @@
     cd jest
     git checkout -b my_branch
     ```
--
+-   
+ 
     Note:
     Replace `<your_username>` with your GitHub username
- 
--2. Run `yarn install`.
-+3. Run `yarn install`.
-    On Windows:
-    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
- 
--   ```sh
--   yarn install
--   ```
--
-+    ```sh
-+    yarn install
-+    ```
-    To check your version of Yarn and ensure it's installed you can type:
--
--   ```sh
--   yarn --version
--   ```
-+    ```sh
-+    yarn --version
-+    ```
-```
-
-# Output
-
-```md
-1. Fork the repo and create your branch from `master`.
-
-   Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
-   ```sh
-   git clone https://github.com/<your_username>/jest
-   cd jest
-   git checkout -b my_branch
-   ```
-   Note:
-   Replace `<your_username>` with your GitHub username
-
-3. Run `yarn install`.
-   On Windows:
-   To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
-
+@@ -18,7 +17,6 @@
     ```sh
     yarn install
     ```
-   To check your version of Yarn and ensure it's installed you can type:
+-   
+ 
+    To check your version of Yarn and ensure it's installed you can type:
     ```sh
-    yarn --version
-    ```
-```
 
-# Lines exceeding max width of 80 characters
-```
-   14:    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -17,9 +17,6 @@
+     hard_line_break,
+     hard_line_break,
+     "```",
+-    hard_line_break,
+-    "
+-",
+     empty_line,
+     "Note:",
+     hard_line_break,
+@@ -42,11 +39,8 @@
+     hard_line_break,
+     hard_line_break,
+     "```",
+-    hard_line_break,
+-    "
+-",
+     empty_line,
+-    "To check your version of Yarn and ensure it's installed you can type:",
++    " To check your version of Yarn and ensure it's installed you can type:",
+     hard_line_break,
+     hard_line_break,
+     "```sh",
+
 ```

@@ -210,7 +210,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@354..355 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@355..356 "\n" [] [],
@@ -234,7 +233,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@468..469 "\n" [] [],
@@ -2319,7 +2317,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] []
                 17: MD_TEXTUAL@354..355
                   0: MD_TEXTUAL_LITERAL@354..355 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@355..356
               0: NEWLINE@355..356 "\n" [] []
             2: MD_CONTINUATION_INDENT@356..358
@@ -2334,7 +2331,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@358..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [] []
                 1: MD_TEXTUAL@467..468
                   0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
-              1: (empty)
             4: MD_NEWLINE@468..469
               0: NEWLINE@468..469 "\n" [] []
             5: MD_CONTINUATION_INDENT@469..471

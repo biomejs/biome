@@ -173,7 +173,7 @@ ternaryInvalid.ts:3:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
       1   1 │   // Strict !== null
       2   2 │   declare const a: string | null;
@@ -201,7 +201,7 @@ ternaryInvalid.ts:7:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
       5   5 │   // Strict !== undefined
       6   6 │   declare const b: string | undefined;
@@ -229,7 +229,7 @@ ternaryInvalid.ts:11:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
       9   9 │   // Loose != null
      10  10 │   declare const c: string | null;
@@ -257,7 +257,7 @@ ternaryInvalid.ts:15:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      13  13 │   // Inverted === null
      14  14 │   declare const d: string | null;
@@ -285,7 +285,7 @@ ternaryInvalid.ts:19:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      17  17 │   // Inverted === undefined
      18  18 │   declare const e: string | undefined;
@@ -313,7 +313,7 @@ ternaryInvalid.ts:23:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      21  21 │   // Inverted == null
      22  22 │   declare const f: string | null;
@@ -341,7 +341,7 @@ ternaryInvalid.ts:27:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      25  25 │   // Compound !== null && !== undefined
      26  26 │   declare const g: string | null | undefined;
@@ -369,7 +369,7 @@ ternaryInvalid.ts:31:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      29  29 │   // Compound === null || === undefined
      30  30 │   declare const h: string | null | undefined;
@@ -397,7 +397,7 @@ ternaryInvalid.ts:35:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      33  33 │   // Null on left side
      34  34 │   declare const i: string | null;
@@ -425,7 +425,7 @@ ternaryInvalid.ts:39:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      37  37 │   // Undefined on left side
      38  38 │   declare const j: string | undefined;
@@ -453,7 +453,7 @@ ternaryInvalid.ts:43:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      41  41 │   // Member access
      42  42 │   declare const obj: { prop: string | null };
@@ -481,7 +481,7 @@ ternaryInvalid.ts:47:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      45  45 │   // Loose != undefined
      46  46 │   declare const l: string | undefined;
@@ -509,7 +509,7 @@ ternaryInvalid.ts:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      49  49 │   // Inverted, null on left
      50  50 │   declare const n: string | null;
@@ -556,7 +556,7 @@ ternaryInvalid.ts:59:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      57  57 │   // Fallback is conditional (needs parens)
      58  58 │   declare const p: string | null;
@@ -584,7 +584,7 @@ ternaryInvalid.ts:63:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      61  61 │   // Fallback is logical OR (needs parens, ?? cannot mix with ||)
      62  62 │   declare const q: string | null;
@@ -633,7 +633,7 @@ ternaryInvalid.ts:67:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      65  65 │   // Fallback is logical AND (needs parens, ?? cannot mix with &&)
      66  66 │   declare const s: string | null;
@@ -699,7 +699,7 @@ ternaryInvalid.ts:79:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      77  77 │   // Undefined literal type
      78  78 │   const undef: undefined = undefined;
@@ -727,7 +727,7 @@ ternaryInvalid.ts:83:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      81  81 │   // Number | undefined (non-string union)
      82  82 │   declare const maybeNum: number | undefined;
@@ -755,7 +755,7 @@ ternaryInvalid.ts:87:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      85  85 │   // Loose != null with triple union (covers both null and undefined)
      86  86 │   declare const tripleUnion: string | null | undefined;
@@ -783,7 +783,7 @@ ternaryInvalid.ts:92:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      90  90 │   interface Config { timeout?: number; }
      91  91 │   declare const config: Config;
@@ -830,7 +830,7 @@ ternaryInvalid.ts:100:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
      98  98 │   // Function return context
      99  99 │   function getVal(x: string | null): string {
@@ -858,7 +858,7 @@ ternaryInvalid.ts:105:14 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
     103 103 │   // Nested in parentheses
     104 104 │   declare const paren: string | null;
@@ -962,7 +962,7 @@ ternaryInvalid.ts:127:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
     125 125 │   // Checks !== null, type has only null: fix IS safe
     126 126 │   declare const ss5: string | null;
@@ -990,7 +990,7 @@ ternaryInvalid.ts:131:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
     129 129 │   // Checks !== undefined, type has only undefined: fix IS safe
     130 130 │   declare const ss6: string | undefined;
@@ -1056,7 +1056,7 @@ ternaryInvalid.ts:145:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
     143 143 │   // Complementary: one null, one undefined: fix IS safe
     144 144 │   declare const cp2: string | null | undefined;
@@ -1083,7 +1083,7 @@ ternaryInvalid.ts:149:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Safe fix: Replace the ternary with ??.
   
     147 147 │   // Complementary reversed order: fix IS safe
     148 148 │   declare const cp3: string | null | undefined;

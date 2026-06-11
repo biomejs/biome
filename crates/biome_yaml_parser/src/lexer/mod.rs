@@ -62,6 +62,8 @@ impl<'src> YamlLexer<'src> {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
+            b'%' if self.is_at_directive() => self.consume_directive().into(),
+            b'-' if self.is_at_directive_end() => self.consume_directive_end(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
             b'!' | b'&' => self.consume_block_properties(),
             current if maybe_at_mapping_start(current, self.peek_byte()) => self
@@ -140,6 +142,12 @@ impl<'src> YamlLexer<'src> {
         let mut tokens = properties;
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         tokens.append(&mut potential_mapping_keys);
+
+        // Consume any trailing trivia remaining before closing the mapping/flow, as we must not
+        // have trailing trivia followed MAPPING_END/FLOW_END token
+        let mut trivia = self.consume_trivia(true);
+        tokens.append(&mut trivia);
+
         if self
             .scopes
             .last()
@@ -154,10 +162,6 @@ impl<'src> YamlLexer<'src> {
             } else {
                 // Just a normal flow value
                 tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
-                // Consume any trailing trivia remaining before closing the flow, as we must not
-                // have trailing trivia followed FLOW_END token
-                let mut trivia = self.consume_trivia(true);
-                tokens.append(&mut trivia);
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
         } else if self.is_at_mapping_indicator() {
@@ -316,6 +320,8 @@ impl<'src> YamlLexer<'src> {
     fn consume_potential_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
         if is_flow_collection_indicator(current) {
             self.consume_flow_collection()
+        } else if current == b'*' {
+            self.consume_alias_node().into()
         } else if current == b'"' {
             self.consume_double_quoted_literal().into()
         } else if current == b'\'' {
@@ -399,6 +405,7 @@ impl<'src> YamlLexer<'src> {
                     self.consume_byte_as_token(T!['}'])
                 }
                 (b',', _) => self.consume_byte_as_token(T![,]),
+                (b'*', _) => self.consume_alias_node(),
                 (b'&', _) => self.consume_anchor_property(),
                 (b'!', _) => self.consume_tag_property(),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
@@ -542,6 +549,62 @@ impl<'src> YamlLexer<'src> {
         LexToken::new(SINGLE_QUOTED_LITERAL, start, token_end)
     }
 
+    fn is_at_directive(&self) -> bool {
+        self.current_coordinate.column == 0 && self.current_byte().is_some_and(|c| c == b'%')
+    }
+
+    fn consume_directive(&mut self) -> LexToken {
+        self.assert_byte(b'%');
+        let start = self.current_coordinate;
+        while let Some(current) = self.current_byte() {
+            if is_break(current) || self.is_at_directive_trailing_trivia() {
+                break;
+            }
+            self.advance_char_unchecked();
+        }
+
+        LexToken::new(DIRECTIVE_LITERAL, start, self.current_coordinate)
+    }
+
+    fn is_at_directive_trailing_trivia(&self) -> bool {
+        match self.current_byte() {
+            Some(b'#') => self.prev_byte().is_none_or(is_blank),
+            Some(current) if is_space(current) => {
+                let mut offset = 0;
+                while self.byte_at(offset).is_some_and(is_space) {
+                    offset += 1;
+                }
+
+                self.byte_at(offset)
+                    .is_none_or(|c| c == b'#' || is_break(c))
+            }
+            _ => false,
+        }
+    }
+
+    fn is_at_directive_end(&self) -> bool {
+        let is_dash = |c: u8| c == b'-';
+        // A DOC_START token can be evaluated as a plain token if it's not placed at the start of
+        // line or followed by a space, a break, or EOF.
+        self.current_coordinate.column == 0
+            && self.current_byte().is_some_and(is_dash)
+            && self.peek_byte().is_some_and(is_dash)
+            && self.byte_at(2).is_some_and(is_dash)
+            && self.byte_at(3).is_none_or(|b| is_space(b) || is_break(b))
+    }
+
+    fn consume_directive_end(&mut self) -> LinkedList<LexToken> {
+        self.assert_byte(b'-');
+        debug_assert_eq!(self.byte_at(1), Some(b'-'));
+        debug_assert_eq!(self.byte_at(2), Some(b'-'));
+        let start = self.current_coordinate;
+        let mut tokens = self.close_all_scopes();
+        self.advance(3);
+        tokens.push_back(LexToken::new(DIRECTIVE_END, start, self.current_coordinate));
+
+        tokens
+    }
+
     fn is_at_doc_end(&self) -> bool {
         let is_dot = |c: u8| c == b'.';
         // A DOC_END token can be evaluated as a plain token if it's not placed at the start of
@@ -664,7 +727,11 @@ impl<'src> YamlLexer<'src> {
                     // Check if we would breach parent scope before consuming trivia
                     let start = self.current_coordinate;
                     let mut trivia = self.consume_trivia(false);
-                    if self.breach_parent_scope() {
+                    if self
+                        .scopes
+                        .last()
+                        .is_some_and(|scope| !scope.indent_with_dash(self.current_coordinate))
+                    {
                         // Restore position and break
                         self.current_coordinate = start;
                         break;
@@ -701,6 +768,22 @@ impl<'src> YamlLexer<'src> {
         } else {
             properties
         }
+    }
+
+    fn consume_alias_node(&mut self) -> LexToken {
+        self.assert_byte(b'*');
+        let start = self.current_coordinate;
+        self.advance(1);
+
+        while let Some(c) = self.current_byte() {
+            if is_anchor_char(c) && c != b':' {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        LexToken::new(ALIAS_LITERAL, start, self.current_coordinate)
     }
 
     fn consume_anchor_property(&mut self) -> LexToken {
@@ -1129,6 +1212,7 @@ fn maybe_at_mapping_start(current: u8, peek: Option<u8>) -> bool {
         || is_start_of_plain(current, peek, false)
         || current == b'"'
         || current == b'\''
+        || current == b'*'
         // empty key
         || current == b':'
 }

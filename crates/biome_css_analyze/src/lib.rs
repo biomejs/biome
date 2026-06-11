@@ -20,6 +20,8 @@ use biome_analyze::{
 };
 use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
+use biome_module_graph::ProjectDatabase;
+use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
@@ -32,10 +34,21 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     metadata
 });
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct CssAnalyzerServices<'a> {
     pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
     pub file_source: CssFileSource,
+    pub module_db: Option<ProjectDatabase>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl std::fmt::Debug for CssAnalyzerServices<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssAnalyzerServices")
+            .field("file_source", &self.file_source)
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .finish_non_exhaustive()
+    }
 }
 
 impl<'a> CssAnalyzerServices<'a> {
@@ -49,6 +62,16 @@ impl<'a> CssAnalyzerServices<'a> {
         semantic_model: &'a biome_css_semantic::model::SemanticModel,
     ) -> Self {
         self.semantic_model = Some(semantic_model);
+        self
+    }
+
+    pub fn with_module_db(mut self, module_db: ProjectDatabase) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
         self
     }
 }
@@ -150,6 +173,12 @@ where
         let semantic_model = biome_css_semantic::semantic_model(root);
         services.insert_service(Arc::new(semantic_model));
     }
+    if let Some(module_db) = css_services.module_db {
+        services.insert_service(module_db);
+    }
+    if let Some(project_layout) = css_services.project_layout {
+        services.insert_service(project_layout);
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
@@ -237,6 +266,7 @@ mod tests {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -294,6 +324,7 @@ mod tests {
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -345,6 +376,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -392,6 +424,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -436,6 +469,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),

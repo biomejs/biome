@@ -1,4 +1,4 @@
-use crate::services::manifest::Manifest;
+use crate::{services::manifest::Manifest, utils::parse_package_name};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -66,6 +66,7 @@ declare_lint_rule! {
     /// - `devDependencies`: If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
     /// - `peerDependencies`: If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
     /// - `optionalDependencies`: If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+    /// - `bundleDependencies`: If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
     ///
     /// You can set the options like this:
     ///
@@ -74,7 +75,8 @@ declare_lint_rule! {
     ///   "options": {
     ///     "devDependencies": false,
     ///     "peerDependencies": false,
-    ///     "optionalDependencies": false
+    ///     "optionalDependencies": false,
+    ///     "bundleDependencies": false
     ///   }
     /// }
     /// ```
@@ -86,9 +88,8 @@ declare_lint_rule! {
     ///
     /// ### Example using the `devDependencies` option
     ///
-    /// In this example, only test files can use dependencies in the
-    /// `devDependencies` section. `dependencies`, `peerDependencies`, and
-    /// `optionalDependencies` are always available.
+    /// In this example, only test files can use dependencies in the `devDependencies` section.
+    /// `dependencies`, `peerDependencies`, `optionalDependencies` and `bundleDependencies` are always available.
     ///
     /// ```json,options
     /// {
@@ -133,6 +134,7 @@ pub struct RuleState {
     is_dev_dependency_available: bool,
     is_peer_dependency_available: bool,
     is_optional_dependency_available: bool,
+    is_bundle_dependency_available: bool,
 }
 
 impl Rule for NoUndeclaredDependencies {
@@ -165,12 +167,18 @@ impl Rule for NoUndeclaredDependencies {
             .optional_dependencies
             .as_ref()
             .is_none_or(|dep| dep.is_available(path));
+        let is_bundle_dependency_available = ctx
+            .options()
+            .bundle_dependencies
+            .as_ref()
+            .is_none_or(|dep| dep.is_available(path));
 
         let is_available = |package_name| {
             ctx.is_dependency(package_name)
                 || (is_dev_dependency_available && ctx.is_dev_dependency(package_name))
                 || (is_peer_dependency_available && ctx.is_peer_dependency(package_name))
                 || (is_optional_dependency_available && ctx.is_optional_dependency(package_name))
+                || (is_bundle_dependency_available && ctx.is_bundle_dependency(package_name))
         };
 
         let import_text = node.inner_string_text()?;
@@ -206,6 +214,7 @@ impl Rule for NoUndeclaredDependencies {
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
+            is_bundle_dependency_available,
         })
     }
 
@@ -215,6 +224,7 @@ impl Rule for NoUndeclaredDependencies {
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
+            is_bundle_dependency_available,
         } = state;
         let package_name = parse_package_name(import_text.text())?;
 
@@ -253,6 +263,8 @@ impl Rule for NoUndeclaredDependencies {
             Some("peerDependencies")
         } else if ctx.is_optional_dependency(package_name) && !is_optional_dependency_available {
             Some("optionalDependencies")
+        } else if ctx.is_bundle_dependency(package_name) && !is_bundle_dependency_available {
+            Some("bundleDependencies")
         } else {
             None
         };
@@ -272,80 +284,9 @@ impl Rule for NoUndeclaredDependencies {
     }
 }
 
-fn parse_package_name(path: &str) -> Option<&str> {
-    let mut in_scope = false;
-    for (i, c) in path.bytes().enumerate() {
-        match c {
-            b'@' if i == 0 => {
-                in_scope = true;
-            }
-            // uppercase characters are not allowed in package name
-            // Here we are more tolerant and accept them.
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
-            b'.' if i != 0 => {}
-            b'/' => {
-                if in_scope {
-                    if i == 1 {
-                        // Invalid empty scope
-                        // `@/`
-                        return None;
-                    } else {
-                        // We consumed the scope.
-                        // `@scope/`
-                        in_scope = false;
-                    }
-                } else if i == 0 {
-                    // absolute path
-                    return None;
-                } else {
-                    // We consumed the package name
-                    return Some(&path[..i]);
-                }
-            }
-            _ => {
-                return None;
-            }
-        }
-    }
-    // Handle cases where only the scope is given. e.g. `@scope/`
-    (!path.ends_with('/')).then_some(path)
-}
-
 fn is_type_import(import: &AnyJsImportLike) -> bool {
     match import.parent::<AnyJsImportClause>() {
         Some(clause) => clause.type_token().is_some(),
         _ => false,
     }
-}
-
-#[test]
-fn test() {
-    assert_eq!(
-        parse_package_name("@scope/package-name"),
-        Some("@scope/package-name")
-    );
-    assert_eq!(
-        parse_package_name("@scope/package-name/path"),
-        Some("@scope/package-name")
-    );
-    assert_eq!(parse_package_name("package_"), Some("package_"));
-    assert_eq!(parse_package_name("package/path"), Some("package"));
-    assert_eq!(parse_package_name("0"), Some("0"));
-    assert_eq!(parse_package_name("0/path"), Some("0"));
-    assert_eq!(parse_package_name("-"), Some("-"));
-    assert_eq!(parse_package_name("-/path"), Some("-"));
-    assert_eq!(parse_package_name("a.js"), Some("a.js"));
-    assert_eq!(parse_package_name("@././file"), Some("@./."));
-
-    // Invalid package names that we accept
-    assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));
-    assert_eq!(parse_package_name("_"), Some("_"));
-
-    // Invalid package names that we reject
-    assert_eq!(parse_package_name("@/path"), None);
-    assert_eq!(parse_package_name("."), None);
-    assert_eq!(parse_package_name("./path"), None);
-    assert_eq!(parse_package_name("#path"), None);
-    assert_eq!(parse_package_name("/path"), None);
-    assert_eq!(parse_package_name("p@ckage/name"), None);
 }

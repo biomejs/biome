@@ -1,14 +1,12 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
-use biome_string_case::StrLikeExtension;
 
+use crate::Aria;
 use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
-
-const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -121,7 +119,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvgWithoutTitle {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Aria<AnyHtmlElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoSvgWithoutTitleOptions;
@@ -148,32 +146,7 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
-        // TODO: use `aria_roles.has_name_required_image_role` of aria crate
-        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
-        let Some(role_attribute) = node.find_attribute_by_name("role") else {
-            return Some(());
-        };
-
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(role_attribute_text) = role_attribute_value
-            .as_html_string()?
-            .inner_string_text()
-            .ok()
-        else {
-            return Some(());
-        };
-
-        let role_text = role_attribute_text.to_ascii_lowercase_cow();
-        if role_text.trim().is_empty() {
-            return Some(());
-        }
-
-        // Check if any of the space-separated roles are valid
-        let has_name_required_role = role_text
-            .split_whitespace()
-            .any(|role| NAME_REQUIRED_ROLES.contains(&role));
-
-        if has_name_required_role {
+        if ctx.aria_roles().has_name_required_image_role(node) {
             let aria_label = node.find_attribute_by_name("aria-label");
             let aria_labelledby = node.find_attribute_by_name("aria-labelledby");
             let is_valid_a11y_attribute = aria_label.is_some()

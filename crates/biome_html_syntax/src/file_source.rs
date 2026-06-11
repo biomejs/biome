@@ -116,7 +116,7 @@ impl HtmlFileSource {
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {
-            "html" => Ok(Self::html()),
+            "html" | "svg" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
             "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
@@ -133,9 +133,15 @@ impl HtmlFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     /// [VS Code extension]: https://github.com/withastro/language-tools/blob/0503392b80765c8a1292ddc9c063a1187425c187/packages/vscode/package.json#L140
-    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+    pub fn try_from_language_id(
+        language_id: &str,
+        extension: Option<&str>,
+    ) -> Result<Self, FileSourceError> {
         match language_id {
             "html" => Ok(Self::html()),
+            "xml" if extension.is_some_and(|ext| ext.eq_ignore_ascii_case("svg")) => {
+                Ok(Self::html())
+            }
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),

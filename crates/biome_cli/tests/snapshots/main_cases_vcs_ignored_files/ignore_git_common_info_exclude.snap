@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+## `.git`
+
+```git
+gitdir: actual.git/worktrees/current
+
+```
+
+## `.gitignore`
+
+```gitignore
+
+```
+
+## `actual.git/info/exclude`
+
+```git/info/exclude
+file2.js
+
+```
+
+## `actual.git/worktrees/current/commondir`
+
+```git/worktrees/current/commondir
+../..
+
+```
+
+## `file1.js`
+
+```js
+statement();
+
+```
+
+## `file2.js`
+
+```js
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

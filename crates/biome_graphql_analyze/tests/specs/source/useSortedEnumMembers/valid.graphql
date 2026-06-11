@@ -1,0 +1,7 @@
+# should not generate diagnostics
+enum Role {
+  ADMIN
+  GOD
+  SUPER_ADMIN
+  USER
+}

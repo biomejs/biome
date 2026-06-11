@@ -18,33 +18,15 @@ info: yaml/spec/spec-example-6-23-node-properties.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1,3 @@
--!!str &a1 "foo": !!str bar
+@@ -1,2 +1,2 @@
+ !!str &a1 "foo": !!str bar
 -&a2 baz: *a1
-+!!str &a1 "foo":
-+  !!str bar
 +&a2 baz : *a1
 ```
 
 # Output
 
 ```yml
-!!str &a1 "foo":
-  !!str bar
+!!str &a1 "foo": !!str bar
 &a2 baz : *a1
-```
-
-# Errors
-```
-spec-example-6-23-node-properties.yml:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    1 │ !!str &a1 "foo":
-    2 │   !!str bar
-  > 3 │ &a2 baz : *a1
-      │           ^
-    4 │ 
-  
-
 ```

@@ -28,7 +28,7 @@ impl Rule for IgnoreScanner {
         let member = ctx.query();
         let name = member.name().ok()?;
 
-        if name.inner_string_text()?.ok()?.text() != "experimentalScannerIgnores" {
+        if name.inner_string_text()?.text() != "experimentalScannerIgnores" {
             return None;
         }
 
@@ -85,7 +85,7 @@ impl Rule for IgnoreScanner {
             .iter()
             .flatten()
             .filter_map(|member| {
-                let text = member.name().ok()?.inner_string_text()?.ok()?;
+                let text = member.name().ok()?.inner_string_text()?;
                 if text.text() == "experimentalScannerIgnores" {
                     None
                 } else if text.text() == "includes" {

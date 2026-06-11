@@ -44,7 +44,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@8..9 "\n" [] [],
@@ -76,7 +75,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@21..22 "\n" [] [],
@@ -107,7 +105,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@33..34 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@34..35 "\n" [] [],
@@ -141,7 +138,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@67..68 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@68..68 "" [] [],
@@ -164,7 +160,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@4..7 "= =" [] []
         3: MD_TEXTUAL@7..8
           0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@8..9
       0: NEWLINE@8..9 "\n" [] []
     2: MD_PARAGRAPH@9..21
@@ -185,7 +180,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@17..20 "---" [] []
         7: MD_TEXTUAL@20..21
           0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@21..22
       0: NEWLINE@21..22 "\n" [] []
     4: MD_SETEXT_HEADER@22..31
@@ -205,7 +199,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@32..33 "`" [] []
         1: MD_TEXTUAL@33..34
           0: MD_TEXTUAL_LITERAL@33..34 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@34..35
       0: NEWLINE@34..35 "\n" [] []
     8: MD_SETEXT_HEADER@35..54
@@ -227,7 +220,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@66..67 ">" [] []
         2: MD_TEXTUAL@67..68
           0: MD_TEXTUAL_LITERAL@67..68 "\n" [] []
-      1: (empty)
   2: EOF@68..68 "" [] []
 
 ```

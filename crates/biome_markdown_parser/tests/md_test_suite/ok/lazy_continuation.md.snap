@@ -69,7 +69,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@39..40 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -109,7 +108,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@107..108 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -150,7 +148,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@172..173 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -173,7 +170,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@204..205 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -190,7 +186,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@206..246 " This heading ends the lazy continuation" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -222,7 +217,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@300..301 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -261,7 +255,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@333..334 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -284,7 +277,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@373..374 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -309,7 +301,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@409..410 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -353,7 +344,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -410,7 +400,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@544..545 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -441,7 +430,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@18..39 "that continues lazily" [] []
             3: MD_TEXTUAL@39..40
               0: MD_TEXTUAL_LITERAL@39..40 "\n" [] []
-          1: (empty)
     1: MD_NEWLINE@40..41
       0: NEWLINE@40..41 "\n" [] []
     2: MD_QUOTE@41..108
@@ -468,7 +456,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@82..107 "and explicit continuation" [] []
             6: MD_TEXTUAL@107..108
               0: MD_TEXTUAL_LITERAL@107..108 "\n" [] []
-          1: (empty)
     3: MD_NEWLINE@108..109
       0: NEWLINE@108..109 "\n" [] []
     4: MD_QUOTE@109..173
@@ -495,7 +482,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@151..172 "and even more content" [] []
             7: MD_TEXTUAL@172..173
               0: MD_TEXTUAL_LITERAL@172..173 "\n" [] []
-          1: (empty)
     5: MD_NEWLINE@173..174
       0: NEWLINE@173..174 "\n" [] []
     6: MD_QUOTE@174..205
@@ -510,7 +496,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@176..204 "Quote interrupted by heading" [] []
             1: MD_TEXTUAL@204..205
               0: MD_TEXTUAL_LITERAL@204..205 "\n" [] []
-          1: (empty)
     7: MD_HEADER@205..246
       0: MD_INDENT_TOKEN_LIST@205..205
       1: MD_HASH_LIST@205..206
@@ -520,7 +505,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@206..246
           0: MD_TEXTUAL@206..246
             0: MD_TEXTUAL_LITERAL@206..246 " This heading ends the lazy continuation" [] []
-        1: (empty)
       3: MD_HASH_LIST@246..246
     8: MD_NEWLINE@246..247
       0: NEWLINE@246..247 "\n" [] []
@@ -542,7 +526,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@286..300 "Setext heading" [] []
             3: MD_TEXTUAL@300..301
               0: MD_TEXTUAL_LITERAL@300..301 "\n" [] []
-          1: (empty)
     11: MD_THEMATIC_BREAK_BLOCK@301..304
       0: MD_THEMATIC_BREAK_PART_LIST@301..304
         0: MD_THEMATIC_BREAK_CHAR@301..302
@@ -567,7 +550,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@308..333 "Quote interrupted by list" [] []
             1: MD_TEXTUAL@333..334
               0: MD_TEXTUAL_LITERAL@333..334 "\n" [] []
-          1: (empty)
     15: MD_BULLET_LIST_ITEM@334..374
       0: MD_BULLET_LIST@334..374
         0: MD_BULLET@334..374
@@ -583,7 +565,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@336..373 "This list item ends lazy continuation" [] []
                 1: MD_TEXTUAL@373..374
                   0: MD_TEXTUAL_LITERAL@373..374 "\n" [] []
-              1: (empty)
     16: MD_NEWLINE@374..375
       0: NEWLINE@374..375 "\n" [] []
     17: MD_QUOTE@375..410
@@ -598,7 +579,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@377..409 "Quote interrupted by fenced code" [] []
             1: MD_TEXTUAL@409..410
               0: MD_TEXTUAL_LITERAL@409..410 "\n" [] []
-          1: (empty)
     18: MD_FENCED_CODE_BLOCK@410..428
       0: MD_INDENT_TOKEN_LIST@410..410
       1: TRIPLE_BACKTICK@410..413 "```" [] []
@@ -628,7 +608,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@432..467 "Quote interrupted by thematic break" [] []
             1: MD_TEXTUAL@467..468
               0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
-          1: (empty)
     22: MD_THEMATIC_BREAK_BLOCK@468..471
       0: MD_THEMATIC_BREAK_PART_LIST@468..471
         0: MD_THEMATIC_BREAK_CHAR@468..469
@@ -665,7 +644,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
             7: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
-          1: (empty)
   2: EOF@545..545 "" [] []
 
 ```

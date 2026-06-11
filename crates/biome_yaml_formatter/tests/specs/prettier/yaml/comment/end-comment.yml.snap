@@ -28,21 +28,25 @@ A:
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,10 +4,10 @@
+@@ -1,13 +1,13 @@
+ parent:
+   one: 1
+-  # two: 2
++# two: 2
  
  a:
    b:
 -    #b
 -  #a
-+   #b
-+ #a
++#b
++#a
  
  A:
    B:
 -  #A
 -  #A
-+ #A
-+   #A
++#A
++#A
 ```
 
 # Output
@@ -50,15 +54,15 @@ A:
 ```yml
 parent:
   one: 1
-  # two: 2
+# two: 2
 
 a:
   b:
-   #b
- #a
+#b
+#a
 
 A:
   B:
- #A
-   #A
+#A
+#A
 ```

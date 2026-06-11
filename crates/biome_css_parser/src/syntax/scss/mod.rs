@@ -10,12 +10,16 @@ mod token_sets;
 mod value;
 
 pub(crate) use at_rule::{
-    is_at_scss_keyframes_selector, parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule,
-    parse_scss_content_at_rule, parse_scss_debug_at_rule, parse_scss_each_at_rule,
-    parse_scss_error_at_rule, parse_scss_extend_at_rule, parse_scss_for_at_rule,
-    parse_scss_forward_at_rule, parse_scss_function_at_rule, parse_scss_if_at_rule,
-    parse_scss_import_at_rule, parse_scss_include_at_rule, parse_scss_interpolated_query_feature,
-    parse_scss_keyframes_selector, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
+    is_at_scss_interpolated_media_in_parens, is_at_scss_keyframes_name,
+    is_at_scss_keyframes_selector, is_at_scss_media_condition, is_at_scss_media_query,
+    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
+    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
+    parse_scss_include_at_rule, parse_scss_interpolated_media_in_parens,
+    parse_scss_interpolated_query_feature, parse_scss_keyframes_name,
+    parse_scss_keyframes_selector, parse_scss_media_condition, parse_scss_media_query,
+    parse_scss_media_query_or_condition_query, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
@@ -66,7 +70,8 @@ pub(crate) use token_sets::{
 pub(crate) use value::{
     is_at_any_scss_value, is_at_scss_function, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_parent_selector_value, is_nth_at_scss_function,
-    parse_any_scss_value_with_context, parse_scss_function, parse_scss_function_call_from_name,
+    parse_any_scss_value_with_context, parse_scss_bracketed_value_expression_item,
+    parse_scss_function, parse_scss_function_call_from_name,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
     parse_scss_interpolated_string, parse_scss_interpolated_value,
     parse_scss_parent_selector_value,

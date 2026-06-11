@@ -1,0 +1,11 @@
+<!-- should not generate diagnostics -->
+
+<a href="/home">Home</a>
+<a href="https://biomejs.dev">Biome</a>
+<a href="#top">Top</a>
+<!-- Not an anchor tag -->
+<div href="javascript:void(0)">Not a link</div>
+
+<!-- Dynamic hrefs with Svelte interpolation are not flagged -->
+<a href="{url}">Dynamic URL</a>
+<a href="https://example.com/{path}">Dynamic path</a>

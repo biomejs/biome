@@ -1,0 +1,5 @@
+@mixin button {}
+
+body {
+  @include button
+}

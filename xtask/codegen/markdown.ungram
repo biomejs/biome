@@ -40,6 +40,10 @@ SyntaxElement = SyntaxElement
 // Needed by the infrastructure
 MdBogus = SyntaxElement*
 MdBogusBlock = SyntaxElement*
+// Bullet-list recovery node: completed by `or_recover_with_token_set` in
+// `biome_markdown_parser/src/syntax/list.rs` when an expected bullet fails
+// to parse mid-list.
+MdBogusBullet = SyntaxElement*
 
 MdDocument =
   bom: 'UNICODE_BOM'?
@@ -122,7 +126,7 @@ MdFencedCodeBlock =
 	code_list: MdCodeNameList
 	content: MdInlineItemList
 	r_fence_indent: MdIndentTokenList
-	r_fence: ('```' | '~~~')
+	r_fence: ('```' | '~~~')?
 
 MdCodeNameList = MdTextual*
 
@@ -238,7 +242,6 @@ MdListMarkerPrefix =
 // Another block paragraph
 MdParagraph =
 	list: MdInlineItemList
-	hard_line: MdHardLine?
 
 MdInlineItemList = AnyMdInline*
 
@@ -256,7 +259,6 @@ AnyMdInline =
 	| MdEntityReference
 	| MdHtmlBlock
 	| MdHardLine
-	| MdSoftBreak
 	| MdTextual
 	| MdQuotePrefix
 	| MdIndentToken
@@ -381,6 +383,4 @@ MdNewline = value: 'NEWLINE'
 MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
-MdSoftBreak = value: 'md_soft_break_literal'
 MdTextual = value: 'md_textual_literal'
-MdIndent = value: 'md_indent_chunk_literal'

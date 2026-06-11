@@ -21,8 +21,10 @@ key2:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
- key1: &default
+@@ -1,4 +1,6 @@
+-key1: &default
++key1:
++  &default
 +
    subkey1: value1
  
@@ -32,24 +34,11 @@ key2:
 # Output
 
 ```yml
-key1: &default
+key1:
+  &default
 
   subkey1: value1
 
 key2:
   <<: *default
-```
-
-# Errors
-```
-anchor.yml:6:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-    5 │ key2:
-  > 6 │   <<: *default
-      │       ^
-    7 │ 
-  
-
 ```

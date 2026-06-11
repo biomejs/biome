@@ -191,7 +191,7 @@ impl Rule for NoExcessiveLinesPerFunction {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This function has too many lines ("{state.function_lines_count}"). Maximum allowed is "{options.max_lines().to_string()}"."
+                    "This function has too many lines ("{state.function_lines_count}"). Maximum allowed is "{options.max_lines()}"."
                 },
             )
             .note(markup! {

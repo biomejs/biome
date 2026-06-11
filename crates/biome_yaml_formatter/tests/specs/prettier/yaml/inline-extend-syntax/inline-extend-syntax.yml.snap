@@ -25,22 +25,18 @@ bar:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,10 @@
+@@ -1,8 +1,9 @@
  # 8876
  
  foo:
 -  <<: &anchor
 -    K1: "One"
--  K2: "Two"
-+ <<: &anchor
++  <<:
++    &anchor
 +   K1: "One"
-+ K2: "Two"
+   K2: "Two"
  
  bar:
--  <<: *anchor
--  K3: "Three"
-+ <<: *anchor
-+ K3: "Three"
 ```
 
 # Output
@@ -49,26 +45,12 @@ bar:
 # 8876
 
 foo:
- <<: &anchor
+  <<:
+    &anchor
    K1: "One"
- K2: "Two"
+  K2: "Two"
 
 bar:
- <<: *anchor
- K3: "Three"
-```
-
-# Errors
-```
-inline-extend-syntax.yml:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `*`
-  
-     8 │ bar:
-   > 9 │  <<: *anchor
-       │      ^
-    10 │  K3: "Three"
-    11 │ 
-  
-
+  <<: *anchor
+  K3: "Three"
 ```

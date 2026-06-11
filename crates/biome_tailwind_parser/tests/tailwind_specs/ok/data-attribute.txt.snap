@@ -19,12 +19,16 @@ TwRoot {
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [
-                TwDataAttribute {
-                    data_token: DATA_KW@0..4 "data" [] [],
-                    minus_token: DASH@4..5 "-" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@5..11 "active" [] [],
-                    },
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..4 "data" [] [],
+                        },
+                        DASH@4..5 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@5..11 "active" [] [],
+                        },
+                    ],
                 },
                 COLON@11..12 ":" [] [],
             ],
@@ -52,11 +56,13 @@ TwRoot {
   1: TW_CANDIDATE_LIST@0..24
     0: TW_FULL_CANDIDATE@0..24
       0: TW_VARIANT_LIST@0..12
-        0: TW_DATA_ATTRIBUTE@0..11
-          0: DATA_KW@0..4 "data" [] []
-          1: DASH@4..5 "-" [] []
-          2: TW_NAMED_VALUE@5..11
-            0: TW_VALUE@5..11 "active" [] []
+        0: TW_VARIANT_EXPRESSION@0..11
+          0: TW_VARIANT_SEGMENT_LIST@0..11
+            0: TW_NAMED_VARIANT_SEGMENT@0..4
+              0: TW_VARIANT_SEGMENT@0..4 "data" [] []
+            1: DASH@4..5 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@5..11
+              0: TW_VARIANT_SEGMENT@5..11 "active" [] []
         1: COLON@11..12 ":" [] []
       1: (empty)
       2: TW_FUNCTIONAL_CANDIDATE@12..24

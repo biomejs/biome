@@ -1,3 +1,4 @@
+use super::expect_scss_semicolon_at_rule;
 use super::module_clauses::{
     expected_scss_module_configuration, parse_scss_module_configuration_list,
 };
@@ -35,7 +36,7 @@ pub(crate) fn parse_scss_use_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_use_as_clause(p).ok();
     // The `with` clause is optional in the grammar.
     parse_scss_with_clause(p).ok();
-    p.expect(T![;]);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, SCSS_USE_AT_RULE))
 }

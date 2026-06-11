@@ -13,14 +13,30 @@ impl FormatNodeRule<TwSourceInline> for FormatTwSourceInline {
             r_paren_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                inline_token.format(),
-                l_paren_token.format(),
-                &content.format(),
-                r_paren_token.format(),
-            ]
-        )
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write!(
+                f,
+                [
+                    inline_token.format(),
+                    l_paren_token.format(),
+                    space(),
+                    &content.format(),
+                    space(),
+                    r_paren_token.format(),
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    inline_token.format(),
+                    l_paren_token.format(),
+                    &content.format(),
+                    r_paren_token.format(),
+                ]
+            )
+        }
     }
 }

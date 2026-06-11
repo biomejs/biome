@@ -22,8 +22,8 @@ expression: severity_only.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
-			"nursery": { "noShadow": { "level": "error", "options": {} } }
+			"preset": "none",
+			"suspicious": { "noShadow": { "level": "error", "options": {} } }
 		}
 	}
 }

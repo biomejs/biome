@@ -2011,8 +2011,7 @@ fn handle_first_line_marker_only(
     }
 
     // Now check if we're at a blank line (the line immediately after marker is empty).
-    // Per CommonMark: if marker-only line is followed by a blank line,
-    // the item is truly empty and subsequent content is outside the list.
+    // A marker-only line followed by a blank line always ends *this* item.
     let now_at_blank_line = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);
@@ -2021,6 +2020,26 @@ fn handle_first_line_marker_only(
     });
 
     if now_at_blank_line {
+        // Per CommonMark §5.3 (example 315), an empty item followed by a blank
+        // line does NOT end the *list* when a same-marker item continues after
+        // the blank — the items stay one list that becomes loose. Absorb the
+        // separator blank line(s) into this empty item (so they don't leak as
+        // direct MdBulletList siblings) and record the blank so the list is
+        // marked loose.
+        let continues_same_marker = if state.parent_marker_kind.is_some() {
+            has_bullet_item_after_blank_lines_at_indent(p, state.marker_indent)
+                && !marker_changes_after_blank_lines(p, state.parent_marker_kind)
+        } else if state.parent_ordered_delim.is_some() {
+            has_ordered_item_after_blank_lines_at_indent(p, state.marker_indent)
+                && !delim_changes_after_blank_lines(p, state.parent_ordered_delim)
+        } else {
+            false
+        };
+        if continues_same_marker {
+            consume_all_blank_lines(p);
+            state.has_blank_line = true;
+            state.last_was_blank = true;
+        }
         return LoopAction::Break;
     }
 

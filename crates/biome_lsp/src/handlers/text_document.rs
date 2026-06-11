@@ -28,9 +28,10 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
-
     let path = session.file_path(&url)?;
+    let language_hint =
+        DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
+
     let file_path = path.to_path_buf();
     let config_path = session.resolve_configuration_path(Some(&file_path));
 
@@ -64,6 +65,7 @@ pub(crate) async fn did_open(
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
+        editor_features: Some(session.extension_settings.read().unwrap().editor_features()),
     })?;
 
     session.insert_document(url.clone(), doc);
@@ -225,6 +227,7 @@ pub(crate) async fn did_change(
         version,
         content: text,
         inline_config: session.inline_config(),
+        editor_features: None,
     })?;
 
     if let Err(err) = session.update_diagnostics(url).await {
@@ -256,6 +259,7 @@ pub(crate) async fn did_save(
             content: text.clone(),
             version: doc.version,
             inline_config: None,
+            editor_features: None,
         })?;
 
         session.insert_document(

@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: Page.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import Button from "./Button.astro";
+---
+
+<div class="page"><Button /></div>
+
+```

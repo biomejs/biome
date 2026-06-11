@@ -1,10 +1,11 @@
 use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
-use biome_console::fmt::{Display, Formatter};
-use biome_console::{MarkupBuf, markup};
-use biome_diagnostics::display::{SourceFile, markup_to_string};
-use biome_diagnostics::{Error, Location, LogCategory, PrintDescription, Visit};
+use biome_console::markup;
+use biome_diagnostics::display::SourceFile;
+use biome_diagnostics::{Error, Location, PrintDescription, Visit};
+use biome_rowan::{TextRange, TextSize};
+use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
@@ -96,7 +97,7 @@ fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> Option<RdJsonDiagnostic<'a
     let location = diagnostic.location();
     let location = to_rdjson_location(&location);
 
-    let suggestions = to_rdjson_suggetions(diagnostic);
+    let suggestions = to_rdjson_suggestions(diagnostic);
     let category = diagnostic.category()?;
     let code = RdJsonCode {
         url: category.link().map(String::from),
@@ -138,75 +139,152 @@ fn to_rdjson_location(location: &Location<'_>) -> Option<RdJsonLocation> {
 
 struct SuggestionsVisitor {
     suggestions: Vec<RdJsonSuggestion>,
-    current_message: Option<String>,
-    last_diagnostic_length: usize,
 }
 
 impl Visit for SuggestionsVisitor {
-    fn record_log(&mut self, _category: LogCategory, text: &dyn Display) -> std::io::Result<()> {
-        let message = {
-            let mut message = MarkupBuf::default();
-            let mut fmt = Formatter::new(&mut message);
-            fmt.write_markup(markup!({ { text } }))?;
-            markup_to_string(&message).expect("Invalid markup")
+    fn record_code_suggestion(
+        &mut self,
+        location: Location<'_>,
+        diff: &TextEdit,
+    ) -> std::io::Result<()> {
+        let Some(source_code) = location.source_code else {
+            return Ok(());
         };
-        let current_diagnostic_length = self.suggestions.len();
-
-        if self.last_diagnostic_length != current_diagnostic_length {
-            let last_suggestion = self
-                .suggestions
-                .last_mut()
-                .expect("No suggestions to append to");
-            last_suggestion.text = message;
-        } else if let Some(current_message) = self.current_message.as_mut() {
-            current_message.push_str(&message);
-        } else {
-            self.current_message = Some(message);
-        }
-
-        Ok(())
-    }
-
-    fn record_frame(&mut self, location: Location<'_>) -> std::io::Result<()> {
-        let range = if let (Some(span), Some(source_code)) = (location.span, location.source_code) {
-            let source = SourceFile::new(source_code);
-            let start = source.location(span.start()).expect("Invalid span");
-            let end = source.location(span.end()).expect("Invalid span");
-
-            RdJsonRange {
-                end: RdJsonLineColumn {
-                    line: end.line_number.get(),
-                    column: end.column_number.get(),
-                },
-                start: RdJsonLineColumn {
-                    line: start.line_number.get(),
-                    column: start.column_number.get(),
-                },
-            }
-        } else {
-            RdJsonRange::default()
+        let Some(span) = changed_input_range(diff, source_code.text).or(location.span) else {
+            return Ok(());
+        };
+        let Some(text) = suggestion_text(diff, source_code.text, span) else {
+            return Ok(());
         };
 
-        self.last_diagnostic_length = self.suggestions.len();
-        self.suggestions.push(RdJsonSuggestion {
-            text: self.current_message.take().unwrap_or_default(),
-            range,
-        });
+        let source = SourceFile::new(source_code);
+        let Ok(start) = source.location(span.start()) else {
+            return Ok(());
+        };
+        let Ok(end) = source.location(span.end()) else {
+            return Ok(());
+        };
+        let range = RdJsonRange {
+            end: RdJsonLineColumn {
+                line: end.line_number.get(),
+                column: end.column_number.get(),
+            },
+            start: RdJsonLineColumn {
+                line: start.line_number.get(),
+                column: start.column_number.get(),
+            },
+        };
+
+        self.suggestions.push(RdJsonSuggestion { text, range });
 
         Ok(())
     }
 }
 
-fn to_rdjson_suggetions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
+fn to_rdjson_suggestions(diagnostic: &Error) -> Vec<RdJsonSuggestion> {
     let mut visitor = SuggestionsVisitor {
         suggestions: vec![],
-        last_diagnostic_length: 0,
-        current_message: None,
     };
 
     diagnostic.advices(&mut visitor).unwrap();
 
     visitor.suggestions
+}
+
+/// Computes the replacement text that should be applied to `range`.
+fn suggestion_text(diff: &TextEdit, source: &str, range: TextRange) -> Option<String> {
+    let mut output = String::new();
+    let mut input_position = TextSize::from(0);
+
+    for op in diff {
+        match op {
+            CompressedOp::DiffOp(DiffOp::Equal { range: diff_range }) => {
+                let text = diff.get_text(*diff_range);
+                append_overlap(&mut output, text, input_position, range)?;
+                input_position += diff_range.len();
+            }
+            CompressedOp::DiffOp(DiffOp::Insert { range: diff_range }) => {
+                if range.start() <= input_position && input_position <= range.end() {
+                    output.push_str(diff.get_text(*diff_range));
+                }
+            }
+            CompressedOp::DiffOp(DiffOp::Delete { range: diff_range }) => {
+                input_position += diff_range.len();
+            }
+            CompressedOp::EqualLines { line_count } => {
+                let text = equal_lines_text(source, input_position, line_count.get())?;
+                append_overlap(&mut output, text, input_position, range)?;
+                input_position += TextSize::of(text);
+            }
+        }
+    }
+
+    Some(output)
+}
+
+/// Returns the input range touched by `diff`.
+fn changed_input_range(diff: &TextEdit, source: &str) -> Option<TextRange> {
+    let mut input_position = TextSize::from(0);
+    let mut start = None;
+    let mut end = TextSize::from(0);
+
+    for op in diff {
+        match op {
+            CompressedOp::DiffOp(DiffOp::Equal { range }) => {
+                input_position += range.len();
+            }
+            CompressedOp::DiffOp(DiffOp::Insert { .. }) => {
+                start.get_or_insert(input_position);
+                end = input_position;
+            }
+            CompressedOp::DiffOp(DiffOp::Delete { range }) => {
+                start.get_or_insert(input_position);
+                input_position += range.len();
+                end = input_position;
+            }
+            CompressedOp::EqualLines { line_count } => {
+                let text = equal_lines_text(source, input_position, line_count.get())?;
+                input_position += TextSize::of(text);
+            }
+        }
+    }
+
+    start.map(|start| TextRange::new(start, end))
+}
+
+/// Appends the part of `text` that overlaps with `range`.
+fn append_overlap(
+    output: &mut String,
+    text: &str,
+    text_start: TextSize,
+    range: TextRange,
+) -> Option<()> {
+    let text_range = TextRange::at(text_start, TextSize::of(text));
+    let Some(overlap) = text_range.intersect(range) else {
+        return Some(());
+    };
+
+    let relative_range = overlap - text_start;
+    let relative_range: std::ops::Range<usize> = relative_range.into();
+    output.push_str(text.get(relative_range)?);
+    Some(())
+}
+
+/// Replays the source text covered by a compressed equal-lines diff operation.
+fn equal_lines_text(source: &str, start: TextSize, line_count: u32) -> Option<&str> {
+    let input = source.get(usize::from(start)..)?;
+    let mut length = TextSize::from(0);
+
+    // Keep the same line-count semantics as TextEdit::new_string. Splitting on
+    // '\n' preserves CRLF input because the preceding '\r' remains in each line.
+    for line in input.split_inclusive('\n').take(line_count as usize + 1) {
+        length += TextSize::of(line);
+    }
+
+    let range = TextRange::at(start, length);
+    let range: std::ops::Range<usize> = range.into();
+    debug_assert!(range.end <= source.len());
+    source.get(range)
 }
 
 #[derive(Serialize)]
@@ -260,4 +338,50 @@ pub struct RdJsonSuggestion {
 pub struct RdJsonLineColumn {
     column: usize,
     line: usize,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{changed_input_range, equal_lines_text, suggestion_text};
+    use biome_rowan::{TextRange, TextSize};
+    use biome_text_edit::TextEdit;
+
+    #[test]
+    fn changed_input_range_uses_precise_replacement_range() {
+        let source = "let f;\n";
+        let diff = TextEdit::from_unicode_words(source, "let _f;\n");
+        let range = changed_input_range(&diff, source).unwrap();
+
+        assert_eq!(range, TextRange::new(TextSize::from(4), TextSize::from(5)));
+        assert_eq!(suggestion_text(&diff, source, range), Some("_f".into()));
+    }
+
+    #[test]
+    fn changed_input_range_handles_insertions() {
+        let source = "let f;\n";
+        let mut builder = TextEdit::builder();
+        builder.equal("let ");
+        builder.insert("_");
+        builder.equal("f;\n");
+        let diff = builder.finish();
+        let range = changed_input_range(&diff, source).unwrap();
+
+        assert_eq!(range, TextRange::empty(TextSize::from(4)));
+        assert_eq!(suggestion_text(&diff, source, range), Some("_".into()));
+    }
+
+    #[test]
+    fn equal_lines_text_preserves_crlf() {
+        let source = "a\r\nb\r\nc\r\n";
+
+        assert_eq!(
+            equal_lines_text(source, TextSize::from(0), 2),
+            Some("a\r\nb\r\nc\r\n")
+        );
+    }
+
+    #[test]
+    fn equal_lines_text_rejects_invalid_offsets() {
+        assert_eq!(equal_lines_text("abc", TextSize::from(99), 1), None);
+    }
 }

@@ -845,7 +845,7 @@ impl CssComposesProperty {
         CssComposesPropertyFields {
             name: self.name(),
             colon_token: self.colon_token(),
-            value: self.value(),
+            values: self.values(),
         }
     }
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
@@ -854,8 +854,8 @@ impl CssComposesProperty {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<CssComposesPropertyValue> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn values(&self) -> CssComposesPropertyValueList {
+        support::list(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssComposesProperty {
@@ -870,7 +870,7 @@ impl Serialize for CssComposesProperty {
 pub struct CssComposesPropertyFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<CssComposesPropertyValue>,
+    pub values: CssComposesPropertyValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssComposesPropertyValue {
@@ -2724,7 +2724,7 @@ impl CssFunctionAtRuleDeclarator {
     pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -2751,7 +2751,7 @@ impl Serialize for CssFunctionAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssFunctionAtRuleDeclaratorFields {
     pub function_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssDashedIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameters: CssFunctionParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4298,7 +4298,7 @@ impl CssMediaAndCondition {
             right: self.right(),
         }
     }
-    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4318,7 +4318,7 @@ impl Serialize for CssMediaAndCondition {
 }
 #[derive(Serialize)]
 pub struct CssMediaAndConditionFields {
-    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub left: SyntaxResult<AnyCssMediaConditionOperand>,
     pub and_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssMediaAndCombinableCondition>,
 }
@@ -4595,7 +4595,7 @@ impl CssMediaNotCondition {
     pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn condition(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn condition(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -4610,7 +4610,7 @@ impl Serialize for CssMediaNotCondition {
 #[derive(Serialize)]
 pub struct CssMediaNotConditionFields {
     pub not_token: SyntaxResult<SyntaxToken>,
-    pub condition: SyntaxResult<AnyCssMediaInParens>,
+    pub condition: SyntaxResult<AnyCssMediaConditionOperand>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaOrCondition {
@@ -4633,7 +4633,7 @@ impl CssMediaOrCondition {
             right: self.right(),
         }
     }
-    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaConditionOperand> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4653,7 +4653,7 @@ impl Serialize for CssMediaOrCondition {
 }
 #[derive(Serialize)]
 pub struct CssMediaOrConditionFields {
-    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub left: SyntaxResult<AnyCssMediaConditionOperand>,
     pub or_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssMediaOrCombinableCondition>,
 }
@@ -9836,8 +9836,8 @@ impl ScssForwardAtRule {
     pub fn with_clause(&self) -> Option<ScssWithClause> {
         support::node(&self.syntax, 4usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for ScssForwardAtRule {
@@ -9855,7 +9855,7 @@ pub struct ScssForwardAtRuleFields {
     pub as_clause: Option<ScssForwardAsClause>,
     pub visibility_clause: Option<AnyScssForwardVisibilityClause>,
     pub with_clause: Option<ScssWithClause>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssFunctionAtRule {
@@ -10768,6 +10768,39 @@ pub struct ScssInterpolationFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssKeyframesName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssKeyframesName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssKeyframesNameFields {
+        ScssKeyframesNameFields { name: self.name() }
+    }
+    pub fn name(&self) -> SyntaxResult<AnyScssKeyframesName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssKeyframesName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssKeyframesNameFields {
+    pub name: SyntaxResult<AnyScssKeyframesName>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeyframesSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10806,6 +10839,41 @@ impl Serialize for ScssKeyframesSelector {
 pub struct ScssKeyframesSelectorFields {
     pub selector: SyntaxResult<ScssInterpolation>,
     pub percent_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssKeyframesVariableDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssKeyframesVariableDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssKeyframesVariableDeclarationFields {
+        ScssKeyframesVariableDeclarationFields {
+            declaration: self.declaration(),
+        }
+    }
+    pub fn declaration(&self) -> SyntaxResult<ScssVariableDeclaration> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssKeyframesVariableDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssKeyframesVariableDeclarationFields {
+    pub declaration: SyntaxResult<ScssVariableDeclaration>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeywordArgument {
@@ -12012,8 +12080,8 @@ impl ScssUseAtRule {
     pub fn with_clause(&self) -> Option<ScssWithClause> {
         support::node(&self.syntax, 3usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
 }
 impl Serialize for ScssUseAtRule {
@@ -12030,7 +12098,7 @@ pub struct ScssUseAtRuleFields {
     pub url: SyntaxResult<CssString>,
     pub as_clause: Option<ScssUseAsClause>,
     pub with_clause: Option<ScssWithClause>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssVariable {
@@ -13564,12 +13632,19 @@ impl AnyCssAttributeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssBracketedValueItem {
     AnyCssCustomIdentifier(AnyCssCustomIdentifier),
+    AnyScssExpression(AnyScssExpression),
     CssGenericDelimiter(CssGenericDelimiter),
 }
 impl AnyCssBracketedValueItem {
     pub fn as_any_css_custom_identifier(&self) -> Option<&AnyCssCustomIdentifier> {
         match &self {
             Self::AnyCssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_scss_expression(&self) -> Option<&AnyScssExpression> {
+        match &self {
+            Self::AnyScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -14827,6 +14902,7 @@ impl AnyCssKeyframesIdentifier {
 pub enum AnyCssKeyframesItem {
     CssBogusKeyframesItem(CssBogusKeyframesItem),
     CssKeyframesItem(CssKeyframesItem),
+    ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration),
 }
 impl AnyCssKeyframesItem {
     pub fn as_css_bogus_keyframes_item(&self) -> Option<&CssBogusKeyframesItem> {
@@ -14841,12 +14917,21 @@ impl AnyCssKeyframesItem {
             _ => None,
         }
     }
+    pub fn as_scss_keyframes_variable_declaration(
+        &self,
+    ) -> Option<&ScssKeyframesVariableDeclaration> {
+        match &self {
+            Self::ScssKeyframesVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesName {
     AnyCssKeyframesIdentifier(AnyCssKeyframesIdentifier),
     CssBogusKeyframesName(CssBogusKeyframesName),
     CssKeyframesScopedName(CssKeyframesScopedName),
+    ScssKeyframesName(ScssKeyframesName),
 }
 impl AnyCssKeyframesName {
     pub fn as_any_css_keyframes_identifier(&self) -> Option<&AnyCssKeyframesIdentifier> {
@@ -14864,6 +14949,12 @@ impl AnyCssKeyframesName {
     pub fn as_css_keyframes_scoped_name(&self) -> Option<&CssKeyframesScopedName> {
         match &self {
             Self::CssKeyframesScopedName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_keyframes_name(&self) -> Option<&ScssKeyframesName> {
+        match &self {
+            Self::ScssKeyframesName(item) => Some(item),
             _ => None,
         }
     }
@@ -14955,13 +15046,14 @@ impl AnyCssLayer {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaAndCombinableCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
+    CssMediaNotCondition(CssMediaNotCondition),
 }
 impl AnyCssMediaAndCombinableCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -14971,18 +15063,24 @@ impl AnyCssMediaAndCombinableCondition {
             _ => None,
         }
     }
+    pub fn as_css_media_not_condition(&self) -> Option<&CssMediaNotCondition> {
+        match &self {
+            Self::CssMediaNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
     CssMediaNotCondition(CssMediaNotCondition),
     CssMediaOrCondition(CssMediaOrCondition),
 }
 impl AnyCssMediaCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -15001,6 +15099,25 @@ impl AnyCssMediaCondition {
     pub fn as_css_media_or_condition(&self) -> Option<&CssMediaOrCondition> {
         match &self {
             Self::CssMediaOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssMediaConditionOperand {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    ScssMediaQuery(ScssMediaQuery),
+}
+impl AnyCssMediaConditionOperand {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+        match &self {
+            Self::AnyCssMediaInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_media_query(&self) -> Option<&ScssMediaQuery> {
+        match &self {
+            Self::ScssMediaQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -15026,13 +15143,13 @@ impl AnyCssMediaInParens {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaOrCombinableCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaOrCondition(CssMediaOrCondition),
 }
 impl AnyCssMediaOrCombinableCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -15085,14 +15202,14 @@ impl AnyCssMediaQuery {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaTypeCondition {
-    AnyCssMediaInParens(AnyCssMediaInParens),
+    AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
     CssMediaNotCondition(CssMediaNotCondition),
 }
 impl AnyCssMediaTypeCondition {
-    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+    pub fn as_any_css_media_condition_operand(&self) -> Option<&AnyCssMediaConditionOperand> {
         match &self {
-            Self::AnyCssMediaInParens(item) => Some(item),
+            Self::AnyCssMediaConditionOperand(item) => Some(item),
             _ => None,
         }
     }
@@ -16991,6 +17108,25 @@ impl AnyScssInterpolatedValuePart {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssKeyframesName {
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssVariable(ScssVariable),
+}
+impl AnyScssKeyframesName {
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyScssModuleConfiguration {
     CssBogusParameter(CssBogusParameter),
     ScssModuleConfiguration(ScssModuleConfiguration),
@@ -18197,7 +18333,7 @@ impl std::fmt::Debug for CssComposesProperty {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("values", &self.values())
                 .finish()
         } else {
             f.debug_struct("CssComposesProperty").finish()
@@ -29071,7 +29207,7 @@ impl std::fmt::Debug for ScssForwardAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -30238,6 +30374,53 @@ impl From<ScssInterpolation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssKeyframesName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_KEYFRAMES_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_KEYFRAMES_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssKeyframesName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssKeyframesName")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("ScssKeyframesName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssKeyframesName> for SyntaxNode {
+    fn from(n: ScssKeyframesName) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssKeyframesName> for SyntaxElement {
+    fn from(n: ScssKeyframesName) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssKeyframesSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30286,6 +30469,56 @@ impl From<ScssKeyframesSelector> for SyntaxNode {
 }
 impl From<ScssKeyframesSelector> for SyntaxElement {
     fn from(n: ScssKeyframesSelector) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssKeyframesVariableDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_KEYFRAMES_VARIABLE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_KEYFRAMES_VARIABLE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssKeyframesVariableDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssKeyframesVariableDeclaration")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssKeyframesVariableDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssKeyframesVariableDeclaration> for SyntaxNode {
+    fn from(n: ScssKeyframesVariableDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssKeyframesVariableDeclaration> for SyntaxElement {
+    fn from(n: ScssKeyframesVariableDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -31749,7 +31982,7 @@ impl std::fmt::Debug for ScssUseAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -34176,12 +34409,14 @@ impl From<CssGenericDelimiter> for AnyCssBracketedValueItem {
 }
 impl AstNode for AnyCssBracketedValueItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssCustomIdentifier::KIND_SET.union(CssGenericDelimiter::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssCustomIdentifier::KIND_SET
+        .union(AnyScssExpression::KIND_SET)
+        .union(CssGenericDelimiter::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_GENERIC_DELIMITER => true,
             k if AnyCssCustomIdentifier::can_cast(k) => true,
+            k if AnyScssExpression::can_cast(k) => true,
             _ => false,
         }
     }
@@ -34189,8 +34424,14 @@ impl AstNode for AnyCssBracketedValueItem {
         let res = match syntax.kind() {
             CSS_GENERIC_DELIMITER => Self::CssGenericDelimiter(CssGenericDelimiter { syntax }),
             _ => {
-                if let Some(any_css_custom_identifier) = AnyCssCustomIdentifier::cast(syntax) {
-                    return Some(Self::AnyCssCustomIdentifier(any_css_custom_identifier));
+                let syntax = match AnyCssCustomIdentifier::try_cast(syntax) {
+                    Ok(any_css_custom_identifier) => {
+                        return Some(Self::AnyCssCustomIdentifier(any_css_custom_identifier));
+                    }
+                    Err(syntax) => syntax,
+                };
+                if let Some(any_scss_expression) = AnyScssExpression::cast(syntax) {
+                    return Some(Self::AnyScssExpression(any_scss_expression));
                 }
                 return None;
             }
@@ -34201,12 +34442,14 @@ impl AstNode for AnyCssBracketedValueItem {
         match self {
             Self::CssGenericDelimiter(it) => it.syntax(),
             Self::AnyCssCustomIdentifier(it) => it.syntax(),
+            Self::AnyScssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssGenericDelimiter(it) => it.into_syntax(),
             Self::AnyCssCustomIdentifier(it) => it.into_syntax(),
+            Self::AnyScssExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -34214,6 +34457,7 @@ impl std::fmt::Debug for AnyCssBracketedValueItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34222,6 +34466,7 @@ impl From<AnyCssBracketedValueItem> for SyntaxNode {
     fn from(n: AnyCssBracketedValueItem) -> Self {
         match n {
             AnyCssBracketedValueItem::AnyCssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssBracketedValueItem::AnyScssExpression(it) => it.into_syntax(),
             AnyCssBracketedValueItem::CssGenericDelimiter(it) => it.into_syntax(),
         }
     }
@@ -37934,12 +38179,21 @@ impl From<CssKeyframesItem> for AnyCssKeyframesItem {
         Self::CssKeyframesItem(node)
     }
 }
+impl From<ScssKeyframesVariableDeclaration> for AnyCssKeyframesItem {
+    fn from(node: ScssKeyframesVariableDeclaration) -> Self {
+        Self::ScssKeyframesVariableDeclaration(node)
+    }
+}
 impl AstNode for AnyCssKeyframesItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusKeyframesItem::KIND_SET.union(CssKeyframesItem::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusKeyframesItem::KIND_SET
+        .union(CssKeyframesItem::KIND_SET)
+        .union(ScssKeyframesVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM)
+        matches!(
+            kind,
+            CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM | SCSS_KEYFRAMES_VARIABLE_DECLARATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -37947,6 +38201,9 @@ impl AstNode for AnyCssKeyframesItem {
                 Self::CssBogusKeyframesItem(CssBogusKeyframesItem { syntax })
             }
             CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
+            SCSS_KEYFRAMES_VARIABLE_DECLARATION => {
+                Self::ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -37955,12 +38212,14 @@ impl AstNode for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => it.syntax(),
             Self::CssKeyframesItem(it) => it.syntax(),
+            Self::ScssKeyframesVariableDeclaration(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusKeyframesItem(it) => it.into_syntax(),
             Self::CssKeyframesItem(it) => it.into_syntax(),
+            Self::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -37969,6 +38228,7 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
         match self {
             Self::CssBogusKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssKeyframesVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -37977,6 +38237,7 @@ impl From<AnyCssKeyframesItem> for SyntaxNode {
         match n {
             AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
+            AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -37996,14 +38257,20 @@ impl From<CssKeyframesScopedName> for AnyCssKeyframesName {
         Self::CssKeyframesScopedName(node)
     }
 }
+impl From<ScssKeyframesName> for AnyCssKeyframesName {
+    fn from(node: ScssKeyframesName) -> Self {
+        Self::ScssKeyframesName(node)
+    }
+}
 impl AstNode for AnyCssKeyframesName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssKeyframesIdentifier::KIND_SET
         .union(CssBogusKeyframesName::KIND_SET)
-        .union(CssKeyframesScopedName::KIND_SET);
+        .union(CssKeyframesScopedName::KIND_SET)
+        .union(ScssKeyframesName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_KEYFRAMES_NAME | CSS_KEYFRAMES_SCOPED_NAME => true,
+            CSS_BOGUS_KEYFRAMES_NAME | CSS_KEYFRAMES_SCOPED_NAME | SCSS_KEYFRAMES_NAME => true,
             k if AnyCssKeyframesIdentifier::can_cast(k) => true,
             _ => false,
         }
@@ -38016,6 +38283,7 @@ impl AstNode for AnyCssKeyframesName {
             CSS_KEYFRAMES_SCOPED_NAME => {
                 Self::CssKeyframesScopedName(CssKeyframesScopedName { syntax })
             }
+            SCSS_KEYFRAMES_NAME => Self::ScssKeyframesName(ScssKeyframesName { syntax }),
             _ => {
                 if let Some(any_css_keyframes_identifier) = AnyCssKeyframesIdentifier::cast(syntax)
                 {
@@ -38032,6 +38300,7 @@ impl AstNode for AnyCssKeyframesName {
         match self {
             Self::CssBogusKeyframesName(it) => it.syntax(),
             Self::CssKeyframesScopedName(it) => it.syntax(),
+            Self::ScssKeyframesName(it) => it.syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.syntax(),
         }
     }
@@ -38039,6 +38308,7 @@ impl AstNode for AnyCssKeyframesName {
         match self {
             Self::CssBogusKeyframesName(it) => it.into_syntax(),
             Self::CssKeyframesScopedName(it) => it.into_syntax(),
+            Self::ScssKeyframesName(it) => it.into_syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
         }
     }
@@ -38049,6 +38319,7 @@ impl std::fmt::Debug for AnyCssKeyframesName {
             Self::AnyCssKeyframesIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogusKeyframesName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesScopedName(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssKeyframesName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38058,6 +38329,7 @@ impl From<AnyCssKeyframesName> for SyntaxNode {
             AnyCssKeyframesName::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
             AnyCssKeyframesName::CssBogusKeyframesName(it) => it.into_syntax(),
             AnyCssKeyframesName::CssKeyframesScopedName(it) => it.into_syntax(),
+            AnyCssKeyframesName::ScssKeyframesName(it) => it.into_syntax(),
         }
     }
 }
@@ -38321,23 +38593,34 @@ impl From<CssMediaAndCondition> for AnyCssMediaAndCombinableCondition {
         Self::CssMediaAndCondition(node)
     }
 }
+impl From<CssMediaNotCondition> for AnyCssMediaAndCombinableCondition {
+    fn from(node: CssMediaNotCondition) -> Self {
+        Self::CssMediaNotCondition(node)
+    }
+}
 impl AstNode for AnyCssMediaAndCombinableCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssMediaInParens::KIND_SET.union(CssMediaAndCondition::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
+        .union(CssMediaAndCondition::KIND_SET)
+        .union(CssMediaNotCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_MEDIA_AND_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_MEDIA_AND_CONDITION => Self::CssMediaAndCondition(CssMediaAndCondition { syntax }),
+            CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38347,29 +38630,33 @@ impl AstNode for AnyCssMediaAndCombinableCondition {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::CssMediaNotCondition(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::CssMediaNotCondition(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssMediaAndCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaAndCombinableCondition) -> Self {
         match n {
-            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.into_syntax(),
+            AnyCssMediaAndCombinableCondition::CssMediaNotCondition(it) => it.into_syntax(),
         }
     }
 }
@@ -38396,14 +38683,14 @@ impl From<CssMediaOrCondition> for AnyCssMediaCondition {
 }
 impl AstNode for AnyCssMediaCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
         .union(CssMediaAndCondition::KIND_SET)
         .union(CssMediaNotCondition::KIND_SET)
         .union(CssMediaOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION | CSS_MEDIA_OR_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38413,8 +38700,12 @@ impl AstNode for AnyCssMediaCondition {
             CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             CSS_MEDIA_OR_CONDITION => Self::CssMediaOrCondition(CssMediaOrCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38426,7 +38717,7 @@ impl AstNode for AnyCssMediaCondition {
             Self::CssMediaAndCondition(it) => it.syntax(),
             Self::CssMediaNotCondition(it) => it.syntax(),
             Self::CssMediaOrCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -38434,14 +38725,14 @@ impl AstNode for AnyCssMediaCondition {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
             Self::CssMediaNotCondition(it) => it.into_syntax(),
             Self::CssMediaOrCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaOrCondition(it) => std::fmt::Debug::fmt(it, f),
@@ -38451,7 +38742,7 @@ impl std::fmt::Debug for AnyCssMediaCondition {
 impl From<AnyCssMediaCondition> for SyntaxNode {
     fn from(n: AnyCssMediaCondition) -> Self {
         match n {
-            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaAndCondition(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaNotCondition(it) => it.into_syntax(),
             AnyCssMediaCondition::CssMediaOrCondition(it) => it.into_syntax(),
@@ -38460,6 +38751,69 @@ impl From<AnyCssMediaCondition> for SyntaxNode {
 }
 impl From<AnyCssMediaCondition> for SyntaxElement {
     fn from(n: AnyCssMediaCondition) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<ScssMediaQuery> for AnyCssMediaConditionOperand {
+    fn from(node: ScssMediaQuery) -> Self {
+        Self::ScssMediaQuery(node)
+    }
+}
+impl AstNode for AnyCssMediaConditionOperand {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssMediaInParens::KIND_SET.union(ScssMediaQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            SCSS_MEDIA_QUERY => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_MEDIA_QUERY => Self::ScssMediaQuery(ScssMediaQuery { syntax }),
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssMediaQuery(it) => it.syntax(),
+            Self::AnyCssMediaInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssMediaQuery(it) => it.into_syntax(),
+            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaConditionOperand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaConditionOperand> for SyntaxNode {
+    fn from(n: AnyCssMediaConditionOperand) -> Self {
+        match n {
+            AnyCssMediaConditionOperand::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaConditionOperand::ScssMediaQuery(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssMediaConditionOperand> for SyntaxElement {
+    fn from(n: AnyCssMediaConditionOperand) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -38539,11 +38893,11 @@ impl From<CssMediaOrCondition> for AnyCssMediaOrCombinableCondition {
 impl AstNode for AnyCssMediaOrCombinableCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssMediaInParens::KIND_SET.union(CssMediaOrCondition::KIND_SET);
+        AnyCssMediaConditionOperand::KIND_SET.union(CssMediaOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_OR_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38551,8 +38905,12 @@ impl AstNode for AnyCssMediaOrCombinableCondition {
         let res = match syntax.kind() {
             CSS_MEDIA_OR_CONDITION => Self::CssMediaOrCondition(CssMediaOrCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38562,20 +38920,20 @@ impl AstNode for AnyCssMediaOrCombinableCondition {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssMediaOrCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaOrCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaOrCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -38583,7 +38941,7 @@ impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
 impl From<AnyCssMediaOrCombinableCondition> for SyntaxNode {
     fn from(n: AnyCssMediaOrCombinableCondition) -> Self {
         match n {
-            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaOrCombinableCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.into_syntax(),
         }
     }
@@ -38707,13 +39065,13 @@ impl From<CssMediaNotCondition> for AnyCssMediaTypeCondition {
 }
 impl AstNode for AnyCssMediaTypeCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaConditionOperand::KIND_SET
         .union(CssMediaAndCondition::KIND_SET)
         .union(CssMediaNotCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION => true,
-            k if AnyCssMediaInParens::can_cast(k) => true,
+            k if AnyCssMediaConditionOperand::can_cast(k) => true,
             _ => false,
         }
     }
@@ -38722,8 +39080,12 @@ impl AstNode for AnyCssMediaTypeCondition {
             CSS_MEDIA_AND_CONDITION => Self::CssMediaAndCondition(CssMediaAndCondition { syntax }),
             CSS_MEDIA_NOT_CONDITION => Self::CssMediaNotCondition(CssMediaNotCondition { syntax }),
             _ => {
-                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
-                    return Some(Self::AnyCssMediaInParens(any_css_media_in_parens));
+                if let Some(any_css_media_condition_operand) =
+                    AnyCssMediaConditionOperand::cast(syntax)
+                {
+                    return Some(Self::AnyCssMediaConditionOperand(
+                        any_css_media_condition_operand,
+                    ));
                 }
                 return None;
             }
@@ -38734,21 +39096,21 @@ impl AstNode for AnyCssMediaTypeCondition {
         match self {
             Self::CssMediaAndCondition(it) => it.syntax(),
             Self::CssMediaNotCondition(it) => it.syntax(),
-            Self::AnyCssMediaInParens(it) => it.syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssMediaAndCondition(it) => it.into_syntax(),
             Self::CssMediaNotCondition(it) => it.into_syntax(),
-            Self::AnyCssMediaInParens(it) => it.into_syntax(),
+            Self::AnyCssMediaConditionOperand(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssMediaTypeCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssMediaConditionOperand(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38757,7 +39119,7 @@ impl std::fmt::Debug for AnyCssMediaTypeCondition {
 impl From<AnyCssMediaTypeCondition> for SyntaxNode {
     fn from(n: AnyCssMediaTypeCondition) -> Self {
         match n {
-            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+            AnyCssMediaTypeCondition::AnyCssMediaConditionOperand(it) => it.into_syntax(),
             AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.into_syntax(),
             AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.into_syntax(),
         }
@@ -43867,6 +44229,68 @@ impl From<AnyScssInterpolatedValuePart> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyScssKeyframesName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl From<ScssVariable> for AnyScssKeyframesName {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
+impl AstNode for AnyScssKeyframesName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssInterpolatedIdentifier::KIND_SET.union(ScssVariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssKeyframesName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssKeyframesName> for SyntaxNode {
+    fn from(n: AnyScssKeyframesName) -> Self {
+        match n {
+            AnyScssKeyframesName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyScssKeyframesName::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssKeyframesName> for SyntaxElement {
+    fn from(n: AnyScssKeyframesName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusParameter> for AnyScssModuleConfiguration {
     fn from(node: CssBogusParameter) -> Self {
         Self::CssBogusParameter(node)
@@ -44828,6 +45252,11 @@ impl std::fmt::Display for AnyCssMediaCondition {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssMediaConditionOperand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssMediaInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -45139,6 +45568,11 @@ impl std::fmt::Display for AnyScssInterpolatedStringPart {
     }
 }
 impl std::fmt::Display for AnyScssInterpolatedValuePart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssKeyframesName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -46458,7 +46892,17 @@ impl std::fmt::Display for ScssInterpolation {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssKeyframesName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssKeyframesSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssKeyframesVariableDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -48881,6 +49325,88 @@ impl IntoIterator for &CssComposesClassList {
 impl IntoIterator for CssComposesClassList {
     type Item = CssCustomIdentifier;
     type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssComposesPropertyValueList {
+    syntax_list: SyntaxList,
+}
+impl CssComposesPropertyValueList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssComposesPropertyValueList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_PROPERTY_VALUE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_PROPERTY_VALUE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssComposesPropertyValueList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssComposesPropertyValueList {
+    type Language = Language;
+    type Node = CssComposesPropertyValue;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssComposesPropertyValueList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssComposesPropertyValueList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssComposesPropertyValueList {
+    type Item = SyntaxResult<CssComposesPropertyValue>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssComposesPropertyValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssComposesPropertyValueList {
+    type Item = SyntaxResult<CssComposesPropertyValue>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssComposesPropertyValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -34,7 +34,9 @@ pub use crate::commands::{BiomeCommand, biome_command};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 use crate::runner::impls::commands::custom_execution::CustomExecutionCmdImpl;
 use crate::runner::impls::commands::traversal::TraversalCommandImpl;
+pub use crate::runner::impls::watchers::mock::MockWatcher;
 use crate::runner::run::run_command;
+pub use crate::runner::watcher::{Watcher, WatcherEvent};
 pub use diagnostics::CliDiagnostic;
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, TraversalSummary};
@@ -49,6 +51,8 @@ pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
 pub struct CliSession<'app> {
     /// Instance of [App] used by this run of the CLI
     pub app: App<'app>,
+
+    pub watcher_factory: Option<Box<dyn Fn() -> Box<dyn Watcher> + Send + Sync>>,
 }
 
 impl<'app> CliSession<'app> {
@@ -58,6 +62,7 @@ impl<'app> CliSession<'app> {
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
             app: App::new(console, WorkspaceRef::Borrowed(workspace)),
+            watcher_factory: None,
         })
     }
 
@@ -65,6 +70,7 @@ impl<'app> CliSession<'app> {
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
         match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
+            BiomeCommand::Upgrade => commands::upgrade::upgrade(self),
             BiomeCommand::Rage(_, _, daemon_logs, formatter, linter) => {
                 commands::rage::rage(self, daemon_logs, formatter, linter)
             }
@@ -95,6 +101,7 @@ impl<'app> CliSession<'app> {
                 log_options,
                 only,
                 skip,
+                watch,
                 profile_rules,
             } => run_command(
                 self,
@@ -120,6 +127,7 @@ impl<'app> CliSession<'app> {
                     only,
                     skip,
                     profile_rules,
+                    watch,
                 }),
             ),
             BiomeCommand::Lint {
@@ -147,6 +155,7 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 log_options,
                 profile_rules,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -174,6 +183,7 @@ impl<'app> CliSession<'app> {
                     css_parser,
                     json_parser,
                     profile_rules,
+                    watch,
                 }),
             ),
             BiomeCommand::Ci {
@@ -233,6 +243,7 @@ impl<'app> CliSession<'app> {
                 css_parser,
                 json_parser,
                 log_options,
+                watch,
             } => run_command(
                 self,
                 &log_options,
@@ -255,6 +266,7 @@ impl<'app> CliSession<'app> {
                     since,
                     css_parser,
                     json_parser,
+                    watch,
                 }),
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
