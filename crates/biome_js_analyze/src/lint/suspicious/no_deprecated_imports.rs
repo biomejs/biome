@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SymbolName, find_jsdoc_for_exported_symbol,
+    JsImportPath, ModuleDb, ModuleInfo, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
 };
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_deprecated_imports::NoDeprecatedImportsOptions;
@@ -153,36 +153,34 @@ fn find_deprecation(
     module_db: &dyn ModuleDb,
     name: &Text,
 ) -> Option<Option<String>> {
-    find_jsdoc_for_exported_symbol(
-        module_db,
-        module_info,
-        SymbolName::new(module_db, name.text()),
-    )
-    .and_then(|jsdoc| {
-        let mut is_deprecated = false;
-        let mut message = String::new();
-        for line in jsdoc.lines() {
-            let line = line.trim();
-            if is_deprecated {
-                if line.is_empty() {
-                    break;
-                }
+    let symbol = SymbolFromModuleInfo::new(module_db, name.text(), module_info);
+    find_jsdoc_for_exported_symbol(module_db, symbol)
+        .as_ref()
+        .and_then(|jsdoc| {
+            let mut is_deprecated = false;
+            let mut message = String::new();
+            for line in jsdoc.lines() {
+                let line = line.trim();
+                if is_deprecated {
+                    if line.is_empty() {
+                        break;
+                    }
 
-                if !message.is_empty() {
-                    message.push(' ');
-                }
+                    if !message.is_empty() {
+                        message.push(' ');
+                    }
 
-                message.push_str(line);
-            } else if let Some((_before, after)) = line.split_once("@deprecated") {
-                is_deprecated = true;
-                message.push_str(after.trim_start());
+                    message.push_str(line);
+                } else if let Some((_before, after)) = line.split_once("@deprecated") {
+                    is_deprecated = true;
+                    message.push_str(after.trim_start());
+                }
             }
-        }
 
-        is_deprecated.then_some(if message.is_empty() {
-            None
-        } else {
-            Some(message)
+            is_deprecated.then_some(if message.is_empty() {
+                None
+            } else {
+                Some(message)
+            })
         })
-    })
 }

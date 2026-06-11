@@ -75,7 +75,7 @@ use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -237,8 +237,7 @@ impl WorkspaceServer {
 
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> ProjectDatabase {
-        let db = self.db_state.db.lock().expect("db lock poisoned");
-        db.clone()
+        self.db_state.handle.to_db()
     }
 
     /// Returns the module db for use in tests.
@@ -1491,8 +1490,9 @@ impl WorkspaceServer {
         }
     }
 
-    fn lock_db(&self) -> Result<MutexGuard<'_, ProjectDatabase>, WorkspaceError> {
-        self.db_state.lock_db()
+    /// Returns a clone of the database. This is usually used to **read** data from it.
+    fn get_db(&self) -> ProjectDatabase {
+        self.db_state.handle.to_db()
     }
 
     /// Stores a [ModuleInfo] in the database
@@ -1501,23 +1501,16 @@ impl WorkspaceServer {
         path: &Utf8Path,
         kind: ModuleInfoKind,
     ) -> Result<(), WorkspaceError> {
-        let mut db = self.lock_db()?;
-        let path_buf = path.to_path_buf();
-
-        let existing = db.modules.pin().get(&path_buf).copied();
-        if let Some(module_info) = existing {
-            salsa::Setter::to(module_info.set_kind(&mut *db), kind);
-        } else {
-            let module_info = ModuleInfo::new(&*db, path_buf.clone(), kind);
-            db.insert_module(path_buf, module_info);
-        }
+        let db = self.db_state.handle.to_db();
+        let module_info = ModuleInfo::new(&db, path.to_path_buf(), kind);
+        db.insert_module(path.to_path_buf(), module_info);
         Ok(())
     }
 
     /// Removes a [ModuleInfo] from the database
     fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         self.db_state.path_info_cache.remove(path);
-        let db = self.lock_db()?;
+        let db = self.db_state.handle.to_db();
         db.remove_module(path);
         Ok(())
     }
@@ -1525,18 +1518,7 @@ impl WorkspaceServer {
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         self.db_state.path_info_cache.remove(path);
-        let Ok(db) = self.lock_db() else {
-            return;
-        };
-        let modules = db.modules.pin();
-        let to_remove: Vec<Utf8PathBuf> = modules
-            .keys()
-            .filter(|p| p.starts_with(path))
-            .cloned()
-            .collect();
-        for p in to_remove {
-            modules.remove(&p);
-        }
+        self.db_state.handle.to_db().unload_path(path);
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -3148,7 +3130,7 @@ impl Workspace for WorkspaceServer {
         &self,
         _params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
-        let db = self.lock_db()?;
+        let db = self.get_db();
         let mut data = FxHashMap::default();
         db.for_each_module(&mut |path, kind| {
             data.insert(path.as_str().to_string(), kind.dump());
@@ -3197,7 +3179,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                     .into_iter()
                     .any(|package_path| package_path.starts_with(workspace_root))
             }),
-            _ => self.lock_db().is_ok_and(|db| db.contains(path)),
+            _ => self.module_db().contains(path),
         }
     }
 

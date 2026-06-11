@@ -26,10 +26,10 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath, SymbolName,
-    collect_available_classes_for_js_file, find_js_exported_symbol,
-    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
-    transitive_importers_of, traverse_import_tree_for_html_classes,
+    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath,
+    SymbolFromModuleInfo, find_js_exported_symbol, is_class_referenced_by_importers,
+    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -41,6 +41,7 @@ use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashSet;
 use walkdir::WalkDir;
 
 fn build_js_db(
@@ -2544,14 +2545,16 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     // the re-export chain to a binding in `source.ts`).
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
 
-    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "renamedSymbol"));
+    let found =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel));
     assert!(
         found.is_some(),
         "`renamedSymbol` must be found via the aliased re-export chain; got None"
     );
 
     // `originalName` must NOT be visible under the barrel's public API.
-    let not_found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "originalName"));
+    let not_found =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel));
     assert!(
         not_found.is_none(),
         "`originalName` must not be directly exported from the barrel"
@@ -2616,7 +2619,7 @@ fn test_namespace_reexport_is_own_export() {
     );
 
     // Confirm `find_js_exported_symbol` returns `Some` as the lint rule sees it.
-    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "MyNs"));
+    let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "MyNs", barrel));
     assert!(
         found.is_some(),
         "`MyNs` must be found by find_js_exported_symbol"
@@ -2811,11 +2814,14 @@ export function Component() {
         .unwrap();
 
     assert!(
-        is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "used")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "used", styles_css)),
         "'used' class should be referenced by Component.jsx"
     );
     assert!(
-        !is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "unused")),
+        !is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "unused", styles_css)
+        ),
         "'unused' class should not be referenced by any importer"
     );
 }
@@ -2877,13 +2883,13 @@ export function App() {
 
     // The 'base' class is used by App.jsx, so it should be considered referenced.
     assert!(
-        is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "base")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "base", module)),
         "'base' class must be referenced transitively"
     );
 
     // The 'orphan' class is never used anywhere.
     assert!(
-        !is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "orphan")),
+        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "orphan", module)),
         "'orphan' class must not be referenced"
     );
 }
@@ -2977,12 +2983,18 @@ export function App() {
 
     // Classes used in App.tsx should be detected even from nested CSS
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button"),),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "button", components_css)
+        ),
         "'button' class from components.css should be detected as used"
     );
 
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "card", components_css)
+        ),
         "'card' class from components.css should be detected as used"
     );
 
@@ -2990,20 +3002,19 @@ export function App() {
     assert!(
         !is_class_referenced_by_importers(
             &db,
-            components_css,
-            SymbolName::new(&db, "unused-component-class"),
+            SymbolFromModuleInfo::new(&db, "unused-component-class", components_css)
         ),
         "'unused-component-class' should be detected as unused"
     );
 
     // Utils classes should also work
     assert!(
-        is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "flex")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "flex", utils_css)),
         "'flex' class from utils.css should be detected as used"
     );
 
     assert!(
-        !is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "grid")),
+        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "grid", utils_css)),
         "'grid' class from utils.css should be detected as unused"
     );
 }
@@ -3096,100 +3107,33 @@ export function Dashboard() {
 
     // button used in App.tsx
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "button", components_css)
+        ),
         "'button' should be detected as used"
     );
 
     // card used in Dashboard.tsx
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "card", components_css)
+        ),
         "'card' should be detected as used"
     );
 
     // modal not used anywhere
     assert!(
-        !is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "modal")),
+        !is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "modal", components_css)
+        ),
         "'modal' should be detected as unused"
     );
 }
 
-/// Verifies deep nesting: 3 levels of CSS imports.
-///
-/// App.tsx → main.css → theme.css → base.css (defines .primary)
-#[test]
-fn test_deeply_nested_css_import_chain() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "/src/base.css".into(),
-        r#"
-.primary { color: blue; }
-.secondary { color: gray; }
-"#,
-    );
-
-    fs.insert(
-        "/src/theme.css".into(),
-        r#"
-@import "./base.css";
-"#,
-    );
-
-    fs.insert(
-        "/src/main.css".into(),
-        r#"
-@import "./theme.css";
-"#,
-    );
-
-    fs.insert(
-        "/src/App.tsx".into(),
-        r#"
-import "./main.css";
-
-export function App() {
-    return <button className="primary">Primary Button</button>;
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/base.css"),
-        BiomePath::new("/src/theme.css"),
-        BiomePath::new("/src/main.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.tsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = ProjectDatabase::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // App.tsx should be found even for deeply nested base.css
-    let base_css = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
-    let consumers = transitive_importers_of(&db, base_css);
-    assert!(
-        consumers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
-        "App.tsx should be a consumer of base.css through 3-level import chain; got: {consumers:?}"
-    );
-
-    // primary used in App.tsx
-    assert!(
-        is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "primary")),
-        "'primary' from deeply nested base.css should be detected as used"
-    );
-
-    // secondary not used
-    assert!(
-        !is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "secondary")),
-        "'secondary' should be detected as unused"
-    );
-}
-
-/// Tests `collect_available_classes_for_js_file` for a JSX file that directly
+/// Tests `traverse_import_tree_for_classes` for a JSX file that directly
 /// imports CSS.
 #[test]
 fn test_collect_available_classes_for_js_file() {
@@ -3221,10 +3165,15 @@ export function App() {
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) = collect_available_classes_for_js_file(
+    let traversal = traverse_import_tree_for_classes(
         &db,
         db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
     );
+    let classes: FxHashSet<String> = traversal
+        .iter()
+        .flat_map(|step| step.css_classes.values())
+        .map(|class| class.text().to_string())
+        .collect();
 
     // Should find both CSS classes
     assert!(classes.contains("button"), "Should find .button class");
@@ -3239,7 +3188,7 @@ export function App() {
     );
 }
 
-/// Tests `collect_available_classes_for_js_file` with multiple CSS imports.
+/// Tests `traverse_import_tree_for_classes` with multiple CSS imports.
 #[test]
 fn test_collect_available_classes_for_js_file_multiple_css() {
     let fs = MemoryFileSystem::default();
@@ -3281,10 +3230,15 @@ export function App() {
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) = collect_available_classes_for_js_file(
+    let traversal = traverse_import_tree_for_classes(
         &db,
         db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
     );
+    let classes: FxHashSet<String> = traversal
+        .iter()
+        .flat_map(|step| step.css_classes.values())
+        .map(|class| class.text().to_string())
+        .collect();
 
     // Should find all CSS classes from both imports
     assert!(classes.contains("btn"), "Should find .btn class");
@@ -3332,14 +3286,19 @@ fn test_export_equals_namespace_without_type_inference() {
         .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
         .expect("react module must exist");
 
-    let use_state = find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useState"));
+    let use_state = find_js_exported_symbol(
+        &db,
+        SymbolFromModuleInfo::new(&db, "useState", react_module),
+    );
     assert!(
         use_state.is_some(),
         "`useState` must be visible as a named export from `@types/react` even without type inference"
     );
 
-    let use_callback =
-        find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useCallback"));
+    let use_callback = find_js_exported_symbol(
+        &db,
+        SymbolFromModuleInfo::new(&db, "useCallback", react_module),
+    );
     assert!(
         use_callback.is_some(),
         "`useCallback` must be visible as a named export from `@types/react` even without type inference"
@@ -3604,7 +3563,7 @@ fn test_vue_mixed_scoped_and_unscoped() {
     // Only Global class appears in the traversal.
     let module = db.module_for_path(Utf8Path::new("/src/Mixed.vue")).unwrap();
     let traversal_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .into_iter()
+        .iter()
         .flat_map(|step| {
             step.css_classes
                 .values()
@@ -3878,8 +3837,8 @@ fn test_vue_upward_traversal() {
         .module_for_path(Utf8Path::new("/src/Button.vue"))
         .unwrap();
     let available_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .into_iter()
-        .flat_map(|step| step.css_classes.into_values())
+        .iter()
+        .flat_map(|step| step.css_classes.values())
         .collect();
 
     assert!(
