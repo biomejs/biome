@@ -1182,4 +1182,37 @@ mod tests {
             "/* first line\n   continuation */\n  .foo { color: red; }"
         );
     }
+
+    #[test]
+    fn verbatim_ranges_must_be_computed_from_trimmed_code() {
+        // Regression: verbatim ranges computed on code with a leading '\n' are
+        // shifted by 1. When the trimmed code is passed to reindent_embedded_code,
+        // the first continuation line after a template-literal opening backtick
+        // lands exactly at range.start() and fails the strict `<` check, so it
+        // receives the host indent on every pass.
+        //
+        // "const x = `\ncontinuation\n`;"
+        // Template chunk starts at byte 11 (after "const x = `").
+        // With correct ranges [11,..), byte 12 satisfies 11 < 12 → verbatim. ✓
+        // With wrong ranges [12,..) from untrimmed "\nconst x = `...",
+        // byte 12 fails 12 < 12 → not verbatim → BUG.
+        let trimmed = "const x = `\ncontinuation\n`;";
+        let untrimmed = "\nconst x = `\ncontinuation\n`;";
+
+        // Correct: ranges from trimmed — continuation is protected.
+        let correct_ranges = js_verbatim_ranges(trimmed);
+        let result = reindent_embedded_code(trimmed, "  ", &correct_ranges);
+        assert!(
+            !result.contains("  continuation"),
+            "continuation must not be indented when ranges come from trimmed code"
+        );
+
+        // Wrong: ranges from untrimmed — continuation escapes the verbatim check.
+        let wrong_ranges = js_verbatim_ranges(untrimmed);
+        let buggy = reindent_embedded_code(trimmed, "  ", &wrong_ranges);
+        assert!(
+            buggy.contains("  continuation"),
+            "demonstrates the bug: continuation is wrongly indented when ranges come from untrimmed code"
+        );
+    }
 }
