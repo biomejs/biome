@@ -1,9 +1,3 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.jsx
----
-# Input
-```jsx
 /* should not generate diagnostics */
 function DeclarationComponent(props) {
     return <div>{props.name}</div>;
@@ -25,4 +19,6 @@ const NotAComponent = (first, second) => {
     return <div>{first}{second}</div>;
 };
 
-```
+const ShorthandParamComponent = props => {
+    return <div>{props.name}</div>;
+};

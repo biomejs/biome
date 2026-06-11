@@ -4,7 +4,7 @@
     "enabled": true,
     "rules": {
       "nursery": {
-        "useFunctionComponentDefinition": {
+        "useReactFunctionComponentDefinition": {
           "level": "error",
           "options": {
             "namedComponents": "arrowFunction"

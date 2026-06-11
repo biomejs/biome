@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: invalid.jsx
 ---
 # Input
@@ -18,7 +17,7 @@ const FunctionExpressionComponent = function (props) {
 
 # Diagnostics
 ```
-invalid.jsx:2:10 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:10 lint/nursery/useReactFunctionComponentDefinition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The React component FunctionDeclarationComponent is defined as a function declaration.
   
@@ -34,11 +33,22 @@ invalid.jsx:2:10 lint/nursery/useFunctionComponentDefinition ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Use an arrow function for this component.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - function·FunctionDeclarationComponent(props)·{
+      2 │ + const·FunctionDeclarationComponent·=·(props)·=>·{
+    3 3 │       return <div>{props.name}</div>;
+    4   │ - }
+      4 │ + };
+    5 5 │   
+    6 6 │   const FunctionExpressionComponent = function (props) {
+  
 
 ```
 
 ```
-invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:7 lint/nursery/useReactFunctionComponentDefinition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The React component FunctionExpressionComponent is defined as a function expression.
   
@@ -54,6 +64,15 @@ invalid.jsx:6:7 lint/nursery/useFunctionComponentDefinition ━━━━━━�
   i Rewrite this component as an arrow function or configure `namedComponents` to allow a function expression.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an arrow function for this component.
+  
+    4 4 │   }
+    5 5 │   
+    6   │ - const·FunctionExpressionComponent·=·function·(props)·{
+      6 │ + const·FunctionExpressionComponent·=·(props)·=>·{
+    7 7 │       return <div>{props.name}</div>;
+    8 8 │   };
   
 
 ```

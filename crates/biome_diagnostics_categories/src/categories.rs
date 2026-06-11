@@ -264,7 +264,7 @@ define_categories! {
     "lint/nursery/useExplicitReturnType": "https://biomejs.dev/linter/rules/use-explicit-return-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
-    "lint/nursery/useFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-function-component-definition",
+    "lint/nursery/useReactFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-react-function-component-definition",
     "lint/nursery/useGlobalThis": "https://biomejs.dev/linter/rules/use-global-this",
     "lint/nursery/useIframeSandbox": "https://biomejs.dev/linter/rules/use-iframe-sandbox",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",

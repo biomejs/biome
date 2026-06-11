@@ -7,6 +7,8 @@ const ExpressionComponent = function (props) {
     return <div>{props.name}</div>;
 };
 
+const ConciseBodyComponent = (props) => <div>{props.name}</div>;
+
 const MemoComponent = memo((props) => {
     return <div>{props.name}</div>;
 });
