@@ -196,9 +196,8 @@ impl Rule for NoUndeclaredDependencies {
             let alias_prefix = package_name
                 .split('/')
                 .next()
-                .unwrap_or(package_name)
-                .to_string();
-            if is_path_alias_prefix(&alias_prefix, &path.to_path_buf()) {
+                .unwrap_or(package_name);
+            if is_path_alias_prefix(alias_prefix, &path.to_path_buf()) {
                 return None; // Valid path alias, ignore this import
             }
         }
