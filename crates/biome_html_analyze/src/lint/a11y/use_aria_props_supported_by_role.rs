@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAriaPropsSupportedByRole {
-        version: "next",
+        version: "2.5.0",
         name: "useAriaPropsSupportedByRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props").inspired()],

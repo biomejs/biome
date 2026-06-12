@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
     ///
     pub NoAriaHiddenOnFocusable {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaHiddenOnFocusable",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable").inspired(), RuleSource::HtmlEslint("no-aria-hidden-on-focusable").same()],

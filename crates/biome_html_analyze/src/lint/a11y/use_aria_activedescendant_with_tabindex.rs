@@ -55,7 +55,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAriaActivedescendantWithTabindex {
-        version: "next",
+        version: "2.5.0",
         name: "useAriaActivedescendantWithTabindex",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex").inspired()],

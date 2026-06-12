@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     pub UseValidAriaValues {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAriaValues",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-proptypes").inspired()],

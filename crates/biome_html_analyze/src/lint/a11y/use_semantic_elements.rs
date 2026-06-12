@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSemanticElements {
-        version: "next",
+        version: "2.5.0",
         name: "useSemanticElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role").inspired()],

@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
     pub NoNoninteractiveElementToInteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noNoninteractiveElementToInteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role").inspired()],
