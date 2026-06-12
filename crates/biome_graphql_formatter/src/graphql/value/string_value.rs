@@ -50,7 +50,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
                     }
                     // Write the line with the minimum indentation level removed
                     // SAFETY: min_indent is always less than or equal to the length of the line
-                    join.entry(&text(&line[min_indent..], start));
+                    join.entry(&text(&line[min_indent..], Some(start)));
                     start += line.text_len();
 
                     if line.is_empty() {

@@ -6,11 +6,10 @@ use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration, TextSize,
     TrailingNewline, TransformSourceMap,
 };
 use crate::{format, write};
-use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
 
@@ -114,8 +113,12 @@ impl Document {
                         // propagate their expansion.
                         false
                     }
-                    FormatElement::Text { text, .. } => text.contains('\n'),
-                    FormatElement::LocatedTokenText { slice, .. } => slice.contains('\n'),
+                    FormatElement::Text { text_width, .. }
+                    | FormatElement::LocatedTokenText { text_width, .. } => {
+                        text_width.is_multiline()
+                    }
+                    FormatElement::MappedText { text, .. } => text.contains('\n'),
+                    FormatElement::MappedLocatedTokenText { slice, .. } => slice.contains('\n'),
                     FormatElement::ExpandParent
                     | FormatElement::Line(LineMode::Hard | LineMode::Empty) => true,
                     FormatElement::Token { .. } => false,
@@ -275,6 +278,42 @@ impl Format<IrFormatContext> for &[FormatElement] {
     fn fmt(&self, f: &mut Formatter<IrFormatContext>) -> FormatResult<()> {
         use Tag::*;
 
+        fn is_contiguous_display_text(element: &FormatElement) -> bool {
+            matches!(
+                element,
+                FormatElement::Space
+                    | FormatElement::HardSpace
+                    | FormatElement::Token { .. }
+                    | FormatElement::Text { .. }
+                    | FormatElement::LocatedTokenText { .. }
+            )
+        }
+
+        fn write_source_position(
+            f: &mut Formatter<IrFormatContext>,
+            source_position: TextSize,
+        ) -> FormatResult<()> {
+            write!(
+                f,
+                [
+                    text(
+                        &std::format!("source_position({:?})", source_position),
+                        None
+                    ),
+                    token(","),
+                    soft_line_break_or_space()
+                ]
+            )
+        }
+
+        fn write_display_text(f: &mut Formatter<IrFormatContext>, text: &str) -> FormatResult<()> {
+            let text = text.replace('"', "\\\"");
+            f.write_element(FormatElement::Text {
+                text_width: TextWidth::from_text(&text, f.options().indent_width()),
+                text: text.into(),
+            })
+        }
+
         write!(f, [ContentArrayStart])?;
 
         let mut tag_stack = Vec::new();
@@ -284,6 +323,16 @@ impl Format<IrFormatContext> for &[FormatElement] {
         let mut iter = self.iter().peekable();
 
         while let Some(element) = iter.next() {
+            let is_mapped_text = matches!(
+                element,
+                FormatElement::MappedText { .. } | FormatElement::MappedLocatedTokenText { .. }
+            );
+
+            if in_text && is_mapped_text {
+                write!(f, [token("\"")])?;
+                in_text = false;
+            }
+
             if !first_element && !in_text && !element.is_end_tag() {
                 // Write a separator between every two elements
                 write!(f, [token(","), soft_line_break_or_space()])?;
@@ -292,6 +341,42 @@ impl Format<IrFormatContext> for &[FormatElement] {
             first_element = false;
 
             match element {
+                FormatElement::MappedText {
+                    text,
+                    source_position,
+                } => {
+                    write_source_position(f, *source_position)?;
+                    write!(f, [token("\"")])?;
+                    write_display_text(f, text)?;
+
+                    in_text = true;
+
+                    let is_next_text = iter.peek().is_some_and(|e| is_contiguous_display_text(e));
+
+                    if !is_next_text {
+                        write!(f, [token("\"")])?;
+                        in_text = false;
+                    }
+                }
+
+                FormatElement::MappedLocatedTokenText {
+                    slice,
+                    source_position,
+                } => {
+                    write_source_position(f, *source_position)?;
+                    write!(f, [token("\"")])?;
+                    write_display_text(f, slice)?;
+
+                    in_text = true;
+
+                    let is_next_text = iter.peek().is_some_and(|e| is_contiguous_display_text(e));
+
+                    if !is_next_text {
+                        write!(f, [token("\"")])?;
+                        in_text = false;
+                    }
+                }
+
                 element @ (FormatElement::Space
                 | FormatElement::HardSpace
                 | FormatElement::Token { .. }
@@ -312,24 +397,24 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             let new_element = match element {
                                 // except for token because source_position is unknown
                                 FormatElement::Token { .. } => element.clone(),
-                                FormatElement::Text {
-                                    text,
-                                    source_position,
-                                } => {
+                                FormatElement::Text { text, .. } => {
                                     let text = text.to_string().replace('"', "\\\"");
                                     FormatElement::Text {
+                                        text_width: TextWidth::from_text(
+                                            &text,
+                                            f.options().indent_width(),
+                                        ),
                                         text: text.into(),
-                                        source_position: *source_position,
                                     }
                                 }
-                                FormatElement::LocatedTokenText {
-                                    slice,
-                                    source_position,
-                                } => {
+                                FormatElement::LocatedTokenText { slice, .. } => {
                                     let text = slice.to_string().replace('"', "\\\"");
                                     FormatElement::Text {
+                                        text_width: TextWidth::from_text(
+                                            &text,
+                                            f.options().indent_width(),
+                                        ),
                                         text: text.into(),
-                                        source_position: *source_position,
                                     }
                                 }
                                 _ => unreachable!(),
@@ -339,7 +424,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         _ => unreachable!(),
                     }
 
-                    let is_next_text = iter.peek().is_some_and(|e| e.is_text() || e.is_space());
+                    let is_next_text = iter.peek().is_some_and(|e| is_contiguous_display_text(e));
 
                     if !is_next_text {
                         write!(f, [token("\"")])?;
@@ -363,6 +448,13 @@ impl Format<IrFormatContext> for &[FormatElement] {
                 },
                 FormatElement::ExpandParent => {
                     write!(f, [token("expand_parent")])?;
+                }
+
+                FormatElement::SourcePosition(position) => {
+                    write!(
+                        f,
+                        [text(&std::format!("source_position({:?})", position), None),]
+                    )?;
                 }
 
                 FormatElement::LineSuffixBoundary => {
@@ -399,7 +491,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             write!(
                                 f,
                                 [
-                                    text(&std::format!("<interned {index}>"), TextSize::default()),
+                                    text(&std::format!("<interned {index}>"), None),
                                     space(),
                                     &interned.deref(),
                                 ]
@@ -408,10 +500,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         Some(reference) => {
                             write!(
                                 f,
-                                [text(
-                                    &std::format!("<ref interned *{reference}>"),
-                                    TextSize::default()
-                                )]
+                                [text(&std::format!("<ref interned *{reference}>"), None)]
                             )?;
                         }
                     }
@@ -431,10 +520,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                     f,
                                     [
                                         token("<END_TAG_WITHOUT_START<"),
-                                        text(
-                                            &std::format!("{:?}", tag.kind()),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("{:?}", tag.kind()), None),
                                         token(">>"),
                                     ]
                                 )?;
@@ -449,12 +535,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                         token(")"),
                                         soft_line_break_or_space(),
                                         token("ERROR<START_END_TAG_MISMATCH<start: "),
-                                        text(&std::format!("{start_kind:?}"), TextSize::default()),
+                                        text(&std::format!("{start_kind:?}"), None),
                                         token(", end: "),
-                                        text(
-                                            &std::format!("{:?}", tag.kind()),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("{:?}", tag.kind()), None),
                                         token(">>")
                                     ]
                                 )?;
@@ -486,7 +569,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("align("),
-                                    text(&count.to_string(), TextSize::default()),
+                                    text(&count.to_string(), None),
                                     token(","),
                                     space(),
                                 ]
@@ -508,10 +591,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 write!(
                                     f,
                                     [
-                                        text(
-                                            &std::format!("\"{group_id:?}\""),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("\"{group_id:?}\""), None),
                                         token(","),
                                         space(),
                                     ]
@@ -534,7 +614,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("indent_if_group_breaks("),
-                                    text(&std::format!("\"{id:?}\""), TextSize::default()),
+                                    text(&std::format!("\"{id:?}\""), None),
                                     token(","),
                                     space(),
                                 ]
@@ -555,10 +635,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 write!(
                                     f,
                                     [
-                                        text(
-                                            &std::format!("\"{group_id:?}\""),
-                                            TextSize::default()
-                                        ),
+                                        text(&std::format!("\"{group_id:?}\""), None),
                                         token(","),
                                         space(),
                                     ]
@@ -571,7 +648,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("label("),
-                                    text(&std::format!("\"{label_id:?}\""), TextSize::default()),
+                                    text(&std::format!("\"{label_id:?}\""), None),
                                     token(","),
                                     space(),
                                 ]
@@ -619,10 +696,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     ContentArrayEnd,
                     token(")"),
                     soft_line_break_or_space(),
-                    text(
-                        &std::format!("<START_WITHOUT_END<{top:?}>>"),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("<START_WITHOUT_END<{top:?}>>"), None),
                 ]
             )?;
         }
@@ -790,10 +864,10 @@ impl FormatElements for [FormatElement] {
 mod tests {
     use biome_js_syntax::JsSyntaxKind;
     use biome_js_syntax::JsSyntaxToken;
-    use biome_rowan::TextSize;
 
-    use crate::SimpleFormatContext;
+    use crate::prelude::document::IrFormatOptions;
     use crate::prelude::*;
+    use crate::{FormatOptions, SimpleFormatContext};
     use crate::{format, format_args, write};
 
     #[test]
@@ -928,14 +1002,14 @@ mod tests {
     fn escapes_quotes() {
         let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\"bar\"", [], []);
         let token_text = FormatElement::LocatedTokenText {
-            source_position: TextSize::default(),
             slice: token.token_text(),
+            text_width: TextWidth::from_text("\"bar\"", IrFormatOptions.indent_width()),
         };
 
         let mut document = Document::from(vec![
             FormatElement::Text {
+                text_width: TextWidth::from_text("\"foo\"", IrFormatOptions.indent_width()),
                 text: "\"foo\"".into(),
-                source_position: TextSize::default(),
             },
             token_text,
         ]);

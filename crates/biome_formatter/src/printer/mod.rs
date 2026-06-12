@@ -6,7 +6,7 @@ mod stack;
 
 pub use printer_options::*;
 
-use crate::format_element::{BestFittingVariants, LineMode, PrintMode};
+use crate::format_element::{BestFittingVariants, LineMode, PrintMode, TextWidth};
 use crate::{
     ActualStart, FormatElement, GroupId, IndentStyle, InvalidDocumentError, PrintError,
     PrintResult, Printed, SourceMarker, TextRange,
@@ -96,15 +96,35 @@ impl<'a> Printer<'a> {
                 }
             }
 
-            FormatElement::Token { text } => self.print_text(Text::Token(text), None),
-            FormatElement::Text {
+            FormatElement::Token { text } => self.print_text(Text::Token(text)),
+            FormatElement::Text { text, text_width } => self.print_text(Text::Text {
+                text,
+                text_width: Some(*text_width),
+            }),
+            FormatElement::LocatedTokenText { slice, text_width } => self.print_text(Text::Text {
+                text: slice,
+                text_width: Some(*text_width),
+            }),
+            FormatElement::MappedText {
                 text,
                 source_position,
-            } => self.print_text(Text::Text(text), Some(*source_position)),
-            FormatElement::LocatedTokenText {
+            } => {
+                self.state.pending_source_position = Some(*source_position);
+                self.print_text(Text::Text {
+                    text,
+                    text_width: None,
+                });
+            }
+            FormatElement::MappedLocatedTokenText {
                 slice,
                 source_position,
-            } => self.print_text(Text::Text(slice), Some(*source_position)),
+            } => {
+                self.state.pending_source_position = Some(*source_position);
+                self.print_text(Text::Text {
+                    text: slice,
+                    text_width: None,
+                });
+            }
 
             FormatElement::Line(line_mode) => {
                 if args.mode().is_flat() {
@@ -143,6 +163,14 @@ impl<'a> Printer<'a> {
 
             FormatElement::ExpandParent => {
                 // Handled in `Document::propagate_expands()
+            }
+
+            FormatElement::SourcePosition(source_position) => {
+                // The printer defers printing indents until the next text
+                // is printed. Pushing the marker now would mean that the
+                // mapped range includes the indent range, which we don't want.
+                // Queue the source map position and emit it when printing the next character
+                self.state.pending_source_position = Some(*source_position);
             }
 
             FormatElement::LineSuffixBoundary => {
@@ -329,7 +357,7 @@ impl<'a> Printer<'a> {
         result
     }
 
-    fn print_text(&mut self, text: Text, source_position: Option<TextSize>) {
+    fn print_text(&mut self, text: Text) {
         if !self.state.pending_indent.is_empty() {
             let (indent_char, repeat_count) = match self.options.indent_style() {
                 IndentStyle::Tab => ('\t', 1),
@@ -369,7 +397,8 @@ impl<'a> Printer<'a> {
         // If the token has no source position (was created by the formatter)
         // both the start and end marker will use the last known position
         // in the input source (from state.source_position)
-        if let Some(source) = source_position {
+        let pending_source_position = self.state.pending_source_position.take();
+        if let Some(source) = pending_source_position {
             self.state.source_position = source;
         }
 
@@ -387,17 +416,25 @@ impl<'a> Printer<'a> {
                     self.state.has_empty_line = false;
                 }
             }
-            Text::Text(text_str) => {
-                for char in text_str.chars() {
-                    self.print_char(char);
+            Text::Text { text, text_width } => {
+                if let Some(width) = text_width.and_then(TextWidth::width) {
+                    self.state.buffer.push_str(text);
+                    self.state.line_width += width.value() as usize;
+                    if !text.is_empty() {
+                        self.state.has_empty_line = false;
+                    }
+                } else {
+                    for char in text.chars() {
+                        self.print_char(char);
+                    }
                 }
             }
         }
 
-        if source_position.is_some() {
+        if pending_source_position.is_some() {
             let text_str = match text {
                 Text::Token(s) => s,
-                Text::Text(s) => s,
+                Text::Text { text, .. } => text,
             };
             self.state.source_position += text_str.text_len();
         }
@@ -790,7 +827,10 @@ enum Text<'a> {
     /// ASCII only text that contains no line breaks or tab characters.
     Token(&'a str),
     /// Arbitrary text. May contain `\n` line breaks, tab characters, or unicode characters.
-    Text(&'a str),
+    Text {
+        text: &'a str,
+        text_width: Option<TextWidth>,
+    },
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -818,6 +858,8 @@ struct PrinterState<'a> {
     buffer: String,
     source_markers: Vec<SourceMarker>,
     source_position: TextSize,
+    /// The next source position that should be flushed when writing the next text.
+    pending_source_position: Option<TextSize>,
     pending_indent: Indention,
     pending_space: bool,
     measured_group_fits: bool,
@@ -1172,9 +1214,29 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Token { text } => return Ok(self.fits_text(Text::Token(text))),
-            FormatElement::Text { text, .. } => return Ok(self.fits_text(Text::Text(text))),
-            FormatElement::LocatedTokenText { slice, .. } => {
-                return Ok(self.fits_text(Text::Text(slice)));
+            FormatElement::Text { text, text_width } => {
+                return Ok(self.fits_text(Text::Text {
+                    text,
+                    text_width: Some(*text_width),
+                }));
+            }
+            FormatElement::LocatedTokenText { slice, text_width } => {
+                return Ok(self.fits_text(Text::Text {
+                    text: slice,
+                    text_width: Some(*text_width),
+                }));
+            }
+            FormatElement::MappedText { text, .. } => {
+                return Ok(self.fits_text(Text::Text {
+                    text,
+                    text_width: None,
+                }));
+            }
+            FormatElement::MappedLocatedTokenText { slice, .. } => {
+                return Ok(self.fits_text(Text::Text {
+                    text: slice,
+                    text_width: None,
+                }));
             }
 
             FormatElement::LineSuffixBoundary => {
@@ -1187,6 +1249,10 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 if self.must_be_flat {
                     return Ok(Fits::No);
                 }
+            }
+
+            FormatElement::SourcePosition(_) => {
+                // Source position tracking is not needed for fits checking
             }
 
             FormatElement::BestFitting(best_fitting) => {
@@ -1348,22 +1414,26 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             Text::Token(token) => {
                 self.state.line_width += token.len();
             }
-            Text::Text(text_str) => {
-                for c in text_str.chars() {
-                    let char_width = match c {
-                        '\t' => self.options().indent_width.value() as usize,
-                        '\n' => {
-                            return if self.must_be_flat
-                                || self.state.line_width > self.options().print_width.into()
-                            {
-                                Fits::No
-                            } else {
-                                Fits::Yes
-                            };
-                        }
-                        c => c.width().unwrap_or(0),
-                    };
-                    self.state.line_width += char_width;
+            Text::Text { text, text_width } => {
+                if let Some(width) = text_width.and_then(TextWidth::width) {
+                    self.state.line_width += width.value() as usize;
+                } else {
+                    for c in text.chars() {
+                        let char_width = match c {
+                            '\t' => self.options().indent_width.value() as usize,
+                            '\n' => {
+                                return if self.must_be_flat
+                                    || self.state.line_width > self.options().print_width.into()
+                                {
+                                    Fits::No
+                                } else {
+                                    Fits::Yes
+                                };
+                            }
+                            c => c.width().unwrap_or(0),
+                        };
+                        self.state.line_width += char_width;
+                    }
                 }
             }
         }
@@ -1469,7 +1539,6 @@ mod tests {
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
     use crate::{Document, FormatState, IndentStyle, Printed, VecBuffer, format_args, write};
-    use biome_rowan::TextSize;
 
     fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
         format_with_options(
@@ -1559,10 +1628,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1585,10 +1651,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1611,10 +1674,7 @@ a"#,
         let result = format_with_options(
             &format_args![
                 token("function main() {"),
-                block_indent(&text(
-                    "let x = `This is a multiline\nstring`;",
-                    TextSize::default()
-                )),
+                block_indent(&text("let x = `This is a multiline\nstring`;", None)),
                 token("}"),
                 hard_line_break()
             ],
@@ -1641,10 +1701,7 @@ a"#,
     fn it_breaks_a_group_if_a_string_contains_a_newline() {
         let result = format(&FormatArrayElements {
             items: vec![
-                &text(
-                    "`This is a string spanning\ntwo lines`",
-                    TextSize::default(),
-                ),
+                &text("`This is a string spanning\ntwo lines`", None),
                 &token("\"b\""),
             ],
         });
@@ -1928,10 +1985,7 @@ Group 1 breaks"#
             &format_args![group(&format_args!(
                 token("("),
                 soft_line_break(),
-                text(
-                    "This is a string\n containing a newline",
-                    TextSize::default()
-                ),
+                text("This is a string\n containing a newline", None),
                 soft_line_break(),
                 token(")")
             ))],
