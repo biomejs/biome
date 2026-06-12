@@ -487,10 +487,7 @@ impl Format<FormatTypeContext> for CssImport {
                 [&format_args![
                     token("specifier:"),
                     space(),
-                    text(
-                        &std::format!("{:?}", self.specifier.text()),
-                        TextSize::default()
-                    ),
+                    text(&std::format!("{:?}", self.specifier.text()), None),
                     token(","),
                     hard_line_break(),
                     token("resolved_path:"),
@@ -528,7 +525,7 @@ impl Format<FormatTypeContext> for CssImports {
                 write!(
                     f,
                     [&format_args![
-                        text(&std::format!("{:?}", specifier.text()), TextSize::default()),
+                        text(&std::format!("{:?}", specifier.text()), None),
                         space(),
                         token("=>"),
                         space(),
@@ -557,13 +554,10 @@ impl Format<FormatTypeContext> for CssClassDefinition {
         write!(
             f,
             [&format_args![
-                text(self.name.text(), TextSize::default()),
+                text(self.name.text(), None),
                 space(),
                 token("("),
-                text(
-                    &std::format!("{:?}", self.applicability),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.applicability), None),
                 token(")"),
             ]]
         )
@@ -582,14 +576,11 @@ impl Format<FormatTypeContext> for CssClassReference {
         write!(
             f,
             [&format_args![
-                text(
-                    &std::format!("{:?}", self.token.text()),
-                    TextSize::default()
-                ),
+                text(&std::format!("{:?}", self.token.text()), None),
                 space(),
                 token("in"),
                 space(),
-                text(self.file_path.as_str(), TextSize::default()),
+                text(self.file_path.as_str(), None),
             ]]
         )
     }
@@ -639,8 +630,7 @@ impl Format<FormatTypeContext> for crate::css_module_info::CssModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for class in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(class, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -716,10 +706,10 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                         write!(
                             f,
                             [&format_args![
-                                text(name, TextSize::default()),
+                                text(name, None),
                                 space(),
                                 token("("),
-                                text(&std::format!("{applicability:?}"), TextSize::default()),
+                                text(&std::format!("{applicability:?}"), None),
                                 token(")"),
                                 token(","),
                             ]]
@@ -749,8 +739,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for class in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(class, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -774,8 +763,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
                 for path in &sorted {
-                    let entry =
-                        format_with(|f| write!(f, [text(path, TextSize::default()), token(",")]));
+                    let entry = format_with(|f| write!(f, [text(path, None), token(",")]));
                     joiner.entry(&entry);
                 }
                 joiner.finish()
@@ -804,11 +792,11 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                         write!(
                             f,
                             [&format_args![
-                                text(&std::format!("{specifier:?}"), TextSize::default()),
+                                text(&std::format!("{specifier:?}"), None),
                                 space(),
                                 token("=>"),
                                 space(),
-                                text(resolved, TextSize::default()),
+                                text(resolved, None),
                                 token(","),
                             ]]
                         )

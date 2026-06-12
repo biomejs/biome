@@ -357,13 +357,13 @@ where
     Context: FormatContext,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        if let Some(position) = self.position {
-            if f.source_map_generation().is_enabled() {
-                return f.write_element(FormatElement::MappedText {
-                    text: self.text.to_string().into_boxed_str(),
-                    source_position: position,
-                });
-            }
+        if let Some(position) = self.position
+            && f.source_map_generation().is_enabled()
+        {
+            return f.write_element(FormatElement::MappedText {
+                text: self.text.to_string().into_boxed_str(),
+                source_position: position,
+            });
         }
 
         f.write_element(FormatElement::Text {

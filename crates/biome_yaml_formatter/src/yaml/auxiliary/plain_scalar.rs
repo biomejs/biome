@@ -15,7 +15,10 @@ impl FormatNodeRule<YamlPlainScalar> for FormatYamlPlainScalar {
             f,
             [format_replaced(
                 &value_token,
-                &text(trimmed_value_text, value_token.text_trimmed_range().start()),
+                &text(
+                    trimmed_value_text,
+                    Some(value_token.text_trimmed_range().start())
+                ),
             )]
         )
     }
