@@ -609,12 +609,14 @@ impl ReactFunctionComponentWrapperInfo {
     fn from_expression(expression: &AnyJsExpression) -> Option<Self> {
         if let AnyJsExpression::JsCallExpression(call_expression) = &expression {
             let args = call_expression.arguments().ok()?.args();
-            // Both memo and forwardRef take one argument.
-            if args.len() != 1 {
-                return None;
-            }
             let callee_name = call_expression.callee().ok()?.get_callee_member_name()?;
             let callee_member_name = callee_name.text_trimmed();
+            let args_len = args.len();
+            if (callee_member_name == "memo" && !(1..=2).contains(&args_len))
+                || (callee_member_name == "forwardRef" && args_len != 1)
+            {
+                return None;
+            }
             let first_arg = args.first()?.ok()?;
             let wrapped_expression = first_arg.as_any_js_expression()?;
             if callee_member_name == "memo" {
@@ -860,7 +862,7 @@ mod test {
                             return <div>Hello, world!</div>;
                         });
 
-                        const invalid2 = memo(() => {}, extraArg);
+                        const invalid2 = memo(() => {}, arg2, arg3);
                     }
                 "#,
             );

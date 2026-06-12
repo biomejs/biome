@@ -2687,6 +2687,11 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Enforce a specific function type for React function components.
+See https://biomejs.dev/linter/rules/use-react-function-component-definition 
+	 */
+	useReactFunctionComponentDefinition?: UseReactFunctionComponentDefinitionConfiguration;
+	/**
 	* Ensure that platform-specific React Native components are only imported in files named for that platform.
 See https://biomejs.dev/linter/rules/use-react-native-platform-components 
 	 */
@@ -4814,6 +4819,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactFunctionComponentDefinitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactFunctionComponentDefinitionOptions;
 export type UseReactNativePlatformComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactNativePlatformComponentsOptions;
@@ -6726,6 +6734,11 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactFunctionComponentDefinitionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReactFunctionComponentDefinitionOptions;
+}
 export interface RuleWithUseReactNativePlatformComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactNativePlatformComponentsOptions;
@@ -8437,6 +8450,12 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactFunctionComponentDefinitionOptions {
+	/**
+	 * The function style to enforce for named React components.
+	 */
+	namedComponents?: ComponentDefinitionStyle;
+}
 export interface UseReactNativePlatformComponentsOptions {
 	/**
 	* A list of glob patterns to identify Android-specific files.
@@ -9167,6 +9186,10 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type ComponentDefinitionStyle =
+	| "functionDeclaration"
+	| "functionExpression"
+	| "arrowFunction";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
  */
@@ -9673,6 +9696,9 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFind"
+	| "lint/nursery/useReactFunctionComponentDefinition"
+	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
