@@ -25,3 +25,22 @@ arr.indexOf(1) + 1;
 
 // not a member call at all
 indexOf(1) !== -1;
+
+// lastIndexOf with fromIndex or positional use
+const last = arr.lastIndexOf(1);
+arr.lastIndexOf(1, 2) !== -1;
+arr.lastIndexOf(1) > 0;
+
+// some() callbacks that includes() cannot replace
+arr.some(x => x > 1);
+arr.some(x => x == 1);
+arr.some(x => x === x);
+arr.some((x, i) => x === i);
+arr.some((x = 1) => x === 1);
+arr.some(x => { log(x); return x === 1; });
+arr.some(async x => x === 1);
+arr.some(isOne);
+arr.some(x => x === 1, thisArg);
+
+// some() is not defined on strings; presence checks on unknown types
+unknownValue.some(x => x === 1);
