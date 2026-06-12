@@ -44,7 +44,7 @@ declare_lint_rule! {
         version: "2.3.0",
         name: "noHeaderScope",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("scope").same()],
+        sources: &[RuleSource::EslintJsxA11y("scope").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

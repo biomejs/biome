@@ -82,21 +82,3 @@ does not suffice: >
     "TEST", "comma NOT here — but object's now a string due to '>'"
   ]
 ```
-
-# Errors
-```
-flow-sequence.yml:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `:` but instead found `does not suffice`
-  
-    13 │ ---
-    14 │ 
-  > 15 │ does not suffice: >
-       │ ^^^^^^^^^^^^^^^^
-    16 │   [
-    17 │     "object-does-not-fit-within-print-width", "------",
-  
-  i Remove does not suffice
-  
-
-```

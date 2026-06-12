@@ -160,7 +160,7 @@ impl AnyEmbeddedSnippet {
 /// content with offset-aware positioning to maintain correct source locations.
 #[derive(Clone, Debug)]
 pub struct EmbeddedSnippet<L: ServiceLanguage + 'static> {
-    /// The JavaScript source code extracted from the script element.
+    /// The source code extracted from a snippet.
     pub parse: AnyParse,
 
     /// The range of the entire script element in the HTML document,
@@ -291,7 +291,7 @@ pub struct DocumentServices {
     /// Service to track value references from non-source snippets
     value_references: Option<EmbeddedValueReferences>,
 
-    /// The document doesn't have any services
+    /// Services for the language that the document belongs to.
     language: LanguageServices,
 }
 

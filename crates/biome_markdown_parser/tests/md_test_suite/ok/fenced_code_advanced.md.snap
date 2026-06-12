@@ -75,7 +75,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -122,7 +121,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@62..63 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -163,7 +161,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@104..105 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -210,7 +207,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@144..145 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -269,7 +265,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@199..200 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -332,7 +327,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@262..263 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [],
@@ -391,7 +385,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@335..336 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdFencedCodeBlock {
             indent: MdIndentTokenList [
@@ -459,7 +452,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@19..20 ":" [] []
         5: MD_TEXTUAL@20..21
           0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
-      1: (empty)
     1: MD_FENCED_CODE_BLOCK@21..33
       0: MD_INDENT_TOKEN_LIST@21..21
       1: TRIPLE_BACKTICK@21..24 "```" [] []
@@ -491,7 +483,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@61..62 ":" [] []
         5: MD_TEXTUAL@62..63
           0: MD_TEXTUAL_LITERAL@62..63 "\n" [] []
-      1: (empty)
     5: MD_FENCED_CODE_BLOCK@63..95
       0: MD_INDENT_TOKEN_LIST@63..63
       1: TRIPLE_BACKTICK@63..68 "`````" [] []
@@ -519,7 +510,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@97..104 "Tildes:" [] []
         1: MD_TEXTUAL@104..105
           0: MD_TEXTUAL_LITERAL@104..105 "\n" [] []
-      1: (empty)
     9: MD_FENCED_CODE_BLOCK@105..117
       0: MD_INDENT_TOKEN_LIST@105..105
       1: TRIPLE_TILDE@105..108 "~~~" [] []
@@ -551,7 +541,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@143..144 ":" [] []
         5: MD_TEXTUAL@144..145
           0: MD_TEXTUAL_LITERAL@144..145 "\n" [] []
-      1: (empty)
     13: MD_FENCED_CODE_BLOCK@145..172
       0: MD_INDENT_TOKEN_LIST@145..145
       1: TRIPLE_BACKTICK@145..148 "```" [] []
@@ -591,7 +580,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@198..199 ":" [] []
         5: MD_TEXTUAL@199..200
           0: MD_TEXTUAL_LITERAL@199..200 "\n" [] []
-      1: (empty)
     17: MD_FENCED_CODE_BLOCK@200..215
       0: MD_INDENT_TOKEN_LIST@200..200
       1: TRIPLE_BACKTICK@200..203 "```" [] []
@@ -633,7 +621,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@261..262 ":" [] []
         7: MD_TEXTUAL@262..263
           0: MD_TEXTUAL_LITERAL@262..263 "\n" [] []
-      1: (empty)
     21: MD_FENCED_CODE_BLOCK@263..292
       0: MD_INDENT_TOKEN_LIST@263..263
       1: TRIPLE_BACKTICK@263..267 "````" [] []
@@ -673,7 +660,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@334..335 ":" [] []
         5: MD_TEXTUAL@335..336
           0: MD_TEXTUAL_LITERAL@335..336 "\n" [] []
-      1: (empty)
     25: MD_FENCED_CODE_BLOCK@336..359
       0: MD_INDENT_TOKEN_LIST@336..338
         0: MD_INDENT_TOKEN@336..337

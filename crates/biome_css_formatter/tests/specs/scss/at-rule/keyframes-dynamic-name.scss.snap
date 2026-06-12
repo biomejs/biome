@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/keyframes-dynamic-name.scss
+---
+
+# Input
+
+```scss
+$name: fade;
+$suffix: loader;
+
+@keyframes  #{$name}{to{opacity:1}}
+
+@keyframes $name{to{opacity:1}}
+
+@keyframes #{$name}-out{to{opacity:1}}
+
+@keyframes fade-#{$suffix}{to{opacity:1}}
+
+```
+
+
+# Formatted
+
+```scss
+$name: fade;
+$suffix: loader;
+
+@keyframes #{$name} {
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes $name {
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes #{$name}-out {
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fade-#{$suffix} {
+	to {
+		opacity: 1;
+	}
+}
+
+```

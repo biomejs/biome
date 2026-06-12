@@ -9,7 +9,7 @@ Run various checks on a set of files.
 
 Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN|ACTION>
 ]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--staged] [--changed] [--since=REF] [--profile-rules] [
-PATH]...
+--watch] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -19,8 +19,9 @@ Options that changes how the JSON parser behaves
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
         --vcs-client-kind=<git>  The kind of client.
-        --vcs-use-ignore-file=<true|false>  Whether Biome should use the VCS ignore file. When
-                              [true], Biome will ignore the files specified in the ignore file.
+        --vcs-use-ignore-file=<true|false>  Whether Biome should use VCS ignore files. When [true],
+                              Biome will ignore files specified in `.gitignore`, `.ignore`, and
+                              Git's local exclude file.
         --vcs-root=PATH       The folder where Biome should check for VCS files. By default, Biome
                               will use the same folder where `biome.json` was found.
                               If Biome can't find the configuration, it will attempt to use the
@@ -65,9 +66,10 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
-  --reporter-file=PATH]
-        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
+  ] [--reporter-file=PATH]
+        --reporter=
+    <default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
         --reporter-file=PATH
 
         --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
@@ -140,6 +142,8 @@ Available options:
                               biome.json
         --profile-rules       Enable rule profiling output. Captures timing only for rule execution,
                               not preprocessing such as querying or building the semantic model.
+        --watch               Enables the watch mode to re-run the check automatically when any
+                              non-excluded file in the workspace has changed.
     -h, --help                Prints help information
 
 ```

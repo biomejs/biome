@@ -57,7 +57,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@38..39 "\n" [] [],
@@ -92,7 +91,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@78..79 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@79..80 "\n" [] [],
@@ -118,7 +116,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@135..136 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@136..137 "\n" [] [],
@@ -153,7 +150,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@185..186 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@186..187 "\n" [] [],
@@ -176,7 +172,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@228..229 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@229..230 "\n" [] [],
@@ -202,7 +197,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@250..251 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@251..251 "" [] [],
@@ -235,7 +229,6 @@ MdDocument {
           2: DOUBLE_STAR@35..37 "**" [] []
         4: MD_TEXTUAL@37..38
           0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@38..39
       0: NEWLINE@38..39 "\n" [] []
     2: MD_PARAGRAPH@39..79
@@ -258,7 +251,6 @@ MdDocument {
           2: DOUBLE_UNDERSCORE@76..78 "__" [] []
         4: MD_TEXTUAL@78..79
           0: MD_TEXTUAL_LITERAL@78..79 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@79..80
       0: NEWLINE@79..80 "\n" [] []
     4: MD_PARAGRAPH@80..136
@@ -275,7 +267,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@112..135 " should not be emphasis" [] []
         5: MD_TEXTUAL@135..136
           0: MD_TEXTUAL_LITERAL@135..136 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@136..137
       0: NEWLINE@136..137 "\n" [] []
     6: MD_PARAGRAPH@137..186
@@ -298,7 +289,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@184..185 ")" [] []
         8: MD_TEXTUAL@185..186
           0: MD_TEXTUAL_LITERAL@185..186 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@186..187
       0: NEWLINE@186..187 "\n" [] []
     8: MD_PARAGRAPH@187..229
@@ -313,7 +303,6 @@ MdDocument {
           2: UNDERSCORE@227..228 "_" [] []
         2: MD_TEXTUAL@228..229
           0: MD_TEXTUAL_LITERAL@228..229 "\n" [] []
-      1: (empty)
     9: MD_NEWLINE@229..230
       0: NEWLINE@229..230 "\n" [] []
     10: MD_PARAGRAPH@230..251
@@ -330,7 +319,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@246..250 " baz" [] []
         3: MD_TEXTUAL@250..251
           0: MD_TEXTUAL_LITERAL@250..251 "\n" [] []
-      1: (empty)
   2: EOF@251..251 "" [] []
 
 ```

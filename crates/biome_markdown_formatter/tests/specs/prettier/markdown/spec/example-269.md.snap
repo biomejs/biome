@@ -24,35 +24,27 @@ info: markdown/spec/example-269.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,9 @@
- - a
--- b
--- c
--- d
+@@ -2,7 +2,7 @@
+ - b
+ - c
+ - d
 -- e
--- f
--- g
--- h
-+ - b
-+  - c
-+   - d
-+    - e
-+   - f
-+  - g
-+ - h
- - i
++  - e
+ - f
+ - g
+ - h
 ```
 
 # Output
 
 ```md
 - a
- - b
-  - c
-   - d
-    - e
-   - f
-  - g
- - h
+- b
+- c
+- d
+  - e
+- f
+- g
+- h
 - i
 ```

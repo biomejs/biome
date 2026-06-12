@@ -15,28 +15,34 @@ info: markdown/spec/example-234.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,5 +1,5 @@
--1.      indented code
-+1.     indented code
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,4 +1,4 @@
+-1.             indented code
++1.         indented code
  
--    paragraph
-+   paragraph
+     paragraph
  
--        more code
-+       more code
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -2,11 +2,11 @@
+   "1.",
+   align(4, [
+     align(4, [
+-      "             indented code
++      "         indented code
+ "
+     ]),
+     empty_line,
+-    " paragraph",
++    "paragraph",
+     hard_line_break,
+     empty_line,
+     align(4, [
 
-```md
-1.     indented code
-
-   paragraph
-
-       more code
 ```

@@ -4,8 +4,9 @@ use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
-    ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
-    ScssModuleConfiguration, ScssParenthesizedExpression, is_in_scss_include_arguments,
+    ScssExpression, ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
+    ScssListExpressionElementList, ScssListExpressionFields, ScssModuleConfiguration,
+    ScssParenthesizedExpression, ScssVariableDeclaration, is_in_scss_include_arguments,
     is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
@@ -41,7 +42,7 @@ impl<'a> ScssListLayout<'a> {
             );
         }
 
-        if is_scss_map_outer_parenthesized_value_list(self.node) {
+        if is_scss_map_outer_parenthesized_value_list(self.node) && has_list_shape(&elements) {
             // `key: (a, b)` gets its block indent from the parentheses;
             // the list only forces item breaks and the trailing comma.
             return write!(
@@ -71,6 +72,19 @@ impl<'a> ScssListLayout<'a> {
             return write!(f, [group(&format_args![elements.format()])]);
         }
 
+        if is_compound_variable_list(self.node, &elements) {
+            // Print `$buttonConfig:
+            //   "save" 50px,
+            //   "cancel" 50px;`.
+            return write!(
+                f,
+                [
+                    group(&indent(&format_args![soft_line_break(), elements.format()]))
+                        .should_expand(true)
+                ]
+            );
+        }
+
         write!(
             f,
             [group(&indent(&format_args![
@@ -89,47 +103,39 @@ impl<'a> ScssListLayout<'a> {
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let should_force_trailing_comma = self.should_force_include_trailing_comma(elements, f);
-        let trailing_comma =
-            format_with(|f| Self::write_include_trailing_comma(should_force_trailing_comma, f));
+        let is_scalar_include_parentheses = self.is_scalar_include_parentheses(elements);
+        let trailing_comma = format_with(|f| {
+            if should_force_trailing_comma {
+                write!(f, [token(",")])
+            } else if is_scalar_include_parentheses {
+                // Do not turn `2 * ($bar)` into `2 * ($bar,)`.
+                Ok(())
+            } else {
+                write!(f, [if_group_breaks(&token(","))])
+            }
+        });
         let closing_comments = format_with(|f| self.write_include_closing_comments(f));
         let should_expand = self.should_expand_include_list(elements, f);
+        let parenthesized_list = is_scss_map_outer_parenthesized_value_list(self.node)
+            || self.is_parenthesized_include_list();
+        let content = format_once(|f| {
+            if parenthesized_list {
+                // `key: (a, b)` gets its indent from the surrounding parentheses.
+                write!(f, [elements.format(), trailing_comma, closing_comments])
+            } else {
+                write!(
+                    f,
+                    [indent(&format_args![
+                        soft_line_break(),
+                        elements.format(),
+                        trailing_comma,
+                        closing_comments
+                    ])]
+                )
+            }
+        });
 
-        if is_scss_map_outer_parenthesized_value_list(self.node)
-            || self.is_parenthesized_include_list()
-        {
-            // Format the list in `key: (a, b)`. The surrounding parentheses are
-            // handled by `FormatScssParenthesizedExpression`.
-            write!(
-                f,
-                [group(&format_args![
-                    elements.format(),
-                    trailing_comma, closing_comments
-                ])
-                .should_expand(should_expand)]
-            )
-        } else {
-            write!(
-                f,
-                [group(&indent(&format_args![
-                    soft_line_break(),
-                    elements.format(),
-                    trailing_comma,
-                    closing_comments
-                ]))
-                .should_expand(should_expand)]
-            )
-        }
-    }
-
-    /// Formats the comma after an include argument list.
-    ///
-    /// Example: `@include mix($arg: (a))` prints the keyword list comma.
-    fn write_include_trailing_comma(should_force: bool, f: &mut CssFormatter) -> FormatResult<()> {
-        if should_force {
-            write!(f, [token(",")])
-        } else {
-            write!(f, [if_group_breaks(&token(","))])
-        }
+        write!(f, [group(&content).should_expand(should_expand)])
     }
 
     /// Formats include-owned comments before the closing `)`.
@@ -141,7 +147,7 @@ impl<'a> ScssListLayout<'a> {
 
     /// Forces a comma when include parens or comments own the list shape.
     ///
-    /// Examples: `@include mix($arg: (a))`, `@include mix((a) /* end */)`.
+    /// Examples: `@include mix($arg: (a, b))`, `@include mix((a) /* end */)`.
     fn should_force_include_trailing_comma(
         &self,
         elements: &ScssListExpressionElementList,
@@ -153,7 +159,7 @@ impl<'a> ScssListLayout<'a> {
 
     /// Expands include keyword lists that need visible item/comment boundaries.
     ///
-    /// Examples: `@include mix($arg: (a))`, `@include mix($arg: (a) /* end */)`.
+    /// Examples: `@include mix($arg: (a, b))`, `@include mix($arg: (a) /* end */)`.
     fn should_expand_include_list(
         &self,
         elements: &ScssListExpressionElementList,
@@ -165,13 +171,17 @@ impl<'a> ScssListLayout<'a> {
 
     /// Forces expansion and a comma for include keyword lists in parens.
     ///
-    /// Examples: `$arg: (a)`, `$arg: (a,)`.
+    /// Examples: `$arg: (a, b)`, `$arg: (a,)`.
     fn should_force_include_parenthesized_list_layout(
         &self,
         elements: &ScssListExpressionElementList,
     ) -> bool {
-        self.is_parenthesized_include_list()
-            && (elements.len() > 0 || elements.trailing_separator().is_some())
+        self.is_parenthesized_include_list() && has_list_shape(elements)
+    }
+
+    /// Detects scalar include parentheses such as `2 * ($bar)`.
+    fn is_scalar_include_parentheses(&self, elements: &ScssListExpressionElementList) -> bool {
+        self.is_parenthesized_include_list() && !has_list_shape(elements)
     }
 
     /// Detects the list in `@include mix($arg: (a, b))`.
@@ -231,6 +241,49 @@ fn is_include_keyword_list_value_expanded_by_comments(
         .has_dangling_comments(keyword_argument.syntax());
 
     has_trailing_comment || has_keyword_closing_comments
+}
+
+/// Detects `$buttonConfig: "save" 50px, "cancel" 50px;`.
+fn is_compound_variable_list(
+    node: &ScssListExpression,
+    elements: &ScssListExpressionElementList,
+) -> bool {
+    is_scss_variable_value_list(node) && elements.len() > 1 && has_compound_list_element(elements)
+}
+
+/// Checks that the list is the value in `$buttonConfig: "save" 50px, "cancel" 50px;`.
+fn is_scss_variable_value_list(node: &ScssListExpression) -> bool {
+    node.parent::<ScssExpressionItemList>()
+        .and_then(|items| items.parent::<ScssExpression>())
+        .and_then(|expression| expression.parent::<ScssVariableDeclaration>())
+        .is_some()
+}
+
+/// Checks for list items like `"save" 50px`.
+fn has_compound_list_element(elements: &ScssListExpressionElementList) -> bool {
+    elements
+        .iter()
+        .any(|element| element.as_ref().is_ok_and(is_compound_list_element))
+}
+
+/// Returns `true` for SCSS lists with visible separators.
+///
+/// `(a, b)` and `(a,)` are lists; `(a)` is scalar parentheses.
+pub(crate) fn has_scss_list_shape(node: &ScssListExpression) -> bool {
+    has_list_shape(&node.elements())
+}
+
+fn has_list_shape(elements: &ScssListExpressionElementList) -> bool {
+    elements.len() > 1 || elements.trailing_separator().is_some()
+}
+
+/// Checks whether `"save" 50px` has multiple values.
+fn is_compound_list_element(element: &ScssListExpressionElement) -> bool {
+    element.value().ok().is_some_and(|value| {
+        value
+            .as_scss_expression()
+            .is_some_and(|expression| expression.items().len() > 1)
+    })
 }
 
 /// Detects the list in `@use "x" with ($family: (a, b))`.

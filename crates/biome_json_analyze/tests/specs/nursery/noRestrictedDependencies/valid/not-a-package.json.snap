@@ -1,0 +1,13 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: not-a-package.json
+---
+# Input
+```json
+{
+  "dependencies": {
+    "npm-run-all": "^1.0.0"
+  }
+}
+
+```

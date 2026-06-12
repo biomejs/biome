@@ -14,42 +14,19 @@ info: yaml/spec/spec-example-6-10-comment-lines.yml
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -1,9 +1,5 @@
- # Comment
- 
--# Comment
--
--# Comment
--
-   # Comment
-    
- 
+# Prettier differences
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -1,15 +1,10 @@
- [
--  source_position(0),
--  "# Comment",
--  empty_line,
--  source_position(13),
-+  source_position(2),
-   "# Comment",
-   empty_line,
-   verbatim([
-     source_position(0),
--    "# Comment
--
--  # Comment
-+    "  # Comment
-    
- 
- 
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,2 @@
+ # Comment
++
+```
+
+# Output
+
+```yml
+# Comment
 
 ```

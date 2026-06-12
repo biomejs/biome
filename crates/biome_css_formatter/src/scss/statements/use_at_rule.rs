@@ -25,6 +25,10 @@ impl FormatNodeRule<ScssUseAtRule> for FormatScssUseAtRule {
             write!(f, [space(), with_clause.format()])?;
         }
 
-        write!(f, [semicolon_token.format()])
+        if let Some(semicolon_token) = semicolon_token {
+            write!(f, [semicolon_token.format()])
+        } else {
+            write!(f, [token(";")])
+        }
     }
 }

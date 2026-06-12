@@ -26,6 +26,7 @@ use crate::{
 pub(super) fn flattened_expression(
     expr: &TypeofExpression,
     resolver: &mut dyn TypeResolver,
+    depth: usize,
 ) -> Option<TypeData> {
     match expr {
         TypeofExpression::Addition(expr) => {
@@ -101,7 +102,7 @@ pub(super) fn flattened_expression(
                 })
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-            Some(callee) => flattened_call(expr, callee.to_data(), resolver),
+            Some(callee) => flattened_call(expr, callee.to_data(), resolver, depth),
             None => None,
         },
         TypeofExpression::Conditional(expr) => {
@@ -350,14 +351,25 @@ pub(super) fn flattened_expression(
 }
 
 /// Resolves a callee type through layers of indirection (`TypeofExpression`,
-/// `InstanceOf`, `Interface`, `Object`) until a `Function` is found, bounded
-/// by [`MAX_FLATTEN_DEPTH`] iterations.
+/// `InstanceOf`, `Interface`, `Object`) until a `Function` is found.
+///
+/// Each invocation unwraps at most [`MAX_FLATTEN_DEPTH`] non-recursive layers.
+/// Flattening a `TypeofExpression` callee re-enters [`flattened_expression`],
+/// which can cycle back here for self-calling values (e.g. `ctrl = ctrl()`), so
+/// `depth` bounds that recursion and the function bails once it exceeds
+/// [`MAX_FLATTEN_DEPTH`].
 ///
 /// Returns `None` if no function can be reached.
 fn resolve_callee_to_function(
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
+    mut depth: usize,
 ) -> Option<Box<Function>> {
+    depth += 1;
+    if depth > MAX_FLATTEN_DEPTH {
+        return None;
+    }
+
     let mut callee = callee;
     for _ in 0..MAX_FLATTEN_DEPTH {
         match callee {
@@ -366,7 +378,7 @@ fn resolve_callee_to_function(
             // are represented as unflattened `TypeofExpression` nodes when imported.
             // Eagerly flatten them so the underlying function type is reachable.
             TypeData::TypeofExpression(expr) => {
-                callee = flattened_expression(&expr, resolver)?;
+                callee = flattened_expression(&expr, resolver, depth)?;
             }
             TypeData::InstanceOf(instance) => {
                 let instance_callee = resolver.resolve_and_get(&instance.ty)?;
@@ -398,6 +410,7 @@ fn flattened_call(
     expr: &TypeofCallExpression,
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
+    depth: usize,
 ) -> Option<TypeData> {
     match callee {
         TypeData::Union(union) => {
@@ -421,7 +434,8 @@ fn flattened_call(
                     }
                     _ => {}
                 }
-                if let Some(function) = resolve_callee_to_function(resolved.to_data(), resolver)
+                if let Some(function) =
+                    resolve_callee_to_function(resolved.to_data(), resolver, depth)
                     && let Some(result) = flattened_function_call(expr, &function, resolver)
                 {
                     return_types.push(result);
@@ -443,7 +457,7 @@ fn flattened_call(
             }
         }
         callee => {
-            let function = resolve_callee_to_function(callee, resolver)?;
+            let function = resolve_callee_to_function(callee, resolver, depth)?;
             flattened_function_call(expr, &function, resolver)
         }
     }

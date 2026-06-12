@@ -1,6 +1,7 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint,
+    SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -29,8 +30,8 @@ use biome_configuration::json::{
 };
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
-    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    TrailingNewline,
+    BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
@@ -56,6 +57,7 @@ pub struct JsonFormatterSettings {
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -70,6 +72,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             trailing_commas: configuration.trailing_commas,
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
+            delimiter_spacing: configuration.delimiter_spacing,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
         }
@@ -217,6 +220,11 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.bracket_spacing)
             .unwrap_or_default();
 
+        let delimiter_spacing = language
+            .delimiter_spacing
+            .or(global.delimiter_spacing)
+            .unwrap_or_default();
+
         let file_source = document_file_source
             .to_json_file_source()
             .unwrap_or_default();
@@ -229,6 +237,7 @@ impl ServiceLanguage for JsonLanguage {
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
             .with_bracket_spacing(bracket_spacing)
+            .with_delimiter_spacing(delimiter_spacing)
             .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
@@ -376,6 +385,10 @@ impl ExtensionHandler for JsonFileHandler {
             search: SearchCapabilities {
                 search: Some(search),
             },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -520,6 +533,7 @@ fn lint(params: LintParams) -> LintResults {
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -535,6 +549,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -589,7 +604,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings: workspace,
         path,
-        module_graph: _,
+        module_db: _,
         project_layout,
         language,
         skip,
@@ -600,14 +615,17 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
         compute_actions,
         snippet_services: _,
+        analyzer_cache,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
     let tree: JsonRoot = parse.tree();
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
+        working_directory,
         &params.language,
         suppression_reason.as_deref(),
     );
@@ -624,6 +642,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout)
+        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -698,6 +717,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -813,6 +833,10 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
+        let plugin_text_edit = pending_actions
+            .iter()
+            .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
@@ -822,6 +846,17 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         })?;
 
         if result.is_none() {
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsonLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_json_parser::parse_json(&new_text, options);
+                tree = parse.tree();
+                continue;
+            }
+
             break;
         }
     }

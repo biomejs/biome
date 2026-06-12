@@ -738,7 +738,9 @@ AnyCssGenericPropertyValueOrExpression =
 CssComposesProperty =
 	name: CssIdentifier
 	':'
-	value: CssComposesPropertyValue
+	values: CssComposesPropertyValueList
+
+CssComposesPropertyValueList = CssComposesPropertyValue (',' CssComposesPropertyValue)*
 
 CssComposesPropertyValue =
 	classes: CssComposesClassList
@@ -931,7 +933,7 @@ CssViewTransitionAtRuleDeclarator =
 
 CssFunctionAtRuleDeclarator =
 	'function'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 	'('
 	parameters: CssFunctionParameterList
 	')'
@@ -1272,6 +1274,7 @@ CssKeyframesAtRule =
 AnyCssKeyframesName =
 	CssKeyframesScopedName
 	| AnyCssKeyframesIdentifier
+	| ScssKeyframesName
 	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
@@ -1310,6 +1313,13 @@ CssKeyframesScopePrefix =
 //            ^^^^^^^^^^^
 AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
 
+ScssKeyframesName =
+	name: AnyScssKeyframesName
+
+AnyScssKeyframesName =
+	ScssInterpolatedIdentifier
+	| ScssVariable
+
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
 CssKeyframesBlock =
@@ -1321,7 +1331,11 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| ScssKeyframesVariableDeclaration
 	| CssBogusKeyframesItem
+
+ScssKeyframesVariableDeclaration =
+	declaration: ScssVariableDeclaration
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
@@ -1449,42 +1463,49 @@ CssMediaType =
 AnyCssMediaTypeCondition =
 	CssMediaNotCondition
 	| CssMediaAndCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
 
 // <media-condition> = <media-not> | <media-in-parens> [ <media-and>* | <media-or>* ]
 AnyCssMediaCondition =
 	CssMediaNotCondition
 	| CssMediaAndCondition
 	| CssMediaOrCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
+
+AnyCssMediaConditionOperand =
+	AnyCssMediaInParens
+	| ScssMediaQuery
 
 // @media not all and not (color)  { }
 //        						^^^^^^^^^^^
 CssMediaNotCondition =
 	'not'
-	condition: AnyCssMediaInParens
+	condition: AnyCssMediaConditionOperand
 
 // @media (width > 400px) or (color) or (inline-width >= 30em)  { }
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaOrCondition =
-	left: AnyCssMediaInParens
+	left: AnyCssMediaConditionOperand
 	'or'
 	right: AnyCssMediaOrCombinableCondition
 
 AnyCssMediaOrCombinableCondition =
 	CssMediaOrCondition
-	| AnyCssMediaInParens
+	| AnyCssMediaConditionOperand
 
 // @media (width > 400px) and (color) and (inline-width >= 30em)  { }
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAndCondition =
-	left: AnyCssMediaInParens
+	left: AnyCssMediaConditionOperand
 	'and'
 	right: AnyCssMediaAndCombinableCondition
 
 AnyCssMediaAndCombinableCondition =
 	CssMediaAndCondition
-	| AnyCssMediaInParens
+	// Sass accepts `@media #{a} and not (b)`, but plain
+	// `@media (a) and not (b)` must stay invalid in the parser.
+	| CssMediaNotCondition
+	| AnyCssMediaConditionOperand
 
 AnyCssMediaInParens =
 	CssMediaConditionInParens
@@ -1759,7 +1780,13 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
+
+// @supports #{"(display: grid)"} {}
+//           ^^^^^^^^^^^^^^^^^^^^
+ScssSupportsInterpolatedCondition =
+	condition: ScssInterpolation
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}
 //                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2401,6 +2428,7 @@ CssBracketedValueList = AnyCssBracketedValueItem*
 AnyCssBracketedValueItem =
 	AnyCssCustomIdentifier
 	| CssGenericDelimiter
+	| AnyScssExpression
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
@@ -2805,7 +2833,7 @@ ScssUseAtRule =
 	url: CssString
 	as_clause: ScssUseAsClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as *
 // ^^^^
@@ -2830,7 +2858,7 @@ ScssForwardAtRule =
 	as_clause: ScssForwardAsClause?
 	visibility_clause: AnyScssForwardVisibilityClause?
 	with_clause: ScssWithClause?
-	';'
+	';'?
 
 // as theme-*
 // ^^^^^^^^^^^

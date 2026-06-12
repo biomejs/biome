@@ -57,6 +57,33 @@ mod tests {
         assert_eq!(rule.child_ids.len(), 0);
         assert_eq!(rule.parent_id, None);
     }
+
+    #[test]
+    fn test_composes_property_with_multiple_values() {
+        let parse = parse_css(
+            r#".foo {
+  composes: classA from "./a.css", classB from "./b.css";
+}"#,
+            CssFileSource::new_css_modules(),
+            CssParserOptions::default().allow_css_modules(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
+
+        assert_eq!(rule.declarations.len(), 2);
+        assert!(matches!(
+            rule.declarations[0].value(),
+            crate::model::CssPropertyInitialValue::Composes(_)
+        ));
+        assert!(matches!(
+            rule.declarations[1].value(),
+            crate::model::CssPropertyInitialValue::Composes(_)
+        ));
+    }
+
     #[test]
     fn test_nested_selector() {
         let parse = parse_css(

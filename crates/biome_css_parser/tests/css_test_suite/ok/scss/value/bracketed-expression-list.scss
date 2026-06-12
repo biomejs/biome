@@ -1,0 +1,10 @@
+$value: 2;
+$list: [1, $value, []];
+$keywords: [inherit, initial, unset];
+$comma_list: [a, 1, b, c];
+$slash_list: [x / 2 / y / z];
+
+a {
+  b: [[c] [d]];
+  c: [(c,) (d e)];
+}

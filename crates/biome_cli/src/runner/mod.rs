@@ -130,6 +130,7 @@ pub(crate) mod impls;
 pub(crate) mod process_file;
 pub(crate) mod run;
 pub(crate) mod scan_kind;
+pub(crate) mod watcher;
 
 use crate::cli_options::CliOptions;
 use crate::commands::{
@@ -138,12 +139,14 @@ use crate::commands::{
 use crate::diagnostics::StdinDiagnostic;
 use crate::logging::LogOptions;
 use crate::runner::collector::Collector;
-use crate::runner::crawler::Crawler;
+use crate::runner::crawler::{CrawlPath, Crawler};
 use crate::runner::execution::{Execution, Stdin};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
+use crate::runner::impls::watchers::default::DefaultWatcher;
 use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
 use crate::runner::scan_kind::derive_best_scan_kind;
+use crate::runner::watcher::{Watcher, WatcherEvent};
 use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
 use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, markup};
@@ -203,6 +206,9 @@ pub(crate) trait CommandRunner {
     /// directly rather than traversing source files.
     fn requires_crawling(&self) -> bool;
 
+    /// Whether this command is in watch mode and runs the watcher after the first crawl.
+    fn is_watch_mode(&self) -> bool;
+
     /// The [ScanKind] that could be used for this command. Some commands shouldn't implement this
     /// because it should be derived from the configuration.
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
@@ -250,12 +256,24 @@ pub(crate) trait CommandRunner {
     /// The main command to use.
     fn run(
         &mut self,
-        session: CliSession,
+        mut session: CliSession,
         log_options: &LogOptions,
         cli_options: &CliOptions,
     ) -> Result<(), CliDiagnostic> {
         self.setup_logging(log_options, cli_options);
         self.check_incompatible_arguments()?;
+
+        let is_not_default_reporter = cli_options.cli_reporter.iter().any(|r| !r.is_default());
+
+        if self.is_watch_mode() && is_not_default_reporter {
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--watch",
+                "--reporter",
+                "The watch mode can only be used with the default reporter.",
+            ));
+        }
+
+        let watcher_factory = session.watcher_factory.take();
 
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
@@ -307,7 +325,10 @@ pub(crate) trait CommandRunner {
             workspace,
             fs,
             project_key,
-            paths.clone(),
+            paths
+                .iter()
+                .map(|path| CrawlPath::String(path.clone()))
+                .collect(),
             collector,
             execution.get_max_diagnostics(cli_options),
             cli_options.diagnostic_level,
@@ -315,15 +336,69 @@ pub(crate) trait CommandRunner {
 
         Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
 
-        Self::Finalizer::finalize(FinalizePayload {
+        let res = Self::Finalizer::finalize(FinalizePayload {
             cli_options,
             execution: execution.as_ref(),
             fs,
             console,
             scan_duration: duration,
             crawler_output: output,
-            paths,
-        })
+            paths: paths.clone(),
+        });
+
+        if self.is_watch_mode() {
+            let mut watcher: Box<dyn Watcher> = match &watcher_factory {
+                Some(factory) => factory(),
+                None => Box::new(DefaultWatcher::new()),
+            };
+
+            watcher.watch(paths.iter().map(Utf8PathBuf::from).collect());
+            console.log(markup! {
+                <Info>"Watching for changes..."</Info>
+            });
+
+            while let Some(event) = watcher.poll() {
+                match event {
+                    WatcherEvent::Changed(paths) => {
+                        let collector = self.collector(fs, execution.as_ref(), cli_options);
+                        let mut output: Self::CrawlerOutput = Self::Crawler::crawl(
+                            execution.as_ref(),
+                            workspace,
+                            fs,
+                            project_key,
+                            paths
+                                .iter()
+                                .map(|path| CrawlPath::Path(path.clone()))
+                                .collect(),
+                            collector,
+                            execution.get_max_diagnostics(cli_options),
+                            cli_options.diagnostic_level,
+                        )?;
+
+                        Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
+
+                        _ = Self::Finalizer::finalize(FinalizePayload {
+                            cli_options,
+                            execution: execution.as_ref(),
+                            fs,
+                            console,
+                            scan_duration: duration,
+                            crawler_output: output,
+                            paths: paths.into_iter().map(|path| path.into_string()).collect(),
+                        });
+                    }
+                    WatcherEvent::Error(error) => {
+                        console.error(markup! {
+                            {PrintDiagnostic::simple(&error)}
+                        });
+                    }
+                }
+            }
+
+            return Ok(());
+        }
+
+        res
     }
 
     /// This function prepares the workspace with the following:

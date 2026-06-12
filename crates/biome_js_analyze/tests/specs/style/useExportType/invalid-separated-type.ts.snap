@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-separated-type.ts
+---
+# Input
+```ts
+import { type T1, V1 } from "mod";
+// Comment
+export { type T1, V1 };
+
+import type { T2, T3 } from "mod";
+// Comment
+export { type T2, type T3 };
+
+// Comment
+export { type T4, V2, type T5 } from "mod";
+
+// Comment
+export { type T6, type T7 } from "mod";
+
+```
+
+# Diagnostics
+```
+invalid-separated-type.ts:3:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Separate type exports from other exports.
+  
+    1 │ import { type T1, V1 } from "mod";
+    2 │ // Comment
+  > 3 │ export { type T1, V1 };
+      │        ^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ import type { T2, T3 } from "mod";
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Extract types into a new export.
+  
+     1  1 │   import { type T1, V1 } from "mod";
+     2  2 │   // Comment
+     3    │ - export·{·type·T1,·V1·};
+        3 │ + export·type·{·T1,·};
+        4 │ + export·{·V1·};
+     4  5 │   
+     5  6 │   import type { T2, T3 } from "mod";
+  
+
+```
+
+```
+invalid-separated-type.ts:7:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All exports are only types.
+  
+    5 │ import type { T2, T3 } from "mod";
+    6 │ // Comment
+  > 7 │ export { type T2, type T3 };
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Comment
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+     5  5 │   import type { T2, T3 } from "mod";
+     6  6 │   // Comment
+     7    │ - export·{·type·T2,·type·T3·};
+        7 │ + export·type·{·T2,·T3·};
+     8  8 │   
+     9  9 │   // Comment
+  
+
+```
+
+```
+invalid-separated-type.ts:10:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Separate type exports from other exports.
+  
+     9 │ // Comment
+  > 10 │ export { type T4, V2, type T5 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Comment
+  
+  i This export is a type.
+  
+     9 │ // Comment
+  > 10 │ export { type T4, V2, type T5 } from "mod";
+       │          ^^^^^^^
+    11 │ 
+    12 │ // Comment
+  
+  i This export is a type.
+  
+     9 │ // Comment
+  > 10 │ export { type T4, V2, type T5 } from "mod";
+       │                       ^^^^^^^
+    11 │ 
+    12 │ // Comment
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Extract types into a new export.
+  
+     8  8 │   
+     9  9 │   // Comment
+    10    │ - export·{·type·T4,·V2,·type·T5·}·from·"mod";
+       10 │ + export·type·{·T4,·T5·}·from·"mod";
+       11 │ + export·{·V2,·}·from·"mod";
+    11 12 │   
+    12 13 │   // Comment
+  
+
+```
+
+```
+invalid-separated-type.ts:13:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All exports are only types.
+  
+    12 │ // Comment
+  > 13 │ export { type T6, type T7 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+    11 11 │   
+    12 12 │   // Comment
+    13    │ - export·{·type·T6,·type·T7·}·from·"mod";
+       13 │ + export·type·{·T6,·T7·}·from·"mod";
+    14 14 │   
+  
+
+```

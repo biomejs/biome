@@ -22,4 +22,4 @@ info: yaml/property/tag_property.yaml
 
 ## Unimplemented nodes/tokens
 
-"[&x \"val\", !tag [1, 2]]\n" => 0..24
+"[&x \"val\", !tag [1, 2]]" => 0..23

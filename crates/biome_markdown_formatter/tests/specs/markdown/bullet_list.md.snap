@@ -14,7 +14,9 @@ info: markdown/bullet_list.md
 
 * - - -
 
-* - - -\n  __bold__
+* - - -
+
+__bold__
 
 ```
 
@@ -26,10 +28,12 @@ info: markdown/bullet_list.md
 
 - item with **bold** and _italic_
 
-- item with `code`
+* item with `code`
 
 * - - -
 
-- - - -\n  **bold**
+* - - -
+
+**bold**
 
 ```

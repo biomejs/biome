@@ -1,0 +1,92 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/global.css`
+
+## Source
+
+```css
+.layout {
+	display: flex;
+}
+.hero {
+	font-size: 2rem;
+}
+```
+
+## Module Info
+
+```
+Classes {
+  hero,
+  layout,
+}
+Imports {
+  No imports
+}
+```
+
+
+# `/src/Hero.astro`
+
+## Source
+
+```astro
+---
+---
+<section class="hero">Welcome</section>
+
+<style>
+  .hero { color: navy; }
+</style>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  hero (Local),
+}
+ReferencedClasses {
+  hero,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  No script imports
+}
+```
+
+
+# `/src/Layout.astro`
+
+## Source
+
+```astro
+---
+import "./global.css";
+import Hero from "./Hero.astro";
+---
+<div class="layout"><Hero /></div>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  No style classes
+}
+ReferencedClasses {
+  layout,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  "./Hero.astro" => /src/Hero.astro,
+  "./global.css" => /src/global.css,
+}
+```

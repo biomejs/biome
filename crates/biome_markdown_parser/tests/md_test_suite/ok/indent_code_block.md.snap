@@ -127,7 +127,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@86..87 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@87..88 "\n" [] [],
@@ -251,7 +250,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@63..86 "Regular paragraph here." [] []
         1: MD_TEXTUAL@86..87
           0: MD_TEXTUAL_LITERAL@86..87 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@87..88
       0: NEWLINE@87..88 "\n" [] []
     4: MD_INDENT_CODE_BLOCK@88..121

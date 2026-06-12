@@ -22,9 +22,10 @@ key2:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,6 @@
+@@ -1,4 +1,7 @@
 -key1: &default # This key ...
-+key1: &default
++key1:
++  &default
 +
 +  # This key ...
    subkey1: value1
@@ -35,7 +36,8 @@ key2:
 # Output
 
 ```yml
-key1: &default
+key1:
+  &default
 
   # This key ...
   subkey1: value1

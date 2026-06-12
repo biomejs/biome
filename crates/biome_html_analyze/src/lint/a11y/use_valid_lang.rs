@@ -38,7 +38,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useValidLang",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("lang").same()],
+        sources: &[RuleSource::EslintJsxA11y("lang").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

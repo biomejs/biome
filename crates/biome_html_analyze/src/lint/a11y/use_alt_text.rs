@@ -86,7 +86,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAltText",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("alt-text").same(), RuleSource::HtmlEslint("require-img-alt").same()],
+        sources: &[RuleSource::EslintJsxA11y("alt-text").inspired(), RuleSource::HtmlEslint("require-img-alt").same()],
         recommended: true,
         severity: Severity::Error,
     }

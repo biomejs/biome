@@ -42,6 +42,7 @@ const c = [
             document_file_source: Some(DocumentFileSource::from(source_type)),
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -71,6 +72,7 @@ const c = [
             content: printed.as_code().to_string(),
             version: 1,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

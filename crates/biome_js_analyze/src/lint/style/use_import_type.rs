@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
     /// then you can disable this rule, as TSC can remove imports only used as types.
     /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
-    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// In that case, it's recommended to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
     /// This configuration ensures that TSC preserves imports not marked with the `type` keyword.
     ///
     /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.
@@ -120,7 +120,7 @@ declare_lint_rule! {
     ///
     /// - `inlineType`: always use `import { type T }` instead of `import type { T }`
     /// - `separatedType`: always use `import type { T }` instead of `import { type T }`
-    /// - `auto`: use both `import type { T }` and `import { type T }` (default)
+    /// - `auto`: use `import type { T }` or `import { type T, V }` when values are imported alongside types (default)
     ///
     /// ```jsonc,options
     /// {
@@ -207,16 +207,14 @@ impl Rule for UseImportType {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
-                                } else if specifiers.is_empty() {
-                                    // Don't group inline type-imports,
-                                    // when the default import is not only used as a type.
-                                    None
                                 } else if style == Style::SeparatedType {
                                     Some(ImportTypeFix::ExtractCombinedImportType(Box::default()))
-                                } else {
+                                } else if !specifiers.is_empty() {
                                     // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
                                     Some(ImportTypeFix::AddTypeQualifiers(specifiers))
+                                } else {
+                                    None
                                 }
                             }
                             Some(NamedImportTypeFix::AddInlineTypeQualifiers(specifiers)) => {
@@ -922,7 +920,7 @@ fn named_import_type_fix(
     }
 }
 
-fn add_module_items(
+pub(crate) fn add_module_items(
     mutation: &mut BatchMutation<JsLanguage>,
     preceding_item: &JsSyntaxNode,
     new_items: impl IntoIterator<Item = AnyJsModuleItem>,
@@ -997,10 +995,11 @@ fn extract_combined_specifier_in_new_import(
                                 type_token.leading_trivia().pieces(),
                                 trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                             ))?;
-                        new_specifiers = new_specifiers.replace_child(
-                            specifier.clone().into_syntax().into(),
-                            new_specifier.into_syntax().into(),
-                        )?;
+                        let slot_index = specifier.syntax().index();
+                        new_specifiers = new_specifiers.splice_slots(
+                            slot_index..=slot_index,
+                            [Some(new_specifier.into_syntax().into())],
+                        );
                     }
                 }
                 let new_specifiers = JsNamedImportSpecifierList::unwrap_cast(new_specifiers);
@@ -1068,6 +1067,8 @@ fn split_named_import_specifiers(
     specifiers_requiring_type_marker: &[AnyJsNamedImportSpecifier],
 ) -> Option<(JsNamedImportSpecifiers, JsNamedImportSpecifiers)> {
     let specifiers = named_specifiers.specifiers();
+    // There is at least one import that is not a type.
+    // Thus there is at most `len - 1` type-only imports.
     let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
     let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
     let mut value_specifiers =

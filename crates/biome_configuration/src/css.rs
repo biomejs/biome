@@ -1,7 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    DelimiterSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -122,6 +122,17 @@ pub struct CssFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter). Only applies when the content fits on a single line, and empty
+    /// delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
+    /// square brackets (e.g., `[ data-attr ]`). Defaults to false.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

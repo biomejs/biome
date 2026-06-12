@@ -342,7 +342,7 @@ impl CssComposesProperty {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssComposesPropertyValue) -> Self {
+    pub fn with_values(self, element: CssComposesPropertyValueList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1084,7 +1084,7 @@ impl CssFunctionAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssDashedIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1750,7 +1750,7 @@ impl CssMarginAtRule {
     }
 }
 impl CssMediaAndCondition {
-    pub fn with_left(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_left(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -1872,7 +1872,7 @@ impl CssMediaNotCondition {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_condition(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_condition(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1880,7 +1880,7 @@ impl CssMediaNotCondition {
     }
 }
 impl CssMediaOrCondition {
-    pub fn with_left(self, element: AnyCssMediaInParens) -> Self {
+    pub fn with_left(self, element: AnyCssMediaConditionOperand) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3962,10 +3962,10 @@ impl ScssForwardAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -4319,6 +4319,14 @@ impl ScssInterpolation {
         )
     }
 }
+impl ScssKeyframesName {
+    pub fn with_name(self, element: AnyScssKeyframesName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssKeyframesSelector {
     pub fn with_selector(self, element: ScssInterpolation) -> Self {
         Self::unwrap_cast(
@@ -4330,6 +4338,14 @@ impl ScssKeyframesSelector {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+}
+impl ScssKeyframesVariableDeclaration {
+    pub fn with_declaration(self, element: ScssVariableDeclaration) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4749,6 +4765,14 @@ impl ScssStringText {
         )
     }
 }
+impl ScssSupportsInterpolatedCondition {
+    pub fn with_condition(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssUnaryExpression {
     pub fn with_operator_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4810,10 +4834,10 @@ impl ScssUseAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
 }

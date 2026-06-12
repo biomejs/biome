@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/issue-9130.yml
+---
+
+# Input
+
+```yml
+- foo: 0
+  bar: 1
+
+  # baz: 2
+- quux: 3
+
+- foo: 0
+  bar: 1
+
+  # baz: 2
+
+  # baz: 3
+- quux: 3
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,13 @@
+ - foo: 0
+   bar: 1
+ 
+-  # baz: 2
++# baz: 2
+ - quux: 3
+ 
+ - foo: 0
+   bar: 1
+ 
+-  # baz: 2
++# baz: 2
+ 
+-  # baz: 3
++# baz: 3
+ - quux: 3
+```
+
+# Output
+
+```yml
+- foo: 0
+  bar: 1
+
+# baz: 2
+- quux: 3
+
+- foo: 0
+  bar: 1
+
+# baz: 2
+
+# baz: 3
+- quux: 3
+```

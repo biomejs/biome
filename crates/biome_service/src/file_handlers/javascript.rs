@@ -1,9 +1,11 @@
+mod go_to;
+
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
-    DebugCapabilities, DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler,
-    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
-    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
-    SearchCapabilities, UpdateSnippetsNodes,
+    DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
+    ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
+    ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -12,6 +14,7 @@ use crate::embed::types::{
     EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
+use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
 use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
@@ -42,8 +45,9 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 // TODO: js_embeds feature when ready
@@ -70,7 +74,7 @@ use biome_js_syntax::{
     TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_parser::AnyParse;
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
@@ -81,7 +85,6 @@ use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
-use std::sync::Arc;
 use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -94,6 +97,7 @@ pub struct JsFormatterSettings {
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
@@ -119,6 +123,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             enabled: value.enabled,
             line_width: value.line_width,
             bracket_spacing: value.bracket_spacing,
+            delimiter_spacing: value.delimiter_spacing,
             attribute_position: value.attribute_position,
             indent_width: value.indent_width,
             indent_style: value.indent_style,
@@ -278,6 +283,12 @@ impl ServiceLanguage for JsLanguage {
             language
                 .bracket_spacing
                 .or(global.bracket_spacing)
+                .unwrap_or_default(),
+        )
+        .with_delimiter_spacing(
+            language
+                .delimiter_spacing
+                .or(global.delimiter_spacing)
                 .unwrap_or_default(),
         )
         .with_bracket_same_line(
@@ -528,6 +539,10 @@ impl ExtensionHandler for JsFileHandler {
             },
             search: SearchCapabilities {
                 search: Some(search),
+            },
+            editors: EditorCapabilities {
+                resolve_binding: Some(resolve_binding),
+                resolve_definition: Some(resolve_definition),
             },
         }
     }
@@ -828,10 +843,10 @@ fn debug_formatter_ir(
 fn debug_type_info(
     path: &BiomePath,
     parse: Option<AnyParse>,
-    graph: Arc<ModuleGraph>,
+    module_db: ProjectDatabase,
 ) -> Result<String, WorkspaceError> {
     let Some(parse) = parse else {
-        let result = graph.js_module_info_for_path(path);
+        let result = module_db.js_module_info_for_path(path);
         return match result {
             None => Ok(String::new()),
             // TODO: print correct type info
@@ -947,6 +962,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -961,6 +977,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -977,14 +994,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         .and_then(|s| s.semantic_model.clone());
 
     let mut services = JsAnalyzerServices::from((
-        params.module_graph,
+        params.module_db,
         params.project_layout,
         file_source,
         semantic_model,
     ));
 
     if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-        services.set_embedded_bindings(embedded_bindings.bindings)
+        services.set_embedded_bindings(embedded_bindings.bindings_without_source())
     }
 
     if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1014,7 +1031,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph,
+        module_db,
         project_layout,
         language,
         only,
@@ -1025,14 +1042,20 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services,
+        working_directory,
         compute_actions,
         snippet_services,
+        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -1045,6 +1068,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
+        .with_cache(analyzer_cache)
         .finish();
     let filter = AnalysisFilter {
         categories,
@@ -1064,7 +1088,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
-        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
+        JsAnalyzerServices::from((module_db, project_layout, source_type, semantic_model));
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1124,6 +1148,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1165,13 +1190,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
             let mut services = JsAnalyzerServices::from((
-                params.module_graph.clone(),
+                params.module_db.clone(),
                 params.project_layout.clone(),
                 file_source,
             ));
 
             if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-                services.set_embedded_bindings(embedded_bindings.bindings)
+                services.set_embedded_bindings(embedded_bindings.bindings_without_source())
             }
 
             if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1231,13 +1256,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let mut services = JsAnalyzerServices::from((
-            params.module_graph.clone(),
+            params.module_db.clone(),
             params.project_layout.clone(),
             file_source,
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1255,6 +1280,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
+        let plugin_text_edit = pending_actions
+            .iter()
+            .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match AnyJsRoot::cast(root) {
                 Some(tree) => tree,
@@ -1264,6 +1293,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_js_parser::parse(&new_text, file_source, options);
+                tree = parse.tree();
+                continue;
+            }
+
             break;
         }
     }
@@ -1271,13 +1311,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     // Phase 2: run all rules on the fixed tree for final diagnostics
     {
         let mut services = JsAnalyzerServices::from((
-            params.module_graph.clone(),
+            params.module_db.clone(),
             params.project_layout.clone(),
             file_source,
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1455,18 +1495,23 @@ pub(crate) fn pull_diagnostics_and_actions(
         only,
         skip,
         categories,
-        module_graph,
+        module_db,
         project_layout,
         suppression_reason,
         enabled_selectors,
         plugins,
         diagnostic_offset,
         document_services,
+        working_directory,
         snippet_services,
     } = params;
     let tree = parse.tree();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
@@ -1497,7 +1542,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
-        JsAnalyzerServices::from((module_graph, project_layout, source_type, semantic_model));
+        JsAnalyzerServices::from((module_db, project_layout, source_type, semantic_model));
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

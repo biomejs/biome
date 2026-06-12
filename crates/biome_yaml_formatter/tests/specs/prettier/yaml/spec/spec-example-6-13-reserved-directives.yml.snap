@@ -35,17 +35,3 @@ info: yaml/spec/spec-example-6-13-reserved-directives.yml
               # with a warning.
 --- "foo"
 ```
-
-# Errors
-```
-spec-example-6-13-reserved-directives.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected character `%`
-  
-  > 1 │ %FOO  bar baz # Should be ignored
-      │ ^
-    2 │               # with a warning.
-    3 │ --- "foo"
-  
-
-```
