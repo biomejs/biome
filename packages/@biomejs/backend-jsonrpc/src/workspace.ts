@@ -2688,7 +2688,7 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
 	* Enforce a specific function type for React function components.
-See https://biomejs.dev/linter/rules/use-react-function-component-definition
+See https://biomejs.dev/linter/rules/use-react-function-component-definition 
 	 */
 	useReactFunctionComponentDefinition?: UseReactFunctionComponentDefinitionConfiguration;
 	/**
