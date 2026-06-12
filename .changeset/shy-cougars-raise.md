@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Add allowTrailingCommas to json-schema to make VSCode happy.
+Improved the DX the JSON schema when it's used by certain code editors like VSCode.
