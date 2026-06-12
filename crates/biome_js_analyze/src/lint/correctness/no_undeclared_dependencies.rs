@@ -192,7 +192,13 @@ impl Rule for NoUndeclaredDependencies {
         // Check if it's a TypeScript path alias configured in tsconfig.json
         // This fixes Issue #10607: @components/Button should not trigger error if @components is a path alias
         if package_name.starts_with('@') {
-            if is_path_alias_prefix(package_name, &path.to_path_buf()) {
+            // Extract alias prefix: "@components/Button" -> "@components"
+            let alias_prefix = package_name
+                .split('/')
+                .next()
+                .unwrap_or(package_name)
+                .to_string();
+            if is_path_alias_prefix(&alias_prefix, &path.to_path_buf()) {
                 return None; // Valid path alias, ignore this import
             }
         }
@@ -271,8 +277,7 @@ impl Rule for NoUndeclaredDependencies {
             },
         );
 
-        let available_in = if ctx.is_dev_dependency(package_name) && !is_dev_dependency_available
-        {
+        let available_in = if ctx.is_dev_dependency(package_name) && !is_dev_dependency_available {
             Some("devDependencies")
         } else if ctx.is_peer_dependency(package_name) && !is_peer_dependency_available {
             Some("peerDependencies")

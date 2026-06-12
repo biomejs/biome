@@ -1,5 +1,3 @@
-//! Helpers para path aliases TypeScript
-
 use camino::Utf8PathBuf;
 use std::fs;
 
@@ -40,7 +38,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_contains_pattern() {
+    fn test_pattern_matching() {
         let content = r#"{
             "compilerOptions": {
                 "paths": {
@@ -51,20 +49,43 @@ mod tests {
             }
         }"#;
 
-        assert!(content.contains(&format!("\"{}*\"", "components")));
-        assert!(content.contains(&format!("\"{}/*\"", "components")));
+        // Verifica se os padrões de busca funcionam
+        assert!(content.contains(&format!("\"{}/*\"", "@components")));
+        assert!(content.contains(&format!("\"{}/*\"", "@utils")));
+        assert!(content.contains(&format!("\"{}/*\"", "@")));
+        assert!(!content.contains(&format!("\"{}/*\"", "@missing")));
     }
 
     #[test]
-    fn test_not_contains() {
+    fn test_pattern_without_slash() {
         let content = r#"{
             "compilerOptions": {
                 "paths": {
-                    "@/*": ["./src/*"]
+                    "@components*": ["./src/components/*"],
+                    "@utils*": ["./src/utils/*"]
                 }
             }
         }"#;
 
-        assert!(!content.contains(&format!("\"{}*\"", "components")));
+        // Verifica se o padrão sem /* também funciona
+        assert!(content.contains(&format!("\"{}*\"", "@components")));
+        assert!(content.contains(&format!("\"{}*\"", "@utils")));
+        assert!(!content.contains(&format!("\"{}*\"", "@missing")));
+    }
+
+    #[test]
+    fn test_both_patterns() {
+        let content = r#"{
+            "compilerOptions": {
+                "paths": {
+                    "@components/*": ["./src/components/*"],
+                    "@components*": ["./src/components/*"]
+                }
+            }
+        }"#;
+
+        // Ambos os padrões devem funcionar
+        assert!(content.contains(&format!("\"{}/*\"", "@components")));
+        assert!(content.contains(&format!("\"{}*\"", "@components")));
     }
 }

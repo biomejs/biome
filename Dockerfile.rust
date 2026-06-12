@@ -1,0 +1,18 @@
+FROM rust:1.96.0-bookworm
+
+WORKDIR /biome
+
+RUN apt-get update && apt-get install -y \
+    clang \
+    lld \
+    pkg-config \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm
+RUN npm install -g pnpm
+
+COPY . .
+
+CMD ["bash"]
