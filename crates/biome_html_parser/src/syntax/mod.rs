@@ -250,7 +250,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
     // printed verbatim, so removing <pre> from the embedded-language path
     // here has no effect on formatting output.
-    let is_pre = opening_tag_name.to_ascii_lowercase() == "pre";
+    let is_pre = opening_tag_name.eq_ignore_ascii_case("pre");
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
