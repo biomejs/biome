@@ -10226,6 +10226,7 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource };
 export type EditorFeatures = EditorFeature[];
@@ -10234,7 +10235,7 @@ export interface JsFileSource {
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
 For example, if inside an Astro file, a top-level return statement is allowed. 
 	 */
-	embedding_kind: EmbeddingKind;
+	embedding_kind: JsEmbeddingKind;
 	language: Language;
 	module_kind: ModuleKind;
 	variant: LanguageVariant;
@@ -10250,9 +10251,12 @@ export interface CssFileSource {
 	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
 For example, if inside a styled`` literal, a top-level declaration is allowed. 
 	 */
-	embeddingKind: EmbeddingKind2;
+	embeddingKind: CssEmbeddingKind;
 	language: CssFileLanguage;
 	variant: CssVariant;
+}
+export interface GraphqlFileSource {
+	variant: GraphqlVariant;
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
@@ -10261,7 +10265,7 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EditorFeature = "gotoDefinition";
-export type EmbeddingKind =
+export type JsEmbeddingKind =
 	| "None"
 	| {
 			Astro: {
@@ -10341,7 +10345,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
+export type CssEmbeddingKind = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
  * The language of the stylesheet.
  */
@@ -10355,6 +10359,10 @@ the latest Recommendation level standards.
 It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard" | "cssModules" | "tailwindCss";
+/**
+ * The style of GraphQL contained in the file.
+ */
+export type GraphqlVariant = "standard";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"

@@ -3,9 +3,9 @@
 use biome_formatter::{
     CstFormatContext, FormatLanguage, FormatResult, Formatted, Printed, SourceMapGeneration,
 };
+use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::{ServiceLanguage, Settings};
 
 pub mod check_reformat;

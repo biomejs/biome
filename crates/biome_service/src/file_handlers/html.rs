@@ -50,9 +50,10 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_languages::{HtmlFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
 use camino::Utf8Path;

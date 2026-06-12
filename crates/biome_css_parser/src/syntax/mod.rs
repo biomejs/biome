@@ -37,7 +37,8 @@ use crate::syntax::value::function::{
     parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
+use biome_css_syntax::{CssSyntaxKind, T};
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -79,12 +80,12 @@ impl SyntaxFeature for CssSyntaxFeatures {
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     match p.source_type.as_embedding_kind() {
-        EmbeddingKind::Styled => {
+        CssEmbeddingKind::Styled => {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
             m.complete(p, CSS_SNIPPET_ROOT);
         }
-        EmbeddingKind::None | EmbeddingKind::Html(_) => {
+        CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
             RootItemList.parse_list(p);
@@ -969,7 +970,8 @@ pub(crate) fn try_parse<T, E>(
 #[cfg(test)]
 mod tests {
     use crate::{CssParserOptions, parser::CssParser};
-    use biome_css_syntax::{CssFileSource, CssSyntaxKind, T};
+    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_languages::CssFileSource;
     use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 

@@ -469,10 +469,11 @@ mod tests {
     use biome_formatter::{SourceMapGeneration, SourceMarker, TransformSourceMap};
     use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
-        JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
-        JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,
-        JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
+        JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsIdentifierExpression,
+        JsLogicalExpression, JsSequenceExpression, JsStringLiteralExpression, JsSyntaxNode,
+        JsUnaryExpression, JsxTagExpression,
     };
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
 
     #[test]

@@ -17,8 +17,7 @@ use crate::settings::{
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
-    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PatternId,
-    PullActionsResult,
+    CodeAction, FixFileResult, GetSyntaxTreeResult, PatternId, PullActionsResult,
 };
 use crate::workspace::{FixFileMode, SearchQuery};
 use biome_analyze::options::PreferredQuote;
@@ -41,6 +40,7 @@ use biome_formatter::{
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
+use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -930,7 +930,7 @@ fn search(
 #[cfg(test)]
 mod test {
     use super::*;
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     #[test]
     fn inherit_global_format_settings() {

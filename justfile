@@ -41,7 +41,7 @@ gen-types:
 
 # Generates the JSON Schema of the configuration
 gen-schema:
-  cargo codegen-schema
+  cargo run -p xtask_codegen --features schema -- schema
 
 # Generates code generated files for the linter
 gen-analyzer:

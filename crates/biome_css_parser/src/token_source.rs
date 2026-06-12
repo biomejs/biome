@@ -1,7 +1,8 @@
 use crate::CssParserOptions;
 use crate::lexer::{CssLexContext, CssLexer, CssReLexContext, CssStringQuote};
 use biome_css_syntax::CssSyntaxKind::EOF;
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, TextRange};
+use biome_css_syntax::{CssSyntaxKind, TextRange};
+use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexerCheckpoint};
 use biome_parser::prelude::{BumpWithContext, TokenSource};

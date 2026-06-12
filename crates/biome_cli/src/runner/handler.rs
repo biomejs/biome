@@ -3,7 +3,7 @@ use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
-use biome_service::file_handlers::DocumentFileSource;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
     FileFeaturesResult, IgnoreKind, PathIsIgnoredParams, SupportsFeatureParams,
 };

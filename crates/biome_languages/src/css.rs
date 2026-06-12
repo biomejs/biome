@@ -6,7 +6,7 @@ use camino::Utf8Path;
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub enum EmbeddingKind {
+pub enum CssEmbeddingKind {
     /// styled-components or Emotion embedded CSS
     Styled,
 
@@ -66,7 +66,7 @@ pub struct CssFileSource {
 
     /// Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
     /// For example, if inside a styled`` literal, a top-level declaration is allowed.
-    embedding_kind: EmbeddingKind,
+    embedding_kind: CssEmbeddingKind,
 }
 
 /// The language of the stylesheet.
@@ -116,7 +116,7 @@ impl CssFileSource {
         Self {
             language: CssFileLanguage::Css,
             variant: CssVariant::Standard,
-            embedding_kind: EmbeddingKind::None,
+            embedding_kind: CssEmbeddingKind::None,
         }
     }
 
@@ -124,7 +124,7 @@ impl CssFileSource {
         Self {
             language: CssFileLanguage::Scss,
             variant: CssVariant::Standard,
-            embedding_kind: EmbeddingKind::None,
+            embedding_kind: CssEmbeddingKind::None,
         }
     }
 
@@ -132,7 +132,7 @@ impl CssFileSource {
         Self {
             language: CssFileLanguage::Css,
             variant: CssVariant::TailwindCss,
-            embedding_kind: EmbeddingKind::None,
+            embedding_kind: CssEmbeddingKind::None,
         }
     }
 
@@ -140,16 +140,16 @@ impl CssFileSource {
         Self {
             language: CssFileLanguage::Css,
             variant: CssVariant::CssModules,
-            embedding_kind: EmbeddingKind::None,
+            embedding_kind: CssEmbeddingKind::None,
         }
     }
 
-    pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
+    pub const fn with_embedding_kind(mut self, kind: CssEmbeddingKind) -> Self {
         self.embedding_kind = kind;
         self
     }
 
-    pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
+    pub const fn as_embedding_kind(&self) -> &CssEmbeddingKind {
         &self.embedding_kind
     }
 
@@ -178,15 +178,15 @@ impl CssFileSource {
     pub fn is_vue_embedded(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. })
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. })
         )
     }
 
     /// Returns the applicability of this embedded CSS block.
     pub fn embedding_applicability(&self) -> EmbeddingStyleApplicability {
         match &self.embedding_kind {
-            EmbeddingKind::Html(EmbeddingHtmlKind::Html) => EmbeddingStyleApplicability::Global,
-            EmbeddingKind::Html(
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Html) => EmbeddingStyleApplicability::Global,
+            CssEmbeddingKind::Html(
                 EmbeddingHtmlKind::Vue { applicability }
                 | EmbeddingHtmlKind::Astro { applicability }
                 | EmbeddingHtmlKind::Svelte { applicability },
@@ -205,7 +205,7 @@ impl CssFileSource {
 
     /// If the CSS is embedded, it sets its applicability
     pub fn set_applicability(&mut self, new_applicability: EmbeddingStyleApplicability) {
-        if let EmbeddingKind::Html(embedded_kind) = &mut self.embedding_kind {
+        if let CssEmbeddingKind::Html(embedded_kind) = &mut self.embedding_kind {
             match embedded_kind {
                 EmbeddingHtmlKind::None => {}
                 EmbeddingHtmlKind::Html => {}

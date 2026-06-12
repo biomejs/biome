@@ -133,6 +133,7 @@ impl SemanticEvent {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// let mut extractor = SemanticEventExtractor::default();
 /// for e in tree.syntax().preorder() {
@@ -1441,6 +1442,7 @@ impl Iterator for SemanticEventIterator {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// for e in semantic_events(tree.syntax()) {
 ///     dbg!(e);

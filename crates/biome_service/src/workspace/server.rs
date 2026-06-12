@@ -4,9 +4,9 @@ use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
-    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
-    DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
-    ParseResult, ResolveBindingParams, ResolveDefinitionParams, UpdateSnippetsNodes,
+    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
+    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, ResolveBindingParams,
+    ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -42,7 +42,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{AnyCssRoot, CssFileSource, CssVariant};
+use biome_css_syntax::AnyCssRoot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -52,9 +52,11 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, ModuleKind};
+use biome_js_syntax::AnyJsRoot;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_languages::css::CssVariant;
+use biome_languages::javascript::{JsEmbeddingKind, LanguageVariant, ModuleKind};
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_module_graph::{
     HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, ProjectDatabase, resolve_css_module, resolve_html_module, resolve_js_module,
@@ -304,7 +306,7 @@ impl WorkspaceServer {
         match (document_file_source, path_source) {
             (DocumentFileSource::Js(_), DocumentFileSource::Html(_)) => true,
             (DocumentFileSource::Js(_), DocumentFileSource::Js(path_source)) => {
-                !matches!(path_source.as_embedding_kind(), EmbeddingKind::None)
+                !matches!(path_source.as_embedding_kind(), JsEmbeddingKind::None)
             }
             _ => false,
         }

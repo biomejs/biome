@@ -1,6 +1,6 @@
 use biome_css_parser::{CssParserOptions, parse_css_with_cache};
-use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
+use biome_languages::CssFileSource;
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
 use criterion::{

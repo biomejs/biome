@@ -7,14 +7,15 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make::{self, js_module_item_list};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsModuleItem, JsFileSource, JsModuleItemList, JsSyntaxKind,
-    JsVariableDeclarator, JsVariableDeclaratorList, T,
+    AnyJsExpression, AnyJsModuleItem, JsModuleItemList, JsSyntaxKind, JsVariableDeclarator,
+    JsVariableDeclaratorList, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, TriviaPieceKind};
 use biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions;
 use rustc_hash::FxHashMap;
 
 use crate::JsRuleAction;
+use biome_languages::JsFileSource;
 
 declare_lint_rule! {
     /// Enforce specific order of Vue compiler macros.

@@ -1,7 +1,7 @@
 pub(crate) mod traverse;
 mod visitor;
 
-use biome_css_syntax::EmbeddingStyleApplicability;
+use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;

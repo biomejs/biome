@@ -3,12 +3,10 @@ use biome_fs::BiomePath;
 use biome_graphql_formatter::GraphqlFormatLanguage;
 use biome_graphql_formatter::context::GraphqlFormatContext;
 use biome_graphql_parser::parse_graphql;
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
+use biome_languages::{DocumentFileSource, GraphqlFileSource};
 use biome_parser::{AnyParse, NodeParse};
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 #[derive(Default)]
 pub struct GraphqlTestFormatLanguage {

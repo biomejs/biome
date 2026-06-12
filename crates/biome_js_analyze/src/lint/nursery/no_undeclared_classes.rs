@@ -4,9 +4,10 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsFileSource, JsxAttribute,
+    AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsxAttribute,
     binding_ext::AnyJsBindingDeclaration,
 };
+use biome_languages::JsFileSource;
 use biome_module_graph::{
     ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
     build_import_tree_for_js, traverse_import_tree_for_classes,

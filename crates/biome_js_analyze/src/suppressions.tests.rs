@@ -4,7 +4,8 @@ use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use std::slice;
 

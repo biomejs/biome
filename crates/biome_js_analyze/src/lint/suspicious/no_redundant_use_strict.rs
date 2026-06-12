@@ -3,8 +3,9 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, de
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
+    AnyJsClass, JsDirective, JsDirectiveList, JsFunctionBody, JsModule, JsScript,
 };
+use biome_languages::JsFileSource;
 use biome_rule_options::no_redundant_use_strict::NoRedundantUseStrictOptions;
 
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};

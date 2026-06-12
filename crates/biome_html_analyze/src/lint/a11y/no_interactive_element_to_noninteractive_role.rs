@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 

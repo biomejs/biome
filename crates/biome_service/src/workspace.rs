@@ -88,14 +88,13 @@ use tokio::sync::watch;
 use tracing::debug;
 
 pub use crate::{
-    WorkspaceError,
-    file_handlers::{Capabilities, DocumentFileSource},
-    projects::ProjectKey,
-    scanner::ScanKind,
+    WorkspaceError, file_handlers::Capabilities, projects::ProjectKey, scanner::ScanKind,
     settings::Settings,
 };
+use biome_languages::DocumentFileSource;
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
+
 pub mod db;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};

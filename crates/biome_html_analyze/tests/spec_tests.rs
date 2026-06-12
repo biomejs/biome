@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::parse_html;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,

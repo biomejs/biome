@@ -2,10 +2,10 @@ use biome_formatter::TrailingNewline;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_service::workspace::{
-    ChangeFileParams, DocumentFileSource, FileContent, FormatFileParams, GetFormatterIRParams,
-    OpenFileParams, OpenProjectParams, server,
+    ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
+    OpenProjectParams, server,
 };
 use std::sync::Arc;
 

@@ -11,18 +11,16 @@ use biome_resolver::ResolveError;
 use crate::snap::ModuleGraphSnapshot;
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_syntax::{
-    CssFileSource, EmbeddingHtmlKind, EmbeddingKind, EmbeddingStyleApplicability,
-};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
-use biome_html_syntax::HtmlFileSource;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
+use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
+use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
@@ -35,7 +33,6 @@ use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Text, TextRange, TextSize};
 use biome_service::Workspace;
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
@@ -3325,10 +3322,10 @@ fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedCont
     // Mirror the workspace server: enable CSS modules parsing for embedded CSS
     // in framework files (Vue → Vue dialect; Svelte/Astro → Classic).
     let css_modules_kind = match file_source.as_embedding_kind() {
-        EmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
-        EmbeddingKind::Html(EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. }) => {
-            CssModulesKind::Classic
-        }
+        CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
+        CssEmbeddingKind::Html(
+            EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. },
+        ) => CssModulesKind::Classic,
         _ => CssModulesKind::None,
     };
     let options = CssParserOptions {
@@ -3347,40 +3344,40 @@ fn parse_html_src(src: &str, file_source: HtmlFileSource) -> biome_html_syntax::
 
 /// Returns a `CssFileSource` for a plain HTML `<style>` block (always Global).
 fn html_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Html))
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
 }
 
 /// Returns a `CssFileSource` for a Vue `<style>` (unscoped → Global).
 fn vue_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
         applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Vue `<style scoped>` (Local).
 fn vue_scoped_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style>` (default → Local).
 fn astro_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style is:global>` (Global).
 fn astro_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
         applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Svelte `<style>` (default → Local).
 fn svelte_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
@@ -3745,8 +3742,8 @@ fn test_svelte_global_pseudo_class_is_visible() {
 #[test]
 fn test_vue_upward_traversal() {
     use biome_html_parser::HtmlParserOptions;
-    use biome_html_syntax::HtmlFileSource;
     use biome_js_parser::JsParserOptions;
+    use biome_languages::HtmlFileSource;
 
     let fs = MemoryFileSystem::default();
 
@@ -3773,7 +3770,7 @@ fn test_vue_upward_traversal() {
     // App.vue's embedded <script> imports app.css and Page.vue
     let app_script = biome_js_parser::parse(
         r#"import "./app.css"; import Page from "./Page.vue";"#,
-        biome_js_parser::JsFileSource::ts(),
+        JsFileSource::ts(),
         JsParserOptions::default(),
     );
     let app_embedded = vec![HtmlEmbeddedContent::Js(app_script.tree())];
@@ -3786,7 +3783,7 @@ fn test_vue_upward_traversal() {
     // Page.vue's embedded <script> imports Button.vue
     let page_script = biome_js_parser::parse(
         r#"import Button from "./Button.vue";"#,
-        biome_js_parser::JsFileSource::ts(),
+        JsFileSource::ts(),
         JsParserOptions::default(),
     );
     let page_embedded = vec![HtmlEmbeddedContent::Js(page_script.tree())];

@@ -1,8 +1,12 @@
-use std::collections::BTreeMap;
-use std::num::NonZeroU64;
-use std::str::FromStr;
-use std::sync::Arc;
-
+use super::{
+    CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
+    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
+    UpdateModuleGraphParams, UpdateSettingsParams, server,
+};
+use crate::projects::ProjectKey;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::{Workspace, WorkspaceError};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::{RuleGroup, RuleSelector};
 use biome_configuration::{
@@ -10,21 +14,16 @@ use biome_configuration::{
 };
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
-use biome_js_syntax::{JsFileSource, TextSize};
+use biome_js_syntax::TextSize;
+use biome_languages::DocumentFileSource;
+use biome_languages::JsFileSource;
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
-
-use super::{
-    CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
-};
-use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::ModuleGraphResolutionKind;
-use crate::{Workspace, WorkspaceError};
+use std::collections::BTreeMap;
+use std::num::NonZeroU64;
+use std::str::FromStr;
+use std::sync::Arc;
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Arc::new(MemoryFileSystem::default()), None);

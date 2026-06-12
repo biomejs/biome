@@ -3,9 +3,9 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{
-    HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
-};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;

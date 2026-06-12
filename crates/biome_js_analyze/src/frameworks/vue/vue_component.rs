@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsNamedImportSpecifier,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsStatement, AnyTsType, AnyTsTypeMember,
     JsArrayBindingPattern, JsArrowFunctionExpression, JsCallExpression, JsDefaultImportSpecifier,
-    JsExportDefaultExpressionClause, JsFileSource, JsFunctionDeclaration, JsFunctionExpression,
+    JsExportDefaultExpressionClause, JsFunctionDeclaration, JsFunctionExpression,
     JsIdentifierBinding, JsMethodObjectMember, JsModule, JsNamedImportSpecifier,
     JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsObjectBindingPattern,
     JsPropertyObjectMember, JsShorthandNamedImportSpecifier, JsStringLiteralExpression,
@@ -23,6 +23,7 @@ use camino::Utf8Path;
 use std::iter;
 
 use crate::utils::rename::RenamableNode;
+use biome_languages::JsFileSource;
 use enumflags2::{BitFlags, bitflags};
 
 mod component_name;

@@ -668,7 +668,8 @@ impl ReactSuperClass {
 mod test {
     use super::*;
     use biome_js_parser::{JsParserOptions, Parse, parse};
-    use biome_js_syntax::{AnyJsRoot, JsFileSource};
+    use biome_js_syntax::AnyJsRoot;
+    use biome_languages::JsFileSource;
 
     fn parse_jsx(code: &str) -> Parse<AnyJsRoot> {
         let source = parse(code, JsFileSource::jsx(), JsParserOptions::default());

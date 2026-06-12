@@ -1,16 +1,14 @@
-use std::default::Default;
-use std::fmt;
-use std::rc::Rc;
-
+use crate::YamlCommentStyle;
+use crate::comments::{FormatYamlLeadingComment, YamlComments};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{IndentWidth, prelude::*};
 use biome_yaml_syntax::YamlLanguage;
-
-use crate::YamlCommentStyle;
-use crate::comments::{FormatYamlLeadingComment, YamlComments};
+use std::default::Default;
+use std::fmt;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct YamlFormatContext {

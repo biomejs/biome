@@ -7,7 +7,8 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::JsonFileSource;
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;

@@ -27,6 +27,7 @@ biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_css"] }
 biome_module_graph       = { workspace = true }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }

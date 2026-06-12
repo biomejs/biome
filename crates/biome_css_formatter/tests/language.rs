@@ -1,14 +1,12 @@
 use biome_css_formatter::CssFormatLanguage;
 use biome_css_formatter::context::CssFormatContext;
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
+use biome_languages::{CssFileSource, DocumentFileSource};
 use biome_parser::AnyParse;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct CssTestFormatLanguage {
     source_type: CssFileSource,

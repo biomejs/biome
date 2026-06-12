@@ -180,7 +180,7 @@ impl EmbeddedValueReferencesBuilder {
 mod tests {
     use super::*;
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn parse_js(source: &str) -> AnyJsRoot {
         let result = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());

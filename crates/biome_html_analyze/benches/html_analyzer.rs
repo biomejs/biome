@@ -7,7 +7,7 @@ use biome_analyze::{
 };
 use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::HtmlFileSource;
+use biome_languages::HtmlFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 

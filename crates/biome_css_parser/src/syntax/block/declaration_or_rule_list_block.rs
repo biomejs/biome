@@ -15,8 +15,8 @@ use crate::syntax::{
     try_parse_nested_qualified_rule_without_selector_recovery,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::EmbeddingKind;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -57,7 +57,7 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
 #[inline]
 fn is_at_top_level_qualified_rule(p: &mut CssParser) -> bool {
     !p.state().is_nesting_block
-        && matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        && matches!(p.source_type.as_embedding_kind(), CssEmbeddingKind::Styled)
         && is_at_qualified_rule(p)
 }
 

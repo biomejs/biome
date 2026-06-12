@@ -6,9 +6,10 @@ mod test {
     };
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{
-        JsFileSource, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
-        JsSyntaxKind, TsIdentifierBinding,
+        JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier, JsSyntaxKind,
+        TsIdentifierBinding,
     };
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, SyntaxNodeCast};
 
     fn svelte_options() -> SemanticModelOptions {

@@ -1,7 +1,6 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod file_source;
 mod generated;
 mod import_ext;
 mod number_ext;
@@ -15,10 +14,6 @@ mod syntax_node;
 pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
-};
-pub use file_source::{
-    CssFileLanguage, CssFileSource, CssVariant, EmbeddingHtmlKind, EmbeddingKind,
-    EmbeddingStyleApplicability,
 };
 pub use number_ext::{CssNumberScanOptions, scan_css_number};
 pub use property_ext::{CssGridTemplateProperty, css_grid_template_property};

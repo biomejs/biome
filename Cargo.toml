@@ -73,6 +73,7 @@ biome_json_formatter         = { path = "./crates/biome_json_formatter", version
 biome_json_parser            = { path = "./crates/biome_json_parser", version = "0.5.7" }
 biome_json_syntax            = { path = "./crates/biome_json_syntax", version = "0.5.7" }
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
+biome_languages              = { path = "./crates/biome_languages/", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
