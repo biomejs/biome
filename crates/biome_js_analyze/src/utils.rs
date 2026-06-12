@@ -4,6 +4,7 @@ use std::iter;
 
 pub mod batch;
 pub mod rename;
+pub mod path_alias_helper;
 #[cfg(test)]
 pub mod tests;
 

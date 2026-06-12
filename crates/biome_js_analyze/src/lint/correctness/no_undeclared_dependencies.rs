@@ -1,9 +1,11 @@
-use crate::{services::manifest::Manifest, utils::parse_package_name};
+use crate::{
+    services::manifest::Manifest,
+    utils::{parse_package_name, path_alias_helper::is_path_alias_prefix},
+};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_resolver::is_builtin_node_module;
@@ -23,6 +25,8 @@ declare_lint_rule! {
     ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+    ///
+    /// Path aliases configured in `tsconfig.json` (e.g., `@components/*`) are also ignored, as they are not npm packages.
     ///
     /// To ensure that Visual Studio Code uses relative imports when it automatically imports a variable,
     /// you may set [`javascript.preferences.importModuleSpecifier` and `typescript.preferences.importModuleSpecifier`](https://code.visualstudio.com/docs/getstarted/settings) to `relative`.
@@ -58,6 +62,8 @@ declare_lint_rule! {
     ///
     /// import { A } from "./local.js"; // relative imports don't trigger the rule
     /// import { B } from "#alias"; // same goes for aliases
+    ///
+    /// import { C } from "@components/Button"; // path alias in tsconfig.json
     /// ```
     ///
     /// ## Options
@@ -120,9 +126,7 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noUndeclaredDependencies",
         language: "js",
-        sources: &[
-            RuleSource::EslintImport("no-extraneous-dependencies").same(),
-        ],
+        sources: &[RuleSource::EslintImport("no-extraneous-dependencies").same()],
         recommended: false,
         severity: Severity::Error,
         domains: &[RuleDomain::Project],
@@ -153,7 +157,8 @@ impl Rule for NoUndeclaredDependencies {
         let is_dev_dependency_available =
             // Type-only imports are always considered as dev dependencies.
             is_type_import(node)
-                || ctx.options()
+                || ctx
+                    .options()
                     .dev_dependencies
                     .as_ref()
                     .is_none_or(|dep| dep.is_available(path));
@@ -183,6 +188,15 @@ impl Rule for NoUndeclaredDependencies {
 
         let import_text = node.inner_string_text()?;
         let package_name = parse_package_name(import_text.text())?;
+
+        // Check if it's a TypeScript path alias configured in tsconfig.json
+        // This fixes Issue #10607: @components/Button should not trigger error if @components is a path alias
+        if package_name.starts_with('@') {
+            if is_path_alias_prefix(package_name, &path.to_path_buf()) {
+                return None; // Valid path alias, ignore this import
+            }
+        }
+
         if is_available(package_name)
             // Self package imports
             // TODO: we should also check that an `.` exports exists.
@@ -257,7 +271,8 @@ impl Rule for NoUndeclaredDependencies {
             },
         );
 
-        let available_in = if ctx.is_dev_dependency(package_name) && !is_dev_dependency_available {
+        let available_in = if ctx.is_dev_dependency(package_name) && !is_dev_dependency_available
+        {
             Some("devDependencies")
         } else if ctx.is_peer_dependency(package_name) && !is_peer_dependency_available {
             Some("peerDependencies")
