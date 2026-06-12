@@ -444,8 +444,13 @@ where
     let has_scss_list_comments =
         scss_parent_property.is_some() && has_list_comments(list, comments);
 
-    // Comment-bearing SCSS grid rows are tracked as a separate layout gap.
-    if is_grid_property && !(has_scss_trailing_comments || has_scss_list_comments) {
+    // In:
+    // .grid {
+    //   grid-template-areas: // row
+    //     "header";
+    // }
+    // PreserveInline owns the string-row indent after the `:` comment.
+    if is_grid_property && (has_scss_trailing_comments || !has_scss_list_comments) {
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
