@@ -73,6 +73,7 @@
 		}
 	},
 	"additionalProperties": false,
+	"allowTrailingCommas": true,
 	"$defs": {
 		"A11y": {
 			"description": "A list of rules that belong to this group",
