@@ -9415,6 +9415,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssStringText {
         )
     }
 }
+impl FormatRule < biome_css_syntax :: ScssSupportsInterpolatedCondition > for crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: ScssSupportsInterpolatedCondition , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: ScssSupportsInterpolatedCondition > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssSupportsInterpolatedCondition {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssSupportsInterpolatedCondition , crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssSupportsInterpolatedCondition {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssSupportsInterpolatedCondition , crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssUnaryExpression>
     for crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression
 {
