@@ -32,14 +32,21 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -7,7 +7,7 @@
+@@ -13,12 +13,12 @@
      hard_line_break,
-     hard_line_break,
+     source_position(17),
      "```",
 -    empty_line,
+-    source_position(24),
 +    hard_line_break,
++    source_position(20),
      "
  ",
      empty_line,
+-    source_position(29),
++    source_position(25),
+     "bar",
+     hard_line_break,
+     hard_line_break
 
 ```

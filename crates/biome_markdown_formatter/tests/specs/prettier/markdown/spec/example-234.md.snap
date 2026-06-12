@@ -30,19 +30,33 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -2,11 +2,11 @@
-   "1.",
-   align(4, [
+@@ -5,22 +5,21 @@
      align(4, [
--      "             indented code
-+      "         indented code
+       "    ",
+       source_position(2),
+-      "         indented code",
+-      source_position(24),
++      "     indented code",
++      source_position(20),
+       "
  "
      ]),
      empty_line,
--    " paragraph",
-+    "paragraph",
+-    " ",
+-    source_position(30),
++    source_position(25),
+     "paragraph",
      hard_line_break,
      empty_line,
      align(4, [
+       "    ",
+-      source_position(49),
++      source_position(43),
+       "more code",
+-      source_position(58),
++      source_position(52),
+       "
+ "
+     ]),
 
 ```
