@@ -146,7 +146,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReactFunctionComponentDefinition {
-        version: "next",
+        version: "2.5.0",
         name: "useReactFunctionComponentDefinition",
         language: "jsx",
         recommended: false,

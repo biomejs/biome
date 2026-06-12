@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoStaticElementInteractions {
-        version: "next",
+        version: "2.5.0",
         name: "noStaticElementInteractions",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-static-element-interactions").inspired()],

@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseFocusableInteractive {
-        version: "next",
+        version: "2.5.0",
         name: "useFocusableInteractive",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus").inspired()],

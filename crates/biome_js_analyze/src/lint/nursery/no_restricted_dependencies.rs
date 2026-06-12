@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// See [the e18e docs](https://e18e.dev/docs/replacements/) for the full list of replacements.
     ///
     pub NoRestrictedDependencies {
-        version: "next",
+        version: "2.5.0",
         name: "noRestrictedDependencies",
         language: "js",
         recommended: false,

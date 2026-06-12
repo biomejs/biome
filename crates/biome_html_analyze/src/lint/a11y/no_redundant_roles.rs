@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantRoles {
-        version: "next",
+        version: "2.5.0",
         name: "noRedundantRoles",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").inspired(), RuleSource::HtmlEslint("no-redundant-role").same()],

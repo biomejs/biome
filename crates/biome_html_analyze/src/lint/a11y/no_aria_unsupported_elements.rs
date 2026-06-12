@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAriaUnsupportedElements {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaUnsupportedElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").inspired()],

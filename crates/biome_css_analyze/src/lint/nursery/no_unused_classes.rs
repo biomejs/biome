@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnusedClasses {
-        version: "next",
+        version: "2.5.0",
         name: "noUnusedClasses",
         language: "css",
         recommended: false,

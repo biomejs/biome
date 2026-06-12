@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// - [HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
     ///
     pub UseValidAutocomplete {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAutocomplete",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("autocomplete-valid").inspired()],

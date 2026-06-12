@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUndeclaredClasses {
-        version: "next",
+        version: "2.5.0",
         name: "noUndeclaredClasses",
         language: "html",
         recommended: false,

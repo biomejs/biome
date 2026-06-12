@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInteractiveElementToNoninteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noInteractiveElementToNoninteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").inspired()],

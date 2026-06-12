@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
     pub UseKeyWithMouseEvents {
-        version: "next",
+        version: "2.5.0",
         name: "useKeyWithMouseEvents",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events").inspired()],
