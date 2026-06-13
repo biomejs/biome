@@ -253,11 +253,6 @@ impl Rule for RuleMover {
             for elt in old_list.elements() {
                 let node = elt.node.ok()?;
                 let trailing_separator = elt.trailing_separator.ok()?;
-                // Record every original member's separator, including one we are about to
-                // remove below. Otherwise, removing the *last* member (which has no trailing
-                // separator) leaves `last_has_separator` reflecting its predecessor, and
-                // `fix_separators` then appends an illegal trailing comma after the new
-                // last member — which aborts migration of a strict JSON config.
                 last_has_separator = trailing_separator.is_some();
                 if let Some(name) = node.name().ok().and_then(|name| name.inner_string_text()) {
                     if name.text() == new_rule_name {
