@@ -2504,6 +2504,16 @@ See https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout
 	 */
 	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
 	/**
+	* Disallow forgetting to clear setInterval within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-interval 
+	 */
+	noReactLeakedInterval?: NoReactLeakedIntervalConfiguration;
+	/**
+	* Disallow forgetting to clear setTimeout within useEffect.
+See https://biomejs.dev/linter/rules/no-react-leaked-timeout 
+	 */
+	noReactLeakedTimeout?: NoReactLeakedTimeoutConfiguration;
+	/**
 	* Disallow deep imports from the react-native package.
 See https://biomejs.dev/linter/rules/no-react-native-deep-imports 
 	 */
@@ -4714,6 +4724,12 @@ export type NoPlaywrightWaitForSelectorConfiguration =
 export type NoPlaywrightWaitForTimeoutConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightWaitForTimeoutOptions;
+export type NoReactLeakedIntervalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedIntervalOptions;
+export type NoReactLeakedTimeoutConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactLeakedTimeoutOptions;
 export type NoReactNativeDeepImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeDeepImportsOptions;
@@ -6583,6 +6599,14 @@ export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightWaitForTimeoutOptions;
 }
+export interface RuleWithNoReactLeakedIntervalOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedIntervalOptions;
+}
+export interface RuleWithNoReactLeakedTimeoutOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactLeakedTimeoutOptions;
+}
 export interface RuleWithNoReactNativeDeepImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeDeepImportsOptions;
@@ -8292,6 +8316,8 @@ export type NoPlaywrightUselessAwaitOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
+export type NoReactLeakedIntervalOptions = {};
+export type NoReactLeakedTimeoutOptions = {};
 export type NoReactNativeDeepImportsOptions = {};
 export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
@@ -9666,6 +9692,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noReactLeakedInterval"
+	| "lint/nursery/noReactLeakedTimeout"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"

@@ -204,6 +204,8 @@ pub mod no_quickfix_biome;
 pub mod no_qwik_use_visible_task;
 pub mod no_re_export_all;
 pub mod no_react_forward_ref;
+pub mod no_react_leaked_interval;
+pub mod no_react_leaked_timeout;
 pub mod no_react_native_deep_imports;
 pub mod no_react_native_literal_colors;
 pub mod no_react_native_raw_text;

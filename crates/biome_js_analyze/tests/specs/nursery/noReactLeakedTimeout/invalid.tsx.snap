@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+import { useEffect } from "react";
+
+function Invalid1() {
+  useEffect(() => {
+    setTimeout(() => {}, 1000);
+  }, []);
+}
+
+function Invalid2() {
+  useEffect(() => {
+    window.setTimeout(() => {}, 1000);
+  }, []);
+}
+
+function Invalid3() {
+  useEffect(() => {
+    const timeoutId = global.setTimeout(() => {}, 1000);
+  }, []);
+}
+
+function Invalid4() {
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {}, 1000);
+  }, []);
+}
+
+function Invalid5() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {}, 1000) as number;
+  }, []);
+}
+
+function Invalid6() {
+  useEffect(() => {
+    (setTimeout as any)(() => {}, 1000);
+  }, []);
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:6:5 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    4 │ function Invalid1() {
+    5 │   useEffect(() => {
+  > 6 │     setTimeout(() => {}, 1000);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   }, []);
+    8 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:12:5 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    10 │ function Invalid2() {
+    11 │   useEffect(() => {
+  > 12 │     window.setTimeout(() => {}, 1000);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   }, []);
+    14 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:18:23 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    16 │ function Invalid3() {
+    17 │   useEffect(() => {
+  > 18 │     const timeoutId = global.setTimeout(() => {}, 1000);
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │   }, []);
+    20 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:24:23 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    22 │ function Invalid4() {
+    23 │   useEffect(() => {
+  > 24 │     const timeoutId = globalThis.setTimeout(() => {}, 1000);
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │   }, []);
+    26 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:30:23 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    28 │ function Invalid5() {
+    29 │   useEffect(() => {
+  > 30 │     const timeoutId = setTimeout(() => {}, 1000) as number;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │   }, []);
+    32 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:36:5 lint/nursery/noReactLeakedTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Timeout cleanup missing.
+  
+    34 │ function Invalid6() {
+    35 │   useEffect(() => {
+  > 36 │     (setTimeout as any)(() => {}, 1000);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │   }, []);
+    38 │ }
+  
+  i A setTimeout created in an effect must be cleared in the cleanup function.
+  
+  i Not clearing the timeout can cause memory leaks and trigger state updates on an unmounted component.
+  
+  i Return a cleanup function from the effect that calls clearTimeout with the timeout ID.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
