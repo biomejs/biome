@@ -30,7 +30,9 @@ pub fn is_path_alias_prefix(prefix: &str, file_path: &Utf8PathBuf) -> bool {
         {
             let cache = ALIAS_CACHE.lock().unwrap();
             if let Some(aliases) = cache.get(&dir_str) {
-                return aliases.iter().any(|a| a == prefix || a == &format!("{}/*", prefix) || a == &format!("{}*", prefix));
+                return aliases.iter().any(|a| {
+                    a == prefix || a == &format!("{}/*", prefix) || a == &format!("{}*", prefix)
+                });
             }
         }
 
@@ -65,7 +67,9 @@ pub fn is_path_alias_prefix(prefix: &str, file_path: &Utf8PathBuf) -> bool {
             }
 
             // Verifica se o prefixo está na lista (com variação de padrões)
-            return found_aliases.iter().any(|a| a == prefix || a == &format!("{}/*", prefix) || a == &format!("{}*", prefix));
+            return found_aliases.iter().any(|a| {
+                a == prefix || a == &format!("{}/*", prefix) || a == &format!("{}*", prefix)
+            });
         }
 
         current_dir = dir.parent();
