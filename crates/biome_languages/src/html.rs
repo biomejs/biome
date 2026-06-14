@@ -8,6 +8,9 @@ use camino::Utf8Path;
 )]
 pub struct HtmlFileSource {
     variant: HtmlVariant,
+    #[serde(skip)]
+    #[cfg_attr(feature = "schema", schemars(skip))]
+    is_svg: bool,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -43,13 +46,25 @@ impl HtmlFileSource {
     pub fn html() -> Self {
         Self {
             variant: HtmlVariant::default(),
+            is_svg: false,
+        }
+    }
+
+    pub fn svg() -> Self {
+        Self {
+            variant: HtmlVariant::default(),
+            is_svg: true,
         }
     }
 
     /// Returns `true` if the current file is `.html` and doesn't support
     /// any text expression capability
     pub const fn is_html(&self) -> bool {
-        matches!(self.variant, HtmlVariant::Standard(_))
+        matches!(self.variant, HtmlVariant::Standard(_)) && !self.is_svg
+    }
+
+    pub const fn is_svg(&self) -> bool {
+        self.is_svg
     }
 
     pub const fn is_vue(&self) -> bool {
@@ -83,23 +98,27 @@ impl HtmlFileSource {
     pub fn html_with_text_expressions() -> Self {
         Self {
             variant: HtmlVariant::Standard(HtmlTextExpressions::Double),
+            is_svg: false,
         }
     }
 
     pub fn astro() -> Self {
         Self {
             variant: HtmlVariant::Astro,
+            is_svg: false,
         }
     }
 
     pub fn vue() -> Self {
         Self {
             variant: HtmlVariant::Vue,
+            is_svg: false,
         }
     }
     pub fn svelte() -> Self {
         Self {
             variant: HtmlVariant::Svelte,
+            is_svg: false,
         }
     }
 
@@ -116,7 +135,8 @@ impl HtmlFileSource {
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {
-            "html" | "svg" => Ok(Self::html()),
+            "html" => Ok(Self::html()),
+            "svg" => Ok(Self::svg()),
             "astro" => Ok(Self::astro()),
             "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
@@ -140,7 +160,7 @@ impl HtmlFileSource {
         match language_id {
             "html" => Ok(Self::html()),
             "xml" if extension.is_some_and(|ext| ext.eq_ignore_ascii_case("svg")) => {
-                Ok(Self::html())
+                Ok(Self::svg())
             }
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),

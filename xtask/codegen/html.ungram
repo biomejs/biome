@@ -48,9 +48,13 @@ VueBogusDirectiveArgument = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	frontmatter: AnyAstroFrontmatterElement?
-	directive: HtmlDirective?
+	directive: AnyHtmlRootDirective?
 	html: HtmlElementList
 	eof: 'EOF'
+
+AnyHtmlRootDirective =
+	HtmlDirective
+	| HtmlProcessingInstructionDirective
 
 // <!DOCTYPE html>
 // ^^^^^^^^^^^^^^^
@@ -64,6 +68,15 @@ HtmlDirective =
 	system_id: 'html_string_literal'?
 	'>'
 
+// <?xml version="1.0"?>
+HtmlProcessingInstructionDirective =
+	'<'
+	opening_question_mark: '?'
+	target: HtmlTagName
+	attributes: HtmlAttributeList
+	closing_question_mark: '?'
+	'>'
+
 // ==================================
 // Elements (AKA tags)
 // ==================================
@@ -71,8 +84,7 @@ HtmlDirective =
 HtmlElementList = AnyHtmlElement*
 
 AnyHtmlElement =
-	HtmlProcessingInstruction
-	| HtmlSelfClosingElement
+	HtmlSelfClosingElement
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
@@ -105,14 +117,6 @@ HtmlSingleTextExpression =
 	'}'
 
 HtmlTextExpression = 'html_literal'
-
-// <?xml version="1.0"?>
-HtmlProcessingInstruction =
-	'<'
-	target: HtmlTagName
-	attributes: HtmlAttributeList
-	'?'
-	'>'
 
 // <a />
 HtmlSelfClosingElement =

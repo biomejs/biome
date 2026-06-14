@@ -739,12 +739,19 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.into_node(HTML_OPENING_ELEMENT, children)
             }
-            HTML_PROCESSING_INSTRUCTION => {
+            HTML_PROCESSING_INSTRUCTION_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [?]
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -780,11 +787,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        HTML_PROCESSING_INSTRUCTION.to_bogus(),
+                        HTML_PROCESSING_INSTRUCTION_DIRECTIVE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(HTML_PROCESSING_INSTRUCTION, children)
+                slots.into_node(HTML_PROCESSING_INSTRUCTION_DIRECTIVE, children)
             }
             HTML_ROOT => {
                 let mut elements = (&children).into_iter();
@@ -805,7 +812,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && HtmlDirective::can_cast(element.kind())
+                    && AnyHtmlRootDirective::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

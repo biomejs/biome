@@ -15,7 +15,7 @@ pub(crate) mod element;
 pub(crate) mod embedded_content;
 pub(crate) mod member_name;
 pub(crate) mod opening_element;
-pub(crate) mod processing_instruction;
+pub(crate) mod processing_instruction_directive;
 pub(crate) mod root;
 pub(crate) mod self_closing_element;
 pub(crate) mod single_text_expression;

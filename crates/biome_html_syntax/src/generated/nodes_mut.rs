@@ -417,35 +417,41 @@ impl HtmlOpeningElement {
         )
     }
 }
-impl HtmlProcessingInstruction {
+impl HtmlProcessingInstructionDirective {
     pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_target(self, element: HtmlTagName) -> Self {
+    pub fn with_opening_question_mark_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_attributes(self, element: HtmlAttributeList) -> Self {
+    pub fn with_target(self, element: HtmlTagName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_question_mark_token(self, element: SyntaxToken) -> Self {
+    pub fn with_attributes(self, element: HtmlAttributeList) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_closing_question_mark_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
     pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
 }
@@ -462,7 +468,7 @@ impl HtmlRoot {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_directive(self, element: Option<HtmlDirective>) -> Self {
+    pub fn with_directive(self, element: Option<AnyHtmlRootDirective>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),

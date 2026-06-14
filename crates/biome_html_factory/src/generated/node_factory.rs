@@ -381,20 +381,22 @@ pub fn html_opening_element(
         ],
     ))
 }
-pub fn html_processing_instruction(
+pub fn html_processing_instruction_directive(
     l_angle_token: SyntaxToken,
+    opening_question_mark_token: SyntaxToken,
     target: HtmlTagName,
     attributes: HtmlAttributeList,
-    question_mark_token: SyntaxToken,
+    closing_question_mark_token: SyntaxToken,
     r_angle_token: SyntaxToken,
-) -> HtmlProcessingInstruction {
-    HtmlProcessingInstruction::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION,
+) -> HtmlProcessingInstructionDirective {
+    HtmlProcessingInstructionDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION_DIRECTIVE,
         [
             Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(opening_question_mark_token)),
             Some(SyntaxElement::Node(target.into_syntax())),
             Some(SyntaxElement::Node(attributes.into_syntax())),
-            Some(SyntaxElement::Token(question_mark_token)),
+            Some(SyntaxElement::Token(closing_question_mark_token)),
             Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
@@ -413,7 +415,7 @@ pub struct HtmlRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     frontmatter: Option<AnyAstroFrontmatterElement>,
-    directive: Option<HtmlDirective>,
+    directive: Option<AnyHtmlRootDirective>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
@@ -424,7 +426,7 @@ impl HtmlRootBuilder {
         self.frontmatter = Some(frontmatter);
         self
     }
-    pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
+    pub fn with_directive(mut self, directive: AnyHtmlRootDirective) -> Self {
         self.directive = Some(directive);
         self
     }

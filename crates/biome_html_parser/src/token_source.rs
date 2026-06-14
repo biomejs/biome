@@ -190,10 +190,9 @@ pub(crate) enum HtmlReLexContext {
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
 
 impl<'source> HtmlTokenSource<'source> {
-    /// Creates a new token source for the given string
+    /// Creates a new token source for the given string.
     pub fn from_str(source: &'source str) -> Self {
         let lexer = HtmlLexer::from_str(source);
-
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
 

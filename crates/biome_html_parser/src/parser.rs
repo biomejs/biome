@@ -145,6 +145,7 @@ pub struct HtmlParserOptions {
     pub(crate) vue: bool,
     pub(crate) svelte: bool,
     pub(crate) is_html: bool,
+    pub(crate) is_svg: bool,
 }
 
 impl HtmlParserOptions {
@@ -192,6 +193,10 @@ impl HtmlParserOptions {
     pub fn is_html(&self) -> bool {
         self.is_html
     }
+
+    pub fn is_svg(&self) -> bool {
+        self.is_svg
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParserOptions {
@@ -218,6 +223,8 @@ impl From<&HtmlFileSource> for HtmlParserOptions {
                 options = options.with_single_text_expression().with_svelte();
             }
         }
+
+        options.is_svg = file_source.is_svg();
 
         options
     }

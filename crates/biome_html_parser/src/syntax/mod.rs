@@ -99,10 +99,30 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // content from being incorrectly lexed as a FENCE token.
     p.set_after_frontmatter(true);
 
-    parse_doc_type(p).ok();
+    parse_processing_instruction_directive(p)
+        .or_else(|| parse_doc_type(p))
+        .ok();
     ElementList.parse_list(p);
 
     m.complete(p, HTML_ROOT);
+}
+
+fn parse_processing_instruction_directive(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.options().is_svg() || !(p.at(T![<]) && p.nth_at(1, T![?])) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![?], HtmlLexContext::InsideTag);
+
+    parse_literal(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
+    AttributeList.parse_list(p);
+
+    p.expect_with_context(T![?], HtmlLexContext::InsideTag);
+    p.expect_with_context(T![>], HtmlLexContext::Regular);
+
+    Present(m.complete(p, HTML_PROCESSING_INSTRUCTION_DIRECTIVE))
 }
 
 fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
@@ -244,7 +264,6 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
         && !is_possible_component(p, opening_tag_name.as_str());
-    let is_processing_instruction = opening_tag_name.starts_with('?');
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
@@ -264,11 +283,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     AttributeList.parse_list(p);
 
-    if is_processing_instruction {
-        p.expect_with_context(T![?], inside_tag_context(p));
-        p.expect_with_context(T![>], HtmlLexContext::Regular);
-        Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
-    } else if p.at(T![/]) {
+    if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
         p.expect_with_context(T![>], HtmlLexContext::Regular);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
@@ -388,7 +403,7 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
-        T![<] => parse_element(p),
+        T![<] => parse_bogus_processing_instruction_element(p).or_else(|| parse_element(p)),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
             |p| parse_double_text_expression(p, HtmlLexContext::Regular),
@@ -424,6 +439,26 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
         }
         _ => Absent,
     }
+}
+
+fn parse_bogus_processing_instruction_element(p: &mut HtmlParser) -> ParsedSyntax {
+    if p.options().is_svg() || !(p.at(T![<]) && p.nth_at(1, T![?])) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.error(p.err_builder(
+        "Processing instructions are only supported in SVG files.",
+        p.cur_range(),
+    ));
+
+    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
+    while !p.at(EOF) && !p.at(T![>]) {
+        p.bump_any_with_context(HtmlLexContext::InsideTag);
+    }
+    p.eat_with_context(T![>], HtmlLexContext::Regular);
+
+    Present(m.complete(p, HTML_BOGUS_ELEMENT))
 }
 
 #[derive(Default)]

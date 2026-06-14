@@ -1,0 +1,112 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<?xml version="1.0" encoding="utf-8"?>
+<div></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                L_ANGLE@0..1 "<" [] [],
+                QUESTION@1..2 "?" [] [],
+                HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+                HTML_LITERAL@6..13 "version" [] [],
+                EQ@13..14 "=" [] [],
+                HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")],
+                HTML_LITERAL@20..28 "encoding" [] [],
+                EQ@28..29 "=" [] [],
+                HTML_STRING_LITERAL@29..36 "\"utf-8\"" [] [],
+                QUESTION@36..37 "?" [] [],
+                R_ANGLE@37..38 ">" [] [],
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@38..40 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@40..43 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@43..44 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@44..45 "<" [] [],
+                slash_token: SLASH@45..46 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@46..49 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@49..50 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@50..51 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..51
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..50
+    0: HTML_BOGUS_ELEMENT@0..38
+      0: L_ANGLE@0..1 "<" [] []
+      1: QUESTION@1..2 "?" [] []
+      2: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+      3: HTML_LITERAL@6..13 "version" [] []
+      4: EQ@13..14 "=" [] []
+      5: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")]
+      6: HTML_LITERAL@20..28 "encoding" [] []
+      7: EQ@28..29 "=" [] []
+      8: HTML_STRING_LITERAL@29..36 "\"utf-8\"" [] []
+      9: QUESTION@36..37 "?" [] []
+      10: R_ANGLE@37..38 ">" [] []
+    1: HTML_ELEMENT@38..50
+      0: HTML_OPENING_ELEMENT@38..44
+        0: L_ANGLE@38..40 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@40..43
+          0: HTML_LITERAL@40..43 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@43..43
+        3: R_ANGLE@43..44 ">" [] []
+      1: HTML_ELEMENT_LIST@44..44
+      2: HTML_CLOSING_ELEMENT@44..50
+        0: L_ANGLE@44..45 "<" [] []
+        1: SLASH@45..46 "/" [] []
+        2: HTML_TAG_NAME@46..49
+          0: HTML_LITERAL@46..49 "div" [] []
+        3: R_ANGLE@49..50 ">" [] []
+  4: EOF@50..51 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+xml-processing-instruction.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Processing instructions are only supported in SVG files.
+  
+  > 1 │ <?xml version="1.0" encoding="utf-8"?>
+      │ ^
+    2 │ <div></div>
+    3 │ 
+  
+```

@@ -97,9 +97,6 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && current == b'?' => {
-                self.consume_processing_instruction_target()
-            }
             QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
@@ -156,9 +153,6 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && current == b'?' => {
-                self.consume_processing_instruction_target()
-            }
             QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
@@ -229,9 +223,6 @@ impl<'src> HtmlLexer<'src> {
             HAS => self.consume_byte(T![#]),
 
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && current == b'?' => {
-                self.consume_processing_instruction_target()
-            }
             QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
@@ -354,6 +345,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             EXL if self.current() == T![<] => self.consume_byte(T![!]),
             SLH if self.current() == T![<] => self.consume_byte(T![/]),
+            QST if self.current() == T![<] => self.consume_byte(T![?]),
             COM if self.current() == T![<] => self.consume_byte(T![,]),
             MIN if !self.after_frontmatter && self.at_frontmatter_edge() => {
                 self.consume_frontmatter_edge()
@@ -1007,21 +999,6 @@ impl<'src> HtmlLexer<'src> {
         self.assert_current_char_boundary();
 
         self.advance_byte_or_char(first);
-
-        while let Some(byte) = self.current_byte() {
-            if is_tag_name_byte(byte) {
-                self.advance(1)
-            } else {
-                break;
-            }
-        }
-
-        HTML_LITERAL
-    }
-
-    fn consume_processing_instruction_target(&mut self) -> HtmlSyntaxKind {
-        self.assert_byte(b'?');
-        self.advance(1);
 
         while let Some(byte) = self.current_byte() {
             if is_tag_name_byte(byte) {

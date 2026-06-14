@@ -1045,10 +1045,10 @@ pub struct HtmlOpeningElementFields {
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlProcessingInstruction {
+pub struct HtmlProcessingInstructionDirective {
     pub(crate) syntax: SyntaxNode,
 }
-impl HtmlProcessingInstruction {
+impl HtmlProcessingInstructionDirective {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1058,32 +1058,36 @@ impl HtmlProcessingInstruction {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> HtmlProcessingInstructionFields {
-        HtmlProcessingInstructionFields {
+    pub fn as_fields(&self) -> HtmlProcessingInstructionDirectiveFields {
+        HtmlProcessingInstructionDirectiveFields {
             l_angle_token: self.l_angle_token(),
+            opening_question_mark_token: self.opening_question_mark_token(),
             target: self.target(),
             attributes: self.attributes(),
-            question_mark_token: self.question_mark_token(),
+            closing_question_mark_token: self.closing_question_mark_token(),
             r_angle_token: self.r_angle_token(),
         }
     }
     pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn opening_question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
     pub fn target(&self) -> SyntaxResult<HtmlTagName> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn attributes(&self) -> HtmlAttributeList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 3usize)
     }
-    pub fn question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn closing_question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
+    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
 }
-impl Serialize for HtmlProcessingInstruction {
+impl Serialize for HtmlProcessingInstructionDirective {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1092,11 +1096,12 @@ impl Serialize for HtmlProcessingInstruction {
     }
 }
 #[derive(Serialize)]
-pub struct HtmlProcessingInstructionFields {
+pub struct HtmlProcessingInstructionDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
+    pub opening_question_mark_token: SyntaxResult<SyntaxToken>,
     pub target: SyntaxResult<HtmlTagName>,
     pub attributes: HtmlAttributeList,
-    pub question_mark_token: SyntaxResult<SyntaxToken>,
+    pub closing_question_mark_token: SyntaxResult<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1128,7 +1133,7 @@ impl HtmlRoot {
     pub fn frontmatter(&self) -> Option<AnyAstroFrontmatterElement> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn directive(&self) -> Option<HtmlDirective> {
+    pub fn directive(&self) -> Option<AnyHtmlRootDirective> {
         support::node(&self.syntax, 2usize)
     }
     pub fn html(&self) -> HtmlElementList {
@@ -1150,7 +1155,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub frontmatter: Option<AnyAstroFrontmatterElement>,
-    pub directive: Option<HtmlDirective>,
+    pub directive: Option<AnyHtmlRootDirective>,
     pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -4755,7 +4760,6 @@ pub enum AnyHtmlElement {
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlElement(HtmlElement),
-    HtmlProcessingInstruction(HtmlProcessingInstruction),
     HtmlSelfClosingElement(HtmlSelfClosingElement),
 }
 impl AnyHtmlElement {
@@ -4783,15 +4787,30 @@ impl AnyHtmlElement {
             _ => None,
         }
     }
-    pub fn as_html_processing_instruction(&self) -> Option<&HtmlProcessingInstruction> {
-        match &self {
-            Self::HtmlProcessingInstruction(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_html_self_closing_element(&self) -> Option<&HtmlSelfClosingElement> {
         match &self {
             Self::HtmlSelfClosingElement(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyHtmlRootDirective {
+    HtmlDirective(HtmlDirective),
+    HtmlProcessingInstructionDirective(HtmlProcessingInstructionDirective),
+}
+impl AnyHtmlRootDirective {
+    pub fn as_html_directive(&self) -> Option<&HtmlDirective> {
+        match &self {
+            Self::HtmlDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_processing_instruction_directive(
+        &self,
+    ) -> Option<&HtmlProcessingInstructionDirective> {
+        match &self {
+            Self::HtmlProcessingInstructionDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -6640,12 +6659,12 @@ impl From<HtmlOpeningElement> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for HtmlProcessingInstruction {
+impl AstNode for HtmlProcessingInstructionDirective {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_PROCESSING_INSTRUCTION as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_PROCESSING_INSTRUCTION_DIRECTIVE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_PROCESSING_INSTRUCTION
+        kind == HTML_PROCESSING_INSTRUCTION_DIRECTIVE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6661,22 +6680,26 @@ impl AstNode for HtmlProcessingInstruction {
         self.syntax
     }
 }
-impl std::fmt::Debug for HtmlProcessingInstruction {
+impl std::fmt::Debug for HtmlProcessingInstructionDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
         let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlProcessingInstruction")
+            f.debug_struct("HtmlProcessingInstructionDirective")
                 .field(
                     "l_angle_token",
                     &support::DebugSyntaxResult(self.l_angle_token()),
                 )
+                .field(
+                    "opening_question_mark_token",
+                    &support::DebugSyntaxResult(self.opening_question_mark_token()),
+                )
                 .field("target", &support::DebugSyntaxResult(self.target()))
                 .field("attributes", &self.attributes())
                 .field(
-                    "question_mark_token",
-                    &support::DebugSyntaxResult(self.question_mark_token()),
+                    "closing_question_mark_token",
+                    &support::DebugSyntaxResult(self.closing_question_mark_token()),
                 )
                 .field(
                     "r_angle_token",
@@ -6684,19 +6707,20 @@ impl std::fmt::Debug for HtmlProcessingInstruction {
                 )
                 .finish()
         } else {
-            f.debug_struct("HtmlProcessingInstruction").finish()
+            f.debug_struct("HtmlProcessingInstructionDirective")
+                .finish()
         };
         DEPTH.set(current_depth);
         result
     }
 }
-impl From<HtmlProcessingInstruction> for SyntaxNode {
-    fn from(n: HtmlProcessingInstruction) -> Self {
+impl From<HtmlProcessingInstructionDirective> for SyntaxNode {
+    fn from(n: HtmlProcessingInstructionDirective) -> Self {
         n.syntax
     }
 }
-impl From<HtmlProcessingInstruction> for SyntaxElement {
-    fn from(n: HtmlProcessingInstruction) -> Self {
+impl From<HtmlProcessingInstructionDirective> for SyntaxElement {
+    fn from(n: HtmlProcessingInstructionDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -11361,11 +11385,6 @@ impl From<HtmlElement> for AnyHtmlElement {
         Self::HtmlElement(node)
     }
 }
-impl From<HtmlProcessingInstruction> for AnyHtmlElement {
-    fn from(node: HtmlProcessingInstruction) -> Self {
-        Self::HtmlProcessingInstruction(node)
-    }
-}
 impl From<HtmlSelfClosingElement> for AnyHtmlElement {
     fn from(node: HtmlSelfClosingElement) -> Self {
         Self::HtmlSelfClosingElement(node)
@@ -11377,15 +11396,12 @@ impl AstNode for AnyHtmlElement {
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlElement::KIND_SET)
-        .union(HtmlProcessingInstruction::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_ELEMENT
-            | HTML_CDATA_SECTION
-            | HTML_ELEMENT
-            | HTML_PROCESSING_INSTRUCTION
-            | HTML_SELF_CLOSING_ELEMENT => true,
+            HTML_BOGUS_ELEMENT | HTML_CDATA_SECTION | HTML_ELEMENT | HTML_SELF_CLOSING_ELEMENT => {
+                true
+            }
             k if AnyHtmlContent::can_cast(k) => true,
             _ => false,
         }
@@ -11395,9 +11411,6 @@ impl AstNode for AnyHtmlElement {
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
-            HTML_PROCESSING_INSTRUCTION => {
-                Self::HtmlProcessingInstruction(HtmlProcessingInstruction { syntax })
-            }
             HTML_SELF_CLOSING_ELEMENT => {
                 Self::HtmlSelfClosingElement(HtmlSelfClosingElement { syntax })
             }
@@ -11415,7 +11428,6 @@ impl AstNode for AnyHtmlElement {
             Self::HtmlBogusElement(it) => it.syntax(),
             Self::HtmlCdataSection(it) => it.syntax(),
             Self::HtmlElement(it) => it.syntax(),
-            Self::HtmlProcessingInstruction(it) => it.syntax(),
             Self::HtmlSelfClosingElement(it) => it.syntax(),
             Self::AnyHtmlContent(it) => it.syntax(),
         }
@@ -11425,7 +11437,6 @@ impl AstNode for AnyHtmlElement {
             Self::HtmlBogusElement(it) => it.into_syntax(),
             Self::HtmlCdataSection(it) => it.into_syntax(),
             Self::HtmlElement(it) => it.into_syntax(),
-            Self::HtmlProcessingInstruction(it) => it.into_syntax(),
             Self::HtmlSelfClosingElement(it) => it.into_syntax(),
             Self::AnyHtmlContent(it) => it.into_syntax(),
         }
@@ -11438,7 +11449,6 @@ impl std::fmt::Debug for AnyHtmlElement {
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlProcessingInstruction(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -11450,13 +11460,76 @@ impl From<AnyHtmlElement> for SyntaxNode {
             AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
             AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
-            AnyHtmlElement::HtmlProcessingInstruction(it) => it.into_syntax(),
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.into_syntax(),
         }
     }
 }
 impl From<AnyHtmlElement> for SyntaxElement {
     fn from(n: AnyHtmlElement) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<HtmlDirective> for AnyHtmlRootDirective {
+    fn from(node: HtmlDirective) -> Self {
+        Self::HtmlDirective(node)
+    }
+}
+impl From<HtmlProcessingInstructionDirective> for AnyHtmlRootDirective {
+    fn from(node: HtmlProcessingInstructionDirective) -> Self {
+        Self::HtmlProcessingInstructionDirective(node)
+    }
+}
+impl AstNode for AnyHtmlRootDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        HtmlDirective::KIND_SET.union(HtmlProcessingInstructionDirective::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, HTML_DIRECTIVE | HTML_PROCESSING_INSTRUCTION_DIRECTIVE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            HTML_DIRECTIVE => Self::HtmlDirective(HtmlDirective { syntax }),
+            HTML_PROCESSING_INSTRUCTION_DIRECTIVE => {
+                Self::HtmlProcessingInstructionDirective(HtmlProcessingInstructionDirective {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::HtmlDirective(it) => it.syntax(),
+            Self::HtmlProcessingInstructionDirective(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::HtmlDirective(it) => it.into_syntax(),
+            Self::HtmlProcessingInstructionDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyHtmlRootDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HtmlDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlProcessingInstructionDirective(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyHtmlRootDirective> for SyntaxNode {
+    fn from(n: AnyHtmlRootDirective) -> Self {
+        match n {
+            AnyHtmlRootDirective::HtmlDirective(it) => it.into_syntax(),
+            AnyHtmlRootDirective::HtmlProcessingInstructionDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyHtmlRootDirective> for SyntaxElement {
+    fn from(n: AnyHtmlRootDirective) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -13080,6 +13153,11 @@ impl std::fmt::Display for AnyHtmlElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyHtmlRootDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyHtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -13295,7 +13373,7 @@ impl std::fmt::Display for HtmlOpeningElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for HtmlProcessingInstruction {
+impl std::fmt::Display for HtmlProcessingInstructionDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
