@@ -5599,6 +5599,16 @@ Default: `natural`.
 	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
+	/**
+	* A list of attribute names that should be sorted before all other
+attributes, in the order they appear in this list.
+
+Attributes not listed here are sorted normally, after the listed ones.
+This is useful to keep attributes such as `key` first.
+
+Defaults to `[]`. 
+	 */
+	sortFirst?: string[];
 	sortOrder?: SortOrder;
 }
 export type UseSortedEnumMembersOptions = {};

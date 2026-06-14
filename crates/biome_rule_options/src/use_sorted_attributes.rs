@@ -8,4 +8,14 @@ use serde::{Deserialize, Serialize};
 pub struct UseSortedAttributesOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub sort_order: Option<SortOrder>,
+
+    /// A list of attribute names that should be sorted before all other
+    /// attributes, in the order they appear in this list.
+    ///
+    /// Attributes not listed here are sorted normally, after the listed ones.
+    /// This is useful to keep attributes such as `key` first.
+    ///
+    /// Defaults to `[]`.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub sort_first: Option<Box<[Box<str>]>>,
 }

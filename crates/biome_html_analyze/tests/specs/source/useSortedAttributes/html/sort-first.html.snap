@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: sort-first.html
+---
+# Input
+```html
+<!-- `type` then `id` are pinned first, the rest sorted naturally. -->
+<input id="name" name="name" type="text" />
+
+<input checked name="" id="" type="checkbox">
+
+<!-- Already correct: type, id, then the rest sorted. -->
+<input type="text" id="name" name="name" />
+
+```
+
+# Diagnostics
+```
+sort-first.html:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- `type` then `id` are pinned first, the rest sorted naturally. -->
+  > 2 │ <input id="name" name="name" type="text" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <input checked name="" id="" type="checkbox">
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- `type` then `id` are pinned first, the rest sorted naturally. -->
+    2   │ - <input·id="name"·name="name"·type="text"·/>
+      2 │ + <input·type="text"·id="name"·name="name"·/>
+    3 3 │   
+    4 4 │   <input checked name="" id="" type="checkbox">
+  
+
+```
+
+```
+sort-first.html:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    2 │ <input id="name" name="name" type="text" />
+    3 │ 
+  > 4 │ <input checked name="" id="" type="checkbox">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- Already correct: type, id, then the rest sorted. -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    2 2 │   <input id="name" name="name" type="text" />
+    3 3 │   
+    4   │ - <input·checked·name=""·id=""·type="checkbox">
+      4 │ + <input·type="checkbox"·id=""·checked·name=""·>
+    5 5 │   
+    6 6 │   <!-- Already correct: type, id, then the rest sorted. -->
+  
+
+```

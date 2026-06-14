@@ -16056,6 +16056,11 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
+				"sortFirst": {
+					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list.\n\nAttributes not listed here are sorted normally, after the listed ones.\nThis is useful to keep attributes such as `key` first.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}

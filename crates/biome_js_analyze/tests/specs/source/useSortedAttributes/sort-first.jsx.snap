@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sort-first.jsx
+---
+# Input
+```jsx
+<Hello firstName="John" key={id} lastName="Smith" />;
+
+// `key` is pinned first within each group delimited by spread props.
+<Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+
+// Already correct: `key` first, then the rest sorted naturally.
+<Hello key={id} firstName="John" lastName="Smith" />;
+
+```
+
+# Diagnostics
+```
+sort-first.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+  > 1 │ <Hello firstName="John" key={id} lastName="Smith" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ // `key` is pinned first within each group delimited by spread props.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1   │ - <Hello·firstName="John"·key={id}·lastName="Smith"·/>;
+      1 │ + <Hello·key={id}·firstName="John"·lastName="Smith"·/>;
+    2 2 │   
+    3 3 │   // `key` is pinned first within each group delimited by spread props.
+  
+
+```
+
+```
+sort-first.jsx:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    3 │ // `key` is pinned first within each group delimited by spread props.
+  > 4 │ <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Already correct: `key` first, then the rest sorted naturally.
+  
+  i Safe fix: Sort the JSX props.
+  
+    2 2 │   
+    3 3 │   // `key` is pinned first within each group delimited by spread props.
+    4   │ - <Hello·a="1"·key={id}·{...props}·z="2"·key={id2}·b="3"·/>;
+      4 │ + <Hello·key={id}·a="1"·{...props}·z="2"·key={id2}·b="3"·/>;
+    5 5 │   
+    6 6 │   // Already correct: `key` first, then the rest sorted naturally.
+  
+
+```
+
+```
+sort-first.jsx:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    3 │ // `key` is pinned first within each group delimited by spread props.
+  > 4 │ <Hello a="1" key={id} {...props} z="2" key={id2} b="3" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // Already correct: `key` first, then the rest sorted naturally.
+  
+  i Safe fix: Sort the JSX props.
+  
+    2 2 │   
+    3 3 │   // `key` is pinned first within each group delimited by spread props.
+    4   │ - <Hello·a="1"·key={id}·{...props}·z="2"·key={id2}·b="3"·/>;
+      4 │ + <Hello·a="1"·key={id}·{...props}·key={id2}·b="3"·z="2"·/>;
+    5 5 │   
+    6 6 │   // Already correct: `key` first, then the rest sorted naturally.
+  
+
+```
