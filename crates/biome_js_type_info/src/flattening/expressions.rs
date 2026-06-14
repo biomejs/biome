@@ -579,6 +579,17 @@ fn signature_accepts_arguments(
 fn resolve_function(ty: &TypeReference, resolver: &dyn TypeResolver) -> Option<Box<Function>> {
     match resolver.resolve_and_get(ty)?.to_data() {
         TypeData::Function(function) => Some(function),
+        // Callable interfaces/objects: `interface Cb { (): Promise<void> }`
+        TypeData::Interface(interface) => interface
+            .members
+            .iter()
+            .find(|m| m.kind.is_call_signature())
+            .and_then(|m| resolve_function(&m.ty, resolver)),
+        TypeData::Object(object) => object
+            .members
+            .iter()
+            .find(|m| m.kind.is_call_signature())
+            .and_then(|m| resolve_function(&m.ty, resolver)),
         _ => None,
     }
 }
