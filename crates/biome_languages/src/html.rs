@@ -8,7 +8,7 @@ use camino::Utf8Path;
 )]
 pub struct HtmlFileSource {
     variant: HtmlVariant,
-    #[serde(skip)]
+    #[serde(default)]
     #[cfg_attr(feature = "schema", schemars(skip))]
     is_svg: bool,
 }
@@ -50,6 +50,7 @@ impl HtmlFileSource {
         }
     }
 
+    /// Returns a file source for SVG files.
     pub fn svg() -> Self {
         Self {
             variant: HtmlVariant::default(),
@@ -63,6 +64,7 @@ impl HtmlFileSource {
         matches!(self.variant, HtmlVariant::Standard(_)) && !self.is_svg
     }
 
+    /// Returns `true` if the current file source is for SVG files.
     pub const fn is_svg(&self) -> bool {
         self.is_svg
     }

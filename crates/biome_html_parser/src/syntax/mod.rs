@@ -108,7 +108,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
 }
 
 fn parse_processing_instruction_directive(p: &mut HtmlParser) -> ParsedSyntax {
-    if !p.options().is_svg() || !(p.at(T![<]) && p.nth_at(1, T![?])) {
+    if !(p.options().is_svg() && p.at(T![<]) && p.nth_at(1, T![?])) {
         return Absent;
     }
 
