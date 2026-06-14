@@ -35,6 +35,7 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlProcessingInstruction(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_javascript_tag(),
         }
@@ -45,6 +46,7 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlProcessingInstruction(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_style_tag(),
         }
@@ -58,7 +60,10 @@ impl AnyHtmlElement {
             Self::HtmlElement(element) => element.find_attribute_by_name(name_to_lookup),
             Self::HtmlSelfClosingElement(element) => element.find_attribute_by_name(name_to_lookup),
             // Other variants don't have attributes
-            Self::AnyHtmlContent(_) | Self::HtmlBogusElement(_) | Self::HtmlCdataSection(_) => None,
+            Self::AnyHtmlContent(_)
+            | Self::HtmlBogusElement(_)
+            | Self::HtmlProcessingInstruction(_)
+            | Self::HtmlCdataSection(_) => None,
         }
     }
 

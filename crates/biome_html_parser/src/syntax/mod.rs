@@ -244,6 +244,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
         && !is_possible_component(p, opening_tag_name.as_str());
+    let is_processing_instruction = opening_tag_name.starts_with('?');
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
@@ -263,7 +264,11 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     AttributeList.parse_list(p);
 
-    if p.at(T![/]) {
+    if is_processing_instruction {
+        p.expect_with_context(T![?], inside_tag_context(p));
+        p.expect_with_context(T![>], HtmlLexContext::Regular);
+        Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
+    } else if p.at(T![/]) {
         p.bump_with_context(T![/], inside_tag_context(p));
         p.expect_with_context(T![>], HtmlLexContext::Regular);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
@@ -466,7 +471,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![/]) || p.at(T!['}']) || p.at(T![?])
     }
 
     fn recover(

@@ -97,6 +97,10 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
+            _ if self.current_kind == T![<] && current == b'?' => {
+                self.consume_processing_instruction_target()
+            }
+            QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -152,6 +156,10 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
+            _ if self.current_kind == T![<] && current == b'?' => {
+                self.consume_processing_instruction_target()
+            }
+            QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 self.consume_tag_name(current)
@@ -221,6 +229,10 @@ impl<'src> HtmlLexer<'src> {
             HAS => self.consume_byte(T![#]),
 
             QOT => self.consume_string_literal(current),
+            _ if self.current_kind == T![<] && current == b'?' => {
+                self.consume_processing_instruction_target()
+            }
+            QST => self.consume_byte(T![?]),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -366,7 +378,7 @@ impl<'src> HtmlLexer<'src> {
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 if self
                     .peek_byte()
-                    .is_some_and(|b| is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>')
+                    .is_some_and(|b| is_tag_start_byte(b) || matches!(b, b'!' | b'/' | b'>' | b'?'))
                 {
                     self.consume_l_angle()
                 } else {
@@ -995,6 +1007,21 @@ impl<'src> HtmlLexer<'src> {
         self.assert_current_char_boundary();
 
         self.advance_byte_or_char(first);
+
+        while let Some(byte) = self.current_byte() {
+            if is_tag_name_byte(byte) {
+                self.advance(1)
+            } else {
+                break;
+            }
+        }
+
+        HTML_LITERAL
+    }
+
+    fn consume_processing_instruction_target(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'?');
+        self.advance(1);
 
         while let Some(byte) = self.current_byte() {
             if is_tag_name_byte(byte) {

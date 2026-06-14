@@ -234,6 +234,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                 _ => false,
             }
         }
+        AnyHtmlElement::HtmlProcessingInstruction(_) => false,
         AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => true,
     })
 }

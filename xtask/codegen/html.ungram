@@ -71,7 +71,8 @@ HtmlDirective =
 HtmlElementList = AnyHtmlElement*
 
 AnyHtmlElement =
-	HtmlSelfClosingElement
+	HtmlProcessingInstruction
+	| HtmlSelfClosingElement
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
@@ -105,6 +106,13 @@ HtmlSingleTextExpression =
 
 HtmlTextExpression = 'html_literal'
 
+// <?xml version="1.0"?>
+HtmlProcessingInstruction =
+	'<'
+	target: HtmlTagName
+	attributes: HtmlAttributeList
+	'?'
+	'>'
 
 // <a />
 HtmlSelfClosingElement =

@@ -381,6 +381,24 @@ pub fn html_opening_element(
         ],
     ))
 }
+pub fn html_processing_instruction(
+    l_angle_token: SyntaxToken,
+    target: HtmlTagName,
+    attributes: HtmlAttributeList,
+    question_mark_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> HtmlProcessingInstruction {
+    HtmlProcessingInstruction::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Node(target.into_syntax())),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(question_mark_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
+        ],
+    ))
+}
 pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
         html,
