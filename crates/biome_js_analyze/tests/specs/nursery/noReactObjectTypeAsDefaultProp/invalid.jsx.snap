@@ -1,0 +1,485 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+// function declaration
+function Foo({
+  a = {},
+  b = ["one", "two"],
+  c = /regex/i,
+  d = () => {},
+  e = function () {},
+  f = class {},
+  g = new Thing(),
+  h = <Thing />,
+  i = Symbol("foo"),
+}) {
+  return null;
+}
+
+// arrow function
+const Bar = ({
+  a = {},
+  b = ["one", "two"],
+  c = /regex/i,
+  d = () => {},
+  e = function () {},
+  f = class {},
+  g = new Thing(),
+  h = <Thing />,
+  i = Symbol("foo"),
+}) => {
+  return null;
+};
+
+// memo / forwardRef wrappers
+const Wrapped = memo(({ a = {} }) => null);
+const Forwarded = forwardRef(({ b = [] }, ref) => null);
+
+// PascalCase name is enough; Biome detects components by name, not by return value
+export default function NotReturningJsx({ foo = {} }) {}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an object literal is created here on every render.
+  
+    3 │ // function declaration
+    4 │ function Foo({
+  > 5 │   a = {},
+      │       ^^
+    6 │   b = ["one", "two"],
+    7 │   c = /regex/i,
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an array literal is created here on every render.
+  
+    4 │ function Foo({
+    5 │   a = {},
+  > 6 │   b = ["one", "two"],
+      │       ^^^^^^^^^^^^^^
+    7 │   c = /regex/i,
+    8 │   d = () => {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a regular expression literal is created here on every render.
+  
+    5 │   a = {},
+    6 │   b = ["one", "two"],
+  > 7 │   c = /regex/i,
+      │       ^^^^^^^^
+    8 │   d = () => {},
+    9 │   e = function () {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an arrow function is created here on every render.
+  
+     6 │   b = ["one", "two"],
+     7 │   c = /regex/i,
+   > 8 │   d = () => {},
+       │       ^^^^^^^^
+     9 │   e = function () {},
+    10 │   f = class {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a function expression is created here on every render.
+  
+     7 │   c = /regex/i,
+     8 │   d = () => {},
+   > 9 │   e = function () {},
+       │       ^^^^^^^^^^^^^^
+    10 │   f = class {},
+    11 │   g = new Thing(),
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a class expression is created here on every render.
+  
+     8 │   d = () => {},
+     9 │   e = function () {},
+  > 10 │   f = class {},
+       │       ^^^^^^^^
+    11 │   g = new Thing(),
+    12 │   h = <Thing />,
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a newly constructed object is created here on every render.
+  
+     9 │   e = function () {},
+    10 │   f = class {},
+  > 11 │   g = new Thing(),
+       │       ^^^^^^^^^^^
+    12 │   h = <Thing />,
+    13 │   i = Symbol("foo"),
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a JSX element is created here on every render.
+  
+    10 │   f = class {},
+    11 │   g = new Thing(),
+  > 12 │   h = <Thing />,
+       │       ^^^^^^^^^
+    13 │   i = Symbol("foo"),
+    14 │ }) {
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a Symbol is created here on every render.
+  
+    11 │   g = new Thing(),
+    12 │   h = <Thing />,
+  > 13 │   i = Symbol("foo"),
+       │       ^^^^^^^^^^^^^
+    14 │ }) {
+    15 │   return null;
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an object literal is created here on every render.
+  
+    18 │ // arrow function
+    19 │ const Bar = ({
+  > 20 │   a = {},
+       │       ^^
+    21 │   b = ["one", "two"],
+    22 │   c = /regex/i,
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:21:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an array literal is created here on every render.
+  
+    19 │ const Bar = ({
+    20 │   a = {},
+  > 21 │   b = ["one", "two"],
+       │       ^^^^^^^^^^^^^^
+    22 │   c = /regex/i,
+    23 │   d = () => {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:22:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a regular expression literal is created here on every render.
+  
+    20 │   a = {},
+    21 │   b = ["one", "two"],
+  > 22 │   c = /regex/i,
+       │       ^^^^^^^^
+    23 │   d = () => {},
+    24 │   e = function () {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an arrow function is created here on every render.
+  
+    21 │   b = ["one", "two"],
+    22 │   c = /regex/i,
+  > 23 │   d = () => {},
+       │       ^^^^^^^^
+    24 │   e = function () {},
+    25 │   f = class {},
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a function expression is created here on every render.
+  
+    22 │   c = /regex/i,
+    23 │   d = () => {},
+  > 24 │   e = function () {},
+       │       ^^^^^^^^^^^^^^
+    25 │   f = class {},
+    26 │   g = new Thing(),
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:25:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a class expression is created here on every render.
+  
+    23 │   d = () => {},
+    24 │   e = function () {},
+  > 25 │   f = class {},
+       │       ^^^^^^^^
+    26 │   g = new Thing(),
+    27 │   h = <Thing />,
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:26:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a newly constructed object is created here on every render.
+  
+    24 │   e = function () {},
+    25 │   f = class {},
+  > 26 │   g = new Thing(),
+       │       ^^^^^^^^^^^
+    27 │   h = <Thing />,
+    28 │   i = Symbol("foo"),
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:27:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a JSX element is created here on every render.
+  
+    25 │   f = class {},
+    26 │   g = new Thing(),
+  > 27 │   h = <Thing />,
+       │       ^^^^^^^^^
+    28 │   i = Symbol("foo"),
+    29 │ }) => {
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:28:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new a Symbol is created here on every render.
+  
+    26 │   g = new Thing(),
+    27 │   h = <Thing />,
+  > 28 │   i = Symbol("foo"),
+       │       ^^^^^^^^^^^^^
+    29 │ }) => {
+    30 │   return null;
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:29 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an object literal is created here on every render.
+  
+    33 │ // memo / forwardRef wrappers
+  > 34 │ const Wrapped = memo(({ a = {} }) => null);
+       │                             ^^
+    35 │ const Forwarded = forwardRef(({ b = [] }, ref) => null);
+    36 │ 
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an array literal is created here on every render.
+  
+    33 │ // memo / forwardRef wrappers
+    34 │ const Wrapped = memo(({ a = {} }) => null);
+  > 35 │ const Forwarded = forwardRef(({ b = [] }, ref) => null);
+       │                                     ^^
+    36 │ 
+    37 │ // PascalCase name is enough; Biome detects components by name, not by return value
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:49 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A new an object literal is created here on every render.
+  
+    37 │ // PascalCase name is enough; Biome detects components by name, not by return value
+  > 38 │ export default function NotReturningJsx({ foo = {} }) {}
+       │                                                 ^^
+    39 │ 
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

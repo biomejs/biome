@@ -1,0 +1,46 @@
+/* should not generate diagnostics */
+
+const emptyFunction = () => {};
+const emptyArray = [];
+
+function Primitives({ a = 1, b = "hello", c = true, d = null, e = undefined }) {
+  return null;
+}
+
+function VariableRef({ bar = emptyFunction, items = emptyArray }) {
+  return null;
+}
+
+function WithRest({ bar = emptyFunction, ...rest }) {
+  return null;
+}
+
+function NotDestructured(props) {
+  return null;
+}
+
+const ArrowPrimitive = ({ bar = 1 }) => null;
+
+// lowercase name -> not a component
+function notAComponent({ items = [] }) {
+  return null;
+}
+
+// two params -> not a component
+const TwoParams = ({ a = {} }, context) => null;
+
+// defaultProps is out of scope
+function Baz(props) {
+  return null;
+}
+Baz.defaultProps = { bar: () => {} };
+
+// nested patterns are not checked
+function Nested({ config: { value = {} } = {} }) {
+  return null;
+}
+
+// non-Symbol calls are allowed
+function CallDefault({ ref = createRef() }) {
+  return null;
+}
