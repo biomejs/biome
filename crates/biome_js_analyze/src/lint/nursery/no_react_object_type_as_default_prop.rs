@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsObjectBindingPatternMember, AnyJsParameter, JsParameters,
+    AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsObjectBindingPatternMember, JsParameters,
 };
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
@@ -200,16 +200,12 @@ fn forbidden_default_kind(expression: &AnyJsExpression) -> Option<ForbiddenDefau
 
 fn collect_forbidden_defaults(parameters: &JsParameters) -> Option<Vec<ForbiddenDefault>> {
     let first_param = parameters.items().into_iter().next()?.ok()?;
-
-    let AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(param)) =
-        first_param
-    else {
-        return None;
-    };
-
-    let AnyJsBindingPattern::JsObjectBindingPattern(object_pattern) = param.binding().ok()? else {
-        return None;
-    };
+    let binding = first_param
+        .as_any_js_formal_parameter()?
+        .as_js_formal_parameter()?
+        .binding()
+        .ok()?;
+    let object_pattern = binding.as_js_object_binding_pattern()?;
 
     let mut defaults = Vec::new();
     for property in object_pattern.properties() {
