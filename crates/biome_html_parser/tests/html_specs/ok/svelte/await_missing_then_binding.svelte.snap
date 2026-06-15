@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
-assertion_line: 143
 expression: snapshot
 ---
 
@@ -39,7 +38,7 @@ HtmlRoot {
                         opening_element: HtmlOpeningElement {
                             l_angle_token: L_ANGLE@16..20 "<" [Newline("\n"), Whitespace("  ")] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@20..21 "p" [] [],
+                                value_token: P_KW@20..21 "p" [] [],
                             },
                             attributes: HtmlAttributeList [],
                             r_angle_token: R_ANGLE@21..22 ">" [] [],
@@ -53,7 +52,7 @@ HtmlRoot {
                             l_angle_token: L_ANGLE@32..33 "<" [] [],
                             slash_token: SLASH@33..34 "/" [] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@34..35 "p" [] [],
+                                value_token: P_KW@34..35 "p" [] [],
                             },
                             r_angle_token: R_ANGLE@35..36 ">" [] [],
                         },
@@ -71,7 +70,7 @@ HtmlRoot {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@48..49 "p" [] [],
+                                    value_token: P_KW@48..49 "p" [] [],
                                 },
                                 attributes: HtmlAttributeList [],
                                 r_angle_token: R_ANGLE@49..50 ">" [] [],
@@ -85,7 +84,7 @@ HtmlRoot {
                                 l_angle_token: L_ANGLE@55..56 "<" [] [],
                                 slash_token: SLASH@56..57 "/" [] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@57..58 "p" [] [],
+                                    value_token: P_KW@57..58 "p" [] [],
                                 },
                                 r_angle_token: R_ANGLE@58..59 ">" [] [],
                             },
@@ -126,7 +125,7 @@ HtmlRoot {
             0: HTML_OPENING_ELEMENT@16..22
               0: L_ANGLE@16..20 "<" [Newline("\n"), Whitespace("  ")] []
               1: HTML_TAG_NAME@20..21
-                0: HTML_LITERAL@20..21 "p" [] []
+                0: P_KW@20..21 "p" [] []
               2: HTML_ATTRIBUTE_LIST@21..21
               3: R_ANGLE@21..22 ">" [] []
             1: HTML_ELEMENT_LIST@22..32
@@ -136,7 +135,7 @@ HtmlRoot {
               0: L_ANGLE@32..33 "<" [] []
               1: SLASH@33..34 "/" [] []
               2: HTML_TAG_NAME@34..35
-                0: HTML_LITERAL@34..35 "p" [] []
+                0: P_KW@34..35 "p" [] []
               3: R_ANGLE@35..36 ">" [] []
       1: SVELTE_AWAIT_CLAUSES_LIST@36..59
         0: SVELTE_AWAIT_THEN_BLOCK@36..59
@@ -149,7 +148,7 @@ HtmlRoot {
               0: HTML_OPENING_ELEMENT@44..50
                 0: L_ANGLE@44..48 "<" [Newline("\n"), Whitespace("  ")] []
                 1: HTML_TAG_NAME@48..49
-                  0: HTML_LITERAL@48..49 "p" [] []
+                  0: P_KW@48..49 "p" [] []
                 2: HTML_ATTRIBUTE_LIST@49..49
                 3: R_ANGLE@49..50 ">" [] []
               1: HTML_ELEMENT_LIST@50..55
@@ -159,7 +158,7 @@ HtmlRoot {
                 0: L_ANGLE@55..56 "<" [] []
                 1: SLASH@56..57 "/" [] []
                 2: HTML_TAG_NAME@57..58
-                  0: HTML_LITERAL@57..58 "p" [] []
+                  0: P_KW@57..58 "p" [] []
                 3: R_ANGLE@58..59 ">" [] []
       2: SVELTE_AWAIT_CLOSING_BLOCK@59..68
         0: SV_CURLY_SLASH@59..62 "{/" [Newline("\n")] []
