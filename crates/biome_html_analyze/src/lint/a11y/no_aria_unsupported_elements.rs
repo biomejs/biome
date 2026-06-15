@@ -6,13 +6,15 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective, element_ext::AnyHtmlTagElement};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{
+    AnyHtmlAttribute, AnyVueDirective, HtmlSyntaxKind, T, element_ext::AnyHtmlTagElement,
+};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 use biome_string_case::StrLikeExtension;
 
-use crate::{HtmlRuleAction, utils::is_html_tag};
+use crate::HtmlRuleAction;
 
 declare_lint_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -50,7 +52,8 @@ declare_lint_rule! {
     }
 }
 
-const ARIA_UNSUPPORTED_ELEMENTS: [&str; 4] = ["meta", "html", "script", "style"];
+const ARIA_UNSUPPORTED_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![meta], T![html], T![script], T![style]);
 
 #[derive(Debug)]
 enum AttributeKind {
@@ -80,11 +83,9 @@ impl Rule for NoAriaUnsupportedElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
-        let is_unsupported = ARIA_UNSUPPORTED_ELEMENTS
-            .iter()
-            .any(|el| is_html_tag(node, source_type, el));
+        let is_unsupported = node
+            .tag_name_kind()
+            .is_some_and(|kind| ARIA_UNSUPPORTED_ELEMENTS.contains(kind));
 
         if is_unsupported {
             let report = node.attributes().iter().find_map(|attribute| {
