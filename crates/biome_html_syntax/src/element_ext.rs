@@ -1,3 +1,7 @@
+use crate::HtmlSyntaxKind::{
+    self, AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
+    SCRIPT_KW, SOURCE_KW, STYLE_KW, TRACK_KW, WBR_KW,
+};
 use crate::{
     AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
     AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList,
@@ -5,14 +9,17 @@ use crate::{
     HtmlTagName, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
-/// https://html.spec.whatwg.org/#void-elements
-const VOID_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
-    "wbr",
-];
+/// [Void elements](https://html.spec.whatwg.org/#void-elements): they never have
+/// content or a closing tag. Tag names are keywords, so membership is an `O(1)`
+/// token-kind test.
+const VOID_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    AREA_KW, BASE_KW, BR_KW, COL_KW, EMBED_KW, HR_KW, IMG_KW, INPUT_KW, LINK_KW, META_KW,
+    SOURCE_KW, TRACK_KW, WBR_KW
+);
 
 /// Helper to get the text value from any tag name variant
 fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
@@ -68,6 +75,12 @@ impl AnyHtmlElement {
             Self::HtmlSelfClosingElement(el) => el.tag_name(),
             _ => None,
         }
+    }
+
+    /// Returns the token kind of this element's tag name, if it is a tag element.
+    /// See [`AnyHtmlTagName::tag_name_kind`].
+    pub fn tag_name_kind(&self) -> Option<HtmlSyntaxKind> {
+        self.clone().as_any_html_tag_element()?.tag_name_kind()
     }
 
     /// Returns the closing `>` token from this element's closing tag, if it has one.
@@ -222,9 +235,8 @@ impl HtmlSelfClosingElement {
     ///
     /// <https://html.spec.whatwg.org/#void-elements>
     pub fn is_void_element(&self) -> Option<bool> {
-        let name = self.name().ok()?;
-        let name_text = get_tag_name_text(&name)?;
-        Some(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
+        let kind = self.name().ok()?.tag_name_kind();
+        Some(kind.is_some_and(|kind| VOID_ELEMENTS.contains(kind)))
     }
 }
 
@@ -299,27 +311,19 @@ impl HtmlElement {
     }
 
     pub fn is_style_tag(&self) -> bool {
-        let Ok(name) = self.opening_element().and_then(|el| el.name()) else {
-            return false;
-        };
-
-        let Some(name_text) = name.token_text_trimmed() else {
-            return false;
-        };
-
-        name_text.eq_ignore_ascii_case("style")
+        self.opening_element()
+            .and_then(|el| el.name())
+            .ok()
+            .and_then(|name| name.tag_name_kind())
+            == Some(STYLE_KW)
     }
 
     pub fn is_script_tag(&self) -> bool {
-        let Ok(name) = self.opening_element().and_then(|el| el.name()) else {
-            return false;
-        };
-
-        let Some(name_text) = name.token_text_trimmed() else {
-            return false;
-        };
-
-        name_text.eq_ignore_ascii_case("script")
+        self.opening_element()
+            .and_then(|el| el.name())
+            .ok()
+            .and_then(|name| name.tag_name_kind())
+            == Some(SCRIPT_KW)
     }
 
     fn has_attribute_with_value(&self, name: &str, value: &str) -> bool {
@@ -398,6 +402,22 @@ impl AnyHtmlTagName {
     pub fn token_text_trimmed(&self) -> Option<TokenText> {
         get_tag_name_text(self)
     }
+
+    /// Returns the token kind of a plain HTML/SVG tag name.
+    ///
+    /// Known tags resolve to their keyword kind (e.g. `<div>` -> `DIV_KW`), and
+    /// unknown or custom tags to `HTML_UNKNOWN_TAG`. Returns `None` for component
+    /// names (`<Foo>`) and member names (`<Foo.Bar>`), which are not native tags.
+    ///
+    /// Because the lexer case-folds HTML tag names into their keyword kind, this is
+    /// the `O(1)` way to check an element's tag name instead of a case-insensitive
+    /// string comparison.
+    pub fn tag_name_kind(&self) -> Option<HtmlSyntaxKind> {
+        match self {
+            Self::HtmlTagName(tag) => Some(tag.value_token().ok()?.kind()),
+            Self::HtmlComponentName(_) | Self::HtmlMemberName(_) => None,
+        }
+    }
 }
 
 declare_node_union! {
@@ -410,6 +430,12 @@ impl AnyHtmlTagElement {
             Self::HtmlOpeningElement(element) => element.tag_name(),
             Self::HtmlSelfClosingElement(element) => element.tag_name(),
         }
+    }
+
+    /// Returns the token kind of this element's tag name.
+    /// See [`AnyHtmlTagName::tag_name_kind`].
+    pub fn tag_name_kind(&self) -> Option<HtmlSyntaxKind> {
+        self.name().ok()?.tag_name_kind()
     }
 
     pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {

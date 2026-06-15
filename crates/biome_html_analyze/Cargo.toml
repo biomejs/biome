@@ -27,6 +27,7 @@ biome_html_factory       = { workspace = true }
 biome_html_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_html"] }
 biome_module_graph       = { workspace = true }
+biome_parser             = { workspace = true }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }

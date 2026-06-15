@@ -1,11 +1,10 @@
+use crate::Aria;
 use crate::a11y::is_hidden_from_screen_reader;
-use crate::{Aria, utils::is_html_tag};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 
-use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{T, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 
@@ -89,13 +88,11 @@ impl Rule for UseKeyWithClickEvents {
             return None;
         }
 
-        if !aria_roles.is_not_interactive_element(element) {
-            let source_type = ctx.source_type::<HtmlFileSource>();
-            if !is_html_tag(element, source_type, "a")
-                || element.find_attribute_by_name("href").is_some()
-            {
-                return None;
-            }
+        if !aria_roles.is_not_interactive_element(element)
+            && (element.tag_name_kind() != Some(T![a])
+                || element.find_attribute_by_name("href").is_some())
+        {
+            return None;
         }
 
         // Check for keyboard event handlers

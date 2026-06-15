@@ -3,12 +3,10 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 
+use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforces the usage and validity of the attribute `type` for the element `button`
@@ -55,9 +53,8 @@ impl Rule for UseButtonType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(element, source_type, "button") {
+        if element.tag_name_kind() != Some(T![button]) {
             return None;
         }
 
