@@ -39,8 +39,6 @@ pub trait SortableAttribute {
         }
     }
 
-    /// The position of this attribute's name in `sort_first`,
-    /// or `sort_first.len()` when the name isn't listed.
     fn sort_first_index(&self, sort_first: &[Box<str>]) -> usize {
         self.name()
             .and_then(|name| {
@@ -51,8 +49,6 @@ pub trait SortableAttribute {
             .unwrap_or(sort_first.len())
     }
 
-    /// Compares two attributes, ordering the ones listed in `sort_first` first
-    /// (in list order), and using `base` for everything else.
     fn cmp_sort_first(
         &self,
         other: &Self,
