@@ -13,9 +13,9 @@
   "keywords": [],
   "author": "Biome Developers and Contributors",
   "license": "MIT OR Apache-2.0",
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "pnpm@11.6.0",
   "engines": {
-    "pnpm": "11.5.2",
+    "pnpm": "11.6.0",
     "node": ">=22.13"
   },
   "type": "module",
