@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: groups-multiline.jsx
+---
+# Input
+```jsx
+// sortScope: "group" with :MULTILINE: group at the end
+// Multiline props should sort after all other non-group props
+
+// Unsorted: multiline before regular props
+<Hello
+  style={{
+    color: "red",
+  }}
+  name="John"
+/>;
+
+// Unsorted: multiline before callback
+<Hello
+  onClick={
+    () => doSomething()
+  }
+  name="John"
+  onChange={fn}
+/>;
+
+// Correctly ordered: regular props first, then multiline
+<Hello name="John" style={{
+  color: "red",
+}} />;
+
+```
+
+# Diagnostics
+```
+groups-multiline.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     4 │ // Unsorted: multiline before regular props
+   > 5 │ <Hello
+       │ ^^^^^^
+   > 6 │   style={{
+   > 7 │     color: "red",
+   > 8 │   }}
+   > 9 │   name="John"
+  > 10 │ />;
+       │ ^^
+    11 │ 
+    12 │ // Unsorted: multiline before callback
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   // Unsorted: multiline before regular props
+     5  5 │   <Hello
+     6    │ - ··style={{
+     7    │ - ····color:·"red",
+     8    │ - ··}}
+     9    │ - ··name="John"
+        6 │ + ··name="John"
+        7 │ + ··style={{
+        8 │ + ····color:·"red",
+        9 │ + ··}}
+    10 10 │   />;
+    11 11 │   
+  
+
+```
+
+```
+groups-multiline.jsx:13:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    12 │ // Unsorted: multiline before callback
+  > 13 │ <Hello
+       │ ^^^^^^
+  > 14 │   onClick={
+        ...
+  > 18 │   onChange={fn}
+  > 19 │ />;
+       │ ^^
+    20 │ 
+    21 │ // Correctly ordered: regular props first, then multiline
+  
+  i Safe fix: Sort the JSX props.
+  
+    12 12 │   // Unsorted: multiline before callback
+    13 13 │   <Hello
+    14    │ - ··onClick={
+    15    │ - ····()·=>·doSomething()
+    16    │ - ··}
+    17    │ - ··name="John"
+    18    │ - ··onChange={fn}
+       14 │ + ··onChange={fn}
+       15 │ + ··onClick={
+       16 │ + ····()·=>·doSomething()
+       17 │ + ··}
+       18 │ + ··name="John"
+    19 19 │   />;
+    20 20 │   
+  
+
+```
+
+```
+groups-multiline.jsx:22:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    21 │ // Correctly ordered: regular props first, then multiline
+  > 22 │ <Hello name="John" style={{
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 23 │   color: "red",
+  > 24 │ }} />;
+       │ ^^^^^
+    25 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    20 20 │   
+    21 21 │   // Correctly ordered: regular props first, then multiline
+    22    │ - <Hello·name="John"·style={{
+    23    │ - ··color:·"red",
+    24    │ - }}·/>;
+       22 │ + <Hello·style={{
+       23 │ + ··color:·"red",
+       24 │ + }}·name="John"·/>;
+    25 25 │   
+  
+
+```

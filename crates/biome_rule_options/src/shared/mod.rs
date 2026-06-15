@@ -2,6 +2,7 @@ use biome_string_case::StrLikeExtension;
 
 pub mod restricted_regex;
 pub mod sort_order;
+pub mod sort_scope;
 
 const REDUNDANT_WORDS: [&str; 3] = ["image", "photo", "picture"];
 

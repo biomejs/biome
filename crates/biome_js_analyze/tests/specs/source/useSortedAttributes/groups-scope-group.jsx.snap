@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: groups-scope-group.jsx
+---
+# Input
+```jsx
+// sortScope: "group" with default groups
+// Default group order: [:IMPLICIT:, :RESERVED:, :DOM_RESERVED:, :CALLBACK:, :MULTILINE:, ...rest]
+
+// Correctly ordered: implicit first, then rest alphabetically
+<Hello disabled name="John" onChange={fn} />;
+
+// Unsorted: callback before implicit
+<Hello onChange={fn} disabled name="John" />;
+
+// Unsorted: key not first (reserved group)
+<Hello name="John" key="1" />;
+
+// Unsorted: children before regular props but after key/ref
+<Hello name="John" key="1" children={<Foo />} />;
+
+// Correctly ordered: key, ref, then rest
+<Hello key="1" ref={myRef} name="John" />;
+
+// Unsorted: callback before implicit and rest out of order
+<Hello onFocus={fn} onClick={fn} active name="John" />;
+
+```
+
+# Diagnostics
+```
+groups-scope-group.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ // Correctly ordered: implicit first, then rest alphabetically
+  > 5 │ <Hello disabled name="John" onChange={fn} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Unsorted: callback before implicit
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   
+     4  4 │   // Correctly ordered: implicit first, then rest alphabetically
+     5    │ - <Hello·disabled·name="John"·onChange={fn}·/>;
+        5 │ + <Hello·disabled·onChange={fn}·name="John"·/>;
+     6  6 │   
+     7  7 │   // Unsorted: callback before implicit
+  
+
+```
+
+```
+groups-scope-group.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     7 │ // Unsorted: callback before implicit
+   > 8 │ <Hello onChange={fn} disabled name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Unsorted: key not first (reserved group)
+  
+  i Safe fix: Sort the JSX props.
+  
+     6  6 │   
+     7  7 │   // Unsorted: callback before implicit
+     8    │ - <Hello·onChange={fn}·disabled·name="John"·/>;
+        8 │ + <Hello·disabled·onChange={fn}·name="John"·/>;
+     9  9 │   
+    10 10 │   // Unsorted: key not first (reserved group)
+  
+
+```
+
+```
+groups-scope-group.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Unsorted: key not first (reserved group)
+  > 11 │ <Hello name="John" key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Unsorted: children before regular props but after key/ref
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Unsorted: key not first (reserved group)
+    11    │ - <Hello·name="John"·key="1"·/>;
+       11 │ + <Hello·key="1"·name="John"·/>;
+    12 12 │   
+    13 13 │   // Unsorted: children before regular props but after key/ref
+  
+
+```
+
+```
+groups-scope-group.jsx:14:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    13 │ // Unsorted: children before regular props but after key/ref
+  > 14 │ <Hello name="John" key="1" children={<Foo />} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Correctly ordered: key, ref, then rest
+  
+  i Safe fix: Sort the JSX props.
+  
+    12 12 │   
+    13 13 │   // Unsorted: children before regular props but after key/ref
+    14    │ - <Hello·name="John"·key="1"·children={<Foo·/>}·/>;
+       14 │ + <Hello·key="1"·children={<Foo·/>}·name="John"·/>;
+    15 15 │   
+    16 16 │   // Correctly ordered: key, ref, then rest
+  
+
+```
+
+```
+groups-scope-group.jsx:20:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    19 │ // Unsorted: callback before implicit and rest out of order
+  > 20 │ <Hello onFocus={fn} onClick={fn} active name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    18 18 │   
+    19 19 │   // Unsorted: callback before implicit and rest out of order
+    20    │ - <Hello·onFocus={fn}·onClick={fn}·active·name="John"·/>;
+       20 │ + <Hello·active·onClick={fn}·onFocus={fn}·name="John"·/>;
+    21 21 │   
+  
+
+```
