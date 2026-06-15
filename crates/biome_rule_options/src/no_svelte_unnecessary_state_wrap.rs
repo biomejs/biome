@@ -22,4 +22,11 @@ impl NoSvelteUnnecessaryStateWrapOptions {
     pub fn allow_reassign(&self) -> bool {
         self.allow_reassign.unwrap_or(Self::DEFAULT_ALLOW_REASSIGN)
     }
+
+    /// Returns the list of additional reactive classes, or an empty slice if not set.
+    pub fn additional_reactive_classes(&self) -> &[Box<str>] {
+        self.additional_reactive_classes
+            .as_deref()
+            .unwrap_or_default()
+    }
 }

@@ -136,10 +136,8 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
-    /// Name of the reactive class being unnecessarily wrapped.
-    class_name: TokenText,
-}
+/// The name of the reactive class being unnecessarily wrapped.
+pub type RuleState = TokenText;
 
 impl Rule for NoSvelteUnnecessaryStateWrap {
     type Query = Semantic<JsCallExpression>;
@@ -187,9 +185,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         let is_builtin = REACTIVE_CLASSES.contains(&class_name_text.text());
         let is_additional = ctx
             .options()
-            .additional_reactive_classes
-            .as_deref()
-            .unwrap_or(&[])
+            .additional_reactive_classes()
             .iter()
             .any(|c| c.as_ref() == class_name_text.text());
 
@@ -198,6 +194,9 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         }
 
         // For built-in classes, verify the class is imported from `svelte/reactivity`.
+        // We only check static ES module imports (`import { X } from "..."`), which is
+        // the only realistic pattern in Svelte component files. Dynamic `import()` and
+        // CommonJS `require()` are not handled.
         if is_builtin {
             let binding = model.binding(&class_ref)?;
             let imported_from = binding
@@ -212,9 +211,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
             }
         }
 
-        Some(RuleState {
-            class_name: class_name_text,
-        })
+        Some(class_name_text)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -224,7 +221,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
                 rule_category!(),
                 call.range(),
                 markup! {
-                    <Emphasis>{state.class_name.text()}</Emphasis>" is already reactive, wrapping it in "<Emphasis>"$state()"</Emphasis>" is unnecessary."
+                    <Emphasis>{state.text()}</Emphasis>" is already reactive, wrapping it in "<Emphasis>"$state()"</Emphasis>" is unnecessary."
                 },
             )
             .note(markup! {

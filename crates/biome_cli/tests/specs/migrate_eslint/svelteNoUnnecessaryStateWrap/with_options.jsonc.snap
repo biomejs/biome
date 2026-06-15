@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"svelte/no-unnecessary-state-wrap": [
+			"error",
+			{ "additionalReactiveClasses": ["MyStore"], "allowReassign": true }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": {
+				"noSvelteUnnecessaryStateWrap": {
+					"level": "error",
+					"options": {
+						"additionalReactiveClasses": ["MyStore"],
+						"allowReassign": true
+					}
+				}
+			}
+		}
+	}
+}
+
+```
