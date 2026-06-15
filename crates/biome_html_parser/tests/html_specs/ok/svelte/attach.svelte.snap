@@ -38,7 +38,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteAttachAttribute {
@@ -61,7 +61,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@31..32 "<" [] [],
                 slash_token: SLASH@32..33 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@33..36 "div" [] [],
+                    value_token: DIV_KW@33..36 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@36..37 ">" [] [],
             },
@@ -70,7 +70,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@37..39 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@39..46 "button" [] [Whitespace(" ")],
+                    value_token: BUTTON_KW@39..46 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteAttachAttribute {
@@ -93,7 +93,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@83..85 "<" [Newline("\n")] [],
                 slash_token: SLASH@85..86 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@86..92 "button" [] [],
+                    value_token: BUTTON_KW@86..92 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@92..93 ">" [] [],
             },
@@ -102,7 +102,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@93..95 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@95..101 "canvas" [] [],
+                    value_token: CANVAS_KW@95..101 "canvas" [] [],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -151,7 +151,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@310..311 "<" [] [],
                 slash_token: SLASH@311..312 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@312..318 "canvas" [] [],
+                    value_token: CANVAS_KW@312..318 "canvas" [] [],
                 },
                 r_angle_token: R_ANGLE@318..319 ">" [] [],
             },
@@ -173,7 +173,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..28
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..27
           0: SVELTE_ATTACH_ATTRIBUTE@5..27
             0: SV_CURLY_AT@5..7 "{@" [] []
@@ -189,13 +189,13 @@ HtmlRoot {
         0: L_ANGLE@31..32 "<" [] []
         1: SLASH@32..33 "/" [] []
         2: HTML_TAG_NAME@33..36
-          0: HTML_LITERAL@33..36 "div" [] []
+          0: DIV_KW@33..36 "div" [] []
         3: R_ANGLE@36..37 ">" [] []
     1: HTML_ELEMENT@37..93
       0: HTML_OPENING_ELEMENT@37..73
         0: L_ANGLE@37..39 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@39..46
-          0: HTML_LITERAL@39..46 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@39..46 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@46..72
           0: SVELTE_ATTACH_ATTRIBUTE@46..72
             0: SV_CURLY_AT@46..48 "{@" [] []
@@ -211,13 +211,13 @@ HtmlRoot {
         0: L_ANGLE@83..85 "<" [Newline("\n")] []
         1: SLASH@85..86 "/" [] []
         2: HTML_TAG_NAME@86..92
-          0: HTML_LITERAL@86..92 "button" [] []
+          0: BUTTON_KW@86..92 "button" [] []
         3: R_ANGLE@92..93 ">" [] []
     2: HTML_ELEMENT@93..319
       0: HTML_OPENING_ELEMENT@93..310
         0: L_ANGLE@93..95 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@95..101
-          0: HTML_LITERAL@95..101 "canvas" [] []
+          0: CANVAS_KW@95..101 "canvas" [] []
         2: HTML_ATTRIBUTE_LIST@101..308
           0: HTML_ATTRIBUTE@101..113
             0: HTML_ATTRIBUTE_NAME@101..108
@@ -251,7 +251,7 @@ HtmlRoot {
         0: L_ANGLE@310..311 "<" [] []
         1: SLASH@311..312 "/" [] []
         2: HTML_TAG_NAME@312..318
-          0: HTML_LITERAL@312..318 "canvas" [] []
+          0: CANVAS_KW@312..318 "canvas" [] []
         3: R_ANGLE@318..319 ">" [] []
   4: EOF@319..320 "" [Newline("\n")] []
 

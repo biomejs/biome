@@ -62,7 +62,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@9..10 ">" [] [],
@@ -71,7 +71,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@10..56 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- Basic v-model on ..."), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@56..62 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -93,7 +93,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@79..82 "<" [Newline("\n"), Whitespace("\t")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@82..91 "textarea" [] [Whitespace(" ")],
+                            value_token: TEXTAREA_KW@82..91 "textarea" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
@@ -115,7 +115,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@109..110 "<" [] [],
                         slash_token: SLASH@110..111 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@111..119 "textarea" [] [],
+                            value_token: TEXTAREA_KW@111..119 "textarea" [] [],
                         },
                         r_angle_token: R_ANGLE@119..120 ">" [] [],
                     },
@@ -123,7 +123,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@120..161 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Modifiers on nat ..."), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@161..167 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@161..167 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -149,7 +149,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@193..196 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@196..202 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@196..202 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -175,7 +175,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@225..228 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@228..234 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@228..234 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -201,7 +201,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@256..259 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@259..265 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@259..265 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -235,7 +235,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@302..361 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- v-model on custo ..."), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@361..374 "custom-input" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@361..374 "custom-input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -256,7 +256,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@392..395 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@395..404 "my-input" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@395..404 "my-input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -290,7 +290,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@437..480 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Named v-models o ..."), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@480..492 "date-picker" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@480..492 "date-picker" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -316,7 +316,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@515..518 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@518..532 "custom-select" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@518..532 "custom-select" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -342,7 +342,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@562..565 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@565..571 "child" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@565..571 "child" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -368,7 +368,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@601..604 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@604..610 "child" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@604..610 "child" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -403,7 +403,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@648..705 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Dynamic argument ..."), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@705..717 "component-a" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@705..717 "component-a" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -436,7 +436,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@753..756 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@756..768 "component-b" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@756..768 "component-b" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -469,7 +469,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@803..806 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@806..818 "component-c" [] [Whitespace(" ")],
+                        value_token: HTML_UNKNOWN_TAG@806..818 "component-c" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         VueDirective {
@@ -503,7 +503,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@857..911 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Native controls  ..."), Newline("\n"), Whitespace("\t")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@911..918 "select" [] [Whitespace(" ")],
+                            value_token: SELECT_KW@911..918 "select" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             VueDirective {
@@ -525,7 +525,7 @@ HtmlRoot {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@943..947 "<" [Newline("\n"), Whitespace("\t\t")] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@947..954 "option" [] [Whitespace(" ")],
+                                    value_token: OPTION_KW@947..954 "option" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
                                     HtmlAttribute {
@@ -551,7 +551,7 @@ HtmlRoot {
                                 l_angle_token: L_ANGLE@965..966 "<" [] [],
                                 slash_token: SLASH@966..967 "/" [] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@967..973 "option" [] [],
+                                    value_token: OPTION_KW@967..973 "option" [] [],
                                 },
                                 r_angle_token: R_ANGLE@973..974 ">" [] [],
                             },
@@ -560,7 +560,7 @@ HtmlRoot {
                             opening_element: HtmlOpeningElement {
                                 l_angle_token: L_ANGLE@974..978 "<" [Newline("\n"), Whitespace("\t\t")] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@978..985 "option" [] [Whitespace(" ")],
+                                    value_token: OPTION_KW@978..985 "option" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
                                     VueVBindShorthandDirective {
@@ -590,7 +590,7 @@ HtmlRoot {
                                 l_angle_token: L_ANGLE@1003..1004 "<" [] [],
                                 slash_token: SLASH@1004..1005 "/" [] [],
                                 name: HtmlTagName {
-                                    value_token: HTML_LITERAL@1005..1011 "option" [] [],
+                                    value_token: OPTION_KW@1005..1011 "option" [] [],
                                 },
                                 r_angle_token: R_ANGLE@1011..1012 ">" [] [],
                             },
@@ -600,7 +600,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@1012..1015 "<" [Newline("\n"), Whitespace("\t")] [],
                         slash_token: SLASH@1015..1016 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@1016..1022 "select" [] [],
+                            value_token: SELECT_KW@1016..1022 "select" [] [],
                         },
                         r_angle_token: R_ANGLE@1022..1023 ">" [] [],
                     },
@@ -608,7 +608,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@1023..1027 "<" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@1027..1033 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@1027..1033 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -640,7 +640,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@1067..1070 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@1070..1076 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@1070..1076 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -683,7 +683,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@1120..1123 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@1123..1129 "input" [] [Whitespace(" ")],
+                        value_token: INPUT_KW@1123..1129 "input" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -727,7 +727,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@1173..1245 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Grouping and nes ..."), Newline("\n"), Whitespace("\t")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@1245..1249 "div" [] [Whitespace(" ")],
+                            value_token: DIV_KW@1245..1249 "div" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             HtmlAttribute {
@@ -748,7 +748,7 @@ HtmlRoot {
                         HtmlSelfClosingElement {
                             l_angle_token: L_ANGLE@1265..1269 "<" [Newline("\n"), Whitespace("\t\t")] [],
                             name: HtmlTagName {
-                                value_token: HTML_LITERAL@1269..1275 "child" [] [Whitespace(" ")],
+                                value_token: HTML_UNKNOWN_TAG@1269..1275 "child" [] [Whitespace(" ")],
                             },
                             attributes: HtmlAttributeList [
                                 VueDirective {
@@ -776,7 +776,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@1299..1302 "<" [Newline("\n"), Whitespace("\t")] [],
                         slash_token: SLASH@1302..1303 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@1303..1306 "div" [] [],
+                            value_token: DIV_KW@1303..1306 "div" [] [],
                         },
                         r_angle_token: R_ANGLE@1306..1307 ">" [] [],
                     },
@@ -786,7 +786,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@1307..1309 "<" [Newline("\n")] [],
                 slash_token: SLASH@1309..1310 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1310..1318 "template" [] [],
+                    value_token: TEMPLATE_KW@1310..1318 "template" [] [],
                 },
                 r_angle_token: R_ANGLE@1318..1319 ">" [] [],
             },
@@ -808,14 +808,14 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..9
-          0: HTML_LITERAL@1..9 "template" [] []
+          0: TEMPLATE_KW@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
       1: HTML_ELEMENT_LIST@10..1307
         0: HTML_SELF_CLOSING_ELEMENT@10..79
           0: L_ANGLE@10..56 "<" [Newline("\n"), Whitespace("\t"), Comments("<!-- Basic v-model on ..."), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@56..62
-            0: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@56..62 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@62..77
             0: VUE_DIRECTIVE@62..77
               0: IDENT@62..69 "v-model" [] []
@@ -831,7 +831,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@79..109
             0: L_ANGLE@79..82 "<" [Newline("\n"), Whitespace("\t")] []
             1: HTML_TAG_NAME@82..91
-              0: HTML_LITERAL@82..91 "textarea" [] [Whitespace(" ")]
+              0: TEXTAREA_KW@82..91 "textarea" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@91..108
               0: VUE_DIRECTIVE@91..108
                 0: IDENT@91..98 "v-model" [] []
@@ -847,12 +847,12 @@ HtmlRoot {
             0: L_ANGLE@109..110 "<" [] []
             1: SLASH@110..111 "/" [] []
             2: HTML_TAG_NAME@111..119
-              0: HTML_LITERAL@111..119 "textarea" [] []
+              0: TEXTAREA_KW@111..119 "textarea" [] []
             3: R_ANGLE@119..120 ">" [] []
         2: HTML_SELF_CLOSING_ELEMENT@120..193
           0: L_ANGLE@120..161 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Modifiers on nat ..."), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@161..167
-            0: HTML_LITERAL@161..167 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@161..167 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@167..191
             0: VUE_DIRECTIVE@167..191
               0: IDENT@167..174 "v-model" [] []
@@ -870,7 +870,7 @@ HtmlRoot {
         3: HTML_SELF_CLOSING_ELEMENT@193..225
           0: L_ANGLE@193..196 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@196..202
-            0: HTML_LITERAL@196..202 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@196..202 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@202..223
             0: VUE_DIRECTIVE@202..223
               0: IDENT@202..209 "v-model" [] []
@@ -888,7 +888,7 @@ HtmlRoot {
         4: HTML_SELF_CLOSING_ELEMENT@225..256
           0: L_ANGLE@225..228 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@228..234
-            0: HTML_LITERAL@228..234 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@228..234 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@234..254
             0: VUE_DIRECTIVE@234..254
               0: IDENT@234..241 "v-model" [] []
@@ -906,7 +906,7 @@ HtmlRoot {
         5: HTML_SELF_CLOSING_ELEMENT@256..302
           0: L_ANGLE@256..259 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@259..265
-            0: HTML_LITERAL@259..265 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@259..265 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@265..300
             0: VUE_DIRECTIVE@265..300
               0: IDENT@265..272 "v-model" [] []
@@ -930,7 +930,7 @@ HtmlRoot {
         6: HTML_SELF_CLOSING_ELEMENT@302..392
           0: L_ANGLE@302..361 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- v-model on custo ..."), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@361..374
-            0: HTML_LITERAL@361..374 "custom-input" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@361..374 "custom-input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@374..390
             0: VUE_DIRECTIVE@374..390
               0: IDENT@374..381 "v-model" [] []
@@ -945,7 +945,7 @@ HtmlRoot {
         7: HTML_SELF_CLOSING_ELEMENT@392..437
           0: L_ANGLE@392..395 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@395..404
-            0: HTML_LITERAL@395..404 "my-input" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@395..404 "my-input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@404..435
             0: VUE_DIRECTIVE@404..418
               0: IDENT@404..411 "v-model" [] []
@@ -969,7 +969,7 @@ HtmlRoot {
         8: HTML_SELF_CLOSING_ELEMENT@437..515
           0: L_ANGLE@437..480 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Named v-models o ..."), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@480..492
-            0: HTML_LITERAL@480..492 "date-picker" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@480..492 "date-picker" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@492..513
             0: VUE_DIRECTIVE@492..513
               0: IDENT@492..499 "v-model" [] []
@@ -987,7 +987,7 @@ HtmlRoot {
         9: HTML_SELF_CLOSING_ELEMENT@515..562
           0: L_ANGLE@515..518 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@518..532
-            0: HTML_LITERAL@518..532 "custom-select" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@518..532 "custom-select" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@532..560
             0: VUE_DIRECTIVE@532..560
               0: IDENT@532..539 "v-model" [] []
@@ -1005,7 +1005,7 @@ HtmlRoot {
         10: HTML_SELF_CLOSING_ELEMENT@562..601
           0: L_ANGLE@562..565 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@565..571
-            0: HTML_LITERAL@565..571 "child" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@565..571 "child" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@571..599
             0: VUE_DIRECTIVE@571..599
               0: IDENT@571..578 "v-model" [] []
@@ -1023,7 +1023,7 @@ HtmlRoot {
         11: HTML_SELF_CLOSING_ELEMENT@601..648
           0: L_ANGLE@601..604 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@604..610
-            0: HTML_LITERAL@604..610 "child" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@604..610 "child" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@610..646
             0: VUE_DIRECTIVE@610..646
               0: IDENT@610..617 "v-model" [] []
@@ -1047,7 +1047,7 @@ HtmlRoot {
         12: HTML_SELF_CLOSING_ELEMENT@648..753
           0: L_ANGLE@648..705 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Dynamic argument ..."), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@705..717
-            0: HTML_LITERAL@705..717 "component-a" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@705..717 "component-a" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@717..751
             0: VUE_DIRECTIVE@717..751
               0: IDENT@717..724 "v-model" [] []
@@ -1070,7 +1070,7 @@ HtmlRoot {
         13: HTML_SELF_CLOSING_ELEMENT@753..803
           0: L_ANGLE@753..756 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@756..768
-            0: HTML_LITERAL@756..768 "component-b" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@756..768 "component-b" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@768..801
             0: VUE_DIRECTIVE@768..801
               0: IDENT@768..775 "v-model" [] []
@@ -1093,7 +1093,7 @@ HtmlRoot {
         14: HTML_SELF_CLOSING_ELEMENT@803..857
           0: L_ANGLE@803..806 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@806..818
-            0: HTML_LITERAL@806..818 "component-c" [] [Whitespace(" ")]
+            0: HTML_UNKNOWN_TAG@806..818 "component-c" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@818..855
             0: VUE_DIRECTIVE@818..855
               0: IDENT@818..825 "v-model" [] []
@@ -1117,7 +1117,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@857..943
             0: L_ANGLE@857..911 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Native controls  ..."), Newline("\n"), Whitespace("\t")] []
             1: HTML_TAG_NAME@911..918
-              0: HTML_LITERAL@911..918 "select" [] [Whitespace(" ")]
+              0: SELECT_KW@911..918 "select" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@918..942
               0: VUE_DIRECTIVE@918..942
                 0: IDENT@918..925 "v-model" [] []
@@ -1133,7 +1133,7 @@ HtmlRoot {
               0: HTML_OPENING_ELEMENT@943..964
                 0: L_ANGLE@943..947 "<" [Newline("\n"), Whitespace("\t\t")] []
                 1: HTML_TAG_NAME@947..954
-                  0: HTML_LITERAL@947..954 "option" [] [Whitespace(" ")]
+                  0: OPTION_KW@947..954 "option" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@954..963
                   0: HTML_ATTRIBUTE@954..963
                     0: HTML_ATTRIBUTE_NAME@954..959
@@ -1150,13 +1150,13 @@ HtmlRoot {
                 0: L_ANGLE@965..966 "<" [] []
                 1: SLASH@966..967 "/" [] []
                 2: HTML_TAG_NAME@967..973
-                  0: HTML_LITERAL@967..973 "option" [] []
+                  0: OPTION_KW@967..973 "option" [] []
                 3: R_ANGLE@973..974 ">" [] []
             1: HTML_ELEMENT@974..1012
               0: HTML_OPENING_ELEMENT@974..1002
                 0: L_ANGLE@974..978 "<" [Newline("\n"), Whitespace("\t\t")] []
                 1: HTML_TAG_NAME@978..985
-                  0: HTML_LITERAL@978..985 "option" [] [Whitespace(" ")]
+                  0: OPTION_KW@978..985 "option" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@985..1001
                   0: VUE_V_BIND_SHORTHAND_DIRECTIVE@985..1001
                     0: VUE_DIRECTIVE_ARGUMENT@985..991
@@ -1176,18 +1176,18 @@ HtmlRoot {
                 0: L_ANGLE@1003..1004 "<" [] []
                 1: SLASH@1004..1005 "/" [] []
                 2: HTML_TAG_NAME@1005..1011
-                  0: HTML_LITERAL@1005..1011 "option" [] []
+                  0: OPTION_KW@1005..1011 "option" [] []
                 3: R_ANGLE@1011..1012 ">" [] []
           2: HTML_CLOSING_ELEMENT@1012..1023
             0: L_ANGLE@1012..1015 "<" [Newline("\n"), Whitespace("\t")] []
             1: SLASH@1015..1016 "/" [] []
             2: HTML_TAG_NAME@1016..1022
-              0: HTML_LITERAL@1016..1022 "select" [] []
+              0: SELECT_KW@1016..1022 "select" [] []
             3: R_ANGLE@1022..1023 ">" [] []
         16: HTML_SELF_CLOSING_ELEMENT@1023..1067
           0: L_ANGLE@1023..1027 "<" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@1027..1033
-            0: HTML_LITERAL@1027..1033 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@1027..1033 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@1033..1065
             0: HTML_ATTRIBUTE@1033..1049
               0: HTML_ATTRIBUTE_NAME@1033..1037
@@ -1209,7 +1209,7 @@ HtmlRoot {
         17: HTML_SELF_CLOSING_ELEMENT@1067..1120
           0: L_ANGLE@1067..1070 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@1070..1076
-            0: HTML_LITERAL@1070..1076 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@1070..1076 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@1076..1118
             0: HTML_ATTRIBUTE@1076..1089
               0: HTML_ATTRIBUTE_NAME@1076..1080
@@ -1238,7 +1238,7 @@ HtmlRoot {
         18: HTML_SELF_CLOSING_ELEMENT@1120..1173
           0: L_ANGLE@1120..1123 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@1123..1129
-            0: HTML_LITERAL@1123..1129 "input" [] [Whitespace(" ")]
+            0: INPUT_KW@1123..1129 "input" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@1129..1171
             0: HTML_ATTRIBUTE@1129..1142
               0: HTML_ATTRIBUTE_NAME@1129..1133
@@ -1268,7 +1268,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@1173..1265
             0: L_ANGLE@1173..1245 "<" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("<!-- Grouping and nes ..."), Newline("\n"), Whitespace("\t")] []
             1: HTML_TAG_NAME@1245..1249
-              0: HTML_LITERAL@1245..1249 "div" [] [Whitespace(" ")]
+              0: DIV_KW@1245..1249 "div" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@1249..1264
               0: HTML_ATTRIBUTE@1249..1264
                 0: HTML_ATTRIBUTE_NAME@1249..1254
@@ -1282,7 +1282,7 @@ HtmlRoot {
             0: HTML_SELF_CLOSING_ELEMENT@1265..1299
               0: L_ANGLE@1265..1269 "<" [Newline("\n"), Whitespace("\t\t")] []
               1: HTML_TAG_NAME@1269..1275
-                0: HTML_LITERAL@1269..1275 "child" [] [Whitespace(" ")]
+                0: HTML_UNKNOWN_TAG@1269..1275 "child" [] [Whitespace(" ")]
               2: HTML_ATTRIBUTE_LIST@1275..1297
                 0: VUE_DIRECTIVE@1275..1297
                   0: IDENT@1275..1282 "v-model" [] []
@@ -1301,13 +1301,13 @@ HtmlRoot {
             0: L_ANGLE@1299..1302 "<" [Newline("\n"), Whitespace("\t")] []
             1: SLASH@1302..1303 "/" [] []
             2: HTML_TAG_NAME@1303..1306
-              0: HTML_LITERAL@1303..1306 "div" [] []
+              0: DIV_KW@1303..1306 "div" [] []
             3: R_ANGLE@1306..1307 ">" [] []
       2: HTML_CLOSING_ELEMENT@1307..1319
         0: L_ANGLE@1307..1309 "<" [Newline("\n")] []
         1: SLASH@1309..1310 "/" [] []
         2: HTML_TAG_NAME@1310..1318
-          0: HTML_LITERAL@1310..1318 "template" [] []
+          0: TEMPLATE_KW@1310..1318 "template" [] []
         3: R_ANGLE@1318..1319 ">" [] []
   4: EOF@1319..1319 "" [] []
 

@@ -24,7 +24,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -76,7 +76,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@54..56 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@56..62 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -128,7 +128,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@111..117 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@111..117 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlAttribute {
@@ -193,7 +193,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..54
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..52
         0: HTML_ATTRIBUTE@7..20
           0: HTML_ATTRIBUTE_NAME@7..11
@@ -228,7 +228,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@54..109
       0: L_ANGLE@54..56 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@56..62
-        0: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@56..62 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@62..107
         0: HTML_ATTRIBUTE@62..75
           0: HTML_ATTRIBUTE_NAME@62..66
@@ -263,7 +263,7 @@ HtmlRoot {
     2: HTML_SELF_CLOSING_ELEMENT@109..170
       0: L_ANGLE@109..111 "<" [Newline("\n")] []
       1: HTML_TAG_NAME@111..117
-        0: HTML_LITERAL@111..117 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@111..117 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@117..168
         0: HTML_ATTRIBUTE@117..133
           0: HTML_ATTRIBUTE_NAME@117..121

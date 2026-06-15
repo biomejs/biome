@@ -23,7 +23,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -44,7 +44,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@20..22 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -78,7 +78,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..20
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..18
         0: SVELTE_BIND_DIRECTIVE@7..18
           0: BIND_KW@7..11 "bind" [] []
@@ -93,7 +93,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@20..56
       0: L_ANGLE@20..22 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@22..43
-        0: HTML_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@43..54
         0: SVELTE_BIND_DIRECTIVE@43..54
           0: BIND_KW@43..47 "bind" [] []

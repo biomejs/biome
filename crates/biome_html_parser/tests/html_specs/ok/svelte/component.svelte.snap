@@ -24,7 +24,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlComponentName {
-                    value_token: HTML_LITERAL@1..6 "Base" [] [Whitespace(" ")],
+                    value_token: HTML_COMPONENT_LITERAL@1..6 "Base" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -46,7 +46,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@18..20 "<" [Newline("\n")] [],
                 slash_token: SLASH@20..21 "/" [] [],
                 name: HtmlComponentName {
-                    value_token: HTML_LITERAL@21..25 "Base" [] [],
+                    value_token: HTML_COMPONENT_LITERAL@21..25 "Base" [] [],
                 },
                 r_angle_token: R_ANGLE@25..26 ">" [] [],
             },
@@ -68,7 +68,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..18
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_COMPONENT_NAME@1..6
-          0: HTML_LITERAL@1..6 "Base" [] [Whitespace(" ")]
+          0: HTML_COMPONENT_LITERAL@1..6 "Base" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@6..17
           0: HTML_ATTRIBUTE@6..17
             0: HTML_ATTRIBUTE_NAME@6..11
@@ -83,7 +83,7 @@ HtmlRoot {
         0: L_ANGLE@18..20 "<" [Newline("\n")] []
         1: SLASH@20..21 "/" [] []
         2: HTML_COMPONENT_NAME@21..25
-          0: HTML_LITERAL@21..25 "Base" [] []
+          0: HTML_COMPONENT_LITERAL@21..25 "Base" [] []
         3: R_ANGLE@25..26 ">" [] []
   4: EOF@26..27 "" [Newline("\n")] []
 

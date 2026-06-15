@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::{HtmlLexer, TextSize};
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlFramework, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{self, *};
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
@@ -122,7 +122,7 @@ fn doctype_upper_key() {
 #[test]
 fn string_literal() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "\"data-attribute\"",
         HTML_STRING_LITERAL: 16,
     }
@@ -131,10 +131,10 @@ fn string_literal() {
 #[test]
 fn self_closing() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div />",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         SLASH: 1
         R_ANGLE: 1
@@ -144,14 +144,14 @@ fn self_closing() {
 #[test]
 fn element() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div></div>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         R_ANGLE: 1,
         L_ANGLE: 1,
         SLASH: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         R_ANGLE: 1,
     }
 }
@@ -197,10 +197,10 @@ fn doctype_with_quirk_and_system() {
 #[test]
 fn element_with_attributes() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div class='joy and happiness'>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         HTML_LITERAL: 5,
         EQ:1,
@@ -212,10 +212,10 @@ fn element_with_attributes() {
 #[test]
 fn element_with_dashed_attributes() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<div aria-hidden>",
         L_ANGLE: 1,
-        HTML_LITERAL: 3,
+        DIV_KW: 3,
         WHITESPACE: 1,
         HTML_LITERAL: 11,
         R_ANGLE: 1,
@@ -225,14 +225,14 @@ fn element_with_dashed_attributes() {
 #[test]
 fn html_element() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "<html></html>",
         L_ANGLE: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         R_ANGLE: 1,
         L_ANGLE: 1,
         SLASH: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         R_ANGLE: 1,
     }
 }
@@ -413,7 +413,7 @@ fn svelte_keywords() {
 #[test]
 fn svelte_line_comment_inside_tag() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment\n",
         COMMENT: 10,
         NEWLINE: 1,
@@ -423,7 +423,7 @@ fn svelte_line_comment_inside_tag() {
 #[test]
 fn svelte_line_comment_without_newline() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment",
         COMMENT: 10,
     }
@@ -432,7 +432,7 @@ fn svelte_line_comment_without_newline() {
 #[test]
 fn svelte_block_comment_single_line() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/* comment */",
         COMMENT: 13,
     }
@@ -441,7 +441,7 @@ fn svelte_block_comment_single_line() {
 #[test]
 fn svelte_block_comment_multiline() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/* line1\nline2 */",
         COMMENT: 17,
     }
@@ -450,7 +450,7 @@ fn svelte_block_comment_multiline() {
 #[test]
 fn plain_slash_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "/",
         SLASH: 1,
     }
@@ -459,7 +459,7 @@ fn plain_slash_inside_tag_not_a_comment() {
 #[test]
 fn plain_double_slash_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "//",
         SLASH: 1,
         SLASH: 1,
@@ -469,7 +469,7 @@ fn plain_double_slash_inside_tag_not_a_comment() {
 #[test]
 fn plain_slash_asterisk_inside_tag_not_a_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTag,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
         "/*",
         SLASH: 1,
         HTML_LITERAL: 1,
@@ -479,7 +479,7 @@ fn plain_slash_asterisk_inside_tag_not_a_comment() {
 #[test]
 fn svelte_slash_remains_slash_in_svelte_context() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "/",
         SLASH: 1,
     }
@@ -488,10 +488,64 @@ fn svelte_slash_remains_slash_in_svelte_context() {
 #[test]
 fn svelte_slash_after_comment() {
     assert_lex! {
-        HtmlLexContext::InsideTagSvelte,
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
         "// comment\n/",
         COMMENT: 10,
         NEWLINE: 1,
         SLASH: 1,
+    }
+}
+
+#[test]
+fn known_html_tag_name_is_case_insensitive() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<DIV>",
+        L_ANGLE: 1,
+        DIV_KW: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn unknown_html_tag_name() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<my-element>",
+        L_ANGLE: 1,
+        HTML_UNKNOWN_TAG: 10,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_svg_tag_name_is_case_sensitive() {
+    // SVG camelCase names are recognized by their exact spelling...
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<feGaussianBlur>",
+        L_ANGLE: 1,
+        FE_GAUSSIAN_BLUR_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    // ...but the all-lowercase spelling is not a known tag.
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<fegaussianblur>",
+        L_ANGLE: 1,
+        HTML_UNKNOWN_TAG: 14,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn pascal_case_tag_is_a_component_in_frameworks() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<Foo>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 3,
+        R_ANGLE: 1,
     }
 }

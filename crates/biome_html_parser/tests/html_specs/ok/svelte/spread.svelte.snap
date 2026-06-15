@@ -24,7 +24,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlSpreadAttribute {
@@ -42,7 +42,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@18..20 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@20..30 "Component" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@20..30 "Component" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlSpreadAttribute {
@@ -60,7 +60,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@41..43 "<" [Newline("\n")] [],
             name: HtmlComponentName {
-                value_token: HTML_LITERAL@43..53 "Component" [] [Whitespace(" ")],
+                value_token: HTML_COMPONENT_LITERAL@43..53 "Component" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlSpreadAttribute {
@@ -91,7 +91,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..18
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..16
         0: HTML_SPREAD_ATTRIBUTE@7..16
           0: L_CURLY@7..8 "{" [] []
@@ -104,7 +104,7 @@ HtmlRoot {
     1: HTML_SELF_CLOSING_ELEMENT@18..41
       0: L_ANGLE@18..20 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@20..30
-        0: HTML_LITERAL@20..30 "Component" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@20..30 "Component" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@30..39
         0: HTML_SPREAD_ATTRIBUTE@30..39
           0: L_CURLY@30..31 "{" [] []
@@ -117,7 +117,7 @@ HtmlRoot {
     2: HTML_SELF_CLOSING_ELEMENT@41..74
       0: L_ANGLE@41..43 "<" [Newline("\n")] []
       1: HTML_COMPONENT_NAME@43..53
-        0: HTML_LITERAL@43..53 "Component" [] [Whitespace(" ")]
+        0: HTML_COMPONENT_LITERAL@43..53 "Component" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@53..72
         0: HTML_SPREAD_ATTRIBUTE@53..72
           0: L_CURLY@53..54 "{" [] []

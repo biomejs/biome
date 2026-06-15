@@ -24,7 +24,7 @@ HtmlRoot {
                 HtmlOpeningElement {
                     l_angle_token: L_ANGLE@0..1 "<" [] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@1..5 "span" [] [],
+                        value_token: SPAN_KW@1..5 "span" [] [],
                     },
                     attributes: HtmlAttributeList [],
                     r_angle_token: R_ANGLE@5..6 ">" [] [],
@@ -36,7 +36,7 @@ HtmlRoot {
                     HtmlSelfClosingElement {
                         l_angle_token: L_ANGLE@9..10 "<" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@10..12 "br" [] [],
+                            value_token: BR_KW@10..12 "br" [] [],
                         },
                         attributes: HtmlAttributeList [],
                         slash_token: missing (optional),
@@ -51,7 +51,7 @@ HtmlRoot {
                         L_ANGLE@36..37 "<" [] [],
                         SLASH@37..38 "/" [] [],
                         HtmlTagName {
-                            value_token: HTML_LITERAL@38..40 "br" [] [],
+                            value_token: BR_KW@38..40 "br" [] [],
                         },
                         R_ANGLE@40..41 ">" [] [],
                     ],
@@ -65,7 +65,7 @@ HtmlRoot {
                     l_angle_token: L_ANGLE@44..45 "<" [] [],
                     slash_token: SLASH@45..46 "/" [] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@46..50 "span" [] [],
+                        value_token: SPAN_KW@46..50 "span" [] [],
                     },
                     r_angle_token: R_ANGLE@50..51 ">" [] [],
                 },
@@ -88,7 +88,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..6
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "span" [] []
+          0: SPAN_KW@1..5 "span" [] []
         2: HTML_ATTRIBUTE_LIST@5..5
         3: R_ANGLE@5..6 ">" [] []
       1: HTML_ELEMENT_LIST@6..36
@@ -97,7 +97,7 @@ HtmlRoot {
         1: HTML_SELF_CLOSING_ELEMENT@9..13
           0: L_ANGLE@9..10 "<" [] []
           1: HTML_TAG_NAME@10..12
-            0: HTML_LITERAL@10..12 "br" [] []
+            0: BR_KW@10..12 "br" [] []
           2: HTML_ATTRIBUTE_LIST@12..12
           3: (empty)
           4: R_ANGLE@12..13 ">" [] []
@@ -107,7 +107,7 @@ HtmlRoot {
         0: L_ANGLE@36..37 "<" [] []
         1: SLASH@37..38 "/" [] []
         2: HTML_TAG_NAME@38..40
-          0: HTML_LITERAL@38..40 "br" [] []
+          0: BR_KW@38..40 "br" [] []
         3: R_ANGLE@40..41 ">" [] []
       3: HTML_ELEMENT_LIST@41..44
         0: HTML_CONTENT@41..44
@@ -116,7 +116,7 @@ HtmlRoot {
         0: L_ANGLE@44..45 "<" [] []
         1: SLASH@45..46 "/" [] []
         2: HTML_TAG_NAME@46..50
-          0: HTML_LITERAL@46..50 "span" [] []
+          0: SPAN_KW@46..50 "span" [] []
         3: R_ANGLE@50..51 ">" [] []
   4: EOF@51..52 "" [Newline("\n")] []
 

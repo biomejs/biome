@@ -22,7 +22,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 HtmlBogusAttribute {
@@ -70,7 +70,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..22
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..22
         0: HTML_BOGUS_ATTRIBUTE@7..22
           0: BIND_KW@7..11 "bind" [] []

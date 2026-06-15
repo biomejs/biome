@@ -23,7 +23,7 @@ HtmlRoot {
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlTagName {
-                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+                value_token: INPUT_KW@1..7 "input" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 SvelteBindDirective {
@@ -94,7 +94,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@79..81 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@81..87 "video" [] [Whitespace(" ")],
+                    value_token: VIDEO_KW@81..87 "video" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteBindDirective {
@@ -165,7 +165,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@155..156 "<" [] [],
                 slash_token: SLASH@156..157 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@157..162 "video" [] [],
+                    value_token: VIDEO_KW@157..162 "video" [] [],
                 },
                 r_angle_token: R_ANGLE@162..163 ">" [] [],
             },
@@ -186,7 +186,7 @@ HtmlRoot {
     0: HTML_SELF_CLOSING_ELEMENT@0..79
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_TAG_NAME@1..7
-        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+        0: INPUT_KW@1..7 "input" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@7..77
         0: SVELTE_BIND_DIRECTIVE@7..25
           0: BIND_KW@7..11 "bind" [] []
@@ -236,7 +236,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@79..155
         0: L_ANGLE@79..81 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@81..87
-          0: HTML_LITERAL@81..87 "video" [] [Whitespace(" ")]
+          0: VIDEO_KW@81..87 "video" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@87..154
           0: SVELTE_BIND_DIRECTIVE@87..111
             0: BIND_KW@87..91 "bind" [] []
@@ -286,7 +286,7 @@ HtmlRoot {
         0: L_ANGLE@155..156 "<" [] []
         1: SLASH@156..157 "/" [] []
         2: HTML_TAG_NAME@157..162
-          0: HTML_LITERAL@157..162 "video" [] []
+          0: VIDEO_KW@157..162 "video" [] []
         3: R_ANGLE@162..163 ">" [] []
   4: EOF@163..164 "" [Newline("\n")] []
 

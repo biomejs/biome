@@ -946,6 +946,7 @@ dependencies = [
  "biome_aria",
  "biome_html_factory",
  "biome_html_parser",
+ "biome_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",

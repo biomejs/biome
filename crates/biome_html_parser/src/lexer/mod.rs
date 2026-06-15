@@ -1,11 +1,11 @@
 mod tests;
 
 use crate::token_source::{
-    HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt,
-    TextExpressionKind,
+    HtmlEmbeddedLanguage, HtmlFramework, HtmlLexContext, HtmlReLexContext,
+    RestrictedExpressionStopAt, TextExpressionKind,
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
+use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
@@ -36,6 +36,32 @@ enum IdentifierContext {
     VueDirectiveArgument,
     Astro,
     VueVForValue,
+}
+
+/// Controls how [`HtmlLexer::consume_tag_name`] classifies a tag-name token.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TagNameMode {
+    /// Plain HTML: tag-name keyword lookup, no component names.
+    Html,
+    /// Framework file (Vue/Svelte/Astro): tag-name keyword lookup, but a PascalCase
+    /// name (or a name followed by `.`) is a component.
+    HtmlOrComponent,
+    /// Component/member-name context: always emit `HTML_COMPONENT_LITERAL`.
+    ComponentOnly,
+}
+
+impl TagNameMode {
+    fn for_inside_tag(framework: HtmlFramework) -> Self {
+        if framework.supports_components() {
+            Self::HtmlOrComponent
+        } else {
+            Self::Html
+        }
+    }
+
+    const fn allows_components(self) -> bool {
+        matches!(self, Self::HtmlOrComponent | Self::ComponentOnly)
+    }
 }
 
 impl IdentifierContext {
@@ -71,7 +97,7 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::InsideTag] context.
-    fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag(&mut self, current: u8, mode: TagNameMode) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -97,10 +123,12 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+            // A tag name immediately follows the `<` of an opening tag or the `/`
+            // of a closing tag (`</div>`), so classify it in both cases.
+            _ if matches!(self.current_kind, T![<] | T![/]) && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
-                self.consume_tag_name(current)
+                self.consume_tag_name(current, mode)
             }
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::None)
@@ -123,7 +151,7 @@ impl<'src> HtmlLexer<'src> {
     /// Consume a token in the [HtmlLexContext::InsideTagAstro] context.
     /// This context is used for Astro files with Astro-specific directives (client:, set:, etc.)
     /// It handles colons as separate tokens to enable directive parsing.
-    fn consume_token_inside_tag_astro(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag_astro(&mut self, current: u8, mode: TagNameMode) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -152,9 +180,11 @@ impl<'src> HtmlLexer<'src> {
                 }
             }
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+            // A tag name immediately follows the `<` of an opening tag or the `/`
+            // of a closing tag (`</div>`), so classify it in both cases.
+            _ if matches!(self.current_kind, T![<] | T![/]) && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
-                self.consume_tag_name(current)
+                self.consume_tag_name(current, mode)
             }
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::Astro)
@@ -177,7 +207,12 @@ impl<'src> HtmlLexer<'src> {
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
     /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
-    fn consume_token_inside_tag_directives(&mut self, current: u8, svelte: bool) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag_directives(
+        &mut self,
+        current: u8,
+        svelte: bool,
+        mode: TagNameMode,
+    ) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -221,10 +256,12 @@ impl<'src> HtmlLexer<'src> {
             HAS => self.consume_byte(T![#]),
 
             QOT => self.consume_string_literal(current),
-            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+            // A tag name immediately follows the `<` of an opening tag or the `/`
+            // of a closing tag (`</div>`), so classify it in both cases.
+            _ if matches!(self.current_kind, T![<] | T![/]) && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
-                self.consume_tag_name(current)
+                self.consume_tag_name(current, mode)
             }
             _ if (self.current_kind == T![@] && is_attribute_name_byte_vue(current)) => {
                 self.consume_identifier(current, IdentifierContext::VueDirectiveArgument)
@@ -274,7 +311,11 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagSvelte] context.
     /// This context is used for Svelte files with JS-style comment support.
-    fn consume_token_inside_tag_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
+    fn consume_token_inside_tag_svelte(
+        &mut self,
+        current: u8,
+        mode: TagNameMode,
+    ) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
@@ -286,7 +327,7 @@ impl<'src> HtmlLexer<'src> {
             PRD => return self.consume_byte(T![.]),
             _ => {}
         }
-        self.consume_token_inside_tag(current)
+        self.consume_token_inside_tag(current, mode)
     }
 
     fn consume_token_vue_v_for_value(&mut self, current: u8) -> HtmlSyntaxKind {
@@ -986,25 +1027,89 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consumes an HTML tag name token starting with the given byte.
-    /// Tag names can contain alphanumeric characters, hyphens, colons and dots.
-    /// Consumes an HTML tag name token starting with the given byte.
-    /// Tag names can contain alphanumeric characters, hyphens, and colons.
-    /// In component contexts (Vue/Svelte/Astro), dots are excluded and lexed separately.
-    fn consume_tag_name(&mut self, first: u8) -> HtmlSyntaxKind {
+    /// Consumes a tag-name token starting with the given byte, classifying it
+    /// into a specific token kind according to `mode`:
+    ///
+    /// - A known HTML/SVG tag name becomes its keyword kind (e.g. `div` -> `DIV_KW`,
+    ///   `circle` -> `CIRCLE_KW`). HTML names are matched case-insensitively; SVG
+    ///   camelCase names (e.g. `feGaussianBlur`) match by their exact spelling.
+    /// - In a framework file a PascalCase name, or any name immediately followed by
+    ///   `.` (a member expression base), becomes `HTML_COMPONENT_LITERAL`.
+    /// - In the component-name context (`ComponentOnly`) every name becomes
+    ///   `HTML_COMPONENT_LITERAL`.
+    /// - Anything else (custom elements, namespaced names, unknown tags) becomes
+    ///   `HTML_UNKNOWN_TAG`.
+    ///
+    /// Tag names can contain alphanumeric characters, hyphens, and colons. In
+    /// component contexts dots are excluded and lexed separately for member access.
+    fn consume_tag_name(&mut self, first: u8, mode: TagNameMode) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
+        // The longest known tag name is `feComponentTransfer` (19 bytes); anything
+        // longer cannot be a known tag, so we only need to buffer up to this many
+        // bytes to perform the lookup.
+        const BUFFER_SIZE: usize = 24;
+        let mut buffer = [0u8; BUFFER_SIZE];
+        let mut len = 0;
+        let mut overflow = false;
+
+        // `consume_tag_name` is only entered when the current byte is a tag-name
+        // byte, which is always ASCII, so buffering bytes verbatim is sound.
+        buffer[0] = first;
+        len += 1;
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            if is_tag_name_byte(byte) {
+            // In component-capable contexts a `.` separates member-expression parts
+            // (`Foo.Bar`), so it ends the name. Otherwise (plain HTML / SVG) `.` is
+            // a non-spec-compliant tag-name character we keep, matching Prettier.
+            let is_name_byte =
+                is_tag_name_byte(byte) || (!mode.allows_components() && byte == b'.');
+            if is_name_byte {
+                if len < BUFFER_SIZE {
+                    buffer[len] = byte;
+                    len += 1;
+                } else {
+                    overflow = true;
+                }
                 self.advance(1)
             } else {
                 break;
             }
         }
 
-        HTML_LITERAL
+        // Component / member-expression detection.
+        if mode == TagNameMode::ComponentOnly {
+            return HTML_COMPONENT_LITERAL;
+        }
+        if mode.allows_components()
+            && (first.is_ascii_uppercase() || self.current_byte() == Some(b'.'))
+        {
+            return HTML_COMPONENT_LITERAL;
+        }
+
+        // A name too long to be a known tag is always unknown.
+        if overflow {
+            return HTML_UNKNOWN_TAG;
+        }
+
+        // Tag names are keywords. Try the exact spelling first (so case-sensitive
+        // SVG names like `feGaussianBlur` match), then a lower-cased fallback (so
+        // HTML names like `<DIV>` match case-insensitively). Keywords that aren't
+        // tag names (e.g. the Svelte `bind` keyword) are rejected and lex as
+        // `HTML_UNKNOWN_TAG`.
+        let lookup = |name: &str| {
+            HtmlSyntaxKind::from_keyword(name).filter(|kind| HTML_TAG_NAMES.contains(*kind))
+        };
+        let name = &buffer[..len];
+        let kind = std::str::from_utf8(name).ok().and_then(lookup).or_else(|| {
+            let mut lower = [0u8; BUFFER_SIZE];
+            lower[..len].copy_from_slice(name);
+            lower[..len].make_ascii_lowercase();
+            std::str::from_utf8(&lower[..len]).ok().and_then(lookup)
+        });
+
+        kind.unwrap_or(HTML_UNKNOWN_TAG)
     }
 
     /// Consumes a quoted string literal token.
@@ -1426,14 +1531,27 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
-                    HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
-                    HtmlLexContext::InsideTagWithDirectives { svelte } => {
-                        self.consume_token_inside_tag_directives(current, svelte)
+                    HtmlLexContext::InsideTag { framework } => {
+                        let mode = TagNameMode::for_inside_tag(framework);
+                        match framework {
+                            HtmlFramework::Plain => self.consume_token_inside_tag(current, mode),
+                            HtmlFramework::Vue => {
+                                self.consume_token_inside_tag_directives(current, false, mode)
+                            }
+                            HtmlFramework::Svelte => {
+                                self.consume_token_inside_tag_svelte(current, mode)
+                            }
+                            HtmlFramework::Astro => {
+                                self.consume_token_inside_tag_astro(current, mode)
+                            }
+                        }
                     }
-                    HtmlLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
-                    HtmlLexContext::InsideTagSvelte => {
-                        self.consume_token_inside_tag_svelte(current)
-                    }
+                    HtmlLexContext::InsideTagWithDirectives { svelte } => self
+                        .consume_token_inside_tag_directives(
+                            current,
+                            svelte,
+                            TagNameMode::ComponentOnly,
+                        ),
                     HtmlLexContext::VueDirectiveArgument => {
                         self.consume_token_vue_directive_argument()
                     }
@@ -1544,9 +1662,17 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
             Some(current) => match context {
                 HtmlReLexContext::Svelte => self.consume_svelte(current),
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
-                HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
-                HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
-                HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                // Re-lexing is only used mid-tag (e.g. to split `:`/`.`), never at the
+                // tag-name position, so the classification mode is irrelevant here.
+                HtmlReLexContext::InsideTag => {
+                    self.consume_token_inside_tag(current, TagNameMode::Html)
+                }
+                HtmlReLexContext::InsideTagAstro => {
+                    self.consume_token_inside_tag_astro(current, TagNameMode::Html)
+                }
+                HtmlReLexContext::InsideTagSvelte => {
+                    self.consume_token_inside_tag_svelte(current, TagNameMode::Html)
+                }
                 HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,

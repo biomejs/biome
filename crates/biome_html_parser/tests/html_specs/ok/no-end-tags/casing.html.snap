@@ -26,7 +26,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "head" [] [],
+                    value_token: HEAD_KW@1..5 "head" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@5..6 ">" [] [],
@@ -35,7 +35,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@9..14 "META" [] [Whitespace(" ")],
+                        value_token: META_KW@9..14 "META" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -56,7 +56,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@33..38 "MeTa" [] [Whitespace(" ")],
+                        value_token: META_KW@33..38 "MeTa" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -79,7 +79,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@54..56 "<" [Newline("\n")] [],
                 slash_token: SLASH@56..57 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@57..61 "head" [] [],
+                    value_token: HEAD_KW@57..61 "head" [] [],
                 },
                 r_angle_token: R_ANGLE@61..62 ">" [] [],
             },
@@ -101,14 +101,14 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..6
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "head" [] []
+          0: HEAD_KW@1..5 "head" [] []
         2: HTML_ATTRIBUTE_LIST@5..5
         3: R_ANGLE@5..6 ">" [] []
       1: HTML_ELEMENT_LIST@6..54
         0: HTML_SELF_CLOSING_ELEMENT@6..30
           0: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@9..14
-            0: HTML_LITERAL@9..14 "META" [] [Whitespace(" ")]
+            0: META_KW@9..14 "META" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@14..29
             0: HTML_ATTRIBUTE@14..29
               0: HTML_ATTRIBUTE_NAME@14..21
@@ -122,7 +122,7 @@ HtmlRoot {
         1: HTML_SELF_CLOSING_ELEMENT@30..54
           0: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@33..38
-            0: HTML_LITERAL@33..38 "MeTa" [] [Whitespace(" ")]
+            0: META_KW@33..38 "MeTa" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@38..53
             0: HTML_ATTRIBUTE@38..53
               0: HTML_ATTRIBUTE_NAME@38..45
@@ -137,7 +137,7 @@ HtmlRoot {
         0: L_ANGLE@54..56 "<" [Newline("\n")] []
         1: SLASH@56..57 "/" [] []
         2: HTML_TAG_NAME@57..61
-          0: HTML_LITERAL@57..61 "head" [] []
+          0: HEAD_KW@57..61 "head" [] []
         3: R_ANGLE@61..62 ">" [] []
   4: EOF@62..63 "" [Newline("\n")] []
 
