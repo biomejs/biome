@@ -36,12 +36,12 @@
 
 **Biome** to wydajny łańcuch narzędzi dla projektów webowych, którego celem jest dostarczenie narzędzi deweloperskich do utrzymania zdrowia tych projektów.
 
-**Biome to [szybki formater](./benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który osiąga **[97% kompatybilności z _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome to [szybki formater](https://github.com/biomejs/benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który osiąga **[97% kompatybilności z _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome to [wydajny linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który zawiera **[ponad 500 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
+**Biome to [wydajny linter](https://github.com/biomejs/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który zawiera **[ponad 500 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
 **Wyprowadza szczegółowe i skontekstualizowane diagnostyki**, które pomagają Ci ulepszyć kod i zostać lepszym programistą!
 
-**Biome** jest zaprojektowany od początku do używania [interaktywnie w edytorze](https://biomejs.dev/guides/editors/first-party-extensions/).
+**Biome** jest zaprojektowany od początku do używania [interaktywnie w edytorze](https://biomejs.dev/pl/editors/first-party-extensions/).
 Może formatować i sprawdzać błędny kod podczas jego pisania.
 
 ### Instalacja
