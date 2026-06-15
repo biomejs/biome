@@ -83,7 +83,7 @@ impl Rule for NoReactObjectTypeAsDefaultProp {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let kind = state.kind.as_str();
+        let kind = &state.kind;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -136,7 +136,6 @@ fn parameters_from_expression(expression: &AnyJsExpression) -> Option<JsParamete
     None
 }
 
-#[derive(Clone, Copy)]
 enum ForbiddenDefaultKind {
     ObjectLiteral,
     ArrayLiteral,
@@ -149,9 +148,9 @@ enum ForbiddenDefaultKind {
     Symbol,
 }
 
-impl ForbiddenDefaultKind {
-    fn as_str(self) -> &'static str {
-        match self {
+impl biome_console::fmt::Display for ForbiddenDefaultKind {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        let repr = match self {
             Self::ObjectLiteral => "an object literal",
             Self::ArrayLiteral => "an array literal",
             Self::ArrowFunction => "an arrow function",
@@ -161,7 +160,8 @@ impl ForbiddenDefaultKind {
             Self::JsxElement => "a JSX element",
             Self::RegexLiteral => "a regular expression literal",
             Self::Symbol => "a Symbol",
-        }
+        };
+        write!(f, "{repr}")
     }
 }
 
