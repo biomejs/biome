@@ -38,37 +38,31 @@ pub trait SortableAttribute {
             (None, None) => Ordering::Equal,
         }
     }
-}
 
-/// Returns the rank of an attribute according to the `sort_first` list.
-///
-/// Attributes whose name appears in `sort_first` get the index of that name,
-/// so they sort before any attribute not present in the list (which all get
-/// `sort_first.len()`). When `sort_first` is empty, every attribute gets rank
-/// `0`, leaving the ordering entirely to the base comparator.
-pub fn sort_first_rank<T: SortableAttribute>(attr: &T, sort_first: &[Box<str>]) -> usize {
-    attr.name()
-        .and_then(|name| {
-            sort_first
-                .iter()
-                .position(|first| first.as_ref() == name.text_trimmed())
-        })
-        .unwrap_or(sort_first.len())
-}
+    /// The position of this attribute's name in `sort_first`,
+    /// or `sort_first.len()` when the name isn't listed.
+    fn sort_first_index(&self, sort_first: &[Box<str>]) -> usize {
+        self.name()
+            .and_then(|name| {
+                sort_first
+                    .iter()
+                    .position(|listed| listed.as_ref() == name.text_trimmed())
+            })
+            .unwrap_or(sort_first.len())
+    }
 
-/// Compares two attributes, giving precedence to the `sort_first` list.
-///
-/// Attributes listed in `sort_first` are ordered first, in the order they
-/// appear in the list. Ties (including the common case where neither attribute
-/// is listed) fall back to `base`.
-pub fn compare_with_sort_first<T, F>(a: &T, b: &T, sort_first: &[Box<str>], base: F) -> Ordering
-where
-    T: SortableAttribute,
-    F: Fn(&T, &T) -> Ordering,
-{
-    sort_first_rank(a, sort_first)
-        .cmp(&sort_first_rank(b, sort_first))
-        .then_with(|| base(a, b))
+    /// Compares two attributes, ordering the ones listed in `sort_first` first
+    /// (in list order), and using `base` for everything else.
+    fn cmp_sort_first(
+        &self,
+        other: &Self,
+        sort_first: &[Box<str>],
+        base: impl Fn(&Self, &Self) -> Ordering,
+    ) -> Ordering {
+        self.sort_first_index(sort_first)
+            .cmp(&other.sort_first_index(sort_first))
+            .then_with(|| base(self, other))
+    }
 }
 
 #[derive(Clone)]

@@ -5601,12 +5601,10 @@ Default: `natural`.
 export interface UseSortedAttributesOptions {
 	/**
 	* A list of attribute names that should be sorted before all other
-attributes, in the order they appear in this list.
+attributes, in the order they appear in this list. The remaining
+attributes are sorted after the listed ones.
 
-Attributes not listed here are sorted normally, after the listed ones.
-This is useful to keep attributes such as `key` first.
-
-Defaults to `[]`. 
+This is useful to keep attributes such as `key` first. 
 	 */
 	sortFirst?: string[];
 	sortOrder?: SortOrder;

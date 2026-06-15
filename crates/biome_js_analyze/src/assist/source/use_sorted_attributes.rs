@@ -1,8 +1,6 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
-use biome_analyze::shared::sort_attributes::{
-    AttributeGroup, SortableAttribute, compare_with_sort_first,
-};
+use biome_analyze::shared::sort_attributes::{AttributeGroup, SortableAttribute};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -74,13 +72,9 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `sortFirst`
-    /// A list of attribute names that should be sorted before all other
-    /// attributes, in the order they appear in this list. The remaining
-    /// attributes are sorted normally, after the listed ones.
-    ///
-    /// This is useful to keep attributes such as `key` first.
-    ///
-    /// > Default: `[]`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. This is useful to keep attributes such as `key` first.
     ///
     /// ```json,options
     /// {
@@ -123,7 +117,7 @@ impl Rule for UseSortedAttributes {
         };
 
         let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
-            compare_with_sort_first(a, b, sort_first, base)
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         // Convert to boolean-based comparator for is_sorted_by
@@ -191,7 +185,7 @@ impl Rule for UseSortedAttributes {
         };
 
         let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
-            compare_with_sort_first(a, b, sort_first, base)
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in

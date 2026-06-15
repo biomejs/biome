@@ -16057,7 +16057,7 @@
 			"type": "object",
 			"properties": {
 				"sortFirst": {
-					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list.\n\nAttributes not listed here are sorted normally, after the listed ones.\nThis is useful to keep attributes such as `key` first.\n\nDefaults to `[]`.",
+					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list. The remaining\nattributes are sorted after the listed ones.\n\nThis is useful to keep attributes such as `key` first.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

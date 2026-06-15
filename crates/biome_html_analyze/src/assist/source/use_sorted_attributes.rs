@@ -1,7 +1,5 @@
 use crate::HtmlRuleAction;
-use biome_analyze::shared::sort_attributes::{
-    AttributeGroup, SortableAttribute, compare_with_sort_first,
-};
+use biome_analyze::shared::sort_attributes::{AttributeGroup, SortableAttribute};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
@@ -120,14 +118,9 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `sortFirst`
-    /// A list of attribute names that should be sorted before all other
-    /// attributes, in the order they appear in this list. The remaining
-    /// attributes are sorted normally, after the listed ones, and listed
-    /// attributes take precedence over the category-based ordering.
-    ///
-    /// Default: `[]`
-    ///
-    /// #### Examples for `"sortFirst": ["type"]`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. Listed attributes take precedence over the category-based ordering.
     ///
     /// ```json,options
     /// {
@@ -167,7 +160,7 @@ impl Rule for UseSortedAttributes {
 
         let base = get_comparator(sort_by);
         let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
-            compare_with_sort_first(a, b, sort_first, base)
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         // Convert to boolean-based comparator for is_sorted_by
@@ -233,7 +226,7 @@ impl Rule for UseSortedAttributes {
 
         let base = get_comparator(sort_by);
         let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
-            compare_with_sort_first(a, b, sort_first, base)
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         for (SortableHtmlAttribute(attr), SortableHtmlAttribute(sorted_attr)) in

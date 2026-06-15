@@ -6,7 +6,7 @@
 				"useSortedAttributes": {
 					"level": "on",
 					"options": {
-						"sortFirst": ["key"]
+						"sortFirst": ["key", "ref"]
 					}
 				}
 			}
