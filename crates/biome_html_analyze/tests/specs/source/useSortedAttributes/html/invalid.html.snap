@@ -4,8 +4,7 @@ expression: invalid.html
 ---
 # Input
 ```html
-<!-- Invalid cases - should trigger the rule. -->
-<!-- `type` and `id` are pinned first, in that order, then the rest are sorted. -->
+<!-- should generate diagnostics -->
 <input id="name" name="name" type="text" />
 <input checked name="" id="" type="checkbox">
 
@@ -13,47 +12,45 @@ expression: invalid.html
 
 # Diagnostics
 ```
+invalid.html:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input id="name" name="name" type="text" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <input checked name="" id="" type="checkbox">
+    4 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <input·id="name"·name="name"·type="text"·/>
+      2 │ + <input·type="text"·id="name"·name="name"·/>
+    3 3 │   <input checked name="" id="" type="checkbox">
+    4 4 │   
+  
+
+```
+
+```
 invalid.html:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The attributes are not sorted.
   
-    1 │ <!-- Invalid cases - should trigger the rule. -->
-    2 │ <!-- `type` and `id` are pinned first, in that order, then the rest are sorted. -->
-  > 3 │ <input id="name" name="name" type="text" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <input checked name="" id="" type="checkbox">
-    5 │ 
-  
-  i Safe fix: Sort the HTML attributes.
-  
-    1 1 │   <!-- Invalid cases - should trigger the rule. -->
-    2 2 │   <!-- `type` and `id` are pinned first, in that order, then the rest are sorted. -->
-    3   │ - <input·id="name"·name="name"·type="text"·/>
-      3 │ + <input·type="text"·id="name"·name="name"·/>
-    4 4 │   <input checked name="" id="" type="checkbox">
-    5 5 │   
-  
-
-```
-
-```
-invalid.html:4:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The attributes are not sorted.
-  
-    2 │ <!-- `type` and `id` are pinned first, in that order, then the rest are sorted. -->
-    3 │ <input id="name" name="name" type="text" />
-  > 4 │ <input checked name="" id="" type="checkbox">
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input id="name" name="name" type="text" />
+  > 3 │ <input checked name="" id="" type="checkbox">
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    4 │ 
   
   i Safe fix: Sort the HTML attributes.
   
-    2 2 │   <!-- `type` and `id` are pinned first, in that order, then the rest are sorted. -->
-    3 3 │   <input id="name" name="name" type="text" />
-    4   │ - <input·checked·name=""·id=""·type="checkbox">
-      4 │ + <input·type="checkbox"·id=""·checked·name=""·>
-    5 5 │   
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <input id="name" name="name" type="text" />
+    3   │ - <input·checked·name=""·id=""·type="checkbox">
+      3 │ + <input·type="checkbox"·id=""·checked·name=""·>
+    4 4 │   
   
 
 ```

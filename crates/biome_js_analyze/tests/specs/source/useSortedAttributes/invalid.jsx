@@ -1,6 +1,4 @@
-// Invalid cases - should trigger the rule.
-// `key` and `ref` are pinned first, in that order, then the rest are sorted.
-
+/* should generate diagnostics */
 <Hello firstName="John" key={id} lastName="Smith" />;
 
 <Hello a="1" ref={r} key={id} b="2" />;
