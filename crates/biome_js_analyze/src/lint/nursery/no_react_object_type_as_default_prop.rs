@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
     AnyJsLiteralExpression, AnyJsObjectBindingPatternMember, AnyJsParameter, JsParameters,
@@ -60,6 +61,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("no-object-type-as-default-prop").same()],
         recommended: true,
         domains: &[RuleDomain::React],
+        severity: Severity::Error,
     }
 }
 
