@@ -14,11 +14,11 @@ use crate::react::components::{AnyPotentialReactComponentDeclaration, ReactCompo
 declare_lint_rule! {
     /// Disallow array, object, and function values as default props.
     ///
-    /// In React, a default prop value like `{ items = [] }` is created again every
-    /// time the component renders. Arrays, objects, and functions are a new value
+    /// In React, a default prop value like `{ items = [] }` is created every
+    /// time the component renders. Arrays, objects, and functions are new values
     /// each time, even when they look the same. React then thinks the prop changed,
     /// so it may re-render the component more than needed, or re-run hooks like
-    /// `useEffect` that depend on the prop.
+    /// `useEffect` that depends on the prop.
     ///
     /// Numbers, strings, and other primitives are fine, because they stay the same
     /// between renders.
