@@ -1,34 +1,34 @@
 [package]
-name = "biome_js_type_info"
-version = "0.0.1"
-authors.workspace = true
-edition.workspace = true
-description = "Data structures for tracking type information"
-homepage.workspace = true
+name                 = "biome_js_type_info"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Data structures for tracking type information"
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
-publish = true
+publish              = true
 
 [dependencies]
-biome_formatter = { workspace = true }
-biome_js_semantic = { workspace = true }
-biome_js_syntax = { workspace = true }
+biome_formatter           = { workspace = true }
+biome_js_semantic         = { workspace = true }
+biome_js_syntax           = { workspace = true }
 biome_js_type_info_macros = { workspace = true }
-biome_languages = { workspace = true, features = ["lang_js"] }
-biome_resolver = { workspace = true }
-biome_rowan = { workspace = true }
-camino = { workspace = true }
-hashbrown = { workspace = true }
-rustc-hash = { workspace = true }
+biome_languages           = { workspace = true, features = ["lang_js"] }
+biome_resolver            = { workspace = true }
+biome_rowan               = { workspace = true }
+camino                    = { workspace = true }
+hashbrown                 = { workspace = true }
+rustc-hash                = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { path = "../biome_js_formatter" }
-biome_js_parser = { path = "../biome_js_parser" }
-biome_languages = { path = "../biome_languages", features = ["lang_js"] }
-biome_test_utils = { path = "../biome_test_utils" }
-insta = { workspace = true }
+biome_js_parser    = { path = "../biome_js_parser" }
+biome_languages    = { path = "../biome_languages", features = ["lang_js"] }
+biome_test_utils   = { path = "../biome_test_utils" }
+insta              = { workspace = true }
 
 [lints]
 workspace = true

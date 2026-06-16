@@ -107,9 +107,6 @@ pub struct WorkspaceServer {
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
-    /// Stores the document sources used across the workspace
-    file_sources: boxcar::Vec<DocumentFileSource>,
-
     search_provider: Arc<dyn SearchQuery>,
 
     /// Node cache for faster parsing of modified documents.
@@ -233,7 +230,6 @@ impl WorkspaceServer {
             #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
             documents: Default::default(),
-            file_sources: boxcar::Vec::default(),
             search_provider,
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
@@ -417,24 +413,6 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns a previously inserted file source by index.
-    ///
-    /// File sources can be inserted using `insert_source()`.
-    fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        self.file_sources.get(index).copied()
-    }
-
-    /// Inserts a file source so that it can be retrieved by index later.
-    ///
-    /// Returns the index at which the file source can be retrieved using
-    /// `get_source()`.
-    fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
-        self.file_sources
-            .iter()
-            .position(|(_, file_source)| *file_source == document_file_source)
-            .unwrap_or_else(|| self.file_sources.push(document_file_source))
-    }
-
     #[instrument(
         level = "debug",
         skip(self, params),
@@ -558,7 +536,7 @@ impl WorkspaceServer {
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
-        let mut file_source_index = self.insert_source(source);
+        let mut file_source_index = self.db_add_source(source);
 
         let size = content.len();
         let limit = settings.as_ref().get_max_file_size(&path);
@@ -584,7 +562,7 @@ impl WorkspaceServer {
             } = parse_result;
 
             if let Some(language) = language {
-                file_source_index = self.insert_source(language);
+                file_source_index = self.db_add_source(language);
                 source = language;
 
                 if settings.as_ref().is_linter_enabled()
@@ -906,7 +884,7 @@ impl WorkspaceServer {
         });
 
         for (parse, content, file_source) in result.nodes {
-            let index = self.insert_source(file_source);
+            let index = self.db_add_source(file_source);
             embedded_nodes.push((parse, content, index));
         }
 
@@ -922,7 +900,7 @@ impl WorkspaceServer {
         node_cache: &mut NodeCache,
     ) -> Result<ParseResult, WorkspaceError> {
         let file_source = self
-            .get_source(file_source_index)
+            .db_get_source(file_source_index)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let capabilities = self.features.get_deprecated_capabilities(file_source);
 
@@ -1415,6 +1393,24 @@ impl WorkspaceServer {
     // - `db_add` for operations that add new inputs
     // - `db_update` for operations that update existing inputs
     // - `db_remove` for operations that remove existing inputs
+    // - `db_get` for operations that read data
+
+    /// Returns a previously inserted file source by index.
+    ///
+    /// File sources can be inserted using `insert_source()`.
+    fn db_get_source(&self, index: usize) -> Option<DocumentFileSource> {
+        let db = self.get_db();
+        db.source_from_index(index)
+    }
+
+    /// Inserts a file source so that it can be retrieved by index later.
+    ///
+    /// Returns the index at which the file source can be retrieved using
+    /// `get_source()`.
+    fn db_add_source(&self, document_file_source: DocumentFileSource) -> usize {
+        let mut db = self.get_db();
+        db.insert_source(document_file_source)
+    }
 
     /// Stores a [ModuleInfo] in the database
     fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {

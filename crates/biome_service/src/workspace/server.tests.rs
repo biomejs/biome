@@ -7,9 +7,11 @@ use biome_configuration::{
     analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
 };
+use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
-use biome_rowan::{AstNode, TextSize};
+use biome_js_syntax::JsLanguage;
+use biome_rowan::TextSize;
 use camino::Utf8Path;
 use std::str::FromStr;
 
@@ -208,7 +210,6 @@ fn store_embedded_nodes_with_current_ranges() {
     let scripts: Vec<_> = snippets
         .iter()
         .filter(|node| {
-            dbg!(db.source_from_index(node.document_source_index(&db)));
             db.source_from_index(node.document_source_index(&db))
                 .is_some_and(|source| source.is_javascript_like())
         })
@@ -229,8 +230,8 @@ fn store_embedded_nodes_with_current_ranges() {
     let script_node = script.parsed(&db);
     assert!(
         script_node
-            .tree::<AnyJsRoot>()
-            .syntax()
+            .unwrap_as_embedded_syntax_node()
+            .into_node::<JsLanguage>()
             .text_range_with_trivia()
             .start()
             > TextSize::from(0)
@@ -239,8 +240,8 @@ fn store_embedded_nodes_with_current_ranges() {
     let style_node = style.parsed(&db);
     assert!(
         style_node
-            .tree::<AnyCssRoot>()
-            .syntax()
+            .unwrap_as_embedded_syntax_node()
+            .into_node::<CssLanguage>()
             .text_range_with_trivia()
             .start()
             > TextSize::from(0)

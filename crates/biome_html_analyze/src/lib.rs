@@ -16,7 +16,7 @@ use crate::suppression_action::HtmlSuppressionAction;
 /// Services available to HTML lint rules.
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
-    pub module_db: Option<Box<dyn ModuleDb>>,
+    pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -42,6 +42,7 @@ use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;

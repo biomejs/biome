@@ -3,6 +3,7 @@ use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_semantic::db::css_semantic_model;
 use biome_css_syntax::CssClassSelector;
 use biome_fs::BiomePath;
+use biome_languages::LanguageDb;
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, find_css_class_definition};
 use biome_rowan::AstNode;
 use std::ops::Add;
@@ -25,6 +26,17 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 }
                 result.store(BiomePath::new(css_path), range);
             }
+        }
+
+        let Some(file_source) = params.workspace_db.source_from_index(
+            params
+                .parsed_source
+                .document_file_index(&params.workspace_db),
+        ) else {
+            return Some(result);
+        };
+        if !file_source.is_css_like() {
+            return Some(result);
         }
 
         let diagnostic_offset = params.parsed_source.diagnostic_offset(&params.workspace_db);

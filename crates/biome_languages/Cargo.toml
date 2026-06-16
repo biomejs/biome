@@ -1,40 +1,40 @@
 [package]
-name = "biome_languages"
-version = "0.1.0"
-authors.workspace = true
-edition.workspace = true
-homepage.workspace = true
+name                 = "biome_languages"
+version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
 
 [dependencies]
 biome_console.workspace = true
-biome_rowan = { workspace = true }
-biome_string_case = { workspace = true }
-camino = { workspace = true }
-directories = { workspace = true }
-schemars = { workspace = true, optional = true }
-serde = { workspace = true }
-tracing = { workspace = true }
-salsa = { workspace = true }
-biome_db = { workspace = true }
+biome_db                = { workspace = true }
+biome_rowan             = { workspace = true }
+biome_string_case       = { workspace = true }
+camino                  = { workspace = true }
+directories             = { workspace = true }
+salsa                   = { workspace = true }
+schemars                = { workspace = true, optional = true }
+serde                   = { workspace = true }
+tracing                 = { workspace = true }
 
 [features]
 # This is used only for testing purpose. It enables ALL languages
-all = ["lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json", "lang_md", "lang_yaml"]
-lang_css = []
+all          = ["lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json", "lang_md", "lang_yaml"]
+lang_css     = []
 lang_graphql = []
-lang_grit = []
-lang_html = []
-lang_js = []
-lang_json = []
-lang_md = []
-lang_yaml = []
+lang_grit    = []
+lang_html    = []
+lang_js      = []
+lang_json    = []
+lang_md      = []
+lang_yaml    = []
 # Insert here only languages that are **exposed to the user** or enabled via feature flags
-schema = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
-scss = ["lang_css"]
+schema       = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
+scss         = ["lang_css"]
 
 [lints]
 workspace = true

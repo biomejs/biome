@@ -1,30 +1,29 @@
 [package]
-name = "biome_css_semantic"
-version = "0.0.0"
-authors.workspace = true
-edition.workspace = true
-description = "Biome's semantic model for CSS"
-homepage.workspace = true
+name                 = "biome_css_semantic"
+version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's semantic model for CSS"
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
-publish = true
+publish              = true
 
 [dependencies]
-biome_css_syntax = { workspace = true }
-biome_formatter = { workspace = true }
-biome_languages = { workspace = true, features = ["lang_css"] }
-biome_rowan = { workspace = true }
+biome_css_syntax  = { workspace = true }
+biome_db          = { workspace = true }
+biome_formatter   = { workspace = true }
+biome_languages   = { workspace = true, features = ["lang_css"] }
+biome_rowan       = { workspace = true }
 biome_string_case = { workspace = true }
-rustc-hash = { workspace = true }
-biome_db = { workspace = true }
-salsa = { workspace = true }
+rustc-hash        = { workspace = true }
+salsa             = { workspace = true }
 
 [dev-dependencies]
 biome_css_parser = { path = "../biome_css_parser" }
-camino = { workspace = true }
-
+camino           = { workspace = true }
 
 [lints]
 workspace = true
