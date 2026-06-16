@@ -29,7 +29,7 @@ pub fn get_binding_by_name<'db>(
     for bindings in db.bindings() {
         for binding in bindings {
             if binding.text(db).text() == *binding_name.name(db) {
-                return Some(*binding);
+                return Some(binding);
             }
         }
     }
@@ -44,7 +44,7 @@ pub fn get_binding_with_source<'db>(
     for bindings in db.bindings() {
         for binding in bindings {
             if binding.text(db).text() == *binding_name.name(db) && binding.source(db).is_some() {
-                return Some(*binding);
+                return Some(binding);
             }
         }
     }

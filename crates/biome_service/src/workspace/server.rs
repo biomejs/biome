@@ -1535,23 +1535,6 @@ impl WorkspaceServer {
         }
     }
 
-    fn get_parsed_snippets_and_parse_error_count(
-        &self,
-        path: &Utf8Path,
-    ) -> Result<(ParsedSource, Vec<ParsedSnippet>, usize), WorkspaceError> {
-        self.assert_parse(path)?;
-        let db = self.db_state.handle.to_db();
-        db.get_file(path)
-            .map(|parsed_source| {
-                (
-                    parsed_source,
-                    parsed_source.snippets(&db).clone(),
-                    parsed_source.error_count(&db),
-                )
-            })
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
-    }
-
     fn get_parsed_snippets_and_parse_source(
         &self,
         path: &Utf8Path,

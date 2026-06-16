@@ -6,12 +6,6 @@
 //!
 //! Module info is stored as Salsa inputs in a `ProjectDatabase`. Query and
 //! traversal functions in this module accept `&dyn ModuleDb` to look up data.
-
-// Salsa's `#[salsa::input]` macro generates `use<...>` capture syntax that
-// clippy flags as redundant. We cannot suppress it on the struct itself because
-// the lint fires inside the macro expansion.
-#![allow(impl_trait_redundant_captures)]
-
 pub(crate) mod fs_proxy;
 
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};

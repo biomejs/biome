@@ -10,6 +10,7 @@ use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
+use parking_lot::RwLock;
 use salsa::Storage;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -26,8 +27,8 @@ pub struct WorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
-    bindings: Arc<Vec<Vec<EmbeddedBinding>>>,
-    references: Arc<Vec<Vec<EmbeddedValueReference>>>,
+    bindings: Arc<RwLock<Vec<Vec<EmbeddedBinding>>>>,
+    references: Arc<RwLock<Vec<Vec<EmbeddedValueReference>>>>,
 
     // LAST
     storage: Storage<Self>,
@@ -35,11 +36,11 @@ pub struct WorkspaceDb {
 
 impl WorkspaceDb {
     pub fn insert_bindings(&mut self, bindings: Vec<Vec<EmbeddedBinding>>) {
-        self.bindings = Arc::new(bindings);
+        *self.bindings.write() = bindings;
     }
 
     pub fn insert_references(&mut self, references: Vec<Vec<EmbeddedValueReference>>) {
-        self.references = Arc::new(references);
+        *self.references.write() = references;
     }
 
     /// Inserts a file source so that it can be retrieved by index later.
@@ -141,8 +142,8 @@ pub struct WorkspaceDbHandle {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
-    bindings: Arc<Vec<Vec<EmbeddedBinding>>>,
-    references: Arc<Vec<Vec<EmbeddedValueReference>>>,
+    bindings: Arc<RwLock<Vec<Vec<EmbeddedBinding>>>>,
+    references: Arc<RwLock<Vec<Vec<EmbeddedValueReference>>>>,
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
@@ -177,12 +178,12 @@ impl JsSemanticDb for WorkspaceDb {}
 
 #[salsa::db]
 impl EmbeddedDb for WorkspaceDb {
-    fn bindings(&self) -> &[Vec<EmbeddedBinding>] {
-        self.bindings.as_slice()
+    fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
+        self.bindings.read().clone()
     }
 
-    fn references(&self) -> &[Vec<EmbeddedValueReference>] {
-        self.references.as_slice()
+    fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
+        self.references.read().clone()
     }
 }
 

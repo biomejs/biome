@@ -7,15 +7,15 @@ pub mod references;
 
 #[salsa::db]
 pub trait EmbeddedDb: biome_db::Db {
-    fn bindings(&self) -> &[Vec<EmbeddedBinding>];
+    fn bindings(&self) -> Vec<Vec<EmbeddedBinding>>;
 
-    fn references(&self) -> &[Vec<EmbeddedValueReference>];
+    fn references(&self) -> Vec<Vec<EmbeddedValueReference>>;
 
     fn binding_by_name(&self, name: &str) -> Option<EmbeddedBinding> {
         for bindings in self.bindings() {
             for binding in bindings {
                 if binding.text(self).text() == name {
-                    return Some(binding.clone());
+                    return Some(binding);
                 }
             }
         }

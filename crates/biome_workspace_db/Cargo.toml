@@ -23,6 +23,7 @@ biome_rowan.workspace          = true
 boxcar.workspace               = true
 camino.workspace               = true
 papaya.workspace               = true
+parking_lot.workspace          = true
 salsa                          = { workspace = true }
 serde.workspace                = true
 
