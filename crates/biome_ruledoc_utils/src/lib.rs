@@ -5,11 +5,11 @@ use biome_js_analyze::JsAnalyzerServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_module_graph::{
-    ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module, resolve_html_module,
-    resolve_js_module,
+    ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8PathBuf;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
@@ -22,7 +22,7 @@ pub use codeblock::*;
 /// The builder can be reused to create cheap instances of analyzer services
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
-    module_db: ProjectDatabase,
+    module_db: WorkspaceDb,
     project_layout: Arc<ProjectLayout>,
 }
 
@@ -37,7 +37,7 @@ impl AnalyzerServicesBuilder {
     /// * `files` - A map of file paths to their contents.
     pub fn from_files<S: BuildHasher>(files: HashMap<String, String, S>) -> Self {
         if files.is_empty() {
-            let db = ProjectDatabase::default();
+            let db = WorkspaceDb::default();
             return Self {
                 module_db: db,
                 project_layout: Default::default(),
@@ -93,7 +93,7 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let db = ProjectDatabase::default();
+        let db = WorkspaceDb::default();
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
@@ -150,12 +150,11 @@ impl AnalyzerServicesBuilder {
         }
     }
 
-    pub fn build_for_js_file_source(&self, file_source: JsFileSource) -> JsAnalyzerServices {
+    pub fn build_for_js_file_source(&self, file_source: JsFileSource) -> JsAnalyzerServices<'_> {
         JsAnalyzerServices::from((
-            self.module_db.clone(),
+            self.module_db.rc_module_db(),
             self.project_layout.clone(),
             file_source,
-            None,
         ))
     }
 }

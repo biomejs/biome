@@ -12,7 +12,7 @@ pub trait Db: salsa::Database {
 
     fn parsed_snippets_for_path(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
         self.parsed_source_for_path(path)
-            .map(|source| source.snippets(self).iter().copied().collect::<Vec<_>>())
+            .map(|source| source.snippets(self).clone())
             .unwrap_or_default()
     }
 }
@@ -48,26 +48,14 @@ impl ParsedSource {
         self.parsed(db).clone().into_serde_diagnostics()
     }
 
-    pub fn parse_diagnostics<'db>(&self, db: &'db dyn Db) -> Vec<ParseDiagnostic> {
-        self.parsed(db)
-            .diagnostics()
-            .into_iter()
-            .cloned()
-            .collect::<Vec<_>>()
+    pub fn parse_diagnostics(&self, db: &dyn Db) -> Vec<ParseDiagnostic> {
+        self.parsed(db).diagnostics().to_vec()
     }
 
-    pub fn snippets_parse_diagnostics<'db>(&self, db: &'db dyn Db) -> Vec<ParseDiagnostic> {
+    pub fn snippets_parse_diagnostics(&self, db: &dyn Db) -> Vec<ParseDiagnostic> {
         let mut diagnostics = vec![];
         for snippet in self.snippets(db) {
-            diagnostics.extend(
-                snippet
-                    .clone()
-                    .parsed(db)
-                    .diagnostics()
-                    .into_iter()
-                    .cloned()
-                    .collect::<Vec<ParseDiagnostic>>(),
-            )
+            diagnostics.extend((*snippet).parsed(db).diagnostics().to_vec())
         }
         diagnostics
     }
@@ -147,7 +135,7 @@ impl AnyParsedSource {
         }
     }
 
-    pub fn syntax<L: Language>(&self, db: &dyn Db) -> SyntaxNode<L>
+    pub fn syntax<L>(&self, db: &dyn Db) -> SyntaxNode<L>
     where
         L: Language + 'static,
     {
@@ -221,12 +209,12 @@ impl From<ParsedSnippet> for AnyParsedSource {
 
 impl From<&ParsedSource> for AnyParsedSource {
     fn from(source: &ParsedSource) -> Self {
-        AnyParsedSource::ParsedSource(source.clone())
+        AnyParsedSource::ParsedSource(*source)
     }
 }
 
 impl From<&ParsedSnippet> for AnyParsedSource {
     fn from(snippet: &ParsedSnippet) -> Self {
-        AnyParsedSource::ParsedSnippet(snippet.clone())
+        AnyParsedSource::ParsedSnippet(*snippet)
     }
 }

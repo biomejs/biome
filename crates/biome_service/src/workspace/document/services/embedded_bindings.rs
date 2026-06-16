@@ -855,6 +855,63 @@ mod tests {
     use biome_js_syntax::AnyJsRoot;
     use biome_languages::HtmlFileSource;
     use biome_languages::JsFileSource;
+    use biome_rowan::{RawSyntaxKind, TextRange, TokenText};
+    use biome_workspace_db::embedded::EmbeddedDb;
+    use biome_workspace_db::embedded::bindings::{
+        EmbeddedBinding, InternedBinding, get_binding_by_name,
+    };
+    use camino::Utf8Path;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        bindings: Vec<Vec<EmbeddedBinding>>,
+        storage: salsa::Storage<Self>,
+    }
+
+    impl TestDb {
+        fn insert_collected_bindings(
+            &mut self,
+            groups: &[Vec<(TextRange, TokenText, Option<TokenText>)>],
+        ) {
+            let bindings = groups
+                .iter()
+                .map(|bindings| {
+                    bindings
+                        .iter()
+                        .map(|(range, text, source)| {
+                            EmbeddedBinding::new(self, *range, text.clone(), source.clone())
+                        })
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>();
+
+            self.bindings = bindings;
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl EmbeddedDb for TestDb {
+        fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
+            self.bindings.clone()
+        }
+
+        fn references(
+            &self,
+        ) -> Vec<Vec<biome_workspace_db::embedded::references::EmbeddedValueReference>> {
+            Vec::new()
+        }
+    }
 
     fn parse_js(source: &str) -> AnyJsRoot {
         let result = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());
@@ -886,12 +943,14 @@ mod tests {
     }
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {
-        for bindings in service.bindings.iter() {
-            if bindings.iter().any(|(_, text, _)| text.text() == binding) {
-                return true;
-            }
-        }
-        false
+        let mut db = TestDb::default();
+        db.insert_collected_bindings(&service.bindings);
+
+        get_binding_by_name(
+            &db,
+            InternedBinding::new(&db, TokenText::new_raw(RawSyntaxKind(0), binding)),
+        )
+        .is_some()
     }
 
     fn visit_html_root(service: &mut EmbeddedBuilder, source: &str) {

@@ -5,7 +5,7 @@ use biome_html_formatter::context::HtmlFormatContext;
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::{DocumentFileSource, HtmlFileSource};
-use biome_parser::AnyParsedSource;
+use biome_parser::AnyParse;
 use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct HtmlTestFormatLanguage {
@@ -23,7 +23,7 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
     type Context = HtmlFormatContext;
     type FormatLanguage = HtmlFormatLanguage;
 
-    fn parse(&self, text: &str) -> AnyParsedSource {
+    fn parse(&self, text: &str) -> AnyParse {
         parse_html(text, HtmlParserOptions::from(&self.source_type)).into()
     }
 

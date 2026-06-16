@@ -27,6 +27,7 @@ smallvec            = { workspace = true }
 biome_console     = { path = "../biome_console" }
 biome_diagnostics = { path = "../biome_diagnostics" }
 biome_js_parser   = { path = "../biome_js_parser" }
+camino            = { workspace = true }
 insta             = { workspace = true }
 
 [lints]

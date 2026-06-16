@@ -736,7 +736,6 @@ impl WorkspaceServer {
 
         let db = self.db_state.handle.to_db();
         db.get_file(path)
-            .map(|parsed_source| parsed_source.into())
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
     }
 
@@ -1277,7 +1276,7 @@ impl WorkspaceServer {
                     Ok((deps, diagnostics))
                 } else if let Some(html_root) = root.clone().into_language_root::<HtmlRoot>(&db) {
                     let embedded_content: Vec<HtmlEmbeddedContent> = self
-                        .get_parse(&path)
+                        .get_parse(path)
                         .map(|doc| {
                             doc.snippets(&db)
                                 .iter()
@@ -1292,8 +1291,9 @@ impl WorkspaceServer {
                                             css_source,
                                             snippet.content_offset(&db),
                                         ))
-                                    } else if let Some(_) =
-                                        source.and_then(|source| source.to_js_file_source())
+                                    } else if source
+                                        .and_then(|source| source.to_js_file_source())
+                                        .is_some()
                                     {
                                         Some(HtmlEmbeddedContent::Js(snippet.parsed(&db).tree()))
                                     } else {
@@ -1436,7 +1436,7 @@ impl WorkspaceServer {
             .map(|(parse, content, index)| {
                 ParsedSnippet::new(
                     &db,
-                    parse.into(),
+                    parse,
                     content.element_range,
                     content.content_range,
                     content.content_offset,
@@ -1492,15 +1492,15 @@ impl WorkspaceServer {
         db.parsed_source_for_path(path)
             .map(|parsed_source| {
                 let mut diagnostics = Vec::new();
-                diagnostics.extend(parsed_source.parse_diagnostics(&db).to_vec());
-                diagnostics.extend(parsed_source.snippets_parse_diagnostics(&db).to_vec());
+                diagnostics.extend(parsed_source.parse_diagnostics(&db).clone());
+                diagnostics.extend(parsed_source.snippets_parse_diagnostics(&db).clone());
 
                 diagnostics
             })
             .unwrap_or_default()
     }
 
-    ///
+    /// Makes sure that the file was parsed and it is within the configured file limit
     fn assert_parse(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         let syntax = self
             .documents

@@ -26,7 +26,7 @@ pub trait EmbeddedDb: biome_db::Db {
         self.references()
             .iter()
             .map(|refs| {
-                refs.into_iter()
+                refs.iter()
                     .map(|this_ref| (this_ref.range(self), this_ref.text(self)))
                     .collect::<Vec<_>>()
             })

@@ -1000,6 +1000,7 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
+ "biome_workspace_db",
  "bitvec",
  "camino",
  "codspeed-criterion-compat",
@@ -1127,6 +1128,7 @@ dependencies = [
  "biome_jsdoc_comment",
  "biome_languages",
  "biome_rowan",
+ "camino",
  "insta",
  "rust-lapper",
  "rustc-hash 2.1.2",
@@ -1534,6 +1536,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
@@ -1722,6 +1725,7 @@ dependencies = [
  "biome_project_layout",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
 ]
 

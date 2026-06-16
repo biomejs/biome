@@ -1,7 +1,7 @@
 use biome_formatter::{IndentWidth, LineEnding, LineWidth};
 use biome_formatter_test::TestFormatLanguage;
 use biome_languages::{DocumentFileSource, yaml::YamlFileSource};
-use biome_parser::AnyParsedSource;
+use biome_parser::AnyParse;
 use biome_service::settings::Settings;
 use biome_yaml_formatter::{YamlFormatContext, YamlFormatLanguage, YamlFormatOptions};
 use biome_yaml_parser::parse_yaml;
@@ -18,7 +18,7 @@ impl TestFormatLanguage for YamlTestFormatLanguage {
     type Context = YamlFormatContext;
     type FormatLanguage = YamlFormatLanguage;
 
-    fn parse(&self, text: &str) -> AnyParsedSource {
+    fn parse(&self, text: &str) -> AnyParse {
         parse_yaml(text).into()
     }
 

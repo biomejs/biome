@@ -25,7 +25,7 @@ pub struct FileTooLarge {
 #[derive(Clone, Default)]
 pub struct WorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
-    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     bindings: Arc<RwLock<Vec<Vec<EmbeddedBinding>>>>,
     references: Arc<RwLock<Vec<Vec<EmbeddedValueReference>>>>,
@@ -93,6 +93,10 @@ impl WorkspaceDb {
     /// Returns an [Rc] to itself, cast to [ModuleDb]. This is used to send the service
     /// to the analyzer.
     pub fn rc_module_db(&self) -> Rc<dyn ModuleDb> {
+        Rc::new(self.clone())
+    }
+
+    pub fn rc_embedded_db(&self) -> Rc<dyn EmbeddedDb> {
         Rc::new(self.clone())
     }
 

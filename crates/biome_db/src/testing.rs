@@ -75,7 +75,7 @@ pub fn assert_function_query_was_run<Db, Q, QDb, I, R>(
 ) where
     Db: salsa::Database,
     Q: Fn(QDb, I) -> R,
-    I: salsa::plumbing::AsId + std::fmt::Debug + Copy,
+    I: salsa::plumbing::AsId + std::fmt::Debug,
 {
     let id = input.as_id();
     let (query_name, will_execute_event) = find_will_execute_event(db, query, input, events);
@@ -98,7 +98,7 @@ pub fn assert_function_query_was_not_run<Db, Q, QDb, I, R>(
 ) where
     Db: salsa::Database,
     Q: Fn(QDb, I) -> R,
-    I: salsa::plumbing::AsId + std::fmt::Debug + Copy,
+    I: salsa::plumbing::AsId + std::fmt::Debug,
 {
     let id = input.as_id();
     let (query_name, will_execute_event) = find_will_execute_event(db, query, input, events);

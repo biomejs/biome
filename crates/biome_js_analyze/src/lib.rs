@@ -3,8 +3,7 @@
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
@@ -20,8 +19,9 @@ use biome_languages::JsFileSource;
 use biome_module_graph::{ModuleDb, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_workspace_db::embedded::EmbeddedDb;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -52,10 +52,9 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 #[derive(Default)]
 pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
+    embedded_db: Option<Rc<dyn EmbeddedDb>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
-    embedded_value_references: Vec<Vec<(TextRange, TokenText)>>,
     semantic_model: Option<&'a SemanticModel>,
 }
 
@@ -69,10 +68,9 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
     ) -> Self {
         Self {
             module_db: Some(module_db),
+            embedded_db: None,
             project_layout,
             source_type,
-            embedded_bindings: Default::default(),
-            embedded_value_references: Default::default(),
             semantic_model: None,
         }
     }
@@ -82,10 +80,9 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
+            embedded_db: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
-            embedded_bindings: Default::default(),
-            embedded_value_references: Default::default(),
             semantic_model: None,
         }
     }
@@ -107,17 +104,14 @@ impl<'a> JsAnalyzerServices<'a> {
         self
     }
 
-    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
-        self.project_layout = project_layout;
+    pub fn with_embedded_db(mut self, embedded_db: Rc<dyn EmbeddedDb>) -> Self {
+        self.embedded_db = Some(embedded_db);
         self
     }
 
-    pub fn set_embedded_bindings(&mut self, bindings: Vec<Vec<(TextRange, TokenText)>>) {
-        self.embedded_bindings = bindings;
-    }
-
-    pub fn set_embedded_value_references(&mut self, refs: Vec<Vec<(TextRange, TokenText)>>) {
-        self.embedded_value_references = refs;
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = project_layout;
+        self
     }
 }
 
@@ -172,10 +166,9 @@ where
 
     let JsAnalyzerServices {
         module_db,
+        embedded_db,
         project_layout,
         source_type,
-        embedded_bindings,
-        embedded_value_references,
         semantic_model,
     } = services;
 
@@ -239,8 +232,7 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    services.insert_service(EmbeddedBindings(embedded_bindings));
-    services.insert_service(EmbeddedValueReferences(embedded_value_references));
+    services.insert_service(EmbeddedService::new(embedded_db));
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).

@@ -1,7 +1,7 @@
 use crate::{
     JsRuleAction,
     lint::style::use_import_type::add_module_items,
-    services::{embedded_value_references::EmbeddedValueReferences, semantic::Semantic},
+    services::{embedded::EmbeddedService, semantic::Semantic},
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -163,8 +163,8 @@ impl Rule for UseExportType {
                 }
                 let model = ctx.model();
                 let references = ctx
-                    .get_service::<EmbeddedValueReferences>()
-                    .expect("embedded value references service");
+                    .get_service::<EmbeddedService>()
+                    .expect("embedded service");
                 match export_named_fix(
                     model,
                     &clause.specifiers(),
@@ -585,7 +585,7 @@ fn export_named_fix(
     model: &SemanticModel,
     specifiers: &JsExportNamedSpecifierList,
     has_type_token: bool,
-    references: &EmbeddedValueReferences,
+    references: &EmbeddedService,
 ) -> Option<ExportNamedFix> {
     if specifiers.is_empty() {
         return None;
@@ -613,15 +613,20 @@ fn export_named_fix(
             };
             if specifier.type_token().is_none() {
                 if let Ok(local_name) = specifier.local_name()
-                    && let local_name = local_name.value_token().ok()?.text_trimmed()
-                    && model
+                    && let Some(token) = local_name.value_token().ok()
+                {
+                    let local_name = token.text_trimmed();
+                    if model
                         .global_scope()
                         .bindings()
                         .filter(|binding| binding.syntax().text_trimmed() == local_name)
                         .all(|binding| binding.tree().is_type_only())
-                    && !references.is_used_as_value(local_name)
-                {
-                    specifiers_requiring_type_marker.push(specifier);
+                        && !references.is_used_as_value(token.token_text_trimmed())
+                    {
+                        specifiers_requiring_type_marker.push(specifier);
+                    } else {
+                        imports_only_types = false;
+                    }
                 } else {
                     imports_only_types = false;
                 }

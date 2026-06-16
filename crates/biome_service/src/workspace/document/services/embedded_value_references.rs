@@ -181,6 +181,59 @@ mod tests {
     use super::*;
     use biome_js_parser::JsParserOptions;
     use biome_languages::JsFileSource;
+    use biome_rowan::{RawSyntaxKind, TextRange};
+    use biome_workspace_db::embedded::EmbeddedDb;
+    use biome_workspace_db::embedded::bindings::EmbeddedBinding;
+    use biome_workspace_db::embedded::references::{
+        EmbeddedValueReference, InternedReference, is_value_reference_used,
+    };
+    use camino::Utf8Path;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        references: Vec<Vec<EmbeddedValueReference>>,
+        storage: salsa::Storage<Self>,
+    }
+
+    impl TestDb {
+        fn insert_collected_references(&mut self, groups: &[Vec<(TextRange, TokenText)>]) {
+            let references = groups
+                .iter()
+                .map(|references| {
+                    references
+                        .iter()
+                        .map(|(range, text)| {
+                            EmbeddedValueReference::new(self, *range, text.clone())
+                        })
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>();
+
+            self.references = references;
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl EmbeddedDb for TestDb {
+        fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
+            Vec::new()
+        }
+
+        fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
+            self.references.clone()
+        }
+    }
 
     fn parse_js(source: &str) -> AnyJsRoot {
         let result = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());
@@ -188,15 +241,13 @@ mod tests {
     }
 
     fn contains_reference(service: &EmbeddedValueReferences, reference: &str) -> bool {
-        for refs in service.references.iter() {
-            if refs.iter().any(|(_, token)| {
-                let text = token.text();
-                text == reference
-            }) {
-                return true;
-            }
-        }
-        false
+        let mut db = TestDb::default();
+        db.insert_collected_references(&service.references);
+
+        is_value_reference_used(
+            &db,
+            InternedReference::new(&db, TokenText::new_raw(RawSyntaxKind(0), reference)),
+        )
     }
 
     #[test]
@@ -249,9 +300,6 @@ mod tests {
         let source = r#"<Component /><AvatarPrimitive.Fallback />"#;
         // Enable Vue parsing so component names are parsed correctly
         let parsed = parse_html(source, HtmlParserOptions::default().with_vue());
-
-        println!("Diagnostics: {:?}", parsed.diagnostics());
-        println!("Has errors: {}", !parsed.diagnostics().is_empty());
 
         let mut service = EmbeddedValueReferences::default();
         let mut builder = service.builder();

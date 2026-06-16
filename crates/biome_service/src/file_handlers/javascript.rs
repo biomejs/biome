@@ -80,8 +80,6 @@ use biome_rowan::{
     WalkEvent,
 };
 use biome_workspace_db::WorkspaceDb;
-use biome_workspace_db::embedded::EmbeddedDb;
-use biome_workspace_db::embedded::bindings::bindings_without_source;
 use camino::Utf8Path;
 use either::Either;
 use serde::{Deserialize, Serialize};
@@ -979,20 +977,13 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let semantic_model = js_semantic_model(&params.workspace_db, &params.parsed_source);
-    let mut services = JsAnalyzerServices::from((
+    let services = JsAnalyzerServices::from((
         params.workspace_db.rc_module_db(),
         params.project_layout,
         files_source,
     ))
+    .with_embedded_db(params.workspace_db.rc_embedded_db())
     .with_semantic_model(semantic_model);
-
-    services.set_embedded_bindings(
-        bindings_without_source(&params.workspace_db)
-            .iter()
-            .cloned()
-            .collect::<Vec<_>>(),
-    );
-    services.set_embedded_value_references(params.workspace_db.service_references());
 
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -1061,8 +1052,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     let source_type = workspace_db
         .source_from_index(parsed_source.document_file_index(&workspace_db))
-        .map(|file_source| file_source.to_js_file_source())
-        .unwrap_or(JsFileSource::try_from(path.as_path()).ok());
+        .map_or(JsFileSource::try_from(path.as_path()).ok(), |file_source| {
+            file_source.to_js_file_source()
+        });
     let Some(source_type) = source_type else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
@@ -1073,6 +1065,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services =
         JsAnalyzerServices::from((workspace_db.rc_module_db(), project_layout, source_type))
+            .with_embedded_db(workspace_db.rc_embedded_db())
             .with_semantic_model(semantic_model);
 
     debug!("Javascript runs the analyzer");
@@ -1164,8 +1157,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 .parsed_source
                 .document_file_index(&params.workspace_db),
         )
-        .map(|file_source| file_source.to_js_file_source())
-        .unwrap_or(JsFileSource::try_from(params.biome_path.as_path()).ok());
+        .map_or(
+            JsFileSource::try_from(params.biome_path.as_path()).ok(),
+            |file_source| file_source.to_js_file_source(),
+        );
     let Some(file_source) = source_type else {
         error!("Could not determine the file source of the file");
         return Ok(FixFileResult::default());
@@ -1180,18 +1175,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let mut services = JsAnalyzerServices::from((
+            let services = JsAnalyzerServices::from((
                 params.workspace_db.rc_module_db(),
                 params.project_layout.clone(),
                 file_source,
-            ));
-            services.set_embedded_bindings(
-                bindings_without_source(&params.workspace_db)
-                    .iter()
-                    .cloned()
-                    .collect(),
-            );
-            services.set_embedded_value_references(params.workspace_db.service_references());
+            ))
+            .with_embedded_db(params.workspace_db.rc_embedded_db());
 
             let mut pending_actions = Vec::new();
 
@@ -1245,20 +1234,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     };
 
     loop {
-        let mut services = JsAnalyzerServices::from((
+        let services = JsAnalyzerServices::from((
             params.workspace_db.rc_module_db(),
             params.project_layout.clone(),
             file_source,
-        ));
-
-        services.set_embedded_bindings(
-            bindings_without_source(&params.workspace_db)
-                .iter()
-                .cloned()
-                .collect(),
-        );
-
-        services.set_embedded_value_references(params.workspace_db.service_references());
+        ))
+        .with_embedded_db(params.workspace_db.rc_embedded_db());
 
         let mut pending_actions = Vec::new();
 
@@ -1301,20 +1282,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     {
-        let mut services = JsAnalyzerServices::from((
+        let services = JsAnalyzerServices::from((
             params.workspace_db.rc_module_db(),
             params.project_layout.clone(),
             file_source,
-        ));
-
-        services.set_embedded_bindings(
-            bindings_without_source(&params.workspace_db)
-                .iter()
-                .cloned()
-                .collect(),
-        );
-
-        services.set_embedded_value_references(params.workspace_db.service_references());
+        ))
+        .with_embedded_db(params.workspace_db.rc_embedded_db());
 
         let (_, _) = analyze(
             &tree,
@@ -1541,8 +1514,9 @@ pub(crate) fn pull_diagnostics_and_actions(
     let diagnostic_offset = parsed_source.diagnostic_offset(&workspace_db);
     let source_type = workspace_db
         .source_from_index(parsed_source.document_file_index(&workspace_db))
-        .map(|file_source| file_source.to_js_file_source())
-        .unwrap_or(JsFileSource::try_from(path.as_path()).ok());
+        .map_or(JsFileSource::try_from(path.as_path()).ok(), |file_source| {
+            file_source.to_js_file_source()
+        });
     let Some(source_type) = source_type else {
         error!("Could not determine the file source of the file");
         return PullDiagnosticsAndActionsResult {
@@ -1552,6 +1526,7 @@ pub(crate) fn pull_diagnostics_and_actions(
     let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let services =
         JsAnalyzerServices::from((workspace_db.rc_module_db(), project_layout, source_type))
+            .with_embedded_db(workspace_db.rc_embedded_db())
             .with_semantic_model(semantic_model);
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);

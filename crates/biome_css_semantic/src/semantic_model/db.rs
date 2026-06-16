@@ -7,8 +7,8 @@ use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 pub trait CssSemanticDb: biome_db::Db {}
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_source<'db>(
-    db: &'db dyn CssSemanticDb,
+pub(crate) fn css_model_from_parsed_source(
+    db: &dyn CssSemanticDb,
     file: ParsedSource,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
@@ -16,8 +16,8 @@ pub(crate) fn css_model_from_parsed_source<'db>(
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn css_model_from_parsed_snippet<'db>(
-    db: &'db dyn CssSemanticDb,
+pub(crate) fn css_model_from_parsed_snippet(
+    db: &dyn CssSemanticDb,
     file: ParsedSnippet,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();

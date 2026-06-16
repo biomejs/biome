@@ -24,9 +24,9 @@ use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileS
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath,
-    SymbolFromModuleInfo, find_js_exported_symbol, is_class_referenced_by_importers,
-    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
+    ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
+    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
@@ -37,6 +37,7 @@ use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
+use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use walkdir::WalkDir;
@@ -46,8 +47,8 @@ fn build_js_db(
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
     infer_types: bool,
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
         let (module_info, _, _) = resolve_js_module(
@@ -77,8 +78,8 @@ fn build_html_db(
         biome_html_syntax::HtmlRoot,
         Vec<HtmlEmbeddedContent>,
     )],
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, embedded_content) in html_data {
         let (module_info, _, _) = resolve_html_module(
@@ -100,7 +101,7 @@ fn build_html_db(
 }
 
 fn add_js_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
@@ -127,7 +128,7 @@ fn add_js_modules(
 }
 
 fn add_css_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
@@ -146,7 +147,7 @@ fn add_css_modules(
 }
 
 fn add_html_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     html_data: &[(
@@ -548,8 +549,8 @@ fn test_export_default_imported_binding() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     // Test that the default export's type is correctly resolved as a function returning number
     let default_export_ty = resolver
@@ -807,8 +808,8 @@ export const promise = makePromiseCb();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let promise_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -837,8 +838,8 @@ fn test_resolve_generic_mapped_value() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let mapped_id = resolver
         .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
@@ -896,8 +897,8 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -939,8 +940,8 @@ fn test_resolve_import_as_namespace() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -980,8 +981,8 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
@@ -1013,8 +1014,8 @@ fn test_resolve_return_value_of_function() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let foo_id = resolver
         .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
@@ -1068,8 +1069,8 @@ fn test_resolve_type_of_property_with_getter() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let foo_id = resolver
         .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
@@ -1101,8 +1102,8 @@ fn test_writable_annotated_binding_does_not_become_singleton_union() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let sink_id = resolver
         .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
@@ -1192,8 +1193,8 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=7 {
         let name = format!("foo{i}");
@@ -1264,8 +1265,8 @@ fn test_resolve_type_of_this_in_object() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=5 {
         let name = format!("foo{i}");
@@ -1353,8 +1354,8 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=5 {
         let name = format!("notFoo{i}");
@@ -1728,8 +1729,8 @@ fn test_resolve_react_types() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let use_callback_id = resolver
         .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
@@ -1825,8 +1826,8 @@ fn test_resolve_single_reexport() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -1886,8 +1887,8 @@ fn test_resolve_type_of_union_from_imported_module() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
@@ -1949,8 +1950,8 @@ fn test_resolve_multiple_reexports() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result1_id = resolver
         .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
@@ -2037,8 +2038,8 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -2097,8 +2098,8 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -2148,8 +2149,8 @@ const { mutate } = useSWRConfig();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let use_swr_config_id = resolver
         .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
@@ -2205,8 +2206,8 @@ type Intersection = Foo & Bar;"#,
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let intersection_id = resolver
         .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
@@ -2297,8 +2298,7 @@ fn test_resolve_swr_types() {
         })
     );
 
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let mutate_id = resolver
         .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
@@ -2338,8 +2338,8 @@ function f() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
 
@@ -2371,8 +2371,8 @@ function g() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
 
@@ -2673,8 +2673,8 @@ fn test_namespace_reexport_type_inference() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -2724,7 +2724,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2803,7 +2803,7 @@ export function Component() {
     let js_paths = [BiomePath::new("/src/Component.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
     let styles_css = db
@@ -2864,7 +2864,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2959,7 +2959,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.tsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -3075,7 +3075,7 @@ export function Dashboard() {
     ];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -3158,7 +3158,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -3223,7 +3223,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -3754,7 +3754,7 @@ fn test_vue_upward_traversal() {
     fs.insert("/src/Button.vue".into(), "");
 
     let layout = ProjectLayout::default();
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
 
     // Add CSS
     let css_paths = [BiomePath::new("/src/app.css")];
@@ -3984,7 +3984,7 @@ import Card from "./Card.svelte";
 /// This mirrors production behavior: `open_file` triggers
 /// `parse_embedded_nodes`, which correctly extracts `<style>`, `<script>`, and
 /// Astro frontmatter (`---...---`) blocks with their scoping semantics.
-fn build_module_db_via_workspace(files: &[(&str, &str)]) -> ProjectDatabase {
+fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {
     let mem_fs = MemoryFileSystem::default();
     for (path, content) in files {
         mem_fs.insert(Utf8PathBuf::from(*path), *content);
@@ -4043,8 +4043,7 @@ fn test_property_const_assertion_flows_through_module_resolver() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
     let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
     let TypeData::Object(object) = object.deref() else {
         panic!("expected object type");

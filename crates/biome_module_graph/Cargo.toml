@@ -59,6 +59,7 @@ biome_json_parser    = { path = "../biome_json_parser" }
 biome_json_value     = { path = "../biome_json_value" }
 biome_service        = { path = "../biome_service", features = ["testing"] }
 biome_test_utils     = { path = "../biome_test_utils" }
+biome_workspace_db   = { path = "../biome_workspace_db" }
 divan                = { package = "codspeed-divan-compat", version = "=4.4.1" }
 insta                = { workspace = true }
 walkdir              = { workspace = true }
