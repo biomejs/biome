@@ -32,8 +32,13 @@ function notAComponent({ items = [] }) {
   return null;
 }
 
-// two params -> not a component
+// two params -> not a component (arrow)
 const TwoParams = ({ a = {} }, context) => null;
+
+// two params -> not a component (function declaration)
+function TwoParamsFunction({ a = {} }, context) {
+  return null;
+}
 
 // defaultProps is out of scope
 function Baz(props) {
