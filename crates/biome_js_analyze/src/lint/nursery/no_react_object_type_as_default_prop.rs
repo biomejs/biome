@@ -4,8 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsObjectBindingPatternMember, JsParameters,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectBindingPatternMember, JsObjectBindingPattern,
 };
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
@@ -73,13 +72,13 @@ impl Rule for NoReactObjectTypeAsDefaultProp {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if ReactComponentInfo::from_declaration(node.syntax()).is_none() {
-            return vec![];
-        }
-        let Some(parameters) = component_parameters(node) else {
+        let Some(component) = ReactComponentInfo::from_declaration(node.syntax()) else {
             return vec![];
         };
-        collect_forbidden_defaults(&parameters).unwrap_or_default()
+        let Some(object_pattern) = component.props_object_pattern() else {
+            return vec![];
+        };
+        collect_forbidden_defaults(&object_pattern).unwrap_or_default()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -100,40 +99,6 @@ impl Rule for NoReactObjectTypeAsDefaultProp {
             }),
         )
     }
-}
-
-fn component_parameters(node: &AnyPotentialReactComponentDeclaration) -> Option<JsParameters> {
-    match node {
-        AnyPotentialReactComponentDeclaration::JsFunctionDeclaration(declaration) => {
-            declaration.parameters().ok()
-        }
-        AnyPotentialReactComponentDeclaration::JsFunctionExportDefaultDeclaration(declaration) => {
-            declaration.parameters().ok()
-        }
-        AnyPotentialReactComponentDeclaration::JsVariableDeclarator(declarator) => {
-            let expression = declarator.initializer()?.expression().ok()?;
-            parameters_from_expression(&expression)
-        }
-        _ => None,
-    }
-}
-
-fn parameters_from_expression(expression: &AnyJsExpression) -> Option<JsParameters> {
-    if let Some(arrow) = expression.as_js_arrow_function_expression() {
-        return match arrow.parameters().ok()? {
-            AnyJsArrowFunctionParameters::JsParameters(parameters) => Some(parameters),
-            AnyJsArrowFunctionParameters::AnyJsBinding(_) => None,
-        };
-    }
-    if let Some(function) = expression.as_js_function_expression() {
-        return function.parameters().ok();
-    }
-    // unwrap memo() / forwardRef() wrappers
-    if let Some(call) = expression.as_js_call_expression() {
-        let first_argument = call.arguments().ok()?.args().into_iter().next()?.ok()?;
-        return parameters_from_expression(first_argument.as_any_js_expression()?);
-    }
-    None
 }
 
 enum ForbiddenDefaultKind {
@@ -198,15 +163,9 @@ fn forbidden_default_kind(expression: &AnyJsExpression) -> Option<ForbiddenDefau
     Some(kind)
 }
 
-fn collect_forbidden_defaults(parameters: &JsParameters) -> Option<Vec<ForbiddenDefault>> {
-    let first_param = parameters.items().into_iter().next()?.ok()?;
-    let binding = first_param
-        .as_any_js_formal_parameter()?
-        .as_js_formal_parameter()?
-        .binding()
-        .ok()?;
-    let object_pattern = binding.as_js_object_binding_pattern()?;
-
+fn collect_forbidden_defaults(
+    object_pattern: &JsObjectBindingPattern,
+) -> Option<Vec<ForbiddenDefault>> {
     let mut defaults = Vec::new();
     for property in object_pattern.properties() {
         let property = property.ok()?;

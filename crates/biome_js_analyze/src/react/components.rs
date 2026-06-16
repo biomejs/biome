@@ -715,6 +715,33 @@ mod test {
         source
     }
 
+    fn function_of(component: &ReactComponentInfo) -> Option<AnyJsFunction> {
+        match &component.kind {
+            ReactComponentKind::Function(info) => info.function.clone(),
+            _ => None,
+        }
+    }
+
+    fn props_object_pattern(code: &str) -> Option<JsObjectBindingPattern> {
+        let source = parse_jsx(code);
+        let declaration = source
+            .syntax()
+            .descendants()
+            .find_map(AnyPotentialReactComponentDeclaration::cast)?;
+        ReactComponentInfo::from_declaration(declaration.syntax())?.props_object_pattern()
+    }
+
+    #[test]
+    fn props_object_pattern_returns_destructured_props() {
+        assert!(props_object_pattern("function C({ a }) { return null; }").is_some());
+        assert!(props_object_pattern("const C = ({ a }) => null;").is_some());
+        assert!(props_object_pattern("const C = memo(({ a }) => null);").is_some());
+        // Not destructured.
+        assert!(props_object_pattern("function C(props) { return null; }").is_none());
+        // No parameters.
+        assert!(props_object_pattern("function C() { return null; }").is_none());
+    }
+
     #[test]
     fn should_handle_unexported_class() {
         let source = parse_jsx(
@@ -1929,6 +1956,7 @@ mod test {
                         start_range: func.start_range(),
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                             wrappers: Box::new([]),
+                            function: AnyJsFunction::cast_ref(func.syntax()),
                         }),
                     })
                 )
@@ -2173,6 +2201,7 @@ mod test {
                                 ]),
                                 _ => Box::new([]),
                             },
+                            function: function_of(&component_info),
                         }),
                     }
                 )
@@ -2286,7 +2315,8 @@ mod test {
                         name_hint: None,
                         start_range: component_info.start_range,
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
-                            wrappers: Box::new([])
+                            wrappers: Box::new([]),
+                            function: function_of(&component_info),
                         }),
                     }
                 )
