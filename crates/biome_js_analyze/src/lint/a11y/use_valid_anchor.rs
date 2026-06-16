@@ -29,9 +29,14 @@ declare_lint_rule! {
     /// - it can source of invalid links, and crawlers can't navigate the website, risking to penalize
     /// SEO ranking
     ///
-    ///
+    /// 
     /// For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-in-modern-web-applications
     ///
+    /// Even without attached logic, a link that uses the empty fragment `#` for in-page navigation does not
+    /// point to a real target, so some browsers may scroll the page while leaving keyboard focus on the link.
+    /// This can make visual position and focus order fall out of sync; prefer linking to a real element such
+    /// as `href="#top"`.
+    /// 
     /// ## Examples
     ///
     /// ### Invalid

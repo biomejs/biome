@@ -35,6 +35,11 @@ declare_lint_rule! {
     ///
     /// For a detailed explanation, check out [this article by Marcy Sutton](https://marcysutton.com/links-vs-buttons-in-modern-web-applications)
     ///
+    /// Even without attached logic, a link that uses the empty fragment `#` for in-page navigation does not
+    /// point to a real target, so some browsers may scroll the page while leaving keyboard focus on the link.
+    /// This can make visual position and focus order fall out of sync; prefer linking to a real element such
+    /// as `href="#top"`.
+    /// 
     /// ## Examples
     ///
     /// ### Invalid
