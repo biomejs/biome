@@ -3,7 +3,6 @@ use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::embed::types::EmbedContent;
-use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
     FixAllParams, LintParams, LintResults, ParseEmbeddedParams, ParseResult, ResolveBindingParams,
@@ -564,22 +563,6 @@ impl WorkspaceServer {
             if let Some(language) = language {
                 file_source_index = self.db_add_source(language);
                 source = language;
-
-                if settings.as_ref().is_linter_enabled()
-                    || settings.as_ref().is_assist_enabled()
-                    || settings.needs_document_services()
-                {
-                    if language.is_css_like() {
-                    } else if let DocumentFileSource::Js(source_type) = language {
-                        let source_type = if source_type.is_svelte_component() {
-                            // Component files infer JS/TS from `<script ...>` content.
-                            // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
-                            SvelteFileHandler::file_source(&content)
-                        } else {
-                            source_type
-                        };
-                    }
-                }
             }
 
             if persist_node_cache {
@@ -770,7 +753,7 @@ impl WorkspaceServer {
         cursor_offset: TextSize,
         parse: &ParsedSource,
         language: DocumentFileSource,
-    ) -> Result<(Option<DefinitionReference>, BiomePath, Capabilities), WorkspaceError> {
+    ) -> Result<(Option<DefinitionReference>, Capabilities), WorkspaceError> {
         let workspace_db = self.get_db();
         let capabilities = self.features.get_deprecated_capabilities(language);
 
@@ -809,7 +792,7 @@ impl WorkspaceServer {
             });
             if result.is_some() {
                 let capabilities = resolve_capabilities(&result, capabilities);
-                return Ok((result, path.clone(), capabilities));
+                return Ok((result, capabilities));
             }
         }
 
@@ -849,11 +832,11 @@ impl WorkspaceServer {
 
             if adjusted.is_some() {
                 let capabilities = resolve_capabilities(&adjusted, snippet_caps);
-                return Ok((adjusted, path.clone(), capabilities));
+                return Ok((adjusted, capabilities));
             }
         }
 
-        Ok((None, path.clone(), capabilities))
+        Ok((None, capabilities))
     }
 
     /// Parses the language snippets if the current language implements the capability `parser.parse_embedded_nodes`
@@ -2132,22 +2115,6 @@ impl Workspace for WorkspaceServer {
             vec![]
         };
 
-        if settings.as_ref().is_linter_enabled()
-            || settings.as_ref().is_assist_enabled()
-            || settings.needs_document_services()
-        {
-            if document_source.is_css_like() {
-            } else if let DocumentFileSource::Js(source_type) = document_source {
-                let source_type = if source_type.is_svelte_component() {
-                    // Component files infer JS/TS from `<script ...>` content.
-                    // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
-                    SvelteFileHandler::file_source(&content)
-                } else {
-                    source_type
-                };
-            }
-        }
-
         exported_bindings.finish(builder);
         self.db_update_embedded_bindings(exported_bindings.bindings);
 
@@ -2960,7 +2927,7 @@ impl Workspace for WorkspaceServer {
         let workspace_db = self.get_db();
 
         // Try to resolve the binding, checking embedded snippets first
-        let (definition_ref, effective_path, capabilities) =
+        let (definition_ref, capabilities) =
             self.resolve_binding_in_document_or_snippets(path, cursor_offset, &parse, language)?;
 
         let Some(definition_ref) = definition_ref else {

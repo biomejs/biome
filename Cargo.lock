@@ -1906,6 +1906,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_string_case",
+ "biome_workspace_db",
  "camino",
  "countme",
  "json_comments",

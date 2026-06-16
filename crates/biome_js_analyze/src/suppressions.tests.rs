@@ -25,7 +25,7 @@ fn quick_test() {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::tsx())
-        .with_semantic_model(semantic_model)
+        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
     crate::analyze(
@@ -813,7 +813,7 @@ const foo0 = function (bar: string) {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::ts())
-        .with_semantic_model(semantic_model);
+        .with_semantic_model(&semantic_model);
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {

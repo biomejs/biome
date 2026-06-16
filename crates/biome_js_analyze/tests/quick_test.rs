@@ -62,13 +62,11 @@ fn quick_test() {
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let db = module_graph_for_test_file(file_path.as_path(), project_layout.as_ref());
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-    let services = crate::JsAnalyzerServices::from((
-        module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
-        project_layout,
-        JsFileSource::tsx(),
-        Some(semantic_model),
-    ));
+    let services =
+        crate::JsAnalyzerServices::from((db.rc_module_db(), project_layout, JsFileSource::tsx()))
+            .with_semantic_model(&semantic_model);
 
     analyze(
         &parsed.tree(),

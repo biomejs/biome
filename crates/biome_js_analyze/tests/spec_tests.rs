@@ -212,11 +212,11 @@ pub(crate) fn analyze_and_snap(
 
     let mut services = JsAnalyzerServices::default()
         .with_source_type(source_type)
-        .with_semantic_model(semantic_model)
+        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout.clone());
     if needs_module_graph {
         let module_db = module_graph_for_test_file(input_file, &project_layout);
-        services = services.with_module_db(module_db);
+        services = services.with_module_db(module_db.rc_module_db());
     }
 
     let (_, errors) =

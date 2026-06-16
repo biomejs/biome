@@ -22,8 +22,7 @@ use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_languages::DocumentFileSource;
 use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module,
-    resolve_js_module,
+    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_js_module,
 };
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
@@ -39,6 +38,7 @@ use biome_service::workspace::{
 };
 use biome_service::{Workspace, WorkspaceError};
 use biome_string_case::StrLikeExtension;
+use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
@@ -259,8 +259,8 @@ where
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -311,8 +311,8 @@ pub fn module_graph_for_test_file(
 pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -367,7 +367,7 @@ pub fn module_graph_for_css_test_file(
 pub fn module_graph_for_html_test_file(
     input_file: &Utf8Path,
     _project_layout: &ProjectLayout,
-) -> ProjectDatabase {
+) -> WorkspaceDb {
     let dir = input_file.parent().unwrap().to_path_buf();
 
     // Load all files from the test directory into a MemoryFileSystem.
