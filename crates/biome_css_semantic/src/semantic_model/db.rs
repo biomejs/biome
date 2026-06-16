@@ -6,31 +6,31 @@ use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 #[salsa::db]
 pub trait CssSemanticDb: biome_db::Db {}
 
-#[salsa::tracked]
-pub(crate) fn css_model_from_parsed_source(
-    db: &dyn CssSemanticDb,
+#[salsa::tracked(returns(ref))]
+pub(crate) fn css_model_from_parsed_source<'db>(
+    db: &'db dyn CssSemanticDb,
     file: ParsedSource,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
-#[salsa::tracked]
-pub(crate) fn css_model_from_parsed_snippet(
-    db: &dyn CssSemanticDb,
+#[salsa::tracked(returns(ref))]
+pub(crate) fn css_model_from_parsed_snippet<'db>(
+    db: &'db dyn CssSemanticDb,
     file: ParsedSnippet,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
-pub fn css_semantic_model<Db>(db: &Db, file: AnyParsedSource) -> SemanticModel
+pub fn css_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
 where
     Db: CssSemanticDb,
 {
     match file {
-        AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, s),
-        AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, s),
+        AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
+        AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, *s),
     }
 }
 

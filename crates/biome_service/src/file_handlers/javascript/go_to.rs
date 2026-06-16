@@ -18,7 +18,7 @@ use std::ops::Add;
 
 /// Source-side capability: given a cursor position, identify what binding the user clicked on.
 pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let semantic_model = js_semantic_model(&params.workspace_db, params.parsed_source.clone());
+    let semantic_model = js_semantic_model(&params.workspace_db, &params.parsed_source);
     let root: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {

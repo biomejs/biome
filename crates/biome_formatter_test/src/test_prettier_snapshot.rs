@@ -3,7 +3,7 @@ use crate::check_reformat::{CheckReformat, ReformatError};
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::{PrettierDiff, get_prettier_diff, strip_prettier_placeholders};
 use biome_formatter::{FormatLanguage, FormatOptions, Printed};
-use biome_parser::AnyParse;
+use biome_parser::AnyParsedSource;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use std::sync::OnceLock;
@@ -154,7 +154,7 @@ where
         }
     }
 
-    fn format_for_snapshot(&self, parsed: &AnyParse) -> Option<FormatAttempt> {
+    fn format_for_snapshot(&self, parsed: &AnyParsedSource) -> Option<FormatAttempt> {
         let syntax = parsed.syntax();
         let printed = match self.run_formatter(&syntax) {
             Some(Ok(printed)) => printed,
@@ -223,7 +223,7 @@ where
 
     fn finish_formatted_output(
         &self,
-        parsed: &AnyParse,
+        parsed: &AnyParsedSource,
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
         printed: Printed,
     ) -> Result<String, PrettierSnapshotError> {
@@ -246,7 +246,7 @@ where
 
     fn finish_file_format(
         &self,
-        parsed: &AnyParse,
+        parsed: &AnyParsedSource,
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
         printed: Printed,
     ) -> Result<String, PrettierSnapshotError> {

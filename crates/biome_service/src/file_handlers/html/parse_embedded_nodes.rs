@@ -3,13 +3,10 @@ use crate::embed::types::{
     EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
-use crate::file_handlers::{DocumentFileSource, ParseEmbedResult};
-use crate::settings::SettingsWithEditor;
+use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssLanguage, TextSize};
-use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
@@ -27,19 +24,21 @@ use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 use std::collections::VecDeque;
 
-pub(crate) fn parse_embedded_nodes(
-    root: &AnyParse,
-    biome_path: &BiomePath,
-    file_source: &DocumentFileSource,
-    settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-    builder: &mut EmbeddedBuilder,
-) -> ParseEmbedResult {
+pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
+    let ParseEmbeddedParams {
+        any_parse,
+        path,
+        file_source,
+        settings,
+        node_cache,
+        embedded_builder,
+        workspace_db,
+    } = params;
     let mut nodes = Vec::new();
-    let html_root: HtmlRoot = root.tree();
+    let html_root: HtmlRoot = any_parse.parsed(&workspace_db).tree();
     let Some(file_source) = file_source.to_html_file_source() else {
         return ParseEmbedResult::default();
     };
@@ -47,11 +46,11 @@ pub(crate) fn parse_embedded_nodes(
     let doc_file_source = DocumentFileSource::Html(file_source);
 
     let mut ctx = EmbedParseContext {
-        cache,
-        biome_path,
+        cache: node_cache,
+        biome_path: path,
         host_file_source: &file_source,
         settings,
-        builder,
+        builder: embedded_builder,
     };
 
     match file_source.variant() {
@@ -354,12 +353,16 @@ pub(crate) fn parse_embedded_nodes(
         }
     }
 
+    if file_source.is_vue() {
+        embedded_builder.visit_html_root(&html_root);
+    }
+
     ParseEmbedResult { nodes }
 }
 
 // Pass 3: control flow blocks via registry
 fn parse_svelte_blocks(
-    nodes: &mut Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
+    nodes: &mut Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
     html_root: &HtmlRoot,
     doc_file_source: DocumentFileSource,
     ctx: &mut EmbedParseContext,
@@ -855,7 +858,7 @@ impl EmbedParseContext<'_, '_> {
         candidate: &EmbedCandidate,
         doc_file_source: &DocumentFileSource,
         embedded_file_source: Option<JsFileSource>,
-        nodes: &mut Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
+        nodes: &mut Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
     ) -> Option<()> {
         let parsed = self.detect_and_parse(candidate, doc_file_source, embedded_file_source)?;
         nodes.push(parsed.node);
@@ -1006,15 +1009,8 @@ fn parse_matched_embed(
                 );
             }
 
-            let snippet: EmbeddedSnippet<JsLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
             Some(ParsedEmbed {
-                node: (snippet.into(), doc_source),
+                node: (parse.into(), content, doc_source),
                 // Only source-level embeds contribute to embedded_file_source capture
                 js_file_source: if is_source_level {
                     Some(js_source)
@@ -1043,23 +1039,8 @@ fn parse_matched_embed(
                 options,
             );
 
-            let mut services = CssDocumentServices::default();
-            if ctx.settings.as_ref().is_linter_enabled()
-                || ctx.settings.as_ref().is_assist_enabled()
-                || ctx.settings.needs_document_services()
-            {
-                services = services.with_css_semantic_model(&parse.tree());
-            }
-
-            let snippet: EmbeddedSnippet<CssLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
             Some(ParsedEmbed {
-                node: ((snippet, services.into()).into(), doc_source),
+                node: (parse.into(), content, doc_source),
                 js_file_source: None,
             })
         }
@@ -1076,15 +1057,8 @@ fn parse_matched_embed(
                 options,
             );
 
-            let snippet: EmbeddedSnippet<JsonLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
             Some(ParsedEmbed {
-                node: (snippet.into(), doc_source),
+                node: (parse.into(), content, doc_source),
                 js_file_source: None,
             })
         }

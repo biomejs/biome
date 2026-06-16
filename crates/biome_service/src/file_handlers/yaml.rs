@@ -10,11 +10,11 @@ use crate::settings::{
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
+use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_languages::AnyFileSource;
-use biome_db::AnyParsedSource;
-use biome_parser::{AnyParse, NodeParse};
+use biome_languages::DocumentFileSource;
+use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
@@ -68,7 +68,7 @@ impl ServiceLanguage for YamlLanguage {
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
     }
 
@@ -77,7 +77,7 @@ impl ServiceLanguage for YamlLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, path);
@@ -110,7 +110,7 @@ impl ServiceLanguage for YamlLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         _path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
         _suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
@@ -208,7 +208,7 @@ fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     _biome_path: &BiomePath,
-    file_source: AnyFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -238,7 +238,7 @@ fn debug_syntax_tree(
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
@@ -254,7 +254,7 @@ fn debug_formatter_ir(
 
 pub(crate) fn format(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,

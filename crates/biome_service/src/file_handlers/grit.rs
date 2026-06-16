@@ -1,5 +1,5 @@
 use super::{
-    AnalyzerCapabilities, AnyFileSource, Capabilities, DebugCapabilities, EditorCapabilities,
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
     ParseResult, ParserCapabilities, SearchCapabilities,
 };
@@ -25,7 +25,6 @@ use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
@@ -106,7 +105,7 @@ impl ServiceLanguage for GritLanguage {
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
     }
 
@@ -115,7 +114,7 @@ impl ServiceLanguage for GritLanguage {
         overrides: &crate::settings::OverrideSettings,
         language: &Self::FormatterSettings,
         path: &biome_fs::BiomePath,
-        file_source: &super::AnyFileSource,
+        file_source: &super::DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -158,7 +157,7 @@ impl ServiceLanguage for GritLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
@@ -313,7 +312,7 @@ fn search_enabled(_path: &Utf8Path, _settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     _biome_path: &BiomePath,
-    file_source: AnyFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -341,7 +340,7 @@ fn debug_syntax_tree(
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
@@ -358,7 +357,7 @@ fn debug_formatter_ir(
 #[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
@@ -377,7 +376,7 @@ fn format(
 #[tracing::instrument(level = "debug", skip_all)]
 fn format_range(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
@@ -393,7 +392,7 @@ fn format_range(
 #[tracing::instrument(level = "debug", skip_all)]
 fn format_on_type(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,

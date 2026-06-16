@@ -41,7 +41,7 @@ pub struct ParsedSource {
 }
 
 impl ParsedSource {
-    pub fn errors(&self, db: &dyn Db) -> usize {
+    pub fn error_count(&self, db: &dyn Db) -> usize {
         self.parsed(db)
             .diagnostics()
             .iter()
@@ -50,16 +50,42 @@ impl ParsedSource {
     }
 
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed(db).clone().into_serde_diagnostics(None)
+        self.parsed(db).clone().into_serde_diagnostics()
+    }
+
+    pub fn parse_diagnostics<'db>(&self, db: &'db dyn Db) -> Vec<ParseDiagnostic> {
+        self.parsed(db)
+            .diagnostics()
+            .into_iter()
+            .cloned()
+            .collect::<Vec<_>>()
+    }
+
+    pub fn snippets_parse_diagnostics<'db>(&self, db: &'db dyn Db) -> Vec<ParseDiagnostic> {
+        let mut diagnostics = vec![];
+        for snippet in self.snippets(db) {
+            diagnostics.extend(
+                snippet
+                    .clone()
+                    .parsed(db)
+                    .diagnostics()
+                    .into_iter()
+                    .cloned()
+                    .collect::<Vec<ParseDiagnostic>>(),
+            )
+        }
+        diagnostics
     }
 
     pub fn has_errors(&self, db: &dyn Db) -> bool {
-        self.errors(db) > 0
+        self.error_count(db) > 0
     }
 }
 
-/// The primordial type of the biome database. It represents a parsed snippet.
-/// /// The `range` is the ID.
+/// Represents embedded content extracted from HTML documents.
+///
+/// This struct stores parsing metadata and provides access to the parsed
+/// content with offset-aware positioning to maintain correct source locations.
 #[salsa::input]
 #[derive(Debug)]
 pub struct ParsedSnippet {
@@ -69,17 +95,17 @@ pub struct ParsedSnippet {
 
     /// The range of the entire script element in the HTML document,
     /// including the opening and closing tags.
-    #[returns(ref)]
+    #[returns(clone)]
     pub element_range: TextRange,
 
     /// The range of just the JavaScript content within the script element,
     /// excluding the script tags themselves.
-    #[returns(ref)]
+    #[returns(clone)]
     pub content_range: TextRange,
 
     /// The offset where the JavaScript content starts in the parent document.
     /// This is used for offset-aware parsing.
-    #[returns(ref)]
+    #[returns(clone)]
     pub content_offset: TextSize,
 
     /// The file source of the document
@@ -88,9 +114,11 @@ pub struct ParsedSnippet {
 
 impl ParsedSnippet {
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed(db)
-            .clone()
-            .into_serde_diagnostics(Some(*self.content_offset(db)))
+        self.parsed(db).clone().into_serde_diagnostics()
+    }
+
+    pub fn has_errors(&self, db: &dyn Db) -> bool {
+        self.parsed(db).has_errors()
     }
 }
 
@@ -108,8 +136,8 @@ impl AnyParsedSource {
         N::Language: 'static,
     {
         match self {
-            Self::ParsedSource(parsed) => parsed.parsed(db).tree(),
-            Self::ParsedSnippet(parsed) => parsed.parsed(db).tree(),
+            Self::ParsedSource(parsed) => parsed.parsed(db).tree::<N>(),
+            Self::ParsedSnippet(parsed) => parsed.parsed(db).tree::<N>(),
         }
     }
 
@@ -151,7 +179,7 @@ impl AnyParsedSource {
     pub fn diagnostic_offset(&self, db: &dyn Db) -> Option<TextSize> {
         match self {
             Self::ParsedSource(_) => None,
-            Self::ParsedSnippet(snippet) => Some(*snippet.content_offset(db)),
+            Self::ParsedSnippet(snippet) => Some(snippet.content_offset(db)),
         }
     }
 
@@ -173,6 +201,13 @@ impl AnyParsedSource {
         match self {
             Self::ParsedSource(source) => source.parsed(db),
             Self::ParsedSnippet(snippet) => snippet.parsed(db),
+        }
+    }
+
+    pub fn has_errors(&self, db: &dyn Db) -> bool {
+        match self {
+            Self::ParsedSource(source) => source.has_errors(db),
+            Self::ParsedSnippet(snippet) => snippet.has_errors(db),
         }
     }
 }

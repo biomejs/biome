@@ -4,7 +4,7 @@ use biome_languages::DocumentFileSource;
 use biome_markdown_formatter::{MdFormatLanguage, context::MarkdownFormatContext};
 use biome_markdown_parser::parse_markdown;
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_parser::AnyParse;
+use biome_parser::AnyParsedSource;
 use biome_service::settings::{ServiceLanguage, Settings};
 
 #[derive(Default)]
@@ -15,7 +15,7 @@ impl TestFormatLanguage for MarkdownTestFormatLanguage {
     type Context = MarkdownFormatContext;
     type FormatLanguage = MdFormatLanguage;
 
-    fn parse(&self, text: &str) -> AnyParse {
+    fn parse(&self, text: &str) -> AnyParsedSource {
         parse_markdown(text).into()
     }
 

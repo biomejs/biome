@@ -9,7 +9,7 @@ use biome_configuration::{
 };
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
-use biome_rowan::TextSize;
+use biome_rowan::{AstNode, TextSize};
 use camino::Utf8Path;
 use std::str::FromStr;
 
@@ -48,7 +48,7 @@ fn commonjs_file_rejects_import_statement() {
 
     match workspace.get_parse("/project/a.js".into()) {
         Ok(parse) => {
-            insta::assert_debug_snapshot!(parse.diagnostics(), @r#"
+            insta::assert_debug_snapshot!(parse.parse_diagnostics(&workspace.get_db()), @r#"
             [
                 ParseDiagnostic {
                     span: Some(
@@ -199,21 +199,25 @@ fn store_embedded_nodes_with_current_ranges() {
         })
         .unwrap();
 
+    let db = workspace.get_db();
+    let snippets = workspace.get_snippets(BiomePath::new("/project/file.html").as_path());
     let documents = workspace.documents.pin();
     let document = documents.get(&Utf8PathBuf::from("/project/file.html"));
 
     assert!(document.is_some());
-
-    let document = document.unwrap();
-    let scripts: Vec<_> = document
-        .embedded_snippets
+    let scripts: Vec<_> = snippets
         .iter()
-        .filter_map(|node| node.as_js_embedded_snippet())
+        .filter(|node| {
+            db.source_from_index(node.document_source_index(&db))
+                .is_some_and(|source| source.is_javascript_like())
+        })
         .collect();
-    let styles: Vec<_> = document
-        .embedded_snippets
+    let styles: Vec<_> = snippets
         .iter()
-        .filter_map(|node| node.as_css_embedded_snippet())
+        .filter(|node| {
+            db.source_from_index(node.document_source_index(&db))
+                .is_some_and(|source| source.is_css_like())
+        })
         .collect();
     assert_eq!(scripts.len(), 1);
     assert_eq!(styles.len(), 1);
@@ -221,11 +225,25 @@ fn store_embedded_nodes_with_current_ranges() {
     let script = scripts.first().unwrap();
     let style = styles.first().unwrap();
 
-    let script_node = script.node();
-    assert!(script_node.text_range_with_trivia().start() > TextSize::from(0));
+    let script_node = script.parsed(&db);
+    assert!(
+        script_node
+            .tree::<AnyJsRoot>()
+            .syntax()
+            .text_range_with_trivia()
+            .start()
+            > TextSize::from(0)
+    );
 
-    let style_node = style.node();
-    assert!(style_node.text_range_with_trivia().start() > TextSize::from(0));
+    let style_node = style.parsed(&db);
+    assert!(
+        style_node
+            .tree::<AnyCssRoot>()
+            .syntax()
+            .text_range_with_trivia()
+            .start()
+            > TextSize::from(0)
+    );
 }
 
 #[test]
@@ -385,12 +403,13 @@ function Foo({cond}) {
         })
         .unwrap();
 
+    let db = workspace.get_db();
     let ts_file_source = workspace.get_file_source("/project/a.ts".into(), false);
     let ts = ts_file_source.to_js_file_source().expect("JS file source");
     assert!(ts.is_typescript());
     assert!(!ts.is_jsx());
     match workspace.get_parse("/project/a.ts".into()) {
-        Ok(parse) => assert_eq!(parse.diagnostics().len(), 0),
+        Ok(parse) => assert_eq!(parse.parse_diagnostics(&db).len(), 0),
         Err(error) => panic!("File not available: {error}"),
     }
 
@@ -399,7 +418,7 @@ function Foo({cond}) {
     assert!(!js.is_typescript());
     assert!(js.is_jsx());
     match workspace.get_parse("/project/a.js".into()) {
-        Ok(parse) => assert_eq!(parse.diagnostics().len(), 0),
+        Ok(parse) => assert_eq!(parse.parse_diagnostics(&db).len(), 0),
         Err(error) => panic!("File not available: {error}"),
     }
     match workspace.format_file(FormatFileParams {
@@ -504,12 +523,13 @@ function Foo({cond}) {
         })
         .unwrap();
 
+    let db = workspace.get_db();
     let js_file_source = workspace.get_file_source("/project/a.js".into(), false);
     let js = js_file_source.to_js_file_source().expect("JS file source");
     assert!(!js.is_typescript());
     assert!(!js.is_jsx());
     match workspace.get_parse("/project/a.js".into()) {
-        Ok(parse) => assert_ne!(parse.diagnostics().len(), 0),
+        Ok(parse) => assert_ne!(parse.parse_diagnostics(&db).len(), 0),
         Err(error) => panic!("File not available: {error}"),
     }
 
@@ -518,7 +538,7 @@ function Foo({cond}) {
     assert!(!jsx.is_typescript());
     assert!(jsx.is_jsx());
     match workspace.get_parse("/project/a.jsx".into()) {
-        Ok(parse) => assert_eq!(parse.diagnostics().len(), 0),
+        Ok(parse) => assert_eq!(parse.parse_diagnostics(&db).len(), 0),
         Err(error) => panic!("File not available: {error}"),
     }
     match workspace.format_file(FormatFileParams {
@@ -1536,7 +1556,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             project_key,
             path: BiomePath::new(SVELTE_TS_FILE_PATH),
             content: FileContent::FromServer,
-            document_file_source: Some(AnyFileSource::from_language_id("typescript", None)),
+            document_file_source: Some(DocumentFileSource::from_language_id("typescript", None)),
             persist_node_cache: false,
             inline_config: None,
             editor_features: None,
@@ -1548,7 +1568,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             project_key,
             path: BiomePath::new(SVELTE_JS_FILE_PATH),
             content: FileContent::FromServer,
-            document_file_source: Some(AnyFileSource::from_language_id("javascript", None)),
+            document_file_source: Some(DocumentFileSource::from_language_id("javascript", None)),
             persist_node_cache: false,
             inline_config: None,
             editor_features: None,

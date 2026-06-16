@@ -1,11 +1,11 @@
 use crate::embedded::EmbeddedDb;
-use crate::embedded::EmbeddedValueReference;
 use biome_rowan::{TextRange, TokenText};
 
 #[salsa::input]
 #[derive(Debug)]
 pub struct EmbeddedBinding {
     /// The range of the binding
+    #[returns(clone)]
     pub range: TextRange,
     /// The text of the binding
     #[returns(clone)]
@@ -21,7 +21,7 @@ pub struct InternedBinding {
     name: TokenText,
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(ref))]
 pub fn get_binding_by_name<'db>(
     db: &'db dyn EmbeddedDb,
     binding_name: InternedBinding<'db>,
@@ -29,14 +29,14 @@ pub fn get_binding_by_name<'db>(
     for bindings in db.bindings() {
         for binding in bindings {
             if binding.text(db).text() == *binding_name.name(db) {
-                return Some(binding);
+                return Some(*binding);
             }
         }
     }
     None
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(ref))]
 pub fn get_binding_with_source<'db>(
     db: &'db dyn EmbeddedDb,
     binding_name: InternedBinding<'db>,
@@ -44,13 +44,13 @@ pub fn get_binding_with_source<'db>(
     for bindings in db.bindings() {
         for binding in bindings {
             if binding.text(db).text() == *binding_name.name(db) && binding.source(db).is_some() {
-                return Some(binding);
+                return Some(*binding);
             }
         }
     }
     None
 }
-#[salsa::tracked]
+#[salsa::tracked(returns(ref))]
 pub fn bindings_without_source<'db>(db: &'db dyn EmbeddedDb) -> Vec<Vec<(TextRange, TokenText)>> {
     db.bindings()
         .into_iter()
@@ -63,10 +63,6 @@ pub fn bindings_without_source<'db>(db: &'db dyn EmbeddedDb) -> Vec<Vec<(TextRan
         .collect::<Vec<_>>()
 }
 
-#[salsa::tracked]
-pub fn embedded_bindings<'db>(db: &'db dyn EmbeddedDb) -> Vec<Vec<EmbeddedBinding>> {
-    db.bindings()
-}
 //
 // #[cfg(test)]
 // mod tests {

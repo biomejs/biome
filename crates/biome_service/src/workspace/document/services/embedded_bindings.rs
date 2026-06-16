@@ -14,13 +14,11 @@ use biome_js_syntax::{
 use biome_languages::HtmlFileSource;
 use biome_languages::html::HtmlVariant;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
-use biome_workspace_db::embedded::EmbeddedDb;
-use biome_workspace_db::embedded::bindings::EmbeddedBinding;
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedExportedBindings {
-    pub bindings: Vec<Vec<EmbeddedBinding>>,
+    pub bindings: Vec<Vec<(TextRange, TokenText, Option<TokenText>)>>,
 }
 
 #[derive(Debug)]
@@ -34,14 +32,8 @@ impl EmbeddedExportedBindings {
         EmbeddedBuilder::new()
     }
 
-    pub(crate) fn finish(&mut self, builder: EmbeddedBuilder, db: &dyn EmbeddedDb) {
-        self.bindings.push(
-            builder
-                .js_bindings
-                .into_iter()
-                .map(|(range, text, source)| EmbeddedBinding::new(db, range, text, source))
-                .collect::<Vec<_>>(),
-        );
+    pub(crate) fn finish(&mut self, builder: EmbeddedBuilder) {
+        self.bindings.push(builder.js_bindings);
     }
 }
 impl EmbeddedBuilder {
@@ -895,7 +887,7 @@ mod tests {
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {
         for bindings in service.bindings.iter() {
-            if bindings.iter().any(|b| b.token_text().text() == binding) {
+            if bindings.iter().any(|(_, text, _)| text.text() == binding) {
                 return true;
             }
         }

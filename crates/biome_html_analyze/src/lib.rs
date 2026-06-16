@@ -16,7 +16,7 @@ use crate::suppression_action::HtmlSuppressionAction;
 /// Services available to HTML lint rules.
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
-    pub module_db: Option<ProjectDatabase>,
+    pub module_db: Option<Box<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -38,7 +38,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::HtmlFileSource;
-use biome_module_graph::ProjectDatabase;
+use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;

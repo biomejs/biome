@@ -1,5 +1,5 @@
 use super::{
-    AnyFileSource, Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath,
+    Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::WorkspaceError;
@@ -12,14 +12,14 @@ use biome_analyze::AnalyzerOptions;
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::linter::LinterEnabled;
 use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownFormatterEnabled};
+use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
 use biome_markdown_formatter::context::MdFormatOptions;
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
-use biome_db::AnyParsedSource;
-use biome_parser::{AnyParse, NodeParse};
+use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
@@ -82,7 +82,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _overrides: &OverrideSettings,
         _language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         MarkdownParserOptions::default()
     }
@@ -92,7 +92,7 @@ impl ServiceLanguage for MarkdownLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
-        _document_file_source: &AnyFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         // TODO: apply markdown overrides once markdown override settings are introduced.
         let _ = (overrides, path);
@@ -130,7 +130,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
-        _file_source: &AnyFileSource,
+        _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
@@ -274,7 +274,7 @@ fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
 
 fn parse(
     _biome_path: &BiomePath,
-    file_source: AnyFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
@@ -305,7 +305,7 @@ fn debug_syntax_tree(
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
@@ -321,7 +321,7 @@ fn debug_formatter_ir(
 
 pub(crate) fn format(
     biome_path: &BiomePath,
-    document_file_source: &AnyFileSource,
+    document_file_source: &DocumentFileSource,
     parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,

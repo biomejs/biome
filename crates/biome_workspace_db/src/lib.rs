@@ -4,13 +4,14 @@ use crate::embedded::{EmbeddedBinding, EmbeddedDb, EmbeddedValueReference};
 use biome_css_semantic::db::CssSemanticDb;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_js_semantic::JsSemanticDb;
-use biome_languages::AnyFileSource;
-use biome_languages::db::LanguageDb;
+use biome_languages::DocumentFileSource;
+use biome_languages::LanguageDb;
 use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use salsa::Storage;
+use std::rc::Rc;
 use std::sync::Arc;
 
 #[derive(Clone, Debug)]
@@ -23,10 +24,10 @@ pub struct FileTooLarge {
 #[derive(Clone, Default)]
 pub struct WorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
-    // snippets: Arc<HashMap<TextRange, ParsedSnippet>>,
-    file_sources: boxcar::Vec<AnyFileSource>,
-    bindings: Vec<Vec<EmbeddedBinding>>,
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    bindings: Arc<Vec<Vec<EmbeddedBinding>>>,
+    references: Arc<Vec<Vec<EmbeddedValueReference>>>,
 
     // LAST
     storage: Storage<Self>,
@@ -50,22 +51,22 @@ impl WorkspaceDb {
     }
 
     pub fn insert_bindings(&mut self, bindings: Vec<Vec<EmbeddedBinding>>) {
-        self.bindings = bindings;
+        self.bindings = Arc::new(bindings);
+    }
+
+    pub fn insert_references(&mut self, references: Vec<Vec<EmbeddedValueReference>>) {
+        self.references = Arc::new(references);
     }
 
     /// Inserts a file source so that it can be retrieved by index later.
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    pub fn insert_source(&mut self, document_file_source: AnyFileSource) -> usize {
+    pub fn insert_source(&mut self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
             .position(|(_, file_source)| *file_source == document_file_source)
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
-    }
-
-    pub fn insert_module(&mut self, path: &Utf8Path, module: ModuleInfo) {
-        self.modules.pin().insert(path.to_path_buf(), module);
     }
 
     pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
@@ -82,10 +83,6 @@ impl WorkspaceDb {
 
     pub fn get_file(&self, path: &Utf8Path) -> Option<ParsedSource> {
         self.files.pin().get(path).copied()
-    }
-
-    pub fn remove_module(&self, path: &Utf8Path) {
-        self.modules.pin().remove(path);
     }
 
     /// Removes all modules that start with the given path. That's usually used when removing a library or a
@@ -107,6 +104,76 @@ impl WorkspaceDb {
     pub fn boxed_module_db(&self) -> Box<dyn ModuleDb> {
         Box::new(self.clone())
     }
+
+    /// Returns an [Rc] to itself, cast to [ModuleDb]. This is used to send the service
+    /// to the analyzer.
+    pub fn rc_module_db(&self) -> Rc<dyn ModuleDb> {
+        Rc::new(self.clone())
+    }
+
+    pub fn insert_module(&self, path: Utf8PathBuf, module: ModuleInfo) {
+        self.modules.pin().insert(path, module);
+    }
+
+    /// It updates the CST of an existing parsed source
+    pub fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
+        self.files
+            .pin()
+            .update(path.to_path_buf(), |parsed_source| {
+                let mut any_parse = parsed_source.parsed(self).clone();
+                any_parse.set_new_root(new_root.clone());
+
+                ParsedSource::new(
+                    self,
+                    path.to_path_buf(),
+                    any_parse,
+                    parsed_source.document_source_index(self),
+                    parsed_source.snippets(self).clone(),
+                )
+            });
+    }
+
+    pub fn remove_module(&self, path: &Utf8Path) {
+        self.modules.pin().remove(path);
+    }
+
+    pub fn unload_path(&self, path: &Utf8Path) {
+        let modules = self.modules.pin();
+        let to_remove: Vec<Utf8PathBuf> = modules
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            modules.remove(&p);
+        }
+    }
+}
+
+/// This handler is exclusively used for cloning operations (reading operations).
+/// Writing operations still go through [ProjectDatabase].
+#[derive(Clone, Default)]
+pub struct WorkspaceDbHandle {
+    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+    bindings: Arc<Vec<Vec<EmbeddedBinding>>>,
+    references: Arc<Vec<Vec<EmbeddedValueReference>>>,
+    storage: salsa::StorageHandle<WorkspaceDb>,
+}
+
+impl WorkspaceDbHandle {
+    pub fn to_db(&self) -> WorkspaceDb {
+        WorkspaceDb {
+            files: self.files.clone(),
+            // snippets: Arc<HashMap<TextRange, ParsedSnippet>>,
+            file_sources: self.file_sources.clone(),
+            bindings: self.bindings.clone(),
+            modules: self.modules.clone(),
+            references: self.references.clone(),
+            storage: self.storage.clone().into_storage(),
+        }
+    }
 }
 
 #[salsa::db]
@@ -127,12 +194,12 @@ impl JsSemanticDb for WorkspaceDb {}
 
 #[salsa::db]
 impl EmbeddedDb for WorkspaceDb {
-    fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
-        self.bindings.clone()
+    fn bindings(&self) -> &[Vec<EmbeddedBinding>] {
+        self.bindings.as_slice()
     }
 
-    fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
-        self.references().clone()
+    fn references(&self) -> &[Vec<EmbeddedValueReference>] {
+        self.references.as_slice()
     }
 }
 
@@ -157,7 +224,7 @@ impl LanguageDb for WorkspaceDb {
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
-    fn source_from_index(&self, index: usize) -> Option<AnyFileSource> {
+    fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
         self.file_sources.get(index).copied()
     }
 }

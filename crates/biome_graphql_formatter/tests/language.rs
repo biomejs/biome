@@ -5,7 +5,7 @@ use biome_graphql_formatter::context::GraphqlFormatContext;
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_languages::{DocumentFileSource, GraphqlFileSource};
-use biome_parser::{AnyParse, NodeParse};
+use biome_parser::{AnyParsedSource, NodeParse};
 use biome_service::settings::{ServiceLanguage, Settings};
 
 #[derive(Default)]
@@ -18,7 +18,7 @@ impl TestFormatLanguage for GraphqlTestFormatLanguage {
     type Context = GraphqlFormatContext;
     type FormatLanguage = GraphqlFormatLanguage;
 
-    fn parse(&self, text: &str) -> AnyParse {
+    fn parse(&self, text: &str) -> AnyParsedSource {
         let parse = parse_graphql(text);
 
         NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into()

@@ -41,7 +41,6 @@ use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
@@ -178,7 +177,7 @@ impl ServiceLanguage for JsonLanguage {
         overrides: &OverrideSettings,
         language: &JsonFormatterSettings,
         path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -228,7 +227,7 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.delimiter_spacing)
             .unwrap_or_default();
 
-        let mut options = JsonFormatOptions::new(file_source)
+        let mut options = JsonFormatOptions::new()
             .with_line_ending(line_ending)
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
@@ -536,7 +535,7 @@ fn lint(params: LintParams) -> LintResults {
     else {
         return LintResults::default();
     };
-    let root: JsonRoot = params.parse.tree();
+    let root: JsonRoot = params.parsed_source.tree(&params.workspace_db);
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
@@ -584,9 +583,7 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    let mut diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())
@@ -607,11 +604,11 @@ fn lint(params: LintParams) -> LintResults {
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
-        parse,
+        parsed_source,
         range,
         settings: workspace,
         path,
-        module_db: _,
+        workspace_db,
         project_layout,
         language,
         skip,
@@ -626,7 +623,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
-    let tree: JsonRoot = parse.tree();
+    let tree: JsonRoot = parsed_source.tree(&workspace_db);
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
         working_directory,

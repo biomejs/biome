@@ -4,7 +4,7 @@ use biome_formatter::{
     CstFormatContext, FormatLanguage, FormatResult, Formatted, Printed, SourceMapGeneration,
 };
 use biome_languages::DocumentFileSource;
-use biome_parser::AnyParse;
+use biome_parser::AnyParsedSource;
 use biome_rowan::{SyntaxNode, TextRange};
 use biome_service::settings::{ServiceLanguage, Settings};
 
@@ -26,7 +26,7 @@ pub trait TestFormatLanguage {
         + 'static
         + Clone;
 
-    fn parse(&self, text: &str) -> AnyParse;
+    fn parse(&self, text: &str) -> AnyParsedSource;
 
     fn format_node(
         &self,

@@ -3,7 +3,7 @@ use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::{DiagnosticExt, termcolor};
 use biome_formatter::Printed;
-use biome_parser::AnyParse;
+use biome_parser::AnyParsedSource;
 use camino::Utf8Path;
 use std::fmt;
 use std::fmt::Write;
@@ -135,7 +135,7 @@ impl<'a> SnapshotBuilder<'a> {
         self
     }
 
-    pub fn with_errors(mut self, parsed: &AnyParse, parse_input: &str) -> Self {
+    pub fn with_errors(mut self, parsed: &AnyParsedSource, parse_input: &str) -> Self {
         if !parsed.has_errors() {
             return self;
         }

@@ -172,6 +172,7 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
 
 /// The text content and position information for an embed site.
 /// Shared across all `EmbedCandidate` variants.
+#[derive(Clone)]
 pub(crate) struct EmbedContent {
     /// The text range of the entire host element (including tags/delimiters).
     pub element_range: TextRange,
@@ -188,13 +189,13 @@ pub(crate) struct EmbedContent {
 
 impl EmbedCandidate {
     /// Access the content, regardless of variant.
-    pub fn content(&self) -> &EmbedContent {
+    pub fn content(&self) -> EmbedContent {
         match self {
             Self::Element { content, .. }
             | Self::Frontmatter { content }
             | Self::TaggedTemplate { content, .. }
             | Self::TextExpression { content, .. }
-            | Self::Directive { content, .. } => content,
+            | Self::Directive { content, .. } => content.clone(),
         }
     }
 

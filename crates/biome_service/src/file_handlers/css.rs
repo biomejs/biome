@@ -33,6 +33,7 @@ use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
+use biome_css_semantic::db::css_semantic_model;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_db::AnyParsedSource;
@@ -42,7 +43,6 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
@@ -583,7 +583,7 @@ fn lint(params: LintParams) -> LintResults {
         &params.language,
         params.suppression_reason.as_deref(),
     );
-    let tree = params.parse.tree();
+    let tree = params.parsed_source.tree(&params.workspace_db);
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -608,12 +608,12 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
     let css_services = CssAnalyzerServices {
-        semantic_model: params.snippet_services.and_then(|s| {
-            s.as_css_services()
-                .and_then(|services| services.semantic_model.as_ref())
-        }),
+        semantic_model: Some(css_semantic_model(
+            &params.workspace_db,
+            &params.parsed_source,
+        )),
         file_source,
-        module_db: Some(params.module_db.clone()),
+        module_db: Some(params.workspace_db.rc_module_db()),
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -626,9 +626,7 @@ fn lint(params: LintParams) -> LintResults {
     );
 
     process_lint.into_result(
-        params
-            .parse
-            .into_serde_diagnostics(params.diagnostic_offset),
+        params.parsed_source.serde_diagnostics(&params.workspace_db),
         analyze_diagnostics,
     )
 }
@@ -636,11 +634,11 @@ fn lint(params: LintParams) -> LintResults {
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
-        parse,
+        parsed_source,
         range,
         settings,
         path,
-        module_db,
+        workspace_db,
         project_layout,
         language,
         only,
@@ -653,7 +651,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         compute_actions,
         analyzer_cache,
     } = params;
-    let tree = parse.tree();
+    let tree = parsed_source.tree(&workspace_db);
     let Some(file_source) = language.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
@@ -693,11 +691,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
-        semantic_model: document_services
-            .as_css_services()
-            .and_then(|services| services.semantic_model.as_ref()),
+        semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
         file_source,
-        module_db: Some(module_db),
+        module_db: Some(workspace_db.rc_module_db()),
         project_layout: Some(project_layout),
     };
 
@@ -793,7 +789,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             let css_services = CssAnalyzerServices {
                 semantic_model: None,
                 file_source,
-                module_db: Some(params.module_db.clone()),
+                module_db: Some(params.workspace_db.rc_module_db()),
                 project_layout: Some(params.project_layout.clone()),
             };
 
@@ -849,7 +845,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source,
-            module_db: Some(params.module_db.clone()),
+            module_db: Some(params.workspace_db.rc_module_db()),
             project_layout: Some(params.project_layout.clone()),
         };
 
@@ -897,7 +893,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source,
-            module_db: Some(params.module_db.clone()),
+            module_db: Some(params.workspace_db.rc_module_db()),
             project_layout: Some(params.project_layout.clone()),
         };
 

@@ -5,7 +5,7 @@ use biome_css_syntax::CssLanguage;
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_languages::{CssFileSource, DocumentFileSource};
-use biome_parser::AnyParse;
+use biome_parser::AnyParsedSource;
 use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct CssTestFormatLanguage {
@@ -23,7 +23,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     type Context = CssFormatContext;
     type FormatLanguage = CssFormatLanguage;
 
-    fn parse(&self, text: &str) -> AnyParse {
+    fn parse(&self, text: &str) -> AnyParsedSource {
         let options = CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()

@@ -3,7 +3,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_css_syntax::CssClassSelector;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
-use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, is_class_referenced_by_importers};
+use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
 use biome_rowan::AstNode;
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
