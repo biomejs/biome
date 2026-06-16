@@ -1,10 +1,11 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause, JsExtendsClause,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
+    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern, JsParameters,
     JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, TextRange, declare_node_union};
@@ -98,6 +99,7 @@ impl ReactComponentInfo {
             start_range: function_declaration.start_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: Box::new([]),
+                function: AnyJsFunction::cast_ref(function_declaration.syntax()),
             }),
         })
     }
@@ -269,6 +271,7 @@ impl ReactComponentInfo {
             start_range: expression.syntax().first_token()?.text_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: wrappers.into_boxed_slice(),
+                function: AnyJsFunction::cast_ref(expression.syntax()),
             }),
         })
     }
@@ -372,6 +375,7 @@ impl ReactComponentInfo {
                 start_range: expression.syntax().first_token()?.text_range(),
                 kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                     wrappers: wrappers.into_boxed_slice(),
+                    function: AnyJsFunction::cast_ref(function_expression.syntax()),
                 }),
             })
         } else if let Some(function_or_method) = AnyJsFunctionOrMethodDeclaration::cast_ref(syntax)
@@ -380,6 +384,34 @@ impl ReactComponentInfo {
         } else {
             None
         }
+    }
+
+    /// Returns the object binding pattern of the component's props parameter, if any.
+    pub(crate) fn props_object_pattern(&self) -> Option<JsObjectBindingPattern> {
+        let ReactComponentKind::Function(info) = &self.kind else {
+            return None;
+        };
+        let parameters = function_parameters(info.function.as_ref()?)?;
+        let first_parameter = parameters.items().into_iter().next()?.ok()?;
+        first_parameter
+            .as_any_js_formal_parameter()?
+            .as_js_formal_parameter()?
+            .binding()
+            .ok()?
+            .as_js_object_binding_pattern()
+            .cloned()
+    }
+}
+
+fn function_parameters(function: &AnyJsFunction) -> Option<JsParameters> {
+    match function {
+        AnyJsFunction::JsArrowFunctionExpression(arrow) => match arrow.parameters().ok()? {
+            AnyJsArrowFunctionParameters::JsParameters(parameters) => Some(parameters),
+            AnyJsArrowFunctionParameters::AnyJsBinding(_) => None,
+        },
+        AnyJsFunction::JsFunctionDeclaration(function) => function.parameters().ok(),
+        AnyJsFunction::JsFunctionExportDefaultDeclaration(function) => function.parameters().ok(),
+        AnyJsFunction::JsFunctionExpression(function) => function.parameters().ok(),
     }
 }
 
@@ -579,6 +611,8 @@ declare_node_union! {
 pub(crate) struct ReactFunctionComponentInfo {
     /// List of wrappers that was used to wrap the component.
     pub(crate) wrappers: Box<[ReactFunctionComponentWrapper]>,
+    /// The function that implements the component, when it is a function or arrow.
+    function: Option<AnyJsFunction>,
 }
 
 /// Represents a React class component.
