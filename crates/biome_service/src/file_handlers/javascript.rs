@@ -591,7 +591,6 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         settings,
         node_cache,
         embedded_builder: _,
-        workspace_db,
     } = params;
     if !settings
         .as_ref()
@@ -600,7 +599,7 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         return ParseEmbedResult { nodes: vec![] };
     }
 
-    let js_root: AnyJsRoot = any_parse.parsed(&workspace_db).tree();
+    let js_root: AnyJsRoot = any_parse.tree();
 
     let nodes = js_root
         .syntax()

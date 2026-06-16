@@ -35,10 +35,9 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         settings,
         node_cache,
         embedded_builder,
-        workspace_db,
     } = params;
     let mut nodes = Vec::new();
-    let html_root: HtmlRoot = any_parse.parsed(&workspace_db).tree();
+    let html_root: HtmlRoot = any_parse.tree();
     let Some(file_source) = file_source.to_html_file_source() else {
         return ParseEmbedResult::default();
     };

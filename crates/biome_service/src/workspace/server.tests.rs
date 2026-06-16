@@ -208,6 +208,7 @@ fn store_embedded_nodes_with_current_ranges() {
     let scripts: Vec<_> = snippets
         .iter()
         .filter(|node| {
+            dbg!(db.source_from_index(node.document_source_index(&db)));
             db.source_from_index(node.document_source_index(&db))
                 .is_some_and(|source| source.is_javascript_like())
         })

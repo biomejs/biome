@@ -46,7 +46,7 @@ use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
+use biome_db::{AnyParsedSource, ParsedSnippet};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -131,13 +131,12 @@ pub struct ParseEmbedResult {
 }
 
 pub(crate) struct ParseEmbeddedParams<'a> {
-    pub(crate) any_parse: &'a ParsedSource,
+    pub(crate) any_parse: &'a AnyParse,
     pub(crate) path: &'a BiomePath,
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) node_cache: &'a mut NodeCache,
     pub(crate) embedded_builder: &'a mut EmbeddedBuilder,
-    pub(crate) workspace_db: WorkspaceDb,
 }
 
 type Parse =

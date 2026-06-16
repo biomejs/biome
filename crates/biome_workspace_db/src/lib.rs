@@ -2,7 +2,7 @@ pub mod embedded;
 
 use crate::embedded::{EmbeddedBinding, EmbeddedDb, EmbeddedValueReference};
 use biome_css_semantic::db::CssSemanticDb;
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::ParsedSource;
 use biome_js_semantic::JsSemanticDb;
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
@@ -34,22 +34,6 @@ pub struct WorkspaceDb {
 }
 
 impl WorkspaceDb {
-    /// Inserts a new snippet. `range` should be the `content_range`
-    pub fn insert_snippets(&mut self, path: &Utf8Path, snippets: Vec<ParsedSnippet>) {
-        let file = self.get_file(path);
-        if let Some(file) = file {
-            let snippets = salsa::Setter::to(file.set_snippets(self), snippets);
-            let new_file = ParsedSource::new(
-                self,
-                file.path(self).to_path_buf(),
-                file.parsed(self).clone(),
-                file.document_source_index(self),
-                snippets,
-            );
-            self.update_file(path, new_file);
-        }
-    }
-
     pub fn insert_bindings(&mut self, bindings: Vec<Vec<EmbeddedBinding>>) {
         self.bindings = Arc::new(bindings);
     }
@@ -166,7 +150,6 @@ impl WorkspaceDbHandle {
     pub fn to_db(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
-            // snippets: Arc<HashMap<TextRange, ParsedSnippet>>,
             file_sources: self.file_sources.clone(),
             bindings: self.bindings.clone(),
             modules: self.modules.clone(),
