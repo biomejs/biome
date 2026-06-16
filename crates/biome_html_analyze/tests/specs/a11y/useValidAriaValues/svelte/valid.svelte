@@ -5,3 +5,15 @@
 
 <!-- valid tristate -->
 <span aria-checked="mixed">some text</span>
+
+<!-- dynamic binding should be ignored -->
+<div role="grid" aria-rowcount={count}></div>
+
+<!-- dynamic binding on a non-integer attribute should be ignored -->
+<span aria-checked={isChecked}>some text</span>
+
+<!-- quoted dynamic binding should be ignored -->
+<div role="grid" aria-rowcount="{count}"></div>
+
+<!-- interpolated value should be ignored -->
+<div role="grid" aria-rowcount="row-{count}"></div>

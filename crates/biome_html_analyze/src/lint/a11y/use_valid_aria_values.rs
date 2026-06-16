@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttribute};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
@@ -77,6 +77,24 @@ impl Rule for UseValidAriaValues {
             AnyHtmlAttribute::AnyVueDirective(_) => return None,
             _ => return None,
         };
+
+        // Svelte/Astro dynamic bindings carry a runtime value, not a static one,
+        // so skip them. This covers both aria-x={expr} and interpolated values
+        // such as aria-x="row-{expr}".
+        let is_dynamic_binding = html_attr
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .is_some_and(|value| match &value {
+                AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_) => true,
+                // Interpolated values have no statically-known string.
+                AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => {
+                    value.string_value().is_none()
+                }
+                _ => false,
+            });
+        if is_dynamic_binding {
+            return None;
+        }
 
         let name = extract_html_attribute_name(html_attr)?;
         let is_html_file = ctx.source_type::<HtmlFileSource>().is_html();
