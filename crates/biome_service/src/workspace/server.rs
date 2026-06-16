@@ -2798,7 +2798,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
-        let workspace_db = self.get_db();
+        let mut workspace_db = self.get_db();
         let fix_all = capabilities
             .analyzer
             .fix_all
@@ -2877,6 +2877,10 @@ impl Workspace for WorkspaceServer {
 
             let new_root = update_snippets(parse.into(), workspace_db.clone(), new_snippets)?;
             self.db_update_parsed_root(path.as_path(), new_root);
+            workspace_db = self.get_db();
+            parse = workspace_db
+                .get_file(path.as_path())
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         }
 
         let fix_result = fix_all(FixAllParams {
