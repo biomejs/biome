@@ -21,7 +21,7 @@ declare_lint_rule! {
     /// This rule is designed to prevent invalid anchor usage when the `href` is missing or not navigable,
     /// including the empty fragment `#` both with and without attached logic. With logic attached, an anchor
     /// with an invalid `href` usually behaves like an action and should be a `button`, because that's likely
-    /// what the user wants. Without logic, `href="#"`still points to no real target and can cause scroll
+    /// what the user wants. Without logic, `href="#"` still points to no real target and can cause scroll
     /// position and keyboard focus to fall out of sync. Prefer linking to an actual destination, such as 
     /// `href="#top"`.
     ///
