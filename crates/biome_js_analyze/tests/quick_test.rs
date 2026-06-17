@@ -42,7 +42,7 @@ impl LanguageDb for TestDb {
 #[salsa::db]
 impl biome_db::Db for TestDb {
     fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
-        self.parsed.clone()
+        self.parsed
     }
 }
 

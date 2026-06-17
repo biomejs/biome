@@ -54,7 +54,7 @@ impl LanguageDb for TestDb {
 #[salsa::db]
 impl biome_db::Db for TestDb {
     fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
-        self.parsed.clone()
+        self.parsed
     }
 }
 
@@ -75,7 +75,7 @@ fn embedded_db(
         vec![],
     );
     db.parsed = Some(parsed);
-    db.source_type = Some(DocumentFileSource::from(source_type.clone()));
+    db.source_type = Some(DocumentFileSource::from(*source_type));
     Rc::new(db)
 }
 
@@ -264,7 +264,7 @@ pub(crate) fn analyze_and_snap(
         .with_source_type(source_type)
         .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout.clone())
-        .with_embedded_db(embedded_db(&root, &input_file, &source_type));
+        .with_embedded_db(embedded_db(&root, input_file, &source_type));
     if needs_module_graph {
         let module_db = module_graph_for_test_file(input_file, &project_layout);
         services = services.with_module_db(module_db.rc_module_db());
