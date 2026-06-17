@@ -4,7 +4,10 @@ use crate::{
     services::{embedded_value_references::EmbeddedValueReferences, semantic::Semantic},
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext,
+    declare_lint_rule,
+    utils::{Split, split_separated_list},
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -17,7 +20,7 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TriviaPieceKind, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_export_type::{Style, UseExportTypeOptions};
@@ -153,7 +156,8 @@ impl Rule for UseExportType {
                     let specifiers = clause
                         .specifiers()
                         .iter()
-                        .collect::<Result<Vec<_>, _>>()
+                        .map(|x| Ok(AnyJsExportSpecifier::from(x?)))
+                        .collect::<Result<Vec<_>, SyntaxError>>()
                         .ok()?;
                     return if specifiers.is_empty() {
                         None
@@ -213,11 +217,12 @@ impl Rule for UseExportType {
                             .iter()
                             .filter_map(|specifier| specifier.ok())
                             .filter(|specifier| specifier.type_token().is_none())
+                            .map(AnyJsExportSpecifier::from)
                             .collect();
                         if missing_type_tokens.is_empty() {
                             None
                         } else {
-                            Some(ExportTypeFix::AddInlineTypeQualifiers2(missing_type_tokens))
+                            Some(ExportTypeFix::AddInlineTypeQualifiers(missing_type_tokens))
                         }
                     } else {
                         // Factorize `export type { type ... }` into `export type { ... }`
@@ -234,18 +239,18 @@ impl Rule for UseExportType {
                         }
                     }
                 } else {
-                    let specifiers_with_type_marker: Vec<_> = specifiers
+                    let specifiers_with_type_marker_count = specifiers
                         .iter()
                         .filter_map(|specifier| specifier.ok())
                         .filter(|specifier| specifier.type_token().is_some())
-                        .collect();
-                    let exports_only_types = specifiers.len() == specifiers_with_type_marker.len();
-                    if specifiers_with_type_marker.is_empty() {
+                        .count();
+                    let exports_only_types = specifiers.len() == specifiers_with_type_marker_count;
+                    if specifiers_with_type_marker_count == 0 {
                         None
                     } else if exports_only_types && style != Style::InlineType {
                         Some(ExportTypeFix::UseExportType)
                     } else if style == Style::SeparatedType {
-                        Some(ExportTypeFix::SeparateTypes2(specifiers_with_type_marker))
+                        Some(ExportTypeFix::SeparateTypes(Vec::new()))
                     } else {
                         None
                     }
@@ -263,17 +268,6 @@ impl Rule for UseExportType {
                 "All exports are only types.",
             ),
             ExportTypeFix::AddInlineTypeQualifiers(specifiers) => {
-                let mut diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    named_export_clause.range(),
-                    "Some exports are only types.",
-                );
-                for specifier in specifiers {
-                    diagnostic = diagnostic.detail(specifier.range(), "This export is a type.")
-                }
-                diagnostic
-            }
-            ExportTypeFix::AddInlineTypeQualifiers2(specifiers) => {
                 let mut diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     named_export_clause.range(),
@@ -303,17 +297,6 @@ impl Rule for UseExportType {
                 return Some(diagnostic);
             }
             ExportTypeFix::SeparateTypes(specifiers) => {
-                let mut diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    named_export_clause.range(),
-                    "Separate type exports from other exports.",
-                );
-                for specifier in specifiers {
-                    diagnostic = diagnostic.detail(specifier.range(), "This export is a type.")
-                }
-                diagnostic
-            }
-            ExportTypeFix::SeparateTypes2(specifiers) => {
                 let mut diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     named_export_clause.range(),
@@ -445,33 +428,6 @@ impl Rule for UseExportType {
                     mutation,
                 )
             }
-            ExportTypeFix::AddInlineTypeQualifiers2(specifiers) => {
-                if let Some(type_token) = export_named_clause.type_token() {
-                    // Inline `export type` into `export { type }`
-                    mutation.remove_token(type_token);
-                }
-                for specifier in specifiers {
-                    mutation.replace_node(
-                        specifier.clone(),
-                        specifier
-                            .clone()
-                            .with_leading_trivia_pieces([])?
-                            .with_type_token(Some(
-                                make::token(T![type])
-                                    .with_leading_trivia_pieces(
-                                        specifier.syntax().first_leading_trivia()?.pieces(),
-                                    )
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                            )),
-                    );
-                }
-                JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
-                    mutation,
-                )
-            }
             ExportTypeFix::RemoveInlineTypeQualifiers(type_tokens) => {
                 for type_token in type_tokens {
                     mutation.remove_token(type_token.clone());
@@ -487,58 +443,31 @@ impl Rule for UseExportType {
             ExportTypeFix::SeparateTypes(specifiers_requiring_type_marker) => {
                 let export = export_named_clause.parent::<JsExport>()?;
                 let export_token = export.export_token().ok()?;
-                match export_named_clause {
+                let (export_named_type, export_named_value) = match export_named_clause {
                     AnyJsExportNamedClause::JsExportNamedClause(clause) => {
                         let specifiers = clause.specifiers();
                         let (named_type, named_value) = split_export_named_specifiers(
                             &specifiers,
                             specifiers_requiring_type_marker,
                         )?;
-                        let (export_named_type, export_named_value) =
-                            new_named_exports(export_token, clause, named_type, named_value)?;
-                        add_module_items(
-                            &mut mutation,
-                            export.syntax(),
-                            [export_named_type.into(), export_named_value.into()],
-                        );
-                    }
-                    AnyJsExportNamedClause::JsExportNamedFromClause(_clause) => {
-                        return None;
-                    }
-                }
-                JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Extract types into a new export." }.to_owned(),
-                    mutation,
-                )
-            }
-            ExportTypeFix::SeparateTypes2(specifiers_requiring_type_marker) => {
-                let export = export_named_clause.parent::<JsExport>()?;
-                let export_token = export.export_token().ok()?;
-                match export_named_clause {
-                    AnyJsExportNamedClause::JsExportNamedClause(_clause) => {
-                        return None;
+                        new_named_exports(export_token, clause, named_type, named_value)
                     }
                     AnyJsExportNamedClause::JsExportNamedFromClause(clause) => {
                         let specifiers = clause.specifiers();
-                        let (named_type, named_value) = split_export_named_from_specifiers(
-                            &specifiers,
-                            specifiers_requiring_type_marker,
-                        )?;
-                        let (export_named_type, export_named_value) =
-                            new_named_from_exports(export_token, clause, named_type, named_value)?;
-                        add_module_items(
-                            &mut mutation,
-                            export.syntax(),
-                            [export_named_type.into(), export_named_value.into()],
-                        );
+                        let (named_type, named_value) =
+                            split_export_named_from_specifiers(&specifiers)?;
+                        new_named_from_exports(export_token, clause, named_type, named_value)
                     }
-                }
+                }?;
+                add_module_items(
+                    &mut mutation,
+                    export.syntax(),
+                    [export_named_type.into(), export_named_value.into()],
+                );
                 JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
-                    markup! { "Extract types into a new export." }.to_owned(),
+                    markup! { "Separate types into a new export." }.to_owned(),
                     mutation,
                 )
             }
@@ -549,6 +478,22 @@ impl Rule for UseExportType {
 
 declare_node_union! {
     pub AnyJsExportNamedClause = JsExportNamedClause | JsExportNamedFromClause
+}
+
+declare_node_union! {
+    pub AnyJsExportSpecifier = AnyJsExportNamedSpecifier | JsExportNamedFromSpecifier
+}
+impl AnyJsExportSpecifier {
+    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> Self {
+        match self {
+            Self::AnyJsExportNamedSpecifier(specifier) => {
+                specifier.with_type_token(type_token).into()
+            }
+            Self::JsExportNamedFromSpecifier(specifier) => {
+                specifier.with_type_token(type_token).into()
+            }
+        }
+    }
 }
 
 impl AnyJsExportNamedClause {
@@ -566,17 +511,15 @@ pub enum ExportTypeFix {
      * Group inline type exports such as `export { type A, type B }` into `export type { A, B }`.
      */
     UseExportType,
-    AddInlineTypeQualifiers(Vec<AnyJsExportNamedSpecifier>),
-    AddInlineTypeQualifiers2(Vec<JsExportNamedFromSpecifier>),
+    AddInlineTypeQualifiers(Vec<AnyJsExportSpecifier>),
     RemoveInlineTypeQualifiers(Vec<JsSyntaxToken>),
-    SeparateTypes(Vec<AnyJsExportNamedSpecifier>),
-    SeparateTypes2(Vec<JsExportNamedFromSpecifier>),
+    SeparateTypes(Vec<AnyJsExportSpecifier>),
 }
 
 #[derive(Debug)]
 enum ExportNamedFix {
-    UseImportType(Vec<AnyJsExportNamedSpecifier>),
-    AddInlineTypeQualifiers(Vec<AnyJsExportNamedSpecifier>),
+    UseImportType(Vec<AnyJsExportSpecifier>),
+    AddInlineTypeQualifiers(Vec<AnyJsExportSpecifier>),
     RemoveInlineTypeQualifiers(Vec<JsSyntaxToken>),
     CanSeparateType,
 }
@@ -621,7 +564,7 @@ fn export_named_fix(
                         .all(|binding| binding.tree().is_type_only())
                     && !references.is_used_as_value(local_name)
                 {
-                    specifiers_requiring_type_marker.push(specifier);
+                    specifiers_requiring_type_marker.push(specifier.into());
                 } else {
                     imports_only_types = false;
                 }
@@ -649,20 +592,10 @@ fn export_named_fix(
 
 fn split_export_named_specifiers(
     specifiers: &JsExportNamedSpecifierList,
-    specifiers_requiring_type_keyword: &[AnyJsExportNamedSpecifier],
+    specifiers_requiring_type_keyword: &[AnyJsExportSpecifier],
 ) -> Option<(JsExportNamedSpecifierList, JsExportNamedSpecifierList)> {
-    // There is at least one expprt that is not a type.
-    // Thus there is at most `len - 1` type-only exports.
-    let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
-    let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
-    let mut value_specifiers =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_keyword.len());
-    let mut value_specifier_separators =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_keyword.len());
-    for specifier_element in specifiers.elements() {
-        let specifier = specifier_element.node().ok()?.clone();
-        let trailing_sep = specifier_element.into_trailing_separator().ok()?;
-        if let Some(type_token) = specifier.type_token() {
+    split_separated_list(specifiers, |specifier| {
+        Some(if let Some(type_token) = specifier.type_token() {
             let new_specifier = specifier
                 .with_type_token(None)
                 .trim_leading_trivia()?
@@ -670,50 +603,25 @@ fn split_export_named_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            type_specifiers.push(new_specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Split::Left(new_specifier)
         } else if specifiers_requiring_type_keyword
             .iter()
-            .any(|x| x.range().start() == specifier.range().start())
+            .any(|x| x.syntax().index() == specifier.syntax().index())
         {
-            type_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Split::Left(specifier)
         } else {
-            value_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                value_specifier_separators.push(trailing_sep);
-            }
-        }
-    }
-    let named_type =
-        make::js_export_named_specifier_list(type_specifiers, type_specifier_separators);
-    let named_value =
-        make::js_export_named_specifier_list(value_specifiers, value_specifier_separators);
-    Some((named_type, named_value))
+            Split::Right(specifier)
+        })
+    })
 }
 
 fn split_export_named_from_specifiers(
     specifiers: &JsExportNamedFromSpecifierList,
-    specifiers_requiring_type_keyword: &[JsExportNamedFromSpecifier],
 ) -> Option<(
     JsExportNamedFromSpecifierList,
     JsExportNamedFromSpecifierList,
 )> {
-    // There is at least one expprt that is not a type.
-    // Thus there is at most `len - 1` type-only exports.
-    let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
-    let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
-    let mut value_specifiers =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_keyword.len());
-    let mut value_specifier_separators =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_keyword.len());
-    for specifier_element in specifiers.elements() {
-        let specifier = specifier_element.node().ok()?.clone();
-        let trailing_sep = specifier_element.into_trailing_separator().ok()?;
+    split_separated_list(specifiers, |specifier| {
         if let Some(type_token) = specifier.type_token() {
             let new_specifier = specifier
                 .with_type_token(None)
@@ -722,30 +630,11 @@ fn split_export_named_from_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            type_specifiers.push(new_specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
-        } else if specifiers_requiring_type_keyword
-            .iter()
-            .any(|x| x.range().start() == specifier.range().start())
-        {
-            type_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Some(Split::Left(new_specifier))
         } else {
-            value_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                value_specifier_separators.push(trailing_sep);
-            }
+            Some(Split::Right(specifier))
         }
-    }
-    let named_type =
-        make::js_export_named_from_specifier_list(type_specifiers, type_specifier_separators);
-    let named_value =
-        make::js_export_named_from_specifier_list(value_specifiers, value_specifier_separators);
-    Some((named_type, named_value))
+    })
 }
 
 fn new_named_exports(

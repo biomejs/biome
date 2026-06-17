@@ -117,7 +117,7 @@ where
 /// It allows you to add missing separators and remove an extra separator.
 /// Usually, you collect every pair of nodes and separators in a vector and then pass a mutable iterator to `fix_separators`.
 ///
-/// See [sorted_separated_list_by] as a usage example.
+/// See [`sorted_separated_list_by`] as a usage example.
 pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     // Mutable iterator of a list of nodes and their optional separators
     iter: impl std::iter::ExactSizeIterator<Item = (&'a mut N, &'a mut Option<SyntaxToken<L>>)>,
@@ -157,6 +157,82 @@ pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
             }
         }
     }
+}
+
+/// Represents an item that eiher part of a left partition or a right partition.
+///
+/// This is the return type of [`split_separated_list`].
+#[derive(Debug)]
+pub enum Split<T> {
+    Left(T),
+    Right(T),
+}
+
+/// Splits the list into two new lists according to a partitioning function.
+///
+/// Every item of `list` is passed to `partition` that decides if the item is
+/// part of the left or the right returned list.
+/// The `partition` function can change the passed item before returning it.
+/// This allows supporting cases where the passed AST node must be modified.
+///
+/// The trailing separators are moved with their node.
+pub fn split_separated_list<'a, L: Language + 'a, List, Node>(
+    list: &List,
+    partition: impl Fn(Node) -> Option<Split<Node>>,
+) -> Option<(List, List)>
+where
+    List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
+    Node: AstNode<Language = L> + 'a,
+{
+    let mut left_items = Vec::with_capacity(list.len());
+    let mut left_separators = Vec::with_capacity(list.len());
+    let mut right_items = Vec::with_capacity(list.len());
+    let mut right_separators = Vec::with_capacity(list.len());
+
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in list.elements()
+    {
+        let node = node.ok()?;
+        let trailing_separator = trailing_separator.ok()?;
+        let (items, separators, node) = match partition(node)? {
+            Split::Left(node) => (&mut left_items, &mut left_separators, node),
+            Split::Right(node) => (&mut right_items, &mut right_separators, node),
+        };
+        items.push(node);
+        if let Some(trailing_separator) = trailing_separator {
+            separators.push(trailing_separator);
+        }
+    }
+
+    let mut left_items = left_items.into_iter();
+    let mut left_separators = left_separators.into_iter();
+    let left_list = List::unwrap_cast(SyntaxNode::new_detached(
+        list.syntax().kind(),
+        (0..left_items.len() + left_separators.len()).map(|index| {
+            if index % 2 == 0 {
+                Some(left_items.next()?.into_syntax().into())
+            } else {
+                Some(left_separators.next()?.into())
+            }
+        }),
+    ));
+
+    let mut right_items = right_items.into_iter();
+    let mut right_separators = right_separators.into_iter();
+    let right_list = List::unwrap_cast(SyntaxNode::new_detached(
+        list.syntax().kind(),
+        (0..right_items.len() + right_separators.len()).map(|index| {
+            if index % 2 == 0 {
+                Some(right_items.next()?.into_syntax().into())
+            } else {
+                Some(right_separators.next()?.into())
+            }
+        }),
+    ));
+
+    Some((left_list, right_list))
 }
 
 /// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.

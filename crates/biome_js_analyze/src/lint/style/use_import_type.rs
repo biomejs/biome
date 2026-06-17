@@ -5,8 +5,11 @@ use crate::{
     services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext,
+    declare_lint_rule,
     options::JsxRuntime,
+    utils::{Split, split_separated_list},
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -1068,17 +1071,7 @@ fn split_named_import_specifiers(
     specifiers_requiring_type_marker: &[AnyJsNamedImportSpecifier],
 ) -> Option<(JsNamedImportSpecifiers, JsNamedImportSpecifiers)> {
     let specifiers = named_specifiers.specifiers();
-    // There is at least one import that is not a type.
-    // Thus there is at most `len - 1` type-only imports.
-    let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
-    let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
-    let mut value_specifiers =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
-    let mut value_specifier_separators =
-        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
-    for specifier_element in specifiers.elements() {
-        let specifier = specifier_element.node().ok()?.clone();
-        let trailing_sep = specifier_element.into_trailing_separator().ok()?;
+    let (type_specifiers, value_specifiers) = split_separated_list(&specifiers, |specifier| {
         if let Some(type_token) = specifier.type_token() {
             let new_specifier = specifier
                 .with_type_token(None)
@@ -1087,35 +1080,18 @@ fn split_named_import_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            type_specifiers.push(new_specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Some(Split::Left(new_specifier))
         } else if specifiers_requiring_type_marker
             .iter()
-            .any(|x| x.range().start() == specifier.range().start())
+            .any(|x| x.syntax().index() == specifier.syntax().index())
         {
-            type_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                type_specifier_separators.push(trailing_sep);
-            }
+            Some(Split::Left(specifier))
         } else {
-            value_specifiers.push(specifier);
-            if let Some(trailing_sep) = trailing_sep {
-                value_specifier_separators.push(trailing_sep);
-            }
+            Some(Split::Right(specifier))
         }
-    }
-    let named_type = {
-        let type_specifiers =
-            make::js_named_import_specifier_list(type_specifiers, type_specifier_separators);
-        named_specifiers.clone().with_specifiers(type_specifiers)
-    };
-    let named_value = {
-        let value_specifiers =
-            make::js_named_import_specifier_list(value_specifiers, value_specifier_separators);
-        named_specifiers.with_specifiers(value_specifiers)
-    };
+    })?;
+    let named_type = named_specifiers.clone().with_specifiers(type_specifiers);
+    let named_value = named_specifiers.with_specifiers(value_specifiers);
     Some((named_type, named_value))
 }
 
