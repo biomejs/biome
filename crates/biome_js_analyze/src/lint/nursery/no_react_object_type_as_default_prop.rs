@@ -78,7 +78,7 @@ impl Rule for NoReactObjectTypeAsDefaultProp {
         let Some(object_pattern) = component.props_object_pattern() else {
             return vec![];
         };
-        collect_forbidden_defaults(&object_pattern).unwrap_or_default()
+        collect_forbidden_defaults(&object_pattern)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -163,33 +163,22 @@ fn forbidden_default_kind(expression: &AnyJsExpression) -> Option<ForbiddenDefau
     Some(kind)
 }
 
-fn collect_forbidden_defaults(
-    object_pattern: &JsObjectBindingPattern,
-) -> Option<Vec<ForbiddenDefault>> {
-    let mut defaults = Vec::new();
-    for property in object_pattern.properties() {
-        let property = property.ok()?;
-
-        let AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(shorthand) =
-            property
-        else {
-            continue;
-        };
-
-        let Some(initializer) = shorthand.init() else {
-            continue;
-        };
-        let default_value = initializer.expression().ok()?;
-
-        let Some(kind) = forbidden_default_kind(&default_value) else {
-            continue;
-        };
-
-        defaults.push(ForbiddenDefault {
-            range: default_value.range(),
-            kind,
-        });
-    }
-
-    Some(defaults)
+fn collect_forbidden_defaults(object_pattern: &JsObjectBindingPattern) -> Vec<ForbiddenDefault> {
+    object_pattern
+        .properties()
+        .into_iter()
+        .filter_map(|property| {
+            let AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(shorthand) =
+                property.ok()?
+            else {
+                return None;
+            };
+            let default_value = shorthand.init()?.expression().ok()?;
+            let kind = forbidden_default_kind(&default_value)?;
+            Some(ForbiddenDefault {
+                range: default_value.range(),
+                kind,
+            })
+        })
+        .collect()
 }
