@@ -130,6 +130,10 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
         AnyCssSubSelector::CssAttributeSelector(_) => CLASS_SPECIFICITY,
         AnyCssSubSelector::CssPseudoClassSelector(s) => evaluate_pseudo_selector(s),
         AnyCssSubSelector::CssPseudoElementSelector(_) => TYPE_SPECIFICITY,
+        // The nesting selector's specificity is the specificity of the parent
+        // selector it's substituted with, which isn't known here. As with the
+        // leading `&` in `nesting_selectors`, treat it as contributing nothing.
+        AnyCssSubSelector::CssNestedSelector(_) => ZERO_SPECIFICITY,
         AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
     }
 }
