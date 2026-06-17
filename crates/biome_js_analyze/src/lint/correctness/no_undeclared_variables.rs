@@ -99,7 +99,8 @@ impl Rule for NoUndeclaredVariables {
                 }
 
                 if embedded.contains_binding(token_text)
-                    || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
+                    || store_name
+                        .is_some_and(|store_name| embedded.contains_binding_text(store_name))
                 {
                     return None;
                 }

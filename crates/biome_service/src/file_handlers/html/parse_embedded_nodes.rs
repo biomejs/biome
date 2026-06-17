@@ -4,15 +4,13 @@ use crate::embed::types::{
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
-use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssLanguage, TextSize};
 use biome_html_syntax::{
-    AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
-    AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
-    AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
-    HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
-    HtmlSingleTextExpression, HtmlTextExpression, SvelteName, VueDirective,
+    AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
+    AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
+    HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression,
+    HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression, SvelteName, VueDirective,
     VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
@@ -25,7 +23,6 @@ use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
-use std::collections::VecDeque;
 
 pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
     let ParseEmbeddedParams {
@@ -34,7 +31,6 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         file_source,
         settings,
         node_cache,
-        embedded_builder,
     } = params;
     let mut nodes = Vec::new();
     let html_root: HtmlRoot = any_parse.tree();
@@ -49,7 +45,6 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         biome_path: path,
         host_file_source: &file_source,
         settings,
-        builder: embedded_builder,
     };
 
     match file_source.variant() {
@@ -351,11 +346,6 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             }
         }
     }
-
-    if file_source.is_vue() {
-        embedded_builder.visit_html_root(&html_root);
-    }
-
     ParseEmbedResult { nodes }
 }
 
@@ -431,18 +421,6 @@ fn parse_svelte_blocks(
                     if let Some(item) = opening_block.item() {
                         match item {
                             AnySvelteBlockItem::SvelteEachAsKeyedItem(as_keyed) => {
-                                if let Ok(name) = as_keyed.name() {
-                                    register_svelte_each_name_bindings(ctx.builder, name);
-                                }
-                                if let Some(index) = as_keyed.index()
-                                    && let Ok(value) = index.value()
-                                    && let Ok(token) = value.ident_token()
-                                {
-                                    ctx.builder.register_binding(
-                                        token.text_trimmed_range(),
-                                        token.token_text_trimmed(),
-                                    );
-                                }
                                 if let Some(key) = as_keyed.key()
                                     && let Ok(key_expression) = key.expression()
                                     && let Some(candidate) = build_svelte_text_expression_candidate(
@@ -458,17 +436,7 @@ fn parse_svelte_blocks(
                                     );
                                 }
                             }
-                            AnySvelteBlockItem::SvelteEachKeyedItem(keyed) => {
-                                if let Some(index) = keyed.index()
-                                    && let Ok(value) = index.value()
-                                    && let Ok(token) = value.ident_token()
-                                {
-                                    ctx.builder.register_binding(
-                                        token.text_trimmed_range(),
-                                        token.token_text_trimmed(),
-                                    );
-                                }
-                            }
+                            AnySvelteBlockItem::SvelteEachKeyedItem(_) => {}
                         }
                     }
                 }
@@ -872,7 +840,6 @@ fn parse_matched_embed(
     ctx: &mut EmbedParseContext,
     embedded_file_source: Option<JsFileSource>,
 ) -> Option<ParsedEmbed> {
-    let host_file_source = ctx.host_file_source;
     let content = candidate.content();
 
     match embed_match.guest {
@@ -997,17 +964,6 @@ fn parse_matched_embed(
                 ctx.cache,
             );
 
-            // We track bindings in the following cases:
-            // - Source snippets
-            // - Snippets declared inside svelte files. Blocks such as #snippet and #render can define functions and bindings.
-            if is_source_level || host_file_source.is_svelte() {
-                ctx.builder.visit_js_source_snippet(
-                    &parse.tree(),
-                    host_file_source,
-                    candidate.as_block_kind(),
-                );
-            }
-
             Some(ParsedEmbed {
                 node: (parse.into(), content, doc_source),
                 // Only source-level embeds contribute to embedded_file_source capture
@@ -1067,87 +1023,6 @@ fn parse_matched_embed(
             None
         }
     }
-}
-
-/// Registers bindings declared by the `as` clause of a Svelte `{#each}` block.
-///
-/// Handles the three name shapes the grammar allows: a plain identifier,
-/// an object or array destructure, and a text expression. Only the first two
-/// introduce new bindings; the text expression form is left alone.
-fn register_svelte_each_name_bindings(builder: &mut EmbeddedBuilder, name: AnySvelteEachName) {
-    match name {
-        AnySvelteEachName::SvelteName(ident) => {
-            if let Ok(token) = ident.ident_token() {
-                builder.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-            }
-        }
-        AnySvelteEachName::AnySvelteDestructuredName(destructured) => {
-            register_svelte_destructured_bindings(builder, destructured);
-        }
-        AnySvelteEachName::HtmlTextExpression(_) => {}
-    }
-}
-
-/// Walks a Svelte curly or square destructure pattern iteratively and
-/// registers every identifier introduced by it, including nested patterns
-/// and rest bindings (`{ ...rest }`).
-fn register_svelte_destructured_bindings(
-    builder: &mut EmbeddedBuilder,
-    destructured: AnySvelteDestructuredName,
-) -> Option<()> {
-    let mut queue: VecDeque<AnySvelteDestructuredName> = VecDeque::new();
-    queue.push_back(destructured);
-
-    while let Some(current) = queue.pop_front() {
-        let list = match current {
-            AnySvelteDestructuredName::SvelteCurlyDestructuredName(n) => n.names(),
-            AnySvelteDestructuredName::SvelteSquareDestructuredName(n) => n.names(),
-        };
-        for binding in list.iter().flatten() {
-            match binding {
-                AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
-                    let token = ident.ident_token().ok()?;
-                    builder
-                        .register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-                }
-                AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(nested) => {
-                    queue.push_back(nested);
-                }
-                AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
-                    let name = rest.name().ok()?;
-                    let token = name.ident_token().ok()?;
-                    builder
-                        .register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-                }
-                AnySvelteBindingAssignmentBinding::SvelteRenameBinding(rename) => {
-                    // The alias side (`{ prop: alias }` or `{ prop: { a, b } }`) is the binding.
-                    match rename.name().ok()? {
-                        AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
-                            let token = ident.ident_token().ok()?;
-                            builder.register_binding(
-                                token.text_trimmed_range(),
-                                token.token_text_trimmed(),
-                            );
-                        }
-                        AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(nested) => {
-                            queue.push_back(nested);
-                        }
-                        AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
-                            let name = rest.name().ok()?;
-                            let token = name.ident_token().ok()?;
-                            builder.register_binding(
-                                token.text_trimmed_range(),
-                                token.token_text_trimmed(),
-                            );
-                        }
-                        AnySvelteBindingAssignmentBinding::SvelteRenameBinding(_) => {}
-                    }
-                }
-            }
-        }
-    }
-
-    Some(())
 }
 
 #[cfg(test)]

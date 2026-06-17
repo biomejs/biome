@@ -38,6 +38,7 @@ use biome_configuration::javascript::{
 };
 use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::CssLanguage;
+use biome_db::{AnyParsedSource, ParsedSnippet};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
@@ -45,9 +46,6 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, LanguageDb};
-// TODO: js_embeds feature when ready
-use biome_db::{AnyParsedSource, ParsedSnippet};
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(feature = "lang_graphql")]
@@ -74,6 +72,7 @@ use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 #[cfg(feature = "lang_graphql")]
 use biome_languages::GraphqlFileSource;
 use biome_languages::css::CssEmbeddingKind;
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
@@ -588,7 +587,6 @@ fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
         file_source,
         settings,
         node_cache,
-        embedded_builder: _,
     } = params;
     if !settings
         .as_ref()

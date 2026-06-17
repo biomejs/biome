@@ -124,16 +124,6 @@ pub(crate) enum EmbedCandidate {
     },
 }
 
-impl EmbedCandidate {
-    pub(crate) fn as_block_kind(&self) -> Option<&EmbedBlockKind> {
-        if let Self::TextExpression { block_kind, .. } = &self {
-            Some(block_kind)
-        } else {
-            None
-        }
-    }
-}
-
 #[derive(Debug, Default)]
 pub(crate) enum EmbedBlockKind {
     Svelte(SvelteBlockKind),

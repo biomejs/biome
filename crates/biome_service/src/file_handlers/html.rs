@@ -16,7 +16,6 @@ use crate::settings::{
 };
 use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
-use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -428,7 +427,6 @@ struct EmbedParseContext<'a, 'b> {
     biome_path: &'a BiomePath,
     host_file_source: &'a HtmlFileSource,
     settings: &'a SettingsWithEditor<'b>,
-    builder: &'a mut EmbeddedBuilder,
 }
 
 fn debug_syntax_tree(

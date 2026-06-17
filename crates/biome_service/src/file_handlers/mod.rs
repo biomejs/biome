@@ -30,7 +30,6 @@ pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     CodeAction, DefinitionReference, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
     GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
@@ -136,7 +135,6 @@ pub(crate) struct ParseEmbeddedParams<'a> {
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) node_cache: &'a mut NodeCache,
-    pub(crate) embedded_builder: &'a mut EmbeddedBuilder,
 }
 
 type Parse =

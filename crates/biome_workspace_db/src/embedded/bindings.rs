@@ -1,24 +1,21 @@
 use crate::embedded::EmbeddedDb;
+use crate::embedded::visitor::embedded_bindings_from_source;
 use biome_rowan::{TextRange, TokenText};
 use camino::Utf8PathBuf;
 
-#[salsa::input]
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EmbeddedBinding {
     /// The range of the binding
-    #[returns(clone)]
     pub range: TextRange,
     /// The text of the binding
-    #[returns(clone)]
     pub text: TokenText,
     /// Optionally, the source of the binding. It represents the path of the import/dynamic import.
-    #[returns(ref)]
     pub source: Option<TokenText>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
-pub struct InternedBinding {
+pub struct InternedBindingTokenText {
     #[returns(ref)]
     path: Utf8PathBuf,
 
@@ -26,15 +23,27 @@ pub struct InternedBinding {
     name: TokenText,
 }
 
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedBindingText {
+    #[returns(ref)]
+    path: Utf8PathBuf,
+
+    #[returns(ref)]
+    name: String,
+}
+
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_by_name<'db>(
     db: &'db dyn EmbeddedDb,
-    binding_name: InternedBinding<'db>,
+    binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
-    for bindings in db.bindings(binding_name.path(db)) {
+    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+
+    for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
-            if binding.text(db).text() == *binding_name.name(db) {
-                return Some(binding);
+            if binding.text.text() == *binding_name.name(db) {
+                return Some(binding.clone());
             }
         }
     }
@@ -44,45 +53,70 @@ pub fn get_binding_by_name<'db>(
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_with_source<'db>(
     db: &'db dyn EmbeddedDb,
-    binding_name: InternedBinding<'db>,
+    binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
-    for bindings in db.bindings(binding_name.path(db)) {
+    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+    for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
-            if binding.text(db).text() == *binding_name.name(db) && binding.source(db).is_some() {
-                return Some(binding);
+            if binding.text.text() == *binding_name.name(db) && binding.source.is_some() {
+                return Some(binding.clone());
             }
         }
     }
     None
 }
 
-// #[salsa::tracked(returns(ref))]
-// pub fn bindings_without_source(db: &dyn EmbeddedDb) -> Vec<Vec<(TextRange, TokenText)>> {
-//     db.bindings()
-//         .into_iter()
-//         .map(|bindings| {
-//             bindings
-//                 .into_iter()
-//                 .map(|b| (b.range(db), b.text(db)))
-//                 .collect::<Vec<_>>()
-//         })
-//         .collect::<Vec<_>>()
-// }
+#[salsa::tracked(returns(ref))]
+pub fn get_binding_by_token_text<'db>(
+    db: &'db dyn EmbeddedDb,
+    binding_name: InternedBindingTokenText<'db>,
+) -> Option<EmbeddedBinding> {
+    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+
+    for bindings in embedded_bindings_from_source(db, parsed_source) {
+        for binding in bindings {
+            if binding.text.text() == binding_name.name(db).text() {
+                return Some(binding.clone());
+            }
+        }
+    }
+    None
+}
+
+#[salsa::tracked(returns(ref))]
+pub fn get_binding_by_text<'db>(
+    db: &'db dyn EmbeddedDb,
+    binding_name: InternedBindingText<'db>,
+) -> Option<EmbeddedBinding> {
+    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+
+    for bindings in embedded_bindings_from_source(db, parsed_source) {
+        for binding in bindings {
+            if binding.text.text() == binding_name.name(db).as_str() {
+                return Some(binding.clone());
+            }
+        }
+    }
+    None
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::embedded::references::EmbeddedValueReference;
     use biome_db::testing::{Events, assert_function_query_was_not_run};
+    use biome_db::{Db, ParsedSnippet, ParsedSource};
+    use biome_html_parser::{HtmlParserOptions, parse_html};
+    use biome_js_parser::JsParserOptions;
+    use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_rowan::{RawSyntaxKind, TextSize};
-    use camino::Utf8Path;
+    use camino::{Utf8Path, Utf8PathBuf};
     use papaya::HashMap;
     use salsa::Storage;
 
     #[salsa::db]
     #[derive(Default)]
     struct TestDb {
-        bindings: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedBinding>>>,
+        files: HashMap<Utf8PathBuf, ParsedSource>,
         events: Events,
         storage: Storage<Self>,
     }
@@ -91,7 +125,7 @@ mod tests {
         fn new() -> Self {
             let events = Events::default();
             Self {
-                bindings: HashMap::new(),
+                files: HashMap::new(),
                 storage: salsa::Storage::new(Some(Box::new({
                     let events = events.clone();
                     move |event| {
@@ -110,8 +144,8 @@ mod tests {
             self.take_salsa_events();
         }
 
-        fn insert_bindings(&mut self, path: Utf8PathBuf, bindings: Vec<Vec<EmbeddedBinding>>) {
-            self.bindings.pin().insert(path, bindings);
+        fn insert_file(&self, path: Utf8PathBuf, file: ParsedSource) {
+            self.files.pin().insert(path, file);
         }
     }
 
@@ -120,122 +154,178 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<biome_db::ParsedSource> {
-            None
+        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            self.files.pin().get(path).copied()
         }
     }
 
     #[salsa::db]
-    impl EmbeddedDb for TestDb {
-        fn bindings(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedBinding>> {
-            self.bindings.pin().get(path).cloned().unwrap_or_default()
+    impl LanguageDb for TestDb {
+        fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
+            Some(match index {
+                0 => DocumentFileSource::Html(HtmlFileSource::vue()),
+                2 => DocumentFileSource::Html(HtmlFileSource::html()),
+                3 => DocumentFileSource::Js(JsFileSource::js_module()),
+                _ => DocumentFileSource::Js(JsFileSource::vue()),
+            })
         }
+    }
 
-        fn references(&self, _path: &Utf8Path) -> Vec<Vec<EmbeddedValueReference>> {
-            Vec::new()
-        }
+    #[salsa::db]
+    impl EmbeddedDb for TestDb {}
+
+    fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/App.vue");
+        let parsed = parse_html(source, HtmlParserOptions::default().with_vue()).into();
+        let file = ParsedSource::new(db, path.clone(), parsed, 0, vec![]);
+        db.insert_file(path.clone(), file);
+        path
+    }
+
+    fn parse_html_source_with_js_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/file.html");
+        let parsed = parse_html(html, HtmlParserOptions::default()).into();
+        let snippet_parse =
+            biome_js_parser::parse(js, JsFileSource::js_module(), JsParserOptions::default())
+                .into();
+        let content_start = TextSize::from(html.find(js).expect("snippet should exist") as u32);
+        let content_end = content_start + TextSize::from(js.len() as u32);
+        let snippet = ParsedSnippet::new(
+            db,
+            snippet_parse,
+            TextRange::new(TextSize::from(0), TextSize::from(html.len() as u32)),
+            TextRange::new(content_start, content_end),
+            content_start,
+            3,
+        );
+        let file = ParsedSource::new(db, path.clone(), parsed, 2, vec![snippet]);
+        db.insert_file(path.clone(), file);
+        path
+    }
+
+    fn parse_vue_source_with_js_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
+        let path = Utf8PathBuf::from("src/App.vue");
+        let parsed = parse_html(html, HtmlParserOptions::default().with_vue()).into();
+        let snippet_parse =
+            biome_js_parser::parse(js, JsFileSource::vue(), JsParserOptions::default()).into();
+        let snippet = ParsedSnippet::new(
+            db,
+            snippet_parse,
+            TextRange::default(),
+            TextRange::default(),
+            TextSize::default(),
+            1,
+        );
+        let file = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
+        db.insert_file(path.clone(), file);
+        path
     }
 
     fn token_text(text: &str) -> TokenText {
         TokenText::new_raw(RawSyntaxKind(0), text)
     }
 
-    fn range(start: u32, end: u32) -> TextRange {
-        TextRange::new(TextSize::from(start), TextSize::from(end))
-    }
-
-    fn binding(db: &TestDb, name: &str, range: TextRange, source: Option<&str>) -> EmbeddedBinding {
-        EmbeddedBinding::new(db, range, token_text(name), source.map(token_text))
-    }
-
     #[test]
     fn get_binding_by_name_finds_matching_binding() {
-        let mut db = TestDb::new();
-        let path = Utf8PathBuf::from("src/App.vue");
-        db.insert_bindings(
-            path.clone(),
-            vec![vec![
-                binding(&db, "Local", range(0, 5), None),
-                binding(&db, "Component", range(10, 19), Some("./Component.vue")),
-            ]],
+        let db = TestDb::new();
+        let path = parse_vue_source(
+            &db,
+            r#"<template><div v-for="Local in items" /></template>"#,
         );
 
         let found = get_binding_by_name(
             &db,
-            InternedBinding::new(&db, path.clone(), token_text("Local")),
+            InternedBindingTokenText::new(&db, path, token_text("Local")),
         )
+        .as_ref()
         .expect("binding should exist");
 
-        assert_eq!(found.range(&db), range(0, 5));
-        assert_eq!(found.text(&db).text(), "Local");
+        assert_eq!(found.text.text(), "Local");
     }
 
     #[test]
     fn get_binding_with_source_ignores_local_bindings() {
-        let mut db = TestDb::new();
-        let path = Utf8PathBuf::from("src/App.vue");
-        db.insert_bindings(
-            path.clone(),
-            vec![vec![
-                binding(&db, "Local", range(0, 5), None),
-                binding(&db, "Component", range(10, 19), Some("./Component.vue")),
-            ]],
+        let db = TestDb::new();
+        let path = parse_vue_source(
+            &db,
+            r#"<template><div v-for="Local in items" /></template>"#,
         );
 
         assert!(
             get_binding_with_source(
                 &db,
-                InternedBinding::new(&db, path.clone(), token_text("Local"))
+                InternedBindingTokenText::new(&db, path, token_text("Local"))
             )
             .is_none()
+        );
+    }
+
+    #[test]
+    fn get_binding_with_source_finds_imported_binding_from_source_snippet() {
+        let db = TestDb::new();
+        let path = parse_vue_source_with_js_snippet(
+            &db,
+            "<script setup></script>",
+            r#"import Component from "./Component.vue";"#,
         );
 
         let found = get_binding_with_source(
             &db,
-            InternedBinding::new(&db, path.clone(), token_text("Component")),
+            InternedBindingTokenText::new(&db, path, token_text("Component")),
         )
+        .as_ref()
         .expect("imported binding should exist");
 
-        assert_eq!(found.text(&db).text(), "Component");
+        assert_eq!(found.text.text(), "Component");
         assert_eq!(
-            found.source(&db).as_ref().map(TokenText::text),
+            found.source.as_ref().map(TokenText::text),
             Some("./Component.vue")
         );
     }
 
-    // #[test]
-    // fn bindings_without_source_preserves_groups_and_text() {
-    //     let mut db = TestDb::new();
-    //     db.insert_bindings(vec![
-    //         vec![binding(&db, "first", range(0, 5), None)],
-    //         vec![binding(&db, "second", range(10, 16), Some("./second"))],
-    //     ]);
-    //
-    //     let groups = bindings_without_source(&db);
-    //
-    //     assert_eq!(groups.len(), 2);
-    //     assert_eq!(groups[0][0].0, range(0, 5));
-    //     assert_eq!(groups[0][0].1.text(), "first");
-    //     assert_eq!(groups[1][0].0, range(10, 16));
-    //     assert_eq!(groups[1][0].1.text(), "second");
-    // }
+    #[test]
+    fn collects_bindings_from_plain_html_script_source_snippet() {
+        let db = TestDb::new();
+        let js = r#"import _ from "lodash"; const schema = {};"#;
+        let path = parse_html_source_with_js_snippet(
+            &db,
+            &format!(r#"<script type="module">{js}</script>"#),
+            js,
+        );
+
+        assert!(
+            get_binding_by_name(
+                &db,
+                InternedBindingTokenText::new(&db, path.clone(), token_text("_"))
+            )
+            .is_some()
+        );
+        assert!(
+            get_binding_by_name(
+                &db,
+                InternedBindingTokenText::new(&db, path, token_text("schema"))
+            )
+            .is_some()
+        );
+    }
 
     #[test]
     fn get_binding_by_name_is_memoized() {
-        let mut db = TestDb::new();
-        let path = Utf8PathBuf::from("src/App.vue");
-        db.insert_bindings(
-            path.clone(),
-            vec![vec![binding(&db, "Local", range(0, 5), None)]],
+        let db = TestDb::new();
+        let path = parse_vue_source(
+            &db,
+            r#"<template><div v-for="Local in items" /></template>"#,
         );
-        let name = InternedBinding::new(&db, path, token_text("Local"));
+        let file = db
+            .parsed_source_for_path(&path)
+            .expect("parsed source should be stored");
 
-        let _ = get_binding_by_name(&db, name);
+        let _ = embedded_bindings_from_source(&db, file);
 
         db.clear_salsa_events();
-        let _ = get_binding_by_name(&db, name);
+        let _ = embedded_bindings_from_source(&db, file);
         let events = db.take_salsa_events();
 
-        assert_function_query_was_not_run(&db, get_binding_by_name, name, &events);
+        assert_function_query_was_not_run(&db, embedded_bindings_from_source, file, &events);
     }
 }

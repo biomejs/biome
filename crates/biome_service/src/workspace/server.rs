@@ -16,10 +16,6 @@ use crate::scanner::{
 use crate::settings::{
     EditorFeature, EditorFeatures, ModuleGraphResolutionKind, SettingsHandle, SettingsWithEditor,
 };
-use crate::workspace::document::services::embedded_bindings::{
-    EmbeddedBuilder, EmbeddedExportedBindings,
-};
-use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, DropPatternParams, FeaturesBuilder, FileContent, FileExistsParams,
@@ -73,10 +69,8 @@ use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{NodeCache, SendNode, TokenText};
+use biome_rowan::{NodeCache, SendNode};
 use biome_workspace_db::WorkspaceDb;
-use biome_workspace_db::embedded::bindings::EmbeddedBinding;
-use biome_workspace_db::embedded::references::EmbeddedValueReference;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
@@ -572,9 +566,7 @@ impl WorkspaceServer {
                     .insert(path.clone(), node_cache);
             }
 
-            let mut exported_bindings = EmbeddedExportedBindings::default();
             let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled();
-            let mut builder = exported_bindings.builder();
 
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content.
             let mut node_cache = NodeCache::default();
@@ -586,47 +578,13 @@ impl WorkspaceServer {
                         &any_parse,
                         &mut node_cache,
                         &settings,
-                        &mut builder,
                     )?
                 } else {
                     Default::default()
                 };
 
-            exported_bindings.finish(builder);
-            self.db_update_embedded_bindings(exported_bindings.bindings);
-
             let final_source =
                 self.db_update_parsed_file(&path, any_parse, file_source_index, embedded_snippets);
-
-            // Track value references from non-source snippets (templates).
-            let mut value_references = EmbeddedValueReferences::default();
-            let db = self.get_db();
-            for snippet in final_source.snippets(&db) {
-                let Some(file_source) = db.source_from_index(snippet.document_source_index(&db))
-                else {
-                    continue;
-                };
-                let Some(js_file_source) = file_source.to_js_file_source() else {
-                    continue;
-                };
-                if !js_file_source.is_embedded_source() {
-                    let mut builder = value_references.builder();
-                    builder.visit_non_source_snippet(&snippet.parsed(&db).tree());
-                    value_references.finish(builder);
-                }
-            }
-
-            // Also track component element names from HTML templates (Vue/Svelte).
-            if let Some(html_file_source) = source.to_html_file_source()
-                && html_file_source.supports_components()
-            {
-                let html_root: HtmlRoot = final_source.parsed(&db).tree();
-                let mut builder = value_references.builder();
-                builder.visit_html_root(&html_root);
-                value_references.finish(builder);
-            }
-
-            self.db_update_value_references(value_references.references);
             parsed_source = Some(final_source);
             Some(Ok(()))
         };
@@ -787,6 +745,7 @@ impl WorkspaceServer {
             let result = resolve_binding(ResolveBindingParams {
                 parsed_source: parse.into(),
                 cursor_offset,
+                path: path.to_path_buf(),
                 workspace_db: workspace_db.clone(),
             });
             if result.is_some() {
@@ -818,6 +777,7 @@ impl WorkspaceServer {
             let result = resolve(ResolveBindingParams {
                 parsed_source: snippet.into(),
                 cursor_offset: local_cursor,
+                path: path.to_path_buf(),
                 workspace_db: workspace_db.clone(),
             });
 
@@ -846,7 +806,6 @@ impl WorkspaceServer {
         any_parse: &'a AnyParse,
         node_cache: &'a mut NodeCache,
         settings: &'a SettingsWithEditor<'a>,
-        embedded_builder: &'a mut EmbeddedBuilder,
     ) -> Result<Vec<(AnyParse, EmbedContent, usize)>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
         let capabilities = self.get_file_capabilities(
@@ -862,7 +821,6 @@ impl WorkspaceServer {
             file_source,
             settings,
             node_cache,
-            embedded_builder,
         });
 
         for (parse, content, file_source) in result.nodes {
@@ -1454,41 +1412,6 @@ impl WorkspaceServer {
         );
         db.insert_file(path, parsed_file);
         parsed_file
-    }
-
-    fn db_update_embedded_bindings(
-        &self,
-        path: &Utf8Path,
-        bindings: Vec<Vec<(TextRange, TokenText, Option<TokenText>)>>,
-    ) {
-        let mut db = self.db_state.handle.to_db();
-        let bindings: Vec<_> = bindings
-            .into_iter()
-            .map(|bindings| {
-                bindings
-                    .into_iter()
-                    .map(|(range, text, source)| EmbeddedBinding::new(&db, range, text, source))
-                    .collect::<Vec<_>>()
-            })
-            .collect();
-        db.insert_bindings(path.to_path_buf(), bindings);
-    }
-
-    fn db_update_value_references(
-        &self,
-        path: &Utf8Path,
-        references: Vec<Vec<(TextRange, TokenText)>>,
-    ) {
-        let mut db = self.db_state.handle.to_db();
-        let references: Vec<_> = references
-            .into_iter()
-            .map(|v| {
-                v.into_iter()
-                    .map(|(range, token)| EmbeddedValueReference::new(&db, range, token))
-                    .collect()
-            })
-            .collect();
-        db.insert_references(path.to_path_buf(), references);
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -2098,8 +2021,6 @@ impl Workspace for WorkspaceServer {
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
         let any_parse = parsed.any_parse;
 
-        let mut exported_bindings = EmbeddedExportedBindings::default();
-        let mut builder = exported_bindings.builder();
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let mut node_cache = NodeCache::default();
 
@@ -2114,48 +2035,13 @@ impl Workspace for WorkspaceServer {
                 &any_parse,
                 &mut node_cache,
                 &settings,
-                &mut builder,
             )?
         } else {
             vec![]
         };
 
-        exported_bindings.finish(builder);
-        self.db_update_embedded_bindings(path.as_path(), exported_bindings.bindings);
-
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
-        let db = self.get_db();
-
-        // Track value references from non-source snippets (templates)
-        let mut value_references = EmbeddedValueReferences::default();
-
-        for snippet in parsed.snippets(&db) {
-            let Some(file_source) = db.source_from_index(snippet.document_source_index(&db)) else {
-                continue;
-            };
-            let Some(js_file_source) = file_source.to_js_file_source() else {
-                continue;
-            };
-            // Only process non-source snippets (templates)
-            if !js_file_source.is_embedded_source() {
-                let mut builder = value_references.builder();
-                builder.visit_non_source_snippet(&snippet.parsed(&db).tree());
-                value_references.finish(builder);
-            }
-        }
-
-        // Also track component element names from HTML templates (Vue/Svelte)
-        if let Some(html_file_source) = document_source.to_html_file_source()
-            && html_file_source.supports_components()
-        {
-            let html_root: HtmlRoot = parsed.parsed(&db).tree();
-            let mut builder = value_references.builder();
-            builder.visit_html_root(&html_root);
-            value_references.finish(builder);
-        }
-
-        self.db_update_value_references(path.as_path(), value_references.references);
 
         let document = Document {
             content,
