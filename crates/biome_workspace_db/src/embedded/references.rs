@@ -1,4 +1,5 @@
 use biome_rowan::{TextRange, TokenText};
+use camino::Utf8PathBuf;
 
 #[salsa::input]
 pub struct EmbeddedValueReference {
@@ -13,6 +14,9 @@ pub struct EmbeddedValueReference {
 #[derive(Debug)]
 pub struct InternedReference {
     #[returns(ref)]
+    path: Utf8PathBuf,
+
+    #[returns(ref)]
     name: TokenText,
 }
 
@@ -21,7 +25,7 @@ pub fn is_value_reference_used(
     db: &dyn crate::embedded::EmbeddedDb,
     reference: InternedReference<'_>,
 ) -> bool {
-    db.references().iter().any(|refs| {
+    db.references(reference.path(db)).iter().any(|refs| {
         refs.iter()
             .any(|value_reference| value_reference.text(db).text() == *reference.name(db))
     })
@@ -35,12 +39,13 @@ mod tests {
     use biome_db::testing::{Events, assert_function_query_was_not_run};
     use biome_rowan::{RawSyntaxKind, TextSize};
     use camino::Utf8Path;
+    use papaya::HashMap;
     use salsa::Storage;
 
     #[salsa::db]
     #[derive(Default)]
     struct TestDb {
-        references: Vec<Vec<EmbeddedValueReference>>,
+        references: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedValueReference>>>,
         events: Events,
         storage: Storage<Self>,
     }
@@ -49,7 +54,7 @@ mod tests {
         fn new() -> Self {
             let events = Events::default();
             Self {
-                references: Vec::new(),
+                references: HashMap::new(),
                 storage: salsa::Storage::new(Some(Box::new({
                     let events = events.clone();
                     move |event| {
@@ -68,8 +73,12 @@ mod tests {
             self.take_salsa_events();
         }
 
-        fn insert_references(&mut self, references: Vec<Vec<EmbeddedValueReference>>) {
-            self.references = references;
+        fn insert_references(
+            &mut self,
+            path: Utf8PathBuf,
+            references: Vec<Vec<EmbeddedValueReference>>,
+        ) {
+            self.references.pin().insert(path, references);
         }
     }
 
@@ -85,12 +94,12 @@ mod tests {
 
     #[salsa::db]
     impl EmbeddedDb for TestDb {
-        fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
+        fn bindings(&self, _path: &Utf8Path) -> Vec<Vec<EmbeddedBinding>> {
             Vec::new()
         }
 
-        fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
-            self.references.clone()
+        fn references(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedValueReference>> {
+            self.references.pin().get(path).cloned().unwrap_or_default()
         }
     }
 
@@ -109,30 +118,38 @@ mod tests {
     #[test]
     fn is_value_reference_used_finds_references_across_groups() {
         let mut db = TestDb::new();
-        db.insert_references(vec![
-            vec![reference(&db, "First", range(0, 5))],
-            vec![reference(&db, "Second", range(10, 16))],
-        ]);
+        let path = Utf8PathBuf::from("/file.html");
+        db.insert_references(
+            path.clone(),
+            vec![
+                vec![reference(&db, "First", range(0, 5))],
+                vec![reference(&db, "Second", range(10, 16))],
+            ],
+        );
 
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, token_text("First"))
+            InternedReference::new(&db, path.clone(), token_text("First"))
         ));
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, token_text("Second"))
+            InternedReference::new(&db, path.clone(), token_text("Second"))
         ));
         assert!(!is_value_reference_used(
             &db,
-            InternedReference::new(&db, token_text("Missing"))
+            InternedReference::new(&db, path.clone(), token_text("Missing"))
         ));
     }
 
     #[test]
     fn is_value_reference_used_is_memoized() {
         let mut db = TestDb::new();
-        db.insert_references(vec![vec![reference(&db, "First", range(0, 5))]]);
-        let reference = InternedReference::new(&db, token_text("First"));
+        let path = Utf8PathBuf::from("/file.html");
+        db.insert_references(
+            path.clone(),
+            vec![vec![reference(&db, "First", range(0, 5))]],
+        );
+        let reference = InternedReference::new(&db, path.clone(), token_text("First"));
 
         let _ = is_value_reference_used(&db, reference);
 

@@ -1,3 +1,6 @@
+//! This is the database used inside the biome Workspace, mainly the `biome_service` crate.
+//!
+
 pub mod embedded;
 
 use crate::embedded::{EmbeddedBinding, EmbeddedDb, EmbeddedValueReference};
@@ -10,37 +13,42 @@ use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
-use parking_lot::RwLock;
 use salsa::Storage;
 use std::rc::Rc;
 use std::sync::Arc;
 
-#[derive(Clone, Debug)]
-pub struct FileTooLarge {
-    pub size: usize,
-    pub limit: usize,
-}
-
+/// The database used by the `biome_service` crate.
+///
+/// All data stored in the database must be clonable and must support [Sync] and [Send].
 #[salsa::db]
 #[derive(Clone, Default)]
 pub struct WorkspaceDb {
+    /// It maps a file path to its corresponding parsed version.
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    /// It maps a file path to its module graph representation
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    /// It stores the file sources across projects.
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
-    bindings: Arc<RwLock<Vec<Vec<EmbeddedBinding>>>>,
-    references: Arc<RwLock<Vec<Vec<EmbeddedValueReference>>>>,
+    /// It maps a file path to the embedded bindings. Only certain files have embedded bindings.
+    bindings: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedBinding>>>,
+    /// It maps a file path to the embedded references. Only certain files have embedded references.
+    references: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedValueReference>>>,
 
-    // LAST
+    // NOTE: this must stay last as per salsa restrictions.
     storage: Storage<Self>,
 }
 
 impl WorkspaceDb {
-    pub fn insert_bindings(&mut self, bindings: Vec<Vec<EmbeddedBinding>>) {
-        *self.bindings.write() = bindings;
+    pub fn insert_bindings(&mut self, path: Utf8PathBuf, bindings: Vec<Vec<EmbeddedBinding>>) {
+        self.bindings.pin().insert(path, bindings);
     }
 
-    pub fn insert_references(&mut self, references: Vec<Vec<EmbeddedValueReference>>) {
-        *self.references.write() = references;
+    pub fn insert_references(
+        &mut self,
+        path: Utf8PathBuf,
+        references: Vec<Vec<EmbeddedValueReference>>,
+    ) {
+        self.references.pin().insert(path, references);
     }
 
     /// Inserts a file source so that it can be retrieved by index later.
@@ -140,14 +148,14 @@ impl WorkspaceDb {
 }
 
 /// This handler is exclusively used for cloning operations (reading operations).
-/// Writing operations still go through [ProjectDatabase].
+/// Writing operations still go through [WorkspaceDb].
 #[derive(Clone, Default)]
 pub struct WorkspaceDbHandle {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
-    bindings: Arc<RwLock<Vec<Vec<EmbeddedBinding>>>>,
-    references: Arc<RwLock<Vec<Vec<EmbeddedValueReference>>>>,
+    bindings: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedBinding>>>,
+    references: HashMap<Utf8PathBuf, Vec<Vec<EmbeddedValueReference>>>,
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
@@ -182,12 +190,12 @@ impl JsSemanticDb for WorkspaceDb {}
 
 #[salsa::db]
 impl EmbeddedDb for WorkspaceDb {
-    fn bindings(&self) -> Vec<Vec<EmbeddedBinding>> {
-        self.bindings.read().clone()
+    fn bindings(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedBinding>> {
+        self.bindings.pin().get(path).cloned().unwrap_or_default()
     }
 
-    fn references(&self) -> Vec<Vec<EmbeddedValueReference>> {
-        self.references.read().clone()
+    fn references(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedValueReference>> {
+        self.references.pin().get(path).cloned().unwrap_or_default()
     }
 }
 

@@ -4,7 +4,7 @@
 //! This can be used by lint rules for things such as cycle detection, and
 //! detecting broken imports.
 //!
-//! Module info is stored as Salsa inputs in a `ProjectDatabase`. Query and
+//! Module info is stored as Salsa inputs in a `WorkspaceDb`. Query and
 //! traversal functions in this module accept `&dyn ModuleDb` to look up data.
 pub(crate) mod fs_proxy;
 

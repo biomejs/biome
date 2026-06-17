@@ -77,7 +77,11 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
             && let Some(element_value) = element.value_token().ok()
             && let Some(binding) = get_binding_with_source(
                 &params.workspace_db,
-                InternedBinding::new(&params.workspace_db, element_value.token_text_trimmed()),
+                InternedBinding::new(
+                    &params.workspace_db,
+                    params.path.clone(),
+                    element_value.token_text_trimmed(),
+                ),
             )
             && let Some(source) = binding.source(&params.workspace_db)
         {
@@ -91,7 +95,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
             && let Some(element_value) = element.html_literal_token().ok()
             && let Some(binding) = params
                 .workspace_db
-                .binding_by_name(element_value.text_trimmed())
+                .binding_by_name(params.path.as_path(), element_value.text_trimmed())
         {
             return Some(DefinitionReference::LocalEmbedded {
                 range: binding.range(&params.workspace_db),

@@ -3,22 +3,27 @@ use biome_rowan::TokenText;
 use biome_workspace_db::embedded::EmbeddedDb;
 use biome_workspace_db::embedded::bindings::{InternedBinding, get_binding_by_name};
 use biome_workspace_db::embedded::references::{InternedReference, is_value_reference_used};
+use camino::Utf8PathBuf;
 use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct EmbeddedService {
     db: Option<Rc<dyn EmbeddedDb>>,
+    path: Utf8PathBuf,
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Option<Rc<dyn EmbeddedDb>>) -> Self {
-        Self { db }
+    pub(crate) fn new(db: Option<Rc<dyn EmbeddedDb>>, path: Utf8PathBuf) -> Self {
+        Self { db, path }
     }
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         if let Some(db) = &self.db {
-            return get_binding_by_name(db.as_ref(), InternedBinding::new(db.as_ref(), binding))
-                .is_some();
+            return get_binding_by_name(
+                db.as_ref(),
+                InternedBinding::new(db.as_ref(), &self.path.clone(), binding),
+            )
+            .is_some();
         }
 
         false
@@ -26,7 +31,7 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         if let Some(db) = &self.db {
-            return db.binding_by_name(binding).is_some();
+            return db.binding_by_name(&self.path, binding).is_some();
         }
 
         false
@@ -36,7 +41,7 @@ impl EmbeddedService {
         if let Some(db) = &self.db {
             return is_value_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), identifier),
+                InternedReference::new(db.as_ref(), &self.path.clone(), identifier),
             );
         }
 

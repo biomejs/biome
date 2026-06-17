@@ -1988,7 +1988,6 @@ dependencies = [
  "boxcar",
  "camino",
  "papaya",
- "parking_lot",
  "salsa",
  "serde",
 ]

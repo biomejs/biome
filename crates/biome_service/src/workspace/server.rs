@@ -1458,6 +1458,7 @@ impl WorkspaceServer {
 
     fn db_update_embedded_bindings(
         &self,
+        path: &Utf8Path,
         bindings: Vec<Vec<(TextRange, TokenText, Option<TokenText>)>>,
     ) {
         let mut db = self.db_state.handle.to_db();
@@ -1470,10 +1471,14 @@ impl WorkspaceServer {
                     .collect::<Vec<_>>()
             })
             .collect();
-        db.insert_bindings(bindings);
+        db.insert_bindings(path.to_path_buf(), bindings);
     }
 
-    fn db_update_value_references(&self, references: Vec<Vec<(TextRange, TokenText)>>) {
+    fn db_update_value_references(
+        &self,
+        path: &Utf8Path,
+        references: Vec<Vec<(TextRange, TokenText)>>,
+    ) {
         let mut db = self.db_state.handle.to_db();
         let references: Vec<_> = references
             .into_iter()
@@ -1483,7 +1488,7 @@ impl WorkspaceServer {
                     .collect()
             })
             .collect();
-        db.insert_references(references);
+        db.insert_references(path.to_path_buf(), references);
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -2116,7 +2121,7 @@ impl Workspace for WorkspaceServer {
         };
 
         exported_bindings.finish(builder);
-        self.db_update_embedded_bindings(exported_bindings.bindings);
+        self.db_update_embedded_bindings(path.as_path(), exported_bindings.bindings);
 
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
@@ -2150,7 +2155,7 @@ impl Workspace for WorkspaceServer {
             value_references.finish(builder);
         }
 
-        self.db_update_value_references(value_references.references);
+        self.db_update_value_references(path.as_path(), value_references.references);
 
         let document = Document {
             content,

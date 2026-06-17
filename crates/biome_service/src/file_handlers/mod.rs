@@ -72,7 +72,7 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_text_edit::TextEdit;
 use biome_workspace_db::WorkspaceDb;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
@@ -877,6 +877,7 @@ pub(crate) struct ResolveBindingParams {
     pub(crate) parsed_source: AnyParsedSource,
     pub(crate) cursor_offset: TextSize,
     pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) path: Utf8PathBuf,
 }
 
 pub(crate) struct ResolveDefinitionParams<'a> {

@@ -1,18 +1,19 @@
 pub(crate) use crate::embedded::bindings::EmbeddedBinding;
 pub(crate) use crate::embedded::references::EmbeddedValueReference;
 use biome_rowan::{TextRange, TokenText};
+use camino::Utf8Path;
 
 pub mod bindings;
 pub mod references;
 
 #[salsa::db]
 pub trait EmbeddedDb: biome_db::Db {
-    fn bindings(&self) -> Vec<Vec<EmbeddedBinding>>;
+    fn bindings(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedBinding>>;
 
-    fn references(&self) -> Vec<Vec<EmbeddedValueReference>>;
+    fn references(&self, path: &Utf8Path) -> Vec<Vec<EmbeddedValueReference>>;
 
-    fn binding_by_name(&self, name: &str) -> Option<EmbeddedBinding> {
-        for bindings in self.bindings() {
+    fn binding_by_name(&self, path: &Utf8Path, name: &str) -> Option<EmbeddedBinding> {
+        for bindings in self.bindings(path) {
             for binding in bindings {
                 if binding.text(self).text() == name {
                     return Some(binding);
@@ -22,8 +23,8 @@ pub trait EmbeddedDb: biome_db::Db {
         None
     }
 
-    fn service_references(&self) -> Vec<Vec<(TextRange, TokenText)>> {
-        self.references()
+    fn service_references(&self, path: &Utf8Path) -> Vec<Vec<(TextRange, TokenText)>> {
+        self.references(path)
             .iter()
             .map(|refs| {
                 refs.iter()
