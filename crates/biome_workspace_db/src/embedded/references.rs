@@ -1,4 +1,5 @@
 use crate::embedded::visitor::embedded_references_from_source;
+use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
 use camino::Utf8PathBuf;
 
@@ -21,10 +22,7 @@ pub struct InternedReference {
 }
 
 #[salsa::tracked]
-pub fn is_value_reference_used(
-    db: &dyn crate::embedded::EmbeddedDb,
-    reference: InternedReference<'_>,
-) -> bool {
+pub fn is_value_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
     let parsed_source = db.parsed_source_for_path(reference.path(db));
     parsed_source.is_some_and(|parsed_source| {
         embedded_references_from_source(db, parsed_source)
@@ -39,7 +37,6 @@ pub fn is_value_reference_used(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::embedded::EmbeddedDb;
     use biome_db::testing::{Events, assert_function_query_was_not_run};
     use biome_db::{Db, ParsedSnippet, ParsedSource};
     use biome_html_parser::{HtmlParserOptions, parse_html};
@@ -113,9 +110,6 @@ mod tests {
             })
         }
     }
-
-    #[salsa::db]
-    impl EmbeddedDb for TestDb {}
 
     fn token_text(text: &str) -> TokenText {
         TokenText::new_raw(RawSyntaxKind(0), text)

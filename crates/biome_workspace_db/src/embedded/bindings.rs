@@ -1,5 +1,5 @@
-use crate::embedded::EmbeddedDb;
 use crate::embedded::visitor::embedded_bindings_from_source;
+use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
 use camino::Utf8PathBuf;
 
@@ -35,7 +35,7 @@ pub struct InternedBindingText {
 
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_by_name<'db>(
-    db: &'db dyn EmbeddedDb,
+    db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
     let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
@@ -52,7 +52,7 @@ pub fn get_binding_by_name<'db>(
 
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_with_source<'db>(
-    db: &'db dyn EmbeddedDb,
+    db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
     let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
@@ -68,7 +68,7 @@ pub fn get_binding_with_source<'db>(
 
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_by_token_text<'db>(
-    db: &'db dyn EmbeddedDb,
+    db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
     let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
@@ -85,7 +85,7 @@ pub fn get_binding_by_token_text<'db>(
 
 #[salsa::tracked(returns(ref))]
 pub fn get_binding_by_text<'db>(
-    db: &'db dyn EmbeddedDb,
+    db: &'db dyn LanguageDb,
     binding_name: InternedBindingText<'db>,
 ) -> Option<EmbeddedBinding> {
     let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
@@ -170,9 +170,6 @@ mod tests {
             })
         }
     }
-
-    #[salsa::db]
-    impl EmbeddedDb for TestDb {}
 
     fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
         let path = Utf8PathBuf::from("src/App.vue");

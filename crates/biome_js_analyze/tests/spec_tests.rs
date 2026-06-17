@@ -20,7 +20,6 @@ use biome_test_utils::{
     project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
-use biome_workspace_db::embedded::EmbeddedDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use std::ops::Deref;
@@ -40,9 +39,6 @@ struct TestDb {
     source_type: Option<DocumentFileSource>,
     storage: Storage<Self>,
 }
-
-#[salsa::db]
-impl EmbeddedDb for TestDb {}
 
 #[salsa::db]
 impl LanguageDb for TestDb {
@@ -65,7 +61,7 @@ fn embedded_db(
     parsed: &AnyJsRoot,
     path: impl Into<Utf8PathBuf>,
     source_type: &JsFileSource,
-) -> Rc<dyn EmbeddedDb> {
+) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
     let parsed = ParsedSource::new(
         &db,
@@ -264,7 +260,7 @@ pub(crate) fn analyze_and_snap(
         .with_source_type(source_type)
         .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout.clone())
-        .with_embedded_db(embedded_db(&root, input_file, &source_type));
+        .with_language_db(embedded_db(&root, input_file, &source_type));
     if needs_module_graph {
         let module_db = module_graph_for_test_file(input_file, &project_layout);
         services = services.with_module_db(module_db.rc_module_db());

@@ -4,7 +4,7 @@
 //! we care re-use the same semantic model, if the information that belong to the semantic model didn't change
 
 use crate::db::semantic_model_from_source;
-use crate::{JsSemanticDb, SemanticModel, semantic_model};
+use crate::{SemanticModel, semantic_model};
 use biome_db::ParsedSource;
 use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_js_parser::parse;
@@ -139,9 +139,6 @@ impl biome_db::Db for TestDb {
 }
 
 #[salsa::db]
-impl JsSemanticDb for TestDb {}
-
-#[salsa::db]
 impl LanguageDb for TestDb {
     fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
         Some(DocumentFileSource::Js(JsFileSource::tsx()))
@@ -167,7 +164,7 @@ fn semantic_model_is_memoized() {
 
 // Test-only downstream tracked function that reads from js_semantic_model
 #[salsa::tracked]
-fn binding_count(db: &dyn JsSemanticDb, file: ParsedSource) -> usize {
+fn binding_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
     let model = semantic_model_from_source(db, file);
     model.data.bindings.len()
 }

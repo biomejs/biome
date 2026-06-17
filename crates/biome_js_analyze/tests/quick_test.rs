@@ -15,7 +15,6 @@ use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
-use biome_workspace_db::embedded::EmbeddedDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use std::rc::Rc;
@@ -28,9 +27,6 @@ struct TestDb {
     parsed: Option<ParsedSource>,
     storage: Storage<Self>,
 }
-
-#[salsa::db]
-impl EmbeddedDb for TestDb {}
 
 #[salsa::db]
 impl LanguageDb for TestDb {
@@ -49,7 +45,7 @@ impl biome_db::Db for TestDb {
 #[salsa::db]
 impl salsa::Database for TestDb {}
 
-fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn EmbeddedDb> {
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
     let parsed = ParsedSource::new(
         &db,
@@ -112,7 +108,7 @@ fn quick_test() {
     let services =
         crate::JsAnalyzerServices::from((db.rc_module_db(), project_layout, JsFileSource::tsx()))
             .with_semantic_model(&semantic_model)
-            .with_embedded_db(embedded_db(&parsed));
+            .with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),
@@ -176,7 +172,7 @@ function App() {
         );
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
-    let services = JsAnalyzerServices::default().with_embedded_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::default().with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),

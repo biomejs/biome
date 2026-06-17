@@ -9,7 +9,6 @@ use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
-use biome_workspace_db::embedded::EmbeddedDb;
 use camino::Utf8Path;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use salsa::Storage;
@@ -58,9 +57,6 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             js_source: Option<JsFileSource>,
                             storage: Storage<Self>,
                         }
-
-                        #[salsa::db]
-                        impl EmbeddedDb for TestDb {}
 
                         #[salsa::db]
                         impl LanguageDb for TestDb {
@@ -112,9 +108,9 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 0,
                                 vec![],
                             ));
-                            db.js_source = Some(file_source.clone());
+                            db.js_source = Some(file_source);
                             let services =
-                                JsAnalyzerServices::default().with_embedded_db(Rc::new(db));
+                                JsAnalyzerServices::default().with_language_db(Rc::new(db));
                             biome_js_analyze::analyze(
                                 &parse.tree(),
                                 filter,

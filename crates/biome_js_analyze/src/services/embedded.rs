@@ -1,6 +1,6 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
+use biome_languages::LanguageDb;
 use biome_rowan::TokenText;
-use biome_workspace_db::embedded::EmbeddedDb;
 use biome_workspace_db::embedded::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
@@ -10,12 +10,12 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct EmbeddedService {
-    db: Rc<dyn EmbeddedDb>,
+    db: Rc<dyn LanguageDb>,
     path: Utf8PathBuf,
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn EmbeddedDb>, path: Utf8PathBuf) -> Self {
+    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
         Self { db, path }
     }
 

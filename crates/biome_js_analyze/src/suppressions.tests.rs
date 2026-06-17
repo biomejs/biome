@@ -20,9 +20,6 @@ struct TestDb {
 }
 
 #[salsa::db]
-impl EmbeddedDb for TestDb {}
-
-#[salsa::db]
 impl LanguageDb for TestDb {
     fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
         Some(DocumentFileSource::Js(JsFileSource::tsx()))
@@ -39,7 +36,7 @@ impl biome_db::Db for TestDb {
 #[salsa::db]
 impl salsa::Database for TestDb {}
 
-fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn EmbeddedDb> {
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
     let parsed = ParsedSource::new(
         &db,
@@ -124,7 +121,7 @@ fn quick_test_suppression() {
 
     let services = JsAnalyzerServices::from(&parsed.tree())
         .with_semantic_model(&semantic_model)
-        .with_embedded_db(embedded_db(&parsed));
+        .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -212,7 +209,7 @@ fn suppression() {
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
     let services = JsAnalyzerServices::from(&parsed.tree())
         .with_semantic_model(&semantic_model)
-        .with_embedded_db(embedded_db(&parsed));
+        .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -950,7 +947,7 @@ var foo = {
         ..AnalysisFilter::default()
     };
 
-    let services = JsAnalyzerServices::from(&parsed.tree()).with_embedded_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
 
     let options = AnalyzerOptions::default();
     crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
@@ -988,7 +985,7 @@ console.log("should be suppressed");"#;
     };
 
     let options = AnalyzerOptions::default();
-    let services = JsAnalyzerServices::from(&parsed.tree()).with_embedded_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let mut diagnostic_found = false;
     analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {

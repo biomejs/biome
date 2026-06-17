@@ -174,7 +174,7 @@ impl AnalyzerServicesBuilder {
             self.project_layout.clone(),
             file_source,
         ))
-        .with_embedded_db(self.module_db.rc_embedded_db())
+        .with_language_db(self.module_db.rc_language_db())
         .with_semantic_model(semantic_model_from_source(&self.module_db, parsed_source))
     }
 }

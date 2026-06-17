@@ -3,11 +3,8 @@ use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 use biome_languages::JsFileSource;
 use biome_languages::LanguageDb;
 
-#[salsa::db]
-pub trait JsSemanticDb: biome_db::Db + LanguageDb {}
-
 #[salsa::tracked(returns(ref))]
-pub fn semantic_model_from_source(db: &dyn JsSemanticDb, file: ParsedSource) -> SemanticModel {
+pub fn semantic_model_from_source(db: &dyn LanguageDb, file: ParsedSource) -> SemanticModel {
     let parsed = file.parsed(db);
     let path = file.path(db);
     let source = db.source_from_index(file.document_source_index(db));
@@ -20,7 +17,7 @@ pub fn semantic_model_from_source(db: &dyn JsSemanticDb, file: ParsedSource) -> 
 }
 
 #[salsa::tracked(returns(ref))]
-pub fn semantic_model_from_snippet(db: &dyn JsSemanticDb, file: ParsedSnippet) -> SemanticModel {
+pub fn semantic_model_from_snippet(db: &dyn LanguageDb, file: ParsedSnippet) -> SemanticModel {
     let parsed = file.parsed(db);
     let source = db.source_from_index(file.document_source_index(db));
     let source_type = source
@@ -31,7 +28,7 @@ pub fn semantic_model_from_snippet(db: &dyn JsSemanticDb, file: ParsedSnippet) -
 
 pub fn js_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
 where
-    Db: JsSemanticDb,
+    Db: LanguageDb,
 {
     match file {
         AnyParsedSource::ParsedSource(source) => semantic_model_from_source(db, *source),

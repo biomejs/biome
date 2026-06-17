@@ -15,13 +15,12 @@ use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
-use biome_languages::JsFileSource;
+use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::{ModuleDb, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
-use biome_workspace_db::embedded::EmbeddedDb;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -52,7 +51,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 #[derive(Default)]
 pub struct JsAnalyzerServices<'a> {
     module_db: Option<Rc<dyn ModuleDb>>,
-    embedded_db: Option<Rc<dyn EmbeddedDb>>,
+    language_db: Option<Rc<dyn LanguageDb>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
@@ -68,7 +67,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
     ) -> Self {
         Self {
             module_db: Some(module_db),
-            embedded_db: None,
+            language_db: None,
             project_layout,
             source_type,
             semantic_model: None,
@@ -80,7 +79,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
-            embedded_db: None,
+            language_db: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
@@ -104,8 +103,8 @@ impl<'a> JsAnalyzerServices<'a> {
         self
     }
 
-    pub fn with_embedded_db(mut self, embedded_db: Rc<dyn EmbeddedDb>) -> Self {
-        self.embedded_db = Some(embedded_db);
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
         self
     }
 
@@ -166,7 +165,7 @@ where
 
     let JsAnalyzerServices {
         module_db,
-        embedded_db,
+        language_db: embedded_db,
         project_layout,
         source_type,
         semantic_model,

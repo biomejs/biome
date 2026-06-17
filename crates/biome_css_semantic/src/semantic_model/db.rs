@@ -2,13 +2,11 @@ use crate::model::SemanticModel;
 use crate::semantic_model;
 use biome_css_syntax::AnyCssRoot;
 use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
-
-#[salsa::db]
-pub trait CssSemanticDb: biome_db::Db {}
+use biome_languages::LanguageDb;
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn css_model_from_parsed_source(
-    db: &dyn CssSemanticDb,
+    db: &dyn LanguageDb,
     file: ParsedSource,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
@@ -17,7 +15,7 @@ pub(crate) fn css_model_from_parsed_source(
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn css_model_from_parsed_snippet(
-    db: &dyn CssSemanticDb,
+    db: &dyn LanguageDb,
     file: ParsedSnippet,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
@@ -26,7 +24,7 @@ pub(crate) fn css_model_from_parsed_snippet(
 
 pub fn css_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
 where
-    Db: CssSemanticDb,
+    Db: LanguageDb,
 {
     match file {
         AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
@@ -36,13 +34,14 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{CssSemanticDb, css_model_from_parsed_source};
+    use super::css_model_from_parsed_source;
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_db::ParsedSource;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
     };
     use biome_languages::css::CssFileSource;
+    use biome_languages::{DocumentFileSource, LanguageDb};
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::Storage;
 
@@ -87,7 +86,11 @@ mod tests {
     }
 
     #[salsa::db]
-    impl CssSemanticDb for TestDb {}
+    impl LanguageDb for TestDb {
+        fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+            unreachable!("Not used in this test")
+        }
+    }
 
     fn make_file(db: &TestDb, source: &str) -> ParsedSource {
         let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default()).into();
@@ -109,7 +112,7 @@ mod tests {
     }
 
     #[salsa::tracked]
-    fn rule_count(db: &dyn CssSemanticDb, file: ParsedSource) -> usize {
+    fn rule_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
         let model = css_model_from_parsed_source(db, file);
         model.rules().len()
     }

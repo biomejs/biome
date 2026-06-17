@@ -1,4 +1,3 @@
-use crate::embedded::EmbeddedDb;
 use crate::embedded::bindings::EmbeddedBinding;
 use crate::embedded::references::EmbeddedValueReference;
 use biome_db::ParsedSource;
@@ -19,7 +18,7 @@ use biome_js_syntax::{
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_languages::{HtmlFileSource, JsFileSource};
+use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 
@@ -56,7 +55,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
 
 #[salsa::tracked(returns(ref))]
 pub fn embedded_bindings_from_source(
-    db: &dyn EmbeddedDb,
+    db: &dyn LanguageDb,
     file: ParsedSource,
 ) -> Vec<Vec<EmbeddedBinding>> {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
@@ -112,7 +111,7 @@ pub fn embedded_bindings_from_source(
 
 #[salsa::tracked(returns(ref))]
 pub fn embedded_references_from_source(
-    db: &dyn EmbeddedDb,
+    db: &dyn LanguageDb,
     file: ParsedSource,
 ) -> Vec<Vec<EmbeddedValueReference>> {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {

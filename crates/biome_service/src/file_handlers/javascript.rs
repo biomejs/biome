@@ -980,7 +980,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         params.project_layout,
         files_source,
     ))
-    .with_embedded_db(params.workspace_db.rc_embedded_db())
+    .with_language_db(params.workspace_db.rc_language_db())
     .with_semantic_model(semantic_model);
 
     let (_, analyze_diagnostics) = analyze(
@@ -1063,7 +1063,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services =
         JsAnalyzerServices::from((workspace_db.rc_module_db(), project_layout, source_type))
-            .with_embedded_db(workspace_db.rc_embedded_db())
+            .with_language_db(workspace_db.rc_language_db())
             .with_semantic_model(semantic_model);
 
     debug!("Javascript runs the analyzer");
@@ -1178,7 +1178,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 params.project_layout.clone(),
                 file_source,
             ))
-            .with_embedded_db(params.workspace_db.rc_embedded_db());
+            .with_language_db(params.workspace_db.rc_language_db());
 
             let mut pending_actions = Vec::new();
 
@@ -1237,7 +1237,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             params.project_layout.clone(),
             file_source,
         ))
-        .with_embedded_db(params.workspace_db.rc_embedded_db());
+        .with_language_db(params.workspace_db.rc_language_db());
 
         let mut pending_actions = Vec::new();
 
@@ -1285,7 +1285,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             params.project_layout.clone(),
             file_source,
         ))
-        .with_embedded_db(params.workspace_db.rc_embedded_db());
+        .with_language_db(params.workspace_db.rc_language_db());
 
         let (_, _) = analyze(
             &tree,
@@ -1524,7 +1524,7 @@ pub(crate) fn pull_diagnostics_and_actions(
     let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let services =
         JsAnalyzerServices::from((workspace_db.rc_module_db(), project_layout, source_type))
-            .with_embedded_db(workspace_db.rc_embedded_db())
+            .with_language_db(workspace_db.rc_language_db())
             .with_semantic_model(semantic_model);
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);

@@ -3,10 +3,7 @@
 
 pub mod embedded;
 
-use crate::embedded::EmbeddedDb;
-use biome_css_semantic::db::CssSemanticDb;
 use biome_db::ParsedSource;
-use biome_js_semantic::JsSemanticDb;
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
@@ -81,9 +78,9 @@ impl WorkspaceDb {
         Rc::new(self.clone())
     }
 
-    /// Returns a [Rc] to itself, cast to [EmbeddedDb]. This is used to send the service
+    /// Returns a [Rc] to itself, cast to [LanguageDb]. This is used to send the service
     /// to the analyzer.
-    pub fn rc_embedded_db(&self) -> Rc<dyn EmbeddedDb> {
+    pub fn rc_language_db(&self) -> Rc<dyn LanguageDb> {
         Rc::new(self.clone())
     }
 
@@ -156,15 +153,6 @@ impl biome_db::Db for WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 }
-
-#[salsa::db]
-impl CssSemanticDb for WorkspaceDb {}
-
-#[salsa::db]
-impl JsSemanticDb for WorkspaceDb {}
-
-#[salsa::db]
-impl EmbeddedDb for WorkspaceDb {}
 
 #[salsa::db]
 impl ModuleDb for WorkspaceDb {
