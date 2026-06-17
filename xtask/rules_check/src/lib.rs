@@ -34,6 +34,7 @@ use biome_languages::{
 };
 use biome_rowan::AstNode;
 use biome_ruledoc_utils::{AnalyzerServicesBuilder, CodeBlock, OptionsParsingMode};
+use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
@@ -293,7 +294,7 @@ fn assert_lint(
     test: &CodeBlock,
     code: &str,
     config: Option<Configuration>,
-    services_builder: &AnalyzerServicesBuilder,
+    services_builder: &mut AnalyzerServicesBuilder,
 ) -> anyhow::Result<()> {
     if test.ignore {
         return Ok(());
@@ -352,7 +353,11 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<JsLanguage>(config)?;
 
-                let services = services_builder.build_for_js_file_source(file_source);
+                let services = services_builder.build_for_js_parse(
+                    Utf8PathBuf::from(test.file_path()),
+                    parse,
+                    file_source,
+                );
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -903,7 +908,7 @@ impl TestRunner {
     ///
     /// Resets state for the next section.
     pub fn run_pending_tests(&mut self) -> anyhow::Result<()> {
-        let services_builder =
+        let mut services_builder =
             AnalyzerServicesBuilder::from_files(mem::take(&mut self.file_system));
 
         for test in self.pending_tests.drain(..) {
@@ -914,7 +919,7 @@ impl TestRunner {
                 &test.test,
                 &test.block,
                 test.options_snapshot,
-                &services_builder,
+                &mut services_builder,
             )?;
         }
 

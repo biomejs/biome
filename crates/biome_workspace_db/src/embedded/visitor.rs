@@ -87,8 +87,8 @@ pub fn embedded_bindings_from_source(
             || host_file_source.is_svelte()
             || is_script_element_snippet(&html_root, snippet.content_range(db))
         {
-            let block_kind = block_kind_for_snippet(&html_root, snippet.content_range(db))
-                .or_else(|| block_kind_from_js_source(&js_file_source));
+            let block_kind = block_kind_from_js_source(&js_file_source)
+                .or_else(|| block_kind_for_snippet(&html_root, snippet.content_range(db)));
             builder.visit_js_source_snippet(
                 &snippet.parsed(db).tree(),
                 &host_file_source,

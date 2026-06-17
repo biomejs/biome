@@ -14,9 +14,7 @@ publish              = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_db          = { workspace = true }
 biome_diagnostics = { workspace = true, features = ["std"] }
-boxcar            = { workspace = true }
 camino            = { workspace = true }
 crossbeam         = { workspace = true }
 directories       = { workspace = true }
@@ -26,7 +24,6 @@ parking_lot       = { workspace = true, features = ["arc_lock"] }
 path-absolutize   = { workspace = true }
 rayon             = { workspace = true }
 rustc-hash        = { workspace = true }
-salsa             = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }
 smallvec          = { workspace = true }

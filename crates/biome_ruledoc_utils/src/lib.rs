@@ -1,7 +1,9 @@
 mod codeblock;
 
+use biome_db::ParsedSource;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
+use biome_js_semantic::semantic_model_from_source;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_module_graph::{
@@ -11,11 +13,10 @@ use biome_project_layout::ProjectLayout;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8PathBuf;
+pub use codeblock::*;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
 use std::sync::Arc;
-
-pub use codeblock::*;
 
 /// Builder that can be used for constructing analyzer services.
 ///
@@ -150,11 +151,30 @@ impl AnalyzerServicesBuilder {
         }
     }
 
-    pub fn build_for_js_file_source(&self, file_source: JsFileSource) -> JsAnalyzerServices<'_> {
+    pub fn build_for_js_parse(
+        &mut self,
+        path: Utf8PathBuf,
+        parse: biome_js_parser::Parse<biome_js_parser::AnyJsRoot>,
+        file_source: JsFileSource,
+    ) -> JsAnalyzerServices<'_> {
+        let source_index = self
+            .module_db
+            .insert_source(DocumentFileSource::Js(file_source));
+        let parsed_source = ParsedSource::new(
+            &self.module_db,
+            path.clone(),
+            parse.into(),
+            source_index,
+            vec![],
+        );
+        self.module_db.insert_file(&path, parsed_source);
+
         JsAnalyzerServices::from((
             self.module_db.rc_module_db(),
             self.project_layout.clone(),
             file_source,
         ))
+        .with_embedded_db(self.module_db.rc_embedded_db())
+        .with_semantic_model(semantic_model_from_source(&self.module_db, parsed_source))
     }
 }

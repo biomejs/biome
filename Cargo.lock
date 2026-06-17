@@ -606,9 +606,7 @@ dependencies = [
 name = "biome_fs"
 version = "0.5.7"
 dependencies = [
- "biome_db",
  "biome_diagnostics",
- "boxcar",
  "camino",
  "crossbeam",
  "directories",
@@ -618,7 +616,6 @@ dependencies = [
  "path-absolutize",
  "rayon",
  "rustc-hash 2.1.2",
- "salsa",
  "schemars",
  "serde",
  "serde_json",
@@ -989,6 +986,7 @@ dependencies = [
  "biome_module_graph",
  "biome_module_replacements",
  "biome_package",
+ "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
  "biome_resolver",
@@ -1014,6 +1012,7 @@ dependencies = [
  "regex",
  "roaring",
  "rustc-hash 2.1.2",
+ "salsa",
  "schemars",
  "serde",
  "smallvec",
@@ -1720,6 +1719,7 @@ dependencies = [
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_json_parser",
  "biome_languages",
  "biome_module_graph",

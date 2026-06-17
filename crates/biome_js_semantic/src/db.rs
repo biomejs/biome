@@ -20,10 +20,7 @@ pub fn semantic_model_from_source(db: &dyn JsSemanticDb, file: ParsedSource) -> 
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn semantic_model_from_snippet(
-    db: &dyn JsSemanticDb,
-    file: ParsedSnippet,
-) -> SemanticModel {
+pub fn semantic_model_from_snippet(db: &dyn JsSemanticDb, file: ParsedSnippet) -> SemanticModel {
     let parsed = file.parsed(db);
     let source = db.source_from_index(file.document_source_index(db));
     let source_type = source
