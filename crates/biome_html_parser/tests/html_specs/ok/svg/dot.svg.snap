@@ -26,7 +26,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "svg" [] [Whitespace(" ")],
+                    value_token: SVG_KW@1..5 "svg" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -58,7 +58,7 @@ HtmlRoot {
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@62..65 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@65..72 "circle" [] [Whitespace(" ")],
+                        value_token: CIRCLE_KW@65..72 "circle" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
@@ -113,7 +113,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@110..115 "text" [] [Whitespace(" ")],
+                            value_token: TEXT_KW@110..115 "text" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
                             HtmlAttribute {
@@ -172,7 +172,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@166..167 "<" [] [],
                         slash_token: SLASH@167..168 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_LITERAL@168..172 "text" [] [],
+                            value_token: TEXT_KW@168..172 "text" [] [],
                         },
                         r_angle_token: R_ANGLE@172..173 ">" [] [],
                     },
@@ -182,7 +182,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@173..175 "<" [Newline("\n")] [],
                 slash_token: SLASH@175..176 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@176..179 "svg" [] [],
+                    value_token: SVG_KW@176..179 "svg" [] [],
                 },
                 r_angle_token: R_ANGLE@179..180 ">" [] [],
             },
@@ -204,7 +204,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..62
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "svg" [] [Whitespace(" ")]
+          0: SVG_KW@1..5 "svg" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..61
           0: HTML_ATTRIBUTE@5..40
             0: HTML_ATTRIBUTE_NAME@5..10
@@ -225,7 +225,7 @@ HtmlRoot {
         0: HTML_SELF_CLOSING_ELEMENT@62..107
           0: L_ANGLE@62..65 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_TAG_NAME@65..72
-            0: HTML_LITERAL@65..72 "circle" [] [Whitespace(" ")]
+            0: CIRCLE_KW@65..72 "circle" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@72..105
             0: HTML_ATTRIBUTE@72..80
               0: HTML_ATTRIBUTE_NAME@72..74
@@ -261,7 +261,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@107..163
             0: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] []
             1: HTML_TAG_NAME@110..115
-              0: HTML_LITERAL@110..115 "text" [] [Whitespace(" ")]
+              0: TEXT_KW@110..115 "text" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@115..162
               0: HTML_ATTRIBUTE@115..122
                 0: HTML_ATTRIBUTE_NAME@115..116
@@ -299,13 +299,13 @@ HtmlRoot {
             0: L_ANGLE@166..167 "<" [] []
             1: SLASH@167..168 "/" [] []
             2: HTML_TAG_NAME@168..172
-              0: HTML_LITERAL@168..172 "text" [] []
+              0: TEXT_KW@168..172 "text" [] []
             3: R_ANGLE@172..173 ">" [] []
       2: HTML_CLOSING_ELEMENT@173..180
         0: L_ANGLE@173..175 "<" [Newline("\n")] []
         1: SLASH@175..176 "/" [] []
         2: HTML_TAG_NAME@176..179
-          0: HTML_LITERAL@176..179 "svg" [] []
+          0: SVG_KW@176..179 "svg" [] []
         3: R_ANGLE@179..180 ">" [] []
   4: EOF@180..181 "" [Newline("\n")] []
 

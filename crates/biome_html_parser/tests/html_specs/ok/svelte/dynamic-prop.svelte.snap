@@ -23,7 +23,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
+                    value_token: BUTTON_KW@1..8 "button" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     HtmlAttribute {
@@ -53,7 +53,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@33..34 "<" [] [],
                 slash_token: SLASH@34..35 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@35..41 "button" [] [],
+                    value_token: BUTTON_KW@35..41 "button" [] [],
                 },
                 r_angle_token: R_ANGLE@41..42 ">" [] [],
             },
@@ -75,7 +75,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..25
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..8
-          0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
+          0: BUTTON_KW@1..8 "button" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@8..24
           0: HTML_ATTRIBUTE@8..24
             0: HTML_ATTRIBUTE_NAME@8..16
@@ -95,7 +95,7 @@ HtmlRoot {
         0: L_ANGLE@33..34 "<" [] []
         1: SLASH@34..35 "/" [] []
         2: HTML_TAG_NAME@35..41
-          0: HTML_LITERAL@35..41 "button" [] []
+          0: BUTTON_KW@35..41 "button" [] []
         3: R_ANGLE@41..42 ">" [] []
   4: EOF@42..43 "" [Newline("\n")] []
 

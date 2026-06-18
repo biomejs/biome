@@ -23,11 +23,11 @@ biome_html_syntax   = { workspace = true }
 biome_languages     = { workspace = true, features = ["lang_html"] }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
+biome_string_case   = { workspace = true }
 biome_unicode_table = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-biome_string_case = { path = "../biome_string_case" }
 biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }

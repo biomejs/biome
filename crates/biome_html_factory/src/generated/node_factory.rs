@@ -354,7 +354,7 @@ pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
 pub fn html_member_name(
     object: AnyHtmlComponentObjectName,
     dot_token: SyntaxToken,
-    member: HtmlTagName,
+    member: HtmlComponentName,
 ) -> HtmlMemberName {
     HtmlMemberName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_MEMBER_NAME,
@@ -500,10 +500,10 @@ pub fn html_string(value_token: SyntaxToken) -> HtmlString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
+pub fn html_tag_name(value_token_token: SyntaxToken) -> HtmlTagName {
     HtmlTagName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_TAG_NAME,
-        [Some(SyntaxElement::Token(value_token))],
+        [Some(SyntaxElement::Token(value_token_token))],
     ))
 }
 pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpression {

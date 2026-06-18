@@ -10,6 +10,7 @@ pub mod static_value;
 mod string_ext;
 mod svg;
 mod syntax_node;
+pub mod tags;
 mod text_ext;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
@@ -17,6 +18,7 @@ pub use generated::*;
 pub use script_type::*;
 pub use svg::*;
 pub use syntax_node::*;
+pub use tags::HTML_TAG_NAMES;
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,

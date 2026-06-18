@@ -24,7 +24,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteBindDirective {
@@ -59,7 +59,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@29..30 "<" [] [],
                 slash_token: SLASH@30..31 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@31..34 "div" [] [],
+                    value_token: DIV_KW@31..34 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@34..35 ">" [] [],
             },
@@ -68,7 +68,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@35..37 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@37..44 "canvas" [] [Whitespace(" ")],
+                    value_token: CANVAS_KW@37..44 "canvas" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteBindDirective {
@@ -99,7 +99,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@63..64 "<" [] [],
                 slash_token: SLASH@64..65 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@65..71 "canvas" [] [],
+                    value_token: CANVAS_KW@65..71 "canvas" [] [],
                 },
                 r_angle_token: R_ANGLE@71..72 ">" [] [],
             },
@@ -121,7 +121,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..22
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..21
           0: SVELTE_BIND_DIRECTIVE@5..21
             0: BIND_KW@5..9 "bind" [] []
@@ -145,13 +145,13 @@ HtmlRoot {
         0: L_ANGLE@29..30 "<" [] []
         1: SLASH@30..31 "/" [] []
         2: HTML_TAG_NAME@31..34
-          0: HTML_LITERAL@31..34 "div" [] []
+          0: DIV_KW@31..34 "div" [] []
         3: R_ANGLE@34..35 ">" [] []
     1: HTML_ELEMENT@35..72
       0: HTML_OPENING_ELEMENT@35..63
         0: L_ANGLE@35..37 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@37..44
-          0: HTML_LITERAL@37..44 "canvas" [] [Whitespace(" ")]
+          0: CANVAS_KW@37..44 "canvas" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@44..62
           0: SVELTE_BIND_DIRECTIVE@44..62
             0: BIND_KW@44..48 "bind" [] []
@@ -173,7 +173,7 @@ HtmlRoot {
         0: L_ANGLE@63..64 "<" [] []
         1: SLASH@64..65 "/" [] []
         2: HTML_TAG_NAME@65..71
-          0: HTML_LITERAL@65..71 "canvas" [] []
+          0: CANVAS_KW@65..71 "canvas" [] []
         3: R_ANGLE@71..72 ">" [] []
   4: EOF@72..73 "" [Newline("\n")] []
 

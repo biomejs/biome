@@ -976,7 +976,7 @@ impl HtmlMemberName {
     pub fn dot_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn member(&self) -> SyntaxResult<HtmlTagName> {
+    pub fn member(&self) -> SyntaxResult<HtmlComponentName> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -992,7 +992,7 @@ impl Serialize for HtmlMemberName {
 pub struct HtmlMemberNameFields {
     pub object: SyntaxResult<AnyHtmlComponentObjectName>,
     pub dot_token: SyntaxResult<SyntaxToken>,
-    pub member: SyntaxResult<HtmlTagName>,
+    pub member: SyntaxResult<HtmlComponentName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlOpeningElement {

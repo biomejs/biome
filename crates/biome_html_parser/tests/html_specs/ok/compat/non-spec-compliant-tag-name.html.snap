@@ -22,15 +22,9 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..7 "f:link" [] [],
+                    value_token: HTML_UNKNOWN_TAG@1..17 "f:link.external" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
-                    HtmlAttribute {
-                        name: HtmlAttributeName {
-                            value_token: HTML_LITERAL@7..17 ".external" [] [Whitespace(" ")],
-                        },
-                        initializer: missing (optional),
-                    },
                     HtmlAttribute {
                         name: HtmlAttributeName {
                             value_token: HTML_LITERAL@17..20 "uri" [] [],
@@ -65,7 +59,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@88..89 "<" [] [],
                 slash_token: SLASH@89..90 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@90..105 "f:link.external" [] [],
+                    value_token: HTML_UNKNOWN_TAG@90..105 "f:link.external" [] [],
                 },
                 r_angle_token: R_ANGLE@105..106 ">" [] [],
             },
@@ -86,21 +80,17 @@ HtmlRoot {
     0: HTML_ELEMENT@0..106
       0: HTML_OPENING_ELEMENT@0..84
         0: L_ANGLE@0..1 "<" [] []
-        1: HTML_TAG_NAME@1..7
-          0: HTML_LITERAL@1..7 "f:link" [] []
-        2: HTML_ATTRIBUTE_LIST@7..83
-          0: HTML_ATTRIBUTE@7..17
-            0: HTML_ATTRIBUTE_NAME@7..17
-              0: HTML_LITERAL@7..17 ".external" [] [Whitespace(" ")]
-            1: (empty)
-          1: HTML_ATTRIBUTE@17..42
+        1: HTML_TAG_NAME@1..17
+          0: HTML_UNKNOWN_TAG@1..17 "f:link.external" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@17..83
+          0: HTML_ATTRIBUTE@17..42
             0: HTML_ATTRIBUTE_NAME@17..20
               0: HTML_LITERAL@17..20 "uri" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..42
               0: EQ@20..21 "=" [] []
               1: HTML_STRING@21..42
                 0: HTML_STRING_LITERAL@21..42 "\"https://domain.de/\"" [] [Whitespace(" ")]
-          2: HTML_ATTRIBUTE@42..83
+          1: HTML_ATTRIBUTE@42..83
             0: HTML_ATTRIBUTE_NAME@42..47
               0: HTML_LITERAL@42..47 "class" [] []
             1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@47..83
@@ -115,7 +105,7 @@ HtmlRoot {
         0: L_ANGLE@88..89 "<" [] []
         1: SLASH@89..90 "/" [] []
         2: HTML_TAG_NAME@90..105
-          0: HTML_LITERAL@90..105 "f:link.external" [] []
+          0: HTML_UNKNOWN_TAG@90..105 "f:link.external" [] []
         3: R_ANGLE@105..106 ">" [] []
   4: EOF@106..106 "" [] []
 

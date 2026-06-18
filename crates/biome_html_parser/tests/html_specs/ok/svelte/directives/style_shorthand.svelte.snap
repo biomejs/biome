@@ -24,7 +24,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteStyleDirective {
@@ -50,7 +50,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@26..27 "<" [] [],
                 slash_token: SLASH@27..28 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@28..31 "div" [] [],
+                    value_token: DIV_KW@28..31 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@31..32 ">" [] [],
             },
@@ -59,7 +59,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@32..34 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@34..36 "p" [] [Whitespace(" ")],
+                    value_token: P_KW@34..36 "p" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     SvelteStyleDirective {
@@ -96,7 +96,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@79..80 "<" [] [],
                 slash_token: SLASH@80..81 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@81..82 "p" [] [],
+                    value_token: P_KW@81..82 "p" [] [],
                 },
                 r_angle_token: R_ANGLE@82..83 ">" [] [],
             },
@@ -118,7 +118,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..17
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..16
           0: SVELTE_STYLE_DIRECTIVE@5..16
             0: STYLE_KW@5..10 "style" [] []
@@ -136,13 +136,13 @@ HtmlRoot {
         0: L_ANGLE@26..27 "<" [] []
         1: SLASH@27..28 "/" [] []
         2: HTML_TAG_NAME@28..31
-          0: HTML_LITERAL@28..31 "div" [] []
+          0: DIV_KW@28..31 "div" [] []
         3: R_ANGLE@31..32 ">" [] []
     1: HTML_ELEMENT@32..83
       0: HTML_OPENING_ELEMENT@32..61
         0: L_ANGLE@32..34 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@34..36
-          0: HTML_LITERAL@34..36 "p" [] [Whitespace(" ")]
+          0: P_KW@34..36 "p" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@36..60
           0: SVELTE_STYLE_DIRECTIVE@36..48
             0: STYLE_KW@36..41 "style" [] []
@@ -168,7 +168,7 @@ HtmlRoot {
         0: L_ANGLE@79..80 "<" [] []
         1: SLASH@80..81 "/" [] []
         2: HTML_TAG_NAME@81..82
-          0: HTML_LITERAL@81..82 "p" [] []
+          0: P_KW@81..82 "p" [] []
         3: R_ANGLE@82..83 ">" [] []
   4: EOF@83..84 "" [Newline("\n")] []
 

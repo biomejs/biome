@@ -31,10 +31,7 @@ pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     // Check if this is v-for BEFORE bumping the token
     let is_v_for = p.cur_text() == "v-for";
     // FIXME: Ideally, the lexer would just lex IDENT directly
-    p.bump_remap_with_context(
-        IDENT,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_remap_with_context(IDENT, super::inside_tag_context(p));
     if p.at(T![:]) {
         // is there any trivia after the directive name and before the colon?
         if let Some(last_trivia) = p.source().trivia_list.last()
@@ -92,10 +89,7 @@ pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSy
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![@],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![@], super::inside_tag_context(p));
     // is there any trivia after the @ and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -124,10 +118,7 @@ pub(crate) fn parse_vue_v_slot_shorthand_directive(p: &mut HtmlParser) -> Parsed
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![#],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![#], super::inside_tag_context(p));
     // is there any trivia after the hash and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -156,10 +147,7 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(
-        T![:],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![:], super::inside_tag_context(p));
     // is there any trivia after the colon and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -179,10 +167,7 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
 fn parse_vue_static_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
-    p.expect_with_context(
-        HTML_LITERAL,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_STATIC_ARGUMENT))
 }
@@ -195,14 +180,8 @@ fn parse_vue_dynamic_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_with_context(T!['['], HtmlLexContext::VueDirectiveArgument);
-    p.expect_with_context(
-        HTML_LITERAL,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
-    p.expect_with_context(
-        T![']'],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
+    p.expect_with_context(T![']'], super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_DYNAMIC_ARGUMENT))
 }
@@ -245,21 +224,12 @@ fn parse_vue_modifier(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(
-        T![.],
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.bump_with_context(T![.], super::inside_tag_context(p));
     if p.at(T![:]) {
         // `:` is actually a valid modifier, for example `@keydown.:`
-        p.bump_remap_with_context(
-            HTML_LITERAL,
-            HtmlLexContext::InsideTagWithDirectives { svelte: false },
-        );
+        p.bump_remap_with_context(HTML_LITERAL, super::inside_tag_context(p));
     } else {
-        p.expect_with_context(
-            HTML_LITERAL,
-            HtmlLexContext::InsideTagWithDirectives { svelte: false },
-        );
+        p.expect_with_context(HTML_LITERAL, super::inside_tag_context(p));
     }
 
     Present(m.complete(p, VUE_MODIFIER))
@@ -302,10 +272,7 @@ pub fn parse_vue_v_for_value(p: &mut HtmlParser) -> ParsedSyntax {
         .or_add_diagnostic(p, expected_vue_v_for_expression);
 
     // r_quote: ending quote must match starting quote
-    p.expect_with_context(
-        start_quote_kind,
-        HtmlLexContext::InsideTagWithDirectives { svelte: false },
-    );
+    p.expect_with_context(start_quote_kind, super::inside_tag_context(p));
 
     Present(m.complete(p, VUE_V_FOR_VALUE))
 }

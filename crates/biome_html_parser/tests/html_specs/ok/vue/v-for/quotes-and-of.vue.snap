@@ -25,7 +25,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     VueDirective {
@@ -65,7 +65,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@37..38 "<" [] [],
                 slash_token: SLASH@38..39 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@39..42 "div" [] [],
+                    value_token: DIV_KW@39..42 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@42..43 ">" [] [],
             },
@@ -74,7 +74,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@43..45 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@45..49 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@45..49 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     VueDirective {
@@ -114,7 +114,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@81..82 "<" [] [],
                 slash_token: SLASH@82..83 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@83..86 "div" [] [],
+                    value_token: DIV_KW@83..86 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@86..87 ">" [] [],
             },
@@ -123,7 +123,7 @@ HtmlRoot {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@87..89 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@89..93 "div" [] [Whitespace(" ")],
+                    value_token: DIV_KW@89..93 "div" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
                     VueDirective {
@@ -184,7 +184,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@147..148 "<" [] [],
                 slash_token: SLASH@148..149 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@149..152 "div" [] [],
+                    value_token: DIV_KW@149..152 "div" [] [],
                 },
                 r_angle_token: R_ANGLE@152..153 ">" [] [],
             },
@@ -206,7 +206,7 @@ HtmlRoot {
       0: HTML_OPENING_ELEMENT@0..27
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@5..26
           0: VUE_DIRECTIVE@5..26
             0: IDENT@5..10 "v-for" [] []
@@ -234,13 +234,13 @@ HtmlRoot {
         0: L_ANGLE@37..38 "<" [] []
         1: SLASH@38..39 "/" [] []
         2: HTML_TAG_NAME@39..42
-          0: HTML_LITERAL@39..42 "div" [] []
+          0: DIV_KW@39..42 "div" [] []
         3: R_ANGLE@42..43 ">" [] []
     1: HTML_ELEMENT@43..87
       0: HTML_OPENING_ELEMENT@43..71
         0: L_ANGLE@43..45 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@45..49
-          0: HTML_LITERAL@45..49 "div" [] [Whitespace(" ")]
+          0: DIV_KW@45..49 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@49..70
           0: VUE_DIRECTIVE@49..70
             0: IDENT@49..54 "v-for" [] []
@@ -268,13 +268,13 @@ HtmlRoot {
         0: L_ANGLE@81..82 "<" [] []
         1: SLASH@82..83 "/" [] []
         2: HTML_TAG_NAME@83..86
-          0: HTML_LITERAL@83..86 "div" [] []
+          0: DIV_KW@83..86 "div" [] []
         3: R_ANGLE@86..87 ">" [] []
     2: HTML_ELEMENT@87..153
       0: HTML_OPENING_ELEMENT@87..124
         0: L_ANGLE@87..89 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@89..93
-          0: HTML_LITERAL@89..93 "div" [] [Whitespace(" ")]
+          0: DIV_KW@89..93 "div" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@93..123
           0: VUE_DIRECTIVE@93..123
             0: IDENT@93..98 "v-for" [] []
@@ -317,7 +317,7 @@ HtmlRoot {
         0: L_ANGLE@147..148 "<" [] []
         1: SLASH@148..149 "/" [] []
         2: HTML_TAG_NAME@149..152
-          0: HTML_LITERAL@149..152 "div" [] []
+          0: DIV_KW@149..152 "div" [] []
         3: R_ANGLE@152..153 ">" [] []
   4: EOF@153..154 "" [Newline("\n")] []
 
