@@ -5,11 +5,8 @@ use crate::{
     services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource,
-    context::RuleContext,
-    declare_lint_rule,
-    options::JsxRuntime,
-    utils::{Split, split_separated_list},
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    options::JsxRuntime, utils::split_separated_list,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -1080,14 +1077,14 @@ fn split_named_import_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            Some(Split::Left(new_specifier))
+            Some(either::Either::Left(new_specifier))
         } else if specifiers_requiring_type_marker
             .iter()
             .any(|x| x.syntax().index() == specifier.syntax().index())
         {
-            Some(Split::Left(specifier))
+            Some(either::Either::Left(specifier))
         } else {
-            Some(Split::Right(specifier))
+            Some(either::Either::Right(specifier))
         }
     })?;
     let named_type = named_specifiers.clone().with_specifiers(type_specifiers);

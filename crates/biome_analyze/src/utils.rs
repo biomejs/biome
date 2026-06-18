@@ -160,15 +160,6 @@ pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
     }
 }
 
-/// Represents an item that eiher part of a left partition or a right partition.
-///
-/// This is the return type of [`split_separated_list`].
-#[derive(Debug)]
-pub enum Split<T> {
-    Left(T),
-    Right(T),
-}
-
 /// Splits the list into two new lists according to a partitioning function.
 ///
 /// Every item of `list` is passed to `partition` that decides if the item is
@@ -182,7 +173,7 @@ pub enum Split<T> {
 /// The trailing separators are moved with their node.
 pub fn split_separated_list<'a, L, List, Node>(
     list: &List,
-    partition: impl Fn(Node) -> Option<Split<Node>>,
+    partition: impl Fn(Node) -> Option<either::Either<Node, Node>>,
 ) -> Option<(List, List)>
 where
     L: Language + 'a,
@@ -203,8 +194,8 @@ where
         let node = node.ok()?;
         let trailing_separator = trailing_separator.ok()?;
         let (items, separators, node) = match partition(node)? {
-            Split::Left(node) => (&mut left_items, &mut left_separators, node),
-            Split::Right(node) => (&mut right_items, &mut right_separators, node),
+            either::Either::Left(node) => (&mut left_items, &mut left_separators, node),
+            either::Either::Right(node) => (&mut right_items, &mut right_separators, node),
         };
         items.push(node);
         if let Some(trailing_separator) = trailing_separator {

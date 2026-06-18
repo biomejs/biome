@@ -4,10 +4,8 @@ use crate::{
     services::{embedded_value_references::EmbeddedValueReferences, semantic::Semantic},
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource,
-    context::RuleContext,
-    declare_lint_rule,
-    utils::{Split, split_separated_list},
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    utils::split_separated_list,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -603,14 +601,14 @@ fn split_export_named_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            Split::Left(new_specifier)
+            either::Either::Left(new_specifier)
         } else if specifiers_requiring_type_keyword
             .iter()
             .any(|x| x.syntax().index() == specifier.syntax().index())
         {
-            Split::Left(specifier)
+            either::Either::Left(specifier)
         } else {
-            Split::Right(specifier)
+            either::Either::Right(specifier)
         })
     })
 }
@@ -630,9 +628,9 @@ fn split_export_named_from_specifiers(
                     type_token.leading_trivia().pieces(),
                     trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
                 ))?;
-            Some(Split::Left(new_specifier))
+            Some(either::Either::Left(new_specifier))
         } else {
-            Some(Split::Right(specifier))
+            Some(either::Either::Right(specifier))
         }
     })
 }
