@@ -75,9 +75,7 @@ impl DeriveInput {
                         let fields = data
                             .fields
                             .into_iter()
-                            .filter_map(|field| {
-                                field.ident.map(|ident| (ident, field.attrs))
-                            })
+                            .filter_map(|field| field.ident.map(|ident| (ident, field.attrs)))
                             .filter_map(|(ident, attrs)| {
                                 let attrs = StructFieldAttrs::try_from(&attrs)
                                     .expect("Could not parse field attributes");
