@@ -50,13 +50,14 @@ pub fn is_separated_list_sorted_by<'a, L: Language + 'a, N: AstNode<Language = L
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
-pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key>(
+pub fn sorted_separated_list_by<'a, L, List, Node, Key>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
     comparator: impl Fn(&Key, &Key) -> Ordering,
 ) -> Result<List, SyntaxError>
 where
+    L: Language + 'a,
     List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
     Node: AstNode<Language = L> + 'a,
 {
@@ -176,11 +177,12 @@ pub enum Split<T> {
 /// This allows supporting cases where the passed AST node must be modified.
 ///
 /// The trailing separators are moved with their node.
-pub fn split_separated_list<'a, L: Language + 'a, List, Node>(
+pub fn split_separated_list<'a, L, List, Node>(
     list: &List,
     partition: impl Fn(Node) -> Option<Split<Node>>,
 ) -> Option<(List, List)>
 where
+    L: Language + 'a,
     List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
     Node: AstNode<Language = L> + 'a,
 {
