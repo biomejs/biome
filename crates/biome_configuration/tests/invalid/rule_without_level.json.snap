@@ -1,0 +1,14 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: rule_without_level.json
+---
+rule_without_level.json:5:23 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key `level` is missing.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noDebugger": {}
+      │                       ^^
+    6 │       }
+    7 │     }
