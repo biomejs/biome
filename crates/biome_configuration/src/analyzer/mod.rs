@@ -431,6 +431,7 @@ impl Merge for RuleAssistPlainConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RuleAssistPlainConfiguration,
     /// Rule's options
     pub options: T,
@@ -472,6 +473,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// Rule's options
     #[serde(default)]
@@ -518,6 +520,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
