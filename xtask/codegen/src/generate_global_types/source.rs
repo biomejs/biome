@@ -2,10 +2,8 @@
 
 use std::collections::{BTreeMap, HashSet};
 use std::env;
-use std::ffi::OsStr;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
-use std::process::Command;
 
 use anyhow::{Context, anyhow, bail};
 use biome_js_parser::{JsParserOptions, parse};
@@ -15,11 +13,16 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, Text, TokenText};
 use biome_string_case::StrLikeExtension;
+use git2::{FetchOptions, Oid, Repository, ResetType};
 
 use crate::generate_global_types::SourcePin;
 
 /// Default remote used to acquire TypeScript sources.
 const DEFAULT_TYPESCRIPT_REPO_URL: &str = "https://github.com/microsoft/TypeScript.git";
+
+/// Fetch depth used for the pinned tag over a remote transport: only the
+/// pinned commit, with no ancestry behind it.
+const SHALLOW_FETCH_DEPTH: i32 = 1;
 
 /// Subdirectory under the OS temporary directory used as the per-pin checkout cache.
 const TYPESCRIPT_CACHE_DIR_NAME: &str = "biome-global-types";
@@ -340,8 +343,8 @@ fn cache_key(pin: &SourcePin) -> String {
     format!("{}-{}", pin.tag(), pin.sha())
 }
 
-/// Shallow-clones the pinned TypeScript tag into `checkout_path` and resets it
-/// to the pinned commit.
+/// Fetches the pinned TypeScript tag with `git2` and resets the checkout to the
+/// pinned commit.
 fn clone_checkout(
     checkout_path: &Path,
     pin: &SourcePin,
@@ -352,40 +355,49 @@ fn clone_checkout(
             .with_context(|| format!("failed to create {}", parent.display()))?;
     }
 
-    let repo_url: &OsStr = match opts.repo_url_override.as_deref() {
-        Some(path) => path.as_os_str(),
-        None => OsStr::new(DEFAULT_TYPESCRIPT_REPO_URL),
+    let repo_url = match opts.repo_url_override.as_deref() {
+        Some(path) => path.to_str().ok_or_else(|| {
+            anyhow!(
+                "repository override path is not valid UTF-8: {}",
+                path.display()
+            )
+        })?,
+        None => DEFAULT_TYPESCRIPT_REPO_URL,
     };
 
-    run_git(
-        Command::new("git")
-            .args(["clone", "--depth", "1", "--branch", pin.tag(), "--"])
-            .arg(repo_url)
-            .arg(checkout_path),
-        "git clone TypeScript",
-    )?;
-    run_git(
-        Command::new("git")
-            .arg("-C")
-            .arg(checkout_path)
-            .args(["reset", "--hard", pin.sha()]),
-        "git reset TypeScript",
-    )?;
+    let repository = Repository::init(checkout_path)
+        .with_context(|| format!("failed to initialize {}", checkout_path.display()))?;
 
-    Ok(())
-}
-
-/// Runs a git command and bails with its captured stderr on a non-zero exit.
-fn run_git(command: &mut Command, description: &str) -> anyhow::Result<()> {
-    let output = command
-        .output()
-        .with_context(|| format!("failed to run {description}"))?;
-    if !output.status.success() {
-        bail!(
-            "{description} failed: {}",
-            String::from_utf8_lossy(&output.stderr).trim()
-        );
+    // Only the remote can be shallow-fetched; the local transport (test overrides) rejects a depth.
+    let mut fetch_options = FetchOptions::new();
+    if opts.repo_url_override.is_none() {
+        fetch_options.depth(SHALLOW_FETCH_DEPTH);
     }
+
+    let tag_refspec = format!("+refs/tags/{tag}:refs/tags/{tag}", tag = pin.tag());
+    repository
+        .remote_anonymous(repo_url)
+        .with_context(|| format!("failed to create remote for {repo_url}"))?
+        .fetch(&[tag_refspec.as_str()], Some(&mut fetch_options), None)
+        .with_context(|| {
+            format!(
+                "failed to fetch TypeScript tag {} from {repo_url}",
+                pin.tag()
+            )
+        })?;
+
+    let oid =
+        Oid::from_str(pin.sha()).with_context(|| format!("invalid pinned commit {}", pin.sha()))?;
+    let object = repository.find_object(oid, None).with_context(|| {
+        format!(
+            "pinned commit {} was not fetched from tag {}",
+            pin.sha(),
+            pin.tag()
+        )
+    })?;
+    repository
+        .reset(&object, ResetType::Hard, None)
+        .with_context(|| format!("failed to reset TypeScript checkout to {}", pin.sha()))?;
 
     Ok(())
 }
