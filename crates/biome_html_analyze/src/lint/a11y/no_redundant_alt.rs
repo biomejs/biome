@@ -4,13 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement, T};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
@@ -57,9 +54,8 @@ impl Rule for NoRedundantAlt {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(node, source_type, "img") {
+        if node.tag_name_kind() != Some(T![img]) {
             return None;
         }
 

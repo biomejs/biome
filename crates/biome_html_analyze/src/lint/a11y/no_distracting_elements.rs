@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, T};
 use biome_languages::HtmlFileSource;
 use biome_rowan::BatchMutationExt;
 use biome_rowan::{AstNode, TokenText};
@@ -63,7 +63,12 @@ impl Rule for NoDistractingElements {
 
         let tag_element = element.clone().as_any_html_tag_element()?;
         let element_name = tag_element.tag_name()?;
-        if is_html_tag(&tag_element, source_type, "marquee")
+        // FIXME(parser): `<blink>` has no tag keyword, so it lexes as
+        // `HTML_UNKNOWN_TAG` and can't be matched by kind the way `<marquee>` is.
+        // This is a gap in the HTML lexer's tag-name keyword set (`HTML_TAG_NAMES`
+        // in `biome_html_syntax`), which should include `blink`. Until that's
+        // fixed, fall back to a text comparison for `blink`.
+        if tag_element.tag_name_kind() == Some(T![marquee])
             || is_html_tag(&tag_element, source_type, "blink")
         {
             return Some(element_name);
