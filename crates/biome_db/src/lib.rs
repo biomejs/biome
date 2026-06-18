@@ -42,6 +42,11 @@ impl ParsedSource {
             .iter()
             .filter(|d| d.severity() >= Severity::Error)
             .count()
+            + self
+                .snippets(db)
+                .iter()
+                .filter(|s| s.has_errors(db))
+                .count()
     }
 
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {

@@ -183,8 +183,8 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             );
         }
         DefinitionReference::LocalEmbedded { range, .. } => {
-            let offest = params.parsed_source.diagnostic_offset(&params.workspace_db);
-            if let Some(offset) = offest {
+            let offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
+            if let Some(offset) = offset {
                 result.store(params.path.clone(), range.add(offset))
             }
         }

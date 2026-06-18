@@ -756,13 +756,13 @@ impl WorkspaceServer {
 
         // Check if cursor falls within an embedded snippet
         for snippet in workspace_db.parsed_snippets_for_path(path) {
-            let snippet_offset = snippet.content_offset(&workspace_db);
-            let local_cursor = cursor_offset - snippet_offset;
-
             let snippet_range = snippet.content_range(&workspace_db);
             if cursor_offset < snippet_range.start() || cursor_offset >= snippet_range.end() {
                 continue;
             }
+
+            let snippet_offset = snippet.content_offset(&workspace_db);
+            let local_cursor = cursor_offset - snippet_offset;
 
             let Some(file_source) =
                 workspace_db.source_from_index(snippet.document_source_index(&workspace_db))
@@ -2018,8 +2018,16 @@ impl Workspace for WorkspaceServer {
             settings.as_ref().experimental_full_html_support_enabled(),
         );
 
-        let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
-        let any_parse = parsed.any_parse;
+        let ParseResult {
+            any_parse,
+            language,
+        } = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+
+        let (index, document_source) = if let Some(language) = language {
+            (self.db_add_source(language), language)
+        } else {
+            (index, document_source)
+        };
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let mut node_cache = NodeCache::default();
