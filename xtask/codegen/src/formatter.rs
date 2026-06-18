@@ -50,7 +50,7 @@ impl GitRepo {
         let mut dirty = HashSet::new();
 
         for status in statuses.iter() {
-            if let Some(path) = status.path() {
+            if let Ok(path) = status.path() {
                 match status.status() {
                     Status::CURRENT => (),
                     Status::INDEX_NEW
