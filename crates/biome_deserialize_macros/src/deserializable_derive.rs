@@ -9,8 +9,8 @@ use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use biome_string_case::Case;
 use proc_macro_error2::*;
 use proc_macro2::{Ident, TokenStream};
-use quote::quote;
-use syn::{Data, GenericParam, Generics, Path, Type};
+use quote::{format_ident, quote};
+use syn::{Data, GenericParam, Generics, Path};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -76,9 +76,9 @@ impl DeriveInput {
                             .fields
                             .into_iter()
                             .filter_map(|field| {
-                                field.ident.map(|ident| (ident, field.attrs, field.ty))
+                                field.ident.map(|ident| (ident, field.attrs))
                             })
-                            .filter_map(|(ident, attrs, ty)| {
+                            .filter_map(|(ident, attrs)| {
                                 let attrs = StructFieldAttrs::try_from(&attrs)
                                     .expect("Could not parse field attributes");
                                 if attrs.skip {
@@ -108,7 +108,6 @@ impl DeriveInput {
                                     ident,
                                     key,
                                     required: attrs.required,
-                                    ty,
                                     validate: attrs.validate,
                                 })
                             })
@@ -202,7 +201,6 @@ pub struct DeserializableFieldData {
     ident: Ident,
     key: String,
     required: bool,
-    ty: Type,
     validate: Option<Path>,
 }
 
@@ -351,11 +349,18 @@ fn generate_deserializable_struct(
         .fields
         .into_iter()
         .map(|field_data| {
+            let is_required = field_data.required;
             let DeserializableFieldData {
                 ident: field_ident,
                 key,
                 ..
             } = field_data;
+            let mark_seen = if is_required {
+                let seen_ident = format_ident!("seen_{}", field_ident);
+                quote! { #seen_ident = true; }
+            } else {
+                quote! {}
+            };
             let deprecation_notice = field_data.deprecated.map(|deprecated| match deprecated {
                 DeprecatedField::Message(message) => quote! {
                     ctx.report(DeserializationDiagnostic::new_deprecated(
@@ -386,6 +391,7 @@ fn generate_deserializable_struct(
 
             quote! {
                 #key => {
+                    #mark_seen
                     match Deserializable::deserialize(ctx, &value, &key_text)#validate {
                         Some(value) => {
                             #deprecation_notice
@@ -398,6 +404,13 @@ fn generate_deserializable_struct(
         })
         .collect();
 
+    let seen_declarations: Vec<_> = required_fields
+        .iter()
+        .map(|field_data| {
+            let seen_ident = format_ident!("seen_{}", field_data.ident);
+            quote! { let mut #seen_ident = false; }
+        })
+        .collect();
     let validator = if required_fields.is_empty() {
         quote! {}
     } else {
@@ -406,14 +419,10 @@ fn generate_deserializable_struct(
             .map(|field_data| &field_data.key)
             .collect();
         let required_fields = required_fields.iter().map(|field_data| {
-            let DeserializableFieldData {
-                ident: field_ident,
-                key,
-                ty,
-                ..
-            } = field_data;
+            let DeserializableFieldData { ident, key, .. } = field_data;
+            let seen_ident = format_ident!("seen_{}", ident);
             quote! {
-                if result.#field_ident == #ty::default() {
+                if !#seen_ident {
                     ctx.report(DeserializationDiagnostic::new_missing_key(
                         #key,
                         range,
@@ -496,6 +505,7 @@ fn generate_deserializable_struct(
                     ) -> Option<Self::Output> {
                         use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
                         let mut result: Self::Output = Self::Output::default();
+                        #(#seen_declarations)*
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                                 continue;
