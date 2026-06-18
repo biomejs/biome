@@ -1,80 +1,80 @@
 [package]
-name = "biome_js_analyze"
-version = "0.5.7"
-authors.workspace = true
-edition.workspace = true
-description = "Biome's JavaScript linter"
-homepage.workspace = true
+name                 = "biome_js_analyze"
+version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's JavaScript linter"
+homepage.workspace   = true
 repository.workspace = true
-license.workspace = true
-keywords.workspace = true
+license.workspace    = true
+keywords.workspace   = true
 categories.workspace = true
-publish = true
+publish              = true
 
 [[bench]]
 harness = false
-name = "js_analyzer"
+name    = "js_analyzer"
 
 [[bench]]
 harness = false
-name = "use_sorted_classes_parser"
+name    = "use_sorted_classes_parser"
 
 [dependencies]
-biome_analyze = { workspace = true }
-biome_analyze_macros = { workspace = true }
-biome_aria = { workspace = true }
-biome_aria_metadata = { workspace = true }
-biome_console = { workspace = true }
-biome_control_flow = { workspace = true }
-biome_db = { workspace = true }
-biome_deserialize = { workspace = true, features = ["smallvec"] }
-biome_deserialize_macros = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_fs = { workspace = true }
-biome_glob = { workspace = true, features = ["biome_deserialize", "serde"] }
-biome_js_factory = { workspace = true }
-biome_js_semantic = { workspace = true }
-biome_js_syntax = { workspace = true }
-biome_js_type_info = { workspace = true }
-biome_jsdoc_comment = { workspace = true }
-biome_languages = { workspace = true, features = ["lang_js"] }
-biome_module_graph = { workspace = true }
+biome_analyze             = { workspace = true }
+biome_analyze_macros      = { workspace = true }
+biome_aria                = { workspace = true }
+biome_aria_metadata       = { workspace = true }
+biome_console             = { workspace = true }
+biome_control_flow        = { workspace = true }
+biome_db                  = { workspace = true }
+biome_deserialize         = { workspace = true, features = ["smallvec"] }
+biome_deserialize_macros  = { workspace = true }
+biome_diagnostics         = { workspace = true }
+biome_fs                  = { workspace = true }
+biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
+biome_js_factory          = { workspace = true }
+biome_js_semantic         = { workspace = true }
+biome_js_syntax           = { workspace = true }
+biome_js_type_info        = { workspace = true }
+biome_jsdoc_comment       = { workspace = true }
+biome_languages           = { workspace = true, features = ["lang_js"] }
+biome_module_graph        = { workspace = true }
 biome_module_replacements = { workspace = true }
-biome_package = { workspace = true }
-biome_project_layout = { workspace = true }
-biome_resolver = { workspace = true }
-biome_rowan = { workspace = true }
-biome_rule_options = { workspace = true }
-biome_string_case = { workspace = true, features = ["biome_rowan"] }
-biome_suppression = { workspace = true }
-biome_tailwind_parser = { workspace = true }
-biome_tailwind_syntax = { workspace = true }
-biome_unicode_table = { workspace = true }
-biome_workspace_db = { workspace = true }
-bitvec = "1.0.1"
-camino = { workspace = true }
-enumflags2 = { workspace = true }
-globset = { workspace = true }
-phf = { workspace = true }
-regex = { workspace = true }
-roaring = "0.11.3"
-rustc-hash = { workspace = true }
-schemars = { workspace = true, optional = true }
-serde = { workspace = true, features = ["derive"] }
-smallvec = { workspace = true }
+biome_package             = { workspace = true }
+biome_project_layout      = { workspace = true }
+biome_resolver            = { workspace = true }
+biome_rowan               = { workspace = true }
+biome_rule_options        = { workspace = true }
+biome_string_case         = { workspace = true, features = ["biome_rowan"] }
+biome_suppression         = { workspace = true }
+biome_tailwind_parser     = { workspace = true }
+biome_tailwind_syntax     = { workspace = true }
+biome_unicode_table       = { workspace = true }
+biome_workspace_db        = { workspace = true }
+bitvec                    = "1.0.1"
+camino                    = { workspace = true }
+enumflags2                = { workspace = true }
+globset                   = { workspace = true }
+phf                       = { workspace = true }
+regex                     = { workspace = true }
+roaring                   = "0.11.3"
+rustc-hash                = { workspace = true }
+schemars                  = { workspace = true, optional = true }
+serde                     = { workspace = true, features = ["derive"] }
+smallvec                  = { workspace = true }
 
 [dev-dependencies]
-biome_db = { path = "../biome_db" }
-biome_fs = { path = "../biome_fs" }
-biome_js_parser = { path = "../biome_js_parser", features = ["tests"] }
-biome_parser = { path = "../biome_parser" }
+biome_db            = { path = "../biome_db" }
+biome_fs            = { path = "../biome_fs" }
+biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
+biome_parser        = { path = "../biome_parser" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
-biome_service = { path = "../biome_service" }
-biome_test_utils = { path = "../biome_test_utils" }
-criterion = { package = "codspeed-criterion-compat", version = "=3.0.5" }
-insta = { workspace = true, features = ["glob"] }
-salsa = { workspace = true }
-tests_macros = { path = "../tests_macros" }
+biome_service       = { path = "../biome_service" }
+biome_test_utils    = { path = "../biome_test_utils" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+insta               = { workspace = true, features = ["glob"] }
+salsa               = { workspace = true }
+tests_macros        = { path = "../tests_macros" }
 
 [build-dependencies]
 filetime = { workspace = true }
