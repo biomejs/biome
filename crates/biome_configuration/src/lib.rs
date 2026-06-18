@@ -126,6 +126,7 @@ pub type RootEnabled = Bool<true>;
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", schemars(extend("allowTrailingCommas" = true)))] // mute VSCode warning
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 #[deserializable(with_validator)]
 pub struct Configuration {
