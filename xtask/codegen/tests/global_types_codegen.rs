@@ -81,8 +81,6 @@ const COMMAND_LINE_PARSER_PATH: &str = "src/compiler/commandLineParser.ts";
 
 const COLLECTOR_FIXTURE_DIR: &str = "tests/fixtures/global-types";
 
-const CARRIAGE_RETURN_BYTE: u8 = b'\r';
-
 const LINE_FEED_BYTE: u8 = b'\n';
 
 const COLLECTOR_FIXTURES: [&str; COLLECTOR_FIXTURE_COUNT] = [
@@ -642,29 +640,6 @@ fn lib_map_bytes(map: &BTreeMap<biome_rowan::Text, biome_rowan::Text>) -> Vec<u8
     bytes
 }
 
-/// Normalizes CRLF bytes to LF without allocating when no carriage returns are present.
-fn normalize_lf(bytes: Vec<u8>) -> Vec<u8> {
-    if !bytes.contains(&CARRIAGE_RETURN_BYTE) {
-        return bytes;
-    }
-
-    let mut normalized = Vec::with_capacity(bytes.len());
-    let mut index = 0;
-    while index < bytes.len() {
-        let byte = bytes[index];
-        if byte == CARRIAGE_RETURN_BYTE {
-            let next_index = index + 1;
-            if next_index < bytes.len() && bytes[next_index] == LINE_FEED_BYTE {
-                index = next_index;
-                continue;
-            }
-        }
-        normalized.push(byte);
-        index += 1;
-    }
-    normalized
-}
-
 /// Formats collector output using stable `Debug` sections for fixture files.
 fn stringify_collector_output(output: &CollectorOutput) -> String {
     let mut text = String::new();
@@ -942,9 +917,9 @@ mod tests {
             let dts_path = fixture_root.join(&dts_name);
             let expected_path = fixture_root.join(expected_name);
 
-            let bytes = normalize_lf(fs::read(&dts_path).with_context(|| {
+            let bytes = fs::read(&dts_path).with_context(|| {
                 format!("failed to read collector fixture {}", dts_path.display())
-            })?);
+            })?;
             let expected = fs::read(&expected_path).with_context(|| {
                 format!(
                     "failed to read collector fixture expectation {}",
@@ -956,7 +931,7 @@ mod tests {
             let discovered = xtask_codegen::generate_global_types::source::DiscoveredFile {
                 path: canonical_path,
                 repo_relative: dts_name,
-                bytes_lf: bytes,
+                bytes,
             };
 
             let output = collect(&discovered);
@@ -1033,14 +1008,14 @@ mod tests {
         );
         assert!(
             discovered.iter().any(|file| file
-                .bytes_lf
+                .bytes
                 .windows(b"DefaultLibGlobal".len())
                 .any(|window| window == b"DefaultLibGlobal")),
             "discovery should read the default lib directory file"
         );
         assert!(
             discovered.iter().all(|file| !file
-                .bytes_lf
+                .bytes
                 .windows(b"RootEscapeGlobal".len())
                 .any(|window| window == b"RootEscapeGlobal")),
             "discovery must not read checkout-root shadow files for lib references"

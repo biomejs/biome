@@ -143,7 +143,7 @@ pub fn collect(file: &super::source::DiscoveredFile) -> CollectorOutput {
         coverage: Vec::new(),
     };
 
-    let Ok(text) = std::str::from_utf8(&file.bytes_lf) else {
+    let Ok(text) = std::str::from_utf8(&file.bytes) else {
         state.diagnostic(
             "invalid_utf8",
             ScopePath::Global,

@@ -142,8 +142,8 @@ pub struct DiscoveredFile {
     pub path: CanonicalPath,
     /// Checkout-relative path using forward slashes.
     pub repo_relative: String,
-    /// File bytes after LF normalization.
-    pub bytes_lf: Vec<u8>,
+    /// Raw file bytes read from the checkout.
+    pub bytes: Vec<u8>,
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -183,7 +183,7 @@ pub fn acquire(pin: &SourcePin, opts: &SourceOptions) -> anyhow::Result<Acquired
 
 /// Parses TypeScript's `libEntries` table from `commandLineParser.ts`.
 pub fn parse_lib_entries(checkout: &AcquiredCheckout) -> anyhow::Result<LibEntries> {
-    let bytes = read_source_file_lf_normalized(
+    let bytes = read_source_file(
         &checkout
             .root
             .as_path()
@@ -327,7 +327,7 @@ pub fn discover(
 /// Stack frame used while traversing TypeScript triple-slash dependency references.
 struct Frame {
     source: TrackedSourceFile,
-    bytes_lf: Vec<u8>,
+    bytes: Vec<u8>,
     children_remaining: Vec<TripleSlashReference>,
 }
 
@@ -417,38 +417,9 @@ fn canonicalize_within(root: &Path, path: &Path) -> anyhow::Result<CanonicalPath
     Ok(CanonicalPath(canonical_path))
 }
 
-/// Normalizes CR/CRLF line endings to LF in place. The fast path returns the
-/// input unchanged when no `\r` is present.
-fn normalize_lf(mut bytes: Vec<u8>) -> Vec<u8> {
-    if !bytes.contains(&b'\r') {
-        return bytes;
-    }
-
-    let mut read = 0;
-    let mut write = 0;
-    while read < bytes.len() {
-        if bytes[read] == b'\r' {
-            bytes[write] = b'\n';
-            write += 1;
-            read += 1;
-            if bytes.get(read) == Some(&b'\n') {
-                read += 1;
-            }
-        } else {
-            bytes[write] = bytes[read];
-            write += 1;
-            read += 1;
-        }
-    }
-    bytes.truncate(write);
-    bytes
-}
-
-/// Reads a source file from the validated checkout and normalizes CR/CRLF
-/// line endings to LF.
-fn read_source_file_lf_normalized(path: &Path) -> anyhow::Result<Vec<u8>> {
-    let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
-    Ok(normalize_lf(bytes))
+/// Reads a source file from the validated checkout.
+fn read_source_file(path: &Path) -> anyhow::Result<Vec<u8>> {
+    fs::read(path).with_context(|| format!("failed to read {}", path.display()))
 }
 
 /// Returns the identifier text when the pattern is a single identifier binding.
@@ -547,8 +518,8 @@ fn make_frame(
     root: &Path,
     libs: &LibEntries,
 ) -> anyhow::Result<Frame> {
-    let bytes_lf = read_source_file_lf_normalized(source_file.path.as_path())?;
-    let source = std::str::from_utf8(&bytes_lf).with_context(|| {
+    let bytes = read_source_file(source_file.path.as_path())?;
+    let source = std::str::from_utf8(&bytes).with_context(|| {
         format!(
             "{} is not valid UTF-8",
             source_file.path.as_path().display()
@@ -560,7 +531,7 @@ fn make_frame(
 
     Ok(Frame {
         source: source_file,
-        bytes_lf,
+        bytes,
         children_remaining,
     })
 }
@@ -929,7 +900,7 @@ fn discovered_file_from_frame(frame: Frame) -> DiscoveredFile {
     DiscoveredFile {
         path: frame.source.path,
         repo_relative: frame.source.repo_relative,
-        bytes_lf: frame.bytes_lf,
+        bytes: frame.bytes,
     }
 }
 
