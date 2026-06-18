@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-group-first.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "groupFirst"
+// Within each group, multiline-value props are sub-grouped before single-line-value props.
+
+// Unsorted: single-line onClick before multiline onChange in CALLBACK group,
+// and key/disabled out of group order
+<Hello onClick={fn} onChange={(event) => {
+  handleChange(event);
+}} key="1" disabled name="John" />;
+
+// Unsorted: single-line key before multiline ref in RESERVED group
+<Hello key="1" ref={(el) => {
+  domRef.current = el;
+}} onClick={fn} name="John" />;
+
+// Both callback props have multiline values: sorted alphabetically (onChange < onClick)
+<Hello onClick={(e) => {
+  fn1(e);
+}} onChange={(e) => {
+  fn2(e);
+}} key="1" name="John" />;
+
+// Correctly ordered: RESERVED [multiline ref, single-line key],
+// CALLBACK [multiline onChange, single-line onClick], REST [name]
+<Hello ref={(el) => {
+  domRef.current = el;
+}} key="1" onChange={(event) => {
+  handleChange(event);
+}} onClick={fn} name="John" />;
+
+// Correctly ordered: no multiline-value props — groupFirst has no effect
+<Hello key="1" disabled onClick={fn} name="John" />;
+
+```
+
+# Diagnostics
+```
+multiline-group-first.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     4 │ // Unsorted: single-line onClick before multiline onChange in CALLBACK group,
+     5 │ // and key/disabled out of group order
+   > 6 │ <Hello onClick={fn} onChange={(event) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 7 │   handleChange(event);
+   > 8 │ }} key="1" disabled name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Unsorted: single-line key before multiline ref in RESERVED group
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   // Unsorted: single-line onClick before multiline onChange in CALLBACK group,
+     5  5 │   // and key/disabled out of group order
+     6    │ - <Hello·onClick={fn}·onChange={(event)·=>·{
+     7    │ - ··handleChange(event);
+     8    │ - }}·key="1"·disabled·name="John"·/>;
+        6 │ + <Hello·key="1"·disabled·onChange={(event)·=>·{
+        7 │ + ··handleChange(event);
+        8 │ + }}·onClick={fn}·name="John"·/>;
+     9  9 │   
+    10 10 │   // Unsorted: single-line key before multiline ref in RESERVED group
+  
+
+```
+
+```
+multiline-group-first.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Unsorted: single-line key before multiline ref in RESERVED group
+  > 11 │ <Hello key="1" ref={(el) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │   domRef.current = el;
+  > 13 │ }} onClick={fn} name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Both callback props have multiline values: sorted alphabetically (onChange < onClick)
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Unsorted: single-line key before multiline ref in RESERVED group
+    11    │ - <Hello·key="1"·ref={(el)·=>·{
+    12    │ - ··domRef.current·=·el;
+    13    │ - }}·onClick={fn}·name="John"·/>;
+       11 │ + <Hello·ref={(el)·=>·{
+       12 │ + ··domRef.current·=·el;
+       13 │ + }}·key="1"·onClick={fn}·name="John"·/>;
+    14 14 │   
+    15 15 │   // Both callback props have multiline values: sorted alphabetically (onChange < onClick)
+  
+
+```
+
+```
+multiline-group-first.jsx:16:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    15 │ // Both callback props have multiline values: sorted alphabetically (onChange < onClick)
+  > 16 │ <Hello onClick={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 17 │   fn1(e);
+  > 18 │ }} onChange={(e) => {
+  > 19 │   fn2(e);
+  > 20 │ }} key="1" name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ // Correctly ordered: RESERVED [multiline ref, single-line key],
+  
+  i Safe fix: Sort the JSX props.
+  
+    14 14 │   
+    15 15 │   // Both callback props have multiline values: sorted alphabetically (onChange < onClick)
+    16    │ - <Hello·onClick={(e)·=>·{
+    17    │ - ··fn1(e);
+    18    │ - }}·onChange={(e)·=>·{
+       16 │ + <Hello·key="1"·onChange={(e)·=>·{
+    19 17 │     fn2(e);
+    20    │ - }}·key="1"·name="John"·/>;
+       18 │ + }}·onClick={(e)·=>·{
+       19 │ + ··fn1(e);
+       20 │ + }}·name="John"·/>;
+    21 21 │   
+    22 22 │   // Correctly ordered: RESERVED [multiline ref, single-line key],
+  
+
+```

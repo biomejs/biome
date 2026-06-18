@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-spread.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "group" (default)
+// Spread fences apply independently: each segment is sorted by group order.
+
+// Unsorted segment before spread: CALLBACK before RESERVED and IMPLICIT
+<Hello onChange={(e) => {
+  fn(e);
+}} disabled key="1" {...rest} name="John" />;
+
+// Both segments unsorted
+<Hello onChange={(e) => {
+  fn(e);
+}} disabled {...rest} onBlur={(e) => {
+  fn(e);
+}} key="1" />;
+
+// Correctly sorted: RESERVED, IMPLICIT, CALLBACK in each segment
+<Hello key="1" disabled onChange={(e) => {
+  fn(e);
+}} {...rest} name="John" />;
+
+```
+
+# Diagnostics
+```
+multiline-spread.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ // Unsorted segment before spread: CALLBACK before RESERVED and IMPLICIT
+  > 5 │ <Hello onChange={(e) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │   fn(e);
+  > 7 │ }} disabled key="1" {...rest} name="John" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Both segments unsorted
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   
+     4  4 │   // Unsorted segment before spread: CALLBACK before RESERVED and IMPLICIT
+     5    │ - <Hello·onChange={(e)·=>·{
+     6    │ - ··fn(e);
+     7    │ - }}·disabled·key="1"·{...rest}·name="John"·/>;
+        5 │ + <Hello·key="1"·disabled·onChange={(e)·=>·{
+        6 │ + ··fn(e);
+        7 │ + }}·{...rest}·name="John"·/>;
+     8  8 │   
+     9  9 │   // Both segments unsorted
+  
+
+```
+
+```
+multiline-spread.jsx:10:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     9 │ // Both segments unsorted
+  > 10 │ <Hello onChange={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │   fn(e);
+  > 12 │ }} disabled {...rest} onBlur={(e) => {
+  > 13 │   fn(e);
+  > 14 │ }} key="1" />;
+       │ ^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Correctly sorted: RESERVED, IMPLICIT, CALLBACK in each segment
+  
+  i Safe fix: Sort the JSX props.
+  
+     8  8 │   
+     9  9 │   // Both segments unsorted
+    10    │ - <Hello·onChange={(e)·=>·{
+    11    │ - ··fn(e);
+    12    │ - }}·disabled·{...rest}·onBlur={(e)·=>·{
+       10 │ + <Hello·disabled·onChange={(e)·=>·{
+       11 │ + ··fn(e);
+       12 │ + }}·{...rest}·onBlur={(e)·=>·{
+    13 13 │     fn(e);
+    14 14 │   }} key="1" />;
+  
+
+```
+
+```
+multiline-spread.jsx:10:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     9 │ // Both segments unsorted
+  > 10 │ <Hello onChange={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │   fn(e);
+  > 12 │ }} disabled {...rest} onBlur={(e) => {
+  > 13 │   fn(e);
+  > 14 │ }} key="1" />;
+       │ ^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Correctly sorted: RESERVED, IMPLICIT, CALLBACK in each segment
+  
+  i Safe fix: Sort the JSX props.
+  
+    10 10 │   <Hello onChange={(e) => {
+    11 11 │     fn(e);
+    12    │ - }}·disabled·{...rest}·onBlur={(e)·=>·{
+    13    │ - ··fn(e);
+    14    │ - }}·key="1"·/>;
+       12 │ + }}·disabled·{...rest}·key="1"·onBlur={(e)·=>·{
+       13 │ + ··fn(e);
+       14 │ + }}·/>;
+    15 15 │   
+    16 16 │   // Correctly sorted: RESERVED, IMPLICIT, CALLBACK in each segment
+  
+
+```

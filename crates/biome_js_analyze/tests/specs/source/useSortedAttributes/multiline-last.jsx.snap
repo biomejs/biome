@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-last.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "last"
+// Single-line props come before multiline-value props (sorted by groups within each part).
+// Note: is_multiline_prop checks text_with_trivia(), so a prop on its own line in a
+// multiline JSX element is also "multiline". Use inline JSX to isolate multiline values.
+
+// Unsorted: multiline-value style before single-line name
+<Hello style={{
+  color: "red",
+}} name="John" />;
+
+// Unsorted: multiline-value callback before single-line callback and REST prop
+<Hello onClick={
+  () => doSomething()
+} name="John" onChange={fn} />;
+
+// Correctly ordered: single-line REST first, then multiline-value REST
+<Hello name="John" style={{
+  color: "red",
+}} />;
+
+// Correctly ordered: single-line CALLBACK then REST, then multiline-value CALLBACK
+<Hello onChange={fn} name="John" onClick={
+  () => doSomething()
+} />;
+
+```
+
+# Diagnostics
+```
+multiline-last.jsx:7:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     6 │ // Unsorted: multiline-value style before single-line name
+   > 7 │ <Hello style={{
+       │ ^^^^^^^^^^^^^^^
+   > 8 │   color: "red",
+   > 9 │ }} name="John" />;
+       │ ^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Unsorted: multiline-value callback before single-line callback and REST prop
+  
+  i Safe fix: Sort the JSX props.
+  
+     5  5 │   
+     6  6 │   // Unsorted: multiline-value style before single-line name
+     7    │ - <Hello·style={{
+     8    │ - ··color:·"red",
+     9    │ - }}·name="John"·/>;
+        7 │ + <Hello·name="John"·style={{
+        8 │ + ··color:·"red",
+        9 │ + }}·/>;
+    10 10 │   
+    11 11 │   // Unsorted: multiline-value callback before single-line callback and REST prop
+  
+
+```
+
+```
+multiline-last.jsx:12:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    11 │ // Unsorted: multiline-value callback before single-line callback and REST prop
+  > 12 │ <Hello onClick={
+       │ ^^^^^^^^^^^^^^^^
+  > 13 │   () => doSomething()
+  > 14 │ } name="John" onChange={fn} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Correctly ordered: single-line REST first, then multiline-value REST
+  
+  i Safe fix: Sort the JSX props.
+  
+    10 10 │   
+    11 11 │   // Unsorted: multiline-value callback before single-line callback and REST prop
+    12    │ - <Hello·onClick={
+    13    │ - ··()·=>·doSomething()
+    14    │ - }·name="John"·onChange={fn}·/>;
+       12 │ + <Hello·onChange={fn}·name="John"·onClick={
+       13 │ + ··()·=>·doSomething()
+       14 │ + }·/>;
+    15 15 │   
+    16 16 │   // Correctly ordered: single-line REST first, then multiline-value REST
+  
+
+```

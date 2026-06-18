@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-group-last.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "groupLast"
+// Within each group, single-line-value props come before multiline-value props.
+
+// Unsorted: multiline ref before single-line key in RESERVED group,
+// multiline onChange before single-line onClick in CALLBACK group
+<Hello ref={(el) => {
+  domRef.current = el;
+}} key="1" onChange={(e) => {
+  handleChange(e);
+}} onClick={fn} name="John" />;
+
+// Unsorted: group order wrong (callback before reserved) and multiline order wrong
+<Hello onChange={(e) => {
+  handleChange(e);
+}} onClick={fn} ref={(el) => {
+  domRef.current = el;
+}} key="1" name="John" />;
+
+// Correctly ordered: RESERVED [single-line key, multiline ref],
+// CALLBACK [single-line onClick, multiline onChange], REST [name]
+<Hello key="1" ref={(el) => {
+  domRef.current = el;
+}} onClick={fn} onChange={(e) => {
+  handleChange(e);
+}} name="John" />;
+
+// Correctly ordered: no multiline-value props — groupLast has no effect
+<Hello key="1" disabled onClick={fn} name="John" />;
+
+```
+
+# Diagnostics
+```
+multiline-group-last.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     4 │ // Unsorted: multiline ref before single-line key in RESERVED group,
+     5 │ // multiline onChange before single-line onClick in CALLBACK group
+   > 6 │ <Hello ref={(el) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+   > 7 │   domRef.current = el;
+   > 8 │ }} key="1" onChange={(e) => {
+   > 9 │   handleChange(e);
+  > 10 │ }} onClick={fn} name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Unsorted: group order wrong (callback before reserved) and multiline order wrong
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   // Unsorted: multiline ref before single-line key in RESERVED group,
+     5  5 │   // multiline onChange before single-line onClick in CALLBACK group
+     6    │ - <Hello·ref={(el)·=>·{
+     7    │ - ··domRef.current·=·el;
+     8    │ - }}·key="1"·onChange={(e)·=>·{
+     9    │ - ··handleChange(e);
+    10    │ - }}·onClick={fn}·name="John"·/>;
+        6 │ + <Hello·key="1"·ref={(el)·=>·{
+        7 │ + ··domRef.current·=·el;
+        8 │ + }}·onClick={fn}·onChange={(e)·=>·{
+        9 │ + ··handleChange(e);
+       10 │ + }}·name="John"·/>;
+    11 11 │   
+    12 12 │   // Unsorted: group order wrong (callback before reserved) and multiline order wrong
+  
+
+```
+
+```
+multiline-group-last.jsx:13:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    12 │ // Unsorted: group order wrong (callback before reserved) and multiline order wrong
+  > 13 │ <Hello onChange={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │   handleChange(e);
+  > 15 │ }} onClick={fn} ref={(el) => {
+  > 16 │   domRef.current = el;
+  > 17 │ }} key="1" name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Correctly ordered: RESERVED [single-line key, multiline ref],
+  
+  i Safe fix: Sort the JSX props.
+  
+    11 11 │   
+    12 12 │   // Unsorted: group order wrong (callback before reserved) and multiline order wrong
+    13    │ - <Hello·onChange={(e)·=>·{
+    14    │ - ··handleChange(e);
+    15    │ - }}·onClick={fn}·ref={(el)·=>·{
+    16    │ - ··domRef.current·=·el;
+    17    │ - }}·key="1"·name="John"·/>;
+       13 │ + <Hello·key="1"·ref={(el)·=>·{
+       14 │ + ··domRef.current·=·el;
+       15 │ + }}·onClick={fn}·onChange={(e)·=>·{
+       16 │ + ··handleChange(e);
+       17 │ + }}·name="John"·/>;
+    18 18 │   
+    19 19 │   // Correctly ordered: RESERVED [single-line key, multiline ref],
+  
+
+```

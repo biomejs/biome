@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-first.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "first"
+// All multiline-value props come before all single-line props.
+// Within each part, props are sorted by group order.
+
+// Unsorted: single-line props before multiline onChange
+<Hello disabled key="1" onClick={fn} name="John" onChange={(e) => {
+  fn(e);
+}} />;
+
+// Unsorted: single-line props interleaved with multilines from different groups
+<Hello disabled key="1" onClick={fn} ref={(el) => {
+  domRef.current = el;
+}} name="John" onChange={(e) => {
+  fn(e);
+}} />;
+
+// Correctly ordered: multiline onChange first, then single-line props by group order
+<Hello onChange={(e) => {
+  fn(e);
+}} key="1" disabled onClick={fn} name="John" />;
+
+// Correctly ordered: multilines from RESERVED then CALLBACK first (group order),
+// then single-line props
+<Hello ref={(el) => {
+  domRef.current = el;
+}} onChange={(e) => {
+  fn(e);
+}} key="1" disabled onClick={fn} name="John" />;
+
+```
+
+# Diagnostics
+```
+multiline-first.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     5 │ // Unsorted: single-line props before multiline onChange
+   > 6 │ <Hello disabled key="1" onClick={fn} name="John" onChange={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 7 │   fn(e);
+   > 8 │ }} />;
+       │ ^^^^^
+     9 │ 
+    10 │ // Unsorted: single-line props interleaved with multilines from different groups
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   
+     5  5 │   // Unsorted: single-line props before multiline onChange
+     6    │ - <Hello·disabled·key="1"·onClick={fn}·name="John"·onChange={(e)·=>·{
+     7    │ - ··fn(e);
+     8    │ - }}·/>;
+        6 │ + <Hello·onChange={(e)·=>·{
+        7 │ + ··fn(e);
+        8 │ + }}·key="1"·disabled·onClick={fn}·name="John"·/>;
+     9  9 │   
+    10 10 │   // Unsorted: single-line props interleaved with multilines from different groups
+  
+
+```
+
+```
+multiline-first.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Unsorted: single-line props interleaved with multilines from different groups
+  > 11 │ <Hello disabled key="1" onClick={fn} ref={(el) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │   domRef.current = el;
+  > 13 │ }} name="John" onChange={(e) => {
+  > 14 │   fn(e);
+  > 15 │ }} />;
+       │ ^^^^^
+    16 │ 
+    17 │ // Correctly ordered: multiline onChange first, then single-line props by group order
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Unsorted: single-line props interleaved with multilines from different groups
+    11    │ - <Hello·disabled·key="1"·onClick={fn}·ref={(el)·=>·{
+    12    │ - ··domRef.current·=·el;
+    13    │ - }}·name="John"·onChange={(e)·=>·{
+    14    │ - ··fn(e);
+    15    │ - }}·/>;
+       11 │ + <Hello·ref={(el)·=>·{
+       12 │ + ··domRef.current·=·el;
+       13 │ + }}·onChange={(e)·=>·{
+       14 │ + ··fn(e);
+       15 │ + }}·key="1"·disabled·onClick={fn}·name="John"·/>;
+    16 16 │   
+    17 17 │   // Correctly ordered: multiline onChange first, then single-line props by group order
+  
+
+```

@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-formatted.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:REST:, :CALLBACK:], multiline: "first"
+// Normally-formatted JSX (one prop per line). Only `data` has a multiline
+// VALUE; the other props are single-line even though each sits on its own
+// source line. `multiline: "first"` must pull only `data` to the front, not
+// treat every own-line prop as multiline.
+
+// Unsorted: multiline-value `data` should move before the single-line props
+<Hello
+  name="John"
+  data={{
+    a: 1,
+  }}
+  onClick={fn}
+/>;
+
+// Correctly ordered: multiline `data` first, then REST (name), then CALLBACK (onClick)
+<Hello
+  data={{
+    a: 1,
+  }}
+  name="John"
+  onClick={fn}
+/>;
+
+```
+
+# Diagnostics
+```
+multiline-formatted.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     7 │ // Unsorted: multiline-value `data` should move before the single-line props
+   > 8 │ <Hello
+       │ ^^^^^^
+   > 9 │   name="John"
+        ...
+  > 13 │   onClick={fn}
+  > 14 │ />;
+       │ ^^
+    15 │ 
+    16 │ // Correctly ordered: multiline `data` first, then REST (name), then CALLBACK (onClick)
+  
+  i Safe fix: Sort the JSX props.
+  
+     7  7 │   // Unsorted: multiline-value `data` should move before the single-line props
+     8  8 │   <Hello
+     9    │ - ··name="John"
+    10    │ - ··data={{
+    11    │ - ····a:·1,
+    12    │ - ··}}
+        9 │ + ··data={{
+       10 │ + ····a:·1,
+       11 │ + ··}}
+       12 │ + ··name="John"
+    13 13 │     onClick={fn}
+    14 14 │   />;
+  
+
+```

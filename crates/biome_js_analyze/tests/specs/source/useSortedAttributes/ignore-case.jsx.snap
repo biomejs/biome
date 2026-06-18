@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignore-case.jsx
+---
+# Input
+```jsx
+// ignoreCase: true, sortScope: "global" (flat sort, case-insensitive)
+
+// Unsorted: uppercase Z before lowercase a without ignoreCase would be fine,
+// but with ignoreCase "Zip" should sort after "name"
+<Hello Zip="NY" name="John" tel={5555555} />;
+
+// Correctly sorted case-insensitively: "age", "Name", "zip"
+<Hello age={30} Name="John" zip="NY" />;
+
+// Unsorted: "Bbb" should come before "ccc" case-insensitively
+<Hello ccc="" Bbb="" aaa="" />;
+
+```
+
+# Diagnostics
+```
+ignore-case.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    3 │ // Unsorted: uppercase Z before lowercase a without ignoreCase would be fine,
+    4 │ // but with ignoreCase "Zip" should sort after "name"
+  > 5 │ <Hello Zip="NY" name="John" tel={5555555} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Correctly sorted case-insensitively: "age", "Name", "zip"
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   // Unsorted: uppercase Z before lowercase a without ignoreCase would be fine,
+     4  4 │   // but with ignoreCase "Zip" should sort after "name"
+     5    │ - <Hello·Zip="NY"·name="John"·tel={5555555}·/>;
+        5 │ + <Hello·name="John"·tel={5555555}·Zip="NY"·/>;
+     6  6 │   
+     7  7 │   // Correctly sorted case-insensitively: "age", "Name", "zip"
+  
+
+```
+
+```
+ignore-case.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Unsorted: "Bbb" should come before "ccc" case-insensitively
+  > 11 │ <Hello ccc="" Bbb="" aaa="" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Unsorted: "Bbb" should come before "ccc" case-insensitively
+    11    │ - <Hello·ccc=""·Bbb=""·aaa=""·/>;
+       11 │ + <Hello·aaa=""·Bbb=""·ccc=""·/>;
+    12 12 │   
+  
+
+```

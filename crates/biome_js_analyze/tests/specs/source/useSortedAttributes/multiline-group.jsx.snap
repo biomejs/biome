@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline-group.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:], multiline: "group"
+// Multiline-value props sort alphabetically within their group — no special positioning.
+
+// Unsorted within CALLBACK: onClick before onChange (onChange has multiline value but still sorts first)
+<Hello key="1" disabled onClick={fn} onChange={(e) => {
+  fn(e);
+}} />;
+
+// Unsorted group order and within group
+<Hello onClick={fn} onChange={(e) => {
+  fn(e);
+}} disabled key="1" />;
+
+// Correctly ordered: RESERVED, IMPLICIT, CALLBACK — onChange sorts before onClick alphabetically
+<Hello key="1" disabled onChange={(e) => {
+  fn(e);
+}} onClick={fn} />;
+
+```
+
+# Diagnostics
+```
+multiline-group.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ // Unsorted within CALLBACK: onClick before onChange (onChange has multiline value but still sorts first)
+  > 5 │ <Hello key="1" disabled onClick={fn} onChange={(e) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │   fn(e);
+  > 7 │ }} />;
+      │ ^^^^^
+    8 │ 
+    9 │ // Unsorted group order and within group
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   
+     4  4 │   // Unsorted within CALLBACK: onClick before onChange (onChange has multiline value but still sorts first)
+     5    │ - <Hello·key="1"·disabled·onClick={fn}·onChange={(e)·=>·{
+     6    │ - ··fn(e);
+     7    │ - }}·/>;
+        5 │ + <Hello·key="1"·disabled·onChange={(e)·=>·{
+        6 │ + ··fn(e);
+        7 │ + }}·onClick={fn}·/>;
+     8  8 │   
+     9  9 │   // Unsorted group order and within group
+  
+
+```
+
+```
+multiline-group.jsx:10:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     9 │ // Unsorted group order and within group
+  > 10 │ <Hello onClick={fn} onChange={(e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │   fn(e);
+  > 12 │ }} disabled key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Correctly ordered: RESERVED, IMPLICIT, CALLBACK — onChange sorts before onClick alphabetically
+  
+  i Safe fix: Sort the JSX props.
+  
+     8  8 │   
+     9  9 │   // Unsorted group order and within group
+    10    │ - <Hello·onClick={fn}·onChange={(e)·=>·{
+    11    │ - ··fn(e);
+    12    │ - }}·disabled·key="1"·/>;
+       10 │ + <Hello·key="1"·disabled·onChange={(e)·=>·{
+       11 │ + ··fn(e);
+       12 │ + }}·onClick={fn}·/>;
+    13 13 │   
+    14 14 │   // Correctly ordered: RESERVED, IMPLICIT, CALLBACK — onChange sorts before onClick alphabetically
+  
+
+```

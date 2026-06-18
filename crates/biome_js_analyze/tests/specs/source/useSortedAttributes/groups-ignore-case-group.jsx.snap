@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-ignore-case-group.jsx
+---
+# Input
+```jsx
+// ignoreCase: true, sortScope: "group" with default groups
+// Case-insensitive comparison applies within each group independently.
+// ASCII case-sensitive: uppercase letters sort before lowercase ('Z' < 'a').
+// Case-insensitive: 'Z'/'z' > 'a', so "Zebra" comes after "ant".
+
+// Unsorted: REST group has Bbb before aaa
+// (case-sensitive 'B' < 'a', but case-insensitive 'b' > 'a')
+<Hello Bbb="" aaa="" disabled key="1" onChange={fn} />;
+
+// Unsorted: IMPLICIT group has Zebra before active
+// (case-sensitive 'Z' < 'a', but case-insensitive 'z' > 'a')
+<Hello Zebra active key="1" />;
+
+// Correctly sorted (case-insensitive):
+// IMPLICIT [active, Zebra], RESERVED [key], REST [aaa, Bbb], CALLBACK [onChange]
+<Hello active Zebra key="1" aaa="" Bbb="" onChange={fn} />;
+
+```
+
+# Diagnostics
+```
+groups-ignore-case-group.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     6 │ // Unsorted: REST group has Bbb before aaa
+     7 │ // (case-sensitive 'B' < 'a', but case-insensitive 'b' > 'a')
+   > 8 │ <Hello Bbb="" aaa="" disabled key="1" onChange={fn} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Unsorted: IMPLICIT group has Zebra before active
+  
+  i Safe fix: Sort the JSX props.
+  
+     6  6 │   // Unsorted: REST group has Bbb before aaa
+     7  7 │   // (case-sensitive 'B' < 'a', but case-insensitive 'b' > 'a')
+     8    │ - <Hello·Bbb=""·aaa=""·disabled·key="1"·onChange={fn}·/>;
+        8 │ + <Hello·disabled·key="1"·aaa=""·Bbb=""·onChange={fn}·/>;
+     9  9 │   
+    10 10 │   // Unsorted: IMPLICIT group has Zebra before active
+  
+
+```
+
+```
+groups-ignore-case-group.jsx:12:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Unsorted: IMPLICIT group has Zebra before active
+    11 │ // (case-sensitive 'Z' < 'a', but case-insensitive 'z' > 'a')
+  > 12 │ <Hello Zebra active key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Correctly sorted (case-insensitive):
+  
+  i Safe fix: Sort the JSX props.
+  
+    10 10 │   // Unsorted: IMPLICIT group has Zebra before active
+    11 11 │   // (case-sensitive 'Z' < 'a', but case-insensitive 'z' > 'a')
+    12    │ - <Hello·Zebra·active·key="1"·/>;
+       12 │ + <Hello·active·Zebra·key="1"·/>;
+    13 13 │   
+    14 14 │   // Correctly sorted (case-insensitive):
+  
+
+```

@@ -5615,7 +5615,48 @@ Default: `natural`.
 	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
+	/**
+	* Groups control the ordering of special prop categories.
+
+Only active when `sortScope` is `"group"`.
+When not configured, the default ordering is used:
+`[":IMPLICIT:", ":RESERVED:", ":DOM_RESERVED:", ":REST:", ":CALLBACK:"]`. 
+	 */
+	groups?: AttributeGroups;
+	/**
+	* Whether to ignore case when comparing prop names.
+
+When `sortScope` is `"global"`, applied to the flat sort.
+When `sortScope` is `"group"`, applied independently within each group.
+
+Defaults to `false` (case-sensitive, preserving current behavior). 
+	 */
+	ignoreCase?: boolean;
+	/**
+	* Controls how multiline props are ordered relative to single-line props.
+
+Only meaningful when `sortScope` is `"group"`. Defaults to `"group"` (mixed).
+
+- `"group"`: multiline props are sorted together with single-line props in their group.
+- `"groupFirst"`: within each group, multiline props are placed before single-line props.
+- `"groupLast"`: within each group, multiline props are placed after single-line props.
+- `"first"`: all multiline props are collected across all groups, sorted by group order,
+  and placed before all single-line groups.
+- `"last"`: all multiline props are collected across all groups, sorted by group order,
+  and placed after all single-line groups. 
+	 */
+	multiline?: MultilineOrder;
+	/**
+	 * Sort order to apply within each group (or globally when `sortScope` is `"global"`).
+	 */
 	sortOrder?: SortOrder;
+	/**
+	* Controls how `sortOrder` and `ignoreCase` interact with `groups`.
+
+- `"global"` (default): flat sort across all props, groups ignored.
+- `"group"`: sort within each group independently, then order by group. 
+	 */
+	sortScope?: SortScope;
 }
 export type UseSortedEnumMembersOptions = {};
 export type UseSortedInterfaceMembersOptions = {};
@@ -7864,6 +7905,56 @@ export interface RuleWithUseStrictModeOptions {
 export type ImportGroups = ImportGroup[];
 export type SortOrder = "natural" | "lexicographic";
 /**
+	* The set of attribute groups for `useSortedAttributes`.
+
+Groups control the position of special prop categories relative to each other
+when `sortScope` is set to `"group"`.
+
+## Predefined groups
+
+- `:CALLBACK:` — Callback props: names beginning with `on` followed by an uppercase letter (e.g. `onClick`, `onChange`).
+- `:IMPLICIT:` — Implicit (boolean shorthand) props: props with no value (e.g. `<Foo disabled />`).
+- `:RESERVED:` — React reserved props: `key` and `ref`.
+- `:DOM_RESERVED:` — DOM-only reserved props: `children` and `dangerouslySetInnerHTML`.
+- `:REST:` — Catch-all for props that don't match any other configured group.
+  Sorted like a regular group, using `sortOrder` and `ignoreCase`.
+
+## Default ordering
+
+When `groups` is not configured, the following default ordering is used
+(only active when `sortScope` is `"group"`):
+
+```json
+[":IMPLICIT:", ":RESERVED:", ":DOM_RESERVED:", ":REST:", ":CALLBACK:"]
+```
+
+If `:REST:` is omitted from a configured `groups` list, props that don't
+match any named group are instead placed after all named groups, in their
+original relative order (unsorted).
+
+Multiline prop positioning is controlled separately via the `multiline` option. 
+	 */
+export type AttributeGroups = AttributeGroupPattern[];
+/**
+ * Controls where multiline props land relative to single-line props.
+ */
+export type MultilineOrder =
+	| "group"
+	| "groupFirst"
+	| "groupLast"
+	| "first"
+	| "last";
+/**
+	* Controls how `sortOrder` and `ignoreCase` interact with `groups`.
+
+- `global`: `sortOrder` and `ignoreCase` are applied over all props at once,
+  ignoring the `groups` order. This preserves the original flat-sort behavior.
+- `group`: `sortOrder` and `ignoreCase` are applied independently within each
+  group defined by `groups`. Props are first partitioned by group, sorted
+  within each group, then concatenated in group order. 
+	 */
+export type SortScope = "global" | "group";
+/**
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
@@ -9108,6 +9199,15 @@ export interface UseRequiredScriptsOptions {
 export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
+/**
+ * A predefined attribute group pattern.
+ */
+export type AttributeGroupPattern =
+	| ":CALLBACK:"
+	| ":IMPLICIT:"
+	| ":RESERVED:"
+	| ":DOM_RESERVED:"
+	| ":REST:";
 export type Visibility = "public" | "package" | "private";
 /**
  * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.

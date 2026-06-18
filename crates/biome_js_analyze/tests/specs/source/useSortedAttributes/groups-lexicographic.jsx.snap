@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-lexicographic.jsx
+---
+# Input
+```jsx
+// sortScope: "group", sortOrder: "lexicographic", groups: [:RESERVED:, :REST:]
+// Lexicographic (byte) order applies within each group: "item10" sorts before
+// "item2" (unlike natural order), and uppercase sorts before lowercase.
+
+// Unsorted REST: lexicographic puts Zebra before apple, and item10 before item2
+<Hello item2="a" key="1" item10="b" apple="c" Zebra="d" />;
+
+// Correctly ordered: reserved key, then REST in lexicographic order
+<Hello key="1" Zebra="d" apple="c" item10="b" item2="a" />;
+
+```
+
+# Diagnostics
+```
+groups-lexicographic.jsx:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    5 │ // Unsorted REST: lexicographic puts Zebra before apple, and item10 before item2
+  > 6 │ <Hello item2="a" key="1" item10="b" apple="c" Zebra="d" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Correctly ordered: reserved key, then REST in lexicographic order
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   
+     5  5 │   // Unsorted REST: lexicographic puts Zebra before apple, and item10 before item2
+     6    │ - <Hello·item2="a"·key="1"·item10="b"·apple="c"·Zebra="d"·/>;
+        6 │ + <Hello·key="1"·Zebra="d"·apple="c"·item10="b"·item2="a"·/>;
+     7  7 │   
+     8  8 │   // Correctly ordered: reserved key, then REST in lexicographic order
+  
+
+```

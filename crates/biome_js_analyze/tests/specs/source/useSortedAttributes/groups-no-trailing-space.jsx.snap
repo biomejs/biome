@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-no-trailing-space.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:CALLBACK:, :RESERVED:]
+// Regression: the source-final prop carries no trailing whitespace (it sits
+// right before `/>` or `>`). When a group moves it off the end, the result must
+// still keep a separating space, otherwise the props mash into invalid JSX
+// (e.g. `onClick={fn}key="1"`).
+
+// Self-closing, no space before `/>`: reserved key moved after callback
+<Hello key="1" onClick={fn}/>;
+
+// Opening element, no space before `>`
+<Hello key="1" onClick={fn}>x</Hello>;
+
+// Already in group order (callback, then reserved): no diagnostic
+<Hello onClick={fn} key="1"/>;
+
+```
+
+# Diagnostics
+```
+groups-no-trailing-space.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     7 │ // Self-closing, no space before `/>`: reserved key moved after callback
+   > 8 │ <Hello key="1" onClick={fn}/>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Opening element, no space before `>`
+  
+  i Safe fix: Sort the JSX props.
+  
+     6  6 │   
+     7  7 │   // Self-closing, no space before `/>`: reserved key moved after callback
+     8    │ - <Hello·key="1"·onClick={fn}/>;
+        8 │ + <Hello·onClick={fn}·key="1"·/>;
+     9  9 │   
+    10 10 │   // Opening element, no space before `>`
+  
+
+```
+
+```
+groups-no-trailing-space.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Opening element, no space before `>`
+  > 11 │ <Hello key="1" onClick={fn}>x</Hello>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Already in group order (callback, then reserved): no diagnostic
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Opening element, no space before `>`
+    11    │ - <Hello·key="1"·onClick={fn}>x</Hello>;
+       11 │ + <Hello·onClick={fn}·key="1"·>x</Hello>;
+    12 12 │   
+    13 13 │   // Already in group order (callback, then reserved): no diagnostic
+  
+
+```
