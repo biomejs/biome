@@ -176,6 +176,9 @@ pub enum Split<T> {
 /// The `partition` function can change the passed item before returning it.
 /// This allows supporting cases where the passed AST node must be modified.
 ///
+/// This function returns `None` if it encounters a buggy item or
+/// if `partition` returns `None` for at least one item.
+///
 /// The trailing separators are moved with their node.
 pub fn split_separated_list<'a, L, List, Node>(
     list: &List,
@@ -196,6 +199,7 @@ where
         trailing_separator,
     } in list.elements()
     {
+        // Abort the split if a node is buggy or if `partition` returns `None`.
         let node = node.ok()?;
         let trailing_separator = trailing_separator.ok()?;
         let (items, separators, node) = match partition(node)? {
