@@ -431,6 +431,7 @@ impl Merge for RuleAssistPlainConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RuleAssistPlainConfiguration,
     /// Rule's options
     pub options: T,
@@ -472,6 +473,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// Rule's options
     #[serde(default)]
@@ -518,6 +520,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1186,7 +1189,10 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
 
 #[cfg(test)]
 mod test {
-    use crate::analyzer::RuleSelector;
+    use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RuleSelector};
+    use biome_deserialize::json::deserialize_from_json_str;
+    use biome_json_parser::JsonParserOptions;
+    use biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions;
     use std::str::FromStr;
 
     #[test]
@@ -1258,5 +1264,36 @@ mod test {
             RuleSelector::from_str("assist/source/useSortedKeys").unwrap(),
             RuleSelector::Rule("source", "useSortedKeys")
         );
+    }
+
+    #[test]
+    fn rule_configuration_with_options_requires_level() {
+        let result = deserialize_from_json_str::<RuleConfiguration<NoUndeclaredDependenciesOptions>>(
+            r#"{
+                "options": {
+                    "devDependencies": false
+                }
+            }"#,
+            JsonParserOptions::default(),
+            "noUndeclaredDependencies",
+        );
+
+        assert!(result.has_errors());
+    }
+
+    #[test]
+    fn rule_fix_configuration_with_options_requires_level() {
+        let result =
+            deserialize_from_json_str::<RuleFixConfiguration<NoUndeclaredDependenciesOptions>>(
+                r#"{
+                "options": {
+                    "devDependencies": false
+                }
+            }"#,
+                JsonParserOptions::default(),
+                "noUndeclaredDependencies",
+            );
+
+        assert!(result.has_errors());
     }
 }
