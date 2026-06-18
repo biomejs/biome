@@ -3017,3 +3017,80 @@ fn go_to_definition_css_class_via_transitive_import() {
     // "card" in `.card` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
 }
+
+#[test]
+fn go_to_definition_cursor_before_embedded_script_does_not_underflow() {
+    const HTML_CONTENT: &str = "\
+<div>foo</div>
+<script>
+const x = 1;
+</script>
+";
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        HTML_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    let configuration =
+        biome_deserialize::json::deserialize_from_json_str::<biome_configuration::Configuration>(
+            r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    // Cursor at offset 0: inside `<div>`, before the embedded `<script>` content.
+    let cursor_range = TextRange::new(TextSize::from(0), TextSize::from(0));
+
+    // Must not panic with `attempt to subtract with overflow`.
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    // There is nothing to resolve before the script, so no definition is expected.
+    assert!(
+        result.is_none_or(|definition| definition.matches.is_empty()),
+        "cursor before an embedded script should not resolve to any definition"
+    );
+}
