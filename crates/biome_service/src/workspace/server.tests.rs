@@ -3073,10 +3073,11 @@ fn go_to_definition_css_class_via_transitive_import() {
 #[test]
 fn fix_file_is_idempotent_for_template_literals_and_css_block_comments() {
     // Regression: reindent_embedded_code was adding the host indentation prefix
-    // to continuation lines inside template literals and block comments, so each
-    // successive fix_file call stacked another indent level.
-    const FILE_PATH: &str = "/project/page.svelte";
-    const FILE_CONTENT: &str = "<script>\n\tconst sql = `\n\t\tSELECT *\n\t\tFROM users\n\t`;\n</script>\n<style>\n\t/*\n\t * A block comment.\n\t */\n\t.foo { color: red; }\n</style>\n";
+    // to continuation lines inside template literals and CSS block comments, so
+    // each successive `biome check --write` stacked another indent level.
+    // HTML files exercise the update_snippets → reindent_embedded_code path.
+    const FILE_PATH: &str = "/project/page.html";
+    const FILE_CONTENT: &str = "<html>\n\t<head>\n\t\t<script>\n\t\t\tconst sql = `\n\t\t\t\tSELECT *\n\t\t\t\tFROM users\n\t\t\t`;\n\t\t</script>\n\t\t<style>\n\t\t\t/*\n\t\t\t * A block comment.\n\t\t\t */\n\t\t\t.foo { color: red; }\n\t\t</style>\n\t</head>\n</html>\n";
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
