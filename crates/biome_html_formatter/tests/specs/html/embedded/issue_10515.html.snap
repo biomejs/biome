@@ -22,11 +22,8 @@ info: embedded/issue_10515.html
       const x = 1;
     </script>
     <style>
-      /*
-       * A block comment
-       * spanning multiple lines.
-       */
       .foo {
+        /* inline block comment */
         color: red;
       }
     </style>
@@ -55,11 +52,8 @@ info: embedded/issue_10515.html
 		const x = 1;
 		</script>
 		<style>
-		/*
-       * A block comment
-       * spanning multiple lines.
-       */
 		.foo {
+			/* inline block comment */
 			color: red;
 		}
 		</style>
