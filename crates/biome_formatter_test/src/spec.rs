@@ -5,11 +5,11 @@ use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_formatter::LineWidth;
 use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_languages::DocumentFileSource;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::{
-    ChangeFileParams, DocumentFileSource, FileContent, FormatFileParams, FormatRangeParams,
-    GetFormatterIRParams, OpenFileParams, OpenProjectParams, OpenProjectResult,
-    UpdateSettingsParams, server,
+    ChangeFileParams, FileContent, FormatFileParams, FormatRangeParams, GetFormatterIRParams,
+    OpenFileParams, OpenProjectParams, OpenProjectResult, UpdateSettingsParams, server,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
@@ -202,6 +202,7 @@ impl<'a> SpecSnapshot<'a> {
                 document_file_source: self.document_file_source,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             })
             .unwrap();
 
@@ -297,6 +298,7 @@ impl<'a> SpecSnapshot<'a> {
                     content: output_code.clone(),
                     version: 1,
                     inline_config: None,
+                    editor_features: None,
                 })
                 .unwrap();
 

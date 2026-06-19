@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: directImport.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import "./styles.css";
+
+function Component() {
+	return <button className="undefined-class">Test</button>;
+}
+
+```
+
+# Diagnostics
+```
+directImport.jsx:6:28 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undefined-class is not defined in any imported stylesheet.
+  
+    5 │ function Component() {
+  > 6 │ 	return <button className="undefined-class">Test</button>;
+      │ 	                          ^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    directImport.jsx (this file) -> which imports styles.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

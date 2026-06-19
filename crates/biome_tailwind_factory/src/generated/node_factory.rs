@@ -265,6 +265,20 @@ pub fn tw_arbitrary_variant(
         ],
     ))
 }
+pub fn tw_arbitrary_variant_segment(
+    l_brack_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+    r_brack_token: SyntaxToken,
+) -> TwArbitraryVariantSegment {
+    TwArbitraryVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_ARBITRARY_VARIANT_SEGMENT,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
 pub fn tw_css_variable_value(
     l_paren_token: SyntaxToken,
     value_token: SyntaxToken,
@@ -279,17 +293,17 @@ pub fn tw_css_variable_value(
         ],
     ))
 }
-pub fn tw_data_attribute(
-    data_token: SyntaxToken,
-    minus_token: SyntaxToken,
-    value: AnyTwDataAttributeValue,
-) -> TwDataAttribute {
-    TwDataAttribute::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_DATA_ATTRIBUTE,
+pub fn tw_css_variable_variant_segment(
+    l_paren_token: SyntaxToken,
+    value_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> TwCssVariableVariantSegment {
+    TwCssVariableVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_CSS_VARIABLE_VARIANT_SEGMENT,
         [
-            Some(SyntaxElement::Token(data_token)),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -367,20 +381,6 @@ impl TwFunctionalCandidateBuilder {
         ))
     }
 }
-pub fn tw_functional_variant(
-    base_token: SyntaxToken,
-    minus_token: SyntaxToken,
-    value: AnyTwValue,
-) -> TwFunctionalVariant {
-    TwFunctionalVariant::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT,
-        [
-            Some(SyntaxElement::Token(base_token)),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
-}
 pub fn tw_modifier(slash_token: SyntaxToken, value: AnyTwValue) -> TwModifier {
     TwModifier::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_MODIFIER,
@@ -393,6 +393,12 @@ pub fn tw_modifier(slash_token: SyntaxToken, value: AnyTwValue) -> TwModifier {
 pub fn tw_named_value(value_token: SyntaxToken) -> TwNamedValue {
     TwNamedValue::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_NAMED_VALUE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn tw_named_variant_segment(value_token: SyntaxToken) -> TwNamedVariantSegment {
+    TwNamedVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_NAMED_VARIANT_SEGMENT,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -448,10 +454,10 @@ pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
         [Some(SyntaxElement::Token(base_token))],
     ))
 }
-pub fn tw_static_variant(base_token: SyntaxToken) -> TwStaticVariant {
-    TwStaticVariant::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_STATIC_VARIANT,
-        [Some(SyntaxElement::Token(base_token))],
+pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpression {
+    TwVariantExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_VARIANT_EXPRESSION,
+        [Some(SyntaxElement::Node(segments.into_syntax()))],
     ))
 }
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
@@ -532,6 +538,27 @@ where
         }),
     ))
 }
+pub fn tw_variant_segment_list<I, S>(items: I, separators: S) -> TwVariantSegmentList
+where
+    I: IntoIterator<Item = AnyTwVariantSegment>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    TwVariantSegmentList::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_VARIANT_SEGMENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_bogus_property_value<I>(slots: I) -> CssBogusPropertyValue
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -589,6 +616,16 @@ where
 {
     TwBogusVariant::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_BOGUS_VARIANT,
+        slots,
+    ))
+}
+pub fn tw_bogus_variant_segment<I>(slots: I) -> TwBogusVariantSegment
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwBogusVariantSegment::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_BOGUS_VARIANT_SEGMENT,
         slots,
     ))
 }

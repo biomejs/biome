@@ -711,6 +711,60 @@ impl FromStr for BracketSpacing {
     }
 }
 
+/// Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+/// delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+/// Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+/// Only applies when the content fits on a single line; when content breaks across multiple lines,
+/// no extra spaces are added. The specific delimiters affected depend on the language.
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct DelimiterSpacing(bool);
+
+impl DelimiterSpacing {
+    /// Return the boolean value for this [DelimiterSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for DelimiterSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+impl biome_console::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
+    }
+}
+
+impl FromStr for DelimiterSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for DelimiterSpacing. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -1258,7 +1312,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 ///     fn fmt(&self, f: &mut Formatter<SimpleFormatContext>) -> FormatResult<()> {
 ///         write!(f, [
 ///             hard_line_break(),
-///             text(&self.0, TextSize::from(0)),
+///             text(&self.0, None),
 ///             hard_line_break(),
 ///         ])
 ///     }
@@ -1647,6 +1701,21 @@ pub fn format_node<L: FormatLanguage>(
     language: L,
     delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
+    format_node_with_source_map_generation(
+        root,
+        language,
+        delegate_fmt_embedded_nodes,
+        SourceMapGeneration::Disabled,
+    )
+}
+
+/// Formats a syntax node while configuring whether source positions are stored in the IR.
+pub fn format_node_with_source_map_generation<L: FormatLanguage>(
+    root: &SyntaxNode<L::SyntaxLanguage>,
+    language: L,
+    delegate_fmt_embedded_nodes: bool,
+    source_map_generation: SourceMapGeneration,
+) -> FormatResult<Formatted<L::Context>> {
     let (root, source_map) = match language.transform(root) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
@@ -1694,7 +1763,7 @@ pub fn format_node<L: FormatLanguage>(
     let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-    let mut state = FormatState::new(context);
+    let mut state = FormatState::new_with_source_map_generation(context, source_map_generation);
     let mut buffer = VecBuffer::new(&mut state);
 
     write!(buffer, [format_node])?;
@@ -1769,7 +1838,8 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-    let mut state = FormatState::new(context);
+    let mut state =
+        FormatState::new_with_source_map_generation(context, SourceMapGeneration::Disabled);
     let mut buffer = VecBuffer::new(&mut state);
 
     write!(buffer, [format_node])?;
@@ -2155,7 +2225,12 @@ pub fn format_sub_tree<L: FormatLanguage>(
         None => 0,
     };
 
-    let formatted = format_node(root, language, false)?;
+    let formatted = format_node_with_source_map_generation(
+        root,
+        language,
+        false,
+        SourceMapGeneration::Enabled,
+    )?;
     let mut printed = formatted.print_with_indent(initial_indent, SourceMapGeneration::Enabled)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();
@@ -2168,7 +2243,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
     ))
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTriviaPiece<L> {
+impl<L: Language, Context: FormatContext> Format<Context> for SyntaxTriviaPiece<L> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let range = self.text_range();
 
@@ -2197,6 +2272,7 @@ pub struct FormatState<Context> {
     context: Context,
 
     group_id_builder: UniqueGroupIdBuilder,
+    source_map_generation: SourceMapGeneration,
 
     // This is using a RefCell as it only exists in debug mode,
     // the Formatter is still completely immutable in release builds
@@ -2218,9 +2294,17 @@ where
 impl<Context> FormatState<Context> {
     /// Creates a new state with the given language specific context
     pub fn new(context: Context) -> Self {
+        Self::new_with_source_map_generation(context, SourceMapGeneration::Enabled)
+    }
+
+    pub fn new_with_source_map_generation(
+        context: Context,
+        source_map_generation: SourceMapGeneration,
+    ) -> Self {
         Self {
             context,
             group_id_builder: Default::default(),
+            source_map_generation,
 
             #[cfg(debug_assertions)]
             printed_tokens: Default::default(),
@@ -2234,6 +2318,10 @@ impl<Context> FormatState<Context> {
     /// Returns the context specifying how to format the current CST
     pub fn context(&self) -> &Context {
         &self.context
+    }
+
+    pub const fn source_map_generation(&self) -> SourceMapGeneration {
+        self.source_map_generation
     }
 
     /// Returns a mutable reference to the context
@@ -2327,10 +2415,14 @@ pub struct FormatStateSnapshot {
 
 #[cfg(test)]
 mod tests {
-    use super::LineWidth;
+    use super::{
+        FormatElement, FormatState, LineWidth, SimpleFormatContext, SourceMapGeneration, VecBuffer,
+    };
+    use crate::prelude::*;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_deserialize_macros::Deserializable;
     use biome_diagnostics::Error;
+    use biome_rowan::TextSize;
 
     #[test]
     fn test_out_of_range_line_width() {
@@ -2361,7 +2453,7 @@ mod tests {
         let source = r#"{ "lineWidth": 500 }"#;
         let deserialized = deserialize_from_json_str::<TestConfig>(source, Default::default(), "");
         assert_eq!(
-            format!("{}", DiagnosticPrinter::new(deserialized.diagnostics())),
+            std::format!("{}", DiagnosticPrinter::new(deserialized.diagnostics())),
             "The number should be an integer between 1 and 320."
         );
         assert_eq!(
@@ -2405,5 +2497,43 @@ mod tests {
         let printed = Printed::new(String::new(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "");
+    }
+
+    #[test]
+    fn disabled_source_map_generation_omits_source_position_elements() {
+        let mut state = FormatState::new_with_source_map_generation(
+            SimpleFormatContext::default(),
+            SourceMapGeneration::Disabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+
+        crate::write!(buffer, [text("alpha", Some(TextSize::from(7))), token(";")]).unwrap();
+
+        let elements = buffer.into_vec();
+        assert_eq!(elements.len(), 2);
+        assert!(matches!(elements[0], FormatElement::Text { .. }));
+        assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[test]
+    fn enabled_source_map_generation_inlines_source_position_on_text() {
+        let mut state = FormatState::new_with_source_map_generation(
+            SimpleFormatContext::default(),
+            SourceMapGeneration::Enabled,
+        );
+        let mut buffer = VecBuffer::new(&mut state);
+
+        crate::write!(buffer, [text("alpha", Some(TextSize::from(7))), token(";")]).unwrap();
+
+        let elements = buffer.into_vec();
+        assert_eq!(elements.len(), 2);
+        assert!(matches!(
+            elements[0],
+            FormatElement::MappedText {
+                source_position,
+                ..
+            } if source_position == TextSize::from(7)
+        ));
+        assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
     }
 }

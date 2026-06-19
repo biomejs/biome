@@ -12,14 +12,14 @@ set windows-powershell := true
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta wasm-opt
+	cargo binstall cargo-insta wasm-opt cargo-deny
 	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta wasm-opt --force
+	cargo binstall cargo-insta wasm-opt cargo-deny --force
 	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
@@ -41,7 +41,7 @@ gen-types:
 
 # Generates the JSON Schema of the configuration
 gen-schema:
-  cargo codegen-schema
+  cargo run -p xtask_codegen --features schema -- schema
 
 # Generates code generated files for the linter
 gen-analyzer:
@@ -59,6 +59,10 @@ gen-rules:
 # Generates Baseline data for CSS features from web-features
 gen-css-baseline:
   cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
+
+# Generates module-replacements data from e18e
+gen-module-replacements:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- module-replacements
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration

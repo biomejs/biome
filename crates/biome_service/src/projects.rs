@@ -1,10 +1,9 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
 use crate::settings::{Settings, SettingsWithEditor};
-use crate::workspace::{
-    DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
-};
+use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
 use biome_fs::{ConfigName, FileSystem};
+use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -105,6 +104,24 @@ impl Projects {
         }
 
         Some(data.root_settings.clone())
+    }
+
+    /// Retrieves the correct settings and working directory for the given project.
+    pub fn get_settings_and_wd_based_on_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, Settings)> {
+        let projects = self.0.pin();
+        let data = projects.get(&project_key)?;
+
+        for (project_path, settings) in &data.nested_settings {
+            if file_path.starts_with(project_path) {
+                return Some((project_path.clone(), settings.clone()));
+            }
+        }
+
+        Some((data.path.clone(), data.root_settings.clone()))
     }
 
     /// Retrieves the correct settings for the given project.

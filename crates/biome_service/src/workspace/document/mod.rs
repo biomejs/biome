@@ -3,15 +3,15 @@ pub(crate) mod services;
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::FormatEmbedNode;
 use crate::settings::ServiceLanguage;
-use crate::workspace::DocumentFileSource;
 use crate::workspace::document::services::embedded_bindings::EmbeddedExportedBindings;
 use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_semantic::SemanticModelOptions;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
+use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_json_syntax::JsonLanguage;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize};
@@ -160,7 +160,7 @@ impl AnyEmbeddedSnippet {
 /// content with offset-aware positioning to maintain correct source locations.
 #[derive(Clone, Debug)]
 pub struct EmbeddedSnippet<L: ServiceLanguage + 'static> {
-    /// The JavaScript source code extracted from the script element.
+    /// The source code extracted from a snippet.
     pub parse: AnyParse,
 
     /// The range of the entire script element in the HTML document,
@@ -291,7 +291,7 @@ pub struct DocumentServices {
     /// Service to track value references from non-source snippets
     value_references: Option<EmbeddedValueReferences>,
 
-    /// The document doesn't have any services
+    /// Services for the language that the document belongs to.
     language: LanguageServices,
 }
 

@@ -50,58 +50,41 @@ info: markdown/list/codeblock.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,35 +1,35 @@
- 1. ol01
+@@ -2,8 +2,6 @@
  
--   ```js
--   const a = 1;
-+    ```js
-+    const a = 1;
+    ```js
+    const a = 1;
+-
+-
+    const b = 2;
+    ```
  
+@@ -11,8 +9,6 @@
  
--   const b = 2;
--   ```
-+    const b = 2;
-+    ```
+    ```js
+    const a = 1;
+-
+-
+    const b = 2;
+    ```
  
- 2. ol02
+@@ -20,8 +16,6 @@
  
--   ```js
--   const a = 1;
-+    ```js
-+    const a = 1;
+   ```js
+   const a = 1;
+-
+-
+   const b = 2;
+   ```
  
+@@ -29,7 +23,5 @@
  
--   const b = 2;
--   ```
-+    const b = 2;
-+    ```
- 
- - ul01
- 
--  ```js
--  const a = 1;
-+    ```js
-+    const a = 1;
- 
- 
--  const b = 2;
--  ```
-+    const b = 2;
-+    ```
- 
- - ul02
- 
--  ```js
--  const a = 1;
-+    ```js
-+    const a = 1;
- 
- 
--  const b = 2;
--  ```
-+    const b = 2;
-+    ```
+   ```js
+   const a = 1;
+-
+-
+   const b = 2;
+   ```
 ```
 
 # Output
@@ -109,37 +92,29 @@ info: markdown/list/codeblock.md
 ```md
 1. ol01
 
-    ```js
-    const a = 1;
-
-
-    const b = 2;
-    ```
+   ```js
+   const a = 1;
+   const b = 2;
+   ```
 
 2. ol02
 
-    ```js
-    const a = 1;
-
-
-    const b = 2;
-    ```
+   ```js
+   const a = 1;
+   const b = 2;
+   ```
 
 - ul01
 
-    ```js
-    const a = 1;
-
-
-    const b = 2;
-    ```
+  ```js
+  const a = 1;
+  const b = 2;
+  ```
 
 - ul02
 
-    ```js
-    const a = 1;
-
-
-    const b = 2;
-    ```
+  ```js
+  const a = 1;
+  const b = 2;
+  ```
 ```

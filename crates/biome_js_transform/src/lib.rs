@@ -11,7 +11,8 @@ use biome_analyze::{
     SuppressionAction,
 };
 use biome_diagnostics::Error;
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsLanguage;
+use biome_languages::JsFileSource;
 use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
 use std::ops::Deref;
@@ -133,7 +134,7 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
     use std::slice;
 
     use crate::{AnalysisFilter, ControlFlow, transform};

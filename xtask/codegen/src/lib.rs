@@ -129,6 +129,9 @@ pub enum TaskCommand {
     /// Generates Baseline data for CSS features from web-features
     #[bpaf(command, long("css-baseline"))]
     CssBaseline,
+    /// Generates e18e module replacement data
+    #[bpaf(command, long("module-replacements"))]
+    ModuleReplacements,
     /// Creates a new lint rule
     #[bpaf(command, long("new-lintrule"))]
     NewRule {

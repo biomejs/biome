@@ -1,7 +1,8 @@
 use crate::lexer::{CssReLexContext, CssStringQuote};
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::SCSS_STRING_QUOTE};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::SCSS_STRING_QUOTE};
+use biome_languages::CssFileSource;
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;

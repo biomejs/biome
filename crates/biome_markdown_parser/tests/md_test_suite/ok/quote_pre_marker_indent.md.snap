@@ -44,7 +44,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@19..20 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -74,7 +73,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -107,7 +105,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -145,7 +142,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@98..99 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -192,7 +188,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@3..19 "one space indent" [] []
             1: MD_TEXTUAL@19..20
               0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
-          1: (empty)
     1: MD_NEWLINE@20..21
       0: NEWLINE@20..21 "\n" [] []
     2: MD_QUOTE@21..42
@@ -211,7 +206,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@25..41 "two space indent" [] []
             1: MD_TEXTUAL@41..42
               0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
-          1: (empty)
     3: MD_NEWLINE@42..43
       0: NEWLINE@42..43 "\n" [] []
     4: MD_QUOTE@43..67
@@ -232,7 +226,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@48..66 "three space indent" [] []
             1: MD_TEXTUAL@66..67
               0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
-          1: (empty)
     5: MD_NEWLINE@67..68
       0: NEWLINE@67..68 "\n" [] []
     6: MD_QUOTE@68..99
@@ -257,7 +250,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@73..98 " nested with outer indent" [] []
                 1: MD_TEXTUAL@98..99
                   0: MD_TEXTUAL_LITERAL@98..99 "\n" [] []
-              1: (empty)
     7: MD_NEWLINE@99..100
       0: NEWLINE@99..100 "\n" [] []
     8: MD_INDENT_CODE_BLOCK@100..120

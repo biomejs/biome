@@ -30,4 +30,5 @@ info: yaml/block_scalar/scalar_with_indentation_indicator.yaml
 
 ## Unimplemented nodes/tokens
 
-"- |1-\n xyz\n\n- >-4\n    xyz\n" => 0..26
+" |1-\n xy" => 1..9
+" >-4\n    xy" => 13..24

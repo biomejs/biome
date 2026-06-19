@@ -3,7 +3,7 @@
 //! Separator comments are attached before formatting so renderers only need to
 //! print leading, trailing, or dangling comments.
 
-use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::comment_trivia::{is_block_style_comment, is_trailing_comment_on_node};
 use crate::utils::scss_expression::is_self_breaking_value;
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
@@ -27,7 +27,10 @@ pub(crate) fn place_map_trailing_separator_comment(
 
 /// Places comments that follow a list separator.
 ///
-/// Example: `$list: a, // next\nb;`.
+/// ```scss
+/// $list: a, // next
+/// b;
+/// ```
 pub(crate) fn place_list_trailing_separator_comment(
     list_expression: &ScssListExpression,
     preceding_element: &ScssListExpressionElement,
@@ -201,7 +204,10 @@ fn place_line_separator_comment(
 
 /// Keeps Prettier-style line comments that were written before the separator.
 ///
-/// Example: `@include mix(1px // note\n, 2px)`.
+/// ```scss
+/// @include mix(1px // note
+/// , 2px);
+/// ```
 fn should_keep_line_comment_trailing(
     comment: &DecoratedComment<CssLanguage>,
     preceding_node: &CssSyntaxNode,
@@ -311,8 +317,7 @@ fn is_block_group_before_map_closing(
         .pieces()
         .chain(closing_paren.leading_trivia().pieces())
         .filter(|piece| {
-            piece.is_comments()
-                && piece.text().starts_with("/*")
+            is_block_style_comment(piece)
                 && piece.text_range().start() >= comma.text_trimmed_range().end()
                 && piece.text_range().end() <= closing_paren.text_trimmed_range().start()
         })

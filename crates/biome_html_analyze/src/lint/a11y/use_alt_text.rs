@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
@@ -86,7 +87,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAltText",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("alt-text").same(), RuleSource::HtmlEslint("require-img-alt").same()],
+        sources: &[RuleSource::EslintJsxA11y("alt-text").inspired(), RuleSource::HtmlEslint("require-img-alt").same()],
         recommended: true,
         severity: Severity::Error,
     }

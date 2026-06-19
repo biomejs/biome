@@ -108,159 +108,644 @@ info: markdown/list/start.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -5,8 +5,8 @@
- ---
- 
- 0. abc
--1. def
--2. ghi
-+0. def
-+0. ghi
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -63,6 +63,7 @@
+ 2. def
  
  ---
- 
-@@ -17,8 +17,8 @@
- ---
- 
- 2. abc
--3. def
--4. ghi
-+2. def
-+2. ghi
- 
- ---
- 
-@@ -47,8 +47,8 @@
- ---
- 
- 999. abc
--1000. def
--1001. ghi
-+145. def
-+69. ghi
- 
- ---
- 
-@@ -78,6 +78,7 @@
- 
- ---
- 
 +
  1. abc
  1. def
  
-@@ -94,4 +95,4 @@
- ---
- 
- 999. abc
--1000. def
-+2. def
-```
 
-# Output
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -23,379 +23,433 @@
+   "-",
+   source_position(24),
+   "-",
++  source_position(25),
++  "
++",
+   hard_line_break,
+-  source_position(26),
++  source_position(27),
+   "0.",
+-  source_position(28),
++  source_position(29),
+   " ",
+-  align(3, [source_position(29), "abc", hard_line_break, hard_line_break]),
+-  source_position(33),
++  align(3, [source_position(30), "abc", hard_line_break, hard_line_break]),
++  source_position(34),
+   "0.",
+-  source_position(35),
++  source_position(36),
+   " ",
+-  align(3, [source_position(36), "def", hard_line_break, hard_line_break]),
+-  source_position(40),
++  align(3, [source_position(37), "def", hard_line_break, hard_line_break]),
++  source_position(41),
+   "0.",
+-  source_position(42),
++  source_position(43),
+   " ",
+-  align(3, [source_position(43), "ghi", hard_line_break, hard_line_break]),
+-  source_position(47),
++  align(3, [source_position(44), "ghi", hard_line_break, hard_line_break]),
++  source_position(48),
+   "
+ ",
+-  source_position(48),
+-  "-",
+   source_position(49),
+   "-",
+   source_position(50),
+   "-",
+-  hard_line_break,
++  source_position(51),
++  "-",
+   source_position(52),
+-  "1.",
++  "
++",
++  hard_line_break,
+   source_position(54),
++  "1.",
++  source_position(56),
+   " ",
+-  align(3, [source_position(55), "abc", hard_line_break, hard_line_break]),
+-  source_position(59),
+-  "1.",
++  align(3, [source_position(57), "abc", hard_line_break, hard_line_break]),
+   source_position(61),
+-  " ",
+-  align(3, [source_position(62), "def", hard_line_break, hard_line_break]),
+-  source_position(66),
+   "1.",
++  source_position(63),
++  " ",
++  align(3, [source_position(64), "def", hard_line_break, hard_line_break]),
+   source_position(68),
++  "1.",
++  source_position(70),
+   " ",
+-  align(3, [source_position(69), "ghi", hard_line_break, hard_line_break]),
+-  source_position(73),
++  align(3, [source_position(71), "ghi", hard_line_break, hard_line_break]),
++  source_position(75),
+   "
+ ",
+-  source_position(74),
++  source_position(76),
+   "-",
+-  source_position(75),
++  source_position(77),
+   "-",
+-  source_position(76),
++  source_position(78),
+   "-",
++  source_position(79),
++  "
++",
+   hard_line_break,
+-  source_position(78),
++  source_position(81),
+   "2.",
+-  source_position(80),
++  source_position(83),
+   " ",
+-  align(3, [source_position(81), "abc", hard_line_break, hard_line_break]),
+-  source_position(85),
++  align(3, [source_position(84), "abc", hard_line_break, hard_line_break]),
++  source_position(88),
+   "2.",
+-  source_position(87),
++  source_position(90),
+   " ",
+-  align(3, [source_position(88), "def", hard_line_break, hard_line_break]),
+-  source_position(92),
++  align(3, [source_position(91), "def", hard_line_break, hard_line_break]),
++  source_position(95),
+   "2.",
+-  source_position(94),
++  source_position(97),
+   " ",
+-  align(3, [source_position(95), "ghi", hard_line_break, hard_line_break]),
+-  source_position(99),
++  align(3, [source_position(98), "ghi", hard_line_break, hard_line_break]),
++  source_position(102),
+   "
+ ",
+-  source_position(100),
++  source_position(103),
+   "-",
+-  source_position(101),
++  source_position(104),
+   "-",
+-  source_position(102),
++  source_position(105),
+   "-",
++  source_position(106),
++  "
++",
+   hard_line_break,
+-  source_position(104),
++  source_position(108),
+   "0.",
+-  source_position(106),
++  source_position(110),
+   " ",
+-  align(3, [source_position(107), "abc", hard_line_break, hard_line_break]),
+-  source_position(111),
++  align(3, [source_position(111), "abc", hard_line_break, hard_line_break]),
++  source_position(115),
+   "1.",
+-  source_position(113),
++  source_position(117),
+   " ",
+-  align(3, [source_position(114), "def", hard_line_break, hard_line_break]),
+-  source_position(118),
++  align(3, [source_position(118), "def", hard_line_break, hard_line_break]),
++  source_position(122),
+   "2.",
+-  source_position(120),
++  source_position(124),
+   " ",
+-  align(3, [source_position(121), "ghi", hard_line_break, hard_line_break]),
+-  source_position(125),
++  align(3, [source_position(125), "ghi", hard_line_break, hard_line_break]),
++  source_position(129),
+   "
+ ",
+-  source_position(126),
++  source_position(130),
+   "-",
+-  source_position(127),
++  source_position(131),
+   "-",
+-  source_position(128),
++  source_position(132),
+   "-",
++  source_position(133),
++  "
++",
+   hard_line_break,
+-  source_position(130),
++  source_position(135),
+   "0.",
+-  source_position(132),
+-  " ",
+-  align(3, [source_position(133), "abc", hard_line_break, hard_line_break]),
+   source_position(137),
+-  "1.",
+-  source_position(139),
+   " ",
+-  align(3, [source_position(140), "def", hard_line_break, hard_line_break]),
++  align(3, [source_position(138), "abc", hard_line_break, hard_line_break]),
++  source_position(142),
++  "1.",
+   source_position(144),
++  " ",
++  align(3, [source_position(145), "def", hard_line_break, hard_line_break]),
++  source_position(149),
+   "1.",
+-  source_position(146),
++  source_position(151),
+   " ",
+-  align(3, [source_position(147), "ghi", hard_line_break, hard_line_break]),
+-  source_position(151),
++  align(3, [source_position(152), "ghi", hard_line_break, hard_line_break]),
++  source_position(156),
+   "
+ ",
+-  source_position(152),
++  source_position(157),
+   "-",
+-  source_position(153),
++  source_position(158),
+   "-",
+-  source_position(154),
++  source_position(159),
+   "-",
++  source_position(160),
++  "
++",
+   hard_line_break,
+-  source_position(156),
++  source_position(162),
+   "1.",
+-  source_position(158),
++  source_position(164),
+   " ",
+-  align(3, [source_position(159), "abc", hard_line_break, hard_line_break]),
+-  source_position(163),
++  align(3, [source_position(165), "abc", hard_line_break, hard_line_break]),
++  source_position(169),
+   "2.",
+-  source_position(165),
++  source_position(171),
+   " ",
+-  align(3, [source_position(166), "def", hard_line_break, hard_line_break]),
+-  source_position(170),
++  align(3, [source_position(172), "def", hard_line_break, hard_line_break]),
++  source_position(176),
+   "3.",
+-  source_position(172),
++  source_position(178),
+   " ",
+-  align(3, [source_position(173), "ghi", hard_line_break, hard_line_break]),
+-  source_position(177),
++  align(3, [source_position(179), "ghi", hard_line_break, hard_line_break]),
++  source_position(183),
+   "
+ ",
+-  source_position(178),
++  source_position(184),
+   "-",
+-  source_position(179),
++  source_position(185),
+   "-",
+-  source_position(180),
++  source_position(186),
+   "-",
++  source_position(187),
++  "
++",
+   hard_line_break,
+-  source_position(182),
+-  "2.",
+-  source_position(184),
+-  " ",
+-  align(3, [source_position(185), "abc", hard_line_break, hard_line_break]),
+   source_position(189),
+-  "3.",
++  "2.",
+   source_position(191),
+   " ",
+-  align(3, [source_position(192), "def", hard_line_break, hard_line_break]),
++  align(3, [source_position(192), "abc", hard_line_break, hard_line_break]),
+   source_position(196),
+-  "4.",
++  "3.",
+   source_position(198),
+   " ",
+-  align(3, [source_position(199), "ghi", hard_line_break, hard_line_break]),
++  align(3, [source_position(199), "def", hard_line_break, hard_line_break]),
+   source_position(203),
++  "4.",
++  source_position(205),
++  " ",
++  align(3, [source_position(206), "ghi", hard_line_break, hard_line_break]),
++  source_position(210),
+   "
+ ",
+-  source_position(204),
++  source_position(211),
+   "-",
+-  source_position(205),
++  source_position(212),
+   "-",
+-  source_position(206),
++  source_position(213),
+   "-",
++  source_position(214),
++  "
++",
+   hard_line_break,
+-  source_position(208),
++  source_position(216),
+   "999.",
+-  source_position(212),
++  source_position(220),
+   " ",
+-  align(5, [source_position(213), "abc", hard_line_break, hard_line_break]),
+-  source_position(217),
++  align(5, [source_position(221), "abc", hard_line_break, hard_line_break]),
++  source_position(225),
+   "145.",
+-  source_position(221),
++  source_position(229),
+   " ",
+-  align(5, [source_position(222), "def", hard_line_break, hard_line_break]),
+-  source_position(226),
++  align(5, [source_position(230), "def", hard_line_break, hard_line_break]),
++  source_position(234),
+   "69.",
+-  source_position(229),
++  source_position(237),
+   " ",
+-  align(4, [source_position(230), "ghi", hard_line_break, hard_line_break]),
+-  source_position(234),
++  align(4, [source_position(238), "ghi", hard_line_break, hard_line_break]),
++  source_position(242),
+   "
+ ",
+-  source_position(235),
++  source_position(243),
+   "-",
+-  source_position(236),
++  source_position(244),
+   "-",
+-  source_position(237),
++  source_position(245),
+   "-",
++  source_position(246),
++  "
++",
+   hard_line_break,
+-  source_position(239),
++  source_position(248),
+   "0.",
+-  source_position(241),
++  source_position(250),
+   " ",
+-  align(3, [source_position(242), "abc", hard_line_break, hard_line_break]),
+-  source_position(246),
++  align(3, [source_position(251), "abc", hard_line_break, hard_line_break]),
++  source_position(255),
+   "
+ ",
+-  source_position(247),
++  source_position(256),
+   "-",
+-  source_position(248),
++  source_position(257),
+   "-",
+-  source_position(249),
++  source_position(258),
+   "-",
++  source_position(259),
++  "
++",
+   hard_line_break,
+-  source_position(251),
++  source_position(261),
+   "1.",
+-  source_position(253),
++  source_position(263),
+   " ",
+-  align(3, [source_position(254), "abc", hard_line_break, hard_line_break]),
+-  source_position(258),
++  align(3, [source_position(264), "abc", hard_line_break, hard_line_break]),
++  source_position(268),
+   "
+ ",
+-  source_position(259),
++  source_position(269),
+   "-",
+-  source_position(260),
++  source_position(270),
+   "-",
+-  source_position(261),
++  source_position(271),
+   "-",
++  source_position(272),
++  "
++",
+   hard_line_break,
+-  source_position(263),
++  source_position(274),
+   "2.",
+-  source_position(265),
++  source_position(276),
+   " ",
+-  align(3, [source_position(266), "abc", hard_line_break, hard_line_break]),
+-  source_position(270),
++  align(3, [source_position(277), "abc", hard_line_break, hard_line_break]),
++  source_position(281),
+   "
+ ",
+-  source_position(271),
++  source_position(282),
+   "-",
+-  source_position(272),
++  source_position(283),
+   "-",
+-  source_position(273),
++  source_position(284),
+   "-",
++  source_position(285),
++  "
++",
+   hard_line_break,
+-  source_position(275),
++  source_position(287),
+   "999.",
+-  source_position(279),
++  source_position(291),
+   " ",
+-  align(5, [source_position(280), "abc", hard_line_break, hard_line_break]),
+-  source_position(284),
++  align(5, [source_position(292), "abc", hard_line_break, hard_line_break]),
++  source_position(296),
+   "
+ ",
+-  source_position(285),
++  source_position(297),
+   "-",
+-  source_position(286),
++  source_position(298),
+   "-",
+-  source_position(287),
++  source_position(299),
+   "-",
++  source_position(300),
++  "
++",
+   hard_line_break,
+-  source_position(289),
++  source_position(302),
+   "0.",
+-  source_position(291),
++  source_position(304),
+   " ",
+-  align(3, [source_position(292), "abc", hard_line_break, hard_line_break]),
+-  source_position(296),
++  align(3, [source_position(305), "abc", hard_line_break, hard_line_break]),
++  source_position(309),
+   "1.",
+-  source_position(298),
++  source_position(311),
+   " ",
+-  align(3, [source_position(299), "def", hard_line_break, hard_line_break]),
+-  source_position(303),
++  align(3, [source_position(312), "def", hard_line_break, hard_line_break]),
++  source_position(316),
+   "
+ ",
+-  source_position(304),
++  source_position(317),
+   "-",
+-  source_position(305),
++  source_position(318),
+   "-",
+-  source_position(306),
++  source_position(319),
+   "-",
++  source_position(320),
++  "
++",
+   hard_line_break,
+-  source_position(308),
++  source_position(322),
+   "1.",
+-  source_position(310),
++  source_position(324),
+   " ",
+-  align(3, [source_position(311), "abc", hard_line_break, hard_line_break]),
+-  source_position(315),
++  align(3, [source_position(325), "abc", hard_line_break, hard_line_break]),
++  source_position(329),
+   "2.",
+-  source_position(317),
++  source_position(331),
+   " ",
+-  align(3, [source_position(318), "def", hard_line_break, hard_line_break]),
+-  source_position(322),
++  align(3, [source_position(332), "def", hard_line_break, hard_line_break]),
++  source_position(336),
+   "
+ ",
+-  source_position(323),
++  source_position(337),
+   "-",
+-  source_position(324),
++  source_position(338),
+   "-",
+-  source_position(325),
++  source_position(339),
+   "-",
+-  source_position(326),
++  source_position(340),
++  "
++",
++  source_position(341),
+   "
+ ",
+   hard_line_break,
+-  source_position(328),
++  source_position(343),
+   "1.",
+-  source_position(330),
++  source_position(345),
+   " ",
+-  align(3, [source_position(331), "abc", hard_line_break, hard_line_break]),
+-  source_position(335),
++  align(3, [source_position(346), "abc", hard_line_break, hard_line_break]),
++  source_position(350),
+   "1.",
+-  source_position(337),
++  source_position(352),
+   " ",
+-  align(3, [source_position(338), "def", hard_line_break, hard_line_break]),
+-  source_position(342),
++  align(3, [source_position(353), "def", hard_line_break, hard_line_break]),
++  source_position(357),
+   "
+ ",
+-  source_position(343),
++  source_position(358),
+   "-",
+-  source_position(344),
++  source_position(359),
+   "-",
+-  source_position(345),
++  source_position(360),
+   "-",
++  source_position(361),
++  "
++",
+   hard_line_break,
+-  source_position(347),
++  source_position(363),
+   "2.",
+-  source_position(349),
++  source_position(365),
+   " ",
+-  align(3, [source_position(350), "abc", hard_line_break, hard_line_break]),
+-  source_position(354),
++  align(3, [source_position(366), "abc", hard_line_break, hard_line_break]),
++  source_position(370),
+   "3.",
+-  source_position(356),
++  source_position(372),
+   " ",
+-  align(3, [source_position(357), "def", hard_line_break, hard_line_break]),
+-  source_position(361),
++  align(3, [source_position(373), "def", hard_line_break, hard_line_break]),
++  source_position(377),
+   "
+ ",
+-  source_position(362),
++  source_position(378),
+   "-",
+-  source_position(363),
++  source_position(379),
+   "-",
+-  source_position(364),
++  source_position(380),
+   "-",
++  source_position(381),
++  "
++",
+   hard_line_break,
+-  source_position(366),
++  source_position(383),
+   "999.",
+-  source_position(370),
++  source_position(387),
+   " ",
+-  align(5, [source_position(371), "abc", hard_line_break, hard_line_break]),
+-  source_position(375),
++  align(5, [source_position(388), "abc", hard_line_break, hard_line_break]),
++  source_position(392),
+   "1.",
+-  source_position(377),
++  source_position(394),
+   " ",
+-  align(3, [source_position(378), "def", hard_line_break, hard_line_break]),
+-  source_position(382),
++  align(3, [source_position(395), "def", hard_line_break, hard_line_break]),
++  source_position(399),
+   "
+ ",
+-  source_position(383),
++  source_position(400),
+   "-",
+-  source_position(384),
++  source_position(401),
+   "-",
+-  source_position(385),
++  source_position(402),
+   "-",
++  source_position(403),
++  "
++",
+   hard_line_break,
+-  source_position(387),
++  source_position(405),
+   "999.",
+-  source_position(391),
++  source_position(409),
+   " ",
+-  align(5, [source_position(392), "abc", hard_line_break, hard_line_break]),
+-  source_position(396),
++  align(5, [source_position(410), "abc", hard_line_break, hard_line_break]),
++  source_position(414),
+   "2.",
+-  source_position(398),
++  source_position(416),
+   " ",
+-  align(3, [source_position(399), "def", hard_line_break, hard_line_break]),
++  align(3, [source_position(417), "def", hard_line_break, hard_line_break]),
+   hard_line_break
+ ]
+\ No newline at end of file
 
-```md
-5. abc
-6. def
-7. ghi
-
----
-
-0. abc
-0. def
-0. ghi
-
----
-
-1. abc
-1. def
-1. ghi
-
----
-
-2. abc
-2. def
-2. ghi
-
----
-
-0. abc
-1. def
-2. ghi
-
----
-
-0. abc
-1. def
-1. ghi
-
----
-
-1. abc
-2. def
-3. ghi
-
----
-
-2. abc
-3. def
-4. ghi
-
----
-
-999. abc
-145. def
-69. ghi
-
----
-
-0. abc
-
----
-
-1. abc
-
----
-
-2. abc
-
----
-
-999. abc
-
----
-
-0. abc
-1. def
-
----
-
-1. abc
-2. def
-
----
-
-
-1. abc
-1. def
-
----
-
-2. abc
-3. def
-
----
-
-999. abc
-1. def
-
----
-
-999. abc
-2. def
 ```

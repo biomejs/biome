@@ -36,7 +36,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@5..6 "#" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -56,7 +55,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@8..12 " foo" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [
                 MdHash {
@@ -80,7 +78,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@16..22 "   foo" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [
                 MdHash {
@@ -103,7 +100,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@31..32 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@32..32 "" [] [],
@@ -127,7 +123,6 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@1..5 " foo" [] []
           1: MD_TEXTUAL@5..6
             0: MD_TEXTUAL_LITERAL@5..6 "#" [] []
-        1: (empty)
       3: MD_HASH_LIST@6..6
     1: MD_NEWLINE@6..7
       0: NEWLINE@6..7 "\n" [] []
@@ -140,7 +135,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@8..12
           0: MD_TEXTUAL@8..12
             0: MD_TEXTUAL_LITERAL@8..12 " foo" [] []
-        1: (empty)
       3: MD_HASH_LIST@12..14
         0: MD_HASH@12..14
           0: HASH@12..14 "#" [Whitespace(" ")] []
@@ -155,7 +149,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@16..22
           0: MD_TEXTUAL@16..22
             0: MD_TEXTUAL_LITERAL@16..22 "   foo" [] []
-        1: (empty)
       3: MD_HASH_LIST@22..26
         0: MD_HASH@22..26
           0: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] []
@@ -169,7 +162,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@28..31 "foo" [] []
         2: MD_TEXTUAL@31..32
           0: MD_TEXTUAL_LITERAL@31..32 "\n" [] []
-      1: (empty)
   2: EOF@32..32 "" [] []
 
 ```

@@ -30,8 +30,8 @@ mod visitor;
 pub use biome_diagnostics::category_concat;
 
 pub use crate::analyzer_plugin::{
-    AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec, BatchPluginVisitor,
-    PluginTargetLanguage, PluginVisitor,
+    AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec, BatchPluginVisitor, PluginActionData,
+    PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, PluginVisitor,
 };
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
@@ -49,8 +49,8 @@ pub use crate::registry::{
 };
 pub use crate::rule::{
     CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RuleSource, RuleSourceKind, RuleSourceWithKind,
-    SuppressAction,
+    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RulePreset, RuleSource, RuleSourceKind,
+    RuleSourceWithKind, SuppressAction,
 };
 pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,

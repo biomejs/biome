@@ -80,11 +80,61 @@ pub(crate) fn find_variable_position(
         .next()
 }
 
+// Parse the package name from an import value
+pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
+    if path.is_empty() {
+        return None;
+    }
+
+    let mut in_scope = false;
+    for (i, c) in path.bytes().enumerate() {
+        match c {
+            b'@' if i == 0 => {
+                in_scope = true;
+            }
+            // uppercase characters are not allowed in package name
+            // Here we are more tolerant and accept them.
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
+            b'.' if i != 0 => {}
+            b'/' => {
+                if in_scope {
+                    if i == 1 {
+                        // Invalid empty scope
+                        // `@/`
+                        return None;
+                    } else {
+                        // We consumed the scope.
+                        // `@scope/`
+                        in_scope = false;
+                    }
+                } else if i == 0 {
+                    // absolute path
+                    return None;
+                } else {
+                    // We consumed the package name
+                    return Some(&path[..i]);
+                }
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+
+    // Reject scope-only names (`@scope`) and trailing slash (`@scope/` or `pkg/`).
+    if in_scope || path.ends_with('/') {
+        None
+    } else {
+        Some(path)
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::utils::{VariablePosition, find_variable_position};
+    use crate::utils::{VariablePosition, find_variable_position, parse_package_name};
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::{JsBinaryExpression, JsFileSource};
+    use biome_js_syntax::JsBinaryExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::AstNode;
 
     #[test]
@@ -177,5 +227,39 @@ mod test {
         );
 
         assert_eq!(position, Some(VariablePosition::Left));
+    }
+
+    #[test]
+    fn parse_package_name_tests() {
+        assert_eq!(
+            parse_package_name("@scope/package-name"),
+            Some("@scope/package-name")
+        );
+        assert_eq!(
+            parse_package_name("@scope/package-name/path"),
+            Some("@scope/package-name")
+        );
+        assert_eq!(parse_package_name("package_"), Some("package_"));
+        assert_eq!(parse_package_name("package/path"), Some("package"));
+        assert_eq!(parse_package_name("0"), Some("0"));
+        assert_eq!(parse_package_name("0/path"), Some("0"));
+        assert_eq!(parse_package_name("-"), Some("-"));
+        assert_eq!(parse_package_name("-/path"), Some("-"));
+        assert_eq!(parse_package_name("a.js"), Some("a.js"));
+        assert_eq!(parse_package_name("@././file"), Some("@./."));
+
+        // Invalid package names that we accept
+        assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));
+        assert_eq!(parse_package_name("_"), Some("_"));
+
+        // Invalid package names that we reject
+        assert_eq!(parse_package_name(""), None);
+        assert_eq!(parse_package_name("@scope"), None);
+        assert_eq!(parse_package_name("@/path"), None);
+        assert_eq!(parse_package_name("."), None);
+        assert_eq!(parse_package_name("./path"), None);
+        assert_eq!(parse_package_name("#path"), None);
+        assert_eq!(parse_package_name("/path"), None);
+        assert_eq!(parse_package_name("p@ckage/name"), None);
     }
 }

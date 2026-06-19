@@ -153,7 +153,14 @@ impl FormatScssMapPairLayout<'_> {
     }
 }
 
-/// Returns `true` for `// comment\nkey: value` and `/* comment */ key: value`.
+/// Returns `true` for comments before a map pair.
+///
+/// ```scss
+/// $map: (
+///   // comment
+///   key: value,
+/// );
+/// ```
 ///
 /// The comment joins the pair group, so long comments break before `key`.
 fn should_group_leading_comments_with_pair(node: &ScssMapExpressionPair, f: &CssFormatter) -> bool {

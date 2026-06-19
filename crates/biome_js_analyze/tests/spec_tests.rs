@@ -7,7 +7,8 @@ use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsLanguage};
+use biome_languages::{JsFileSource, javascript::ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
@@ -177,7 +178,10 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let mut options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
     // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
     // and the factory settings are not already set
@@ -204,19 +208,16 @@ pub(crate) fn analyze_and_snap(
     }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
-    let module_graph = if needs_module_graph {
-        module_graph_for_test_file(input_file, &project_layout)
-    } else {
-        Default::default()
-    };
     let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
-    let services = JsAnalyzerServices::from((
-        module_graph,
-        project_layout,
-        source_type,
-        Some(semantic_model),
-    ));
+    let mut services = JsAnalyzerServices::default()
+        .with_source_type(source_type)
+        .with_semantic_model(semantic_model)
+        .with_project_layout(project_layout.clone());
+    if needs_module_graph {
+        let module_db = module_graph_for_test_file(input_file, &project_layout);
+        services = services.with_module_db(module_db);
+    }
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -484,6 +485,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),

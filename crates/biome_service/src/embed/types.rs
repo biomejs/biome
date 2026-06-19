@@ -1,10 +1,8 @@
-use crate::workspace::DocumentFileSource;
-use biome_css_syntax::CssFileSource;
-#[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::GraphqlFileSource;
 use biome_html_syntax::AnySvelteBlock;
-use biome_js_syntax::{JsFileSource, Language};
-use biome_json_syntax::JsonFileSource;
+#[cfg(feature = "lang_graphql")]
+use biome_languages::GraphqlFileSource;
+use biome_languages::javascript::Language;
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_rowan::{TextRange, TextSize, TokenText};
 
 /// Language that can host embeds.
@@ -111,7 +109,7 @@ pub(crate) enum EmbedCandidate {
     /// A directive attribute value containing JS.
     /// - Vue: `@click="handler()"`, `:prop="value"`, `v-if="cond"`
     /// - Svelte: `on:click={handler}`, `bind:value={x}`
-    /// - Astro: `define:vars={{ x }}`,
+    /// - Astro: `define:vars={{ x }}`,` class:list={[...]}`, `set:text={expr}`
     ///
     /// Built from `HtmlAttributeInitializerClause` by the HTML handler.
     Directive {
@@ -119,6 +117,10 @@ pub(crate) enum EmbedCandidate {
         /// True for Vue `v-on:` / `@` event handler directives.
         /// Affects `EmbeddingKind::Vue { event_handler }`.
         is_event_handler: bool,
+        /// True when the directive is a class-related attribute
+        /// (e.g., `class:list={...}` in Astro, `class={...}` in plain HTML).
+        /// Affects `EmbeddingKind::Astro { is_class_attribute }`.
+        is_class_attribute: bool,
     },
 }
 

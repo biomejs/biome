@@ -25,7 +25,7 @@ impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
             f,
             [format_replaced(
                 &token,
-                &text(trimmed_text, token.text_range().start())
+                &text(trimmed_text, Some(token.text_range().start()))
             )]
         )
     }

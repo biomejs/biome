@@ -10,21 +10,24 @@ use crate::workspace::{
     AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
+use biome_css_syntax::{CssLanguage, TextSize};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
-    HtmlSingleTextExpression, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName,
-    VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    HtmlSingleTextExpression, HtmlTextExpression, SvelteName, VueDirective,
+    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
+use biome_js_syntax::JsLanguage;
 use biome_json_parser::parse_json_with_offset_and_cache;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
+use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
+use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, NodeCache};
 use std::collections::VecDeque;
@@ -114,7 +117,8 @@ pub(crate) fn parse_embedded_nodes(
                 // Astro directives: class:list={...}, define:vars={...}, etc.
                 if let Some(directive) = AnyAstroDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) =
+                        build_attribute_expression_candidate(&initializer, true)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -122,7 +126,13 @@ pub(crate) fn parse_embedded_nodes(
                 // Plain HTML attributes with expression values: class={expr}, id={expr}, etc.
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) = build_attribute_expression_candidate(
+                        &initializer,
+                        attr.name()
+                            .ok()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "class"),
+                    )
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -312,7 +322,13 @@ pub(crate) fn parse_embedded_nodes(
 
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) = build_attribute_expression_candidate(
+                        &initializer,
+                        attr.name()
+                            .ok()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "class"),
+                    )
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -457,7 +473,19 @@ fn parse_svelte_blocks(
                     }
                 }
             }
-            AnySvelteBlock::SvelteHtmlBlock(_) => {}
+            AnySvelteBlock::SvelteHtmlBlock(html_block) => {
+                if let Ok(expression) = html_block.expression()
+                    && let Some(candidate) =
+                        build_svelte_text_expression_candidate(&expression, &svelte_block)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        nodes,
+                    );
+                }
+            }
             AnySvelteBlock::SvelteIfBlock(if_block) => {
                 if let Ok(opening_block) = if_block.opening_block()
                     && let Ok(expression) = opening_block.expression()
@@ -542,7 +570,7 @@ fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<Embe
 
     match initializer {
         AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(initializer) => {
-            build_attribute_expression_candidate(&initializer)
+            build_attribute_expression_candidate(&initializer, false)
                 .into_iter()
                 .collect()
         }
@@ -582,6 +610,7 @@ fn build_text_expression_directive_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+        is_class_attribute: false,
     })
 }
 
@@ -592,6 +621,7 @@ fn build_text_expression_directive_candidate(
 /// Returns `None` if the initializer does not contain a text expression.
 fn build_attribute_expression_candidate(
     initializer: &HtmlAttributeInitializerClause,
+    is_class_attribute: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let text_expression = value_node.as_html_attribute_single_text_expression()?;
@@ -606,6 +636,7 @@ fn build_attribute_expression_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+        is_class_attribute,
     })
 }
 
@@ -679,6 +710,7 @@ fn build_vue_directive_candidate(
             text: inner_text,
         },
         is_event_handler,
+        is_class_attribute: false,
     })
 }
 
@@ -772,6 +804,42 @@ fn merge_js_file_source(a: JsFileSource, b: JsFileSource) -> JsFileSource {
     }
 }
 
+fn embedded_css_file_source(
+    host_file_source: &HtmlFileSource,
+    candidate: &EmbedCandidate,
+) -> CssFileSource {
+    let base = if host_file_source.is_html() {
+        CssFileSource::css()
+    } else {
+        CssFileSource::new_css_modules()
+    };
+
+    let embedding_kind = match host_file_source.variant() {
+        HtmlVariant::Standard(_) => CssEmbeddingKind::Html(EmbeddingHtmlKind::Html),
+        HtmlVariant::Vue => {
+            let applicability = if candidate.has_attribute("scoped") {
+                EmbeddingStyleApplicability::Local
+            } else {
+                EmbeddingStyleApplicability::Global
+            };
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { applicability })
+        }
+        HtmlVariant::Astro => {
+            let applicability = if candidate.has_attribute("is:global") {
+                EmbeddingStyleApplicability::Global
+            } else {
+                EmbeddingStyleApplicability::Local
+            };
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro { applicability })
+        }
+        HtmlVariant::Svelte => CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
+            applicability: EmbeddingStyleApplicability::Local,
+        }),
+    };
+
+    base.with_embedding_kind(embedding_kind)
+}
+
 impl EmbedParseContext<'_, '_> {
     /// Runs the detector on a candidate and, if matched, parses the embed.
     /// Returns the raw `ParsedEmbed` for callers that need to inspect the
@@ -840,20 +908,22 @@ fn parse_matched_embed(
             // Configure EmbeddingKind based on framework + candidate type
             let is_source_level = match candidate {
                 EmbedCandidate::Frontmatter { .. } => {
-                    js_source =
-                        js_source.with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
+                    js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                        frontmatter: true,
+                        is_class_attribute: false,
+                    });
                     true
                 }
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
                             is_const_block: false,
                         });
                     } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                             setup: candidate.has_attribute("setup"),
                             is_source: true,
                             event_handler: false,
@@ -865,12 +935,14 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::TextExpression { block_kind, .. } => {
                     if ctx.host_file_source.is_astro() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                            frontmatter: false,
+                            is_class_attribute: false,
+                        });
                     } else if ctx.host_file_source.is_svelte() {
                         let is_function_signature =
                             matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                             is_source: false,
                             is_function_signature,
                             kind: SvelteFileKind::Component,
@@ -880,7 +952,7 @@ fn parse_matched_embed(
                             ),
                         });
                     } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                        js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
                             event_handler: false,
@@ -890,16 +962,20 @@ fn parse_matched_embed(
                     false
                 }
                 EmbedCandidate::Directive {
-                    is_event_handler, ..
+                    is_event_handler,
+                    is_class_attribute,
+                    ..
                 } => {
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                                frontmatter: false,
+                                is_class_attribute: *is_class_attribute,
+                            });
                         }
                         HtmlVariant::Vue => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
                                 setup: false,
                                 is_source: false,
                                 event_handler: *is_event_handler,
@@ -907,7 +983,7 @@ fn parse_matched_embed(
                             });
                         }
                         HtmlVariant::Svelte => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                                 is_source: false,
                                 is_function_signature: false,
                                 kind: SvelteFileKind::Component,
@@ -971,11 +1047,7 @@ fn parse_matched_embed(
         }
 
         GuestLanguage::Css => {
-            let css_source = if ctx.host_file_source.is_html() {
-                CssFileSource::css()
-            } else {
-                CssFileSource::new_css_modules()
-            };
+            let css_source = embedded_css_file_source(ctx.host_file_source, candidate);
             let doc_source = DocumentFileSource::Css(css_source);
             let mut options = ctx
                 .settings
@@ -996,6 +1068,7 @@ fn parse_matched_embed(
             let mut services = CssDocumentServices::default();
             if ctx.settings.as_ref().is_linter_enabled()
                 || ctx.settings.as_ref().is_assist_enabled()
+                || ctx.settings.needs_document_services()
             {
                 services = services.with_css_semantic_model(&parse.tree());
             }
@@ -1094,6 +1167,30 @@ fn register_svelte_destructured_bindings(
                     let token = name.ident_token().ok()?;
                     builder
                         .register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+                }
+                AnySvelteBindingAssignmentBinding::SvelteRenameBinding(rename) => {
+                    // The alias side (`{ prop: alias }` or `{ prop: { a, b } }`) is the binding.
+                    match rename.name().ok()? {
+                        AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
+                            let token = ident.ident_token().ok()?;
+                            builder.register_binding(
+                                token.text_trimmed_range(),
+                                token.token_text_trimmed(),
+                            );
+                        }
+                        AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(nested) => {
+                            queue.push_back(nested);
+                        }
+                        AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
+                            let name = rest.name().ok()?;
+                            let token = name.ident_token().ok()?;
+                            builder.register_binding(
+                                token.text_trimmed_range(),
+                                token.token_text_trimmed(),
+                            );
+                        }
+                        AnySvelteBindingAssignmentBinding::SvelteRenameBinding(_) => {}
+                    }
                 }
             }
         }

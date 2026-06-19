@@ -30,6 +30,7 @@ pub mod yaml;
 #[cfg(feature = "cli")]
 use crate::analyzer::assist::assist_configuration;
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source};
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
@@ -125,10 +126,11 @@ pub type RootEnabled = Bool<true>;
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", schemars(extend("allowTrailingCommas" = true)))] // mute VSCode warning
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 #[deserializable(with_validator)]
 pub struct Configuration {
-    /// A field for the [JSON schema](https://json-schema.org/) specification
+    /// A field for the JSON schema specification: https://json-schema.org/
     #[serde(rename = "$schema")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -292,7 +294,7 @@ impl Configuration {
             linter: Some(LinterConfiguration {
                 enabled: Some(true.into()),
                 rules: Some(Rules {
-                    recommended: Some(true),
+                    preset: Some(PresetConfig::default()),
                     ..Default::default()
                 }),
                 ..Default::default()

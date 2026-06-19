@@ -1,7 +1,7 @@
 use crate::embed::detector::{EmbedDetector, EmbedTarget};
 use crate::embed::types::{EmbedCandidate, GuestLanguage, HostLanguage};
-use crate::workspace::DocumentFileSource;
 use biome_html_syntax::ScriptType;
+use biome_languages::DocumentFileSource;
 
 /// Returned by the registry when a detector matches.
 #[derive(Debug)]

@@ -6,8 +6,8 @@ use crate::runner::execution::Execution;
 use biome_console::Console;
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Severity, category};
 use biome_fs::{BiomePath, File, OpenOptions};
+use biome_languages::DocumentFileSource;
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     FeaturesSupported, FileExistsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
@@ -286,6 +286,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 content: FileContent::from_client(&input),
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             })?;
 
             Ok(Self { guard, path, file })

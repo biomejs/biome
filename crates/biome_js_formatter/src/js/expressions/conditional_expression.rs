@@ -41,7 +41,8 @@ impl FormatNodeRule<JsConditionalExpression> for FormatJsConditionalExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsConditionalExpression, JsFileSource};
+    use biome_js_syntax::JsConditionalExpression;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn needs_parentheses() {

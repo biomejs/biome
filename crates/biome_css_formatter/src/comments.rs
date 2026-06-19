@@ -9,7 +9,8 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage, ScssAtRootAtRule,
     ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
     ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair, T, TextLen, TextSize, is_in_scss_include_arguments,
+    ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
+    is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -41,7 +42,7 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
 
             // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [text(first_line.trim_end(), source_offset)])?;
+            write!(f, [text(first_line.trim_end(), Some(source_offset))])?;
 
             source_offset += first_line.text_len();
 
@@ -52,7 +53,10 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
                     1,
                     &format_once(|f| {
                         for line in lines {
-                            write!(f, [hard_line_break(), text(line.trim(), source_offset)])?;
+                            write!(
+                                f,
+                                [hard_line_break(), text(line.trim(), Some(source_offset))]
+                            )?;
 
                             source_offset += line.text_len();
                         }
@@ -113,6 +117,8 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_function_comment)
+            // Handle SCSS variable name/colon comments before generic properties.
+            .or_else(handle_scss_variable_declaration_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_complex_selector_comment)
@@ -173,19 +179,11 @@ fn handle_scss_each_value_list_comment(
         return CommentPlacement::Default(comment);
     };
 
-    let Some(value_list) = expression
-        .syntax()
-        .parent()
-        .and_then(ScssEachValueList::cast)
-    else {
+    let Some(value_list) = expression.parent::<ScssEachValueList>() else {
         return CommentPlacement::Default(comment);
     };
 
-    if !value_list
-        .syntax()
-        .parent()
-        .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
-    {
+    if value_list.parent::<ScssEachHeader>().is_none() {
         return CommentPlacement::Default(comment);
     }
 
@@ -254,7 +252,7 @@ fn handle_scss_at_root_selector_comment(
         return CommentPlacement::Default(comment);
     };
 
-    let Some(at_root) = selector.syntax().parent().and_then(ScssAtRootAtRule::cast) else {
+    let Some(at_root) = selector.parent::<ScssAtRootAtRule>() else {
         return CommentPlacement::Default(comment);
     };
 
@@ -287,9 +285,7 @@ fn handle_scss_else_clause_comment(
     };
 
     let Some(else_clause) = block
-        .syntax()
-        .parent()
-        .and_then(ScssIfAtRule::cast)
+        .parent::<ScssIfAtRule>()
         .and_then(|if_rule| if_rule.else_clause())
     else {
         return CommentPlacement::Default(comment);
@@ -321,6 +317,75 @@ fn handle_function_comment(
     }
 }
 
+/// Attaches comments that belong to SCSS variable boundaries:
+///
+/// ```scss
+/// $color/* c */: red;
+/// $font:
+///   // c
+///   Arial;
+/// ```
+fn handle_scss_variable_declaration_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(variable_declaration) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(ScssVariableDeclaration::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Ok(name) = variable_declaration.name() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let comment_piece = comment.piece();
+
+    if comment
+        .preceding_node()
+        .is_some_and(|preceding| preceding == name.syntax())
+        && is_between_variable_colon_and_value(
+            &variable_declaration,
+            comment_piece.text_range().start(),
+        )
+    {
+        return CommentPlacement::dangling(variable_declaration.into_syntax(), comment);
+    }
+
+    if let Some(name_token) = name.syntax().last_token() {
+        for piece in name_token.trailing_trivia().pieces() {
+            if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
+                // Keep `$color/* comment */: red;` between name and colon.
+                return CommentPlacement::dangling(variable_declaration.into_syntax(), comment);
+            }
+        }
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+/// Returns `true` for comments between `:` and the variable value.
+fn is_between_variable_colon_and_value(
+    variable_declaration: &ScssVariableDeclaration,
+    comment_start: TextSize,
+) -> bool {
+    let Ok(colon) = variable_declaration.colon_token() else {
+        return false;
+    };
+
+    let Some(value_start) = variable_declaration
+        .value()
+        .ok()
+        .and_then(|value| value.syntax().first_token())
+        .map(|token| token.text_trimmed_range().start())
+    else {
+        return false;
+    };
+
+    comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
 fn handle_generic_property_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -345,7 +410,7 @@ fn handle_generic_property_comment(
     if let Some(name_token) = name.syntax().last_token() {
         for piece in name_token.trailing_trivia().pieces() {
             if piece.is_comments() && piece.text_range() == comment_piece.text_range() {
-                // `color/* comment */: red` keeps the comment between name and colon.
+                // Keep `a { color/* comment */: red; }` between name and colon.
                 return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
         }
@@ -368,7 +433,7 @@ fn is_between_property_colon_and_value(
     property: &CssGenericProperty,
     comment_start: TextSize,
 ) -> bool {
-    // `color: /* comment */ red` belongs to the property colon boundary.
+    // `a { color: /* comment */ red; }` belongs to the colon/value boundary.
     let Ok(colon) = property.colon_token() else {
         return false;
     };
@@ -393,7 +458,8 @@ fn handle_declaration_name_comment(
             if let Some(generic_property) =
                 preceding_node.parent().and_then(CssGenericProperty::cast)
             {
-                // `color // comment\n: red` keeps the comment between name and colon.
+                // SCSS keeps `a { color // comment
+                // : red; }` between name and colon.
                 return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
 

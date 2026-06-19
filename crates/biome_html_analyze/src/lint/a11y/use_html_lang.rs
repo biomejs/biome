@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 
@@ -38,7 +39,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useHtmlLang",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("html-has-lang").same(), RuleSource::HtmlEslint("require-lang").same()],
+        sources: &[RuleSource::EslintJsxA11y("html-has-lang").inspired(), RuleSource::HtmlEslint("require-lang").same()],
         recommended: true,
         severity: Severity::Error,
     }

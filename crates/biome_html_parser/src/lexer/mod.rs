@@ -10,7 +10,6 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -411,6 +410,40 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'"' => self.consume_byte(T!['"']),
+            b'\'' => self.consume_byte(T!["'"]),
+            _ => self.consume_token_attribute_value(current),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
+    fn consume_token_svelte_template_chunk(&mut self, current: u8, quote: u8) -> HtmlSyntaxKind {
+        if current == b'{' {
+            self.consume_byte(T!['{'])
+        } else if current == quote {
+            self.advance(1);
+            if quote == b'"' { T!['"'] } else { T!["'"] }
+        } else {
+            self.consume_svelte_template_chunk(quote)
+        }
+    }
+
+    fn consume_svelte_template_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' || current == quote {
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
+            }
+        }
+
+        HTML_TEMPLATE_CHUNK
+    }
+
     /// Consume a token in the [HtmlLexContext::Doctype] context.
     fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
@@ -542,6 +575,9 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
+        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
+        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let mut first_stop_keyword_seen = false;
 
         let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
         let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
@@ -576,16 +612,25 @@ impl<'src> HtmlLexer<'src> {
                     let checkpoint_pos = self.position;
                     let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        // Check if this keyword is in our stop list
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
                         if should_stop {
-                            // Rewind - don't consume the keyword
-                            self.position = checkpoint_pos;
-                            break;
+                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+                                && !first_stop_keyword_seen
+                            {
+                                // First `as` belongs to a TypeScript `as const` assertion;
+                                // the parser determined this via lookahead. Skip it and
+                                // continue scanning for the Svelte binding `as`.
+                                first_stop_keyword_seen = true;
+                            } else {
+                                // Rewind — don't consume the keyword
+                                self.position = checkpoint_pos;
+                                break;
+                            }
                         }
-                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                        // Not a stop keyword (or skipped), continue
+                        // (position already advanced by consume_language_identifier)
                     } else {
                         // Not a keyword, advance one byte (position was reset by consume_language_identifier)
                         self.advance_byte_or_char(current);
@@ -962,8 +1007,8 @@ impl<'src> HtmlLexer<'src> {
         HTML_LITERAL
     }
 
-    /// Consumes a quoted string literal token, handling escaped characters and unicode sequences.
-    /// Returns ERROR_TOKEN if the string is not properly terminated or contains invalid escapes.
+    /// Consumes a quoted string literal token.
+    /// Returns ERROR_TOKEN if the string is not properly terminated.
     fn consume_string_literal(&mut self, quote: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
         let start = self.text_position();
@@ -982,39 +1027,6 @@ impl<'src> HtmlLexer<'src> {
                         state => state,
                     };
                     break;
-                }
-                // '\t' etc
-                BSL => {
-                    self.advance(1);
-
-                    match self.current_byte() {
-                        Some(b'\n' | b'\r') => self.advance(1),
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'\'') if quote == b'\'' => {
-                            self.advance(1);
-                        }
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'"') if quote == b'"' => {
-                            self.advance(1);
-                        }
-
-                        Some(b'u') => match (self.consume_unicode_escape(), state) {
-                            (Ok(_), _) => {}
-                            (Err(err), LexStringState::InString) => {
-                                self.diagnostics.push(err);
-                                state = LexStringState::InvalidEscapeSequence;
-                            }
-                            (Err(_), _) => {}
-                        },
-
-                        Some(chr) => {
-                            self.advance_byte_or_char(chr);
-                        }
-
-                        None => {}
-                    }
                 }
                 // we don't need to handle IDT because it's always len 1.
                 UNI => self.advance_char_unchecked(),
@@ -1036,7 +1048,6 @@ impl<'src> HtmlLexer<'src> {
 
                 ERROR_TOKEN
             }
-            LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }
     }
 
@@ -1270,54 +1281,6 @@ impl<'src> HtmlLexer<'src> {
         T!["]]>"]
     }
 
-    /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
-    ///
-    /// A unicode escape sequence must consist of 4 hex characters.
-    fn consume_unicode_escape(&mut self) -> Result<(), ParseDiagnostic> {
-        self.assert_byte(b'u');
-        self.assert_current_char_boundary();
-
-        let start = self.text_position();
-
-        let start = start
-            // Subtract 1 to get position of `\`
-            .checked_sub(TextSize::from(1))
-            .unwrap_or(start);
-
-        self.advance(1); // Advance over `u`
-
-        for _ in 0..4 {
-            match self.current_byte() {
-                Some(byte) if byte.is_ascii_hexdigit() => self.advance(1),
-                Some(_) => {
-                    let char = self.current_char_unchecked();
-                    // Reached a non-hex digit which is invalid
-                    return Err(ParseDiagnostic::new(
-
-                        "Invalid unicode sequence",
-                        start..self.text_position(),
-                    )
-                        .with_detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-                None => {
-                    // Reached the end of the file before processing 4 hex digits
-                    return Err(ParseDiagnostic::new(
-                        "Unicode escape sequence with two few hexadecimal numbers.",
-                        start..self.text_position(),
-                    )
-                        .with_detail(
-                            self.text_position()..self.text_position(),
-                            "reached the end of the file",
-                        )
-                        .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
-                }
-            }
-        }
-
-        Ok(())
-    }
-
     /// Consume a single block of HTML text outside of tags.
     ///
     /// We consider a "block" of text to be a sequence of words, with whitespace
@@ -1479,6 +1442,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_vue_v_for_expression(current, quote)
                     }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::SvelteAttributeValue => {
+                        self.consume_token_svelte_attribute_value(current)
+                    }
+                    HtmlLexContext::SvelteTemplateChunk { quote } => {
+                        self.consume_token_svelte_template_chunk(current, quote)
+                    }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
@@ -1578,6 +1547,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,
         };
@@ -1664,9 +1634,6 @@ fn is_at_start_identifier(byte: u8) -> bool {
 
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
-    /// String that contains an invalid escape sequence
-    InvalidEscapeSequence,
-
     /// Between the opening `"` and closing `"` quotes.
     InString,
 

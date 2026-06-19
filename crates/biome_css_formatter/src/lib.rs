@@ -83,7 +83,7 @@ where
 
 /// Implement [AsFormat] for [Option] when `T` implements [AsFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
@@ -120,7 +120,7 @@ where
 
 /// Implement [IntoFormat] for [Option] when `T` implements [IntoFormat]
 ///
-/// Allows to call format on optional AST fields without having to unwrap the field first.
+/// Allows calling format on optional AST fields without having to unwrap the field first.
 impl<T, Context> IntoFormat<Context> for Option<T>
 where
     T: IntoFormat<Context>,
@@ -332,7 +332,10 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
             match original.to_ascii_lowercase_cow() {
                 Cow::Borrowed(_) => self.format_trimmed_token_trivia(token, f),
                 Cow::Owned(lowercase) => {
-                    write!(f, [text(&lowercase, token.text_trimmed_range().start())])
+                    write!(
+                        f,
+                        [text(&lowercase, Some(token.text_trimmed_range().start()))]
+                    )
                 }
             }
         } else {
@@ -426,11 +429,12 @@ mod tests {
     use crate::format_node;
     use crate::{CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::{CssFileSource, CssRoot};
+    use biome_css_syntax::CssRoot;
     use biome_formatter::prelude::token;
     use biome_formatter::{
         Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule, write,
     };
+    use biome_languages::CssFileSource;
     use biome_rowan::AstNode;
 
     #[test]

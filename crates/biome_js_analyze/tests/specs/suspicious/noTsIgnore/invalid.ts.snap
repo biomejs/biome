@@ -64,14 +64,11 @@ invalid.ts:6:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━�
 
   ! Unsafe use of the @ts-ignore directive found in this comment.
   
-     5 │ /**
-   > 6 │  * @ts-ignore
-       │    ^^^^^^^^^^
-   > 7 │  * more comments
-   > 8 │  */
-       │  ^^
-     9 │ let foo;
-    10 │ 
+    5 │ /**
+  > 6 │  * @ts-ignore
+      │    ^^^^^^^^^^
+    7 │  * more comments
+    8 │  */
   
   i The directive is applied to this line.
   
@@ -135,7 +132,7 @@ invalid.ts:19:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━
   
     18 │ // Some comment
   > 19 │ // @ts-ignore Some other comment
-       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │    ^^^^^^^^^^
     20 │ let someTextAfter;
     21 │ 
   

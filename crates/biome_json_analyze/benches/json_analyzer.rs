@@ -5,7 +5,7 @@ use biome_analyze::{
 };
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::JsonFileSource;
+use biome_languages::JsonFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;

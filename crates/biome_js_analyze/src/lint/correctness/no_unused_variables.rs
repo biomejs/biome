@@ -10,13 +10,17 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
+    TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration,
 };
+use biome_languages::JsFileSource;
+use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
+use biome_rule_options::no_unused_variables::{
+    NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
+};
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -127,7 +131,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// #### Example
+    /// If this option is set to `false`, unused rest siblings either have to be renamed or removed.
     ///
     /// ```json,options
     /// {
@@ -148,6 +152,57 @@ declare_lint_rule! {
     /// const { brand: _, ...other } = car;
     /// console.log(other);
     /// ```
+    ///
+    /// ### `ignore`
+    ///
+    /// An object that allows excluding matching identifiers from this rule.
+    ///
+    /// Each key may specify an array of identifiers to ignore which are case-sensitive matches.
+    ///
+    /// The special string `"*"` can serve two purposes:
+    /// - As a **key** it refers to every kind of identifier.
+    /// - As a **value** it may be used to match all identifiers in the respective group, effectively disabling this rule for that group.
+    ///
+    /// Allowed keys:
+    ///
+    /// - `"*"`: Applies to all identifiers
+    /// - `"class"`: Applies to class names
+    /// - `"function"`: Applies to function names
+    /// - `"interface"`: Applies to interface names
+    /// - `"typeAlias"`: Applies to type aliases
+    /// - `"typeParameter"`: Applies to type parameters
+    /// - `"variable"`: Applies to variable names
+    ///
+    /// Default: `{}` (no variables are excluded)
+    ///
+    /// For example, you can exclude all unused identifiers named `ignored` regardless of their kind,
+    /// all unused classes named `IgnoredClass`, and all unused functions with the following
+    /// configuration.
+    ///
+    /// A variable named `unusedVariable` is still flagged as unused, and so is a class named
+    /// `UnusedClass` since they don't fall under the exceptions.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": {
+    ///       "*": ["ignored"],
+    ///       "class": ["IgnoredClass"],
+    ///       "function": ["*"]
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,ignore,use_options
+    /// const ignored = 0;
+    /// class IgnoredClass {}
+    /// function ignoredFunction() {}
+    ///
+    /// const unusedVariable = 0;
+    /// class UnusedClass {}
+    /// ```
+    ///
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
@@ -336,12 +391,16 @@ impl Rule for NoUnusedVariables {
                 .find_map(JsModuleItemList::cast)
         {
             // A declaration file without top-level exports and imports is a global declaration file.
-            // All top-level types and variables are available in every files of the project.
+            // All top-level types and variables are available in every file of the project.
             // Thus, it is ok if top-level types are not used locally.
             let is_top_level = items.parent::<TsDeclarationModule>().is_some();
             if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
                 return None;
             }
+        }
+
+        if is_ignored(binding, ctx.options()).unwrap_or_default() {
+            return None;
         }
 
         let binding_name = binding.name_token().ok()?;
@@ -377,7 +436,7 @@ impl Rule for NoUnusedVariables {
         // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
         // read by the framework.
         if binding_name == "Props"
-            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
             && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
             && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
                 || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
@@ -430,11 +489,11 @@ impl Rule for NoUnusedVariables {
             && is_rest_spread_sibling(&decl)
         {
             diag = diag.note(
-                    markup! {
+                markup! {
                         "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
                         "inside destructured objects with rest properties."
                     },
-                );
+            );
         }
 
         Some(diag)
@@ -479,6 +538,39 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if `binding` is considered as ignored by the user.
+pub fn is_ignored(
+    binding: &AnyJsIdentifierBinding,
+    options: &NoUnusedVariablesOptions,
+) -> Option<bool> {
+    let binding_name = binding.name_token().ok()?;
+    let binding_name = binding_name.text_trimmed();
+
+    let ignore_options = options.ignore();
+    let is_all_ignored = ignore_options.all.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
+
+    if is_all_ignored {
+        return Some(true);
+    }
+
+    let specific_ignores = match binding.syntax().parent()?.kind() {
+        JsSyntaxKind::JS_FUNCTION_DECLARATION => ignore_options.function,
+        JsSyntaxKind::JS_CLASS_DECLARATION => ignore_options.class,
+        JsSyntaxKind::TS_INTERFACE_DECLARATION => ignore_options.interface,
+        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => ignore_options.type_alias,
+        JsSyntaxKind::TS_TYPE_PARAMETER => ignore_options.type_parameter,
+        _ => ignore_options.variable,
+    };
+
+    let is_specific_ignored = specific_ignores.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
+
+    Some(is_specific_ignored)
 }
 
 fn containing_statement_list(decl: &AnyJsBindingDeclaration) -> Option<JsSyntaxNode> {

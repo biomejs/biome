@@ -5,8 +5,8 @@ mod bench_case;
 pub use bench_case::BenchCase;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, RuleCategories};
+use biome_configuration::HtmlConfiguration;
 use biome_configuration::analyzer::AnalyzerSelector;
-use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -15,24 +15,29 @@ use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_html_parser::HtmlParserOptions;
+use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
-use biome_module_graph::ModuleGraph;
-use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
+use biome_languages::DocumentFileSource;
+use biome_module_graph::{
+    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module,
+    resolve_js_module,
+};
+use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{
     ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
 };
+use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
-    FileContent, OpenFileParams, OpenProjectParams, PullDiagnosticsParams, ScanKind,
-    ScanProjectParams, UpdateSettingsParams, server,
+    PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
+use biome_service::{Workspace, WorkspaceError};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -53,9 +58,12 @@ pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String
 
 pub fn create_analyzer_options<L: ServiceLanguage>(
     input_file: &Utf8Path,
+    working_directory: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
+    let options = AnalyzerOptions::default()
+        .with_file_path(input_file.to_path_buf())
+        .with_working_directory(working_directory);
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
@@ -185,7 +193,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, None);
+        let handle = SettingsHandle::new(&settings, Default::default());
         Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
     }
 }
@@ -235,7 +243,7 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, None);
+        let handle = SettingsHandle::new(&settings, Default::default());
         handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
@@ -251,17 +259,201 @@ where
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<ModuleGraph> {
-    let module_graph = ModuleGraph::default();
-
+) -> ProjectDatabase {
+    let db = ProjectDatabase::default();
+    let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
-    let paths = get_js_like_paths_in_dir(&dir);
-    let fs = OsFileSystem::new(dir);
-    let paths = get_added_js_paths(&fs, &paths);
+    let fs = OsFileSystem::new(dir.clone());
 
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, true);
+    let js_paths = get_js_like_paths_in_dir(&dir);
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    for (path, root, semantic_model) in js_roots {
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            path,
+            &fs,
+            project_layout,
+            semantic_model,
+            &path_info_cache,
+            true,
+        );
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
 
-    Arc::new(module_graph)
+    let css_paths = get_css_like_paths_in_dir(&dir);
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    for (path, root) in css_roots {
+        let (module_info, _, _) =
+            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
+
+    db
+}
+
+/// Builds a module graph for a CSS test file by scanning the directory for all
+/// CSS and JS-like files, parsing them, and populating the module graph.
+///
+/// This enables project-domain CSS rules (e.g. `noUnusedClasses`) to work in
+/// spec tests by having both sides of the cross-file reference available:
+/// - CSS files provide class definitions.
+/// - JS/JSX files provide `className` references.
+pub fn module_graph_for_css_test_file(
+    input_file: &Utf8Path,
+    project_layout: &ProjectLayout,
+) -> ProjectDatabase {
+    let db = ProjectDatabase::default();
+    let path_info_cache = PathInfoCache::default();
+    let dir = input_file.parent().unwrap().to_path_buf();
+    let fs = OsFileSystem::new(dir.clone());
+
+    let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
+    let css_roots = get_css_added_paths(&fs, &css_paths);
+    for (path, root) in css_roots {
+        let (module_info, _, _) =
+            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
+
+    let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+    let js_roots = get_added_js_paths(&fs, &js_paths);
+    for (path, root, semantic_model) in js_roots {
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            path,
+            &fs,
+            project_layout,
+            semantic_model,
+            &path_info_cache,
+            false,
+        );
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
+
+    db
+}
+
+/// Builds a module graph for an HTML test file by opening all files in the
+/// test directory through a real [`WorkspaceServer`] instance.
+///
+/// This mirrors production behavior exactly: the workspace server's `open_file`
+/// call drives `parse_embedded_nodes`, which correctly extracts `<style>`,
+/// `<script>`, and Astro frontmatter (`---...---`) blocks — including their
+/// scoping semantics (Vue `<style scoped>`, Astro `<style is:global>`, etc.).
+///
+/// This enables project-domain HTML rules (e.g. `noUndeclaredClasses`) to work
+/// in spec tests with real module graph data, identical to what the LSP/CLI
+/// would compute.
+pub fn module_graph_for_html_test_file(
+    input_file: &Utf8Path,
+    _project_layout: &ProjectLayout,
+) -> ProjectDatabase {
+    let dir = input_file.parent().unwrap().to_path_buf();
+
+    // Load all files from the test directory into a MemoryFileSystem.
+    let mem_fs = MemoryFileSystem::default();
+    let all_files: Vec<Utf8PathBuf> = {
+        let mut files = Vec::new();
+        collect_all_files_in_dir(&dir, &mut files);
+        files
+    };
+    for file_path in &all_files {
+        if let Ok(content) = std::fs::read(file_path.as_std_path()) {
+            mem_fs.insert(file_path.clone(), content);
+        }
+    }
+
+    // Create a WorkspaceServer backed by the MemoryFileSystem.
+    // The project root is the test file's directory so relative import resolution works.
+    let (workspace, project_key) = setup_workspace_and_open_project(mem_fs, dir.as_str());
+
+    // Enable experimental full HTML support so that .vue/.astro/.svelte files
+    // are parsed as HTML-like (with embedded script/style extraction).
+    // Also enable module graph resolution so imports are tracked.
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: None,
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .expect("can update settings");
+
+    // Index every file through the workspace's internal indexing path.
+    // This triggers parse_embedded_nodes (script/style/frontmatter extraction →
+    // module graph update), identical to what the LSP/CLI scanner does.
+    // We pass document_file_source explicitly with experimental_full_html_support=true
+    // so that .vue/.astro/.svelte files are correctly parsed as HTML-like.
+    let files_with_sources = all_files.iter().map(|file_path| {
+        let biome_path = BiomePath::new(file_path.clone());
+        let document_file_source = DocumentFileSource::from_well_known(file_path.as_path(), true);
+        (biome_path, document_file_source)
+    });
+    workspace.index_files_for_test(project_key, files_with_sources);
+
+    workspace.get_module_db_for_test()
+}
+
+/// Recursively collects all file paths under `dir` into `out`.
+fn collect_all_files_in_dir(dir: &Utf8Path, out: &mut Vec<Utf8PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir.as_std_path()) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let Ok(path) = Utf8PathBuf::try_from(entry.path()) else {
+            continue;
+        };
+        if path.is_dir() {
+            collect_all_files_in_dir(&path, out);
+        } else {
+            out.push(path);
+        }
+    }
+}
+
+fn get_css_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
+    std::fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            if path.is_dir() {
+                get_css_like_paths_in_dir(&path)
+            } else {
+                DocumentFileSource::from_well_known(&path, false)
+                    .is_css_like()
+                    .then(|| BiomePath::new(path))
+                    .into_iter()
+                    .collect()
+            }
+        })
+        .collect()
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
@@ -318,8 +510,12 @@ pub fn get_css_added_paths<'a>(
                 return None;
             };
             let root = fs.read_file_from_path(path).ok().map(|content| {
-                let parsed =
-                    biome_css_parser::parse_css(&content, file_source, CssParserOptions::default());
+                let options = if file_source.is_css_modules() {
+                    CssParserOptions::default().allow_css_modules()
+                } else {
+                    CssParserOptions::default()
+                };
+                let parsed = biome_css_parser::parse_css(&content, file_source, options);
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),
@@ -328,6 +524,37 @@ pub fn get_css_added_paths<'a>(
                 parsed.tree()
             })?;
             Some((path, root))
+        })
+        .collect()
+}
+
+/// Loads and parses files from the file system to pass them to service methods.
+pub fn get_html_added_paths<'a>(
+    fs: &dyn FileSystem,
+    paths: &'a [BiomePath],
+) -> Vec<(&'a BiomePath, HtmlRoot, Vec<HtmlEmbeddedContent>)> {
+    paths
+        .iter()
+        .filter_map(|path| {
+            let DocumentFileSource::Html(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
+            let root = fs.read_file_from_path(path).ok().map(|content| {
+                let parsed =
+                    biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                );
+                parsed.tree()
+            })?;
+            // For test utilities, we don't parse embedded content in HTML files.
+            // In real scenarios, the workspace server handles this by parsing
+            // embedded blocks separately and passing them to update_graph_for_html_paths.
+            Some((path, root, Vec::<HtmlEmbeddedContent>::new()))
         })
         .collect()
 }
@@ -350,12 +577,30 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
+/// Searches for a `pnpm-workspace.yaml` file adjacent to the input file
+/// and parses its catalog section if present.
+///
+/// Returns `None` if the workspace file is not found or parsing fails.
+fn find_pnpm_workspace_catalog(fs: &dyn FileSystem, input_file: &Utf8Path) -> Option<Catalogs> {
+    let workspace_file = input_file.with_file_name("pnpm-workspace.yaml");
+    if !fs.path_is_file(&workspace_file) {
+        return None;
+    }
+
+    if let Ok(content) = fs.read_file_from_path(&workspace_file) {
+        return PackageJson::parse_pnpm_workspace_catalog(&content);
+    }
+
+    None
+}
+
 pub fn project_layout_for_test_file(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
+    let pnpm_catalog = find_pnpm_workspace_catalog(&fs, input_file);
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
@@ -374,12 +619,17 @@ pub fn project_layout_for_test_file(
                     }),
             );
         } else {
+            let mut manifest = deserialized.into_deserialized().unwrap_or_default();
+            if manifest.catalog.is_none() {
+                manifest.catalog.clone_from(&pnpm_catalog);
+            }
+
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
                     .map(|dir_path| dir_path.to_path_buf())
                     .unwrap_or_default(),
-                deserialized.into_deserialized().unwrap_or_default(),
+                manifest,
             );
         }
     }
@@ -882,21 +1132,18 @@ pub fn analyze_with_workspace(
     // Set up in-memory filesystem
     let fs = MemoryFileSystem::default();
     fs.insert(virtual_file_path.clone(), input_code.as_bytes());
+    let mut files_to_index = vec![virtual_file_path.clone()];
 
-    // Insert sidecar files if they exist on disk
-    insert_sidecar_files(&fs, input_file, &project_root);
+    // Insert sidecar files if they exist on disk.
+    // Returns virtual paths of the inserted source files (CSS, JS, etc.)
+    // so we can index them for the module graph.
+    let sidecar_paths = insert_sidecar_files(&fs, input_file, &project_root);
+    files_to_index.extend(sidecar_paths.clone());
 
-    // Create workspace
-    let workspace = server(Arc::new(fs), None);
-
-    // Open project
-    let project_result = workspace
-        .open_project(OpenProjectParams {
-            path: BiomePath::new(&project_root),
-            open_uninitialized: true,
-        })
-        .expect("failed to open project");
-    let project_key = project_result.project_key;
+    // Create workspace — use WorkspaceServer directly so we can call
+    // index_files_for_test, which opens files with OpenFileReason::Index
+    // and populates the module graph (needed by project-domain rules).
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, project_root.as_str());
 
     // Build configuration: enable full HTML support + merge .options.json if present
     let config = build_test_configuration(input_file);
@@ -908,7 +1155,7 @@ pub fn analyze_with_workspace(
             configuration: config,
             workspace_directory: Some(BiomePath::new(&project_root)),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
         })
         .expect("failed to update settings");
 
@@ -923,20 +1170,26 @@ pub fn analyze_with_workspace(
         })
         .expect("failed to scan project");
 
-    // Open file
-    workspace
-        .open_file(OpenFileParams {
-            project_key,
-            path: BiomePath::new(&virtual_file_path),
-            content: FileContent::FromClient {
-                content: input_code.clone(),
-                version: 0,
-            },
-            document_file_source: Some(document_file_source),
-            persist_node_cache: false,
-            inline_config: None,
-        })
-        .expect("failed to open file");
+    workspace.index_files_for_test(
+        project_key,
+        files_to_index.into_iter().map(|path| {
+            let document_file_source = DocumentFileSource::from_well_known(path.as_path(), true);
+            (BiomePath::new(path), document_file_source)
+        }),
+    );
+
+    // Index all files through the internal indexing path so that:
+    // - Embedded CSS/JS blocks are parsed and stored
+    // - The module graph is populated with CSS classes and import edges
+    // This is required for project-domain rules like noUndeclaredClasses.
+    let mut all_virtual_files = sidecar_paths;
+    all_virtual_files.push(virtual_file_path.clone());
+    let files_with_sources = all_virtual_files.iter().map(|path| {
+        let biome_path = BiomePath::new(path.clone());
+        let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
+        (biome_path, doc_source)
+    });
+    workspace.index_files_for_test(project_key, files_with_sources);
 
     // Build rule selector
     let rule_selector = format!("{group}/{rule}")
@@ -1028,34 +1281,50 @@ fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
 
 /// Inserts sidecar files (package.json, tsconfig.json, etc.) and peer source
 /// files into the `MemoryFileSystem` for workspace-based tests.
-fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_root: &Utf8Path) {
+///
+/// Returns the list of virtual paths that were inserted (excluding config sidecars
+/// like package.json/tsconfig.json, which don't need indexing).
+fn insert_sidecar_files(
+    fs: &MemoryFileSystem,
+    input_file: &Utf8Path,
+    project_root: &Utf8Path,
+) -> Vec<Utf8PathBuf> {
+    let mut inserted_files = Vec::new();
     // Insert package.json sidecar
     let package_json_sidecar = input_file.with_extension("package.json");
     if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
-        fs.insert(project_root.join("package.json"), content.as_bytes());
+        let target_path = project_root.join("package.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert tsconfig.json sidecar
     let tsconfig_sidecar = input_file.with_extension("tsconfig.json");
     if let Ok(content) = std::fs::read_to_string(&tsconfig_sidecar) {
-        fs.insert(project_root.join("tsconfig.json"), content.as_bytes());
+        let target_path = project_root.join("tsconfig.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert turbo.json sidecar
     let turbo_json_sidecar = input_file.with_extension("turbo.json");
     let turbo_jsonc_sidecar = input_file.with_extension("turbo.jsonc");
     if let Ok(content) = std::fs::read_to_string(&turbo_json_sidecar) {
-        fs.insert(project_root.join("turbo.json"), content.as_bytes());
+        let target_path = project_root.join("turbo.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     } else if let Ok(content) = std::fs::read_to_string(&turbo_jsonc_sidecar) {
-        fs.insert(project_root.join("turbo.jsonc"), content.as_bytes());
+        let target_path = project_root.join("turbo.jsonc");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert additional source files from the same directory for module graph rules
     let Some(parent_dir) = input_file.parent() else {
-        return;
+        return inserted_files;
     };
     let Ok(entries) = std::fs::read_dir(parent_dir) else {
-        return;
+        return inserted_files;
     };
     for entry in entries.flatten() {
         let Ok(path) = Utf8PathBuf::try_from(entry.path()) else {
@@ -1071,6 +1340,7 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
             "js" | "mjs"
                 | "cjs"
                 | "jsx"
+                | "css"
                 | "ts"
                 | "mts"
                 | "cts"
@@ -1082,7 +1352,37 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
         ) && let Ok(content) = std::fs::read_to_string(&path)
         {
             let target_name = path.file_name().unwrap();
-            fs.insert(project_root.join(target_name), content.as_bytes());
+            let target_path = project_root.join(target_name);
+            fs.insert(target_path.clone(), content.as_bytes());
+            inserted_files.push(target_path);
         }
+    }
+
+    inserted_files
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    #[test]
+    fn finds_catalog_from_workspace_file() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8Path::new("project/src/pnpm-workspace.yaml").into(),
+            b"catalog:\n  react: 19.0.0\n".to_vec(),
+        );
+
+        let catalog = find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js"))
+            .expect("catalog should be parsed");
+        let default = catalog.default.expect("default catalog present");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+    }
+
+    #[test]
+    fn no_catalog_when_workspace_missing() {
+        let fs = MemoryFileSystem::default();
+        assert!(find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js")).is_none());
     }
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              { "kind": "bare", "source": "**/*.css" },
+              ":BLANK_LINE:",
+              { "kind": "!bare" },
+              ":BLANK_LINE:",
+              { "kind": "bare" }
+            ],
+            "sortBareImports": true
+          }
+        }
+      }
+    }
+  }
+}

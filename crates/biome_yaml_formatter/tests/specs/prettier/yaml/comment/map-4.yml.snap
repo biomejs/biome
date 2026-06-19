@@ -42,26 +42,39 @@ none(2):
 ```diff
 --- Prettier
 +++ Biome
-@@ -12,13 +12,17 @@
-   # none.comment
+@@ -1,24 +1,24 @@
+ before:
+ 
+-  # before.comment
++# before.comment
+ after:
+-  # after.comment
++# after.comment
+ 
+ before-after:
+ 
+-  # before-after.comment
++# before-after.comment
+ 
+ none:
+-  # none.comment
++# none.comment
  before(2 line):
  
-+
-   # before.comment
+-  # before.comment
++# before.comment
  after(2 line):
-   # after.comment
+-  # after.comment
++# after.comment
  
-+
  before-after(2 line):
  
-+
-   # before-after.comment
+-  # before-after.comment
++# before-after.comment
  
-+
  none(2):
 -  # none.comment
-+  # none.comment
-\ No newline at end of file
++# none.comment
 ```
 
 # Output
@@ -69,29 +82,26 @@ none(2):
 ```yml
 before:
 
-  # before.comment
+# before.comment
 after:
-  # after.comment
+# after.comment
 
 before-after:
 
-  # before-after.comment
+# before-after.comment
 
 none:
-  # none.comment
+# none.comment
 before(2 line):
 
-
-  # before.comment
+# before.comment
 after(2 line):
-  # after.comment
-
+# after.comment
 
 before-after(2 line):
 
-
-  # before-after.comment
-
+# before-after.comment
 
 none(2):
-  # none.comment```
+# none.comment
+```

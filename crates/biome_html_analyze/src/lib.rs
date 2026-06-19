@@ -4,22 +4,45 @@ mod a11y;
 mod assist;
 mod lint;
 mod registry;
+mod services;
 mod suppression_action;
 mod utils;
 
 pub use crate::registry::visit_registry;
+pub use crate::services::aria::{Aria, AriaServices};
+pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 use crate::suppression_action::HtmlSuppressionAction;
+
+/// Services available to HTML lint rules.
+#[derive(Default)]
+pub struct HtmlAnalyzerServices {
+    pub module_db: Option<ProjectDatabase>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl std::fmt::Debug for HtmlAnalyzerServices {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HtmlAnalyzerServices")
+            .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("project_layout", &self.project_layout)
+            .finish()
+    }
+}
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     to_analyzer_suppressions,
 };
+use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
+use biome_module_graph::ProjectDatabase;
+use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
 
@@ -37,13 +60,22 @@ pub fn analyze<'a, F, B>(
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, source_type, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        |_| {},
+        options,
+        source_type,
+        html_services,
+        emit_signal,
+    )
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -58,6 +90,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -102,6 +135,13 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(Arc::new(AriaRoles));
+    if let Some(module_db) = html_services.module_db {
+        services.insert_service(module_db);
+    }
+    if let Some(project_layout) = html_services.project_layout {
+        services.insert_service(project_layout);
+    }
 
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
@@ -137,7 +177,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_html_parser::parse_html;
-    use biome_html_syntax::HtmlFileSource;
+    use biome_languages::HtmlFileSource;
     use biome_rowan::TextRange;
     use std::slice;
 
@@ -168,6 +208,7 @@ mod tests {
             },
             &options,
             HtmlFileSource::html(),
+            crate::HtmlAnalyzerServices::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

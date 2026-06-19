@@ -208,6 +208,7 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlAttributeSingleTextExpression
+	| SvelteTemplateAttributeValue
 	| VueVForValue
 
 
@@ -226,6 +227,21 @@ HtmlAttributeSingleTextExpression =
 	'{'
 	expression: HtmlTextExpression
 	'}'
+
+// <a style="top: {top}px">
+//          ^^^^^^^^^^^^^^
+SvelteTemplateAttributeValue =
+	l_quote: ('"' | '\'')
+	elements: SvelteTemplateElementList
+	r_quote: ('"' | '\'')
+
+SvelteTemplateElementList = AnySvelteTemplateElement*
+
+AnySvelteTemplateElement =
+	SvelteTemplateChunkElement
+	| HtmlAttributeSingleTextExpression
+
+SvelteTemplateChunkElement = 'html_template_chunk'
 
 // ==================================
 // Svelte
@@ -416,12 +432,20 @@ AnySvelteBindingAssignmentBinding =
 	SvelteName
 	| AnySvelteDestructuredName
 	| SvelteRestBinding
+	| SvelteRenameBinding
 
 /// { ...rest }
 ///   ^^^^^^^
 SvelteRestBinding =
  '...'
  name: SvelteName
+
+/// { component: Filter }
+///   ^^^^^^^^^^^^^^^^^^
+SvelteRenameBinding =
+ key: SvelteName
+ ':'
+ name: AnySvelteBindingAssignmentBinding
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^

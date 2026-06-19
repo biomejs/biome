@@ -6,7 +6,7 @@ use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Default)]
 struct FormatSemanticModelOptions;
@@ -105,13 +105,13 @@ impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
         write!(
             f,
             [
-                text(resolved.as_str(), selector.range(root).start()),
+                text(resolved.as_str(), Some(selector.range(root).start())),
                 token(":"),
                 space(),
                 &selector.specificity(),
                 space(),
                 token(" @ "),
-                text(range.as_str(), TextSize::default()),
+                text(range.as_str(), None),
             ]
         )
     }
@@ -123,13 +123,13 @@ impl Format<FormatSemanticModelContext> for Specificity {
             f,
             [
                 token("("),
-                text(self.0.to_string().as_str(), TextSize::default()),
+                text(self.0.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.1.to_string().as_str(), TextSize::default()),
+                text(self.1.to_string().as_str(), None),
                 token(","),
                 space(),
-                text(self.2.to_string().as_str(), TextSize::default()),
+                text(self.2.to_string().as_str(), None),
                 token(")")
             ]
         )
@@ -140,7 +140,7 @@ impl Format<FormatSemanticModelContext> for Specificity {
 mod tests {
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     #[ignore]
     #[test]

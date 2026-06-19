@@ -9,7 +9,7 @@ use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
@@ -55,7 +55,8 @@ fn quick_test() {
         .with_file_path(file_path.clone())
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
-        );
+        )
+        .with_working_directory(fs.working_directory.clone());
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));

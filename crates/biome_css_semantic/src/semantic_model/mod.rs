@@ -33,7 +33,7 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
 #[cfg(test)]
 mod tests {
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
     use biome_rowan::TextRange;
 
     #[test]
@@ -57,6 +57,33 @@ mod tests {
         assert_eq!(rule.child_ids.len(), 0);
         assert_eq!(rule.parent_id, None);
     }
+
+    #[test]
+    fn test_composes_property_with_multiple_values() {
+        let parse = parse_css(
+            r#".foo {
+  composes: classA from "./a.css", classB from "./b.css";
+}"#,
+            CssFileSource::new_css_modules(),
+            CssParserOptions::default().allow_css_modules(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
+
+        assert_eq!(rule.declarations.len(), 2);
+        assert!(matches!(
+            rule.declarations[0].value(),
+            crate::model::CssPropertyInitialValue::Composes(_)
+        ));
+        assert!(matches!(
+            rule.declarations[1].value(),
+            crate::model::CssPropertyInitialValue::Composes(_)
+        ));
+    }
+
     #[test]
     fn test_nested_selector() {
         let parse = parse_css(
@@ -276,7 +303,7 @@ mod tests {
 mod specificity_tests {
     use crate::model::{SemanticModel, Specificity};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_syntax::CssFileSource;
+    use biome_languages::CssFileSource;
 
     fn to_semantic_model(source: &str) -> SemanticModel {
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());

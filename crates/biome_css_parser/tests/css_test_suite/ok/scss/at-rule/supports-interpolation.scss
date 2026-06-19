@@ -1,0 +1,29 @@
+@supports #{"(display: grid)"} {
+  a {
+    display: grid;
+  }
+}
+
+@supports #{"(display: grid)"} and (gap: 1rem) {
+  a {
+    gap: 1rem;
+  }
+}
+
+@supports not #{"(display: flex)"} {
+  a {
+    display: block;
+  }
+}
+
+@supports (gap: 1rem) and #{"(display: grid)"} {
+  a {
+    gap: 1rem;
+  }
+}
+
+@supports (gap: 1rem) or #{"(display: flex)"} {
+  a {
+    display: flex;
+  }
+}

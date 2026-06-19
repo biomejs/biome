@@ -1,0 +1,192 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/collection.yml
+---
+
+# Input
+
+```yml
+a: # a.trailingComment
+  123
+  # implicitMappingValue
+
+? b
+  # explicitMappingKey
+: c
+  # explicitMappingValue
+
+d:
+  - 123
+  # sequence
+
+e:
+  - 123
+    # sequenceItem
+
+f:
+  - a
+  # b.leadingComments
+  - b
+    # b.endComments
+  - c
+    # c.endComments
+  # sequence.endComments
+# documentBody.children
+
+empty_content:
+  # hello world
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,6 +3,7 @@
+ ? b
+   # explicitMappingKey
+ : c
++  
+ 
+ d:
+   - 123
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,97 +1,96 @@
+ [
+   source_position(0),
+   "a",
++  line_suffix([" ", source_position(3), "# a.trailingComment"]),
++  expand_parent,
+   source_position(1),
+   ": ",
+-  source_position(3),
++  source_position(25),
+   "123",
+-  line_suffix([
+-    " ",
+-    source_position(7),
+-    "# a.trailingComment # implicitMappingValue"
+-  ]),
++  line_suffix([" ", source_position(31), "# implicitMappingValue"]),
+   expand_parent,
+   empty_line,
+   verbatim([
+-    source_position(51),
++    source_position(55),
+     "? b
+   # explicitMappingKey
+-: c"
++: c
++  "
+   ]),
+   empty_line,
+-  source_position(86),
++  source_position(112),
+   "d",
+-  source_position(87),
++  source_position(113),
+   ":",
+   indent([
+     hard_line_break,
+-    source_position(91),
++    source_position(117),
+     "- ",
+-    align(2, [source_position(93), "123"])
++    align(2, [source_position(119), "123"])
+   ]),
+   hard_line_break,
+-  source_position(97),
++  source_position(125),
+   "# sequence",
+   empty_line,
+-  source_position(109),
++  source_position(137),
+   "e",
+-  source_position(110),
++  source_position(138),
+   ":",
+   indent([
+     hard_line_break,
+-    source_position(114),
++    source_position(142),
+     "- ",
+     align(2, [
+-      source_position(116),
++      source_position(144),
+       "123",
+-      line_suffix([" ", source_position(120), "# sequenceItem"]),
++      line_suffix([" ", source_position(152), "# sequenceItem"]),
+       expand_parent
+     ])
+   ]),
+   empty_line,
+-  source_position(136),
++  source_position(168),
+   "f",
+-  source_position(137),
++  source_position(169),
+   ":",
+   indent([
+     hard_line_break,
+-    source_position(141),
++    source_position(173),
+     "- ",
+-    align(2, [source_position(143), "a"]),
++    align(2, [source_position(175), "a"]),
+     hard_line_break,
+-    source_position(147),
++    source_position(179),
+     "# b.leadingComments",
+     hard_line_break,
+-    source_position(169),
++    source_position(201),
+     "- ",
+     align(2, [
+-      source_position(171),
++      source_position(203),
+       "b",
+-      line_suffix([" ", source_position(173), "# b.endComments"]),
++      line_suffix([" ", source_position(209), "# b.endComments"]),
+       expand_parent
+     ]),
+     hard_line_break,
+-    source_position(191),
++    source_position(227),
+     "- ",
+     align(2, [
+-      source_position(193),
++      source_position(229),
+       "c",
+-      line_suffix([" ", source_position(195), "# c.endComments"]),
++      line_suffix([" ", source_position(235), "# c.endComments"]),
+       expand_parent
+     ])
+   ]),
+   hard_line_break,
+-  source_position(211),
++  source_position(253),
+   "# sequence.endComments",
+   hard_line_break,
+-  source_position(234),
++  source_position(276),
+   "# documentBody.children",
+   empty_line,
+-  source_position(259),
++  source_position(301),
+   "empty_content",
+-  source_position(272),
++  source_position(314),
+   ":",
+-  line_suffix([hard_line_break, source_position(274), "# hello world"]),
++  line_suffix([hard_line_break, source_position(318), "# hello world"]),
+   expand_parent,
+   hard_line_break
+ ]
+\ No newline at end of file
+
+```

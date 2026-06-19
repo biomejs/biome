@@ -28,7 +28,6 @@ biome_console              = { workspace = true }
 biome_deserialize          = { workspace = true }
 biome_deserialize_macros   = { workspace = true }
 biome_diagnostics          = { workspace = true }
-biome_flags                = { workspace = true }
 biome_formatter            = { workspace = true, features = ["serde"] }
 biome_glob                 = { workspace = true, features = ["schema"] }
 biome_html_formatter       = { workspace = true, features = ["serde"] }
@@ -41,6 +40,7 @@ biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
+biome_yaml_syntax          = { workspace = true, optional = true }
 bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
 regex                      = { workspace = true }
@@ -63,7 +63,7 @@ mimalloc = { workspace = true }
 cli          = ["dep:bpaf"]
 lang_graphql = ["biome_configuration_macros/lang_graphql"]
 lang_md      = []
-lang_yaml    = []
+lang_yaml    = ["dep:biome_yaml_syntax"]
 plugins      = ["dep:biome_plugin_loader"]
 schema       = [
   "biome_analyze/schema",
@@ -75,6 +75,7 @@ schema       = [
   "biome_json_syntax/schema",
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
+  "biome_yaml_syntax/schema",
   "dep:schemars",
   "lang_graphql",
   "plugins",

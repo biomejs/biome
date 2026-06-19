@@ -153,7 +153,7 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
             JsSyntaxKind::JS_IF_STATEMENT => return Some("if statement"),
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => return Some("ternary expression"),
             JsSyntaxKind::JS_CASE_CLAUSE | JsSyntaxKind::JS_DEFAULT_CLAUSE => {
-                return Some("switch case")
+                return Some("switch case");
             }
 
             // Logical expressions that short-circuit
@@ -178,10 +178,14 @@ fn is_in_conditional_context(call: &JsCallExpression) -> Option<&'static str> {
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn get_call_expressions(source: &str) -> Vec<JsCallExpression> {
-        let parsed = parse(source, JsFileSource::js_module(), JsParserOptions::default());
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
         parsed
             .tree()
             .syntax()

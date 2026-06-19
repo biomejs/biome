@@ -6,9 +6,10 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsModuleItem,
     AnyJsModuleSource, AnyJsRoot, AnyJsStatement, AnyTsExternalModuleDeclarationBody,
-    AnyTsIdentifierBinding, AnyTsModuleName, AnyTsVariableAnnotation, JsFileSource, JsLanguage,
-    JsModuleItemList, JsSyntaxKind, JsVariableDeclaration,
+    AnyTsIdentifierBinding, AnyTsModuleName, AnyTsVariableAnnotation, JsLanguage, JsModuleItemList,
+    JsSyntaxKind, JsVariableDeclaration,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeListIterator, Text, TextRange, TokenText};
 
 /// Declaration scope path recorded by the collector.

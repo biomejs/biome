@@ -1,4 +1,7 @@
-use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
+use super::{
+    EditorCapabilities, ParsedLangAndSetup, SearchCapabilities,
+    parse_lang_and_setup_from_script_opening_tag,
+};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -6,13 +9,15 @@ use crate::file_handlers::{
     ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, PullActionsResult};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
+use biome_js_syntax::{JsLanguage, TextRange, TextSize};
+use biome_languages::javascript::JsEmbeddingKind;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -78,7 +83,7 @@ impl VueFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue {
+                        .with_embedding_kind(JsEmbeddingKind::Vue {
                             setup,
                             is_source: true,
                             event_handler: false,
@@ -127,6 +132,10 @@ impl ExtensionHandler for VueFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

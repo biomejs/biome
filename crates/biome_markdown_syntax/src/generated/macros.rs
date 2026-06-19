@@ -60,10 +60,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHtmlBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_INDENT => {
-                    let $pattern = unsafe { $crate::MdIndent::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK => {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body
@@ -157,10 +153,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdSetextHeader::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_SOFT_BREAK => {
-                    let $pattern = unsafe { $crate::MdSoftBreak::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_TEXTUAL => {
                     let $pattern = unsafe { $crate::MdTextual::new_unchecked(node) };
                     $body
@@ -179,6 +171,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::MdBogusBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_BOGUS_BULLET => {
+                    let $pattern = unsafe { $crate::MdBogusBullet::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_BLOCK_LIST => {

@@ -1,3 +1,4 @@
+use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
@@ -71,6 +72,10 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Whether to enable type inference when finalizing the module info
     infer_types: bool,
+
+    /// CSS class references from JSX `className` or `class` attributes
+    /// (static string literals only).
+    pub(super) referenced_classes: Vec<CssClassReference>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -139,6 +144,7 @@ impl JsModuleInfoCollector {
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
             infer_types: false,
+            referenced_classes: Vec::new(),
         }
     }
 
@@ -402,6 +408,29 @@ impl JsModuleInfoCollector {
                 let ty = self.infer_type(&node, binding.clone(), scope_id, semantic_model);
                 self.bindings[index].ty = ty;
             }
+        }
+
+        // A set of same-name function overloads becomes an object with one call
+        // signature per declaration, placed on the binding that name resolution
+        // returns for the set (its last one) so a call site can select among them.
+        let carriers: Vec<(usize, Vec<TypeMember>)> = semantic_model
+            .scopes()
+            .flat_map(|scope| scope.overload_sets())
+            .map(|set| {
+                let signatures = set
+                    .iter()
+                    .map(|id| TypeMember {
+                        kind: TypeMemberKind::CallSignature,
+                        ty: self.bindings[id.index()].ty.clone(),
+                    })
+                    .collect();
+                let representative = set.last().expect("overload set has 2+ entries").index();
+                (representative, signatures)
+            })
+            .collect();
+        for (representative, signatures) in carriers {
+            let ty = self.reference_to_owned_data(TypeData::object_with_members(signatures.into()));
+            self.bindings[representative].ty = ty;
         }
     }
 
@@ -1084,6 +1113,7 @@ impl JsModuleInfo {
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.infer_types,
+            referenced_classes: collector.referenced_classes,
         }))
     }
 }

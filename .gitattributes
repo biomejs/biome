@@ -19,6 +19,7 @@
 /crates/biome_css_analyze/src/{lint,assist,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+/crates/biome_css_analyze/src/baseline_data.rs linguist-generated=true text=auto eol=lf
 # JSON
 /crates/biome_json_formatter/src/json/any/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_json_analyze/src/{lint,assist,syntax}.rs linguist-generated=true text=auto eol=lf

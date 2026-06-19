@@ -1,5 +1,5 @@
 use crate::embed::types::{EmbedCandidate, GuestLanguage, TemplateTagKind};
-use crate::workspace::DocumentFileSource;
+use biome_languages::DocumentFileSource;
 
 /// A single embed detector. Entirely const-constructible.
 ///

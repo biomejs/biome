@@ -662,8 +662,11 @@ fn consume_blank_line(p: &mut MarkdownParser) {
 /// If the paragraph is followed by a setext heading underline (=== or ---),
 /// it becomes a setext heading instead.
 ///
-/// Grammar: MdParagraph = list: MdInlineItemList hard_line: MdHardLine?
+/// Grammar: MdParagraph = list: MdInlineItemList
 /// Grammar: MdSetextHeader = content: MdInlineItemList underline: 'md_setext_underline_literal'
+///
+/// Hard line breaks are inline items inside `list` (`AnyMdInline::MdHardLine`),
+/// not a paragraph-level slot.
 pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 

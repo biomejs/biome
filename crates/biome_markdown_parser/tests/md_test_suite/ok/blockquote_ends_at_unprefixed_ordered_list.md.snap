@@ -34,7 +34,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -57,7 +56,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -86,7 +84,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@2..3 "a" [] []
             1: MD_TEXTUAL@3..4
               0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
-          1: (empty)
     1: MD_ORDERED_LIST_ITEM@4..13
       0: MD_BULLET_LIST@4..13
         0: MD_BULLET@4..13
@@ -102,7 +99,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@8..12 "item" [] []
                 1: MD_TEXTUAL@12..13
                   0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-              1: (empty)
   2: EOF@13..13 "" [] []
 
 ```

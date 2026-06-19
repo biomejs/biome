@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: Block.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+import { Button } from "./Button.jsx";
+
+export function Block() {
+	return <div className="block"><Button /></div>;
+}
+
+```

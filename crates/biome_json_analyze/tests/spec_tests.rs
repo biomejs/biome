@@ -3,7 +3,8 @@ use biome_configuration::{ConfigurationSource, ExtendedConfigurations};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices};
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::JsonFileSource;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
@@ -202,7 +203,10 @@ pub(crate) fn analyze_and_snap(
 
     let mut code_fixes = Vec::new();
     let configuration_source = load_configuration_source(input_file);
-    let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<JsonLanguage>(input_file, working_directory, &mut diagnostics);
     let project_layout = project_layout_for_json_test(input_file);
     let services = JsonAnalyzeServices {
         file_source,

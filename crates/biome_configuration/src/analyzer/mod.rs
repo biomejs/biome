@@ -1,8 +1,10 @@
 pub mod assist;
 pub mod linter;
+pub mod presets;
 
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
+use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
@@ -429,6 +431,7 @@ impl Merge for RuleAssistPlainConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RuleAssistPlainConfiguration,
     /// Rule's options
     pub options: T,
@@ -470,6 +473,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// Rule's options
     #[serde(default)]
@@ -516,6 +520,7 @@ where
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
+    #[deserializable(required)]
     pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -940,12 +945,14 @@ impl<'de> serde::Deserialize<'de> for DomainSelector {
 
 pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> {
     /// Retrieves the recommended rules
-    fn is_recommended_true(&self) -> bool;
+    fn is_preset_recommended(&self) -> bool;
     fn is_recommended_unset(&self) -> bool;
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     /// Checks if, given a rule name, matches one of the rules contained in this category
     fn has_rule(rule_name: &str) -> Option<&'static str>;
+    /// Returns the rule filters that belong to the given analyzer preset
+    fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>];
     /// Select preset rules
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
@@ -956,7 +963,7 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     );
     fn get_rule_configuration(
@@ -1117,7 +1124,7 @@ where
 
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         match self {
@@ -1126,7 +1133,7 @@ where
                     enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
-            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
+            Self::Group(group) => group.collect_preset_rules(parent_preset, enabled_rules),
         }
     }
 }

@@ -3,9 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
-};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
@@ -83,7 +82,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAnchorContent",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],
+        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

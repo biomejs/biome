@@ -1,15 +1,16 @@
 use crate::WorkspaceError;
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
@@ -103,6 +104,10 @@ impl ExtensionHandler for AstroFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

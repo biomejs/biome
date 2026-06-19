@@ -8,9 +8,10 @@ use std::path::{Component, Path, PathBuf};
 use anyhow::{Context, anyhow, bail};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsBindingPattern, AnyJsExpression, AnyJsLiteralExpression, JsFileSource,
+    AnyJsArrayElement, AnyJsBindingPattern, AnyJsExpression, AnyJsLiteralExpression,
     JsVariableDeclarator,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text, TokenText};
 use biome_string_case::StrLikeExtension;
 use git2::{FetchOptions, Oid, Repository, ResetType};

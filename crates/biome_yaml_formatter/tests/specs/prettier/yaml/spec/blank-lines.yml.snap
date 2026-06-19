@@ -27,15 +27,7 @@ text: |
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,12 @@
- foo: 1
- 
- bar: 2
--
-+    
- text: |
-   a
-     
+@@ -8,5 +8,5 @@
    b
  
    c
@@ -50,7 +42,7 @@ text: |
 foo: 1
 
 bar: 2
-    
+
 text: |
   a
     

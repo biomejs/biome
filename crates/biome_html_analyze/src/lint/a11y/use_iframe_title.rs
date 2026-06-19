@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useIframeTitle",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same()],
+        sources: &[RuleSource::EslintJsxA11y("iframe-has-title").inspired(), RuleSource::HtmlEslint("require-frame-title").same()],
         recommended: true,
         severity: Severity::Error,
     }

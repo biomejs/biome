@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-single-a.vue
+---
+# Input
+```vue
+<script lang="ts" setup>
+const emit = defineEmits([]), model = defineModel(), count = ref(0), props = defineProps();
+</script>
+
+<template><div /></template>
+
+```
+
+# Diagnostics
+```
+invalid-single-a.vue:2:70 lint/style/useVueDefineMacrosOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i defineProps macro is out of order.
+  
+    1 │ <script lang="ts" setup>
+  > 2 │ const emit = defineEmits([]), model = defineModel(), count = ref(0), props = defineProps();
+      │                                                                      ^^^^^^^^^^^^^^^^^^^^^
+    3 │ </script>
+    4 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+
+```

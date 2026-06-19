@@ -28,4 +28,4 @@ info: yaml/flow/nested_flow.yaml
 
 ## Unimplemented nodes/tokens
 
-"{\n  a: [1, {'c': d}, 3],\n  e: {f: g},\n}\n" => 0..40
+"{\n  a: [1, {'c': d}, 3],\n  e: {f: g},\n}" => 0..39

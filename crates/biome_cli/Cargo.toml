@@ -26,7 +26,7 @@ biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["bpaf", "std"] }
+biome_diagnostics        = { workspace = true, features = ["bpaf", "notify", "std"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
@@ -44,8 +44,10 @@ biome_json_factory       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
+biome_package            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
@@ -54,26 +56,23 @@ biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
+notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
 quick-junit              = "0.6.0"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
+reqwest                  = { workspace = true, features = ["blocking", "rustls-tls"] }
 rustc-hash               = { workspace = true }
+self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = { workspace = true, features = [
-  "io-std",
-  "io-util",
-  "macros",
-  "net",
-  "rt",
-  "rt-multi-thread",
-  "sync",
-  "time"
-] }
+tokio                    = {
+  workspace = true,
+  features  = ["io-std", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"]
+}
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
@@ -81,6 +80,7 @@ tracing-tree             = "0.4.1"
 
 [dev-dependencies]
 biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
 biome_json_formatter = { path = "../biome_json_formatter" }
 biome_json_parser    = { path = "../biome_json_parser" }

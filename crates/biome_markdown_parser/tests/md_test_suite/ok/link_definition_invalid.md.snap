@@ -45,7 +45,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@101..102 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@102..103 "\n" [] [],
@@ -89,7 +88,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@184..185 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@185..186 "\n" [] [],
@@ -127,7 +125,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@257..258 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@258..259 "\n" [] [],
@@ -171,7 +168,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@328..329 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@329..330 "\n" [] [],
@@ -200,7 +196,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@362..363 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@363..363 "" [] [],
@@ -223,7 +218,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@58..101 "They should fall back to paragraph parsing." [] []
         3: MD_TEXTUAL@101..102
           0: MD_TEXTUAL_LITERAL@101..102 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@102..103
       0: NEWLINE@102..103 "\n" [] []
     2: MD_PARAGRAPH@103..185
@@ -252,7 +246,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@166..184 "http://example.com" [] []
         11: MD_TEXTUAL@184..185
           0: MD_TEXTUAL_LITERAL@184..185 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@185..186
       0: NEWLINE@185..186 "\n" [] []
     4: MD_PARAGRAPH@186..258
@@ -277,7 +270,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@235..257 " /url trailing garbage" [] []
         9: MD_TEXTUAL@257..258
           0: MD_TEXTUAL_LITERAL@257..258 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@258..259
       0: NEWLINE@258..259 "\n" [] []
     6: MD_PARAGRAPH@259..329
@@ -306,7 +298,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@309..328 " /url \"title\" extra" [] []
         11: MD_TEXTUAL@328..329
           0: MD_TEXTUAL_LITERAL@328..329 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@329..330
       0: NEWLINE@329..330 "\n" [] []
     8: MD_PARAGRAPH@330..363
@@ -326,7 +317,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@357..362 " /url" [] []
         5: MD_TEXTUAL@362..363
           0: MD_TEXTUAL_LITERAL@362..363 "\n" [] []
-      1: (empty)
   2: EOF@363..363 "" [] []
 
 ```

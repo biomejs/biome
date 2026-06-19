@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "is-number": "0.0.0",
+    "object.entries": "0.0.0",
+    "npm-run-all": "0.0.0",
+    "sort-object": "0.0.0"
+  }
+}

@@ -30,6 +30,7 @@ biome_css_formatter          = { path = "./crates/biome_css_formatter", version 
 biome_css_parser             = { path = "./crates/biome_css_parser", version = "0.5.7" }
 biome_css_semantic           = { path = "./crates/biome_css_semantic", version = "0.0.0" }
 biome_css_syntax             = { path = "./crates/biome_css_syntax", version = "0.5.7" }
+biome_db                     = { path = "./crates/biome_db", version = "0.0.1" }
 biome_deserialize            = { path = "./crates/biome_deserialize", version = "0.6.0" }
 biome_deserialize_macros     = { path = "./crates/biome_deserialize_macros", version = "0.6.0" }
 biome_diagnostics            = { path = "./crates/biome_diagnostics", version = "0.5.7" }
@@ -72,6 +73,7 @@ biome_json_formatter         = { path = "./crates/biome_json_formatter", version
 biome_json_parser            = { path = "./crates/biome_json_parser", version = "0.5.7" }
 biome_json_syntax            = { path = "./crates/biome_json_syntax", version = "0.5.7" }
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
+biome_languages              = { path = "./crates/biome_languages/", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
@@ -82,6 +84,7 @@ biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", versio
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
 biome_migrate                = { path = "./crates/biome_migrate" }
 biome_module_graph           = { path = "./crates/biome_module_graph", version = "0.0.1" }
+biome_module_replacements    = { path = "./crates/biome_module_replacements", version = "0.5.7" }
 biome_package                = { path = "./crates/biome_package", version = "0.5.7" }
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
@@ -123,10 +126,11 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
-insta                        = "1.47.2"
+insta                        = "1.48.0"
 jiff                         = "0.2.28"
 libc                         = "0.2.186"
 mimalloc                     = "0.1.48"
+notify                       = "8.2.0"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
@@ -137,15 +141,17 @@ quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.45"
 rayon                        = "1.12.0"
-regex                        = "1.12.3"
+regex                        = "1.12.4"
+reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.2"
+salsa                        = "0.26.2"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.150"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.15.1", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"

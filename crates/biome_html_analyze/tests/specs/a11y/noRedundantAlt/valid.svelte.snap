@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+
+<!-- Fully dynamic alt: variable name is irrelevant, runtime value is unknown -->
+<img alt={photo} />
+<img alt={image} />
+<img alt="{altText}" />
+<!-- Static prefix contains no redundant words -->
+<img alt="portrait of {person}" />
+<img alt="{description} taken in {year}" />
+
+```

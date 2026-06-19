@@ -27,7 +27,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@27..28 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@28..29 "\n" [] [],
@@ -38,7 +37,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@29..55 "This is another paragraph." [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@55..55 "" [] [],
@@ -57,14 +55,12 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@0..27 "This is a simple paragraph." [] []
         1: MD_TEXTUAL@27..28
           0: MD_TEXTUAL_LITERAL@27..28 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@28..29
       0: NEWLINE@28..29 "\n" [] []
     2: MD_PARAGRAPH@29..55
       0: MD_INLINE_ITEM_LIST@29..55
         0: MD_TEXTUAL@29..55
           0: MD_TEXTUAL_LITERAL@29..55 "This is another paragraph." [] []
-      1: (empty)
   2: EOF@55..55 "" [] []
 
 ```

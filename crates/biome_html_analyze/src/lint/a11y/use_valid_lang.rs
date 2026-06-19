@@ -3,8 +3,8 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_aria_metadata::{is_valid_country, is_valid_language, is_valid_script};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlFileSource;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_lang::UseValidLangOptions;
 
@@ -38,7 +38,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useValidLang",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("lang").same()],
+        sources: &[RuleSource::EslintJsxA11y("lang").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -132,13 +132,12 @@ impl Rule for UseValidLang {
                 }
             }
 
-            (Some(language), None, None)
-                if !is_valid_language(language) => {
-                    return Some(UseValidLangState {
-                        attribute_range: attribute_value.range(),
-                        invalid_kind: InvalidKind::Language,
-                    });
-                }
+            (Some(language), None, None) if !is_valid_language(language) => {
+                return Some(UseValidLangState {
+                    attribute_range: attribute_value.range(),
+                    invalid_kind: InvalidKind::Language,
+                });
+            }
             _ => {}
         }
 

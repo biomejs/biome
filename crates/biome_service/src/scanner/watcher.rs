@@ -450,7 +450,7 @@ impl Watcher {
         }
     }
 
-    #[tracing::instrument(level = "debug", skip(self, workspace))]
+    #[tracing::instrument(level = "debug", skip(self, workspace, paths))]
     fn watch_folders(
         &mut self,
         workspace: &impl WorkspaceWatcherBridge,

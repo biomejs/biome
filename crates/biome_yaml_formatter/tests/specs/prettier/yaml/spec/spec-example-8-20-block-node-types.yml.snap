@@ -21,10 +21,8 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,6 @@
--- "flow in block"
-+-
-+  "flow in block"
+@@ -1,5 +1,5 @@
+ - "flow in block"
  - >
 -  Block scalar
 + Block scalar
@@ -36,8 +34,7 @@ info: yaml/spec/spec-example-8-20-block-node-types.yml
 # Output
 
 ```yml
--
-  "flow in block"
+- "flow in block"
 - >
  Block scalar
 - !!map # Block collection
