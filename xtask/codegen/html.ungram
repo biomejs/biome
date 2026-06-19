@@ -75,6 +75,7 @@ AnyHtmlElement =
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
+	| HtmlProcessingInstruction
 	| HtmlBogusElement
 
 AnyHtmlContent =
@@ -173,6 +174,14 @@ AstroFrontmatterElement =
 
 AstroEmbeddedContent =
 	content: 'html_literal'?
+
+// <?something href="something" ?>
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+HtmlProcessingInstruction =
+  start: '<?'
+	target: AnyHtmlTagName
+	attributes: HtmlAttributeList
+  end: '?>'
 
 // ==================================
 // Attributes

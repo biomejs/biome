@@ -19,29 +19,29 @@ info: html/comments/bogus.html
 +++ Biome
 @@ -1,2 +1,2 @@
 -<? hello ?>
-+< ? hello ?>
++<?hello ?>
  <!- world ->
 ```
 
 # Output
 
 ```html
-< ? hello ?>
+<?hello ?>
 <!- world ->
 ```
 
 # Errors
 ```
-bogus.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+bogus.html:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unescaped `<` bracket character. Expected a tag or escaped character.
+  × Processing instruction name can't have a leading space.
   
   > 1 │ <? hello ?>
-      │ ^
+      │   ^
     2 │ <!- world ->
     3 │ 
   
-  i Replace this character with `&lt;` to escape it.
+  i Remove the leading space.
   
 bogus.html:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
