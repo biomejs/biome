@@ -1,11 +1,12 @@
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingProperty, AnySvelteDirective,
-    HtmlElement, HtmlFileSource, HtmlRoot, HtmlSelfClosingElement,
+    HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
     JsxReferenceIdentifier,
 };
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 
 #[derive(Debug, Clone, Default)]
