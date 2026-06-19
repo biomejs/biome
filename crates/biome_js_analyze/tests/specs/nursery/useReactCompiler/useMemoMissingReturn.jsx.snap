@@ -41,3 +41,24 @@ useMemoMissingReturn.jsx:6:27 lint/nursery/useReactCompiler ━━━━━━�
   
 
 ```
+
+```
+useMemoMissingReturn.jsx:8:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This memoization dependency list is incomplete or contains unnecessary values.
+  
+     6 │     const value = useMemo(() => {
+     7 │         props.value;
+   > 8 │     }, [props.value]);
+       │         ^^^^^^^^^^^
+     9 │ 
+    10 │     return <div>{value}</div>;
+  
+  i Missing dependencies can produce stale values, while extra dependencies can cause avoidable recomputation.
+  
+  i Include every value used by the memoized callback, and remove values that do not affect it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

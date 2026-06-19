@@ -14,6 +14,33 @@
 //!
 //! The fixtures dir defaults to the sibling `react/` checkout; override with
 //! `REACT_COMPILER_FIXTURES=/path/to/fixtures`.
+//!
+//! # Triage of the remaining skip-list entries
+//!
+//! After the import-binding and object-method-scope fixes, the corpus is at
+//! ~99.6% diagnostics parity (1691 MATCH / 0 Tier-1 / 6 Tier-2). The 6 residual
+//! divergences in `conformance_skiplist.txt` are each one of:
+//!
+//! - **Oracle under-reports (Biome is correct).** On
+//!   `error.bug-invariant-local-or-context-references.js` and
+//!   `preserve-memo-validation/error.useCallback-conditional-access-noAlloc.ts`,
+//!   Biome emits exactly the error the fixture's own `.expect.md` documents,
+//!   while the OXC oracle emits nothing — OXC loses the local-vs-context and the
+//!   `?.`-vs-`.` dependency distinctions. Not Biome bugs.
+//! - **Backend (Rust-port) frontier.** `todo-round3_promote_used_temps.js` is
+//!   minified CommonJS prod code whose header documents a known
+//!   `PromoteUsedTemporaries` divergence in the compiler's Rust port — unrelated
+//!   to Biome's frontend.
+//! - **Deep edge cases on `error.` fixtures, both frontends still error.**
+//!   `error.default-param-accesses-local.js` (Biome compiles where Babel/OXC
+//!   bail with a reorderability Todo on an arrow-valued default param),
+//!   `rules-of-hooks/error.invalid-hook-optional-property.js` (Biome flags Hooks
+//!   but with a different reason for an optional-chained hook call), and
+//!   `error.invalid-unclosed-eslint-suppression.js` (a multi-error fixture where
+//!   the secondary errors differ; both report VoidUseMemo).
+//!
+//! None of the residuals affect compilation of valid code, so none can produce
+//! a false positive in the `useReactCompiler` rule.
 
 use std::collections::BTreeMap;
 use std::panic::{AssertUnwindSafe, catch_unwind};

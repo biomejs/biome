@@ -1,7 +1,8 @@
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use indexmap::IndexMap;
 use react_compiler_ast::scope::{
-    BindingData, BindingId, BindingKind, ScopeData, ScopeId, ScopeInfo, ScopeKind,
+    BindingData, BindingId, BindingKind, ImportBindingData, ImportBindingKind, ScopeData, ScopeId,
+    ScopeInfo, ScopeKind,
 };
 use std::collections::HashMap;
 
@@ -23,7 +24,7 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
             declaration_type: declaration_type(&declaration),
             declaration_start: Some(declaration_start),
             declaration_node_id: Some(node_id_from_start(declaration_start)),
-            import: None,
+            import: import_binding_of(&declaration),
         });
     }
 
@@ -155,6 +156,58 @@ fn node_id_from_start(start: u32) -> u32 {
     start.saturating_add(1)
 }
 
+/// Extract import metadata for a binding declared by an `import` statement.
+///
+/// The compiler resolves a module-scope reference to a builtin type (e.g.
+/// `useEffect`/`useState`/`useRef`) only when the binding carries import info
+/// pointing at a known React module. Without it, an imported hook is treated as
+/// a generic module-local custom hook and every type-based validation (the
+/// effect family, setState/memo-dependency inference, ref access) silently skips
+/// it. Returns `None` for non-import bindings.
+fn import_binding_of(decl_node: &biome_js_syntax::JsSyntaxNode) -> Option<ImportBindingData> {
+    use biome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::{JsImport, JsModuleSource, JsNamedImportSpecifier};
+    use biome_rowan::AstNode;
+
+    let (kind, imported) = decl_node
+        .ancestors()
+        .find_map(|ancestor| match ancestor.kind() {
+            JS_DEFAULT_IMPORT_SPECIFIER => Some((ImportBindingKind::Default, None)),
+            JS_NAMESPACE_IMPORT_SPECIFIER => Some((ImportBindingKind::Namespace, None)),
+            // `import { foo }` — the imported name equals the local binding name.
+            JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => Some((
+                ImportBindingKind::Named,
+                Some(decl_node.text_trimmed().to_string()),
+            )),
+            // `import { foo as bar }` — the imported name is the original `foo`.
+            JS_NAMED_IMPORT_SPECIFIER => {
+                let imported = JsNamedImportSpecifier::unwrap_cast(ancestor)
+                    .name()
+                    .ok()
+                    .and_then(|name| name.as_js_literal_export_name()?.inner_string_text().ok())
+                    .map(|text| text.to_string());
+                Some((ImportBindingKind::Named, imported))
+            }
+            _ => None,
+        })?;
+
+    let source = decl_node
+        .ancestors()
+        .find_map(JsImport::cast)?
+        .syntax()
+        .descendants()
+        .find_map(JsModuleSource::cast)?
+        .inner_string_text()
+        .ok()?
+        .to_string();
+
+    Some(ImportBindingData {
+        source,
+        kind,
+        imported,
+    })
+}
+
 /// Classify a binding into the compiler's `BindingKind`.
 ///
 /// `JsDeclarationKind` collapses `let`/`const`/`var` into a single `Value`
@@ -230,7 +283,10 @@ fn scope_kind(node: &biome_js_syntax::JsSyntaxNode) -> ScopeKind {
         | JS_ARROW_FUNCTION_EXPRESSION
         | JS_METHOD_CLASS_MEMBER
         | JS_GETTER_CLASS_MEMBER
-        | JS_SETTER_CLASS_MEMBER => ScopeKind::Function,
+        | JS_SETTER_CLASS_MEMBER
+        | JS_METHOD_OBJECT_MEMBER
+        | JS_GETTER_OBJECT_MEMBER
+        | JS_SETTER_OBJECT_MEMBER => ScopeKind::Function,
         JS_CLASS_DECLARATION | JS_CLASS_EXPRESSION => ScopeKind::Class,
         JS_FOR_STATEMENT | JS_FOR_IN_STATEMENT | JS_FOR_OF_STATEMENT => ScopeKind::For,
         JS_SWITCH_STATEMENT => ScopeKind::Switch,
