@@ -21,4 +21,8 @@
   <!-- Custom components may render accessible content -->
   <a><Image alt="description" /></a>
   <a><CustomIcon /></a>
+
+  <!-- <slot> renders content provided by the parent component -->
+  <a><slot /></a>
+  <a><slot></slot></a>
 </template>

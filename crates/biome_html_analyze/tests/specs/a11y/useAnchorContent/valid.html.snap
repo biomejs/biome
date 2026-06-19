@@ -39,4 +39,7 @@ expression: valid.html
 <!-- Anchor with both aria-label and title -->
 <a aria-label="Home" title="Navigate home"></a>
 
+<!-- <slot> (web component) renders assigned nodes -->
+<a><slot></slot></a>
+
 ```
