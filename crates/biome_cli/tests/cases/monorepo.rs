@@ -815,3 +815,54 @@ fn plugins_from_root_config_work_in_child_config_extends_root() {
         result,
     ));
 }
+
+#[test]
+fn object_syntax_plugins_in_extended_config_work_from_declaring_config() {
+    let mut fs = TemporaryFs::new("object_syntax_plugins_in_extended_config_work");
+
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+
+    fs.create_file(
+        "packages/tools/biome.shared.jsonc",
+        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }"#,
+    );
+
+    fs.create_file(
+        "packages/tools/biome-plugins/no-object-assign.grit",
+        r#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    fs.create_file(
+        "packages/mobile/biome.json",
+        r#"{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }"#,
+    );
+    fs.create_file("packages/mobile/src/file.js", "Object.assign({}, a, b);\n");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                &format!("{}/packages/mobile/src/file.js", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "object_syntax_plugins_in_extended_config_work",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

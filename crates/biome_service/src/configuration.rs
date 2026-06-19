@@ -708,7 +708,24 @@ impl ConfigurationExt for Configuration {
                     },
                     "",
                 );
-                deserialized_configurations.push(deserialized)
+                let (mut config, diagnostics) = deserialized.consume();
+                if let Some(config) = config.as_mut() {
+                    let config_dir = extend_configuration_file_path
+                        .parent()
+                        .unwrap_or(external_resolution_base_path);
+                    if let Some(plugins) = config.plugins.as_mut() {
+                        plugins.normalize_object_relative_paths(config_dir);
+                    }
+                    if let Some(overrides) = config.overrides.as_mut() {
+                        for pattern in overrides.0.iter_mut() {
+                            if let Some(plugins) = pattern.plugins.as_mut() {
+                                // Normalize object-syntax plugin paths only
+                                plugins.normalize_object_relative_paths(config_dir);
+                            }
+                        }
+                    }
+                }
+                deserialized_configurations.push(Deserialized::new(config, diagnostics))
             }
         }
         Ok(deserialized_configurations)

@@ -7772,7 +7772,7 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"resolvePath\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
 				{ "description": "A plain path to the plugin.", "type": "string" },
 				{
@@ -7790,10 +7790,21 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"path": { "description": "The path to the plugin.", "type": "string" }
+				"path": { "description": "The path to the plugin.", "type": "string" },
+				"resolvePath": {
+					"description": "Controls how relative plugin paths are resolved.",
+					"anyOf": [
+						{ "$ref": "#/$defs/PluginResolvePath" },
+						{ "type": "null" }
+					]
+				}
 			},
 			"additionalProperties": false,
 			"required": ["path"]
+		},
+		"PluginResolvePath": {
+			"type": "string",
+			"enum": ["workspace", "config"]
 		},
 		"Plugins": {
 			"type": "array",

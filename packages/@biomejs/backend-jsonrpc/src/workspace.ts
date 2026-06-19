@@ -1077,13 +1077,14 @@ match these patterns.
 Can be either a plain path string or an object with path and options:
 
 ```json
-{
-  "plugins": [
-    "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] }
-  ]
-}
-``` 
+  {
+    "plugins": [
+      "simple-plugin.grit",
+    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] },
+    { "path": "./local-plugin.grit", "resolvePath": "config" }
+    ]
+  }
+  ``` 
 	 */
 export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
@@ -1348,6 +1349,10 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 	 * The path to the plugin.
 	 */
 	path: string;
+	/**
+	 * Controls how relative plugin paths are resolved.
+	 */
+	resolvePath?: PluginResolvePath;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -4015,6 +4020,7 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
+export type PluginResolvePath = "workspace" | "config";
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithNoDuplicateClassesOptions {
 	level: RuleAssistPlainConfiguration;
