@@ -27,12 +27,12 @@ use biome_js_syntax::{JsLanguage, TextSize};
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMember, JsonObjectValue};
 use biome_languages::{
     DocumentFileSource, HtmlFileSource,
     javascript::{JsEmbeddingKind, JsFileSource},
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstSeparatedList};
 use biome_ruledoc_utils::{AnalyzerServicesBuilder, CodeBlock, OptionsParsingMode};
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
@@ -591,17 +591,18 @@ fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
 ) -> JsonObjectValue {
     make::json_object_value(
         make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
-        make::json_member_list(
-            [make::json_member(
-                biome_json_syntax::AnyJsonMemberName::JsonMemberName(make::json_member_name(
-                    make::json_string_literal(name),
-                )),
-                make::token(biome_json_syntax::JsonSyntaxKind::COLON),
-                value.into(),
-            )],
-            [],
-        ),
+        make::json_member_list([make_member(name, value)], []),
         make::token(biome_json_syntax::JsonSyntaxKind::R_CURLY),
+    )
+}
+
+fn make_member<V: Into<AnyJsonValue>>(name: &str, value: V) -> JsonMember {
+    make::json_member(
+        biome_json_syntax::AnyJsonMemberName::JsonMemberName(make::json_member_name(
+            make::json_string_literal(name),
+        )),
+        make::token(biome_json_syntax::JsonSyntaxKind::COLON),
+        value.into(),
     )
 }
 
@@ -699,6 +700,27 @@ fn parse_rule_options(
             } else {
                 "actions"
             };
+            let parsed_options = make::json_object_value(
+                make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
+                make::json_member_list(
+                    [
+                        make_member(
+                            "level",
+                            make::json_string_value(make::json_string_literal("on")),
+                        ),
+                        // we extract the "options: {}" portion.
+                        parsed_options
+                            .as_json_object_value()
+                            .unwrap()
+                            .json_member_list()
+                            .first()
+                            .unwrap()
+                            .unwrap(),
+                    ],
+                    [make::token(biome_json_syntax::JsonSyntaxKind::COMMA)],
+                ),
+                make::token(biome_json_syntax::JsonSyntaxKind::R_CURLY),
+            );
             let synthetic_tree = make_json_object_with_single_member(
                 lint_or_assist,
                 make_json_object_with_single_member(
