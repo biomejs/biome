@@ -17,9 +17,8 @@ use biome_html_syntax::{
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
-    HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
-     SvelteName, VueDirective, VueVBindShorthandDirective,
-    VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression, SvelteName, VueDirective,
+    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
