@@ -16,9 +16,9 @@ biome_js_semantic = { workspace = true }
 biome_js_syntax   = { workspace = true }
 biome_rowan       = { workspace = true }
 indexmap          = { workspace = true }
-react_compiler = { path = "../../react/compiler/crates/react_compiler" }
-react_compiler_ast = { path = "../../react/compiler/crates/react_compiler_ast" }
-react_compiler_hir = { path = "../../react/compiler/crates/react_compiler_hir" }
+react_compiler = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
+react_compiler_ast = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
+react_compiler_hir = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
 serde_json = { workspace = true }
 
 [dev-dependencies]

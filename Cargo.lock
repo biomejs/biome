@@ -5158,6 +5158,7 @@ dependencies = [
 [[package]]
 name = "react_compiler"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_ast",
@@ -5177,18 +5178,18 @@ dependencies = [
 [[package]]
 name = "react_compiler_ast"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "serde",
  "serde-transcode",
  "serde_json",
- "similar",
- "walkdir",
 ]
 
 [[package]]
 name = "react_compiler_diagnostics"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "serde",
 ]
@@ -5196,6 +5197,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_hir"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5206,6 +5208,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_inference"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5219,6 +5222,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_lowering"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_ast",
@@ -5230,6 +5234,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_optimization"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5241,6 +5246,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_reactive_scopes"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "hmac",
  "indexmap",
@@ -5254,6 +5260,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_ssa"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",
@@ -5264,6 +5271,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_typeinference"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "react_compiler_diagnostics",
  "react_compiler_hir",
@@ -5273,6 +5281,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_utils"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
 ]
@@ -5280,6 +5289,7 @@ dependencies = [
 [[package]]
 name = "react_compiler_validation"
 version = "0.1.0"
+source = "git+https://github.com/facebook/react?rev=b49e04151e1c2cd34f4612e43c5e38edf5da56e2#b49e04151e1c2cd34f4612e43c5e38edf5da56e2"
 dependencies = [
  "indexmap",
  "react_compiler_diagnostics",

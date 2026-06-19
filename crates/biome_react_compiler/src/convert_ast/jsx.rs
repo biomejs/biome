@@ -277,8 +277,27 @@ pub(super) fn convert_jsx_attribute_name(
         AnyJsxAttributeName::JsxName(name) => Ok(JSXAttributeName::JSXIdentifier(
             convert_jsx_identifier(ctx, &name)?,
         )),
-        _ => Err(unsupported(name.syntax())),
+        AnyJsxAttributeName::JsxNamespaceName(name) => Ok(JSXAttributeName::JSXNamespacedName(
+            convert_jsx_namespace_name(ctx, &name)?,
+        )),
     }
+}
+
+pub(super) fn convert_jsx_namespace_name(
+    ctx: &ConvertCtx<'_>,
+    name: &biome_js_syntax::JsxNamespaceName,
+) -> Result<JSXNamespacedName> {
+    let namespace = name
+        .namespace()
+        .map_err(|_| missing("JsxNamespaceName", "namespace"))?;
+    let local = name
+        .name()
+        .map_err(|_| missing("JsxNamespaceName", "name"))?;
+    Ok(JSXNamespacedName {
+        base: ctx.base(name.syntax().text_trimmed_range()),
+        namespace: convert_jsx_identifier(ctx, &namespace)?,
+        name: convert_jsx_identifier(ctx, &local)?,
+    })
 }
 
 pub(super) fn convert_jsx_element_name(
@@ -300,6 +319,9 @@ pub(super) fn convert_jsx_element_name(
         }
         AnyJsxElementName::JsxMemberName(name) => Ok(JSXElementName::JSXMemberExpression(
             convert_jsx_member_name(ctx, &name)?,
+        )),
+        AnyJsxElementName::JsxNamespaceName(name) => Ok(JSXElementName::JSXNamespacedName(
+            convert_jsx_namespace_name(ctx, &name)?,
         )),
         _ => Err(unsupported(name.syntax())),
     }

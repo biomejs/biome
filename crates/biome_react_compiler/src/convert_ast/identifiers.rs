@@ -381,12 +381,21 @@ pub(super) fn convert_binding_identifier(
     ctx: &ConvertCtx<'_>,
     syntax: &JsSyntaxNode,
 ) -> Result<Identifier> {
-    let binding = JsIdentifierBinding::cast(syntax.clone()).ok_or_else(|| unsupported(syntax))?;
-    let name = binding
-        .name_token()
-        .map_err(|_| missing("JsIdentifierBinding", "name_token"))?;
+    // TS type-level names (`type`/`interface`) are `TsIdentifierBinding` rather
+    // than `JsIdentifierBinding`; both expose a `name_token`.
+    let name = if let Some(binding) = JsIdentifierBinding::cast(syntax.clone()) {
+        binding
+            .name_token()
+            .map_err(|_| missing("JsIdentifierBinding", "name_token"))?
+    } else if let Some(binding) = biome_js_syntax::TsIdentifierBinding::cast(syntax.clone()) {
+        binding
+            .name_token()
+            .map_err(|_| missing("TsIdentifierBinding", "name_token"))?
+    } else {
+        return Err(unsupported(syntax));
+    };
     Ok(Identifier {
-        base: ctx.base(binding.syntax().text_trimmed_range()),
+        base: ctx.base(syntax.text_trimmed_range()),
         name: name.text_trimmed().to_string(),
         type_annotation: None,
         optional: None,

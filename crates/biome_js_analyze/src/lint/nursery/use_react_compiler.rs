@@ -45,12 +45,7 @@ declare_lint_rule! {
 
 pub struct ReactCompilerDiagnostic {
     range: TextRange,
-    kind: ReactCompilerDiagnosticKind,
-}
-
-// TODO: probably useless to have an enum with only one variant. refactor when cleaning up.
-pub enum ReactCompilerDiagnosticKind {
-    Compiler { detail: CompilerErrorDetailInfo },
+    detail: CompilerErrorDetailInfo,
 }
 
 impl Rule for UseReactCompiler {
@@ -66,13 +61,13 @@ impl Rule for UseReactCompiler {
         match query.result.as_ref() {
             Ok(output) => {
                 let mut diagnostics = Vec::new();
-                for diagnostic in &output.diagnostics {
-                    let Some(kind) = diagnostic_kind(diagnostic) else {
+                for error in &output.diagnostics {
+                    let Some(detail) = reportable_detail(error) else {
                         continue;
                     };
                     let diagnostic = ReactCompilerDiagnostic {
-                        range: diagnostic_range(diagnostic).unwrap_or(root_range),
-                        kind,
+                        range: diagnostic_range(error).unwrap_or(root_range),
+                        detail: detail.clone(),
                     };
                     if !diagnostics
                         .iter()
@@ -88,44 +83,35 @@ impl Rule for UseReactCompiler {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match &state.kind {
-            ReactCompilerDiagnosticKind::Compiler { detail } => {
-                compiler_diagnostic(state.range, detail)
-            }
-        }
+        compiler_diagnostic(state.range, &state.detail)
     }
 }
 
 fn same_diagnostic(left: &ReactCompilerDiagnostic, right: &ReactCompilerDiagnostic) -> bool {
     left.range == right.range
-        && match (&left.kind, &right.kind) {
-            (
-                ReactCompilerDiagnosticKind::Compiler { detail: left },
-                ReactCompilerDiagnosticKind::Compiler { detail: right },
-            ) => {
-                left.category == right.category
-                    && left.reason == right.reason
-                    && left.description == right.description
-            }
-        }
+        && left.detail.category == right.detail.category
+        && left.detail.reason == right.detail.reason
+        && left.detail.description == right.detail.description
 }
 
-fn diagnostic_kind(error: &ReactCompilerError) -> Option<ReactCompilerDiagnosticKind> {
-    match error {
-        ReactCompilerError::CompilerDiagnostic { detail, .. } => {
-            if !is_reportable_compiler_detail(detail) {
-                return None;
-            }
-            Some(ReactCompilerDiagnosticKind::Compiler {
-                detail: detail.clone(),
-            })
-        }
-        _ => None,
-    }
-}
-
-fn is_reportable_compiler_detail(detail: &CompilerErrorDetailInfo) -> bool {
-    matches!(
+/// Returns the compiler error detail to report, or `None` for errors that are
+/// not user-facing lint diagnostics.
+///
+/// This is the single gate for the rule. It filters on two axes:
+/// - the error must be a [`ReactCompilerError::CompilerDiagnostic`] (converter
+///   gaps, panics, and internal errors never surface);
+/// - the diagnostic category must be one React Compiler reports as an
+///   actionable rule violation, excluding internal bail-out categories such as
+///   `Invariant` and `Todo`.
+///
+/// Once a detail passes this gate, [`compiler_diagnostic`] always renders it:
+/// curated messages where available, and a generic fallback otherwise, so
+/// upstream wording changes never silently drop a diagnostic.
+fn reportable_detail(error: &ReactCompilerError) -> Option<&CompilerErrorDetailInfo> {
+    let ReactCompilerError::CompilerDiagnostic { detail, .. } = error else {
+        return None;
+    };
+    let is_reportable = matches!(
         detail.category.as_str(),
         "Hooks"
             | "CapitalizedCalls"
@@ -145,7 +131,8 @@ fn is_reportable_compiler_detail(detail: &CompilerErrorDetailInfo) -> bool {
             | "IncompatibleLibrary"
             | "Refs"
             | "RenderSetState"
-    )
+    );
+    is_reportable.then_some(detail.as_ref())
 }
 
 fn compiler_diagnostic(
@@ -296,7 +283,7 @@ fn compiler_diagnostic(
             "React treats capitalized functions as components, and components should be rendered with JSX so their hooks and lifecycle are handled correctly."
         })
         .note(markup! {
-            "Render it as JSX, rename it to start with a lowercase letter, or allowlist it in the React Compiler configuration if it is not a component."
+            "Render it as JSX, or rename it to start with a lowercase letter if it is a regular function rather than a component."
         })),
         _ if category == "StaticComponents" => Some(RuleDiagnostic::new(
             rule_category!(),
@@ -480,7 +467,17 @@ fn compiler_diagnostic(
         .note(markup! {
             "Use an error boundary to catch render errors instead of wrapping JSX creation in " <Emphasis>"try"</Emphasis> "/" <Emphasis>"catch"</Emphasis> "."
         })),
-        _ => None,
+        // Generic fallback: a reportable category with no curated message.
+        // Render the compiler's own reason and description so the diagnostic is
+        // never silently dropped if upstream wording changes or a new message is
+        // added to a category we already report.
+        _ => {
+            let mut diagnostic = RuleDiagnostic::new(rule_category!(), range, markup! { {reason} });
+            if let Some(description) = detail.description.as_deref() {
+                diagnostic = diagnostic.note(markup! { {description} });
+            }
+            Some(diagnostic)
+        }
     }
 }
 

@@ -4,9 +4,7 @@
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
-pub use crate::services::react_compiler::{
-    ReactCompiler, ReactCompilerResult, ReactCompilerServices,
-};
+pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
