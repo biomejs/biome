@@ -179,7 +179,9 @@ pub(super) fn node_to_args_pairs(
                             .strip_prefix(lang.metavariable_prefix())
                             .filter(|stripped| {
                                 expected_params.as_ref().is_none_or(|expected| {
-                                    expected.iter().any(|exp| exp == &var_name || exp == stripped)
+                                    expected
+                                        .iter()
+                                        .any(|exp| exp == &var_name || exp == stripped)
                                 })
                             })
                             .or_else(|| {
