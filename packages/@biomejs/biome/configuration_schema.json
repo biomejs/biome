@@ -397,6 +397,41 @@
 			},
 			"additionalProperties": false
 		},
+		"AttributeGroupPattern": {
+			"description": "A predefined attribute group pattern.",
+			"oneOf": [
+				{
+					"description": "Callback props: names beginning with `on` followed by an uppercase letter.",
+					"type": "string",
+					"const": ":CALLBACK:"
+				},
+				{
+					"description": "Implicit (boolean shorthand) props: props with no value.",
+					"type": "string",
+					"const": ":IMPLICIT:"
+				},
+				{
+					"description": "React reserved props: `key` and `ref`.",
+					"type": "string",
+					"const": ":RESERVED:"
+				},
+				{
+					"description": "DOM-only reserved props: `children` and `dangerouslySetInnerHTML`.",
+					"type": "string",
+					"const": ":DOM_RESERVED:"
+				},
+				{
+					"description": "Catch-all for props that don't match any other configured group.\n\nUnlike the other patterns, this never matches directly through\n[`Self::is_match`]: its position is resolved separately by\n[`AttributeGroups::group_index`] as a fallback for unmatched props.",
+					"type": "string",
+					"const": ":REST:"
+				}
+			]
+		},
+		"AttributeGroups": {
+			"description": "The set of attribute groups for `useSortedAttributes`.\n\nGroups control the position of special prop categories relative to each other\nwhen `sortScope` is set to `\"group\"`.\n\n## Predefined groups\n\n- `:CALLBACK:` — Callback props: names beginning with `on` followed by an uppercase letter (e.g. `onClick`, `onChange`).\n- `:IMPLICIT:` — Implicit (boolean shorthand) props: props with no value (e.g. `<Foo disabled />`).\n- `:RESERVED:` — React reserved props: `key` and `ref`.\n- `:DOM_RESERVED:` — DOM-only reserved props: `children` and `dangerouslySetInnerHTML`.\n- `:REST:` — Catch-all for props that don't match any other configured group.\n  Sorted like a regular group, using `sortOrder`.\n\n## Default ordering\n\nWhen `groups` is not configured, the following default ordering is used\n(only active when `sortScope` is `\"group\"`):\n\n```json\n[\":IMPLICIT:\", \":RESERVED:\", \":DOM_RESERVED:\", \":REST:\", \":CALLBACK:\"]\n```\n\nIf `:REST:` is omitted from a configured `groups` list, props that don't\nmatch any named group are instead placed after all named groups, in their\noriginal relative order (unsorted).",
+			"type": "array",
+			"items": { "$ref": "#/$defs/AttributeGroupPattern" }
+		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"AvailabilityNamed": {
 			"description": "Named Baseline availability tiers.",
@@ -12985,6 +13020,21 @@
 			]
 		},
 		"SortOrder": { "type": "string", "enum": ["natural", "lexicographic"] },
+		"SortScope": {
+			"description": "Controls how `sortOrder` interacts with `groups`.\n\n- `global`: `sortOrder` is applied over all props at once, ignoring the\n  `groups` order. This preserves the original flat-sort behavior.\n- `group`: `sortOrder` is applied independently within each group defined\n  by `groups`. Props are first partitioned by group, sorted within each\n  group, then concatenated in group order.",
+			"oneOf": [
+				{
+					"description": "Apply `sortOrder` globally across all props (default).\nGroup order is ignored; sorting is flat. Preserves existing behavior.",
+					"type": "string",
+					"const": "global"
+				},
+				{
+					"description": "Apply `sortOrder` within each group independently.\nProps are partitioned into groups, sorted within each group, then\nconcatenated in group-index order.",
+					"type": "string",
+					"const": "group"
+				}
+			]
+		},
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -16056,8 +16106,17 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
+				"groups": {
+					"description": "Groups control the ordering of special prop categories.\n\nOnly active when `sortScope` is `\"group\"`.\nWhen not configured, the default ordering is used:\n`[\":IMPLICIT:\", \":RESERVED:\", \":DOM_RESERVED:\", \":REST:\", \":CALLBACK:\"]`.",
+					"anyOf": [{ "$ref": "#/$defs/AttributeGroups" }, { "type": "null" }]
+				},
 				"sortOrder": {
+					"description": "Sort order to apply within each group (or globally when `sortScope` is `\"global\"`).",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
+				},
+				"sortScope": {
+					"description": "Controls how `sortOrder` interacts with `groups`.\n\n- `\"global\"` (default): flat sort across all props, groups ignored.\n- `\"group\"`: sort within each group independently, then order by group.",
+					"anyOf": [{ "$ref": "#/$defs/SortScope" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

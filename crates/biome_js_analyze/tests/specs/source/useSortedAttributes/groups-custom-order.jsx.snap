@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: groups-custom-order.jsx
+---
+# Input
+```jsx
+// Custom groups order: [:CALLBACK:, :RESERVED:, :IMPLICIT:]
+// Callbacks first, then reserved (key/ref), then implicit (shorthand), then rest
+
+// Unsorted: implicit before callback
+<Hello disabled key="1" onChange={fn} name="John" />;
+
+// Unsorted: reserved (key) after callback but implicit in wrong position
+<Hello name="John" onChange={fn} disabled key="1" />;
+
+// Correctly ordered: callback, reserved, implicit, rest
+<Hello onChange={fn} key="1" disabled name="John" />;
+
+```
+
+# Diagnostics
+```
+groups-custom-order.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ // Unsorted: implicit before callback
+  > 5 │ <Hello disabled key="1" onChange={fn} name="John" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Unsorted: reserved (key) after callback but implicit in wrong position
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   
+     4  4 │   // Unsorted: implicit before callback
+     5    │ - <Hello·disabled·key="1"·onChange={fn}·name="John"·/>;
+        5 │ + <Hello·onChange={fn}·key="1"·disabled·name="John"·/>;
+     6  6 │   
+     7  7 │   // Unsorted: reserved (key) after callback but implicit in wrong position
+  
+
+```
+
+```
+groups-custom-order.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     7 │ // Unsorted: reserved (key) after callback but implicit in wrong position
+   > 8 │ <Hello name="John" onChange={fn} disabled key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Correctly ordered: callback, reserved, implicit, rest
+  
+  i Safe fix: Sort the JSX props.
+  
+     6  6 │   
+     7  7 │   // Unsorted: reserved (key) after callback but implicit in wrong position
+     8    │ - <Hello·name="John"·onChange={fn}·disabled·key="1"·/>;
+        8 │ + <Hello·onChange={fn}·key="1"·disabled·name="John"·/>;
+     9  9 │   
+    10 10 │   // Correctly ordered: callback, reserved, implicit, rest
+  
+
+```

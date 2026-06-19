@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"useSortedAttributes": {
+					"level": "on",
+					"options": {
+						"sortScope": "group",
+						"sortOrder": "lexicographic",
+						"groups": [":RESERVED:", ":REST:"]
+					}
+				}
+			}
+		}
+	}
+}
