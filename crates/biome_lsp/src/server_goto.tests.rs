@@ -756,7 +756,10 @@ async fn goto_definition_node_modules_import_does_not_error() -> Result<()> {
                 "node_modules/external-pkg/index.js",
                 "export function helper() {}\n",
             ),
-            ("main.js", "import { helper } from 'external-pkg';\nhelper();\n"),
+            (
+                "main.js",
+                "import { helper } from 'external-pkg';\nhelper();\n",
+            ),
         ],
         open_file: "main.js",
         language_id: "javascript",
