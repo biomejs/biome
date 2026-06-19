@@ -4,9 +4,10 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsFileSource, JsxAttribute,
+    AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsxAttribute,
     binding_ext::AnyJsBindingDeclaration,
 };
+use biome_languages::JsFileSource;
 use biome_module_graph::{
     ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
     build_import_tree_for_js, traverse_import_tree_for_classes,
@@ -49,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUndeclaredClasses {
-        version: "next",
+        version: "2.5.0",
         name: "noUndeclaredClasses",
         language: "js",
         recommended: false,
@@ -112,7 +113,7 @@ impl Rule for NoUndeclaredClasses {
         };
         // Collect all reachable CSS steps. If no CSS is reachable at all,
         // skip to avoid false positives on files without any stylesheets.
-        let css_steps: Vec<_> = if is_html_like {
+        let css_steps = if is_html_like {
             traverse_import_tree_for_html_classes(db, module)
         } else {
             traverse_import_tree_for_classes(db, module)
@@ -291,7 +292,7 @@ fn run_without_semantic(
 
     // Collect all reachable CSS steps. If no CSS is reachable at all,
     // skip to avoid false positives on files without any stylesheets.
-    let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, module);
+    let css_steps = traverse_import_tree_for_html_classes(db, module);
 
     if css_steps.is_empty() {
         return Vec::new();

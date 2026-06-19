@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNoninteractiveTabindex {
-        version: "next",
+        version: "2.5.0",
         name: "noNoninteractiveTabindex",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex").inspired()],

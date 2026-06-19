@@ -2,7 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
@@ -64,7 +65,7 @@ declare_lint_rule! {
     /// - [WCAG 2.4.6](https://www.w3.org/TR/UNDERSTANDING-WCAG20/navigation-mechanisms-descriptive.html)
     ///
     pub UseHeadingContent {
-        version: "next",
+        version: "2.5.0",
         name: "useHeadingContent",
         language: "html",
     sources: &[RuleSource::EslintJsxA11y("heading-has-content").inspired(), RuleSource::HtmlEslint("no-empty-headings").same()],

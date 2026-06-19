@@ -5,7 +5,7 @@ use biome_formatter::{
     IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
 };
 use biome_grit_syntax::GritLanguage;
-use biome_grit_syntax::file_source::GritFileSource;
+use biome_languages::GritFileSource;
 use std::fmt::Display;
 use std::rc::Rc;
 

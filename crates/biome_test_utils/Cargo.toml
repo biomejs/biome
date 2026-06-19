@@ -31,6 +31,7 @@ biome_js_parser      = { workspace = true }
 biome_js_semantic    = { workspace = true }
 biome_js_type_info   = { workspace = true }
 biome_json_parser    = { workspace = true }
+biome_languages      = { workspace = true }
 biome_module_graph   = { workspace = true }
 biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }

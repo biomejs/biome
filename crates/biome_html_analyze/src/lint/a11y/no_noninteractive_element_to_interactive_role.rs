@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions;
 
@@ -49,7 +50,7 @@ declare_lint_rule! {
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
     pub NoNoninteractiveElementToInteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noNoninteractiveElementToInteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role").inspired()],

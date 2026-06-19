@@ -1,14 +1,14 @@
+use crate::utils::is_html_tag;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions;
 use phf::phf_set;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// - [HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
     ///
     pub UseValidAutocomplete {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAutocomplete",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("autocomplete-valid").inspired()],

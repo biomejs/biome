@@ -1,4 +1,4 @@
-use biome_css_syntax::EmbeddingKind;
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::CompletedMarker;
 
 use crate::parser::CssParser;
@@ -20,7 +20,7 @@ use crate::syntax::block::{parse_declaration_or_rule_list_block, parse_rule_bloc
 #[inline]
 pub(crate) fn parse_conditional_block(p: &mut CssParser) -> CompletedMarker {
     if p.state().is_nesting_block
-        || matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        || matches!(p.source_type.as_embedding_kind(), CssEmbeddingKind::Styled)
     {
         parse_declaration_or_rule_list_block(p)
     } else {

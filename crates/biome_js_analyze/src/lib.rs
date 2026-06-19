@@ -15,7 +15,8 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
+use biome_js_syntax::{AnyJsRoot, JsLanguage};
+use biome_languages::JsFileSource;
 use biome_module_graph::{ModuleDb, ModuleResolver, ProjectDatabase};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;

@@ -4,9 +4,9 @@ use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
-    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
-    DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
-    ParseResult, ResolveBindingParams, ResolveDefinitionParams, UpdateSnippetsNodes,
+    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
+    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, ResolveBindingParams,
+    ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -42,7 +42,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{AnyCssRoot, CssFileSource, CssVariant};
+use biome_css_syntax::AnyCssRoot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -52,9 +52,11 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, ModuleKind};
+use biome_js_syntax::AnyJsRoot;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_languages::css::CssVariant;
+use biome_languages::javascript::{JsEmbeddingKind, LanguageVariant, ModuleKind};
+use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_module_graph::{
     HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, ProjectDatabase, resolve_css_module, resolve_html_module, resolve_js_module,
@@ -75,7 +77,7 @@ use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -237,8 +239,7 @@ impl WorkspaceServer {
 
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> ProjectDatabase {
-        let db = self.db_state.db.lock().expect("db lock poisoned");
-        db.clone()
+        self.db_state.handle.to_db()
     }
 
     /// Returns the module db for use in tests.
@@ -305,7 +306,7 @@ impl WorkspaceServer {
         match (document_file_source, path_source) {
             (DocumentFileSource::Js(_), DocumentFileSource::Html(_)) => true,
             (DocumentFileSource::Js(_), DocumentFileSource::Js(path_source)) => {
-                !matches!(path_source.as_embedding_kind(), EmbeddingKind::None)
+                !matches!(path_source.as_embedding_kind(), JsEmbeddingKind::None)
             }
             _ => false,
         }
@@ -1491,8 +1492,9 @@ impl WorkspaceServer {
         }
     }
 
-    fn lock_db(&self) -> Result<MutexGuard<'_, ProjectDatabase>, WorkspaceError> {
-        self.db_state.lock_db()
+    /// Returns a clone of the database. This is usually used to **read** data from it.
+    fn get_db(&self) -> ProjectDatabase {
+        self.db_state.handle.to_db()
     }
 
     /// Stores a [ModuleInfo] in the database
@@ -1501,23 +1503,16 @@ impl WorkspaceServer {
         path: &Utf8Path,
         kind: ModuleInfoKind,
     ) -> Result<(), WorkspaceError> {
-        let mut db = self.lock_db()?;
-        let path_buf = path.to_path_buf();
-
-        let existing = db.modules.pin().get(&path_buf).copied();
-        if let Some(module_info) = existing {
-            salsa::Setter::to(module_info.set_kind(&mut *db), kind);
-        } else {
-            let module_info = ModuleInfo::new(&*db, path_buf.clone(), kind);
-            db.insert_module(path_buf, module_info);
-        }
+        let db = self.db_state.handle.to_db();
+        let module_info = ModuleInfo::new(&db, path.to_path_buf(), kind);
+        db.insert_module(path.to_path_buf(), module_info);
         Ok(())
     }
 
     /// Removes a [ModuleInfo] from the database
     fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         self.db_state.path_info_cache.remove(path);
-        let db = self.lock_db()?;
+        let db = self.db_state.handle.to_db();
         db.remove_module(path);
         Ok(())
     }
@@ -1525,18 +1520,7 @@ impl WorkspaceServer {
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         self.db_state.path_info_cache.remove(path);
-        let Ok(db) = self.lock_db() else {
-            return;
-        };
-        let modules = db.modules.pin();
-        let to_remove: Vec<Utf8PathBuf> = modules
-            .keys()
-            .filter(|p| p.starts_with(path))
-            .cloned()
-            .collect();
-        for p in to_remove {
-            modules.remove(&p);
-        }
+        self.db_state.handle.to_db().unload_path(path);
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -3148,7 +3132,7 @@ impl Workspace for WorkspaceServer {
         &self,
         _params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
-        let db = self.lock_db()?;
+        let db = self.get_db();
         let mut data = FxHashMap::default();
         db.for_each_module(&mut |path, kind| {
             data.insert(path.as_str().to_string(), kind.dump());
@@ -3197,7 +3181,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                     .into_iter()
                     .any(|package_path| package_path.starts_with(workspace_root))
             }),
-            _ => self.lock_db().is_ok_and(|db| db.contains(path)),
+            _ => self.module_db().contains(path),
         }
     }
 

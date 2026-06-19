@@ -25,6 +25,7 @@ biome_js_runtime         = { workspace = true, optional = true }
 biome_js_syntax          = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_js"] }
 biome_parser             = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }

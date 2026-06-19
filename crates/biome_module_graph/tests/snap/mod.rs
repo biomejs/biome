@@ -1,14 +1,12 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
-use biome_css_syntax::CssFileSource;
 use biome_fs::MemoryFileSystem;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_parser::HtmlParserOptions;
-use biome_html_syntax::HtmlFileSource;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{JsExport, JsOwnExport, ModuleDb, ModuleInfoKind, ModuleResolver};
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;

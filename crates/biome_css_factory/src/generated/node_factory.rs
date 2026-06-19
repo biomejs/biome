@@ -4265,6 +4265,14 @@ pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn scss_supports_interpolated_condition(
+    condition: ScssInterpolation,
+) -> ScssSupportsInterpolatedCondition {
+    ScssSupportsInterpolatedCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_SUPPORTS_INTERPOLATED_CONDITION,
+        [Some(SyntaxElement::Node(condition.into_syntax()))],
+    ))
+}
 pub fn scss_unary_expression(
     operator_token: SyntaxToken,
     expression: AnyScssExpression,

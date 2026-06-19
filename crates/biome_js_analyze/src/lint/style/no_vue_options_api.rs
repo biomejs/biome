@@ -1,7 +1,7 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsFileSource};
+use biome_js_syntax::AnyJsExpression;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_vue_options_api::NoVueOptionsApiOptions;
 
@@ -9,6 +9,7 @@ use crate::frameworks::vue::vue_call::is_vue_api_reference;
 use crate::frameworks::vue::vue_component::{
     AnyVueComponent, VueComponent, VueComponentQuery, VueOptionsApiBasedComponent,
 };
+use biome_languages::JsFileSource;
 
 declare_lint_rule! {
     /// Disallow the use of Vue Options API.

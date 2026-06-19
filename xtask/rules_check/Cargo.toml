@@ -30,6 +30,7 @@ biome_json_analyze    = { workspace = true }
 biome_json_factory    = { workspace = true }
 biome_json_parser     = { workspace = true }
 biome_json_syntax     = { workspace = true }
+biome_languages       = { workspace = true, features = ["lang_css", "lang_graphql", "lang_js", "lang_json"] }
 biome_module_graph    = { workspace = true }
 biome_project_layout  = { workspace = true }
 biome_rowan           = { workspace = true }

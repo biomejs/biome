@@ -99,7 +99,7 @@ impl Rule for UseInlineScriptId {
             match attribute {
                 AnyJsxAttribute::JsxAttribute(a) => {
                     if let Ok(name_value) = a.name_value_token() {
-                        let name = name_value.token_text();
+                        let name = name_value.token_text_trimmed();
                         attribute_names.insert(name);
                     }
                 }

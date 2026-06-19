@@ -13,25 +13,25 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember,
     JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsModuleItemList,
     JsPrivateClassMemberName, JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken,
     JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
     TsLiteralEnumMemberName, TsTypeParameterName,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
+};
+pub use biome_rule_options::use_naming_convention::{
+    Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
+    UseNamingConventionOptions,
 };
 use biome_string_case::{Case, Cases};
 use biome_unicode_table::is_js_ident;
 use enumflags2::BitFlags;
 use smallvec::SmallVec;
-
-pub use biome_rule_options::use_naming_convention::{
-    Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
-    UseNamingConventionOptions,
-};
 
 declare_lint_rule! {
     /// Enforce naming conventions for everything across a codebase.

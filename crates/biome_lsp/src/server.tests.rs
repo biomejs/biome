@@ -5106,6 +5106,135 @@ async fn relative_configuration_path_resolves_against_correct_workspace_folder()
     Ok(())
 }
 
+/// Regression test for <https://github.com/biomejs/biome/issues/9566>.
+///
+/// In a multi-root workspace, a configuration that fails to load in one workspace
+/// folder must not disable lint/assist diagnostics for files in another, healthy
+/// workspace folder.
+#[tokio::test]
+#[expect(deprecated)]
+async fn broken_configuration_in_one_workspace_folder_does_not_disable_another() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // `good` has a valid config that enables a lint rule; `bad` has a malformed
+    // config that cannot be parsed, so loading it yields an error status.
+    let good_config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "suspicious": { "noDoubleEquals": "error" }
+            }
+        }
+    }"#;
+    let bad_config = r#"{ "linter": { "rules": "#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("good/biome.json")), good_config);
+    fs.insert(to_utf8_file_path_buf(uri!("bad/biome.json")), bad_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("/")),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        name: "good".to_string(),
+                        uri: uri!("good"),
+                    },
+                    WorkspaceFolder {
+                        name: "bad".to_string(),
+                        uri: uri!("bad"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    server.initialized().await?;
+
+    let good_uri = uri!("good/document.js");
+
+    // Open the healthy file: it must produce a lint diagnostic.
+    server
+        .open_named_document("a == b;", good_uri.clone(), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "Expected a lint diagnostic for the healthy file on open"
+    );
+
+    // Open a file in the folder with the broken configuration. Its configuration
+    // fails to load; previously this overwrote the shared status.
+    server
+        .open_named_document("a == b;", uri!("bad/document.js"), "javascript")
+        .await?;
+
+    // Re-trigger diagnostics for the healthy file. The lint diagnostic must still
+    // be reported, proving the broken folder did not disable the healthy one.
+    server
+        .notify(
+            "textDocument/didChange",
+            lsp::DidChangeTextDocumentParams {
+                text_document: lsp::VersionedTextDocumentIdentifier {
+                    uri: good_uri.clone(),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: "a == b;".to_string(),
+                }],
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "The healthy file must keep its lint diagnostic even after a sibling \
+         workspace folder failed to load its configuration"
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 /// Verifies that an absolute `configurationPath` (e.g. `C:/shared-config/biome.json`)
 /// pointing to a file outside the workspace roots properly attributes the registered
 /// project to the workspace root, so that files opened inside the workspace are

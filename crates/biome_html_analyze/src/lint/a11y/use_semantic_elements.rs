@@ -6,8 +6,9 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
+use biome_html_syntax::HtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
@@ -53,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSemanticElements {
-        version: "next",
+        version: "2.5.0",
         name: "useSemanticElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role").inspired()],

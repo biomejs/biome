@@ -44,6 +44,7 @@ biome_json_factory       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
 biome_package            = { workspace = true }
@@ -68,16 +69,10 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = { workspace = true, features = [
-  "io-std",
-  "io-util",
-  "macros",
-  "net",
-  "rt",
-  "rt-multi-thread",
-  "sync",
-  "time"
-] }
+tokio                    = {
+  workspace = true,
+  features  = ["io-std", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"]
+}
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }

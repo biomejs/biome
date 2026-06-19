@@ -28,6 +28,7 @@ biome_js_semantic    = { workspace = true }
 biome_js_syntax      = { workspace = true }
 biome_js_type_info   = { workspace = true }
 biome_jsdoc_comment  = { workspace = true }
+biome_languages      = { workspace = true, features = ["lang_css", "lang_html", "lang_js"] }
 biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }
 biome_resolver       = { workspace = true }

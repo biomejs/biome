@@ -250,7 +250,7 @@ declare_source_rule! {
     /// }
     /// ```
     pub UseSortedPackageJson {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedPackageJson",
         language: "json",
         fix_kind: FixKind::Safe,

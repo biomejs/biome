@@ -118,7 +118,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedAttributes {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedAttributes",
         language: "html",
         recommended: false,

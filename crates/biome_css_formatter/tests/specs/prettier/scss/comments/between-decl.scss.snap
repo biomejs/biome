@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/comments/between-decl.scss
 ---
 
@@ -84,17 +85,6 @@ value;
 ```diff
 --- Prettier
 +++ Biome
-@@ -11,8 +11,8 @@
- .grid {
-   grid-template-areas: //
-     "header header header" //
--    "sidebar content content" //
--    "footer footer footer";
-+      "sidebar content content" //
-+      "footer footer footer";
- 
-   grid-template-areas: "header header header" //
-     "sidebar content content" //
 @@ -42,8 +42,8 @@
  // #7109
  .test {
@@ -124,8 +114,8 @@ selector {
 .grid {
   grid-template-areas: //
     "header header header" //
-      "sidebar content content" //
-      "footer footer footer";
+    "sidebar content content" //
+    "footer footer footer";
 
   grid-template-areas: "header header header" //
     "sidebar content content" //

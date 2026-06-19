@@ -16,7 +16,6 @@ pub mod directive_ext;
 pub mod export_ext;
 pub mod expr_ext;
 pub mod expression_left_side;
-pub mod file_source;
 pub mod function_ext;
 pub mod identifier_ext;
 pub mod import_ext;
@@ -41,7 +40,6 @@ pub use biome_rowan::{
 };
 pub use cast_ext::*;
 pub use expr_ext::*;
-pub use file_source::*;
 pub use function_ext::*;
 pub use identifier_ext::*;
 pub use import_ext::*;

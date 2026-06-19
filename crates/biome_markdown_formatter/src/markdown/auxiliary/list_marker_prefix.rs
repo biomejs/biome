@@ -42,7 +42,7 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
                         [format_replaced(
                             &marker,
                             &format_args![
-                                text(trimmed_text, marker.text_trimmed_range().start(),),
+                                text(trimmed_text, Some(marker.text_trimmed_range().start()),),
                                 token(".")
                             ]
                         )]
@@ -61,7 +61,7 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
                     .text_trimmed_range()
                     .start()
                     .add(TextSize::from(index as u32));
-                write!(f, [text(" ", pos),])?;
+                write!(f, [text(" ", Some(pos)),])?;
             }
         }
         write!(f, [content_indent.format()])

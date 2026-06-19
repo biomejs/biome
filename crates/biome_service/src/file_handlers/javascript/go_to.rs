@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
 use biome_module_graph::{
-    JsOwnExport, ModuleDb, ModuleInfoKind, SymbolName, find_js_exported_symbol,
+    JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo, find_js_exported_symbol,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
 use camino::Utf8Path;
@@ -220,13 +220,11 @@ fn resolve_import_definition(
 
             match find_js_exported_symbol(
                 module_db,
-                target_module,
-                SymbolName::new(module_db, local_name),
+                SymbolFromModuleInfo::new(module_db, local_name, target_module),
             )
             .or(find_js_exported_symbol(
                 module_db,
-                target_module,
-                SymbolName::new(module_db, "default"),
+                SymbolFromModuleInfo::new(module_db, "default", target_module),
             )) {
                 None => {
                     result.store(
@@ -258,8 +256,7 @@ fn resolve_import_definition(
             if let Some(module) = module_db.module_for_path(target_path) {
                 match find_js_exported_symbol(
                     module_db,
-                    module,
-                    SymbolName::new(module_db, local_name),
+                    SymbolFromModuleInfo::new(module_db, local_name, module),
                 ) {
                     None => {
                         result.store(

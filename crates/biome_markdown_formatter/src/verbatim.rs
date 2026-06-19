@@ -42,7 +42,7 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
         // Write the original source text as-is
         text(
             &self.node.to_string(),
-            self.node.text_trimmed_range().start(),
+            Some(self.node.text_trimmed_range().start()),
         )
         .fmt(f)
     }

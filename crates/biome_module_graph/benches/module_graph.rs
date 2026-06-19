@@ -1,7 +1,8 @@
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::{AnyJsRoot, JsFileSource};
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::JsFileSource;
 use biome_module_graph::{PathInfoCache, resolve_js_module};
 use biome_project_layout::ProjectLayout;
 use divan::Bencher;

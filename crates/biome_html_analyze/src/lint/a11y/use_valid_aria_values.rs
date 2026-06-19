@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
 use biome_string_case::StrLikeExtension;
@@ -46,7 +47,7 @@ declare_lint_rule! {
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     pub UseValidAriaValues {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAriaValues",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-proptypes").inspired()],

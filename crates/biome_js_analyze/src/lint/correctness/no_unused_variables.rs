@@ -10,11 +10,13 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
+    TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration,
 };
+use biome_languages::JsFileSource;
+use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::{
     NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
@@ -434,7 +436,7 @@ impl Rule for NoUnusedVariables {
         // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
         // read by the framework.
         if binding_name == "Props"
-            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
             && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
             && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
                 || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))

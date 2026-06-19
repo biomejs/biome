@@ -6,7 +6,7 @@ use biome_formatter::{
 };
 
 use crate::comments::{FormatGraphqlLeadingComment, GraphqlComments};
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
 use std::fmt;
 use std::rc::Rc;
 
@@ -66,13 +66,11 @@ pub struct GraphqlFormatOptions {
     bracket_spacing: BracketSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
-    _file_source: GraphqlFileSource,
 }
 
 impl GraphqlFormatOptions {
-    pub fn new(file_source: GraphqlFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),

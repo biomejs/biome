@@ -3,9 +3,8 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{
-    AnyHtmlAttribute, HtmlFileSource, SVG_EXCLUSIVE_ELEMENTS, element_ext::AnyHtmlTagElement,
-};
+use biome_html_syntax::{AnyHtmlAttribute, SVG_EXCLUSIVE_ELEMENTS, element_ext::AnyHtmlTagElement};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, TokenText};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
 use biome_string_case::Case;

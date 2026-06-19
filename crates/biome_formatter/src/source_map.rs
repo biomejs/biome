@@ -211,8 +211,8 @@ impl TransformSourceMap {
     /// in the original, untransformed source code.
     ///
     /// The printer creates a source map that allows mapping positions from the newly formatted document
-    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::Text]
-    /// and [crate::FormatElement::LocatedTokenText] are relative to the transformed tree
+    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::MappedText]
+    /// and [crate::FormatElement::MappedLocatedTokenText] are relative to the transformed tree
     /// and not the original tree passed to [crate::format_node].
     ///
     /// This function re-maps the positions from the positions in the transformed tree back to the positions

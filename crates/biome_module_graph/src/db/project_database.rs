@@ -22,6 +22,35 @@ impl ProjectDatabase {
     pub fn remove_module(&self, path: &Utf8Path) {
         self.modules.pin().remove(path);
     }
+
+    pub fn unload_path(&self, path: &Utf8Path) {
+        let modules = self.modules.pin();
+        let to_remove: Vec<Utf8PathBuf> = modules
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            modules.remove(&p);
+        }
+    }
+}
+
+/// This handler is exclusively used for cloning operations (reading operations).
+/// Writing operations still go through [ProjectDatabase].
+#[derive(Clone, Default)]
+pub struct ProjectDatabaseHandle {
+    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    storage: salsa::StorageHandle<ProjectDatabase>,
+}
+
+impl ProjectDatabaseHandle {
+    pub fn to_db(&self) -> ProjectDatabase {
+        ProjectDatabase {
+            modules: self.modules.clone(),
+            storage: self.storage.clone().into_storage(),
+        }
+    }
 }
 
 #[salsa::db]

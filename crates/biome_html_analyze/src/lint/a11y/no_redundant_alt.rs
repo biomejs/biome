@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
@@ -79,19 +80,17 @@ impl Rule for NoRedundantAlt {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
-            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => {
-                value
-                    .elements()
-                    .iter()
-                    .filter_map(|el| match el {
-                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => {
-                            chunk.html_template_chunk_token().ok()
-                        }
-                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
-                    })
-                    .any(|t| is_redundant_alt(t.text_trimmed()))
-                    .then_some(alt)
-            }
+            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => value
+                .elements()
+                .iter()
+                .filter_map(|el| match el {
+                    AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => {
+                        chunk.html_template_chunk_token().ok()
+                    }
+                    AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
+                })
+                .any(|t| is_redundant_alt(t.text_trimmed()))
+                .then_some(alt),
             AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }

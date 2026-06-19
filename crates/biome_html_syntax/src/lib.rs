@@ -4,7 +4,6 @@
 pub mod attribute_ext;
 mod directive_ext;
 pub mod element_ext;
-mod file_source;
 mod generated;
 mod script_type;
 pub mod static_value;
@@ -14,7 +13,6 @@ mod syntax_node;
 mod text_ext;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
 pub use generated::*;
 pub use script_type::*;
 pub use svg::*;

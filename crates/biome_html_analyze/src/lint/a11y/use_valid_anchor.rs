@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
 use biome_string_case::StrLikeExtension;
@@ -17,10 +18,12 @@ declare_lint_rule! {
     /// While before it was possible to attach logic to an anchor element, with the advent of JSX libraries,
     /// it's now easier to attach logic to any HTML element, anchors included.
     ///
-    /// This rule is designed to prevent users from attaching logic at the click of anchors when the `href`
-    /// provided to the anchor element is not valid. Avoid using `#` symbol inside the `href` when you are
-    /// attaching the logic to the anchor element. If the anchor has logic attached to it with an incorrect `href`
-    /// the rules suggests to turn it to a `button`, because that's likely what the user wants.
+    /// This rule is designed to prevent invalid anchor usage when the `href` is missing or not navigable,
+    /// including the empty fragment `#` both with and without attached logic. With logic attached, an anchor
+    /// with an invalid `href` usually behaves like an action and should be a `button`, because that's likely
+    /// what the user wants. Without logic, `href="#"` still points to no real target and can cause scroll
+    /// position and keyboard focus to fall out of sync. Prefer linking to an actual destination, such as 
+    /// `href="#top"`.
     ///
     /// Anchor `<a></a>` elements should be used for navigation, while `<button></button>` should be
     /// used for user interaction.
@@ -62,7 +65,7 @@ declare_lint_rule! {
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
     pub UseValidAnchor {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAnchor",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("anchor-is-valid").inspired(), RuleSource::EslintQwik("jsx-a").inspired()],

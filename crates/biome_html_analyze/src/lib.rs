@@ -36,7 +36,8 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
 use biome_module_graph::ProjectDatabase;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -176,7 +177,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_html_parser::parse_html;
-    use biome_html_syntax::HtmlFileSource;
+    use biome_languages::HtmlFileSource;
     use biome_rowan::TextRange;
     use std::slice;
 

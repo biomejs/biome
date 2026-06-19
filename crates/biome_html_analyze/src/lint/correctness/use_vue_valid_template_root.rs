@@ -4,7 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlElement, HtmlFileSource, HtmlRoot};
+use biome_html_syntax::{HtmlElement, HtmlRoot};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions;
 

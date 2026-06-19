@@ -2,7 +2,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_syntax::JsxAttribute;
+use biome_js_syntax::JsxAttributeInitializerClause;
+use biome_js_syntax::JsxAttributeList;
 use biome_js_syntax::JsxElement;
+use biome_js_syntax::JsxExpressionAttributeValue;
+use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -60,6 +65,14 @@ declare_lint_rule! {
     /// <a><div aria-hidden="true"></div>content</a>
     /// ```
     ///
+    /// The following is valid because `<a>` is used as a JSX attribute value on a custom
+    /// component. The rule is suppressed for any such prop on a custom component, as the
+    /// component may render the anchor as a content wrapper whose children supply the link text.
+    ///
+    /// ```jsx
+    /// <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
+    /// ```
+    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 2.4.4](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context)
@@ -92,6 +105,10 @@ impl Rule for UseAnchorContent {
             }
 
             if has_valid_anchor_content(node) {
+                return None;
+            }
+
+            if is_jsx_attribute_anchor(node) {
                 return None;
             }
 
@@ -172,4 +189,43 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
                     .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
+}
+
+/// Returns true when the `<a>` element is the value of a JSX attribute on a custom component.
+///
+/// A custom component may use the anchor as a content wrapper, injecting its own children into
+/// it, so the final DOM can contain both the anchor's attributes and visible text — making the
+/// lint check a false positive.
+///
+/// Handles self-closing (`<a />`), open/close (`<a></a>`), and parenthesized
+/// (`render={(<a />)}`) forms. Native HTML elements are not exempted.
+fn is_jsx_attribute_anchor(node: &AnyJsxElement) -> bool {
+    for ancestor in node.syntax().ancestors().skip(1) {
+        if let Some(attr_value) = JsxExpressionAttributeValue::cast(ancestor.clone()) {
+            return is_component_attribute(&attr_value).unwrap_or(false);
+        }
+        match ancestor.kind() {
+            // Walk up through transparent wrapper nodes:
+            // - JsxElement wraps JsxOpeningElement
+            // - JsxTagExpression wraps JSX elements used as JS expressions
+            // - JsParenthesizedExpression for render={(<a />)}
+            JsSyntaxKind::JSX_ELEMENT
+            | JsSyntaxKind::JSX_TAG_EXPRESSION
+            | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {}
+            _ => return false,
+        }
+    }
+    false
+}
+
+/// Returns `Some(true)` when `attr_value` is an attribute of a custom JSX component (i.e. an
+/// uppercase or member-expression name), `Some(false)` for native HTML elements, and `None`
+/// when the surrounding tree is malformed.
+fn is_component_attribute(attr_value: &JsxExpressionAttributeValue) -> Option<bool> {
+    let initializer = JsxAttributeInitializerClause::cast(attr_value.syntax().parent()?)?;
+    let attribute = JsxAttribute::cast(initializer.syntax().parent()?)?;
+    let element = attribute
+        .parent::<JsxAttributeList>()
+        .and_then(|list| list.parent::<AnyJsxElement>())?;
+    Some(element.is_custom_component())
 }

@@ -2687,6 +2687,11 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Enforce a specific function type for React function components.
+See https://biomejs.dev/linter/rules/use-react-function-component-definition 
+	 */
+	useReactFunctionComponentDefinition?: UseReactFunctionComponentDefinitionConfiguration;
+	/**
 	* Ensure that platform-specific React Native components are only imported in files named for that platform.
 See https://biomejs.dev/linter/rules/use-react-native-platform-components 
 	 */
@@ -4814,6 +4819,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactFunctionComponentDefinitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactFunctionComponentDefinitionOptions;
 export type UseReactNativePlatformComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactNativePlatformComponentsOptions;
@@ -6726,6 +6734,11 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactFunctionComponentDefinitionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReactFunctionComponentDefinitionOptions;
+}
 export interface RuleWithUseReactNativePlatformComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactNativePlatformComponentsOptions;
@@ -8437,6 +8450,12 @@ export interface UseNullishCoalescingOptions {
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactFunctionComponentDefinitionOptions {
+	/**
+	 * The function style to enforce for named React components.
+	 */
+	namedComponents?: ComponentDefinitionStyle;
+}
 export interface UseReactNativePlatformComponentsOptions {
 	/**
 	* A list of glob patterns to identify Android-specific files.
@@ -9167,6 +9186,10 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type ComponentDefinitionStyle =
+	| "functionDeclaration"
+	| "functionExpression"
+	| "arrowFunction";
 /**
  * Controls how `useThisInClassMethods` treats classes that implement interfaces.
  */
@@ -9673,6 +9696,9 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFind"
+	| "lint/nursery/useReactFunctionComponentDefinition"
+	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
@@ -10200,6 +10226,7 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource };
 export type EditorFeatures = EditorFeature[];
@@ -10208,7 +10235,7 @@ export interface JsFileSource {
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
 For example, if inside an Astro file, a top-level return statement is allowed. 
 	 */
-	embedding_kind: EmbeddingKind;
+	embedding_kind: JsEmbeddingKind;
 	language: Language;
 	module_kind: ModuleKind;
 	variant: LanguageVariant;
@@ -10224,9 +10251,12 @@ export interface CssFileSource {
 	* Used to mark if the CSS is embedded inside some particular files. This affects the parsing.
 For example, if inside a styled`` literal, a top-level declaration is allowed. 
 	 */
-	embeddingKind: EmbeddingKind2;
+	embeddingKind: CssEmbeddingKind;
 	language: CssFileLanguage;
 	variant: CssVariant;
+}
+export interface GraphqlFileSource {
+	variant: GraphqlVariant;
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
@@ -10235,7 +10265,7 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export type EditorFeature = "gotoDefinition";
-export type EmbeddingKind =
+export type JsEmbeddingKind =
 	| "None"
 	| {
 			Astro: {
@@ -10315,7 +10345,7 @@ export type LanguageVersion = "eS2022" | "eSNext";
  * It represents the extension of the file
  */
 export type JsonFileVariant = "standard" | "jsonc";
-export type EmbeddingKind2 = "None" | "Styled" | { Html: EmbeddingHtmlKind };
+export type CssEmbeddingKind = "None" | "Styled" | { Html: EmbeddingHtmlKind };
 /**
  * The language of the stylesheet.
  */
@@ -10329,6 +10359,10 @@ the latest Recommendation level standards.
 It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard" | "cssModules" | "tailwindCss";
+/**
+ * The style of GraphQL contained in the file.
+ */
+export type GraphqlVariant = "standard";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"

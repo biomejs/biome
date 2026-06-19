@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUndeclaredClasses {
-        version: "next",
+        version: "2.5.0",
         name: "noUndeclaredClasses",
         language: "html",
         recommended: false,
@@ -112,7 +112,7 @@ impl Rule for NoUndeclaredClasses {
         // stylesheets, and CSS imported by parent files via upward traversal).
         // If no CSS is reachable at all, skip to avoid false positives on
         // completely unstyled files.
-        let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, module);
+        let css_steps = traverse_import_tree_for_html_classes(db, module);
 
         if css_steps.is_empty() {
             return Vec::new();
@@ -130,7 +130,7 @@ impl Rule for NoUndeclaredClasses {
 
             // Check if this class exists in any of the collected CSS steps.
             let mut found_class = false;
-            for step in &css_steps {
+            for step in css_steps {
                 if step
                     .css_classes
                     .values()

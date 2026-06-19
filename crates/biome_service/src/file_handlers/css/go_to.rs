@@ -2,7 +2,7 @@ use crate::file_handlers::ResolveDefinitionParams;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_syntax::CssClassSelector;
 use biome_fs::BiomePath;
-use biome_module_graph::{SymbolName, find_css_class_definition};
+use biome_module_graph::{SymbolFromModuleInfo, find_css_class_definition};
 use biome_rowan::AstNode;
 use std::ops::Add;
 
@@ -15,8 +15,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         if let Some(module) = params.module_db.module_for_path(path) {
             for (css_path, mut range, content_offset) in find_css_class_definition(
                 params.module_db,
-                module,
-                SymbolName::new(params.module_db, class_name),
+                SymbolFromModuleInfo::new(params.module_db, class_name, module),
             ) {
                 // For inline `<style>` blocks, the range is snippet-local.
                 // Apply the content_offset to get parent document coordinates.

@@ -23,14 +23,17 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
+use biome_js_syntax::{JsLanguage, TextSize};
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
+use biome_languages::{
+    DocumentFileSource, HtmlFileSource,
+    javascript::{JsEmbeddingKind, JsFileSource},
+};
 use biome_rowan::AstNode;
 use biome_ruledoc_utils::{AnalyzerServicesBuilder, CodeBlock, OptionsParsingMode};
-use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
@@ -303,8 +306,8 @@ fn assert_lint(
     let document_file_source = if rule_language == "html" {
         // HACK: Force HTML analysis for rules that come from the HTML analyzer
         DocumentFileSource::Html(
-            biome_html_syntax::HtmlFileSource::try_from_extension(&test.tag)
-                .unwrap_or_else(|_| biome_html_syntax::HtmlFileSource::html()),
+            HtmlFileSource::try_from_extension(&test.tag)
+                .unwrap_or_else(|_| HtmlFileSource::html()),
         )
     } else {
         test.document_file_source_from_path()
@@ -314,15 +317,15 @@ fn assert_lint(
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
             let (code, file_source) = match file_source.as_embedding_kind() {
-                EmbeddingKind::Astro { .. } => (
+                JsEmbeddingKind::Astro { .. } => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
                 ),
-                EmbeddingKind::Svelte { .. } => (
+                JsEmbeddingKind::Svelte { .. } => (
                     biome_service::file_handlers::SvelteFileHandler::input(code),
                     biome_service::file_handlers::SvelteFileHandler::file_source(code),
                 ),
-                EmbeddingKind::Vue { .. } => (
+                JsEmbeddingKind::Vue { .. } => (
                     biome_service::file_handlers::VueFileHandler::input(code),
                     biome_service::file_handlers::VueFileHandler::file_source(code),
                 ),

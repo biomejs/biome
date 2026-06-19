@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::{AnyJsonValue, JsonFileSource, JsonObjectValue, JsonStringValue};
+use biome_json_syntax::{AnyJsonValue, JsonObjectValue, JsonStringValue};
+use biome_languages::JsonFileSource;
 use biome_rowan::{AstNode, AstSeparatedList};
 use std::path::PathBuf;
 use std::slice;

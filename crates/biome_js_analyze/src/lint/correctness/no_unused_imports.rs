@@ -21,10 +21,12 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportClause,
     AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier,
-    AnyJsObjectMember, AnyTsTypeMember, EmbeddingKind, JsExport, JsFileSource, JsLanguage,
-    JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
+    AnyJsObjectMember, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
+    JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
+use biome_languages::JsFileSource;
+use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
     NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
@@ -485,7 +487,7 @@ impl Rule for NoUnusedImports {
                 // This does not apply to embedded scripts (Vue, Svelte, Astro),
                 // which are already in a module context.
                 let source_type = ctx.source_type::<JsFileSource>();
-                let is_embedded = !matches!(source_type.as_embedding_kind(), EmbeddingKind::None);
+                let is_embedded = !matches!(source_type.as_embedding_kind(), JsEmbeddingKind::None);
                 let needs_export_empty = !is_embedded
                     && source_type.language().is_typescript()
                     && root.as_js_module().is_some_and(|module| {

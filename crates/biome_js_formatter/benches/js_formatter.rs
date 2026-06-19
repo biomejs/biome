@@ -1,7 +1,8 @@
 use biome_formatter::Printed;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{AnyJsRoot, JsFileSource};
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};

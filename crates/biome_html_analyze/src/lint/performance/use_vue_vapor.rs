@@ -5,9 +5,10 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_factory::make;
 use biome_html_syntax::{
-    AnyHtmlAttribute, HtmlAttributeList, HtmlFileSource, HtmlOpeningElement, HtmlSyntaxKind,
-    HtmlSyntaxToken, element_ext::AnyHtmlTagElement,
+    AnyHtmlAttribute, HtmlAttributeList, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken,
+    element_ext::AnyHtmlTagElement,
 };
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
 use biome_rule_options::use_vue_vapor::UseVueVaporOptions;
 

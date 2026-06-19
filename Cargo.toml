@@ -73,6 +73,7 @@ biome_json_formatter         = { path = "./crates/biome_json_formatter", version
 biome_json_parser            = { path = "./crates/biome_json_parser", version = "0.5.7" }
 biome_json_syntax            = { path = "./crates/biome_json_syntax", version = "0.5.7" }
 biome_json_value             = { path = "./crates/biome_json_value", version = "0.1.0" }
+biome_languages              = { path = "./crates/biome_languages/", version = "0.1.0" }
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.1.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.1.0" }
@@ -125,7 +126,7 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
-insta                        = "1.47.2"
+insta                        = "1.48.0"
 jiff                         = "0.2.28"
 libc                         = "0.2.186"
 mimalloc                     = "0.1.48"
@@ -140,7 +141,7 @@ quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.45"
 rayon                        = "1.12.0"
-regex                        = "1.12.3"
+regex                        = "1.12.4"
 reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.2"
@@ -150,7 +151,7 @@ serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.150"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.15.1", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"

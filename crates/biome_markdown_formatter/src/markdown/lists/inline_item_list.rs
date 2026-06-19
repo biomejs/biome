@@ -298,7 +298,10 @@ impl FormatMdInlineItemList {
                                         f,
                                         [format_replaced(
                                             &token,
-                                            &text(trimmed, token.text_trimmed_range().start())
+                                            &text(
+                                                trimmed,
+                                                Some(token.text_trimmed_range().start())
+                                            )
                                         )]
                                     )
                                 }));
@@ -641,7 +644,7 @@ impl FormatMdInlineItemList {
                                     f,
                                     [format_replaced(
                                         &token,
-                                        &text(trimmed, token.text_trimmed_range().start())
+                                        &text(trimmed, Some(token.text_trimmed_range().start()))
                                     )]
                                 )?;
                             } else {

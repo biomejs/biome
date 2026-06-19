@@ -1,4 +1,4 @@
-use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
+use crate::workspace::CheckFileSizeResult;
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{
     CantResolve, ConfigurationDiagnostic, EditorConfigDiagnostic,
@@ -16,6 +16,7 @@ use biome_fs::{BiomePath, FileSystemDiagnostic};
 #[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+use biome_languages::DocumentFileSource;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
@@ -779,11 +780,11 @@ pub struct DbError {
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
-    use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use biome_languages::DocumentFileSource;
     use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
     use std::ffi::OsString;
 

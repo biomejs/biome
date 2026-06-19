@@ -73,6 +73,7 @@
 		}
 	},
 	"additionalProperties": false,
+	"allowTrailingCommas": true,
 	"$defs": {
 		"A11y": {
 			"description": "A list of rules that belong to this group",
@@ -825,6 +826,25 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"ComponentDefinitionStyle": {
+			"oneOf": [
+				{
+					"description": "Enforce function declarations.",
+					"type": "string",
+					"const": "functionDeclaration"
+				},
+				{
+					"description": "Enforce function expressions assigned to a component binding.",
+					"type": "string",
+					"const": "functionExpression"
+				},
+				{
+					"description": "Enforce arrow functions assigned to a component binding.",
+					"type": "string",
+					"const": "arrowFunction"
+				}
+			]
 		},
 		"ConsistentArrayType": {
 			"oneOf": [
@@ -6972,6 +6992,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactFunctionComponentDefinition": {
+					"description": "Enforce a specific function type for React function components.\nSee https://biomejs.dev/linter/rules/use-react-function-component-definition",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseReactFunctionComponentDefinitionConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useReactNativePlatformComponents": {
 					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
 					"anyOf": [
@@ -11877,6 +11906,18 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactFunctionComponentDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseReactFunctionComponentDefinitionOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReactFunctionComponentsOptions": {
 			"type": "object",
 			"properties": {
@@ -15890,6 +15931,25 @@
 		},
 		"UseReactAsyncServerFunctionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactFunctionComponentDefinitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactFunctionComponentDefinitionOptions" }
+			]
+		},
+		"UseReactFunctionComponentDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"namedComponents": {
+					"description": "The function style to enforce for named React components.",
+					"anyOf": [
+						{ "$ref": "#/$defs/ComponentDefinitionStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseReactFunctionComponentsConfiguration": {

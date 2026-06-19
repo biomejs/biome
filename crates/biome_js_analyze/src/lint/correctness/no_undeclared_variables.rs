@@ -5,9 +5,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsFunction, JsFileSource, JsSyntaxToken, Language, TsAsExpression, TsReferenceType,
-};
+use biome_js_syntax::{AnyJsFunction, JsSyntaxToken, TsAsExpression, TsReferenceType};
+use biome_languages::JsFileSource;
+use biome_languages::javascript::Language;
 use biome_rowan::AstNode;
 use biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions;
 
@@ -91,7 +91,8 @@ impl Rule for NoUndeclaredVariables {
                 // configured globals and embedded bindings aligned on `store`.
                 let store_name = flavor.store_reference_name(text);
 
-                if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name))
+                if ctx.is_global(text)
+                    || store_name.is_some_and(|store_name| ctx.is_global(store_name))
                 {
                     return None;
                 }

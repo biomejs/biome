@@ -3,8 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::HtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
@@ -48,7 +49,7 @@ declare_lint_rule! {
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
     ///
     pub NoAriaHiddenOnFocusable {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaHiddenOnFocusable",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable").inspired(), RuleSource::HtmlEslint("no-aria-hidden-on-focusable").same()],

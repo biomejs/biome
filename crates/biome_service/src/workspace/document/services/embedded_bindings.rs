@@ -1,7 +1,7 @@
 use crate::embed::types::{EmbedBlockKind, SvelteBlockKind};
 use biome_html_syntax::{
-    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlFileSource,
-    HtmlRoot, HtmlVariant, VueVForIdentifierBinding, VueVForValue,
+    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlRoot,
+    VueVForIdentifierBinding, VueVForValue,
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -11,6 +11,8 @@ use biome_js_syntax::{
     JsAssignmentExpression, JsCallExpression, JsExport, JsImport, JsModuleItemList,
     JsSvelteSnippetRoot, JsVariableStatement,
 };
+use biome_languages::HtmlFileSource;
+use biome_languages::html::HtmlVariant;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 
@@ -917,9 +919,10 @@ mod tests {
     use crate::workspace::document::services::embedded_bindings::{
         EmbeddedBuilder, EmbeddedExportedBindings,
     };
-    use biome_html_syntax::HtmlFileSource;
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{AnyJsRoot, JsFileSource};
+    use biome_js_syntax::AnyJsRoot;
+    use biome_languages::HtmlFileSource;
+    use biome_languages::JsFileSource;
 
     fn parse_js(source: &str) -> AnyJsRoot {
         let result = biome_js_parser::parse(source, JsFileSource::ts(), JsParserOptions::default());

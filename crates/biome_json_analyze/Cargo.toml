@@ -25,6 +25,7 @@ biome_deserialize         = { workspace = true }
 biome_diagnostics         = { workspace = true }
 biome_json_factory        = { workspace = true }
 biome_json_syntax         = { workspace = true }
+biome_languages           = { workspace = true, features = ["lang_json"] }
 biome_module_replacements = { workspace = true }
 biome_package             = { workspace = true }
 biome_project_layout      = { workspace = true }

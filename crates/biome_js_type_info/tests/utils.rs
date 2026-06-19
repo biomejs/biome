@@ -9,13 +9,12 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
-use biome_js_syntax::{
-    AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
-};
+use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFunctionDeclaration};
 use biome_js_type_info::{
     GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
     TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
 use biome_test_utils::dump_registered_types;
 

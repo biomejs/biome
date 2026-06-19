@@ -1,5 +1,5 @@
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_syntax::CssFileSource;
+use biome_languages::CssFileSource;
 
 use crate::model::Specificity;
 use crate::semantic_model;

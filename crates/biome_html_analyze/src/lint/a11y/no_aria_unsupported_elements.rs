@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 use biome_string_case::StrLikeExtension;
@@ -39,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAriaUnsupportedElements {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaUnsupportedElements",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").inspired()],

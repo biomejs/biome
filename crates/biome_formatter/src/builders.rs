@@ -1,7 +1,9 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{Argument, Arguments, GroupId, TextRange, TextSize, write};
+use crate::{
+    Argument, Arguments, FormatContext, FormatOptions, GroupId, TextRange, TextSize, write,
+};
 use crate::{Buffer, VecBuffer};
 use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
@@ -275,8 +277,70 @@ impl std::fmt::Debug for Token {
     }
 }
 
+/// Creates a source map entry from the passed source `position`
+/// to the position in the formatted output.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// use biome_rowan::TextSize;
+/// use biome_formatter::{SourceMapGeneration, SourceMarker};
+///
+///
+/// let elements = format!(SimpleFormatContext::default(), [
+///     source_position(TextSize::from(0)),
+///     token("Hello "),
+///     source_position(TextSize::from(7)),
+///     token("'Biome'"),
+/// ])?;
+///
+/// let printed = elements.print_with_indent(0, SourceMapGeneration::Enabled)?;
+///
+/// assert_eq!(printed.as_code(), r#"Hello 'Biome'"#);
+/// assert_eq!(printed.sourcemap(), [
+///     SourceMarker { source: TextSize::from(0), dest: TextSize::from(0) },
+///     SourceMarker { source: TextSize::from(6), dest: TextSize::from(6) },
+///     SourceMarker { source: TextSize::from(7), dest: TextSize::from(6) },
+///     SourceMarker { source: TextSize::from(14), dest: TextSize::from(13) },
+/// ]);
+///
+/// # Ok(())
+/// # }
+/// ```
+pub const fn source_position(position: TextSize) -> SourcePosition {
+    SourcePosition(position)
+}
+
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub struct SourcePosition(TextSize);
+
+impl<Context> Format<Context> for SourcePosition
+where
+    Context: FormatContext,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if f.source_map_generation().is_disabled() {
+            return Ok(());
+        }
+
+        if let Some(FormatElement::SourcePosition(last_position)) = f.buffer.elements().last()
+            && *last_position == self.0
+        {
+            return Ok(());
+        }
+
+        f.write_element(FormatElement::SourcePosition(self.0))?;
+
+        Ok(())
+    }
+}
+
 /// Creates a text from a dynamic string and a range of the input source
-pub fn text(text: &str, position: TextSize) -> Text<'_> {
+pub fn text(text: &str, position: Option<TextSize>) -> Text<'_> {
     debug_assert_no_newlines(text);
 
     Text { text, position }
@@ -285,14 +349,26 @@ pub fn text(text: &str, position: TextSize) -> Text<'_> {
 #[derive(Eq, PartialEq)]
 pub struct Text<'a> {
     text: &'a str,
-    position: TextSize,
+    position: Option<TextSize>,
 }
 
-impl<Context> Format<Context> for Text<'_> {
+impl<Context> Format<Context> for Text<'_>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if let Some(position) = self.position
+            && f.source_map_generation().is_enabled()
+        {
+            return f.write_element(FormatElement::MappedText {
+                text: self.text.to_string().into_boxed_str(),
+                source_position: position,
+            });
+        }
+
         f.write_element(FormatElement::Text {
             text: self.text.to_string().into_boxed_str(),
-            source_position: self.position,
+            text_width: TextWidth::from_text(self.text, f.options().indent_width()),
         })
     }
 }
@@ -321,7 +397,10 @@ pub struct SyntaxTokenCowSlice<'a, L: Language> {
     start: TextSize,
 }
 
-impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
+impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         match &self.text {
             Cow::Borrowed(text) => {
@@ -335,15 +414,31 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 let relative_range = range - self.token.text_range().start();
                 let slice = self.token.token_text().slice(relative_range);
 
-                f.write_element(FormatElement::LocatedTokenText {
-                    slice,
-                    source_position: self.start,
-                })
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedLocatedTokenText {
+                        slice,
+                        source_position: self.start,
+                    })
+                } else {
+                    f.write_element(FormatElement::LocatedTokenText {
+                        slice,
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
             }
-            Cow::Owned(text) => f.write_element(FormatElement::Text {
-                text: text.clone().into_boxed_str(),
-                source_position: self.start,
-            }),
+            Cow::Owned(text) => {
+                if f.source_map_generation().is_enabled() {
+                    f.write_element(FormatElement::MappedText {
+                        text: text.clone().into_boxed_str(),
+                        source_position: self.start,
+                    })
+                } else {
+                    f.write_element(FormatElement::Text {
+                        text: text.clone().into_boxed_str(),
+                        text_width: TextWidth::from_text(text, f.options().indent_width()),
+                    })
+                }
+            }
         }
     }
 }
@@ -375,12 +470,22 @@ pub struct LocatedTokenText {
     source_position: TextSize,
 }
 
-impl<Context> Format<Context> for LocatedTokenText {
+impl<Context> Format<Context> for LocatedTokenText
+where
+    Context: FormatContext,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::LocatedTokenText {
-            slice: self.text.clone(),
-            source_position: self.source_position,
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 
@@ -2285,7 +2390,7 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 ///                 let mut join = f.join_with(&separator);
 ///
 ///                 for item in &self.items {
-///                     join.entry(&format_with(|f| write!(f, [text(item, TextSize::default())])));
+///                     join.entry(&format_with(|f| write!(f, [text(item, None)])));
 ///                 }
 ///                 join.finish()
 ///             })),

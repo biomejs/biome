@@ -2,11 +2,13 @@ use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
-use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssFileSource, EmbeddingStyleApplicability};
+use biome_css_syntax::{AnyCssRoot, CssClassSelector};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
+use biome_languages::CssFileSource;
+use biome_languages::css::EmbeddingStyleApplicability;
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};

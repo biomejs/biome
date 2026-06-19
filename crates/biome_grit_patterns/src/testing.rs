@@ -3,7 +3,7 @@ use crate::grit_query::GritQuery;
 use crate::grit_target_language::GritTargetLanguage;
 use biome_grit_parser::parse_grit;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 
 pub fn compile_js_query(source: &str) -> GritQuery {
     let parsed = parse_grit(source);

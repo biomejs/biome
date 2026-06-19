@@ -48,7 +48,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedTypeFields {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedTypeFields",
         language: "graphql",
         recommended: false,

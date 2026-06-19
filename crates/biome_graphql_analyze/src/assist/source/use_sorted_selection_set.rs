@@ -67,7 +67,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedSelectionSet {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedSelectionSet",
         language: "graphql",
         recommended: false,

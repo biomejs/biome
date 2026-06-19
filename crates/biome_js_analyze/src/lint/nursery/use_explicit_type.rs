@@ -8,9 +8,9 @@ use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
     JsArrayExpression, JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression,
-    JsConditionalExpression, JsConstructorClassMember, JsFileSource, JsFormalParameter,
-    JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
-    JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    JsConditionalExpression, JsConstructorClassMember, JsFormalParameter, JsFunctionDeclaration,
+    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsLanguage,
+    JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
     JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
     JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsSyntaxKind,
     JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
@@ -19,6 +19,7 @@ use biome_js_syntax::{
     TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
     static_value::StaticValue,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
