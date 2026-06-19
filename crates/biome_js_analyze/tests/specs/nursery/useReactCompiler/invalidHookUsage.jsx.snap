@@ -30,6 +30,27 @@ function DynamicHookReference(props) {
 
 # Diagnostics
 ```
+invalidHookUsage.jsx:7:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+    5 │ function HookInNestedFunction() {
+    6 │     function nested() {
+  > 7 │         useState(0);
+      │         ^^^^^^^^
+    8 │     }
+    9 │ 
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
 invalidHookUsage.jsx:16:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This hook usage does not follow React's rules.

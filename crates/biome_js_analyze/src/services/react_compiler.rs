@@ -1,7 +1,6 @@
 use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
-    VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, RuleKey, RuleMetadata,
+    ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
@@ -82,34 +81,6 @@ pub struct ReactCompilerEvent(TextRange);
 impl QueryMatch for ReactCompilerEvent {
     fn text_range(&self) -> TextRange {
         self.0
-    }
-}
-
-#[derive(Clone)]
-pub struct ReactCompiler<N>(pub N);
-
-impl<N> Queryable for ReactCompiler<N>
-where
-    N: AstNode<Language = JsLanguage> + 'static,
-{
-    type Input = JsSyntaxNode;
-    type Output = N;
-
-    type Language = JsLanguage;
-    type Services = ReactCompilerServices;
-
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, || ReactCompilerVisitor::new(root.clone()));
-        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
-    }
-
-    fn key() -> QueryKey<Self::Language> {
-        QueryKey::Syntax(N::KIND_SET)
-    }
-
-    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
-        N::unwrap_cast(node.clone())
     }
 }
 
