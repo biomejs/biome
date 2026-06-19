@@ -88,7 +88,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn record_scanned_path(&self, _path: WalkedPath);
 
     /// Returns and clears the paths recorded via [FileSystem::record_scanned_path].
-    fn take_scanned_paths(&self) -> Vec<WalkedPath>;
+    fn take_scanned_paths(&self) -> HashSetRef<'_, WalkedPath, RandomState, LocalGuard<'_>>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -528,7 +528,7 @@ where
         T::record_scanned_path(self, path)
     }
 
-    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
+    fn take_scanned_paths(&self) -> HashSetRef<'_, WalkedPath, RandomState, LocalGuard<'_>> {
         T::take_scanned_paths(self)
     }
 }

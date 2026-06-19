@@ -1,16 +1,17 @@
+use crate::fs::OpenOptions;
+use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope, WalkedPath};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
+use papaya::{HashSet, HashSetRef, LocalGuard};
 use parking_lot::{Mutex, RawMutex, RwLock, lock_api::ArcMutexGuard};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
+use std::hash::RandomState;
 use std::io;
 use std::panic::{AssertUnwindSafe, RefUnwindSafe};
 use std::path::PathBuf;
 use std::str;
 use std::sync::Arc;
-
-use crate::fs::OpenOptions;
-use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope, WalkedPath};
 
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 
@@ -31,7 +32,7 @@ pub struct MemoryFileSystem {
     allow_write: bool,
     on_get_staged_files: OnGetChangedFiles,
     on_get_changed_files: OnGetChangedFiles,
-    scanned_paths: std::sync::Mutex<Vec<WalkedPath>>,
+    scanned_paths: HashSet<WalkedPath>,
 }
 
 impl Default for MemoryFileSystem {
@@ -131,15 +132,15 @@ impl MemoryFileSystem {
 
 impl FileSystem for MemoryFileSystem {
     fn clear_scanned_paths(&self) {
-        self.scanned_paths.lock().unwrap().clear();
+        self.scanned_paths.pin().clear();
     }
 
     fn record_scanned_path(&self, path: WalkedPath) {
-        self.scanned_paths.lock().unwrap().push(path);
+        self.scanned_paths.pin().insert(path);
     }
 
-    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
-        std::mem::take(&mut self.scanned_paths.lock().unwrap())
+    fn take_scanned_paths(&self) -> HashSetRef<'_, WalkedPath, RandomState, LocalGuard<'_>> {
+        self.scanned_paths.pin()
     }
 
     fn open_with_options(

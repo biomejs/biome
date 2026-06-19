@@ -1,20 +1,19 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
 
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
+use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
+use papaya::{HashSet, HashSetRef, LocalGuard};
+use path_absolutize::Absolutize;
+use rayon::{Scope, scope};
 use std::env::temp_dir;
 use std::fs::{FileType, Metadata};
+use std::hash::RandomState;
 use std::process::Command;
 use std::{
     env, fs,
     io::{self, Read, Seek, Write},
     mem,
-    sync::Mutex,
 };
-
-use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
-use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
-use papaya::HashSet;
-use path_absolutize::Absolutize;
-use rayon::{Scope, scope};
 use tracing::instrument;
 
 use crate::expand_symbolic_link;
@@ -65,9 +64,9 @@ impl FileSystem for OsFileSystem {
         self.scanned_paths.pin().insert(path);
     }
 
-    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
+    fn take_scanned_paths(&self) -> HashSetRef<'_, WalkedPath, RandomState, LocalGuard<'_>> {
         let list = self.scanned_paths.pin();
-        list.iter().cloned().collect()
+        list
     }
 
     fn open_with_options(

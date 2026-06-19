@@ -10,6 +10,8 @@ use biome_service::projects::ProjectKey;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
 use papaya::{HashSet, HashSetRef, LocalGuard};
+use rayon::iter::IntoParallelIterator;
+use rayon::iter::ParallelIterator;
 use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -95,46 +97,62 @@ pub trait Crawler<Output> {
         let scanned_paths = fs.take_scanned_paths();
         match (!scanned_paths.is_empty()).then_some(scanned_paths) {
             Some(scanned) => {
-                fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-                    for input in &inputs {
-                        let input_path = match input {
-                            CrawlPath::Path(input) => input.clone(),
-                            CrawlPath::String(input) => Utf8PathBuf::from(input),
-                        };
-                        let input_path = if input_path.is_absolute() {
-                            input_path
-                        } else if let Some(cwd) = fs.working_directory() {
-                            cwd.join(&input_path)
-                        } else {
-                            input_path
-                        };
+                // Resolve inputs to absolute paths and split them: explicit files keep
+                // direct evaluation; directories become prefixes to match against the
+                // scanner's recorded paths.
+                let mut dir_roots: Vec<Utf8PathBuf> = Vec::new();
+                let mut file_inputs: Vec<Utf8PathBuf> = Vec::new();
+                for input in &inputs {
+                    let input_path = match input {
+                        CrawlPath::Path(input) => input.clone(),
+                        CrawlPath::String(input) => Utf8PathBuf::from(input),
+                    };
+                    // The scanner records absolute paths; resolve against the filesystem's
+                    // working directory (never the process cwd).
+                    let input_path = if input_path.is_absolute() {
+                        input_path
+                    } else if let Some(cwd) = fs.working_directory() {
+                        cwd.join(&input_path)
+                    } else {
+                        input_path
+                    };
 
-                        if fs.path_is_file(&input_path) {
-                            scope.evaluate(ctx, input_path);
-                            continue;
-                        }
-
-                        // Directory inputs: reconstruct candidates from the
-                        // scanner's list and apply the crawler's own filtering.
-                        for walked in scanned
-                            .iter()
-                            .filter(|walked| !walked.is_dir && walked.path.starts_with(&input_path))
-                        {
-                            let biome_path = BiomePath::new_with_kind(
-                                walked.path.clone(),
-                                PathKind::File {
-                                    is_symlink: walked.is_symlink,
-                                },
-                            );
-                            if !ctx.interner().intern_path(biome_path.to_path_buf()) {
-                                continue;
-                            }
-                            if ctx.can_handle(&biome_path) {
-                                ctx.store_path(biome_path);
-                            }
-                        }
+                    if fs.path_is_file(&input_path) {
+                        file_inputs.push(input_path);
+                    } else {
+                        dir_roots.push(input_path);
                     }
-                }));
+                }
+
+                if !file_inputs.is_empty() {
+                    fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
+                        for path in file_inputs {
+                            scope.evaluate(ctx, path);
+                        }
+                    }));
+                }
+
+                let candidates: Vec<_> = scanned
+                    .iter()
+                    .filter(|walked| {
+                        !walked.is_dir && dir_roots.iter().any(|root| walked.path.starts_with(root))
+                    })
+                    .cloned()
+                    .collect();
+
+                candidates.into_par_iter().for_each(|walked| {
+                    let biome_path = BiomePath::new_with_kind(
+                        walked.path,
+                        PathKind::File {
+                            is_symlink: walked.is_symlink,
+                        },
+                    );
+                    if ctx.interner().intern_path(biome_path.to_path_buf())
+                        && ctx.can_handle(&biome_path)
+                    {
+                        ctx.store_path(biome_path);
+                    }
+                });
             }
             // No scan ran, or this is a watcher update with exact paths: walk.
             None => {
