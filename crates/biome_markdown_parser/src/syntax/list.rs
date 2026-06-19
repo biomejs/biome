@@ -159,6 +159,64 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
     }
 }
 
+/// Detect a *sibling* list item at the enclosing list item's marker indent.
+///
+/// `at_bullet_list_item` / `at_order_list_item` use the item's content indent
+/// (`list_item_required_indent`) as their base, which is the right call for
+/// detecting a *child* list. A *sibling*, however, aligns with the enclosing
+/// item's marker indent (`list_item_marker_indent`). When the marker is
+/// followed by more than one space — or by a tab — the marker indent is below
+/// the content indent, so the default check misses siblings and they get
+/// absorbed as lazy paragraph continuation (biomejs/biome#10558).
+///
+/// Returns true only when there is an enclosing list item (`marker_indent > 0`
+/// relative to the current context) and a same-column bullet/ordered marker
+/// sits on the current line.
+pub(crate) fn at_sibling_list_marker(p: &mut MarkdownParser) -> bool {
+    let marker_indent = p.state().list_item_marker_indent;
+    if marker_indent == 0 {
+        return false;
+    }
+    p.lookahead(|p| {
+        if !p.at_line_start() {
+            return false;
+        }
+        let indent = p.line_start_leading_indent();
+        if indent != marker_indent {
+            return false;
+        }
+        skip_leading_whitespace_tokens(p);
+
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            if !is_single_dash_setext_marker(p.cur_text()) {
+                return false;
+            }
+            p.bump_remap(T![-]);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
+            let text = p.cur_text();
+            p.bump_remap(if text == "-" {
+                T![-]
+            } else if text == "*" {
+                T![*]
+            } else {
+                T![+]
+            });
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        false
+    })
+}
+
 fn skip_list_marker_indent(p: &mut MarkdownParser) {
     // Consume whitespace as whitespace trivia (structural, no skipped trivia).
     while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {

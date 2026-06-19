@@ -1,4 +1,5 @@
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
 use biome_parser::lexer::BufferedLexer;
@@ -108,7 +109,12 @@ impl<'source> MarkdownTokenSource<'source> {
     /// Count leading indentation on the current line, including whitespace inside the current token.
     ///
     /// This scans from the start of the current line to the first non-whitespace character.
-    /// Tab characters are counted as 4 spaces per CommonMark spec.
+    ///
+    /// Tabs expand column-relative to the next multiple of `TAB_STOP_SPACES` (4),
+    /// per CommonMark §2.2. Counting a tab as a flat 4 would over-count when the
+    /// tab does not start at a column that is already a multiple of 4 (e.g. a
+    /// leading ` \t` is 4 columns, not 5), which mis-classifies space+tab-indented
+    /// sub-list markers as lazy paragraph continuation (biomejs/biome#10558).
     pub fn line_start_leading_indent(&self) -> usize {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
@@ -117,15 +123,15 @@ impl<'source> MarkdownTokenSource<'source> {
         let line_start = find_line_start(&source[..start]);
 
         let line = &source[line_start..];
-        let mut count = 0usize;
+        let mut column = 0usize;
         for c in line.chars() {
             match c {
-                ' ' => count += 1,
-                '\t' => count += 4,
+                ' ' => column += 1,
+                '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
                 _ => break,
             }
         }
-        count
+        column
     }
 
     /// Returns true if the current token starts on a line with only whitespace before it.
