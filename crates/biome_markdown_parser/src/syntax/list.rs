@@ -165,7 +165,7 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
 /// (`list_item_required_indent`) as their base, which is the right call for
 /// detecting a *child* list. A *sibling*, however, aligns with the enclosing
 /// item's marker indent (`list_item_marker_indent`). When the marker is
-/// followed by more than one space — or by a tab — the marker indent is below
+/// followed by more than one space or by a tab, the marker indent is below
 /// the content indent, so the default check misses siblings and they get
 /// absorbed as lazy paragraph continuation (biomejs/biome#10558).
 ///
