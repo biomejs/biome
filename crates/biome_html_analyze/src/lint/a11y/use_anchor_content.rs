@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlElementList};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -190,6 +190,11 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 false
+            } else if is_slot_element(element) {
+                // `<slot>` renders content provided by the parent component or
+                // assigned nodes, which the linter cannot see, so assume it may
+                // provide accessible content.
+                true
             } else {
                 has_accessible_content(&element.children(), is_astro)
             }
@@ -229,6 +234,9 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                     });
                     !is_hidden
                 }
+                // `<slot>` renders content provided by the parent component or
+                // assigned nodes, which the linter cannot see.
+                Some(name) if name.eq_ignore_ascii_case("slot") => true,
                 // Custom components (PascalCase) may render accessible content
                 Some(name) if name.starts_with(|c: char| c.is_uppercase()) => true,
                 _ => false,
@@ -236,6 +244,19 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         }
         AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => true,
     })
+}
+
+/// Returns `true` if `element` is a `<slot>` element. `<slot>` (Vue, Svelte,
+/// Astro, and web components) renders content provided by the parent or assigned
+/// nodes, which the linter cannot see, so an anchor containing one should not be
+/// reported as empty.
+fn is_slot_element(element: &HtmlElement) -> bool {
+    element
+        .opening_element()
+        .ok()
+        .and_then(|opening| opening.name().ok())
+        .and_then(|name| name.token_text_trimmed())
+        .is_some_and(|name| name.as_ref().eq_ignore_ascii_case("slot"))
 }
 
 /// Checks if the content node contains non-empty text.
