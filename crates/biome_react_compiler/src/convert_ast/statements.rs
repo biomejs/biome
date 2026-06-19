@@ -296,6 +296,17 @@ pub(super) fn convert_statement(
                     .map_err(|_| missing("JsWithStatement", "body"))?,
             )?),
         })),
+        AnyJsStatement::TsTypeAliasDeclaration(declaration) => {
+            Ok(Statement::TSTypeAliasDeclaration(
+                convert_ts_type_alias_declaration(ctx, &declaration)?,
+            ))
+        }
+        AnyJsStatement::TsInterfaceDeclaration(declaration) => Ok(
+            Statement::TSInterfaceDeclaration(convert_ts_interface_declaration(ctx, &declaration)?),
+        ),
+        AnyJsStatement::TsEnumDeclaration(declaration) => Ok(Statement::TSEnumDeclaration(
+            convert_ts_enum_declaration(ctx, &declaration)?,
+        )),
         _ => Err(unsupported(statement.syntax())),
     }
 }
@@ -342,7 +353,7 @@ pub(super) fn convert_class_body(
         base: ctx.base(syntax.text_trimmed_range()),
         body: members
             .into_iter()
-            .map(|_| serde_json::Value::Null)
+            .map(|_| react_compiler_ast::common::RawNode::null())
             .collect(),
     }
 }
@@ -388,33 +399,97 @@ pub(super) fn convert_function_parameters(
     ctx: &ConvertCtx<'_>,
     parameters: &biome_js_syntax::JsParameters,
 ) -> Result<Vec<PatternLike>> {
-    parameters
-        .items()
-        .into_iter()
-        .map(|parameter| {
-            let parameter = parameter.map_err(|_| missing("JsParameters", "parameter"))?;
-            if let Some(rest) = parameter.as_js_rest_parameter() {
-                return Ok(PatternLike::RestElement(RestElement {
-                    base: ctx.base(rest.syntax().text_trimmed_range()),
-                    argument: Box::new(convert_pattern(
-                        ctx,
-                        &rest
-                            .binding()
-                            .map_err(|_| missing("JsRestParameter", "binding"))?,
-                    )?),
-                    type_annotation: None,
-                    decorators: None,
-                }));
-            }
-            let binding = parameter
-                .as_any_js_formal_parameter()
-                .and_then(|parameter| parameter.as_js_formal_parameter())
-                .ok_or_else(|| unsupported(parameter.syntax()))?
-                .binding()
-                .map_err(|_| missing("JsFormalParameter", "binding"))?;
-            convert_pattern(ctx, &binding)
-        })
-        .collect()
+    let mut params = Vec::new();
+    for parameter in parameters.items() {
+        let parameter = parameter.map_err(|_| missing("JsParameters", "parameter"))?;
+        // The TS `this` parameter (`function f(this: T)`) is a type-only
+        // annotation, not a runtime parameter, so the compiler does not model it.
+        if parameter.as_ts_this_parameter().is_some() {
+            continue;
+        }
+        if let Some(rest) = parameter.as_js_rest_parameter() {
+            params.push(PatternLike::RestElement(RestElement {
+                base: ctx.base(rest.syntax().text_trimmed_range()),
+                argument: Box::new(convert_pattern(
+                    ctx,
+                    &rest
+                        .binding()
+                        .map_err(|_| missing("JsRestParameter", "binding"))?,
+                )?),
+                type_annotation: None,
+                decorators: None,
+            }));
+            continue;
+        }
+        let binding = parameter
+            .as_any_js_formal_parameter()
+            .and_then(|parameter| parameter.as_js_formal_parameter())
+            .ok_or_else(|| unsupported(parameter.syntax()))?
+            .binding()
+            .map_err(|_| missing("JsFormalParameter", "binding"))?;
+        params.push(convert_pattern(ctx, &binding)?);
+    }
+    Ok(params)
+}
+
+/// TS type-only declarations (`type`, `interface`, `enum`) carry no runtime
+/// behavior the compiler models, but it still expects them as typed statements
+/// (the OXC frontend emits them too), with type bodies left as opaque raw nodes.
+fn convert_ts_type_alias_declaration(
+    ctx: &ConvertCtx<'_>,
+    declaration: &biome_js_syntax::TsTypeAliasDeclaration,
+) -> Result<react_compiler_ast::declarations::TSTypeAliasDeclaration> {
+    let id = declaration
+        .binding_identifier()
+        .map_err(|_| missing("TsTypeAliasDeclaration", "binding_identifier"))?;
+    Ok(react_compiler_ast::declarations::TSTypeAliasDeclaration {
+        base: ctx.base(declaration.syntax().text_trimmed_range()),
+        id: convert_binding_identifier(ctx, id.syntax())?,
+        type_annotation: react_compiler_ast::common::RawNode::null(),
+        type_parameters: declaration
+            .type_parameters()
+            .map(|_| react_compiler_ast::common::RawNode::null()),
+        declare: None,
+    })
+}
+
+fn convert_ts_interface_declaration(
+    ctx: &ConvertCtx<'_>,
+    declaration: &biome_js_syntax::TsInterfaceDeclaration,
+) -> Result<react_compiler_ast::declarations::TSInterfaceDeclaration> {
+    let id = declaration
+        .id()
+        .map_err(|_| missing("TsInterfaceDeclaration", "id"))?;
+    Ok(react_compiler_ast::declarations::TSInterfaceDeclaration {
+        base: ctx.base(declaration.syntax().text_trimmed_range()),
+        id: convert_binding_identifier(ctx, id.syntax())?,
+        body: react_compiler_ast::common::RawNode::null(),
+        type_parameters: declaration
+            .type_parameters()
+            .map(|_| react_compiler_ast::common::RawNode::null()),
+        extends: declaration.extends_clause().map(|_| Vec::new()),
+        declare: None,
+    })
+}
+
+fn convert_ts_enum_declaration(
+    ctx: &ConvertCtx<'_>,
+    declaration: &biome_js_syntax::TsEnumDeclaration,
+) -> Result<react_compiler_ast::declarations::TSEnumDeclaration> {
+    let id = declaration
+        .id()
+        .map_err(|_| missing("TsEnumDeclaration", "id"))?;
+    Ok(react_compiler_ast::declarations::TSEnumDeclaration {
+        base: ctx.base(declaration.syntax().text_trimmed_range()),
+        id: convert_binding_identifier(ctx, id.syntax())?,
+        members: declaration
+            .members()
+            .into_iter()
+            .map(|_| react_compiler_ast::common::RawNode::null())
+            .collect(),
+        declare: None,
+        is_const: declaration.const_token().map(|_| true),
+    })
 }
 
 pub(super) fn convert_function_body(

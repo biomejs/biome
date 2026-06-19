@@ -38,8 +38,8 @@ use react_compiler_ast::jsx::{
     JSXAttribute, JSXAttributeItem, JSXAttributeName, JSXAttributeValue, JSXChild,
     JSXClosingElement, JSXClosingFragment, JSXElement, JSXElementName, JSXEmptyExpression,
     JSXExpressionContainer, JSXExpressionContainerExpr, JSXFragment, JSXIdentifier,
-    JSXMemberExprObject, JSXMemberExpression, JSXOpeningElement, JSXOpeningFragment,
-    JSXSpreadAttribute, JSXSpreadChild, JSXText,
+    JSXMemberExprObject, JSXMemberExpression, JSXNamespacedName, JSXOpeningElement,
+    JSXOpeningFragment, JSXSpreadAttribute, JSXSpreadChild, JSXText,
 };
 use react_compiler_ast::literals::{
     BigIntLiteral, BooleanLiteral, NullLiteral, NumericLiteral, NumericLiteralExtra, RegExpLiteral,

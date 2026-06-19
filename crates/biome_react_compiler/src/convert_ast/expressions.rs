@@ -479,7 +479,7 @@ pub(super) fn convert_expression(
                         .expression()
                         .map_err(|_| missing("TsAsExpression", "expression"))?,
                 )?),
-                type_annotation: Box::new(serde_json::Value::Null),
+                type_annotation: react_compiler_ast::common::RawNode::null(),
             }))
         }
         AnyJsExpression::TsSatisfiesExpression(expression) => {
@@ -491,7 +491,7 @@ pub(super) fn convert_expression(
                         .expression()
                         .map_err(|_| missing("TsSatisfiesExpression", "expression"))?,
                 )?),
-                type_annotation: Box::new(serde_json::Value::Null),
+                type_annotation: react_compiler_ast::common::RawNode::null(),
             }))
         }
         AnyJsExpression::TsNonNullAssertionExpression(expression) => {
@@ -514,7 +514,7 @@ pub(super) fn convert_expression(
                         .expression()
                         .map_err(|_| missing("TsTypeAssertionExpression", "expression"))?,
                 )?),
-                type_annotation: Box::new(serde_json::Value::Null),
+                type_annotation: react_compiler_ast::common::RawNode::null(),
             }))
         }
         AnyJsExpression::TsInstantiationExpression(expression) => Ok(
@@ -526,9 +526,35 @@ pub(super) fn convert_expression(
                         .expression()
                         .map_err(|_| missing("TsInstantiationExpression", "expression"))?,
                 )?),
-                type_parameters: Box::new(serde_json::Value::Null),
+                type_parameters: react_compiler_ast::common::RawNode::null(),
             }),
         ),
+        AnyJsExpression::JsNewTargetExpression(expression) => {
+            let range = expression.syntax().text_trimmed_range();
+            let meta = expression
+                .new_token()
+                .map_err(|_| missing("JsNewTargetExpression", "new_token"))?;
+            let property = expression
+                .target_token()
+                .map_err(|_| missing("JsNewTargetExpression", "target_token"))?;
+            Ok(Expression::MetaProperty(MetaProperty {
+                base: ctx.base(range),
+                meta: Identifier {
+                    base: ctx.base(meta.text_trimmed_range()),
+                    name: meta.text_trimmed().to_string(),
+                    type_annotation: None,
+                    optional: None,
+                    decorators: None,
+                },
+                property: Identifier {
+                    base: ctx.base(property.text_trimmed_range()),
+                    name: property.text_trimmed().to_string(),
+                    type_annotation: None,
+                    optional: None,
+                    decorators: None,
+                },
+            }))
+        }
         _ => Err(unsupported(expression.syntax())),
     }
 }
@@ -766,6 +792,7 @@ pub(super) fn convert_object_member(
                 decorators: None,
                 return_type: None,
                 type_parameters: None,
+                predicate: None,
             }))
         }
         AnyJsObjectMember::JsGetterObjectMember(getter) => {
@@ -792,6 +819,7 @@ pub(super) fn convert_object_member(
                 decorators: None,
                 return_type: None,
                 type_parameters: None,
+                predicate: None,
             }))
         }
         AnyJsObjectMember::JsSetterObjectMember(setter) => {
@@ -826,6 +854,7 @@ pub(super) fn convert_object_member(
                 decorators: None,
                 return_type: None,
                 type_parameters: None,
+                predicate: None,
             }))
         }
         member => Err(unsupported(member.syntax())),
@@ -886,6 +915,7 @@ pub(super) fn convert_function_expression(
         is_async: function.async_token().is_some(),
         return_type: None,
         type_parameters: None,
+        predicate: None,
     })
 }
 
@@ -985,19 +1015,8 @@ pub(super) fn convert_arrow_parameters(
                 convert_any_binding_identifier(ctx, &binding)?,
             )])
         }
-        biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(parameters) => parameters
-            .items()
-            .into_iter()
-            .map(|parameter| {
-                let parameter = parameter.map_err(|_| missing("JsParameters", "parameter"))?;
-                let binding = parameter
-                    .as_any_js_formal_parameter()
-                    .and_then(|parameter| parameter.as_js_formal_parameter())
-                    .ok_or_else(|| unsupported(parameter.syntax()))?
-                    .binding()
-                    .map_err(|_| missing("JsFormalParameter", "binding"))?;
-                convert_pattern(ctx, &binding)
-            })
-            .collect(),
+        biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(parameters) => {
+            convert_function_parameters(ctx, &parameters)
+        }
     }
 }

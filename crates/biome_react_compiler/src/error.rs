@@ -18,7 +18,9 @@ pub enum ReactCompilerError {
     },
     CompilerDiagnostic {
         range: Option<TextRange>,
-        detail: CompilerErrorDetailInfo,
+        // Boxed: `CompilerErrorDetailInfo` is large, and boxing it keeps
+        // `ReactCompilerError` (and every `Result` that returns it) small.
+        detail: Box<CompilerErrorDetailInfo>,
     },
     CompilerOutput(String),
 }

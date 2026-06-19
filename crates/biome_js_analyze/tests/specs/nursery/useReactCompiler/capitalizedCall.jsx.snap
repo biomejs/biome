@@ -30,7 +30,7 @@ capitalizedCall.jsx:4:12 lint/nursery/useReactCompiler ━━━━━━━━�
   
   i React treats capitalized functions as components, and components should be rendered with JSX so their hooks and lifecycle are handled correctly.
   
-  i Render it as JSX, rename it to start with a lowercase letter, or allowlist it in the React Compiler configuration if it is not a component.
+  i Render it as JSX, or rename it to start with a lowercase letter if it is a regular function rather than a component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
