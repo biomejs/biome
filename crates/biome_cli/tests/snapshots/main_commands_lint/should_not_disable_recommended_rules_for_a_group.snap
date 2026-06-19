@@ -43,6 +43,8 @@ fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 		
   
+  i Using .flatMap() avoids the creation of an intermediate array.
+  
   i Safe fix: Replace the chain with .flatMap().
   
     1 1 │   const array = ["split", "the text", "into words"];
