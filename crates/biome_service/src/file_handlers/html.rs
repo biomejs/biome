@@ -1019,12 +1019,11 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
     let mut ranges = Vec::new();
 
     for descendant in root.descendants() {
-        if let Some(chunk) = JsTemplateChunkElement::cast(descendant) {
-            if let Ok(token) = chunk.template_chunk_token() {
-                if token.text().contains('\n') {
-                    ranges.push(token.text_range());
-                }
-            }
+        if let Some(chunk) = JsTemplateChunkElement::cast(descendant)
+            && let Ok(token) = chunk.template_chunk_token()
+            && token.text().contains('\n')
+        {
+            ranges.push(token.text_range());
         }
     }
 
@@ -1034,10 +1033,11 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
             .pieces()
             .chain(token.trailing_trivia().pieces())
         {
-            if let Some(comment) = piece.as_comments() {
-                if comment.text().starts_with("/*") && comment.has_newline() {
-                    ranges.push(piece.text_range());
-                }
+            if let Some(comment) = piece.as_comments()
+                && comment.text().starts_with("/*")
+                && comment.has_newline()
+            {
+                ranges.push(piece.text_range());
             }
         }
     }
@@ -1059,10 +1059,11 @@ pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
             .pieces()
             .chain(token.trailing_trivia().pieces())
         {
-            if let Some(comment) = piece.as_comments() {
-                if comment.text().starts_with("/*") && comment.has_newline() {
-                    ranges.push(piece.text_range());
-                }
+            if let Some(comment) = piece.as_comments()
+                && comment.text().starts_with("/*")
+                && comment.has_newline()
+            {
+                ranges.push(piece.text_range());
             }
         }
     }
