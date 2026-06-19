@@ -33,13 +33,13 @@ use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
-use papaya::HashMap;
+use papaya::{HashMap, HashSet};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::atomic::{AtomicBool, AtomicU8};
 use tokio::spawn;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
@@ -92,11 +92,13 @@ pub(crate) struct Session {
 
     pub(crate) workspace: Arc<dyn Workspace>,
 
-    configuration_status: AtomicU8,
+    /// Configuration status tracked independently per project key.
+    configuration_status: HashMap<ProjectKey, ConfigurationStatus>,
 
-    /// A flag to notify a message to the user when the configuration is broken, and the LSP attempts
-    /// to update the diagnostics
-    notified_broken_configuration: AtomicBool,
+    /// Remembers which projects we have already warned the user about having a
+    /// broken configuration, so we don't show the same warning again every time
+    /// we refresh that project's diagnostics.
+    notified_broken_configuration: HashSet<ProjectKey>,
 
     /// Tracks whether the initialized() notification has been received
     initialized: AtomicBool,
@@ -226,12 +228,12 @@ impl Session {
             client,
             initialize_params: OnceCell::default(),
             workspace,
-            configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
+            configuration_status: Default::default(),
             projects: Default::default(),
             documents: Default::default(),
             extension_settings: config,
             cancellation,
-            notified_broken_configuration: AtomicBool::new(false),
+            notified_broken_configuration: Default::default(),
             initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
@@ -417,19 +419,20 @@ impl Session {
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
 
-        if !self.notified_broken_configuration() {
-            if self.configuration_status().is_editorconfig_error() {
-                self.set_notified_broken_configuration();
+        let configuration_status = self.configuration_status(doc.project_key);
+        if !self.notified_broken_configuration(doc.project_key) {
+            if configuration_status.is_editorconfig_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client
                     .show_message(MessageType::WARNING, "The .editorconfig file has errors. Biome will report only parsing errors until the file is fixed or its usage is disabled.")
                     .await
-            } else if self.configuration_status().is_error() {
-                self.set_notified_broken_configuration();
+            } else if configuration_status.is_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client
                     .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
                     .await;
-            } else if self.configuration_status().is_plugin_error() {
-                self.set_notified_broken_configuration();
+            } else if configuration_status.is_plugin_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await
             }
         }
@@ -454,7 +457,7 @@ impl Session {
 
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
-            if self.configuration_status().is_loaded() {
+            if configuration_status.is_loaded() {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }
@@ -822,16 +825,14 @@ impl Session {
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
         if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
-            self.set_configuration_status(ConfigurationStatus::Loading);
-
+            let config_file_path = config_path.to_path_buf();
             let status = self
                 .load_biome_configuration_file(config_path, reload)
                 .await;
             debug!("Configuration status: {:?}", status);
-            self.set_configuration_status(status);
+            self.record_configuration_status(config_file_path.as_deref(), status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
-            self.set_configuration_status(ConfigurationStatus::Loading);
             for folder in folders {
                 info!("Attempt to load the configuration file in {:?}", folder.uri);
                 let base_path = folder.uri.to_file_path().map(|p| {
@@ -841,12 +842,12 @@ impl Session {
                     Some(base_path) => {
                         let status = self
                             .load_biome_configuration_file(
-                                ConfigurationPathHint::FromWorkspace(base_path),
+                                ConfigurationPathHint::FromWorkspace(base_path.clone()),
                                 reload,
                             )
                             .await;
                         debug!("Configuration status: {:?}", status);
-                        self.set_configuration_status(status);
+                        self.record_configuration_status(Some(&base_path), status);
                     }
                     None => {
                         error!(
@@ -861,8 +862,9 @@ impl Session {
                 None => ConfigurationPathHint::default(),
                 Some(path) => ConfigurationPathHint::FromLsp(path),
             };
+            let config_file_path = base_path.to_path_buf();
             let status = self.load_biome_configuration_file(base_path, reload).await;
-            self.set_configuration_status(status);
+            self.record_configuration_status(config_file_path.as_deref(), status);
         }
     }
 
@@ -1286,28 +1288,42 @@ impl Session {
         })
     }
 
-    /// Retrieves information regarding the configuration status
-    pub(crate) fn configuration_status(&self) -> ConfigurationStatus {
+    /// Retrieves the configuration status of the given project, defaulting to
+    /// [`ConfigurationStatus::Missing`] when the project has no recorded status.
+    pub(crate) fn configuration_status(&self, project_key: ProjectKey) -> ConfigurationStatus {
         self.configuration_status
-            .load(Ordering::Relaxed)
-            .try_into()
-            .unwrap()
+            .pin()
+            .get(&project_key)
+            .copied()
+            .unwrap_or(ConfigurationStatus::Missing)
     }
 
-    /// Updates the status of the configuration
-    pub(super) fn set_configuration_status(&self, status: ConfigurationStatus) {
+    /// Updates the status of the configuration for the given project.
+    pub(super) fn set_configuration_status(
+        &self,
+        project_key: ProjectKey,
+        status: ConfigurationStatus,
+    ) {
         self.notified_broken_configuration
-            .store(false, Ordering::Relaxed);
-        self.configuration_status
-            .store(status as u8, Ordering::Relaxed);
+            .pin()
+            .remove(&project_key);
+        self.configuration_status.pin().insert(project_key, status);
     }
 
-    fn notified_broken_configuration(&self) -> bool {
-        self.notified_broken_configuration.load(Ordering::Relaxed)
+    /// Records the configuration status for the project that owns `path`.
+    fn record_configuration_status(&self, path: Option<&Utf8Path>, status: ConfigurationStatus) {
+        if let Some(project_key) = path.and_then(|path| self.project_for_path(path)) {
+            self.set_configuration_status(project_key, status);
+        }
     }
-    fn set_notified_broken_configuration(&self) {
+
+    fn notified_broken_configuration(&self, project_key: ProjectKey) -> bool {
         self.notified_broken_configuration
-            .store(true, Ordering::Relaxed);
+            .pin()
+            .contains(&project_key)
+    }
+    fn set_notified_broken_configuration(&self, project_key: ProjectKey) {
+        self.notified_broken_configuration.pin().insert(project_key);
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
@@ -1329,8 +1345,7 @@ impl Session {
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
-        debug!("configuration status {:?}", self.configuration_status());
-        match self.configuration_status() {
+        let disabled_for = |status: ConfigurationStatus| match status {
             ConfigurationStatus::Loaded => false,
             ConfigurationStatus::Missing => self
                 .extension_settings
@@ -1341,7 +1356,17 @@ impl Session {
             | ConfigurationStatus::EditorConfigError
             | ConfigurationStatus::PluginError => false,
             ConfigurationStatus::Loading => true,
+        };
+
+        // This is a single on/off switch for the whole editor: formatting and
+        // code actions are turned on once, not per file. Each request later checks
+        // the file's own project again, so we keep them on as long as at least one
+        // project can use them, and only turn them off when every project would.
+        let statuses = self.configuration_status.pin();
+        if statuses.is_empty() {
+            return self.requires_configuration();
         }
+        statuses.values().all(|status| disabled_for(*status))
     }
 
     pub fn position_encoding(&self) -> PositionEncoding {
