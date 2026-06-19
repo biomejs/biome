@@ -1185,15 +1185,11 @@ mod tests {
 
     #[test]
     fn reindent_skips_template_literal_continuation_at_exact_range_boundary() {
-        // The first continuation line of `\ncontent` lands exactly at byte
-        // range.start() in the trimmed code. The strict `r.start() < line_start`
-        // check must hold — i.e. ranges must be computed from the trimmed string.
-        //
-        // Template chunk "\ncontinuation\n" in "const x = `\ncontinuation\n`;"
-        // starts at byte 11 (right after the opening backtick at byte 10).
-        // "continuation" begins at byte 12 → 11 < 12 → verbatim: no indent.
-        // The line after the closing backtick ("`;" at byte 25) falls outside
-        // the chunk and receives the host indent.
+        // The template chunk starts right after the opening backtick. The
+        // reindent check uses strict `<` so that a line whose first byte is
+        // the chunk start is still treated as verbatim. The line after the
+        // closing backtick falls outside the chunk and should receive the
+        // host indent.
         let code = "const x = `\ncontinuation\n`;";
         let ranges = js_verbatim_ranges(code);
         assert_eq!(
@@ -1204,10 +1200,11 @@ mod tests {
 
     #[test]
     fn verbatim_ranges_from_untrimmed_code_shift_offsets() {
-        // Demonstrates the offset-mismatch bug: when verbatim ranges come from
-        // untrimmed code (leading '\n' shifts every byte position by 1), the
-        // first continuation line lands exactly at the (now-shifted) range.start()
-        // and escapes the strict `<` check, gaining the host indent prefix.
+        // If verbatim ranges are computed from untrimmed code (e.g. with a
+        // leading newline), all byte offsets shift by one. The continuation
+        // line then lands exactly on range.start() and slips past the strict
+        // `<` check, so it wrongly receives the host indent. This test
+        // documents that behaviour — the caller must always pass trimmed code.
         let trimmed = "const x = `\ncontinuation\n`;";
         let untrimmed = "\nconst x = `\ncontinuation\n`;"; // leading '\n' shifts ranges +1
 

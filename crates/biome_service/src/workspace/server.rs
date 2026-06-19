@@ -2,6 +2,7 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::file_handlers::html::{css_verbatim_ranges, js_verbatim_ranges};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
@@ -2851,9 +2852,9 @@ impl Workspace for WorkspaceServer {
                     // reindent_embedded_code — so byte offsets match.
                     let trimmed = results.code.trim();
                     if embedded_snippet.is_js() {
-                        crate::file_handlers::html::js_verbatim_ranges(trimmed)
+                        js_verbatim_ranges(trimmed)
                     } else if embedded_snippet.is_css() {
-                        crate::file_handlers::html::css_verbatim_ranges(trimmed)
+                        css_verbatim_ranges(trimmed)
                     } else {
                         vec![]
                     }
