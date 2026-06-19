@@ -10,7 +10,7 @@ use std::str;
 use std::sync::Arc;
 
 use crate::fs::OpenOptions;
-use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
+use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope, WalkedPath};
 
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 
@@ -31,6 +31,7 @@ pub struct MemoryFileSystem {
     allow_write: bool,
     on_get_staged_files: OnGetChangedFiles,
     on_get_changed_files: OnGetChangedFiles,
+    scanned_paths: std::sync::Mutex<Vec<WalkedPath>>,
 }
 
 impl Default for MemoryFileSystem {
@@ -39,6 +40,7 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
+            scanned_paths: Default::default(),
             on_get_staged_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
                 Vec::new,
             )))))),
@@ -128,6 +130,18 @@ impl MemoryFileSystem {
 }
 
 impl FileSystem for MemoryFileSystem {
+    fn clear_scanned_paths(&self) {
+        self.scanned_paths.lock().unwrap().clear();
+    }
+
+    fn record_scanned_path(&self, path: WalkedPath) {
+        self.scanned_paths.lock().unwrap().push(path);
+    }
+
+    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
+        std::mem::take(&mut self.scanned_paths.lock().unwrap())
+    }
+
     fn open_with_options(
         &self,
         path: &Utf8Path,
@@ -322,6 +336,10 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                 if should_process_file {
                     let _ = ctx.interner().intern_path(path.into());
                     let biome_path = BiomePath::new(path);
+                    // Record the path before the `can_handle` gate, so a context
+                    // can capture every walked path even for entries it won't
+                    // handle (mirrors the behavior of the OS traversal).
+                    ctx.visit_path(&biome_path);
                     if !ctx.can_handle(&biome_path) {
                         continue;
                     }

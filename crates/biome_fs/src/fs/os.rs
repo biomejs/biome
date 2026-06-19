@@ -7,10 +7,12 @@ use std::{
     env, fs,
     io::{self, Read, Seek, Write},
     mem,
+    sync::Mutex,
 };
 
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
+use papaya::HashSet;
 use path_absolutize::Absolutize;
 use rayon::{Scope, scope};
 use tracing::instrument;
@@ -18,7 +20,7 @@ use tracing::instrument;
 use crate::expand_symbolic_link;
 use crate::fs::OpenOptions;
 use crate::{
-    BiomePath, FileSystem, MemoryFileSystem,
+    BiomePath, FileSystem, MemoryFileSystem, WalkedPath,
     fs::{TraversalContext, TraversalScope},
 };
 
@@ -27,12 +29,17 @@ use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 /// Implementation of [FileSystem] that directly calls through to the underlying OS
 pub struct OsFileSystem {
     pub working_directory: Option<Utf8PathBuf>,
+
+    /// Files walked during a traversal, retained so a later traversal on this
+    /// same instance can reuse them instead of walking the disk again.
+    scanned_paths: HashSet<WalkedPath>,
 }
 
 impl OsFileSystem {
     pub fn new(working_directory: Utf8PathBuf) -> Self {
         Self {
             working_directory: Some(working_directory),
+            scanned_paths: HashSet::default(),
         }
     }
 }
@@ -42,11 +49,27 @@ impl Default for OsFileSystem {
         let working_directory = env::current_dir()
             .map(|p| Utf8PathBuf::from_path_buf(p).expect("To be a UTF-8 path"))
             .ok();
-        Self { working_directory }
+        Self {
+            working_directory,
+            scanned_paths: HashSet::default(),
+        }
     }
 }
 
 impl FileSystem for OsFileSystem {
+    fn clear_scanned_paths(&self) {
+        self.scanned_paths.pin().clear();
+    }
+
+    fn record_scanned_path(&self, path: WalkedPath) {
+        self.scanned_paths.pin().insert(path);
+    }
+
+    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
+        let list = self.scanned_paths.pin();
+        list.iter().cloned().collect()
+    }
+
     fn open_with_options(
         &self,
         path: &Utf8Path,
@@ -345,6 +368,8 @@ fn handle_any_file<'scope>(
     } else {
         BiomePath::new_with_kind(&path, path_kind)
     };
+
+    ctx.visit_path(&biome_path);
 
     // Performing this check here let's us skip unsupported
     // files entirely, as well as silently ignore unsupported files when

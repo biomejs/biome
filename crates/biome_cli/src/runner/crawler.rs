@@ -4,7 +4,7 @@ use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
 use crate::runner::process_file::{Message, MessageStat, ProcessFile};
 use biome_diagnostics::{Error, Severity};
-use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
+use biome_fs::{BiomePath, FileSystem, PathInterner, PathKind, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use camino::Utf8PathBuf;
@@ -17,6 +17,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
 
+#[derive(Debug)]
 pub enum CrawlPath {
     String(String),
     Path(Utf8PathBuf),
@@ -91,14 +92,64 @@ pub trait Crawler<Output> {
         ctx: &'a CrawlerOptions<Self::Handler, Self::ProcessFile>,
     ) -> (Duration, Vec<BiomePath>) {
         let start = Instant::now();
-        fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-            for input in inputs {
-                match input {
-                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
-                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
-                };
+        let scanned_paths = fs.take_scanned_paths();
+        match (!scanned_paths.is_empty()).then_some(scanned_paths) {
+            Some(scanned) => {
+                fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
+                    for input in &inputs {
+                        let input_path = match input {
+                            CrawlPath::Path(input) => input.clone(),
+                            CrawlPath::String(input) => Utf8PathBuf::from(input),
+                        };
+                        let input_path = if input_path.is_absolute() {
+                            input_path
+                        } else if let Some(cwd) = fs.working_directory() {
+                            cwd.join(&input_path)
+                        } else {
+                            input_path
+                        };
+
+                        if fs.path_is_file(&input_path) {
+                            scope.evaluate(ctx, input_path);
+                            continue;
+                        }
+
+                        // Directory inputs: reconstruct candidates from the
+                        // scanner's list and apply the crawler's own filtering.
+                        for walked in scanned
+                            .iter()
+                            .filter(|walked| !walked.is_dir && walked.path.starts_with(&input_path))
+                        {
+                            let biome_path = BiomePath::new_with_kind(
+                                walked.path.clone(),
+                                PathKind::File {
+                                    is_symlink: walked.is_symlink,
+                                },
+                            );
+                            if !ctx.interner().intern_path(biome_path.to_path_buf()) {
+                                continue;
+                            }
+                            if ctx.can_handle(&biome_path) {
+                                ctx.store_path(biome_path);
+                            }
+                        }
+                    }
+                }));
             }
-        }));
+            // No scan ran, or this is a watcher update with exact paths: walk.
+            None => {
+                fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
+                    for input in inputs {
+                        match input {
+                            CrawlPath::Path(input) => scope.evaluate(ctx, input),
+                            CrawlPath::String(input) => {
+                                scope.evaluate(ctx, Utf8PathBuf::from(input))
+                            }
+                        };
+                    }
+                }));
+            }
+        }
 
         let mut handle_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
         handle_paths.sort_unstable();

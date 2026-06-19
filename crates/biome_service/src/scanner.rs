@@ -15,7 +15,7 @@ use crate::projects::ProjectKey;
 use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
-use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
+use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope, WalkedPath};
 use biome_module_graph::ModuleDependencies;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -423,6 +423,7 @@ impl Scanner {
 
         let workspace = ctx.workspace;
         let fs = workspace.fs();
+        fs.clear_scanned_paths();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             scope.evaluate(ctx, folder.to_path_buf());
         }));
@@ -810,6 +811,17 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
 
     fn should_store_dirs(&self) -> bool {
         self.watch
+    }
+
+    fn visit_path(&self, path: &BiomePath) {
+        let path_kind = path.path_kind();
+        if path_kind.is_file() {
+            self.workspace.fs().record_scanned_path(WalkedPath {
+                path: path.to_path_buf(),
+                is_dir: false,
+                is_symlink: path_kind.is_symlink(),
+            });
+        }
     }
 }
 

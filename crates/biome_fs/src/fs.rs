@@ -67,10 +67,28 @@ impl PathKind {
     }
 }
 
+/// A file encountered while traversing a [FileSystem].
+#[derive(Eq, Hash, PartialEq, Clone, Debug)]
+pub struct WalkedPath {
+    pub path: Utf8PathBuf,
+    pub is_dir: bool,
+    pub is_symlink: bool,
+}
+
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
     -> io::Result<Box<dyn File>>;
+
+    /// Clears any paths previously recorded via [FileSystem::record_scanned_path].
+    fn clear_scanned_paths(&self);
+
+    /// Records a path walked during a traversal, so a later traversal on this
+    /// same filesystem can reuse it instead of walking the disk again.
+    fn record_scanned_path(&self, _path: WalkedPath);
+
+    /// Returns and clears the paths recorded via [FileSystem::record_scanned_path].
+    fn take_scanned_paths(&self) -> Vec<WalkedPath>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -438,6 +456,12 @@ pub trait TraversalContext: Sync {
     fn should_store_dirs(&self) -> bool {
         false
     }
+
+    /// Called for every file entry the traversal encounters, before the
+    /// [TraversalContext::can_handle] gate. This lets a context record the full
+    /// set of walked paths for later reuse, regardless of whether the path is
+    /// ultimately handled. Defaults to a no-op.
+    fn visit_path(&self, _path: &BiomePath) {}
 }
 
 impl<T> FileSystem for Arc<T>
@@ -494,6 +518,18 @@ where
 
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
         T::read_link(self, path)
+    }
+
+    fn clear_scanned_paths(&self) {
+        T::clear_scanned_paths(self)
+    }
+
+    fn record_scanned_path(&self, path: WalkedPath) {
+        T::record_scanned_path(self, path)
+    }
+
+    fn take_scanned_paths(&self) -> Vec<WalkedPath> {
+        T::take_scanned_paths(self)
     }
 }
 
