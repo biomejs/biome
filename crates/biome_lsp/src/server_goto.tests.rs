@@ -742,4 +742,35 @@ async fn goto_definition_css_cross_file_multiple_definitions() -> Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn goto_definition_node_modules_import_does_not_error() -> Result<()> {
+    // Regression test for https://github.com/biomejs/biome/issues/10694.
+    //
+    // Line 0: `import { helper } from 'external-pkg';`
+    //          0123456789 → `helper` starts at char 9
+    let (res, _fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_node_modules_import_does_not_error",
+        config: r#"{ "linter": { "enabled": true } }"#,
+        files: vec![
+            (
+                "node_modules/external-pkg/index.js",
+                "export function helper() {}\n",
+            ),
+            ("main.js", "import { helper } from 'external-pkg';\nhelper();\n"),
+        ],
+        open_file: "main.js",
+        language_id: "javascript",
+        source: "import { helper } from 'external-pkg';\nhelper();\n",
+        cursor: pos(0, 9),
+    })
+    .await?;
+
+    assert!(
+        res.is_none(),
+        "go-to definition on a node_modules import should resolve to None, not error"
+    );
+
+    Ok(())
+}
+
 // #endregion
