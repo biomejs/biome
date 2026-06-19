@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "a11y": {
+        "useValidAutocomplete": {
+          "level": "error",
+          "options": {
+            "inputComponents": [
+              "Foo",
+              "Bar",
+              "Input"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
