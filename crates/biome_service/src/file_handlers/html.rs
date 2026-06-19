@@ -1021,7 +1021,7 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
     for descendant in root.descendants() {
         if let Some(chunk) = JsTemplateChunkElement::cast(descendant)
             && let Ok(token) = chunk.template_chunk_token()
-            && token.text().contains('\n')
+            && token.text().contains(['\n', '\r'])
         {
             ranges.push(token.text_range());
         }
@@ -1034,7 +1034,6 @@ pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
             .chain(token.trailing_trivia().pieces())
         {
             if let Some(comment) = piece.as_comments()
-                && comment.text().starts_with("/*")
                 && comment.has_newline()
             {
                 ranges.push(piece.text_range());
@@ -1060,7 +1059,6 @@ pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
             .chain(token.trailing_trivia().pieces())
         {
             if let Some(comment) = piece.as_comments()
-                && comment.text().starts_with("/*")
                 && comment.has_newline()
             {
                 ranges.push(piece.text_range());
