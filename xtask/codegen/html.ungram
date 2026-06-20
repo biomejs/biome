@@ -253,6 +253,7 @@ AnySvelteBlock =
 	| SvelteRenderBlock
 	| SvelteHtmlBlock
 	| SvelteConstBlock
+	| SvelteDeclarationBlock
 	| SvelteIfBlock
 	| SvelteEachBlock
 	| SvelteAwaitBlock
@@ -324,6 +325,14 @@ SvelteConstBlock =
 	'const'
   expression: HtmlTextExpression
   '}'
+
+// {let x = ...}  /  {const a = 1, b = 2}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SvelteDeclarationBlock =
+	'{'
+	keyword_token: ('let' | 'const')
+	declarations: HtmlTextExpression
+	'}'
 
 // {#if ..} {:else if ..} {:else} {/if}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

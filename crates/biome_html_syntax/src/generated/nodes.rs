@@ -2110,6 +2110,56 @@ pub struct SvelteDebugBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct SvelteDeclarationBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl SvelteDeclarationBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> SvelteDeclarationBlockFields {
+        SvelteDeclarationBlockFields {
+            l_curly_token: self.l_curly_token(),
+            keyword_token: self.keyword_token(),
+            declarations: self.declarations(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn keyword_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn declarations(&self) -> SyntaxResult<HtmlTextExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for SvelteDeclarationBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct SvelteDeclarationBlockFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub keyword_token: SyntaxResult<SyntaxToken>,
+    pub declarations: SyntaxResult<HtmlTextExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SvelteDirectiveModifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4884,6 +4934,7 @@ pub enum AnySvelteBlock {
     SvelteBogusBlock(SvelteBogusBlock),
     SvelteConstBlock(SvelteConstBlock),
     SvelteDebugBlock(SvelteDebugBlock),
+    SvelteDeclarationBlock(SvelteDeclarationBlock),
     SvelteEachBlock(SvelteEachBlock),
     SvelteHtmlBlock(SvelteHtmlBlock),
     SvelteIfBlock(SvelteIfBlock),
@@ -4913,6 +4964,12 @@ impl AnySvelteBlock {
     pub fn as_svelte_debug_block(&self) -> Option<&SvelteDebugBlock> {
         match &self {
             Self::SvelteDebugBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_svelte_declaration_block(&self) -> Option<&SvelteDeclarationBlock> {
+        match &self {
+            Self::SvelteDeclarationBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -7850,6 +7907,68 @@ impl From<SvelteDebugBlock> for SyntaxNode {
 }
 impl From<SvelteDebugBlock> for SyntaxElement {
     fn from(n: SvelteDebugBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for SvelteDeclarationBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SVELTE_DECLARATION_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SVELTE_DECLARATION_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for SvelteDeclarationBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("SvelteDeclarationBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "keyword_token",
+                    &support::DebugSyntaxResult(self.keyword_token()),
+                )
+                .field(
+                    "declarations",
+                    &support::DebugSyntaxResult(self.declarations()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("SvelteDeclarationBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<SvelteDeclarationBlock> for SyntaxNode {
+    fn from(n: SvelteDeclarationBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<SvelteDeclarationBlock> for SyntaxElement {
+    fn from(n: SvelteDeclarationBlock) -> Self {
         n.syntax.into()
     }
 }
@@ -11743,6 +11862,11 @@ impl From<SvelteDebugBlock> for AnySvelteBlock {
         Self::SvelteDebugBlock(node)
     }
 }
+impl From<SvelteDeclarationBlock> for AnySvelteBlock {
+    fn from(node: SvelteDeclarationBlock) -> Self {
+        Self::SvelteDeclarationBlock(node)
+    }
+}
 impl From<SvelteEachBlock> for AnySvelteBlock {
     fn from(node: SvelteEachBlock) -> Self {
         Self::SvelteEachBlock(node)
@@ -11779,6 +11903,7 @@ impl AstNode for AnySvelteBlock {
         .union(SvelteBogusBlock::KIND_SET)
         .union(SvelteConstBlock::KIND_SET)
         .union(SvelteDebugBlock::KIND_SET)
+        .union(SvelteDeclarationBlock::KIND_SET)
         .union(SvelteEachBlock::KIND_SET)
         .union(SvelteHtmlBlock::KIND_SET)
         .union(SvelteIfBlock::KIND_SET)
@@ -11792,6 +11917,7 @@ impl AstNode for AnySvelteBlock {
                 | SVELTE_BOGUS_BLOCK
                 | SVELTE_CONST_BLOCK
                 | SVELTE_DEBUG_BLOCK
+                | SVELTE_DECLARATION_BLOCK
                 | SVELTE_EACH_BLOCK
                 | SVELTE_HTML_BLOCK
                 | SVELTE_IF_BLOCK
@@ -11806,6 +11932,9 @@ impl AstNode for AnySvelteBlock {
             SVELTE_BOGUS_BLOCK => Self::SvelteBogusBlock(SvelteBogusBlock { syntax }),
             SVELTE_CONST_BLOCK => Self::SvelteConstBlock(SvelteConstBlock { syntax }),
             SVELTE_DEBUG_BLOCK => Self::SvelteDebugBlock(SvelteDebugBlock { syntax }),
+            SVELTE_DECLARATION_BLOCK => {
+                Self::SvelteDeclarationBlock(SvelteDeclarationBlock { syntax })
+            }
             SVELTE_EACH_BLOCK => Self::SvelteEachBlock(SvelteEachBlock { syntax }),
             SVELTE_HTML_BLOCK => Self::SvelteHtmlBlock(SvelteHtmlBlock { syntax }),
             SVELTE_IF_BLOCK => Self::SvelteIfBlock(SvelteIfBlock { syntax }),
@@ -11822,6 +11951,7 @@ impl AstNode for AnySvelteBlock {
             Self::SvelteBogusBlock(it) => it.syntax(),
             Self::SvelteConstBlock(it) => it.syntax(),
             Self::SvelteDebugBlock(it) => it.syntax(),
+            Self::SvelteDeclarationBlock(it) => it.syntax(),
             Self::SvelteEachBlock(it) => it.syntax(),
             Self::SvelteHtmlBlock(it) => it.syntax(),
             Self::SvelteIfBlock(it) => it.syntax(),
@@ -11836,6 +11966,7 @@ impl AstNode for AnySvelteBlock {
             Self::SvelteBogusBlock(it) => it.into_syntax(),
             Self::SvelteConstBlock(it) => it.into_syntax(),
             Self::SvelteDebugBlock(it) => it.into_syntax(),
+            Self::SvelteDeclarationBlock(it) => it.into_syntax(),
             Self::SvelteEachBlock(it) => it.into_syntax(),
             Self::SvelteHtmlBlock(it) => it.into_syntax(),
             Self::SvelteIfBlock(it) => it.into_syntax(),
@@ -11852,6 +11983,7 @@ impl std::fmt::Debug for AnySvelteBlock {
             Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteConstBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteDebugBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::SvelteDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteEachBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteIfBlock(it) => std::fmt::Debug::fmt(it, f),
@@ -11868,6 +12000,7 @@ impl From<AnySvelteBlock> for SyntaxNode {
             AnySvelteBlock::SvelteBogusBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteConstBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteDebugBlock(it) => it.into_syntax(),
+            AnySvelteBlock::SvelteDeclarationBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteEachBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteHtmlBlock(it) => it.into_syntax(),
             AnySvelteBlock::SvelteIfBlock(it) => it.into_syntax(),
@@ -13269,6 +13402,11 @@ impl std::fmt::Display for SvelteCurlyDestructuredName {
     }
 }
 impl std::fmt::Display for SvelteDebugBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SvelteDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
