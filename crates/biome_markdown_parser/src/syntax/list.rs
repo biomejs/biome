@@ -107,17 +107,12 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
             // Pure-space indentation: keep the original behavior. When the
             // current token still carries the pre-marker indentation, measure
             // to the first non-whitespace via the standard helper; otherwise
-            // measure up to the cursor.
+            // count characters up to the cursor (no tabs means each one
+            // advances the column by one).
             if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                 return p.line_start_leading_indent();
             }
-            let mut column = 0;
-            for c in source[line_start..pos].chars() {
-                // No tabs here, so every character (space or content) advances
-                // by one column, matching the original up-to-cursor scan.
-                column += 1;
-            }
-            return column;
+            return source[line_start..pos].chars().count();
         }
 
         // Virtual line start with a tab in the leading whitespace: compute the
