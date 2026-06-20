@@ -1432,6 +1432,7 @@ pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![each],
     T![debug],
     T![const],
+    T![let],
     T![attach],
     T![render],
     T![key],
