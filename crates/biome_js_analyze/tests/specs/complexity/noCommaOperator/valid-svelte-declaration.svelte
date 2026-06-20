@@ -1,0 +1,11 @@
+<!-- should not generate diagnostics -->
+<script>
+	let items = [{ w: 1, h: 2 }];
+</script>
+
+{const a = 1, b = 2, c = 3}
+
+{#each items as item}
+	{const width = item.w, height = item.h}
+	<span>{width} {height}</span>
+{/each}
