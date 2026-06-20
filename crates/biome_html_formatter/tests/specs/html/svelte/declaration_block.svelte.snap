@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/declaration_block.svelte
+---
+
+# Input
+
+```svelte
+{let count = 0}
+{const doubled = count * 2}
+{const a = 1, b = 2, c = 3}
+{const { x, y } = point}
+{const [first, second] = items}
+{const    extra_space = 1}
+{#each boxes as box}
+	{let area = box.width * box.height}
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{let count = 0}
+{const doubled = count * 2}
+{const a = 1, b = 2, c = 3}
+{const { x, y } = point}
+{const [first, second] = items}
+{const extra_space = 1}
+{#each boxes as box}
+	{let area = box.width * box.height}
+{/each}
+
+```
