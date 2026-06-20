@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsFileSource, JsForStatement, JsSequenceExpression};
+use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
 use biome_rule_options::no_comma_operator::NoCommaOperatorOptions;
 
@@ -56,12 +56,6 @@ impl Rule for NoCommaOperator {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let seq = ctx.query();
-        // Commas separating declarations in a Svelte declaration block
-        // (`{const a = 1, b = 2}`) are parsed as a sequence expression, but they
-        // are declaration separators, not an actual comma operator.
-        if ctx.source_type::<JsFileSource>().is_svelte_const_block() {
-            return None;
-        }
         // Ignore nested sequences
         if seq.parent::<JsSequenceExpression>().is_some() {
             return None;
