@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{ letter }
+{ constant }
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@2..9 "letter " [] [],
+            },
+            r_curly_token: R_CURLY@9..10 "}" [] [],
+        },
+        HtmlSingleTextExpression {
+            l_curly_token: L_CURLY@10..13 "{" [Newline("\n")] [Whitespace(" ")],
+            expression: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@13..22 "constant " [] [],
+            },
+            r_curly_token: R_CURLY@22..23 "}" [] [],
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..24
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..23
+    0: HTML_SINGLE_TEXT_EXPRESSION@0..10
+      0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+      1: HTML_TEXT_EXPRESSION@2..9
+        0: HTML_LITERAL@2..9 "letter " [] []
+      2: R_CURLY@9..10 "}" [] []
+    1: HTML_SINGLE_TEXT_EXPRESSION@10..23
+      0: L_CURLY@10..13 "{" [Newline("\n")] [Whitespace(" ")]
+      1: HTML_TEXT_EXPRESSION@13..22
+        0: HTML_LITERAL@13..22 "constant " [] []
+      2: R_CURLY@22..23 "}" [] []
+  4: EOF@23..24 "" [Newline("\n")] []
+
+```

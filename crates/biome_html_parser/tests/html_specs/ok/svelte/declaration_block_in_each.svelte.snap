@@ -1,0 +1,145 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each boxes as box}
+	{let area = box.width * box.height}
+	{box.width} * {box.height} = {area}
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..13 " boxes " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@16..19 "box" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@19..20 "}" [] [],
+            },
+            children: HtmlElementList [
+                SvelteDeclarationBlock {
+                    l_curly_token: L_CURLY@20..23 "{" [Newline("\n"), Whitespace("\t")] [],
+                    keyword_token: LET_KW@23..27 "let" [] [Whitespace(" ")],
+                    declarations: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@27..56 "area = box.width * box.height" [] [],
+                    },
+                    r_curly_token: R_CURLY@56..57 "}" [] [],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@57..60 "{" [Newline("\n"), Whitespace("\t")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@60..69 "box.width" [] [],
+                    },
+                    r_curly_token: R_CURLY@69..71 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@71..73 "*" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@73..74 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@74..84 "box.height" [] [],
+                    },
+                    r_curly_token: R_CURLY@84..86 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@86..88 "=" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@88..89 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@89..93 "area" [] [],
+                    },
+                    r_curly_token: R_CURLY@93..94 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@94..97 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@97..101 "each" [] [],
+                r_curly_token: R_CURLY@101..102 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@102..103 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..103
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..102
+    0: SVELTE_EACH_BLOCK@0..102
+      0: SVELTE_EACH_OPENING_BLOCK@0..20
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..13
+          0: HTML_LITERAL@6..13 " boxes " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@13..19
+          0: AS_KW@13..16 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@16..19
+            0: IDENT@16..19 "box" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@19..20 "}" [] []
+      1: HTML_ELEMENT_LIST@20..94
+        0: SVELTE_DECLARATION_BLOCK@20..57
+          0: L_CURLY@20..23 "{" [Newline("\n"), Whitespace("\t")] []
+          1: LET_KW@23..27 "let" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@27..56
+            0: HTML_LITERAL@27..56 "area = box.width * box.height" [] []
+          3: R_CURLY@56..57 "}" [] []
+        1: HTML_SINGLE_TEXT_EXPRESSION@57..71
+          0: L_CURLY@57..60 "{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TEXT_EXPRESSION@60..69
+            0: HTML_LITERAL@60..69 "box.width" [] []
+          2: R_CURLY@69..71 "}" [] [Whitespace(" ")]
+        2: HTML_CONTENT@71..73
+          0: HTML_LITERAL@71..73 "*" [] [Whitespace(" ")]
+        3: HTML_SINGLE_TEXT_EXPRESSION@73..86
+          0: L_CURLY@73..74 "{" [] []
+          1: HTML_TEXT_EXPRESSION@74..84
+            0: HTML_LITERAL@74..84 "box.height" [] []
+          2: R_CURLY@84..86 "}" [] [Whitespace(" ")]
+        4: HTML_CONTENT@86..88
+          0: HTML_LITERAL@86..88 "=" [] [Whitespace(" ")]
+        5: HTML_SINGLE_TEXT_EXPRESSION@88..94
+          0: L_CURLY@88..89 "{" [] []
+          1: HTML_TEXT_EXPRESSION@89..93
+            0: HTML_LITERAL@89..93 "area" [] []
+          2: R_CURLY@93..94 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@94..102
+        0: SV_CURLY_SLASH@94..97 "{/" [Newline("\n")] []
+        1: EACH_KW@97..101 "each" [] []
+        2: R_CURLY@101..102 "}" [] []
+  4: EOF@102..103 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,51 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{const area = box.width * box.height}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            keyword_token: CONST_KW@1..7 "const" [] [Whitespace(" ")],
+            declarations: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@7..36 "area = box.width * box.height" [] [],
+            },
+            r_curly_token: R_CURLY@36..37 "}" [] [],
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..38
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..37
+    0: SVELTE_DECLARATION_BLOCK@0..37
+      0: L_CURLY@0..1 "{" [] []
+      1: CONST_KW@1..7 "const" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@7..36
+        0: HTML_LITERAL@7..36 "area = box.width * box.height" [] []
+      3: R_CURLY@36..37 "}" [] []
+  4: EOF@37..38 "" [Newline("\n")] []
+
+```
