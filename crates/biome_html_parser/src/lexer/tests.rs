@@ -411,6 +411,28 @@ fn svelte_keywords() {
 }
 
 #[test]
+fn svelte_let_const_keywords() {
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "let const",
+        LET_KW: 3,
+        WHITESPACE: 1,
+        CONST_KW: 5,
+    );
+
+    // Word boundary: identifiers that merely start with `let`/`const` must not
+    // be lexed as keywords, otherwise `{ letter }` would be mistaken for a
+    // declaration block.
+    assert_lex!(
+        HtmlLexContext::Svelte,
+        "letter constant",
+        IDENT: 6,
+        WHITESPACE: 1,
+        IDENT: 8,
+    );
+}
+
+#[test]
 fn svelte_line_comment_inside_tag() {
     assert_lex! {
         HtmlLexContext::InsideTagSvelte,
