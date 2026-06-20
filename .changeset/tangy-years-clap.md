@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 Added support for Svelte's markup `{let ...}` and `{const ...}` declaration blocks, including multiple declarations and destructuring. Biome now parses and formats them instead of emitting a parse error.
