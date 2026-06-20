@@ -89,29 +89,55 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
             return p.line_start_leading_indent();
         }
 
-        // If the current token still contains the preserved pre-marker
-        // indentation, measure to the first non-whitespace character on the
-        // line. Measuring to the current token start would incorrectly report
-        // column 0 for nested list markers.
-        if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            return p.line_start_leading_indent();
-        }
-
-        // Virtual line start: compute actual column from source text.
-        // The leading whitespace was consumed as trivia, but we need the
-        // real column for indented code block detection in nested lists.
         let source = p.source().source_text();
         let pos: usize = p.cur_range().start().into();
 
         // Find the start of the current line
         let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
 
-        // Count columns from line start to current position
+        // Whether the line's leading whitespace (the run before the first
+        // non-whitespace character) contains a tab. This is true both when the
+        // tab sits before the cursor and when it is the current token itself.
+        let leading_has_tab = source[line_start..]
+            .chars()
+            .take_while(|c| matches!(c, ' ' | '\t'))
+            .any(|c| c == '\t');
+
+        if !leading_has_tab {
+            // Pure-space indentation: keep the original behavior. When the
+            // current token still carries the pre-marker indentation, measure
+            // to the first non-whitespace via the standard helper; otherwise
+            // measure up to the cursor.
+            if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                return p.line_start_leading_indent();
+            }
+            let mut column = 0;
+            for c in source[line_start..pos].chars() {
+                // No tabs here, so every character (space or content) advances
+                // by one column, matching the original up-to-cursor scan.
+                column += 1;
+            }
+            return column;
+        }
+
+        // Virtual line start with a tab in the leading whitespace: compute the
+        // real marker column from source text. The leading whitespace may be
+        // partly consumed as trivia, and a marker can sit after a tab whose
+        // column-relative expansion lands past the consumed boundary. For
+        // ` \t- foo` the single space is consumed as the parent's continuation
+        // indent, yet the tab still expands to column 4, so the nested marker
+        // indent is 4, not 1 (biomejs/biome#10558).
+        //
+        // Measure from the start of the current physical line through ALL
+        // leading whitespace (column-relative) to the first non-whitespace
+        // character, so the result is independent of how much of that
+        // whitespace is still in the token stream.
         let mut column = 0;
-        for c in source[line_start..pos].chars() {
+        for c in source[line_start..].chars() {
             match c {
                 '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
-                _ => column += 1,
+                ' ' => column += 1,
+                _ => break,
             }
         }
         column
