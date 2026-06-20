@@ -620,7 +620,7 @@ fn build_text_expression_directive_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            text: content_token.token_text().into(),
         },
         is_event_handler: false,
         is_class_attribute: false,
@@ -646,7 +646,7 @@ fn build_attribute_expression_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            text: content_token.token_text().into(),
         },
         is_event_handler: false,
         is_class_attribute,
@@ -663,7 +663,7 @@ fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<E
             element_range: element.range(),
             content_range,
             content_offset: content_range.start(),
-            text: content_token.token_text_trimmed(),
+            text: content_token.token_text_trimmed().into(),
         },
     })
 }
@@ -678,7 +678,7 @@ fn build_svelte_name_candidate(svelte_name: &SvelteName) -> Option<EmbedCandidat
             element_range: token.text_trimmed_range(),
             content_range: token.text_range(),
             content_offset: token.text_range().start(),
-            text: token.token_text(),
+            text: token.token_text().into(),
         },
         block_kind: EmbedBlockKind::Neutral,
     })
@@ -694,7 +694,7 @@ fn build_svelte_text_expression_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            text: content_token.token_text().into(),
         },
         block_kind: EmbedBlockKind::from(svelte_block),
     })
@@ -720,7 +720,7 @@ fn build_vue_directive_candidate(
             element_range: initializer.range(),
             content_range: token_range,
             content_offset: inner_offset,
-            text: inner_text,
+            text: inner_text.into(),
         },
         is_event_handler,
         is_class_attribute: false,
@@ -739,7 +739,7 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            text: content_token.token_text().into(),
         },
         block_kind: EmbedBlockKind::Neutral,
     })
@@ -793,7 +793,7 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
             content_offset: value_token.text_range().start(),
             // Use full token text (including trivia) to match the untrimmed content_offset.
             // The parser needs text and offset to be consistent.
-            text: value_token.token_text(),
+            text: value_token.token_text().into(),
         },
     })
 }

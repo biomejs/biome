@@ -172,6 +172,33 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
     }
 }
 
+/// The text of an embed site. Usually a zero-copy `TokenText` slice from the
+/// host CST, but Svelte declaration blocks synthesize `keyword + declarations`,
+/// which spans two tokens and must be owned.
+#[derive(Debug, Clone)]
+pub(crate) enum EmbeddedText {
+    /// Zero-copy slice of a single host token.
+    Token(TokenText),
+    /// Owned text synthesized from more than one token.
+    #[expect(dead_code)]
+    Owned(Box<str>),
+}
+
+impl EmbeddedText {
+    pub fn text(&self) -> &str {
+        match self {
+            Self::Token(t) => t.text(),
+            Self::Owned(s) => s,
+        }
+    }
+}
+
+impl From<TokenText> for EmbeddedText {
+    fn from(value: TokenText) -> Self {
+        Self::Token(value)
+    }
+}
+
 /// The text content and position information for an embed site.
 /// Shared across all `EmbedCandidate` variants.
 pub(crate) struct EmbedContent {
@@ -185,7 +212,7 @@ pub(crate) struct EmbedContent {
     pub content_offset: TextSize,
 
     /// The raw text of the embedded content.
-    pub text: TokenText,
+    pub text: EmbeddedText,
 }
 
 impl EmbedCandidate {
