@@ -1,0 +1,925 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<div role="checkbox"></div>
+<div role="radio"></div>
+<div role="heading"></div>
+<div role="separator"></div>
+<div role="button"></div>
+<div role="article"></div>
+<div role="cell"></div>
+<div role="columnheader"></div>
+<div role="figure"></div>
+<div role="form"></div>
+<div role="grid"></div>
+<div role="gridcell"></div>
+<div role="group"></div>
+<div role="link"></div>
+<div role="list"></div>
+<div role="listitem"></div>
+<div role="navigation"></div>
+<div role="row"></div>
+<div role="rowgroup"></div>
+<div role="rowheader"></div>
+<div role="search"></div>
+<div role="searchbox"></div>
+<div role="table"></div>
+<div role="term"></div>
+<div role="textbox"></div>
+<div role="generic"></div>
+<div role="caption"></div>
+<div role="main"></div>
+<div role="time"></div>
+<div role="paragraph"></div>
+<div role="complementary"></div>
+<div role="blockquote"></div>
+<div role="contentinfo"></div>
+<div role="region"></div>
+<div role="checkbox" />
+<div role="separator" />
+
+<!-- Constrained elements: tag matches but required attributes are missing -->
+<input role="checkbox" />
+<input role="radio" />
+<input role="searchbox" />
+<input role="textbox" />
+<th role="columnheader"></th>
+<th role="rowheader"></th>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div role="checkbox"></div>
+      │      ^^^^^^^^^^^^^^^
+    3 │ <div role="radio"></div>
+    4 │ <div role="heading"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="checkbox">
+  
+
+```
+
+```
+invalid.vue:3:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div role="checkbox"></div>
+  > 3 │ <div role="radio"></div>
+      │      ^^^^^^^^^^^^
+    4 │ <div role="heading"></div>
+    5 │ <div role="separator"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="radio">
+  
+
+```
+
+```
+invalid.vue:4:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    2 │ <div role="checkbox"></div>
+    3 │ <div role="radio"></div>
+  > 4 │ <div role="heading"></div>
+      │      ^^^^^^^^^^^^^^
+    5 │ <div role="separator"></div>
+    6 │ <div role="button"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <h1>
+  - <h2>
+  - <h3>
+  - <h4>
+  - <h5>
+  - <h6>
+  
+
+```
+
+```
+invalid.vue:5:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    3 │ <div role="radio"></div>
+    4 │ <div role="heading"></div>
+  > 5 │ <div role="separator"></div>
+      │      ^^^^^^^^^^^^^^^^
+    6 │ <div role="button"></div>
+    7 │ <div role="article"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <hr>
+  
+
+```
+
+```
+invalid.vue:6:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    4 │ <div role="heading"></div>
+    5 │ <div role="separator"></div>
+  > 6 │ <div role="button"></div>
+      │      ^^^^^^^^^^^^^
+    7 │ <div role="article"></div>
+    8 │ <div role="cell"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
+  
+
+```
+
+```
+invalid.vue:7:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    5 │ <div role="separator"></div>
+    6 │ <div role="button"></div>
+  > 7 │ <div role="article"></div>
+      │      ^^^^^^^^^^^^^^
+    8 │ <div role="cell"></div>
+    9 │ <div role="columnheader"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <article>
+  
+
+```
+
+```
+invalid.vue:8:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+     6 │ <div role="button"></div>
+     7 │ <div role="article"></div>
+   > 8 │ <div role="cell"></div>
+       │      ^^^^^^^^^^^
+     9 │ <div role="columnheader"></div>
+    10 │ <div role="figure"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <td>
+  
+
+```
+
+```
+invalid.vue:9:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+     7 │ <div role="article"></div>
+     8 │ <div role="cell"></div>
+   > 9 │ <div role="columnheader"></div>
+       │      ^^^^^^^^^^^^^^^^^^^
+    10 │ <div role="figure"></div>
+    11 │ <div role="form"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="col">
+  
+
+```
+
+```
+invalid.vue:10:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+     8 │ <div role="cell"></div>
+     9 │ <div role="columnheader"></div>
+  > 10 │ <div role="figure"></div>
+       │      ^^^^^^^^^^^^^
+    11 │ <div role="form"></div>
+    12 │ <div role="grid"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <figure>
+  
+
+```
+
+```
+invalid.vue:11:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+     9 │ <div role="columnheader"></div>
+    10 │ <div role="figure"></div>
+  > 11 │ <div role="form"></div>
+       │      ^^^^^^^^^^^
+    12 │ <div role="grid"></div>
+    13 │ <div role="gridcell"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <form>
+  
+
+```
+
+```
+invalid.vue:12:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    10 │ <div role="figure"></div>
+    11 │ <div role="form"></div>
+  > 12 │ <div role="grid"></div>
+       │      ^^^^^^^^^^^
+    13 │ <div role="gridcell"></div>
+    14 │ <div role="group"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <table>
+  
+
+```
+
+```
+invalid.vue:13:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    11 │ <div role="form"></div>
+    12 │ <div role="grid"></div>
+  > 13 │ <div role="gridcell"></div>
+       │      ^^^^^^^^^^^^^^^
+    14 │ <div role="group"></div>
+    15 │ <div role="link"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <td>
+  
+
+```
+
+```
+invalid.vue:14:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    12 │ <div role="grid"></div>
+    13 │ <div role="gridcell"></div>
+  > 14 │ <div role="group"></div>
+       │      ^^^^^^^^^^^^
+    15 │ <div role="link"></div>
+    16 │ <div role="list"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <fieldset>
+  
+
+```
+
+```
+invalid.vue:15:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    13 │ <div role="gridcell"></div>
+    14 │ <div role="group"></div>
+  > 15 │ <div role="link"></div>
+       │      ^^^^^^^^^^^
+    16 │ <div role="list"></div>
+    17 │ <div role="listitem"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <a>
+  - <link>
+  
+
+```
+
+```
+invalid.vue:16:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    14 │ <div role="group"></div>
+    15 │ <div role="link"></div>
+  > 16 │ <div role="list"></div>
+       │      ^^^^^^^^^^^
+    17 │ <div role="listitem"></div>
+    18 │ <div role="navigation"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <ol>
+  - <ul>
+  
+
+```
+
+```
+invalid.vue:17:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    15 │ <div role="link"></div>
+    16 │ <div role="list"></div>
+  > 17 │ <div role="listitem"></div>
+       │      ^^^^^^^^^^^^^^^
+    18 │ <div role="navigation"></div>
+    19 │ <div role="row"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <li>
+  
+
+```
+
+```
+invalid.vue:18:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    16 │ <div role="list"></div>
+    17 │ <div role="listitem"></div>
+  > 18 │ <div role="navigation"></div>
+       │      ^^^^^^^^^^^^^^^^^
+    19 │ <div role="row"></div>
+    20 │ <div role="rowgroup"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <nav>
+  
+
+```
+
+```
+invalid.vue:19:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    17 │ <div role="listitem"></div>
+    18 │ <div role="navigation"></div>
+  > 19 │ <div role="row"></div>
+       │      ^^^^^^^^^^
+    20 │ <div role="rowgroup"></div>
+    21 │ <div role="rowheader"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <tr>
+  
+
+```
+
+```
+invalid.vue:20:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    18 │ <div role="navigation"></div>
+    19 │ <div role="row"></div>
+  > 20 │ <div role="rowgroup"></div>
+       │      ^^^^^^^^^^^^^^^
+    21 │ <div role="rowheader"></div>
+    22 │ <div role="search"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <tbody>
+  - <tfoot>
+  - <thead>
+  
+
+```
+
+```
+invalid.vue:21:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    19 │ <div role="row"></div>
+    20 │ <div role="rowgroup"></div>
+  > 21 │ <div role="rowheader"></div>
+       │      ^^^^^^^^^^^^^^^^
+    22 │ <div role="search"></div>
+    23 │ <div role="searchbox"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="row">
+  
+
+```
+
+```
+invalid.vue:22:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    20 │ <div role="rowgroup"></div>
+    21 │ <div role="rowheader"></div>
+  > 22 │ <div role="search"></div>
+       │      ^^^^^^^^^^^^^
+    23 │ <div role="searchbox"></div>
+    24 │ <div role="table"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <search>
+  
+
+```
+
+```
+invalid.vue:23:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    21 │ <div role="rowheader"></div>
+    22 │ <div role="search"></div>
+  > 23 │ <div role="searchbox"></div>
+       │      ^^^^^^^^^^^^^^^^
+    24 │ <div role="table"></div>
+    25 │ <div role="term"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="search">
+  
+
+```
+
+```
+invalid.vue:24:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    22 │ <div role="search"></div>
+    23 │ <div role="searchbox"></div>
+  > 24 │ <div role="table"></div>
+       │      ^^^^^^^^^^^^
+    25 │ <div role="term"></div>
+    26 │ <div role="textbox"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <table>
+  
+
+```
+
+```
+invalid.vue:25:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    23 │ <div role="searchbox"></div>
+    24 │ <div role="table"></div>
+  > 25 │ <div role="term"></div>
+       │      ^^^^^^^^^^^
+    26 │ <div role="textbox"></div>
+    27 │ <div role="generic"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <dfn>
+  
+
+```
+
+```
+invalid.vue:26:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    24 │ <div role="table"></div>
+    25 │ <div role="term"></div>
+  > 26 │ <div role="textbox"></div>
+       │      ^^^^^^^^^^^^^^
+    27 │ <div role="generic"></div>
+    28 │ <div role="caption"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="text">
+  - <textarea>
+  
+
+```
+
+```
+invalid.vue:28:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    26 │ <div role="textbox"></div>
+    27 │ <div role="generic"></div>
+  > 28 │ <div role="caption"></div>
+       │      ^^^^^^^^^^^^^^
+    29 │ <div role="main"></div>
+    30 │ <div role="time"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <caption>
+  - <figcaption>
+  - <legend>
+  
+
+```
+
+```
+invalid.vue:29:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    27 │ <div role="generic"></div>
+    28 │ <div role="caption"></div>
+  > 29 │ <div role="main"></div>
+       │      ^^^^^^^^^^^
+    30 │ <div role="time"></div>
+    31 │ <div role="paragraph"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <main>
+  
+
+```
+
+```
+invalid.vue:30:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    28 │ <div role="caption"></div>
+    29 │ <div role="main"></div>
+  > 30 │ <div role="time"></div>
+       │      ^^^^^^^^^^^
+    31 │ <div role="paragraph"></div>
+    32 │ <div role="complementary"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <time>
+  
+
+```
+
+```
+invalid.vue:31:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    29 │ <div role="main"></div>
+    30 │ <div role="time"></div>
+  > 31 │ <div role="paragraph"></div>
+       │      ^^^^^^^^^^^^^^^^
+    32 │ <div role="complementary"></div>
+    33 │ <div role="blockquote"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <p>
+  
+
+```
+
+```
+invalid.vue:32:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    30 │ <div role="time"></div>
+    31 │ <div role="paragraph"></div>
+  > 32 │ <div role="complementary"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^
+    33 │ <div role="blockquote"></div>
+    34 │ <div role="contentinfo"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <aside>
+  
+
+```
+
+```
+invalid.vue:33:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    31 │ <div role="paragraph"></div>
+    32 │ <div role="complementary"></div>
+  > 33 │ <div role="blockquote"></div>
+       │      ^^^^^^^^^^^^^^^^^
+    34 │ <div role="contentinfo"></div>
+    35 │ <div role="region"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <blockquote>
+  
+
+```
+
+```
+invalid.vue:34:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    32 │ <div role="complementary"></div>
+    33 │ <div role="blockquote"></div>
+  > 34 │ <div role="contentinfo"></div>
+       │      ^^^^^^^^^^^^^^^^^^
+    35 │ <div role="region"></div>
+    36 │ <div role="checkbox" />
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <footer>
+  
+
+```
+
+```
+invalid.vue:35:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    33 │ <div role="blockquote"></div>
+    34 │ <div role="contentinfo"></div>
+  > 35 │ <div role="region"></div>
+       │      ^^^^^^^^^^^^^
+    36 │ <div role="checkbox" />
+    37 │ <div role="separator" />
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <section>
+  
+
+```
+
+```
+invalid.vue:36:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    34 │ <div role="contentinfo"></div>
+    35 │ <div role="region"></div>
+  > 36 │ <div role="checkbox" />
+       │      ^^^^^^^^^^^^^^^
+    37 │ <div role="separator" />
+    38 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="checkbox">
+  
+
+```
+
+```
+invalid.vue:37:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    35 │ <div role="region"></div>
+    36 │ <div role="checkbox" />
+  > 37 │ <div role="separator" />
+       │      ^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ <!-- Constrained elements: tag matches but required attributes are missing -->
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <hr>
+  
+
+```
+
+```
+invalid.vue:40:8 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    39 │ <!-- Constrained elements: tag matches but required attributes are missing -->
+  > 40 │ <input role="checkbox" />
+       │        ^^^^^^^^^^^^^^^
+    41 │ <input role="radio" />
+    42 │ <input role="searchbox" />
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="checkbox">
+  
+
+```
+
+```
+invalid.vue:41:8 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    39 │ <!-- Constrained elements: tag matches but required attributes are missing -->
+    40 │ <input role="checkbox" />
+  > 41 │ <input role="radio" />
+       │        ^^^^^^^^^^^^
+    42 │ <input role="searchbox" />
+    43 │ <input role="textbox" />
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="radio">
+  
+
+```
+
+```
+invalid.vue:42:8 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    40 │ <input role="checkbox" />
+    41 │ <input role="radio" />
+  > 42 │ <input role="searchbox" />
+       │        ^^^^^^^^^^^^^^^^
+    43 │ <input role="textbox" />
+    44 │ <th role="columnheader"></th>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="search">
+  
+
+```
+
+```
+invalid.vue:43:8 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    41 │ <input role="radio" />
+    42 │ <input role="searchbox" />
+  > 43 │ <input role="textbox" />
+       │        ^^^^^^^^^^^^^^
+    44 │ <th role="columnheader"></th>
+    45 │ <th role="rowheader"></th>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="text">
+  - <textarea>
+  
+
+```
+
+```
+invalid.vue:44:5 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    42 │ <input role="searchbox" />
+    43 │ <input role="textbox" />
+  > 44 │ <th role="columnheader"></th>
+       │     ^^^^^^^^^^^^^^^^^^^
+    45 │ <th role="rowheader"></th>
+    46 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="col">
+  
+
+```
+
+```
+invalid.vue:45:5 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    43 │ <input role="textbox" />
+    44 │ <th role="columnheader"></th>
+  > 45 │ <th role="rowheader"></th>
+       │     ^^^^^^^^^^^^^^^^
+    46 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="row">
+  
+
+```
