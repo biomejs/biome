@@ -11,7 +11,7 @@ use crate::workspace::{
     AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssLanguage, TextSize};
+use biome_css_syntax::{CssLanguage, TextRange, TextSize};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
@@ -714,18 +714,25 @@ fn build_svelte_declaration_candidate(
     let declarations = declaration_block.declarations().ok()?;
     let content_token = declarations.html_literal_token().ok()?;
 
+    // In valid Svelte markup there is no trivia between `{` and the keyword, so
+    // text_trimmed() == text() and prefix_len (keyword + single space) is exact.
     let keyword_text = keyword.text_trimmed();
     let decls_text = content_token.text_trimmed();
     let text = format!("{keyword_text} {decls_text}");
 
     let prefix_len = TextSize::of(keyword_text) + TextSize::from(1); // keyword + single space
     let decls_start = content_token.text_trimmed_range().start();
+    // Unreachable for well-formed parses: `{` + keyword always precede the
+    // declarations, so prefix_len < decls_start. `?` avoids panicking on corrupt trees.
     let content_offset = decls_start.checked_sub(prefix_len)?;
 
     Some(EmbedCandidate::TextExpression {
         content: EmbedContent {
             element_range: declaration_block.range(),
-            content_range: declaration_block.range(),
+            content_range: TextRange::new(
+                content_offset,
+                content_offset + TextSize::of(text.as_str()),
+            ),
             content_offset,
             text: EmbeddedText::Owned(text.into_boxed_str()),
         },

@@ -338,6 +338,8 @@ impl EmbeddedBuilder {
                         }
                     }
                 }
+                // Const bindings are registered via visit_svelte_const_assignment (assignment-expression path);
+                // Declaration bindings via visit_module_item_list -> visit_js_variable_statement (source-level path).
                 SvelteBlockKind::Const | SvelteBlockKind::Declaration => {}
             },
             EmbedBlockKind::Neutral => return None,
