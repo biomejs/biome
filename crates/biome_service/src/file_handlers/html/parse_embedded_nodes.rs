@@ -401,6 +401,19 @@ fn parse_svelte_blocks(
                     );
                 }
             }
+            AnySvelteBlock::SvelteDeclarationBlock(declaration_block) => {
+                if let Ok(expression) = declaration_block.declarations()
+                    && let Some(candidate) =
+                        build_svelte_text_expression_candidate(&expression, &svelte_block)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        nodes,
+                    );
+                }
+            }
 
             AnySvelteBlock::SvelteDebugBlock(debug_block) => {
                 for name in debug_block.bindings().iter().flatten() {
