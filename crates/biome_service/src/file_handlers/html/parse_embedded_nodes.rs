@@ -1,6 +1,7 @@
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
 use crate::embed::types::{
-    EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, SvelteBlockKind,
+    EmbedBlockKind, EmbedCandidate, EmbedContent, EmbeddedText, GuestLanguage, HostLanguage,
+    SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult};
@@ -17,8 +18,9 @@ use biome_html_syntax::{
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteDirectiveInitializerClause,
     AnySvelteEachName, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression, HtmlElement, HtmlRoot,
-    HtmlSingleTextExpression, HtmlTextExpression, SvelteName, VueDirective,
-    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlSingleTextExpression, HtmlTextExpression, SvelteDeclarationBlock, SvelteName,
+    VueDirective, VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
@@ -402,10 +404,7 @@ fn parse_svelte_blocks(
                 }
             }
             AnySvelteBlock::SvelteDeclarationBlock(declaration_block) => {
-                if let Ok(expression) = declaration_block.declarations()
-                    && let Some(candidate) =
-                        build_svelte_text_expression_candidate(&expression, &svelte_block)
-                {
+                if let Some(candidate) = build_svelte_declaration_candidate(declaration_block) {
                     ctx.parse_and_push(
                         &candidate,
                         &doc_file_source,
@@ -700,6 +699,40 @@ fn build_svelte_text_expression_candidate(
     })
 }
 
+/// Build an embed candidate for a Svelte `{let ...}` / `{const ...}` block.
+///
+/// The JS parser is fed `keyword + " " + declarations` (e.g. `const a = 1, b = 2`)
+/// so it parses a `JsVariableStatement` instead of an assignment expression.
+///
+/// `content_offset` is anchored to `declarations_start - (keyword_len + 1)` so every
+/// character of the declarations part maps back to the original source exactly,
+/// regardless of how much whitespace the source had after the keyword.
+fn build_svelte_declaration_candidate(
+    declaration_block: &SvelteDeclarationBlock,
+) -> Option<EmbedCandidate> {
+    let keyword = declaration_block.keyword_token().ok()?;
+    let declarations = declaration_block.declarations().ok()?;
+    let content_token = declarations.html_literal_token().ok()?;
+
+    let keyword_text = keyword.text_trimmed();
+    let decls_text = content_token.text_trimmed();
+    let text = format!("{keyword_text} {decls_text}");
+
+    let prefix_len = TextSize::of(keyword_text) + TextSize::from(1); // keyword + single space
+    let decls_start = content_token.text_trimmed_range().start();
+    let content_offset = decls_start.checked_sub(prefix_len)?;
+
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: declaration_block.range(),
+            content_range: declaration_block.range(),
+            content_offset,
+            text: EmbeddedText::Owned(text.into_boxed_str()),
+        },
+        block_kind: EmbedBlockKind::Svelte(SvelteBlockKind::Declaration),
+    })
+}
+
 /// Build an `EmbedCandidate::Directive` from a Vue directive initializer clause.
 ///
 /// Vue directives use quoted string values (`@click="handler()"`).
@@ -947,6 +980,11 @@ fn parse_matched_embed(
                     true
                 }
                 EmbedCandidate::TextExpression { block_kind, .. } => {
+                    let is_svelte_declaration = ctx.host_file_source.is_svelte()
+                        && matches!(
+                            block_kind,
+                            EmbedBlockKind::Svelte(SvelteBlockKind::Declaration)
+                        );
                     if ctx.host_file_source.is_astro() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
                             frontmatter: false,
@@ -956,7 +994,7 @@ fn parse_matched_embed(
                         let is_function_signature =
                             matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: false,
+                            is_source: is_svelte_declaration,
                             is_function_signature,
                             kind: SvelteFileKind::Component,
                             is_const_block: matches!(
@@ -972,7 +1010,7 @@ fn parse_matched_embed(
                             allow_statements: false,
                         });
                     }
-                    false
+                    is_svelte_declaration
                 }
                 EmbedCandidate::Directive {
                     is_event_handler,

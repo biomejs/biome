@@ -338,7 +338,7 @@ impl EmbeddedBuilder {
                         }
                     }
                 }
-                SvelteBlockKind::Const => {}
+                SvelteBlockKind::Const | SvelteBlockKind::Declaration => {}
             },
             EmbedBlockKind::Neutral => return None,
         }

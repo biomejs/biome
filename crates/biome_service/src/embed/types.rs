@@ -148,9 +148,10 @@ pub(crate) enum SvelteBlockKind {
     Render,
     /// `#snippet` block in Svelte.
     Snippet,
-    /// `{@const name = value}` block in Svelte. The assignment declares a
-    /// new binding scoped to the enclosing `{#each}` / `{#if}` branch.
+    /// `{@const name = value}` block in Svelte (parsed as assignment expression).
     Const,
+    /// `{let ...}` / `{const ...}` markup declaration block (parsed as a JS declaration).
+    Declaration,
 }
 
 impl From<&AnySvelteBlock> for EmbedBlockKind {
@@ -163,9 +164,8 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
             | AnySvelteBlock::SvelteHtmlBlock(_)
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
-            AnySvelteBlock::SvelteConstBlock(_) | AnySvelteBlock::SvelteDeclarationBlock(_) => {
-                Self::Svelte(SvelteBlockKind::Const)
-            }
+            AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
@@ -180,7 +180,6 @@ pub(crate) enum EmbeddedText {
     /// Zero-copy slice of a single host token.
     Token(TokenText),
     /// Owned text synthesized from more than one token.
-    #[expect(dead_code)]
     Owned(Box<str>),
 }
 
