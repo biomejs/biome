@@ -2,50 +2,42 @@ use crate::FormatYamlSyntaxToken;
 use crate::prelude::*;
 use biome_formatter::trivia::FormatToken;
 use biome_formatter::{CstFormatContext, FormatOptions};
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 use biome_yaml_syntax::{
-    AnyYamlBlockHeader, AnyYamlBlockInBlockContent, AnyYamlBlockNode, AnyYamlDocument,
-    YamlBlockContent, YamlBlockHeaderList, YamlBlockInBlockNode, YamlDocument, YamlRoot,
+    AnyYamlBlockHeader, YamlBlockContent, YamlBlockHeaderList, YamlSyntaxKind, YamlSyntaxNode,
     YamlSyntaxToken,
 };
 
-/// True when the document has no decorations (BOM, directives, document
-/// markers) and wraps a single property-less block scalar. Only this exact
-/// shape is supported by our partial delegation; other shapes fall back to
-/// verbatim while the parent chain is still being built out.
-pub(crate) fn is_bare_block_scalar_document(doc: &YamlDocument) -> bool {
-    let fields = doc.as_fields();
-    fields.bom_token.is_none()
-        && fields.directives.is_empty()
-        && fields.dashdashdash_token.is_none()
-        && fields.dotdotdot_token.is_none()
-        && match fields.node {
-            Some(AnyYamlBlockNode::YamlBlockInBlockNode(node)) => is_bare_block_scalar_node(&node),
-            _ => false,
-        }
-}
-
-/// True when the block-in-block node has no properties and wraps a folded
-/// or literal scalar whose body has a shape this formatter can safely
-/// reindent. See [`has_well_indented_body`] for the exact rules.
-pub(crate) fn is_bare_block_scalar_node(node: &YamlBlockInBlockNode) -> bool {
-    if !node.properties().is_empty() {
+/// True when a folded or literal block scalar can be safely reindented to
+/// the canonical width: it sits at the document top level and its body has
+/// a shape we can model (see [`has_well_indented_body`]). Anything else is
+/// left verbatim so we never corrupt content we can't reproduce.
+pub(crate) fn is_reindentable_block_scalar(
+    scalar: &YamlSyntaxNode,
+    headers: &YamlBlockHeaderList,
+    content: &YamlBlockContent,
+) -> bool {
+    if !is_top_level(scalar) {
         return false;
     }
-    let (headers, content) = match node.content() {
-        Ok(AnyYamlBlockInBlockContent::YamlFoldedScalar(scalar)) => {
-            (scalar.headers(), scalar.content().ok())
-        }
-        Ok(AnyYamlBlockInBlockContent::YamlLiteralScalar(scalar)) => {
-            (scalar.headers(), scalar.content().ok())
-        }
-        _ => return false,
-    };
-    let Some(content) = content else { return false };
     let has_explicit_indent = headers
         .iter()
         .any(|h| matches!(h, AnyYamlBlockHeader::YamlIndentationIndicator(_)));
-    has_well_indented_body(&content, has_explicit_indent)
+    has_well_indented_body(content, has_explicit_indent)
+}
+
+/// True when the scalar is the document's top-level node, i.e. not nested
+/// inside a block mapping or sequence. The reindent logic rewrites the body
+/// to a canonical column-0 offset, which is only correct at the top level;
+/// a nested scalar's body indentation is relative to its enclosing node, so
+/// rewriting it would shift the content out of place.
+fn is_top_level(scalar: &YamlSyntaxNode) -> bool {
+    !scalar.ancestors().any(|node| {
+        matches!(
+            node.kind(),
+            YamlSyntaxKind::YAML_BLOCK_MAPPING | YamlSyntaxKind::YAML_BLOCK_SEQUENCE
+        )
+    })
 }
 
 /// A body is "well indented" when every non-blank line has at least one
@@ -74,16 +66,6 @@ fn has_well_indented_body(content: &YamlBlockContent, has_explicit_indent: bool)
         return true;
     }
     indents.all(|i| i == first)
-}
-
-/// True when the root contains exactly one bare block-scalar document.
-pub(crate) fn is_bare_block_scalar_root(root: &YamlRoot) -> bool {
-    let mut docs = root.documents().iter();
-    matches!(
-        (docs.next(), docs.next()),
-        (Some(AnyYamlDocument::YamlDocument(doc)), None)
-            if is_bare_block_scalar_document(&doc)
-    )
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -129,7 +111,7 @@ pub(crate) fn format_block_scalar(
     );
     let position = content_token.text_range().start();
 
-    FormatYamlSyntaxToken.format_replaced(&content_token, &text(&body, position), f)
+    FormatYamlSyntaxToken.format_replaced(&content_token, &text(&body, Some(position)), f)
 }
 
 fn compute_body(
