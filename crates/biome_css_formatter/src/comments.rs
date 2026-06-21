@@ -1,12 +1,13 @@
 use crate::prelude::*;
-use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::comment_trivia::{is_leading_comment_on_node, is_trailing_comment_on_node};
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage, ScssAtRootAtRule,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssRoot, CssComplexSelector,
+    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
+    CssIdentifier, CssLanguage, CssMediaQueryList, CssSyntaxKind, ScssAtRootAtRule,
     ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
     ScssIfAtRule, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
     ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
@@ -19,7 +20,7 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_rowan::{AstSeparatedList, SyntaxTriviaPieceComments};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxTriviaPieceComments};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
@@ -117,6 +118,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_function_comment)
+            .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
             .or_else(handle_generic_property_comment)
@@ -315,6 +317,79 @@ fn handle_function_comment(
     } else {
         CommentPlacement::Default(comment)
     }
+}
+
+/// Attaches media-list comma comments to the following query.
+///
+/// ```scss
+/// @media print, // c
+/// screen {}
+/// ```
+fn handle_media_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_query) = comment
+        .preceding_node()
+        .and_then(AnyCssMediaQuery::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(following_query) = comment
+        .following_node()
+        .and_then(AnyCssMediaQuery::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(media_list) = preceding_query.parent::<CssMediaQueryList>() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_query
+        .parent::<CssMediaQueryList>()
+        .is_none_or(|following_list| following_list.syntax() != media_list.syntax())
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    if !is_media_separator_comment(&preceding_query, &following_query, &comment) {
+        return CommentPlacement::Default(comment);
+    }
+
+    CommentPlacement::leading(following_query.syntax().clone(), comment)
+}
+
+/// Returns true for comments in trivia after a media query comma.
+///
+/// ```scss
+/// @media print, // c
+/// screen {}
+/// ```
+fn is_media_separator_comment(
+    preceding_query: &AnyCssMediaQuery,
+    following_query: &AnyCssMediaQuery,
+    comment: &DecoratedComment<CssLanguage>,
+) -> bool {
+    let Some(comma_token) = preceding_query
+        .syntax()
+        .last_token()
+        .and_then(|token| token.next_token())
+        .filter(|token| token.kind() == CssSyntaxKind::COMMA)
+    else {
+        return false;
+    };
+
+    let comment_piece = comment.piece().as_piece();
+
+    if comma_token == comment_piece.token() {
+        return comma_token
+            .trailing_trivia()
+            .text_range()
+            .contains_range(comment_piece.text_range());
+    }
+
+    is_leading_comment_on_node(following_query.syntax(), comment.piece())
 }
 
 /// Attaches comments that belong to SCSS variable boundaries:
