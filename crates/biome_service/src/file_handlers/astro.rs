@@ -13,7 +13,8 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-use regex::{Matches, Regex, RegexBuilder};
+use core::ops::Range;
+use regex::{Regex, RegexBuilder};
 use std::sync::LazyLock;
 
 use super::SearchCapabilities;
@@ -21,7 +22,7 @@ use super::SearchCapabilities;
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
 
-pub static ASTRO_FENCE: LazyLock<Regex> = LazyLock::new(|| {
+static ASTRO_FENCE: LazyLock<Regex> = LazyLock::new(|| {
     RegexBuilder::new(r#"^---\s*$"#)
         .multi_line(true)
         .build()
@@ -35,30 +36,36 @@ impl AstroFileHandler {
     pub fn input(text: &str) -> &str {
         let mut matches = Self::matches(text);
         match (matches.next(), matches.next()) {
-            (Some(start), Some(end)) => &text[start.end()..end.start()],
+            (Some(start), Some(end)) => &text[start.end..end.start],
             _ => "",
         }
     }
 
-    /// Returns the start byte offset of the Astro fence
+    /// Returns the start byte offset after the Astro fence
     pub fn start(input: &str) -> Option<u32> {
-        ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
+        Self::matches(input).next().map(|m| m.end as u32)
     }
 
-    fn matches(input: &str) -> Matches<'_, '_> {
-        ASTRO_FENCE.find_iter(input)
+    fn matches(input: &str) -> impl Iterator<Item = Range<usize>> {
+        ASTRO_FENCE.find_iter(input).map(|m| {
+            if input[m.end()..].starts_with('\n') {
+                m.start()..(m.end() + 1)
+            } else {
+                m.start()..m.end()
+            }
+        })
     }
 
     /// It takes the original content of an Astro file, and new output of an Astro file. The output is only the content contained inside the
     /// Astro fences. The function replaces `output` inside those fences.
     pub fn output(input: &str, output: &str) -> String {
         let mut matches = Self::matches(input);
-        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
+        if let (Some(prefix), Some(suffix)) = (matches.next(), matches.next()) {
             format!(
                 "{}{}{}",
-                &input[..start.end() + 1],
-                output.trim_start(),
-                &input[end.start()..]
+                &input[..prefix.end],
+                output,
+                &input[suffix.start..],
             )
         } else {
             input.to_string()
