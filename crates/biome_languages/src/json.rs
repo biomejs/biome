@@ -2,8 +2,9 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use core::str;
-use directories::ProjectDirs;
+use directories::{BaseDirs, ProjectDirs};
 use std::fmt::{Display, Formatter};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -281,7 +282,7 @@ impl JsonFileSource {
             return Ok(Self::json_allow_comments_and_trailing_commas(extension));
         }
 
-        if zed_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
+        if zed_global_directory().is_some_and(|dir| path.starts_with(&dir))
             || vscode_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
             || cursor_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
         {
@@ -365,8 +366,14 @@ fn vscode_global_directory() -> Option<ProjectDirs> {
     ProjectDirs::from("", "Code", "User")
 }
 
-fn zed_global_directory() -> Option<ProjectDirs> {
-    ProjectDirs::from("", "", "zed")
+fn zed_global_directory() -> Option<PathBuf> {
+    if cfg!(target_os = "macos") {
+        BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed"))
+    } else if cfg!(target_os = "windows") {
+        BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed"))
+    } else {
+        ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf())
+    }
 }
 
 #[cfg(test)]
@@ -395,10 +402,21 @@ mod tests {
 
     #[test]
     fn test_global_zed_settings() {
-        let path = zed_global_directory()
-            .expect("Failed to get config directory")
-            .config_dir()
-            .join("settings.json");
+        let dir = zed_global_directory().expect("Failed to get config directory");
+
+        #[cfg(target_os = "macos")]
+        {
+            let base = BaseDirs::new().expect("Failed to get base dirs");
+            assert_eq!(dir, base.home_dir().join(".config").join("zed"));
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            let base = BaseDirs::new().expect("Failed to get base dirs");
+            assert_eq!(dir, base.config_dir().join("Zed"));
+        }
+
+        let path = dir.join("settings.json");
         let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
         let file_source =
             JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
