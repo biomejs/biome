@@ -3,6 +3,7 @@ name: Update e18e module replacements data
 on:
   workflow_dispatch:
   schedule:
+    # This cron schedule runs the workflow at midnight (00:00) on Sundays.
     - cron: "0 0 * * 0"
 
 permissions:
@@ -22,20 +23,41 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
-          bins: wasm-bindgen-cli@0.2.117, wasm-opt
+          cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate module replacements
+      - name: Generate e18e module replacements data
         run: just gen-module-replacements
 
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create changeset
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          cat > .changeset/module-replacements-$(date +%s).md << 'EOF'
+          ---
+          "biome": patch
+          ---
+
+          Updated the e18e module replacements data.
+          EOF
+
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update module replacements data"
-          title: "chore: update module replacements data"
-          body: |
-            Automated update for module replacements data.
-          branch: chore/update-module-replacements-data
-          delete-branch: true
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: update e18e module replacements data"
+          git push origin HEAD:chore/update-module-replacements-data -f
+          gh pr create --title "chore: update e18e module replacements data" --body "Automated update for module replacements data." --base main
