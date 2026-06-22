@@ -51,9 +51,12 @@ fn has_well_indented_body(content: &YamlBlockContent, has_explicit_indent: bool)
         return false;
     };
     let text = token.text();
-    let body_text = text.strip_prefix('\n').unwrap_or(text);
+    let body_text = text
+        .strip_prefix("\r\n")
+        .or_else(|| text.strip_prefix('\n'))
+        .unwrap_or(text);
     let mut indents = body_text
-        .split('\n')
+        .lines()
         .filter(|line| !line.trim().is_empty())
         .map(|line| line.bytes().take_while(|b| *b == b' ').count());
     let Some(first) = indents.next() else {
@@ -99,7 +102,7 @@ pub(crate) fn format_block_scalar(
     // for the suppression bookkeeping the debug formatter enforces.
     f.context()
         .comments()
-        .mark_suppression_checked(content.syntax());
+        .is_suppressed(content.syntax());
 
     let content_token = content.value_token()?;
     let canonical_indent = f.options().indent_width().value() as usize;
@@ -120,8 +123,14 @@ fn compute_body(
     chomp: Chomp,
     canonical_indent: usize,
 ) -> String {
-    let body_text = content_text.strip_prefix('\n').unwrap_or(content_text);
-    let lines: Vec<&str> = body_text.split('\n').collect();
+    let body_text = content_text
+        .strip_prefix("\r\n")
+        .or_else(|| content_text.strip_prefix('\n'))
+        .unwrap_or(content_text);
+    let lines: Vec<&str> = body_text
+        .split('\n')
+        .map(|line| line.strip_suffix('\r').unwrap_or(line))
+        .collect();
 
     let trailing_blanks = lines
         .iter()
@@ -227,5 +236,43 @@ mod tests {
         // output — neither indented nor stripped.
         let body = compute_body("\n    a\n\n    b\n\n", false, Chomp::Clip, 2);
         assert_eq!(body, "\n  a\n\n  b\n");
+    }
+
+    // CRLF (Windows) input must yield the same LF-only body as the
+    // equivalent Unix input: the printer is responsible for converting
+    // the `\n`s back to the configured line ending, so emitting a `\r`
+    // here would double up to `\r\r\n`.
+
+    #[test]
+    fn crlf_clip_reindents_like_lf() {
+        let body = compute_body(
+            "\r\n    123\r\n    456\r\n    789\r\n\r\n\r\n",
+            false,
+            Chomp::Clip,
+            2,
+        );
+        assert_eq!(body, "\n  123\n  456\n  789\n");
+    }
+
+    #[test]
+    fn crlf_keep_preserves_trailing_blank_lines() {
+        let body = compute_body(
+            "\r\n    123\r\n    456\r\n    789\r\n\r\n\r\n",
+            false,
+            Chomp::Keep,
+            2,
+        );
+        assert_eq!(body, "\n  123\n  456\n  789\n\n\n");
+    }
+
+    #[test]
+    fn crlf_explicit_indent_preserves_body() {
+        let body = compute_body(
+            "\r\n    123\r\n   456\r\n  789\r\n\r\n\r\n",
+            true,
+            Chomp::Strip,
+            2,
+        );
+        assert_eq!(body, "\n    123\n   456\n  789\n");
     }
 }
