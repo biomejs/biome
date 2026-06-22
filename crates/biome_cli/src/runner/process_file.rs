@@ -147,23 +147,29 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
     where
         Ctx: CrawlerContext,
     {
-        let FileFeaturesResult {
-            features_supported: file_features,
-        } = ctx
-            .workspace()
-            .file_features(SupportsFeatureParams {
-                project_key: ctx.project_key(),
-                path: biome_path.clone(),
-                features: ctx.execution().wanted_features(),
-                inline_config: None,
-                skip_ignore_check: false,
-                not_requested_features: ctx.execution().not_requested_features(),
-            })
-            .with_file_path_and_code_and_tags(
-                biome_path.to_string(),
-                category!("files/missingHandler"),
-                DiagnosticTags::VERBOSE,
-            )?;
+        let file_features = if let Some(file_features) = ctx.get_file_features(biome_path) {
+            file_features
+        } else {
+            let FileFeaturesResult {
+                features_supported: file_features,
+            } = ctx
+                .workspace()
+                .file_features(SupportsFeatureParams {
+                    project_key: ctx.project_key(),
+                    path: biome_path.clone(),
+                    features: ctx.execution().wanted_features(),
+                    inline_config: None,
+                    skip_ignore_check: false,
+                    not_requested_features: ctx.execution().not_requested_features(),
+                })
+                .with_file_path_and_code_and_tags(
+                    biome_path.to_string(),
+                    category!("files/missingHandler"),
+                    DiagnosticTags::VERBOSE,
+                )?;
+
+            file_features
+        };
 
         // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
         if file_features.is_ignored() || file_features.is_not_enabled() {
@@ -319,12 +325,12 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
 
 #[cfg(test)]
 mod tests {
-    use super::WorkspaceFile;
+    use super::{FileStatus, ProcessFile, WorkspaceFile};
     use crate::runner::crawler::CrawlerContext;
     use crate::runner::execution::{AnalyzerSelectors, Execution};
     use crate::runner::process_file::Message;
     use biome_console::MarkupBuf;
-    use biome_diagnostics::{Category, Error, category};
+    use biome_diagnostics::{Category, Error, Severity, category};
     use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
     use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
@@ -333,7 +339,7 @@ mod tests {
     };
     use biome_service::{Workspace, WorkspaceError};
     use camino::Utf8PathBuf;
-    use papaya::{HashSet, HashSetRef, LocalGuard};
+    use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
     use std::hash::RandomState;
     use std::sync::Arc;
     use std::time::Duration;
@@ -392,6 +398,7 @@ mod tests {
         execution: TestExecution,
         interner: PathInterner,
         evaluated_paths: HashSet<BiomePath>,
+        file_features: HashMap<BiomePath, FeaturesSupported>,
     }
 
     impl CrawlerContext for TestContext<'_> {
@@ -419,6 +426,14 @@ mod tests {
 
         fn execution(&self) -> &dyn Execution {
             &self.execution
+        }
+
+        fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported) {
+            self.file_features.pin().insert(path, features);
+        }
+
+        fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported> {
+            self.file_features.pin().get(path).cloned()
         }
     }
 
@@ -480,6 +495,7 @@ mod tests {
             execution: TestExecution { write: false },
             interner,
             evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
         };
 
         {
@@ -519,6 +535,7 @@ mod tests {
             execution: TestExecution { write: true },
             interner,
             evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
         };
 
         {
@@ -541,5 +558,36 @@ mod tests {
             .expect_err("new document should be closed on drop");
 
         assert!(matches!(error, WorkspaceError::NotFound(_)));
+    }
+
+    #[test]
+    fn process_file_uses_cached_file_features() {
+        let file_path = Utf8PathBuf::from("/project/missing.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs,
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: false },
+            interner,
+            evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
+        };
+        let mut file_features = FeaturesSupported::default();
+        file_features.set_ignored_for_all_features();
+        ctx.insert_file_features(path.clone(), file_features);
+
+        let result = <() as ProcessFile>::execute(&ctx, &path, u32::MAX, Severity::Hint).unwrap();
+
+        assert!(matches!(result, FileStatus::Ignored));
     }
 }

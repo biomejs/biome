@@ -1,8 +1,8 @@
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
+    GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
