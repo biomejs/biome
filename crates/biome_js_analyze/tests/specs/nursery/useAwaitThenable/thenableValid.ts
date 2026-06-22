@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+
+interface Thenable<T> { then(onfulfilled: (value: T) => void): void; }
+declare const thenable: Thenable<number>;
+declare const value: unknown;
+
+// Awaiting a value typed as a custom thenable (a callable `then`) is valid.
+async function awaitDeclaredThenable(): Promise<void> {
+    await thenable;
+}
+
+// Awaiting a value cast to a custom thenable is valid.
+async function awaitCastThenable(): Promise<void> {
+    await (value as Thenable<number>);
+}
