@@ -75,7 +75,7 @@ impl Rule for UseVueConsistentVOnStyle {
         match node {
             AnyVueDirective::VueDirective(dir) => {
                 // Only v-on normal form
-                if dir.name_token().ok()?.text_trimmed() != "v-on" {
+                if !dir.is_event_listener() {
                     return None;
                 }
                 // If prefer shorthand, normal form is invalid

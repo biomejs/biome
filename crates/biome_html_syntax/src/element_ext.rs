@@ -506,8 +506,7 @@ impl AnyHtmlTagElement {
 
                     // v-bind:name="..."
                     AnyVueDirective::VueDirective(d) => {
-                        let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
-                        is_bind
+                        d.is_binding()
                             && d.arg()
                                 .and_then(|arg| arg.arg().ok())
                                 .and_then(|arg| arg.as_vue_static_argument().cloned())
@@ -585,8 +584,7 @@ impl AnyHtmlTagElement {
 
                 // v-bind:name="..."
                 AnyVueDirective::VueDirective(d) => {
-                    let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
-                    is_bind
+                    d.is_binding()
                         && d.arg()
                             .and_then(|arg| arg.arg().ok())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
