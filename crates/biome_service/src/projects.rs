@@ -156,7 +156,7 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    /// Returns a dereferenced pointer to the root settings. This is an unsafe function and should be used for testing only
+    /// Returns a dereferenced pointer to the root settings. This inefficient and shouldn't be used other than testing.
     pub fn get_mut_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
         self.0
             .pin()
