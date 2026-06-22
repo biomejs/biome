@@ -16,7 +16,9 @@ use biome_js_syntax::{
     TsReferenceType, TsTypeAliasDeclaration, TsTypeAssertionExpression,
 };
 use biome_js_semantic::ScopeId;
-use biome_js_type_info::{Class, Literal, Type, TypeData, TypeMemberKind, TypeReferenceQualifier};
+use biome_js_type_info::{
+    Class, Literal, Type, TypeData, TypeMemberKind, TypeReferenceQualifier,
+};
 use biome_rowan::{AstNode, Text, TextRange, declare_node_union};
 use biome_rule_options::no_misleading_return_type::NoMisleadingReturnTypeOptions;
 use smallvec::{SmallVec, smallvec};
@@ -892,12 +894,18 @@ struct ReturnInfo {
     /// TypeScript `object` keyword, such as members, tuples, functions, or
     /// class instances.
     has_narrower_than_object: bool,
+    /// Whether a return pins its type with a non-`const` `as`/`<>` assertion,
+    /// so its literal does not widen.
+    has_pinning_assertion: bool,
 }
 
 impl ReturnInfo {
-    /// Single-return whose inferred type is a primitive literal and no `as const`.
+    /// Single-return whose inferred type is a primitive literal and no `as const` or pinning assertion.
     fn is_single_primitive_literal(&self) -> bool {
-        self.types.len() == 1 && !self.has_any_const && is_literal_of_primitive(&self.types[0])
+        self.types.len() == 1
+            && !self.has_any_const
+            && !self.has_pinning_assertion
+            && is_literal_of_primitive(&self.types[0])
     }
 
     /// Every return carries an object-wide cast target (and no `as const`).
@@ -934,6 +942,7 @@ fn collect_return_info(
                     info.has_narrower_than_object = true;
                 }
             }
+            info.has_pinning_assertion |= is_pinned_by_assertion(expr);
             info.types.push(infer_expression_type(ctx, expr));
         }
     }
@@ -967,6 +976,7 @@ fn collect_block_returns(
                     info.has_narrower_than_object = true;
                 }
             }
+            info.has_pinning_assertion |= is_pinned_by_assertion(&expr);
             info.types.push(infer_expression_type(ctx, &expr));
         }
     }
@@ -1524,11 +1534,17 @@ fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
     let mut current = expr.clone();
     loop {
         if let Some(cast) = AnyTsCastExpression::cast(current.syntax().clone()) {
-            let Some(inner) = cast.inner_expression() else {
-                return current;
-            };
-            current = inner;
-            continue;
+            // Only `satisfies` and `as const` are transparent; keep a widening
+            // `as T` so its target type is read, not the inner literal.
+            let is_transparent = matches!(current, AnyJsExpression::TsSatisfiesExpression(_))
+                || is_const_reference_type(&cast.cast_type());
+            if is_transparent {
+                let Some(inner) = cast.inner_expression() else {
+                    return current;
+                };
+                current = inner;
+                continue;
+            }
         }
         match &current {
             AnyJsExpression::JsParenthesizedExpression(e) => match e.expression() {
@@ -1538,6 +1554,15 @@ fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
             _ => return current,
         }
     }
+}
+
+/// Whether the return keeps a non-`const` `as`/`<>` cast after `satisfies` and
+/// `as const` are unwrapped.
+fn is_pinned_by_assertion(expr: &AnyJsExpression) -> bool {
+    matches!(
+        unwrap_type_wrappers(expr),
+        AnyJsExpression::TsAsExpression(_) | AnyJsExpression::TsTypeAssertionExpression(_)
+    )
 }
 
 fn has_const_assertion(expr: &AnyJsExpression) -> bool {
@@ -1974,7 +1999,9 @@ fn is_union_wider(annotated: &Type, inferred: &Type) -> bool {
 fn types_match(a: &Type, b: &Type) -> bool {
     let mut a = a.clone();
     let mut b = b.clone();
-    loop {
+    // Resolving `InstanceOf` bases loops forever on a circular alias (`type R = R`),
+    // so bound the walk like the rule's other type traversals.
+    for _ in 0..MAX_TYPE_TRAVERSAL_ITERATIONS {
         match (&*a, &*b) {
             (TypeData::String, TypeData::String)
             | (TypeData::Number, TypeData::Number)
@@ -2028,4 +2055,5 @@ fn types_match(a: &Type, b: &Type) -> bool {
             _ => return false,
         }
     }
+    false
 }

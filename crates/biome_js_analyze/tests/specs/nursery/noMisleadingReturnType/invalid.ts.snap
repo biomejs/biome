@@ -211,6 +211,11 @@ function partialAbsorbUnion(b: boolean): "a" | "b" | string | null { if (b) retu
 
 function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }
 
+function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
+function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+function singleAssertedBooleanLiteral(): boolean { return false as false; }
+
 ```
 
 # Diagnostics
@@ -2394,10 +2399,101 @@ invalid.ts:206:31 lint/nursery/noMisleadingReturnType ━━━━━━━━�
   > 206 │ function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }
         │                               ^^^^^^^^^^^^^^^^^^
     207 │ 
+    208 │ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
   
   i A wider return type hides the precise types that callers could rely on.
   
   i Consider using "a" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:208:45 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    206 │ function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }
+    207 │ 
+  > 208 │ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
+        │                                             ^^^^^^^^
+    209 │ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+    210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:209:43 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    208 │ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
+  > 209 │ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+        │                                           ^^^^^^^^
+    210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+    211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:210:39 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    208 │ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a"; return "b" as "b"; }
+    209 │ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+  > 210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+        │                                       ^^^^^^^^
+    211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
+    212 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:211:40 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    209 │ function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
+    210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
+  > 211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
+        │                                        ^^^^^^^^^
+    212 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using false as the return type.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
   
