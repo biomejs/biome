@@ -76,7 +76,7 @@ impl Rule for UseVueConsistentVBindStyle {
         match node {
             AnyVueDirective::VueDirective(dir) => {
                 // Only v-bind normal form
-                if dir.name_token().ok()?.text_trimmed() != "v-bind" {
+                if !dir.is_binding() {
                     return None;
                 }
                 // Argument-less v-bind cannot be represented with shorthand syntax.
