@@ -58,7 +58,8 @@ impl Rule for Recommended {
         };
 
         let name = node.name().ok()?;
-        let name = name.as_json_member_name()?.value_token().ok()?;
+        let name_token = name.as_json_member_name()?.value_token().ok()?;
+        let colon_token = node.colon_token().ok()?;
         let value = node
             .value()
             .ok()?
@@ -71,16 +72,18 @@ impl Rule for Recommended {
                 .with_leading_trivia_pieces(value.leading_trivia().pieces())
                 .with_trailing_trivia_pieces(value.trailing_trivia().pieces()),
         );
+        // Preserve the original key's surrounding whitespace.
+        let new_key = json_string_literal("preset")
+            .with_leading_trivia_pieces(name_token.leading_trivia().pieces())
+            .with_trailing_trivia_pieces(name_token.trailing_trivia().pieces());
+        // Preserve both sides of the colon separately — original code overwrote
+        // leading with trailing, which broke inline formatting.
+        let new_colon = token(T![:])
+            .with_leading_trivia_pieces(colon_token.leading_trivia().pieces())
+            .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces());
         let member = json_member(
-            json_member_name(
-                json_string_literal("preset")
-                    .with_leading_trivia_pieces(name.leading_trivia().pieces())
-                    .with_trailing_trivia_pieces(name.leading_trivia().pieces()),
-            )
-            .into(),
-            token(T![:])
-                .with_leading_trivia_pieces(node.colon_token().ok()?.leading_trivia().pieces())
-                .with_leading_trivia_pieces(node.colon_token().ok()?.trailing_trivia().pieces()),
+            json_member_name(new_key).into(),
+            new_colon,
             AnyJsonValue::JsonStringValue(new_value.clone()),
         );
 
