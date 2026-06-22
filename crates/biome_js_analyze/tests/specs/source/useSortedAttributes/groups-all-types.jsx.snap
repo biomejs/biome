@@ -1,0 +1,251 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 150
+expression: groups-all-types.jsx
+---
+# Input
+```jsx
+// sortScope: "group" with default groups [:IMPLICIT:, :RESERVED:, :DOM_RESERVED:, :REST:, :CALLBACK:]
+// Complex components exercising all five group types.
+
+// Unsorted: all five group types mixed
+<Hello
+  onFocus={handleFocus}
+  name="John"
+  children={<Avatar />}
+  active
+  ref={myRef}
+  onChange={handleChange}
+  lastName="Smith"
+  dangerouslySetInnerHTML={{ __html: html }}
+  disabled
+  key="user-1"
+/>;
+
+// Correctly sorted: [:IMPLICIT:, :RESERVED:, :DOM_RESERVED:, :REST:, :CALLBACK:]
+// within each group sorted alphabetically
+<Hello
+  active
+  disabled
+  key="user-1"
+  ref={myRef}
+  children={<Avatar />}
+  dangerouslySetInnerHTML={{ __html: html }}
+  lastName="Smith"
+  name="John"
+  onChange={handleChange}
+  onFocus={handleFocus}
+/>;
+
+// Unsorted: RESERVED group — key after REST prop
+<Hello name="John" key="1" />;
+
+// Unsorted: DOM_RESERVED group — children before REST props (should follow RESERVED)
+<Hello name="John" key="1" children={<Foo />} />;
+
+// Unsorted: multiple callbacks out of alphabetical order, after implicit props
+<Hello onFocus={fn} onClick={fn} active name="John" />;
+
+// Unsorted with spread fence: each segment covers all group types
+<Hello
+  onClick={handleClick}
+  name="John"
+  disabled
+  key="user-1"
+  children={<Avatar />}
+  {...defaults}
+  onFocus={handleFocus}
+  lastName="Smith"
+  active
+  ref={myRef}
+  dangerouslySetInnerHTML={{ __html: html }}
+/>;
+
+```
+
+# Diagnostics
+```
+groups-all-types.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     4 │ // Unsorted: all five group types mixed
+   > 5 │ <Hello
+       │ ^^^^^^
+   > 6 │   onFocus={handleFocus}
+        ...
+  > 15 │   key="user-1"
+  > 16 │ />;
+       │ ^^
+    17 │ 
+    18 │ // Correctly sorted: [:IMPLICIT:, :RESERVED:, :DOM_RESERVED:, :REST:, :CALLBACK:]
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │   // Unsorted: all five group types mixed
+     5  5 │   <Hello
+     6    │ - ··onFocus={handleFocus}
+     7    │ - ··name="John"
+     8    │ - ··children={<Avatar·/>}
+     9    │ - ··active
+    10    │ - ··ref={myRef}
+    11    │ - ··onChange={handleChange}
+        6 │ + ··active
+        7 │ + ··disabled
+        8 │ + ··key="user-1"
+        9 │ + ··ref={myRef}
+       10 │ + ··children={<Avatar·/>}
+       11 │ + ··dangerouslySetInnerHTML={{·__html:·html·}}
+    12 12 │     lastName="Smith"
+    13    │ - ··dangerouslySetInnerHTML={{·__html:·html·}}
+    14    │ - ··disabled
+    15    │ - ··key="user-1"
+       13 │ + ··name="John"
+       14 │ + ··onChange={handleChange}
+       15 │ + ··onFocus={handleFocus}
+    16 16 │   />;
+    17 17 │   
+  
+
+```
+
+```
+groups-all-types.jsx:34:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    33 │ // Unsorted: RESERVED group — key after REST prop
+  > 34 │ <Hello name="John" key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ // Unsorted: DOM_RESERVED group — children before REST props (should follow RESERVED)
+  
+  i Safe fix: Sort the JSX props.
+  
+    32 32 │   
+    33 33 │   // Unsorted: RESERVED group — key after REST prop
+    34    │ - <Hello·name="John"·key="1"·/>;
+       34 │ + <Hello·key="1"·name="John"·/>;
+    35 35 │   
+    36 36 │   // Unsorted: DOM_RESERVED group — children before REST props (should follow RESERVED)
+  
+
+```
+
+```
+groups-all-types.jsx:37:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    36 │ // Unsorted: DOM_RESERVED group — children before REST props (should follow RESERVED)
+  > 37 │ <Hello name="John" key="1" children={<Foo />} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Unsorted: multiple callbacks out of alphabetical order, after implicit props
+  
+  i Safe fix: Sort the JSX props.
+  
+    35 35 │   
+    36 36 │   // Unsorted: DOM_RESERVED group — children before REST props (should follow RESERVED)
+    37    │ - <Hello·name="John"·key="1"·children={<Foo·/>}·/>;
+       37 │ + <Hello·key="1"·children={<Foo·/>}·name="John"·/>;
+    38 38 │   
+    39 39 │   // Unsorted: multiple callbacks out of alphabetical order, after implicit props
+  
+
+```
+
+```
+groups-all-types.jsx:40:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    39 │ // Unsorted: multiple callbacks out of alphabetical order, after implicit props
+  > 40 │ <Hello onFocus={fn} onClick={fn} active name="John" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ // Unsorted with spread fence: each segment covers all group types
+  
+  i Safe fix: Sort the JSX props.
+  
+    38 38 │   
+    39 39 │   // Unsorted: multiple callbacks out of alphabetical order, after implicit props
+    40    │ - <Hello·onFocus={fn}·onClick={fn}·active·name="John"·/>;
+       40 │ + <Hello·active·name="John"·onClick={fn}·onFocus={fn}·/>;
+    41 41 │   
+    42 42 │   // Unsorted with spread fence: each segment covers all group types
+  
+
+```
+
+```
+groups-all-types.jsx:43:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    42 │ // Unsorted with spread fence: each segment covers all group types
+  > 43 │ <Hello
+       │ ^^^^^^
+  > 44 │   onClick={handleClick}
+        ...
+  > 53 │   ref={myRef}
+  > 54 │   dangerouslySetInnerHTML={{ __html: html }}
+  > 55 │ />;
+       │ ^^
+    56 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    48 48 │     children={<Avatar />}
+    49 49 │     {...defaults}
+    50    │ - ··onFocus={handleFocus}
+    51    │ - ··lastName="Smith"
+    52    │ - ··active
+    53    │ - ··ref={myRef}
+    54    │ - ··dangerouslySetInnerHTML={{·__html:·html·}}
+       50 │ + ··active
+       51 │ + ··ref={myRef}
+       52 │ + ··dangerouslySetInnerHTML={{·__html:·html·}}
+       53 │ + ··lastName="Smith"
+       54 │ + ··onFocus={handleFocus}
+    55 55 │   />;
+    56 56 │   
+  
+
+```
+
+```
+groups-all-types.jsx:43:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    42 │ // Unsorted with spread fence: each segment covers all group types
+  > 43 │ <Hello
+       │ ^^^^^^
+  > 44 │   onClick={handleClick}
+        ...
+  > 53 │   ref={myRef}
+  > 54 │   dangerouslySetInnerHTML={{ __html: html }}
+  > 55 │ />;
+       │ ^^
+    56 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    42 42 │   // Unsorted with spread fence: each segment covers all group types
+    43 43 │   <Hello
+    44    │ - ··onClick={handleClick}
+    45    │ - ··name="John"
+    46    │ - ··disabled
+    47    │ - ··key="user-1"
+    48    │ - ··children={<Avatar·/>}
+       44 │ + ··disabled
+       45 │ + ··key="user-1"
+       46 │ + ··children={<Avatar·/>}
+       47 │ + ··name="John"
+       48 │ + ··onClick={handleClick}
+    49 49 │     {...defaults}
+    50 50 │     onFocus={handleFocus}
+  
+
+```

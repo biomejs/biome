@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-rest-explicit.jsx
+---
+# Input
+```jsx
+// Custom groups with an explicit :REST: placement: [:RESERVED:, :REST:, :CALLBACK:]
+// :REST: catches everything not explicitly listed (including implicit/dom-reserved
+// props, since :IMPLICIT: and :DOM_RESERVED: aren't configured here) and sorts
+// them like a regular group, instead of leaving them unsorted at the end.
+
+// Unsorted: reserved not first, rest props out of order
+<Hello zebra="z" key="1" apple="a" onClick={fn} disabled />;
+
+// Correctly ordered: reserved, then rest (sorted, including "disabled"), then callback
+<Hello key="1" apple="a" disabled zebra="z" onClick={fn} />;
+
+```
+
+# Diagnostics
+```
+groups-rest-explicit.jsx:7:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    6 │ // Unsorted: reserved not first, rest props out of order
+  > 7 │ <Hello zebra="z" key="1" apple="a" onClick={fn} disabled />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Correctly ordered: reserved, then rest (sorted, including "disabled"), then callback
+  
+  i Safe fix: Sort the JSX props.
+  
+     5  5 │   
+     6  6 │   // Unsorted: reserved not first, rest props out of order
+     7    │ - <Hello·zebra="z"·key="1"·apple="a"·onClick={fn}·disabled·/>;
+        7 │ + <Hello·key="1"·apple="a"·disabled·zebra="z"·onClick={fn}·/>;
+     8  8 │   
+     9  9 │   // Correctly ordered: reserved, then rest (sorted, including "disabled"), then callback
+  
+
+```

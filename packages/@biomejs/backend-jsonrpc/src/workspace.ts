@@ -5599,7 +5599,25 @@ Default: `natural`.
 	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
+	/**
+	* Groups control the ordering of special prop categories.
+
+Only active when `sortScope` is `"group"`.
+When not configured, the default ordering is used:
+`[":IMPLICIT:", ":RESERVED:", ":DOM_RESERVED:", ":REST:", ":CALLBACK:"]`. 
+	 */
+	groups?: AttributeGroups;
+	/**
+	 * Sort order to apply within each group (or globally when `sortScope` is `"global"`).
+	 */
 	sortOrder?: SortOrder;
+	/**
+	* Controls how `sortOrder` interacts with `groups`.
+
+- `"global"` (default): flat sort across all props, groups ignored.
+- `"group"`: sort within each group independently, then order by group. 
+	 */
+	sortScope?: SortScope;
 }
 export type UseSortedEnumMembersOptions = {};
 export type UseSortedInterfaceMembersOptions = {};
@@ -7839,6 +7857,45 @@ export interface RuleWithUseStrictModeOptions {
 export type ImportGroups = ImportGroup[];
 export type SortOrder = "natural" | "lexicographic";
 /**
+	* The set of attribute groups for `useSortedAttributes`.
+
+Groups control the position of special prop categories relative to each other
+when `sortScope` is set to `"group"`.
+
+## Predefined groups
+
+- `:CALLBACK:` — Callback props: names beginning with `on` followed by an uppercase letter (e.g. `onClick`, `onChange`).
+- `:IMPLICIT:` — Implicit (boolean shorthand) props: props with no value (e.g. `<Foo disabled />`).
+- `:RESERVED:` — React reserved props: `key` and `ref`.
+- `:DOM_RESERVED:` — DOM-only reserved props: `children` and `dangerouslySetInnerHTML`.
+- `:REST:` — Catch-all for props that don't match any other configured group.
+  Sorted like a regular group, using `sortOrder`.
+
+## Default ordering
+
+When `groups` is not configured, the following default ordering is used
+(only active when `sortScope` is `"group"`):
+
+```json
+[":IMPLICIT:", ":RESERVED:", ":DOM_RESERVED:", ":REST:", ":CALLBACK:"]
+```
+
+If `:REST:` is omitted from a configured `groups` list, props that don't
+match any named group are instead placed after all named groups, in their
+original relative order (unsorted). 
+	 */
+export type AttributeGroups = AttributeGroupPattern[];
+/**
+	* Controls how `sortOrder` interacts with `groups`.
+
+- `global`: `sortOrder` is applied over all props at once, ignoring the
+  `groups` order. This preserves the original flat-sort behavior.
+- `group`: `sortOrder` is applied independently within each group defined
+  by `groups`. Props are first partitioned by group, sorted within each
+  group, then concatenated in group order. 
+	 */
+export type SortScope = "global" | "group";
+/**
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
@@ -9071,6 +9128,15 @@ export type UseNumberToFixedDigitsArgumentOptions = {};
 export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
+/**
+ * A predefined attribute group pattern.
+ */
+export type AttributeGroupPattern =
+	| ":CALLBACK:"
+	| ":IMPLICIT:"
+	| ":RESERVED:"
+	| ":DOM_RESERVED:"
+	| ":REST:";
 export type Visibility = "public" | "package" | "private";
 /**
  * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.

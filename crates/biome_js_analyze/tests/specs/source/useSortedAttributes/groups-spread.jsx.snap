@@ -1,0 +1,186 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-spread.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: [:RESERVED:, :IMPLICIT:, :CALLBACK:]
+// Spread props act as fences: each batch between spreads is sorted independently.
+
+// Unsorted batch before a spread
+<Hello onChange={fn} disabled key="1" {...this.props} />;
+
+// Unsorted batch after a spread
+<Hello {...this.props} onChange={fn} disabled key="1" />;
+
+// Both batches unsorted
+<Hello onChange={fn} disabled key="1" {...this.props} onChange={fn} disabled key="2" />;
+
+// First batch sorted, second unsorted
+<Hello key="1" disabled onChange={fn} {...this.props} onChange={fn} disabled key="2" />;
+
+// Correctly sorted: all batches already in group order — no diagnostic
+<Hello key="1" disabled onChange={fn} {...this.props} key="2" disabled onChange={fn} />;
+
+// Multiple spreads: each segment sorted independently
+<Hello onChange={fn} disabled {...props1} lastName="Smith" firstName="John" {...props2} onChange={fn} key="1" />;
+
+```
+
+# Diagnostics
+```
+groups-spread.jsx:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    4 │ // Unsorted batch before a spread
+  > 5 │ <Hello onChange={fn} disabled key="1" {...this.props} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Unsorted batch after a spread
+  
+  i Safe fix: Sort the JSX props.
+  
+     3  3 │   
+     4  4 │   // Unsorted batch before a spread
+     5    │ - <Hello·onChange={fn}·disabled·key="1"·{...this.props}·/>;
+        5 │ + <Hello·key="1"·disabled·onChange={fn}·{...this.props}·/>;
+     6  6 │   
+     7  7 │   // Unsorted batch after a spread
+  
+
+```
+
+```
+groups-spread.jsx:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+     7 │ // Unsorted batch after a spread
+   > 8 │ <Hello {...this.props} onChange={fn} disabled key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Both batches unsorted
+  
+  i Safe fix: Sort the JSX props.
+  
+     6  6 │   
+     7  7 │   // Unsorted batch after a spread
+     8    │ - <Hello·{...this.props}·onChange={fn}·disabled·key="1"·/>;
+        8 │ + <Hello·{...this.props}·key="1"·disabled·onChange={fn}·/>;
+     9  9 │   
+    10 10 │   // Both batches unsorted
+  
+
+```
+
+```
+groups-spread.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Both batches unsorted
+  > 11 │ <Hello onChange={fn} disabled key="1" {...this.props} onChange={fn} disabled key="2" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // First batch sorted, second unsorted
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Both batches unsorted
+    11    │ - <Hello·onChange={fn}·disabled·key="1"·{...this.props}·onChange={fn}·disabled·key="2"·/>;
+       11 │ + <Hello·key="1"·disabled·onChange={fn}·{...this.props}·onChange={fn}·disabled·key="2"·/>;
+    12 12 │   
+    13 13 │   // First batch sorted, second unsorted
+  
+
+```
+
+```
+groups-spread.jsx:11:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    10 │ // Both batches unsorted
+  > 11 │ <Hello onChange={fn} disabled key="1" {...this.props} onChange={fn} disabled key="2" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // First batch sorted, second unsorted
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   
+    10 10 │   // Both batches unsorted
+    11    │ - <Hello·onChange={fn}·disabled·key="1"·{...this.props}·onChange={fn}·disabled·key="2"·/>;
+       11 │ + <Hello·onChange={fn}·disabled·key="1"·{...this.props}·key="2"·disabled·onChange={fn}·/>;
+    12 12 │   
+    13 13 │   // First batch sorted, second unsorted
+  
+
+```
+
+```
+groups-spread.jsx:14:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    13 │ // First batch sorted, second unsorted
+  > 14 │ <Hello key="1" disabled onChange={fn} {...this.props} onChange={fn} disabled key="2" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Correctly sorted: all batches already in group order — no diagnostic
+  
+  i Safe fix: Sort the JSX props.
+  
+    12 12 │   
+    13 13 │   // First batch sorted, second unsorted
+    14    │ - <Hello·key="1"·disabled·onChange={fn}·{...this.props}·onChange={fn}·disabled·key="2"·/>;
+       14 │ + <Hello·key="1"·disabled·onChange={fn}·{...this.props}·key="2"·disabled·onChange={fn}·/>;
+    15 15 │   
+    16 16 │   // Correctly sorted: all batches already in group order — no diagnostic
+  
+
+```
+
+```
+groups-spread.jsx:20:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    19 │ // Multiple spreads: each segment sorted independently
+  > 20 │ <Hello onChange={fn} disabled {...props1} lastName="Smith" firstName="John" {...props2} onChange={fn} key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    18 18 │   
+    19 19 │   // Multiple spreads: each segment sorted independently
+    20    │ - <Hello·onChange={fn}·disabled·{...props1}·lastName="Smith"·firstName="John"·{...props2}·onChange={fn}·key="1"·/>;
+       20 │ + <Hello·onChange={fn}·disabled·{...props1}·lastName="Smith"·firstName="John"·{...props2}·key="1"·onChange={fn}·/>;
+    21 21 │   
+  
+
+```
+
+```
+groups-spread.jsx:20:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    19 │ // Multiple spreads: each segment sorted independently
+  > 20 │ <Hello onChange={fn} disabled {...props1} lastName="Smith" firstName="John" {...props2} onChange={fn} key="1" />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    18 18 │   
+    19 19 │   // Multiple spreads: each segment sorted independently
+    20    │ - <Hello·onChange={fn}·disabled·{...props1}·lastName="Smith"·firstName="John"·{...props2}·onChange={fn}·key="1"·/>;
+       20 │ + <Hello·disabled·onChange={fn}·{...props1}·lastName="Smith"·firstName="John"·{...props2}·onChange={fn}·key="1"·/>;
+    21 21 │   
+  
+
+```

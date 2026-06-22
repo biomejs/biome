@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: groups-empty.jsx
+---
+# Input
+```jsx
+// sortScope: "group", groups: []
+// An empty groups list disables group sorting: every prop falls into the
+// implicit (unsorted) rest bucket, so source order is always preserved and the
+// rule never reports. This pins that behavior.
+
+// Clearly unsorted by name, but no diagnostic is emitted (no-op)
+<Hello zebra="z" apple="a" key="1" />;
+
+```
