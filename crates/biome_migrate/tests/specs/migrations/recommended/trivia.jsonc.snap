@@ -5,35 +5,35 @@ expression: trivia.jsonc
 # Input
 ```json
 {
-	"linter": {
-		"rules": {
-			// keep this comment before the key
-			"recommended" /* keep this comment after the key */: true
-		}
-	}
+  "linter": {
+    "rules": {
+      // keep this comment before the key
+      "recommended" /* keep this comment after the key */: true
+    }
+  }
 }
 
 ```
 
 # Diagnostics
 ```
-trivia.jsonc:5:4 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+trivia.jsonc:5:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The recommended option is deprecated.
   
-    3 │ 		"rules": {
-    4 │ 			// keep this comment before the key
-  > 5 │ 			"recommended" /* keep this comment after the key */: true
-      │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 		}
-    7 │ 	}
+    3 │     "rules": {
+    4 │       // keep this comment before the key
+  > 5 │       "recommended" /* keep this comment after the key */: true
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     }
+    7 │   }
   
   i Safe fix: Use the new preset field instead.
   
     3 3 │       "rules": {
     4 4 │         // keep this comment before the key
-    5   │ - → → → "recommended"·/*·keep·this·comment·after·the·key·*/:·true
-      5 │ + → → → "preset"·/*·keep·this·comment·after·the·key·*/:·"recommended"
+    5   │ - ······"recommended"·/*·keep·this·comment·after·the·key·*/:·true
+      5 │ + ······"preset"·/*·keep·this·comment·after·the·key·*/:·"recommended"
     6 6 │       }
     7 7 │     }
   
