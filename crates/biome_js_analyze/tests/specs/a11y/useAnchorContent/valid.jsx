@@ -11,4 +11,7 @@
     <a><span aria-hidden="false">content</span></a>
     <a>{content}</a>
     <a children={children} />
+    <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
+    <Button render={<a href="/home" aria-label="Home"></a>}>Home</Button>
+    <Button render={(<a href="/home" aria-label="Home" />)}>Home</Button>
 </>

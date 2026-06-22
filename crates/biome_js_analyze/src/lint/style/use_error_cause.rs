@@ -1,7 +1,10 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsBindingPattern, JsCatchClause, JsThrowStatement};
+use biome_js_syntax::{
+    AnyJsBindingPattern, AnyJsObjectMember, JsCatchClause, JsIdentifierBinding,
+    JsReferenceIdentifier, JsThrowStatement,
+};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
 
@@ -199,32 +202,59 @@ impl Rule for UseErrorCause {
                     };
 
                     for member in obj_expr.members().iter().flatten() {
-                        if let Some(prop) = member.as_js_property_object_member() {
-                            let is_cause_prop = prop
-                                .name()
-                                .ok()
-                                .and_then(|name_node| name_node.name())
-                                .is_some_and(|name| name == "cause");
+                        match member {
+                            AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+                                let is_cause_prop = prop
+                                    .name()
+                                    .ok()
+                                    .and_then(|name_node| name_node.name())
+                                    .is_some_and(|name| name == "cause");
 
-                            if is_cause_prop && let Ok(value) = prop.value() {
-                                match is_cause_value_correct_error(
-                                    &value,
-                                    identifier_binding,
-                                    model,
-                                ) {
-                                    CauseValueCheckResult::Correct => return None,
-                                    CauseValueCheckResult::Shadowed => {
-                                        return Some(State::ShadowedCause {
-                                            cause_range: value.range(),
-                                            catch_binding_range: identifier_binding.range(),
-                                        });
-                                    }
-                                    CauseValueCheckResult::Incorrect => {
-                                        // Continue checking other properties, another `cause` might be present.
-                                        // This is unlikely to be valid JS, but we handle it.
+                                if is_cause_prop && let Ok(value) = prop.value() {
+                                    match is_cause_value_correct_error(
+                                        &value,
+                                        identifier_binding,
+                                        model,
+                                    ) {
+                                        CauseValueCheckResult::Correct => return None,
+                                        CauseValueCheckResult::Shadowed => {
+                                            return Some(State::ShadowedCause {
+                                                cause_range: value.range(),
+                                                catch_binding_range: identifier_binding.range(),
+                                            });
+                                        }
+                                        CauseValueCheckResult::Incorrect => {
+                                            // Continue checking other properties, another `cause` might be present.
+                                            // This is unlikely to be valid JS, but we handle it.
+                                        }
                                     }
                                 }
                             }
+                            AnyJsObjectMember::JsShorthandPropertyObjectMember(prop) => {
+                                if let Ok(cause_reference) = prop.name()
+                                    && cause_reference
+                                        .value_token()
+                                        .is_ok_and(|token| token.text_trimmed() == "cause")
+                                {
+                                    match is_cause_reference_correct_error(
+                                        &cause_reference,
+                                        identifier_binding,
+                                        model,
+                                    ) {
+                                        CauseValueCheckResult::Correct => return None,
+                                        CauseValueCheckResult::Shadowed => {
+                                            return Some(State::ShadowedCause {
+                                                cause_range: cause_reference.range(),
+                                                catch_binding_range: identifier_binding.range(),
+                                            });
+                                        }
+                                        CauseValueCheckResult::Incorrect => {
+                                            // Continue checking other properties, another `cause` might be present.
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
                     }
 
@@ -299,7 +329,7 @@ enum CauseValueCheckResult {
 
 fn is_cause_value_correct_error(
     value: &biome_js_syntax::AnyJsExpression,
-    catch_error_binding: &biome_js_syntax::JsIdentifierBinding,
+    catch_error_binding: &JsIdentifierBinding,
     model: &SemanticModel,
 ) -> CauseValueCheckResult {
     let Some(cause_identifier_expr) = value.as_js_identifier_expression() else {
@@ -309,7 +339,25 @@ fn is_cause_value_correct_error(
         return CauseValueCheckResult::Incorrect;
     };
 
-    let Some(cause_binding) = model.binding(&cause_reference) else {
+    is_cause_reference_correct_error(&cause_reference, catch_error_binding, model)
+}
+
+fn is_cause_reference_correct_error(
+    cause_reference: &JsReferenceIdentifier,
+    catch_error_binding: &JsIdentifierBinding,
+    model: &SemanticModel,
+) -> CauseValueCheckResult {
+    let cause_name = cause_reference.value_token().ok();
+    let catch_name = catch_error_binding.name_token().ok();
+
+    let Some(cause_binding) = model.binding(cause_reference) else {
+        if cause_name.as_ref().map(|t| t.text_trimmed())
+            == catch_name.as_ref().map(|t| t.text_trimmed())
+        {
+            // Fall back to textual equality when semantic binding data is unavailable.
+            return CauseValueCheckResult::Correct;
+        }
+
         return CauseValueCheckResult::Incorrect;
     };
 
@@ -318,12 +366,6 @@ fn is_cause_value_correct_error(
     if cause_binding == catch_binding {
         CauseValueCheckResult::Correct
     } else {
-        let cause_name = cause_identifier_expr
-            .name()
-            .ok()
-            .and_then(|n| n.value_token().ok());
-        let catch_name = catch_error_binding.name_token().ok();
-
         if cause_name.as_ref().map(|t| t.text_trimmed())
             == catch_name.as_ref().map(|t| t.text_trimmed())
         {

@@ -259,7 +259,6 @@ impl NamingConventionSelection {
             || modifiers.contains(use_naming_convention::RestrictedModifier::Protected);
         let has_property_modifier =
             modifiers.contains(use_naming_convention::RestrictedModifier::Readonly);
-        modifiers.contains(use_naming_convention::RestrictedModifier::Private);
         let scope = self
             .modifiers
             .iter()

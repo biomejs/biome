@@ -16,10 +16,10 @@ importers:
         version: 0.7.0
       '@changesets/cli':
         specifier: 2.31.0
-        version: 2.31.0(@types/node@24.13.1)
+        version: 2.31.0(@types/node@24.13.2)
       '@types/node':
-        specifier: 24.13.1
-        version: 24.13.1
+        specifier: 24.13.2
+        version: 24.13.2
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
@@ -30,8 +30,8 @@ importers:
   crates/biome_formatter_test/src/prettier:
     dependencies:
       prettier:
-        specifier: 3.8.3
-        version: 3.8.3
+        specifier: 3.8.4
+        version: 3.8.4
 
   packages/@biomejs/backend-jsonrpc:
     devDependencies:
@@ -42,11 +42,11 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 7.3.2
-        version: 7.3.2(@types/node@24.12.2)(tsx@4.21.0)
+        specifier: 7.3.5
+        version: 7.3.5(@types/node@24.12.2)(tsx@4.21.0)
       vitest:
         specifier: 4.1.5
-        version: 4.1.5(@types/node@24.12.2)(happy-dom@20.9.0)(vite@7.3.2(@types/node@24.12.2)(tsx@4.21.0))
+        version: 4.1.5(@types/node@24.12.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0))
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
         specifier: 2.5.0
@@ -131,11 +131,11 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 7.3.2
-        version: 7.3.2(@types/node@24.13.1)(tsx@4.21.0)
+        specifier: 7.3.5
+        version: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
       vitest:
         specifier: 4.1.5
-        version: 4.1.5(@types/node@24.13.1)(happy-dom@20.9.0)(vite@7.3.2(@types/node@24.13.1)(tsx@4.21.0))
+        version: 4.1.5(@types/node@24.13.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -840,8 +840,8 @@ packages:
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
 
-  '@types/node@24.13.1':
-    resolution: {integrity: sha512-RSpUJGmvsJ1ZeBehQZFhIdpsz+bIpES0nIQXko4Ybq+N+kX6XvOq3Jo+iJ82FWLdblFq85AsMikd3m35jgezYg==}
+  '@types/node@24.13.2':
+    resolution: {integrity: sha512-fRa09kZTgu8o71KFcDjUFuc7F+dEbZYZmkI0mg5YBTRs0yMKjYHsq/c0urDKeDb+D5qVgXOdFcuu+DZPKOITwA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1403,6 +1403,11 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  prettier@3.8.4:
+    resolution: {integrity: sha512-N2MylSdi48+5N/6S5j+maeHbUSIzzZ5uOcX5Hm4QpV8Dkb1HFjfAKTKX6yNPJQD9AhcT3ifHNB66tWTTJDi11Q==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   process@0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
@@ -1659,8 +1664,8 @@ packages:
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
-  vite@7.3.2:
-    resolution: {integrity: sha512-Bby3NOsna2jsjfLVOHKes8sGwgl4TT0E6vvpYgnAYDIF/tie7MRaFthmKuHx1NSXjiTueXH3do80FMQgvEktRg==}
+  vite@7.3.5:
+    resolution: {integrity: sha512-KuOaNhcnGFN2zIPGA7wRmzF+lJA1sea7rHq17aiJ++9lzY1WWG6Jpwqwe1KNbRVPIqHmr8GLYx7jbrQcN/7/ww==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1868,7 +1873,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@changesets/cli@2.31.0(@types/node@24.13.1)':
+  '@changesets/cli@2.31.0(@types/node@24.13.2)':
     dependencies:
       '@changesets/apply-release-plan': 7.1.1
       '@changesets/assemble-release-plan': 6.0.10
@@ -1884,7 +1889,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@changesets/write': 0.4.0
-      '@inquirer/external-editor': 1.0.3(@types/node@24.13.1)
+      '@inquirer/external-editor': 1.0.3(@types/node@24.13.2)
       '@manypkg/get-packages': 1.1.3
       ansi-colors: 4.1.3
       enquirer: 2.4.1
@@ -2070,12 +2075,12 @@ snapshots:
   '@esbuild/win32-x64@0.27.2':
     optional: true
 
-  '@inquirer/external-editor@1.0.3(@types/node@24.13.1)':
+  '@inquirer/external-editor@1.0.3(@types/node@24.13.2)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      '@types/node': 24.13.1
+      '@types/node': 24.13.2
 
   '@jimp/core@1.6.0':
     dependencies:
@@ -2478,7 +2483,7 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/node@24.13.1':
+  '@types/node@24.13.2':
     dependencies:
       undici-types: 7.18.2
 
@@ -2505,21 +2510,21 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.5(vite@7.3.2(@types/node@24.12.2)(tsx@4.21.0))':
+  '@vitest/mocker@4.1.5(vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0))':
     dependencies:
       '@vitest/spy': 4.1.5
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.2(@types/node@24.12.2)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.12.2)(tsx@4.21.0)
 
-  '@vitest/mocker@4.1.5(vite@7.3.2(@types/node@24.13.1)(tsx@4.21.0))':
+  '@vitest/mocker@4.1.5(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))':
     dependencies:
       '@vitest/spy': 4.1.5
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.2(@types/node@24.13.1)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
 
   '@vitest/pretty-format@4.1.5':
     dependencies:
@@ -3023,6 +3028,8 @@ snapshots:
 
   prettier@3.8.3: {}
 
+  prettier@3.8.4: {}
+
   process@0.11.10: {}
 
   queue-microtask@1.2.3: {}
@@ -3290,7 +3297,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite@7.3.2(@types/node@24.12.2)(tsx@4.21.0):
+  vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.4)
@@ -3303,7 +3310,7 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.21.0
 
-  vite@7.3.2(@types/node@24.13.1)(tsx@4.21.0):
+  vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.4)
@@ -3312,14 +3319,14 @@ snapshots:
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.13.1
+      '@types/node': 24.13.2
       fsevents: 2.3.3
       tsx: 4.21.0
 
-  vitest@4.1.5(@types/node@24.12.2)(happy-dom@20.9.0)(vite@7.3.2(@types/node@24.12.2)(tsx@4.21.0)):
+  vitest@4.1.5(@types/node@24.12.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0)):
     dependencies:
       '@vitest/expect': 4.1.5
-      '@vitest/mocker': 4.1.5(vite@7.3.2(@types/node@24.12.2)(tsx@4.21.0))
+      '@vitest/mocker': 4.1.5(vite@7.3.5(@types/node@24.12.2)(tsx@4.21.0))
       '@vitest/pretty-format': 4.1.5
       '@vitest/runner': 4.1.5
       '@vitest/snapshot': 4.1.5
@@ -3336,7 +3343,7 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 7.3.2(@types/node@24.12.2)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.12.2)(tsx@4.21.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.12.2
@@ -3344,10 +3351,10 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.5(@types/node@24.13.1)(happy-dom@20.9.0)(vite@7.3.2(@types/node@24.13.1)(tsx@4.21.0)):
+  vitest@4.1.5(@types/node@24.13.2)(happy-dom@20.9.0)(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0)):
     dependencies:
       '@vitest/expect': 4.1.5
-      '@vitest/mocker': 4.1.5(vite@7.3.2(@types/node@24.13.1)(tsx@4.21.0))
+      '@vitest/mocker': 4.1.5(vite@7.3.5(@types/node@24.13.2)(tsx@4.21.0))
       '@vitest/pretty-format': 4.1.5
       '@vitest/runner': 4.1.5
       '@vitest/snapshot': 4.1.5
@@ -3364,10 +3371,10 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 7.3.2(@types/node@24.13.1)(tsx@4.21.0)
+      vite: 7.3.5(@types/node@24.13.2)(tsx@4.21.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.13.1
+      '@types/node': 24.13.2
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw

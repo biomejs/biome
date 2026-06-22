@@ -50,7 +50,12 @@ pub(crate) fn goto_definition(
                 path: path.clone(),
                 cursor_range,
                 enabled,
-            })?;
+            });
+    // The feature might not have access to all files per design e.g. node_modules dependencies.
+    // This will return a `Result`, but we shouldn't bubble it as an error to the user.
+    let Ok(result) = result else {
+        return Ok(None);
+    };
 
     match result {
         Some(definition) => {

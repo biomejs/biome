@@ -5,6 +5,8 @@ mod css_kinds_src;
 mod formatter;
 mod generate_analyzer;
 pub mod generate_analyzer_rule_options;
+#[cfg(feature = "global_types")]
+pub mod generate_global_types;
 mod generate_grit_mappings;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
@@ -111,6 +113,10 @@ pub enum TaskCommand {
     /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
     #[bpaf(command)]
     Bindings,
+    /// Generates the built-in global type declarations from the TypeScript standard library.
+    #[cfg(feature = "global_types")]
+    #[bpaf(command, long("global-types"))]
+    GlobalTypes,
     /// It updates the file that contains licenses
     #[bpaf(command)]
     License,

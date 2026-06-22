@@ -441,7 +441,19 @@ fn parse_svelte_blocks(
                     }
                 }
             }
-            AnySvelteBlock::SvelteHtmlBlock(_) => {}
+            AnySvelteBlock::SvelteHtmlBlock(html_block) => {
+                if let Ok(expression) = html_block.expression()
+                    && let Some(candidate) =
+                        build_svelte_text_expression_candidate(&expression, &svelte_block)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        nodes,
+                    );
+                }
+            }
             AnySvelteBlock::SvelteIfBlock(if_block) => {
                 if let Ok(opening_block) = if_block.opening_block()
                     && let Ok(expression) = opening_block.expression()

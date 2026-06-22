@@ -226,7 +226,7 @@ jobs:
           CARGO_BUILD_JOBS: 3 # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@9d332c4d90b43981c3e55ae8e38e68709996240f # v4.17.0
+        uses: CodSpeedHQ/action@63f3e98b61959fe67f146a3ff022e4136fe9bb9c # v4.17.6
         timeout-minutes: 50
         with:
           mode: simulation
@@ -327,7 +327,7 @@ jobs:
           CARGO_BUILD_JOBS: 3
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@9d332c4d90b43981c3e55ae8e38e68709996240f # v4.17.0
+        uses: CodSpeedHQ/action@63f3e98b61959fe67f146a3ff022e4136fe9bb9c # v4.17.6
         timeout-minutes: 50
         with:
           mode: simulation

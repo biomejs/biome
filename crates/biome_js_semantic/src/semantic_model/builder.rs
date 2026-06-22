@@ -6,6 +6,7 @@ use biome_js_syntax::{
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
 use rustc_hash::{FxHashMap, FxHashSet};
+use std::collections::hash_map::Entry;
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [JsSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
@@ -167,6 +168,7 @@ impl SemanticModelBuilder {
                     children: vec![],
                     bindings: vec![],
                     bindings_by_name: FxHashMap::default(),
+                    overloads_by_name: FxHashMap::default(),
                     read_references: vec![],
                     write_references: vec![],
                     is_closure,
@@ -235,13 +237,39 @@ impl SemanticModelBuilder {
                                 declaration_kind,
                             );
 
-                        scope
-                            .bindings_by_name
-                            .entry(name)
-                            .and_modify(|existing| {
-                                *existing = existing.union_with(binding_reference);
-                            })
-                            .or_insert(binding_reference);
+                        // Update `bindings_by_name` (declaration merging), keeping
+                        // the previous reference so we can detect same-name
+                        // function overloads on collision.
+                        let previous = match scope.bindings_by_name.entry(name.clone()) {
+                            Entry::Occupied(mut existing) => {
+                                let previous = *existing.get();
+                                *existing.get_mut() = previous.union_with(binding_reference);
+                                Some(previous)
+                            }
+                            Entry::Vacant(slot) => {
+                                slot.insert(binding_reference);
+                                None
+                            }
+                        };
+
+                        // Record an overload set only when a function follows a
+                        // same-name function (rare). The common case of a unique
+                        // name adds nothing beyond the check above, keeping the
+                        // hot build path allocation- and rehash-free.
+                        if matches!(declaration_kind, JsDeclarationKind::Function)
+                            && let Some(previous) = previous
+                        {
+                            let previous_id = previous.value_ty_or_ty();
+                            if self.bindings[previous_id.index()].declaration_kind
+                                == JsDeclarationKind::Function
+                            {
+                                scope
+                                    .overloads_by_name
+                                    .entry(name)
+                                    .or_insert_with(|| smallvec::smallvec![previous_id])
+                                    .push(binding_id);
+                            }
+                        }
                     }
                 }
 

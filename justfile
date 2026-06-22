@@ -75,6 +75,9 @@ gen-migrate:
 gen-formatter *args='':
   cargo run -p xtask_codegen -- formatter {{args}}
 
+gen-global-types:
+  cargo run -p xtask_codegen --features global_types -- global-types
+
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:

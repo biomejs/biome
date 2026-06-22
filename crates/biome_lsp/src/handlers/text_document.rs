@@ -97,10 +97,10 @@ async fn ensure_project_for_opened_document(
             // Use the per-file resolved configurationPath so each workspace folder
             // uses its own config, even when a project is already open.
             if let Some(resolved_path) = config_path {
-                session.set_configuration_status(ConfigurationStatus::Loading);
                 let status = session
                     .load_biome_configuration_file(resolved_path.clone(), false)
                     .await;
+                session.set_configuration_status(project_key, status);
                 load_status = Some(status);
             }
         }
@@ -112,15 +112,18 @@ async fn ensure_project_for_opened_document(
     }
 
     if load_status.is_none() {
-        session.set_configuration_status(ConfigurationStatus::Loading);
         if !session.has_initialized() {
             session.load_extension_settings(None).await;
         }
-        load_status = Some(load_from_workspace_root_for_path(session, path, config_path).await);
+        let status = load_from_workspace_root_for_path(session, path, config_path).await;
+        // On success the project was created during loading, so it can now be
+        // resolved from the path and the status recorded against it.
+        if let Some(project_key) = session.project_for_path(path) {
+            session.set_configuration_status(project_key, status);
+        }
+        load_status = Some(status);
     }
     let status = load_status.expect("load_status should be set");
-
-    session.set_configuration_status(status);
 
     if status.is_loaded() {
         session.project_for_path(path).or_else(|| {

@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<input type="submit" value="Submit" />
+<a href="https://webaim.org/">WebAIM.org</a>
+<button>Next</button>
+
+```

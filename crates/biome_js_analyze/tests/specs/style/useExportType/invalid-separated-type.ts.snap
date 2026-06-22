@@ -35,7 +35,7 @@ invalid-separated-type.ts:3:8 lint/style/useExportType  FIXABLE  ━━━━━
   
   i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Extract types into a new export.
+  i Safe fix: Separate types into a new export.
   
      1  1 │   import { type T1, V1 } from "mod";
      2  2 │   // Comment
@@ -85,25 +85,9 @@ invalid-separated-type.ts:10:8 lint/style/useExportType  FIXABLE  ━━━━�
     11 │ 
     12 │ // Comment
   
-  i This export is a type.
-  
-     9 │ // Comment
-  > 10 │ export { type T4, V2, type T5 } from "mod";
-       │          ^^^^^^^
-    11 │ 
-    12 │ // Comment
-  
-  i This export is a type.
-  
-     9 │ // Comment
-  > 10 │ export { type T4, V2, type T5 } from "mod";
-       │                       ^^^^^^^
-    11 │ 
-    12 │ // Comment
-  
   i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Extract types into a new export.
+  i Safe fix: Separate types into a new export.
   
      8  8 │   
      9  9 │   // Comment

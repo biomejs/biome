@@ -29,6 +29,8 @@ use crate::generate_migrate_eslint::generate_migrate_eslint;
 use crate::generate_module_replacements::generate_module_replacements;
 use crate::move_rule::move_rule;
 
+#[cfg(feature = "global_types")]
+use xtask_codegen::generate_global_types;
 use xtask_codegen::{
     TaskCommand, generate_analyzer, generate_analyzer_rule_options, generate_ast,
     generate_formatters, generate_new_analyzer_rule, generate_tables, task_command,
@@ -66,6 +68,10 @@ fn main() -> Result<()> {
         TaskCommand::Bindings => {
             #[cfg(feature = "schema")]
             generate_workspace_bindings(Overwrite)?;
+        }
+        #[cfg(feature = "global_types")]
+        TaskCommand::GlobalTypes => {
+            generate_global_types::run()?;
         }
         TaskCommand::License => {
             #[cfg(feature = "external_data")]
