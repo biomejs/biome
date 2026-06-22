@@ -263,18 +263,17 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             .open_with_options(path.as_path(), open_options)
             .with_file_path(path.to_string())?;
 
-        let mut input = String::new();
-        file.read_to_string(&mut input)
-            .with_file_path(path.to_string())?;
-
-        let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
-            .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
-
         if ctx.workspace().file_exists(FileExistsParams {
             file_path: path.clone(),
         })? {
+            let guard = FileGuard::borrowed(ctx.workspace(), ctx.project_key(), path.clone())
+                .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
+
             Ok(Self { guard, path, file })
         } else {
+            let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
+                .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
+
             let mut input = String::new();
             file.read_to_string(&mut input)
                 .with_file_path(path.to_string())?;
@@ -315,5 +314,232 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard
             .change_file(self.file.file_version(), new_content)?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WorkspaceFile;
+    use crate::runner::crawler::CrawlerContext;
+    use crate::runner::execution::{AnalyzerSelectors, Execution};
+    use crate::runner::process_file::Message;
+    use biome_console::MarkupBuf;
+    use biome_diagnostics::{Category, Error, category};
+    use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
+    use biome_service::projects::ProjectKey;
+    use biome_service::workspace::{
+        FeatureName, FeaturesBuilder, FeaturesSupported, FileContent, GetFileContentParams,
+        OpenFileParams, OpenProjectParams, OpenProjectResult, SupportKind, server,
+    };
+    use biome_service::{Workspace, WorkspaceError};
+    use camino::Utf8PathBuf;
+    use papaya::{HashSet, HashSetRef, LocalGuard};
+    use std::hash::RandomState;
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    #[derive(Debug)]
+    struct TestExecution {
+        write: bool,
+    }
+
+    impl Execution for TestExecution {
+        fn wanted_features(&self) -> FeatureName {
+            FeaturesBuilder::new().with_all().build()
+        }
+
+        fn not_requested_features(&self) -> FeatureName {
+            FeaturesBuilder::new().build()
+        }
+
+        fn can_handle(&self, _features: FeaturesSupported) -> bool {
+            true
+        }
+
+        fn is_vcs_targeted(&self) -> bool {
+            false
+        }
+
+        fn supports_kind(&self, _file_features: &FeaturesSupported) -> Option<SupportKind> {
+            None
+        }
+
+        fn get_stdin_file_path(&self) -> Option<&str> {
+            None
+        }
+
+        fn as_diagnostic_category(&self) -> &'static Category {
+            category!("check")
+        }
+
+        fn requires_write_access(&self) -> bool {
+            self.write
+        }
+
+        fn analyzer_selectors(&self) -> AnalyzerSelectors {
+            AnalyzerSelectors::default()
+        }
+
+        fn summary_phrase(&self, _files: usize, _duration: &Duration) -> MarkupBuf {
+            MarkupBuf::default()
+        }
+    }
+
+    struct TestContext<'a> {
+        fs: Arc<MemoryFileSystem>,
+        workspace: &'a dyn Workspace,
+        project_key: ProjectKey,
+        execution: TestExecution,
+        interner: PathInterner,
+        evaluated_paths: HashSet<BiomePath>,
+    }
+
+    impl CrawlerContext for TestContext<'_> {
+        fn increment_changed(&self, _path: &BiomePath) {}
+
+        fn increment_unchanged(&self) {}
+
+        fn increment_matches(&self, _num_matches: usize) {}
+
+        fn increment_skipped(&self) {}
+
+        fn push_message(&self, _msg: Message) {}
+
+        fn fs(&self) -> &dyn FileSystem {
+            self.fs.as_ref()
+        }
+
+        fn workspace(&self) -> &dyn Workspace {
+            self.workspace
+        }
+
+        fn project_key(&self) -> ProjectKey {
+            self.project_key
+        }
+
+        fn execution(&self) -> &dyn Execution {
+            &self.execution
+        }
+    }
+
+    impl TraversalContext for TestContext<'_> {
+        fn interner(&self) -> &PathInterner {
+            &self.interner
+        }
+
+        fn push_diagnostic(&self, _error: Error) {}
+
+        fn can_handle(&self, _path: &BiomePath) -> bool {
+            true
+        }
+
+        fn handle_path(&self, _path: BiomePath) {}
+
+        fn store_path(&self, path: BiomePath) {
+            self.evaluated_paths.pin().insert(path);
+        }
+
+        fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+            self.evaluated_paths.pin()
+        }
+    }
+
+    #[test]
+    fn workspace_file_borrows_existing_document() {
+        const SOURCE: &str = "const value = 1;";
+
+        let file_path = Utf8PathBuf::from("/project/file.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        fs.insert(file_path.clone(), SOURCE);
+
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs,
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: false },
+            interner,
+            evaluated_paths: HashSet::default(),
+        };
+
+        {
+            let _workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
+        }
+
+        let content = workspace
+            .get_file_content(GetFileContentParams { project_key, path })
+            .unwrap();
+
+        assert_eq!(content, SOURCE);
+    }
+
+    #[test]
+    fn workspace_file_opens_updates_and_closes_new_document() {
+        const SOURCE: &str = "const value = 1;";
+        const UPDATED: &str = "const value = 2;";
+
+        let file_path = Utf8PathBuf::from("/project/file.js");
+        let fs = Arc::new(MemoryFileSystem::default());
+        fs.insert(file_path.clone(), SOURCE);
+
+        let workspace = server(fs.clone(), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new("/project"),
+                open_uninitialized: true,
+            })
+            .unwrap();
+        let path = BiomePath::new(&file_path);
+
+        let (interner, _path_receiver) = PathInterner::new();
+        let ctx = TestContext {
+            fs,
+            workspace: workspace.as_ref(),
+            project_key,
+            execution: TestExecution { write: true },
+            interner,
+            evaluated_paths: HashSet::default(),
+        };
+
+        {
+            let mut workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
+            assert_eq!(workspace_file.input().unwrap(), SOURCE);
+
+            workspace_file.update_file(UPDATED).unwrap();
+            let content = workspace
+                .get_file_content(GetFileContentParams {
+                    project_key,
+                    path: path.clone(),
+                })
+                .unwrap();
+
+            assert_eq!(content, UPDATED);
+        }
+
+        let error = workspace
+            .get_file_content(GetFileContentParams { project_key, path })
+            .expect_err("new document should be closed on drop");
+
+        assert!(matches!(error, WorkspaceError::NotFound(_)));
     }
 }
