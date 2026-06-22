@@ -1,0 +1,41 @@
+name: Update e18e module replacements data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-module-replacements:
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          bins: wasm-bindgen-cli@0.2.117, wasm-opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate module replacements
+        run: just gen-module-replacements
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update module replacements data"
+          title: "chore: update module replacements data"
+          body: |
+            Automated update for module replacements data.
+          branch: chore/update-module-replacements-data
+          delete-branch: true
