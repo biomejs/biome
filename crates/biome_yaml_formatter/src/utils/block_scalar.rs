@@ -100,9 +100,7 @@ pub(crate) fn format_block_scalar(
     // We rewrite the content token directly rather than going through
     // FormatYamlBlockContent's rule, so manually mark the node as visited
     // for the suppression bookkeeping the debug formatter enforces.
-    f.context()
-        .comments()
-        .is_suppressed(content.syntax());
+    f.context().comments().is_suppressed(content.syntax());
 
     let content_token = content.value_token()?;
     let canonical_indent = f.options().indent_width().value() as usize;
