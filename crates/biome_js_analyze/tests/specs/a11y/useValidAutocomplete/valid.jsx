@@ -2,10 +2,12 @@
 <>
 	<input type="text" />
 	<input type="text" autocomplete="name" />
+	<input type="text" autoComplete="name" />
 	<input type="text" autocomplete="" />
 	<input type="text" autocomplete="off" />
 	<input type="text" autocomplete="on" />
 	<input type="text" autocomplete="billing family-name" />
+	<input type="text" autoComplete="billing family-name" />
 	<input type="text" autocomplete="section-blue shipping street-address" />
 	<input type="text" autocomplete="section-somewhere shipping work email" />
 	<input type="text" autocomplete />

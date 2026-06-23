@@ -3,8 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, TextRange};
+use biome_js_syntax::{
+    AnyJsxAttribute, AnyJsxAttributeName, JsxAttribute, jsx_ext::AnyJsxElement,
+};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions;
 
 declare_lint_rule! {
@@ -154,7 +156,7 @@ impl Rule for UseValidAutocomplete {
             return None;
         }
 
-        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
+        let autocomplete_attribute = find_autocomplete_attribute(node)?;
         let autocomplete_val = autocomplete_attribute.as_static_value()?;
         let autocompletes = autocomplete_val
             .text()
@@ -188,6 +190,22 @@ impl Rule for UseValidAutocomplete {
         })
     )
     }
+}
+
+fn find_autocomplete_attribute(node: &AnyJsxElement) -> Option<JsxAttribute> {
+    node.attributes().iter().find_map(|attribute| {
+        if let AnyJsxAttribute::JsxAttribute(attribute) = attribute
+            && let Ok(AnyJsxAttributeName::JsxName(name)) = attribute.name()
+            && name
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .eq_ignore_ascii_case("autocomplete")
+        {
+            return Some(attribute);
+        }
+        None
+    })
 }
 
 /// Checks if the autocomplete attribute values are valid
