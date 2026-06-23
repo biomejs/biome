@@ -1,0 +1,122 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<?xml version="1.0" ?>
+
+<svg>
+	<?something ?>
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlProcessingInstruction {
+            start_token: PI_START@0..2 "<?" [] [],
+            target: HtmlTagName {
+                value_token: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@6..13 "version" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@13..14 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            end_token: PI_END@20..22 "?>" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@22..25 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@25..28 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@29..33 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@33..43 "something" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [],
+                    end_token: PI_END@43..45 "?>" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@45..47 "<" [Newline("\n")] [],
+                slash_token: SLASH@47..48 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@48..51 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@51..52 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..53
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..52
+    0: HTML_PROCESSING_INSTRUCTION@0..22
+      0: PI_START@0..2 "<?" [] []
+      1: HTML_TAG_NAME@2..6
+        0: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@6..20
+        0: HTML_ATTRIBUTE@6..20
+          0: HTML_ATTRIBUTE_NAME@6..13
+            0: HTML_LITERAL@6..13 "version" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@13..20
+            0: EQ@13..14 "=" [] []
+            1: HTML_STRING@14..20
+              0: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")]
+      3: PI_END@20..22 "?>" [] []
+    1: HTML_ELEMENT@22..52
+      0: HTML_OPENING_ELEMENT@22..29
+        0: L_ANGLE@22..25 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@25..28
+          0: HTML_LITERAL@25..28 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@28..28
+        3: R_ANGLE@28..29 ">" [] []
+      1: HTML_ELEMENT_LIST@29..45
+        0: HTML_PROCESSING_INSTRUCTION@29..45
+          0: PI_START@29..33 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@33..43
+            0: HTML_LITERAL@33..43 "something" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@43..43
+          3: PI_END@43..45 "?>" [] []
+      2: HTML_CLOSING_ELEMENT@45..52
+        0: L_ANGLE@45..47 "<" [Newline("\n")] []
+        1: SLASH@47..48 "/" [] []
+        2: HTML_TAG_NAME@48..51
+          0: HTML_LITERAL@48..51 "svg" [] []
+        3: R_ANGLE@51..52 ">" [] []
+  4: EOF@52..53 "" [Newline("\n")] []
+
+```

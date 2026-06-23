@@ -191,7 +191,7 @@ where
         .cloned()
         .collect();
 
-    if !css_plugins.is_empty() {
+    if filter.match_plugins() && !css_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target CSS above.
         unsafe {
             analyzer.add_visitor(

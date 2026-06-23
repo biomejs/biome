@@ -115,6 +115,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlOpeningElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION => {
+                    let $pattern =
+                        unsafe { $crate::HtmlProcessingInstruction::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ROOT => {
                     let $pattern = unsafe { $crate::HtmlRoot::new_unchecked(node) };
                     $body

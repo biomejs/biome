@@ -65,16 +65,6 @@ $my-map: (
  [href]:active & {
    .tooltip {
      opacity: 1;
-@@ -33,7 +35,8 @@
-   "variables",
-   // Comment
-   "reset",
--  "scaffolding", "type",
-+  "scaffolding",
-+  "type",
-   // Comment
-   "bar",
-   "tabs";
 ```
 
 # Output
@@ -117,8 +107,7 @@ $my-map: (
   "variables",
   // Comment
   "reset",
-  "scaffolding",
-  "type",
+  "scaffolding", "type",
   // Comment
   "bar",
   "tabs";

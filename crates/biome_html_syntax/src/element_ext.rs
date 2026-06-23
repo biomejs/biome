@@ -1,8 +1,8 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
     AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList,
-    HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken,
-    HtmlTagName, ScriptType, inner_string_text,
+    HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlProcessingInstruction,
+    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
@@ -35,6 +35,7 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlProcessingInstruction(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_javascript_tag(),
         }
@@ -45,6 +46,7 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_)
             | Self::HtmlBogusElement(_)
             | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlProcessingInstruction(_)
             | Self::HtmlCdataSection(_) => false,
             Self::HtmlElement(element) => element.is_style_tag(),
         }
@@ -57,6 +59,9 @@ impl AnyHtmlElement {
         match self {
             Self::HtmlElement(element) => element.find_attribute_by_name(name_to_lookup),
             Self::HtmlSelfClosingElement(element) => element.find_attribute_by_name(name_to_lookup),
+            Self::HtmlProcessingInstruction(element) => {
+                element.find_attribute_by_name(name_to_lookup)
+            }
             // Other variants don't have attributes
             Self::AnyHtmlContent(_) | Self::HtmlBogusElement(_) | Self::HtmlCdataSection(_) => None,
         }
@@ -225,6 +230,12 @@ impl HtmlSelfClosingElement {
         let name = self.name().ok()?;
         let name_text = get_tag_name_text(&name)?;
         Some(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
+    }
+}
+
+impl HtmlProcessingInstruction {
+    pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
+        self.attributes().find_attribute_by_name(name_to_lookup)
     }
 }
 
@@ -495,8 +506,7 @@ impl AnyHtmlTagElement {
 
                     // v-bind:name="..."
                     AnyVueDirective::VueDirective(d) => {
-                        let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
-                        is_bind
+                        d.is_binding()
                             && d.arg()
                                 .and_then(|arg| arg.arg().ok())
                                 .and_then(|arg| arg.as_vue_static_argument().cloned())
@@ -574,8 +584,7 @@ impl AnyHtmlTagElement {
 
                 // v-bind:name="..."
                 AnyVueDirective::VueDirective(d) => {
-                    let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
-                    is_bind
+                    d.is_binding()
                         && d.arg()
                             .and_then(|arg| arg.arg().ok())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())

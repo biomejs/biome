@@ -1045,6 +1045,56 @@ pub struct HtmlOpeningElementFields {
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlProcessingInstruction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlProcessingInstruction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlProcessingInstructionFields {
+        HtmlProcessingInstructionFields {
+            start_token: self.start_token(),
+            target: self.target(),
+            attributes: self.attributes(),
+            end_token: self.end_token(),
+        }
+    }
+    pub fn start_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn target(&self) -> SyntaxResult<AnyHtmlTagName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn attributes(&self) -> HtmlAttributeList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn end_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for HtmlProcessingInstruction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlProcessingInstructionFields {
+    pub start_token: SyntaxResult<SyntaxToken>,
+    pub target: SyntaxResult<AnyHtmlTagName>,
+    pub attributes: HtmlAttributeList,
+    pub end_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4750,6 +4800,7 @@ pub enum AnyHtmlElement {
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
     HtmlElement(HtmlElement),
+    HtmlProcessingInstruction(HtmlProcessingInstruction),
     HtmlSelfClosingElement(HtmlSelfClosingElement),
 }
 impl AnyHtmlElement {
@@ -4774,6 +4825,12 @@ impl AnyHtmlElement {
     pub fn as_html_element(&self) -> Option<&HtmlElement> {
         match &self {
             Self::HtmlElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_processing_instruction(&self) -> Option<&HtmlProcessingInstruction> {
+        match &self {
+            Self::HtmlProcessingInstruction(item) => Some(item),
             _ => None,
         }
     }
@@ -6632,6 +6689,59 @@ impl From<HtmlOpeningElement> for SyntaxNode {
 }
 impl From<HtmlOpeningElement> for SyntaxElement {
     fn from(n: HtmlOpeningElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlProcessingInstruction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_PROCESSING_INSTRUCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_PROCESSING_INSTRUCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlProcessingInstruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlProcessingInstruction")
+                .field(
+                    "start_token",
+                    &support::DebugSyntaxResult(self.start_token()),
+                )
+                .field("target", &support::DebugSyntaxResult(self.target()))
+                .field("attributes", &self.attributes())
+                .field("end_token", &support::DebugSyntaxResult(self.end_token()))
+                .finish()
+        } else {
+            f.debug_struct("HtmlProcessingInstruction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlProcessingInstruction> for SyntaxNode {
+    fn from(n: HtmlProcessingInstruction) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlProcessingInstruction> for SyntaxElement {
+    fn from(n: HtmlProcessingInstruction) -> Self {
         n.syntax.into()
     }
 }
@@ -11358,6 +11468,11 @@ impl From<HtmlElement> for AnyHtmlElement {
         Self::HtmlElement(node)
     }
 }
+impl From<HtmlProcessingInstruction> for AnyHtmlElement {
+    fn from(node: HtmlProcessingInstruction) -> Self {
+        Self::HtmlProcessingInstruction(node)
+    }
+}
 impl From<HtmlSelfClosingElement> for AnyHtmlElement {
     fn from(node: HtmlSelfClosingElement) -> Self {
         Self::HtmlSelfClosingElement(node)
@@ -11369,12 +11484,15 @@ impl AstNode for AnyHtmlElement {
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
         .union(HtmlElement::KIND_SET)
+        .union(HtmlProcessingInstruction::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_BOGUS_ELEMENT | HTML_CDATA_SECTION | HTML_ELEMENT | HTML_SELF_CLOSING_ELEMENT => {
-                true
-            }
+            HTML_BOGUS_ELEMENT
+            | HTML_CDATA_SECTION
+            | HTML_ELEMENT
+            | HTML_PROCESSING_INSTRUCTION
+            | HTML_SELF_CLOSING_ELEMENT => true,
             k if AnyHtmlContent::can_cast(k) => true,
             _ => false,
         }
@@ -11384,6 +11502,9 @@ impl AstNode for AnyHtmlElement {
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
+            HTML_PROCESSING_INSTRUCTION => {
+                Self::HtmlProcessingInstruction(HtmlProcessingInstruction { syntax })
+            }
             HTML_SELF_CLOSING_ELEMENT => {
                 Self::HtmlSelfClosingElement(HtmlSelfClosingElement { syntax })
             }
@@ -11401,6 +11522,7 @@ impl AstNode for AnyHtmlElement {
             Self::HtmlBogusElement(it) => it.syntax(),
             Self::HtmlCdataSection(it) => it.syntax(),
             Self::HtmlElement(it) => it.syntax(),
+            Self::HtmlProcessingInstruction(it) => it.syntax(),
             Self::HtmlSelfClosingElement(it) => it.syntax(),
             Self::AnyHtmlContent(it) => it.syntax(),
         }
@@ -11410,6 +11532,7 @@ impl AstNode for AnyHtmlElement {
             Self::HtmlBogusElement(it) => it.into_syntax(),
             Self::HtmlCdataSection(it) => it.into_syntax(),
             Self::HtmlElement(it) => it.into_syntax(),
+            Self::HtmlProcessingInstruction(it) => it.into_syntax(),
             Self::HtmlSelfClosingElement(it) => it.into_syntax(),
             Self::AnyHtmlContent(it) => it.into_syntax(),
         }
@@ -11422,6 +11545,7 @@ impl std::fmt::Debug for AnyHtmlElement {
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlProcessingInstruction(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -11433,6 +11557,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
             AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
             AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlProcessingInstruction(it) => it.into_syntax(),
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.into_syntax(),
         }
     }
@@ -13287,6 +13412,11 @@ impl std::fmt::Display for HtmlMemberName {
     }
 }
 impl std::fmt::Display for HtmlOpeningElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlProcessingInstruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

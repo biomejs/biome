@@ -1699,14 +1699,20 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_configuration",
+ "biome_console",
  "biome_db",
+ "biome_deserialize",
+ "biome_diagnostics",
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_json_factory",
  "biome_json_parser",
+ "biome_json_syntax",
  "biome_languages",
  "biome_module_graph",
  "biome_project_layout",
+ "biome_rowan",
  "biome_service",
  "biome_test_utils",
  "camino",
@@ -2500,7 +2506,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.52.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -4825,9 +4831,9 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.11.14"
+version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "434b42fec591c96ef50e21e886936e66d3cc3f737104fdb9b737c40ffb94c098"
+checksum = "4fcb935c5bec503c2f0e306bdd3e58bb9029dcb14fa8d9ac76e3a5256ac0763e"
 dependencies = [
  "bytes",
  "getrandom 0.3.2",
@@ -5137,12 +5143,10 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_configuration",
- "biome_console",
  "biome_css_analyze",
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
- "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
  "biome_graphql_analyze",
@@ -5155,7 +5159,6 @@ dependencies = [
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
- "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",

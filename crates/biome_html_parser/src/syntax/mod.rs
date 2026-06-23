@@ -32,6 +32,7 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_rowan::TextRange;
 
 pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support Astro
@@ -233,6 +234,34 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
     })
 }
 
+/// Parses `<?instruction foo="bar" ?>
+fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<?]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let start_range = p.cur_range();
+    p.bump_with_context(T![<?], inside_tag_context(p));
+
+    let name_range = p.cur_range();
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if start_range.end() != name_range.start() {
+        p.error(expected_no_spaces(
+            p,
+            TextRange::new(start_range.end(), name_range.start()),
+        ));
+    }
+
+    AttributeList.parse_list(p);
+
+    p.expect(T![?>]);
+
+    Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -392,6 +421,7 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
+        T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
@@ -477,7 +507,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![?>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(

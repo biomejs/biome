@@ -61,7 +61,7 @@ use std::sync::{Arc, RwLock};
 /// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
-    /// The configuration that originated this setting, if applicable.
+    /// The configuration that originated this setting if applicable.
     source: Option<Arc<ConfigurationSource>>,
 
     pub(crate) module_graph_resolution_kind: ModuleGraphResolutionKind,
@@ -1168,25 +1168,6 @@ impl VcsSettings {
 
         Ok(())
     }
-
-    /// Stores a list of patterns inside as a nested ignore file
-    pub fn store_nested_ignore_patterns(
-        &mut self,
-        path: &Utf8Path,
-        patterns: &[&str],
-    ) -> Result<(), WorkspaceError> {
-        match self.client_kind {
-            Some(VcsClientKind::Git) => {
-                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
-                if let Some(ignore_matches) = self.ignore_matches.as_mut() {
-                    ignore_matches.insert_git_match(git_ignore);
-                }
-            }
-            None => {}
-        };
-
-        Ok(())
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -1277,7 +1258,10 @@ impl VcsIgnoredPatterns {
     /// ## Error
     ///
     /// If the patterns are invalid
-    fn git_ignore(path: &Utf8Path, patterns: &[&str]) -> Result<Gitignore, WorkspaceError> {
+    pub(crate) fn git_ignore(
+        path: &Utf8Path,
+        patterns: &[&str],
+    ) -> Result<Gitignore, WorkspaceError> {
         let mut gitignore_builder = GitignoreBuilder::new(path.as_std_path());
 
         for the_match in patterns {
