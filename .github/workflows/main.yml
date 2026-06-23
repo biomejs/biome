@@ -101,10 +101,10 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
           - os: depot-macos-14
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
