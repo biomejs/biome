@@ -44,13 +44,14 @@ jobs:
         run: |
           cat > .changeset/module-replacements-$(date +%s).md << 'EOF'
           ---
-          "biome": patch
+          "@biomejs/biome": patch
           ---
 
-          Updated the e18e module replacements data.
+          The [noRestrictedDependencies](https://biomejs.dev/linter/rules/no-restricted-dependencies/) rule has been updated with new module replacement data, it should now detect for more relevant replacements.
           EOF
 
       - name: Create pull request
+        id: create-pull-request
         if: steps.changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,4 +61,15 @@ jobs:
           git add .
           git commit -m "chore: update e18e module replacements data"
           git push origin HEAD:chore/update-module-replacements-data -f
-          gh pr create --title "chore: update e18e module replacements data" --body "Automated update for module replacements data." --base main
+          PR_URL=$(gh pr create --title "chore: update e18e module replacements data" --body "Automated update for module replacements data." --base main)
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+
+      - name: Auto merge
+        if: ${{ steps.create-pull-request.outputs.pr_url != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.create_pr.outputs.pr_url }}" \
+            --auto \
+            --squash \
+            --delete-branch
