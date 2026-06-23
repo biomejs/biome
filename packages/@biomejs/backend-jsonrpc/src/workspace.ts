@@ -2529,6 +2529,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow arbitrary values in Tailwind CSS utility classes.
+See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
+	 */
+	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
 	 */
@@ -4729,6 +4734,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoTailwindArbitraryValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindArbitraryValueOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6603,6 +6611,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoTailwindArbitraryValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindArbitraryValueOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -8302,6 +8314,21 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+/**
+	* Options for the `noTailwindArbitraryValue` rule.
+
+Controls which attributes and utility functions are checked for arbitrary values. 
+	 */
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Additional attributes that will be checked.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be checked.
+	 */
+	functions?: string[];
+}
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -9670,6 +9697,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"

@@ -5536,6 +5536,29 @@
 			]
 		},
 		"NoSyncScriptsOptions": { "type": "object", "additionalProperties": false },
+		"NoTailwindArbitraryValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindArbitraryValueOptions" }
+			]
+		},
+		"NoTailwindArbitraryValueOptions": {
+			"description": "Options for the `noTailwindArbitraryValue` rule.\n\nControls which attributes and utility functions are checked for arbitrary values.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6769,6 +6792,13 @@
 					"description": "Disallow dependencies that are known to have better alternatives.\nSee https://biomejs.dev/linter/rules/no-restricted-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRestrictedDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindArbitraryValue": {
+					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10014,6 +10044,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSyncScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindArbitraryValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
