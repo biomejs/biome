@@ -1077,14 +1077,14 @@ match these patterns.
 Can be either a plain path string or an object with path and options:
 
 ```json
-  {
-    "plugins": [
-      "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] },
+{
+  "plugins": [
+    "simple-plugin.grit",
+    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] },
     { "path": "./local-plugin.grit", "resolvePath": "config" }
-    ]
-  }
-  ``` 
+  ]
+}
+``` 
 	 */
 export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";

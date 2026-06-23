@@ -7781,6 +7781,20 @@
 				}
 			]
 		},
+		"PluginResolvePath": {
+			"oneOf": [
+				{
+					"description": "Resolve relative paths from the consuming workspace.",
+					"type": "string",
+					"const": "workspace"
+				},
+				{
+					"description": "Resolve relative paths from the configuration file that declared the plugin.",
+					"type": "string",
+					"const": "config"
+				}
+			]
+		},
 		"PluginWithOptions": {
 			"description": "Plugin path with additional options.",
 			"type": "object",
@@ -7793,18 +7807,11 @@
 				"path": { "description": "The path to the plugin.", "type": "string" },
 				"resolvePath": {
 					"description": "Controls how relative plugin paths are resolved.",
-					"anyOf": [
-						{ "$ref": "#/$defs/PluginResolvePath" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false,
 			"required": ["path"]
-		},
-		"PluginResolvePath": {
-			"type": "string",
-			"enum": ["workspace", "config"]
 		},
 		"Plugins": {
 			"type": "array",
