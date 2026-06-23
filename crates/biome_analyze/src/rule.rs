@@ -666,7 +666,7 @@ impl RuleDomain {
                 &("ava", ">=2.0.0"),
                 &("vitest", ">=1.0.0"),
             ],
-            Self::Solid => &[&("solid", ">=1.0.0")],
+            Self::Solid => &[&("solid-js", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
             Self::Qwik => &[
                 &("@builder.io/qwik", ">=1.0.0"),
@@ -1812,5 +1812,37 @@ impl FromStr for RulePreset {
             "recommended" => Ok(Self::Recommended),
             _ => Err("Invalid rule preset."),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RuleDomain;
+
+    /// Regression test for https://github.com/biomejs/biome/issues/10742.
+    /// The Solid domain rules only fire when Biome detects that the project
+    /// is a Solid project. Detection is driven by the package name listed
+    /// in the project's `package.json` manifest. That package is published
+    /// on npm as `solid-js`; the bare `solid` package is unrelated and has
+    /// no Solid.js runtime, so the registry must not match it.
+    ///
+    /// If this test fails, `manifest_dependencies` regressed to use `solid`
+    /// instead of `solid-js` and `linters.recommended` will silently skip
+    /// Solid-domain rules (notably `noSolidDestructuredProps`) for real
+    /// Solid.js projects.
+    #[test]
+    fn solid_domain_manifest_uses_solid_js_package_name() {
+        let deps = RuleDomain::Solid.manifest_dependencies();
+
+        assert!(
+            deps.iter().any(|(name, _)| *name == "solid-js"),
+            "expected `solid-js` in RuleDomain::Solid manifest_dependencies, got {:?}",
+            deps,
+        );
+        assert!(
+            !deps.iter().any(|(name, _)| *name == "solid"),
+            "manifest_dependencies for Solid must not match the unrelated `solid` package; got {:?}",
+            deps,
+        );
     }
 }
