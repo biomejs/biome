@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+assertion_line: 50
+expression: invalid.json
+---
+# Input
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The recommended option is deprecated.
+  
+    3 │     "enabled": true,
+    4 │     "rules": {
+  > 5 │       "recommended": true
+      │       ^^^^^^^^^^^^^^^^^^^
+    6 │     }
+    7 │   }
+  
+  i Safe fix: Use the new preset field instead.
+  
+    3  3 │       "enabled": true,
+    4  4 │       "rules": {
+    5    │ - ······"recommended":·true
+       5 │ + ······"preset"
+       6 │ + ·······:"recommended"
+    6  7 │       }
+    7  8 │     }
+  
+
+```

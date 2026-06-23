@@ -51,7 +51,7 @@ impl Rule for Recommended {
         let mut mutation = ctx.root().begin();
         let bool_value_str = bool_value.value_token().ok()?;
 
-        let new_value = if bool_value_str.text() == "true" {
+        let new_value = if bool_value_str.text_trimmed() == "true" {
             "recommended"
         } else {
             "none"
