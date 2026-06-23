@@ -81,6 +81,9 @@ pub(crate) enum EmbedCandidate {
         /// Bare attributes like `setup` have `None` value.
         attributes: Vec<(TokenText, Option<TokenText>)>,
         content: EmbedContent,
+
+        /// Astro defines `is:global` as a directive attribute
+        is_global: bool,
     },
 
     /// Astro frontmatter block: `---\ncode\n---`.
@@ -218,6 +221,16 @@ impl EmbedCandidate {
             Self::Element { attributes, .. } => attributes
                 .iter()
                 .any(|(k, _)| k.text().eq_ignore_ascii_case(name)),
+            _ => false,
+        }
+    }
+
+    /// Whether this is a style element that should apply styles to the entire project.
+    ///
+    /// It usually maps to Astro `is:global` directive.
+    pub fn is_css_global(&self) -> bool {
+        match self {
+            Self::Element { is_global, .. } => *is_global,
             _ => false,
         }
     }

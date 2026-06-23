@@ -768,6 +768,21 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         .ok()
         .into_iter()
         .flat_map(|opening| opening.attributes())
+        .collect();
+
+    let is_global = attributes
+        .iter()
+        .filter_map(|attr| attr.as_any_astro_directive())
+        .filter_map(|directive| directive.as_astro_is_directive())
+        .any(|is_directive| {
+            is_directive
+                .value()
+                .and_then(|value| value.name())
+                .is_ok_and(|name| name.token_text_trimmed().as_deref() == Some("global"))
+        });
+
+    let attributes: Vec<_> = attributes
+        .iter()
         .filter_map(|attr| {
             let html_attr = attr.as_html_attribute()?;
             let name = html_attr
@@ -795,6 +810,7 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
     Some(EmbedCandidate::Element {
         tag_name,
         attributes,
+        is_global,
         content: EmbedContent {
             element_range: content_child.range(),
             content_range: value_token.text_range(),
@@ -846,7 +862,7 @@ fn embedded_css_file_source(
             CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { applicability })
         }
         HtmlVariant::Astro => {
-            let applicability = if candidate.has_attribute("is:global") {
+            let applicability = if candidate.is_css_global() {
                 EmbeddingStyleApplicability::Global
             } else {
                 EmbeddingStyleApplicability::Local
