@@ -69,7 +69,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr merge "${{ steps.create_pr.outputs.pr_url }}" \
+          gh pr merge "${{ steps.create-pull-request.outputs.pr_url }}" \
             --auto \
             --squash \
             --delete-branch
