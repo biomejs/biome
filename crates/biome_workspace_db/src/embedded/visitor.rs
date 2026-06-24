@@ -841,10 +841,10 @@ impl EmbeddedBindingsBuilder {
                     use biome_js_syntax::{AnyJsArrayElement, AnyJsLiteralExpression};
                     for element in props_array.elements() {
                         let Ok(AnyJsArrayElement::AnyJsExpression(
-                                   AnyJsExpression::AnyJsLiteralExpression(
-                                       AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
-                                   ),
-                               )) = element
+                            AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+                            ),
+                        )) = element
                         else {
                             continue;
                         };
@@ -951,7 +951,7 @@ impl EmbeddedBindingsBuilder {
 
         if let Some(type_arguments) = call_expression.type_arguments()
             && let Some(Ok(AnyTsType::TsObjectType(object_type))) =
-            type_arguments.ts_type_argument_list().iter().next()
+                type_arguments.ts_type_argument_list().iter().next()
         {
             for member in object_type.members() {
                 if let biome_js_syntax::AnyTsTypeMember::TsPropertySignatureTypeMember(property) =
@@ -997,10 +997,10 @@ impl EmbeddedBindingsBuilder {
                 use biome_js_syntax::{AnyJsArrayElement, AnyJsLiteralExpression};
                 for element in arr.elements() {
                     let Ok(AnyJsArrayElement::AnyJsExpression(
-                               AnyJsExpression::AnyJsLiteralExpression(
-                                   AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
-                               ),
-                           )) = element
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+                        ),
+                    )) = element
                     else {
                         continue;
                     };
