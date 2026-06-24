@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue9568_invalid.ts
+---
+# Input
+```ts
+function bestEffort(cb: () => Promise<number>): Promise<number>;
+function bestEffort(cb: () => number): number;
+function bestEffort(cb: () => number | Promise<number>): Promise<number> | number {
+	return cb() as Promise<number> | number;
+}
+
+async function asyncWork(): Promise<number> {
+	return 42;
+}
+
+// Resolves to the first overload (async callback) -> returns a promise,
+// so this floating call must still be flagged.
+bestEffort(asyncWork);
+
+```
+
+# Diagnostics
+```
+issue9568_invalid.ts:13:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    11 │ // Resolves to the first overload (async callback) -> returns a promise,
+    12 │ // so this floating call must still be flagged.
+  > 13 │ bestEffort(asyncWork);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

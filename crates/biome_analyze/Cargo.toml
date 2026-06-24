@@ -25,6 +25,7 @@ biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 biome_text_edit          = { workspace = true }
 camino                   = { workspace = true }
+either                   = { workspace = true }
 enumflags2               = { workspace = true }
 indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }

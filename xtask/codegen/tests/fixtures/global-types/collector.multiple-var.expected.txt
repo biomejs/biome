@@ -1,0 +1,6 @@
+records
+DeclarationRecord { file_repo_relative: "collector.multiple-var.d.ts", scope: Global, declared_name: "A", kind: VariableDeclarator { ordinal: 0 }, text_range: 12..27, syntax_kind: JS_VARIABLE_DECLARATOR }
+DeclarationRecord { file_repo_relative: "collector.multiple-var.d.ts", scope: Global, declared_name: "B", kind: VariableDeclarator { ordinal: 1 }, text_range: 29..44, syntax_kind: JS_VARIABLE_DECLARATOR }
+coverage
+Collected(0)
+Collected(1)

@@ -244,9 +244,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
     if let Some(vue) = attr.as_any_vue_directive() {
         if let Some(directive) = vue.as_vue_directive() {
             // only apply to v-bind or v-model directives
-            if let Ok(name) = directive.name_token().map(|name| name.token_text_trimmed())
-                && !(name == "v-bind" || name == "v-model")
-            {
+            if !(directive.is_binding() || directive.is_two_way_binding()) {
                 return None;
             }
             if let Some(vue_arg) = directive.arg()

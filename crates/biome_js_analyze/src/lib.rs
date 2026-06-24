@@ -239,7 +239,7 @@ where
         .cloned()
         .collect();
 
-    if !js_plugins.is_empty() {
+    if filter.match_plugins() && !js_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target JavaScript above.
         unsafe {
             analyzer.add_visitor(

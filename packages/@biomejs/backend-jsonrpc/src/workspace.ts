@@ -8435,6 +8435,10 @@ export type UseNamedCaptureGroupOptions = {};
  */
 export interface UseNullishCoalescingOptions {
 	/**
+	 * Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+	 */
+	ignoreBooleanCoercion?: boolean;
+	/**
 	 * Ignore `||` expressions in conditional test positions (default: `true`).
 	 */
 	ignoreConditionalTests?: boolean;

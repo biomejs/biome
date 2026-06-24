@@ -11,20 +11,26 @@ keywords.workspace   = true
 categories.workspace = true
 
 [dependencies]
-anyhow               = { workspace = true }
-biome_analyze        = { workspace = true }
-biome_configuration  = { workspace = true }
-biome_db             = { workspace = true }
-biome_fs             = { workspace = true }
-biome_js_analyze     = { workspace = true }
-biome_js_parser      = { workspace = true }
-biome_json_parser    = { workspace = true }
-biome_languages      = { workspace = true, features = ["all"] }
-biome_module_graph   = { workspace = true }
-biome_project_layout = { workspace = true }
-biome_service        = { workspace = true, features = ["lang_md", "lang_yaml"] }
-biome_test_utils     = { workspace = true }
-camino               = { workspace = true }
+anyhow                      = { workspace = true }
+biome_analyze               = { workspace = true }
+biome_configuration         = { workspace = true }
+biome_console.workspace     = true
+biome_db                    = { workspace = true }
+biome_deserialize           = { workspace = true }
+biome_diagnostics.workspace = true
+biome_fs                    = { workspace = true }
+biome_js_analyze            = { workspace = true }
+biome_js_parser             = { workspace = true }
+biome_json_factory          = { workspace = true }
+biome_json_parser           = { workspace = true }
+biome_json_syntax           = { workspace = true }
+biome_languages             = { workspace = true, features = ["all"] }
+biome_module_graph          = { workspace = true }
+biome_project_layout        = { workspace = true }
+biome_rowan                 = { workspace = true }
+biome_service               = { workspace = true, features = ["lang_md", "lang_yaml"] }
+biome_test_utils            = { workspace = true }
+camino                      = { workspace = true }
 
 [lints]
 workspace = true

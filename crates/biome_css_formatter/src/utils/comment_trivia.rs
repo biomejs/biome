@@ -2,13 +2,26 @@ use crate::comments::CssCommentStyle;
 use crate::prelude::*;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::comments::{CommentKind, CommentStyle, DecoratedComment, SourceComment};
-use biome_rowan::{SyntaxResult, SyntaxTriviaPiece};
+use biome_rowan::syntax::SyntaxTrivia;
+use biome_rowan::{SyntaxResult, SyntaxTriviaPiece, SyntaxTriviaPieceComments};
 
 /// Returns `true` for CSS `/* ... */` comments.
 pub(crate) fn is_block_style_comment(piece: &SyntaxTriviaPiece<CssLanguage>) -> bool {
     piece
         .as_comments()
         .is_some_and(|comment| CssCommentStyle::get_comment_kind(&comment).is_inline())
+}
+
+/// Returns `true` for `// c` trivia.
+///
+/// ```scss
+/// color: red; // c
+/// ```
+pub(crate) fn has_line_comment(trivia: SyntaxTrivia<CssLanguage>) -> bool {
+    trivia
+        .pieces()
+        .filter_map(|piece| piece.as_comments())
+        .any(|comment| CssCommentStyle::get_comment_kind(&comment).is_line())
 }
 
 /// Returns `true` when the last leading block comment stays with this node.
@@ -46,6 +59,27 @@ pub(crate) fn is_trailing_comment_on_node(
         token == comment_piece.token()
             && token
                 .trailing_trivia()
+                .text_range()
+                .contains_range(comment_piece.text_range())
+    })
+}
+
+/// Returns `true` when `comment` is in a node's leading trivia.
+///
+/// ```scss
+/// // c
+/// $color: red;
+/// ```
+pub(crate) fn is_leading_comment_on_node(
+    node: &CssSyntaxNode,
+    comment: &SyntaxTriviaPieceComments<CssLanguage>,
+) -> bool {
+    let comment_piece = comment.as_piece();
+
+    node.first_token().is_some_and(|token| {
+        token == comment_piece.token()
+            && token
+                .leading_trivia()
                 .text_range()
                 .contains_range(comment_piece.text_range())
     })

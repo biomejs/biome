@@ -13,27 +13,26 @@ use biome_analyze::{
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
-use biome_console::{Console, markup};
 use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
+use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsLanguage, TextSize};
+use biome_js_syntax::JsLanguage;
 use biome_json_analyze::JsonAnalyzeServices;
-use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
+use biome_json_syntax::JsonLanguage;
 use biome_languages::{
     DocumentFileSource, HtmlFileSource,
     javascript::{JsEmbeddingKind, JsFileSource},
 };
-use biome_rowan::AstNode;
-use biome_ruledoc_utils::{AnalyzerServicesBuilder, CodeBlock, OptionsParsingMode};
+use biome_ruledoc_utils::{
+    AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
+    OptionsParsingMode, parse_rule_options,
+};
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
@@ -237,52 +236,6 @@ pub fn check_rules() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[derive(Default)]
-struct DiagnosticWriter {
-    all_diagnostics: Vec<biome_diagnostics::Error>,
-    has_parse_error: bool,
-    subtract_offset: TextSize,
-}
-
-impl DiagnosticWriter {
-    pub fn write_diagnostic(&mut self, diag: biome_diagnostics::Error) {
-        self.all_diagnostics.push(self.adjust_span_offset(diag));
-    }
-
-    pub fn write_parse_error(&mut self, diag: biome_diagnostics::Error) {
-        self.has_parse_error = true;
-        self.write_diagnostic(diag);
-    }
-
-    /// Prints all diagnostics to help the user.
-    fn print_all_diagnostics(&mut self) {
-        let mut console = biome_console::EnvConsole::default();
-        for diag in self.all_diagnostics.iter() {
-            console.println(
-                biome_console::LogLevel::Error,
-                markup! {
-                    {PrintDiagnostic::verbose(diag)}
-                },
-            );
-        }
-    }
-
-    /// Adjusts the location of the diagnostic to account for synthetic nodes
-    /// that arent't present in the source code but only in the AST.
-    fn adjust_span_offset(&self, diag: biome_diagnostics::Error) -> biome_diagnostics::Error {
-        if self.subtract_offset != 0.into() {
-            if let Some(span) = diag.location().span {
-                let new_span = span.checked_sub(self.subtract_offset);
-                diag.with_file_span(new_span)
-            } else {
-                diag
-            }
-        } else {
-            diag
-        }
-    }
-}
-
 /// Parse and analyze the provided code block, and asserts that it emits
 /// exactly zero or one diagnostic depending on the value of `expect_diagnostic`.
 /// That diagnostic is then emitted as text into the `content` buffer
@@ -301,7 +254,7 @@ fn assert_lint(
 
     // Record the diagnostics emitted by the lint rule to later check if
     // what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::default();
+    let mut diagnostics = DiagnosticConsoleWriter::default();
 
     let document_file_source = if rule_language == "html" {
         // HACK: Force HTML analysis for rules that come from the HTML analyzer
@@ -584,207 +537,6 @@ fn assert_lint(
     Ok(())
 }
 
-/// Creates a synthetic JSON AST for an object literal with a single member.
-fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
-    name: &str,
-    value: V,
-) -> JsonObjectValue {
-    make::json_object_value(
-        make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
-        make::json_member_list(
-            [make::json_member(
-                biome_json_syntax::AnyJsonMemberName::JsonMemberName(make::json_member_name(
-                    make::json_string_literal(name),
-                )),
-                make::token(biome_json_syntax::JsonSyntaxKind::COLON),
-                value.into(),
-            )],
-            [],
-        ),
-        make::token(biome_json_syntax::JsonSyntaxKind::R_CURLY),
-    )
-}
-
-fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Option<AnyJsonValue> {
-    let parent_value: AnyJsonValue = parent.into();
-    let member = parent_value
-        .as_json_object_value()?
-        .json_member_list()
-        .into_iter()
-        .next()?
-        .ok()?;
-    let member_name = member.name().ok()?.inner_string_text()?.to_string();
-
-    if member_name.as_str() == expected_name {
-        member.value().ok()
-    } else {
-        None
-    }
-}
-
-/// Parse the options fragment for a lint rule and return the parsed options.
-fn parse_rule_options(
-    group: &'static str,
-    rule_metadata: &RuleMetadata,
-    category: RuleCategory,
-    block: &CodeBlock,
-    code: &str,
-) -> anyhow::Result<Option<Configuration>> {
-    let DocumentFileSource::Json(file_source) = block.document_file_source() else {
-        bail!(
-            "The following non-JSON code block for '{group}/{}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}",
-            rule_metadata.name
-        );
-    };
-
-    // Record the diagnostics emitted during configuration parsing to later check
-    // if what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::default();
-
-    let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
-
-    if parse.has_errors() {
-        for diag in parse.into_diagnostics() {
-            let error = diag
-                .with_file_path(block.file_path())
-                .with_file_source_code(code);
-            diagnostics.write_parse_error(error);
-        }
-        if block.expect_diagnostic {
-            return Ok(None);
-        } else {
-            diagnostics.print_all_diagnostics();
-            bail!("Please fix the parse errors above.");
-        };
-    }
-
-    let parsed_root = parse.tree();
-    let parsed_options = parsed_root.value()?;
-
-    let root = match block.options {
-        OptionsParsingMode::NoOptions => {
-            unreachable!("parse_rule_options should only be called for options blocks")
-        }
-        OptionsParsingMode::RuleOptionsOnly => {
-            // By convention, the configuration blocks in the documentation
-            // only contain the settings for the lint rule itself, like so:
-            //
-            // ```json,options
-            // {
-            //     "options": {
-            //         ...
-            //     }
-            // }
-            // ```
-            //
-            // We therefore extend the JSON AST with some synthetic elements
-            // to make it match the structure expected by the configuration parse:
-            //
-            // {
-            //     "linter": {
-            //         "rules": {
-            //             "<group>": {
-            //                 "<rule>": {<options>}
-            //             }
-            //         }
-            //     }
-            // }
-            let lint_or_assist = if category == RuleCategory::Lint {
-                "linter"
-            } else {
-                "assist"
-            };
-            let rules_or_actions = if category == RuleCategory::Lint {
-                "rules"
-            } else {
-                "actions"
-            };
-            let synthetic_tree = make_json_object_with_single_member(
-                lint_or_assist,
-                make_json_object_with_single_member(
-                    rules_or_actions,
-                    make_json_object_with_single_member(
-                        group,
-                        make_json_object_with_single_member(rule_metadata.name, parsed_options),
-                    ),
-                ),
-            );
-
-            // Create a new JsonRoot from the synthetic AST
-            let eof_token = parsed_root.eof_token()?;
-            let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
-            if let Some(bom_token) = parsed_root.bom_token() {
-                root_builder = root_builder.with_bom_token(bom_token);
-            }
-            let synthetic_root = root_builder.build();
-
-            // Adjust source code spans to account for the synthetic nodes
-            // so that errors are reported at the correct source code locations:
-            let original_offset = parsed_root.value().ok().map(|v| AstNode::range(&v).start());
-            let wrapped_offset = synthetic_root
-                .value()
-                .ok()
-                .and_then(|v| get_first_member(v, lint_or_assist))
-                .and_then(|v| get_first_member(v, rules_or_actions))
-                .and_then(|v| get_first_member(v, group))
-                .and_then(|v| get_first_member(v, rule_metadata.name))
-                .map(|v| AstNode::range(&v).start());
-            diagnostics.subtract_offset = wrapped_offset
-                .zip(original_offset)
-                .and_then(|(wrapped, original)| wrapped.checked_sub(original))
-                .unwrap_or_default();
-
-            synthetic_root
-        }
-        OptionsParsingMode::FullConfiguration => {
-            // In some rare cases, we want to be able to display full JSON configuration
-            // instead, e.t. to be able to show off per-file overrides:
-            //
-            // ```json,full-options
-            // {
-            //     "linter": {
-            //         "rules": {
-            //             "<group>": {
-            //                 "<rule>": {<options>}
-            //             }
-            //         }
-            //     }
-            // }
-            // ```
-            parsed_root
-        }
-    };
-
-    // Deserialize the configuration from the partially-synthetic AST,
-    // and report any errors encountered during deserialization.
-    let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
-    let (config, deserialize_diagnostics) = deserialized.consume();
-
-    if !deserialize_diagnostics.is_empty() {
-        for diag in deserialize_diagnostics {
-            let error = diag
-                .with_file_path(block.file_path())
-                .with_file_source_code(code);
-            diagnostics.write_diagnostic(error);
-        }
-        if block.expect_diagnostic {
-            return Ok(None);
-        } else {
-            diagnostics.print_all_diagnostics();
-            bail!("Please fix the configuration errors above.");
-        };
-    }
-
-    if config.is_none() {
-        bail!(
-            "Failed to deserialize configuration options for '{group}/{}' from the following code block due to unknown error.\n\n{code}",
-            rule_metadata.name
-        );
-    }
-
-    Ok(config)
-}
-
 /// Parse the documentation fragment for a lint rule (in markdown) and lint the code blocks.
 fn parse_documentation(
     group: &'static str,
@@ -792,6 +544,8 @@ fn parse_documentation(
     category: RuleCategory,
 ) -> anyhow::Result<()> {
     let parser = Parser::new(rule_metadata.docs);
+
+    let mut diagnostics_writer = DiagnosticConsoleWriter::default();
 
     let mut test_runner = TestRunner::new(group, rule_metadata.name, rule_metadata.language);
 
@@ -812,8 +566,14 @@ fn parse_documentation(
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
                     if test.options != OptionsParsingMode::NoOptions {
-                        last_options =
-                            parse_rule_options(group, &rule_metadata, category, &test, &block)?;
+                        last_options = parse_rule_options(
+                            group,
+                            &rule_metadata,
+                            category,
+                            &test,
+                            &block,
+                            &mut diagnostics_writer,
+                        )?;
                     } else {
                         if let Some(file_path) = test.explicit_file_path() {
                             test_runner
