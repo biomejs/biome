@@ -13,8 +13,10 @@ impl FormatRule<AnyCssQueryFeatureValue> for FormatAnyCssQueryFeatureValue {
             AnyCssQueryFeatureValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::CssNumber(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::CssRatio(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::ScssExpression(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::ScssInterpolation(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::ScssVariable(node) => node.format().fmt(f),
         }
     }
 }

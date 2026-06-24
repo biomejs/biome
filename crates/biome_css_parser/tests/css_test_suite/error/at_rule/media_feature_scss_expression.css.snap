@@ -1,0 +1,127 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 207
+expression: snapshot
+---
+
+## Input
+
+```css
+@media screen and (max-width: 1 + 2) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaAndTypeQuery {
+                            left: CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@7..14 "screen" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            and_token: AND_KW@14..18 "and" [] [Whitespace(" ")],
+                            right: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@18..19 "(" [] [],
+                                feature: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@19..28 "max-width" [] [],
+                                    },
+                                    colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                                    value: CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")],
+                                    },
+                                },
+                                r_paren_token: missing (required),
+                            },
+                        },
+                        missing separator,
+                        CssBogusMediaQuery {
+                            items: [
+                                PLUS@32..34 "+" [] [Whitespace(" ")],
+                                CSS_NUMBER_LITERAL@34..35 "2" [] [],
+                                R_PAREN@35..37 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@37..38 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@38..39 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..40
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..39
+    0: CSS_AT_RULE@0..39
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..39
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..37
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..37
+            0: CSS_MEDIA_AND_TYPE_QUERY@7..32
+              0: CSS_MEDIA_TYPE_QUERY@7..14
+                0: (empty)
+                1: CSS_MEDIA_TYPE@7..14
+                  0: CSS_IDENTIFIER@7..14
+                    0: IDENT@7..14 "screen" [] [Whitespace(" ")]
+              1: AND_KW@14..18 "and" [] [Whitespace(" ")]
+              2: CSS_MEDIA_FEATURE_IN_PARENS@18..32
+                0: L_PAREN@18..19 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@19..32
+                  0: CSS_IDENTIFIER@19..28
+                    0: IDENT@19..28 "max-width" [] []
+                  1: COLON@28..30 ":" [] [Whitespace(" ")]
+                  2: CSS_NUMBER@30..32
+                    0: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")]
+                2: (empty)
+            1: (empty)
+            2: CSS_BOGUS_MEDIA_QUERY@32..37
+              0: PLUS@32..34 "+" [] [Whitespace(" ")]
+              1: CSS_NUMBER_LITERAL@34..35 "2" [] []
+              2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@37..39
+          0: L_CURLY@37..38 "{" [] []
+          1: CSS_RULE_LIST@38..38
+          2: R_CURLY@38..39 "}" [] []
+  2: EOF@39..40 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+media_feature_scss_expression.css:1:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `+`
+
+  > 1 │ @media screen and (max-width: 1 + 2) {}
+      │                                 ^
+    2 │
+
+  i Remove +
+
+```

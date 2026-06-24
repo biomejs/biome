@@ -15818,8 +15818,10 @@ pub enum AnyCssQueryFeatureValue {
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
+    ScssExpression(ScssExpression),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolation(ScssInterpolation),
+    ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureValue {
     pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
@@ -15852,6 +15854,12 @@ impl AnyCssQueryFeatureValue {
             _ => None,
         }
     }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
         match &self {
             Self::ScssInterpolatedIdentifier(item) => Some(item),
@@ -15861,6 +15869,12 @@ impl AnyCssQueryFeatureValue {
     pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
         match &self {
             Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -40731,6 +40745,11 @@ impl From<CssRatio> for AnyCssQueryFeatureValue {
         Self::CssRatio(node)
     }
 }
+impl From<ScssExpression> for AnyCssQueryFeatureValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedIdentifier> for AnyCssQueryFeatureValue {
     fn from(node: ScssInterpolatedIdentifier) -> Self {
         Self::ScssInterpolatedIdentifier(node)
@@ -40741,6 +40760,11 @@ impl From<ScssInterpolation> for AnyCssQueryFeatureValue {
         Self::ScssInterpolation(node)
     }
 }
+impl From<ScssVariable> for AnyCssQueryFeatureValue {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
 impl AstNode for AnyCssQueryFeatureValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
@@ -40748,15 +40772,19 @@ impl AstNode for AnyCssQueryFeatureValue {
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
-        .union(ScssInterpolation::KIND_SET);
+        .union(ScssInterpolation::KIND_SET)
+        .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
+            | SCSS_EXPRESSION
             | SCSS_INTERPOLATED_IDENTIFIER
-            | SCSS_INTERPOLATION => true,
+            | SCSS_INTERPOLATION
+            | SCSS_VARIABLE => true,
             k if AnyCssDimension::can_cast(k) => true,
             k if AnyCssFunction::can_cast(k) => true,
             _ => false,
@@ -40767,10 +40795,12 @@ impl AstNode for AnyCssQueryFeatureValue {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_RATIO => Self::CssRatio(CssRatio { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
             SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             _ => {
                 let syntax = match AnyCssDimension::try_cast(syntax) {
                     Ok(any_css_dimension) => {
@@ -40791,8 +40821,10 @@ impl AstNode for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssRatio(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
         }
@@ -40802,8 +40834,10 @@ impl AstNode for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssRatio(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -40817,8 +40851,10 @@ impl std::fmt::Debug for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -40830,8 +40866,10 @@ impl From<AnyCssQueryFeatureValue> for SyntaxNode {
             AnyCssQueryFeatureValue::CssIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssNumber(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssRatio(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::ScssExpression(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::ScssInterpolation(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::ScssVariable(it) => it.into_syntax(),
         }
     }
 }

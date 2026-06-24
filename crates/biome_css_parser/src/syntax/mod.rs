@@ -528,10 +528,37 @@ pub(crate) fn parse_any_value_with_context(
 
 #[inline]
 fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+    // Keep ratio before plain numbers so CSS values still parse `16 / 9` as `CSS_RATIO`.
     if is_at_ratio(p) {
         parse_ratio(p)
+    } else if is_at_dashed_identifier(p) {
+        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                parse_tailwind_value_theme_reference,
+                |p, m| tailwind_disabled(p, m.range(p)),
+            )
+        } else {
+            parse_dashed_identifier(p)
+        }
+    } else if is_at_unicode_range(p) {
+        parse_unicode_range(p)
+    } else if is_at_identifier(p) {
+        parse_regular_identifier(p)
+    } else if p.at(CSS_STRING_LITERAL) {
+        parse_string(p)
+    } else if is_at_any_dimension(p) {
+        parse_any_dimension(p)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        parse_regular_number(p)
+    } else if is_at_color(p) {
+        parse_color(p)
+    } else if is_at_bracketed_value(p) {
+        parse_bracketed_value(p)
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
     } else {
-        parse_any_non_function_css_value_atom(p)
+        Absent
     }
 }
 
@@ -568,44 +595,6 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
         parse_scss_parent_selector_value(p)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p)
-    } else {
-        Absent
-    }
-}
-
-/// Parses one non-function CSS value atom without claiming `number / number`
-/// as a ratio.
-///
-/// This split lets SCSS expression parsing own numeric heads directly while
-/// the regular CSS wrapper still preserves `number / number` as `CSS_RATIO`.
-#[inline]
-fn parse_any_non_function_css_value_atom(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_dashed_identifier(p) {
-        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
-            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
-                p,
-                parse_tailwind_value_theme_reference,
-                |p, m| tailwind_disabled(p, m.range(p)),
-            )
-        } else {
-            parse_dashed_identifier(p)
-        }
-    } else if is_at_unicode_range(p) {
-        parse_unicode_range(p)
-    } else if is_at_identifier(p) {
-        parse_regular_identifier(p)
-    } else if p.at(CSS_STRING_LITERAL) {
-        parse_string(p)
-    } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
-    } else if p.at(CSS_NUMBER_LITERAL) {
-        parse_regular_number(p)
-    } else if is_at_color(p) {
-        parse_color(p)
-    } else if is_at_bracketed_value(p) {
-        parse_bracketed_value(p)
-    } else if is_at_metavariable(p) {
-        parse_metavariable(p)
     } else {
         Absent
     }

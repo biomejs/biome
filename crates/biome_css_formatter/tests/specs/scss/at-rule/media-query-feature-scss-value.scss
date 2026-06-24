@@ -1,0 +1,21 @@
+$breakpoint:30em;
+
+@media   screen   and   ( max-width :  $breakpoint ){a{color:red;}}
+
+@media   screen   and   ( max-width :  #{$breakpoint}+1px ){a{color:red;}}
+
+@media   screen   and   ( max-width : 1+2 ){a{color:red;}}
+
+@media   screen   and   ( width < 500px+100px ){a{color:red;}}
+
+@media   screen   and   ( 500px+100px < width ){a{color:red;}}
+
+@media   screen   and   ( 500px+100px < width < 900px+50px ){a{color:red;}}
+
+@media   screen   and   ( max-width : 10+10px ){a{color:red;}}
+
+@media   screen   and   ( aspect-ratio : 16 / 9 ){a{color:red;}}
+
+@container   ( max-width :  $breakpoint ){a{color:red;}}
+
+@container   ( max-width :  #{$breakpoint}+1px ){a{color:red;}}
