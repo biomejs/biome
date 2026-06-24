@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { SvelteMap, SvelteSet, SvelteDate, SvelteURL, SvelteURLSearchParams } from "svelte/reactivity";
+	import { MediaQuery } from "svelte/reactivity";
+
+	// All built-in reactive classes wrapped unnecessarily.
+	const map = $state(new SvelteMap());
+	const set = $state(new SvelteSet());
+	const date = $state(new SvelteDate());
+	const url = $state(new SvelteURL("https://example.com"));
+	const params = $state(new SvelteURLSearchParams());
+	const mq = $state(new MediaQuery("(min-width: 768px)"));
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:7:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteMap is already reactive, wrapping it in $state() is unnecessary.
+  
+    6 │ 	// All built-in reactive classes wrapped unnecessarily.
+  > 7 │ 	const map = $state(new SvelteMap());
+      │ 	            ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	const set = $state(new SvelteSet());
+    9 │ 	const date = $state(new SvelteDate());
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    6 │ → const·map·=·$state(new·SvelteMap());
+      │               -------              -  
+
+```
+
+```
+invalid.svelte:8:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteSet is already reactive, wrapping it in $state() is unnecessary.
+  
+     6 │ 	// All built-in reactive classes wrapped unnecessarily.
+     7 │ 	const map = $state(new SvelteMap());
+   > 8 │ 	const set = $state(new SvelteSet());
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	const date = $state(new SvelteDate());
+    10 │ 	const url = $state(new SvelteURL("https://example.com"));
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    7 │ → const·set·=·$state(new·SvelteSet());
+      │               -------              -  
+
+```
+
+```
+invalid.svelte:9:15 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteDate is already reactive, wrapping it in $state() is unnecessary.
+  
+     7 │ 	const map = $state(new SvelteMap());
+     8 │ 	const set = $state(new SvelteSet());
+   > 9 │ 	const date = $state(new SvelteDate());
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	const url = $state(new SvelteURL("https://example.com"));
+    11 │ 	const params = $state(new SvelteURLSearchParams());
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    8 │ → const·date·=·$state(new·SvelteDate());
+      │                -------               -  
+
+```
+
+```
+invalid.svelte:10:14 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteURL is already reactive, wrapping it in $state() is unnecessary.
+  
+     8 │ 	const set = $state(new SvelteSet());
+     9 │ 	const date = $state(new SvelteDate());
+  > 10 │ 	const url = $state(new SvelteURL("https://example.com"));
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	const params = $state(new SvelteURLSearchParams());
+    12 │ 	const mq = $state(new MediaQuery("(min-width: 768px)"));
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    9 │ → const·url·=·$state(new·SvelteURL("https://example.com"));
+      │               -------                                   -  
+
+```
+
+```
+invalid.svelte:11:17 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i SvelteURLSearchParams is already reactive, wrapping it in $state() is unnecessary.
+  
+     9 │ 	const date = $state(new SvelteDate());
+    10 │ 	const url = $state(new SvelteURL("https://example.com"));
+  > 11 │ 	const params = $state(new SvelteURLSearchParams());
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	const mq = $state(new MediaQuery("(min-width: 768px)"));
+    13 │ </script>
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    10 │ → const·params·=·$state(new·SvelteURLSearchParams());
+       │                  -------                          -  
+
+```
+
+```
+invalid.svelte:12:13 lint/nursery/noSvelteUnnecessaryStateWrap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i MediaQuery is already reactive, wrapping it in $state() is unnecessary.
+  
+    10 │ 	const url = $state(new SvelteURL("https://example.com"));
+    11 │ 	const params = $state(new SvelteURLSearchParams());
+  > 12 │ 	const mq = $state(new MediaQuery("(min-width: 768px)"));
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ </script>
+    14 │ 
+  
+  i Classes from svelte/reactivity track their own mutations without needing a $state wrapper.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary $state() wrapper.
+  
+    11 │ → const·mq·=·$state(new·MediaQuery("(min-width:·768px)"));
+       │              -------                                   -  
+
+```
