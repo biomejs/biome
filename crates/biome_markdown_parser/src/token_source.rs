@@ -106,15 +106,12 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.source()
     }
 
-    /// Count leading indentation on the current line, including whitespace inside the current token.
+    /// Count leading indentation on the current line, including whitespace
+    /// inside the current token.
     ///
-    /// This scans from the start of the current line to the first non-whitespace character.
-    ///
-    /// Tabs expand column-relative to the next multiple of `TAB_STOP_SPACES` (4),
-    /// per CommonMark §2.2. Counting a tab as a flat 4 would over-count when the
-    /// tab does not start at a column that is already a multiple of 4 (e.g. a
-    /// leading ` \t` is 4 columns, not 5), which mis-classifies space+tab-indented
-    /// sub-list markers as lazy paragraph continuation (biomejs/biome#10558).
+    /// Scans from the start of the current line to the first non-whitespace
+    /// character. Tabs expand to the next multiple of `TAB_STOP_SPACES`,
+    /// per CommonMark §2.2.
     pub fn line_start_leading_indent(&self) -> usize {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();

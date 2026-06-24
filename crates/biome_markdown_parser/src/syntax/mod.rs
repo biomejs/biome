@@ -1845,11 +1845,10 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
             if at_order_list_item(p) && can_ordered_marker_interrupt_paragraph(p) {
                 return true;
             }
-            // A sibling list item sits at the enclosing item's *marker* indent,
-            // which can be below its content (`required`) indent when the marker
-            // is followed by more than one space (or a tab). Detect siblings at
-            // the marker indent too, otherwise such lines are absorbed as lazy
-            // paragraph continuation (biomejs/biome#10558).
+            // Siblings sit at the enclosing item's marker indent, which can
+            // fall below its content indent when the marker is followed by more
+            // than one space or a tab. Check there too, so they aren't absorbed
+            // as lazy paragraph continuation.
             if at_sibling_list_marker(p) {
                 return true;
             }

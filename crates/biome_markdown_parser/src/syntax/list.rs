@@ -115,18 +115,10 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
             return source[line_start..pos].chars().count();
         }
 
-        // Virtual line start with a tab in the leading whitespace: compute the
-        // real marker column from source text. The leading whitespace may be
-        // partly consumed as trivia, and a marker can sit after a tab whose
-        // column-relative expansion lands past the consumed boundary. For
-        // ` \t- foo` the single space is consumed as the parent's continuation
-        // indent, yet the tab still expands to column 4, so the nested marker
-        // indent is 4, not 1 (biomejs/biome#10558).
-        //
-        // Measure from the start of the current physical line through ALL
-        // leading whitespace (column-relative) to the first non-whitespace
-        // character, so the result is independent of how much of that
-        // whitespace is still in the token stream.
+        // Leading whitespace contains a tab: compute the marker column across
+        // the full run, because part of the whitespace may already be consumed
+        // as trivia. For ` \t- foo`, the tab expands to column 4 regardless of
+        // the consumed space, so the marker indent is 4, not 1.
         let mut column = 0;
         for c in source[line_start..].chars() {
             match c {
@@ -180,19 +172,15 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
     }
 }
 
-/// Detect a *sibling* list item at the enclosing list item's marker indent.
+/// Detect a sibling list item at the enclosing item's marker indent.
 ///
-/// `at_bullet_list_item` / `at_order_list_item` use the item's content indent
-/// (`list_item_required_indent`) as their base, which is the right call for
-/// detecting a *child* list. A *sibling*, however, aligns with the enclosing
-/// item's marker indent (`list_item_marker_indent`). When the marker is
-/// followed by more than one space or by a tab, the marker indent is below
-/// the content indent, so the default check misses siblings and they get
-/// absorbed as lazy paragraph continuation (biomejs/biome#10558).
+/// `at_bullet_list_item` and `at_order_list_item` check from the content indent,
+/// which suits child detection but misses siblings when the marker is followed
+/// by more than one space or a tab, since the marker indent then sits below the
+/// content indent.
 ///
-/// Returns true only when there is an enclosing list item (`marker_indent > 0`
-/// relative to the current context) and a same-column bullet/ordered marker
-/// sits on the current line.
+/// Returns true only when an enclosing list item exists and a bullet or ordered
+/// marker sits on the current line at that indent.
 pub(crate) fn at_sibling_list_marker(p: &mut MarkdownParser) -> bool {
     let marker_indent = p.state().list_item_marker_indent;
     if marker_indent == 0 {
