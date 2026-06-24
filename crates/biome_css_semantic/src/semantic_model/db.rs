@@ -139,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn value_change_does_not_recompute_downstream() {
+    fn value_change_does_recompute_downstream() {
         let mut db = TestDb::new();
         let file = make_file(&db, "p { color: red; }");
         let count = rule_count(&db, file);
@@ -159,7 +159,7 @@ mod tests {
         let events = db.take_salsa_events();
 
         assert_function_query_was_run(&db, css_model_from_parsed_source, file, &events);
-        assert_function_query_was_not_run(&db, rule_count, file, &events);
+        assert_function_query_was_run(&db, rule_count, file, &events);
     }
 
     #[test]

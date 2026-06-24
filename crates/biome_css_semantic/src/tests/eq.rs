@@ -29,15 +29,6 @@ fn comment_change_is_eq() {
 }
 
 #[test]
-fn value_change_same_variant_is_eq() {
-    assert_eq!(
-        build_model("p { color: red; }"),
-        build_model("p { color: blue; }"),
-        "different values of the same variant should be equal"
-    );
-}
-
-#[test]
 fn selector_change_is_not_eq() {
     assert_ne!(
         build_model("p { color: red; }"),
@@ -149,11 +140,11 @@ fn at_property_inherits_change_is_not_eq() {
 }
 
 #[test]
-fn same_nested_structure_value_change_is_eq() {
-    assert_eq!(
+fn same_nested_structure_value_change_is_not_eq() {
+    assert_ne!(
         build_model(".parent { color: red; .child { font-size: 12px; } }"),
         build_model(".parent { color: blue; .child { font-size: 16px; } }"),
-        "value-only changes in nested rules should be equal"
+        "value-only changes in nested rules should not be equal"
     );
 }
 

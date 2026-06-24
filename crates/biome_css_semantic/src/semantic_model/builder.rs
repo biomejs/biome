@@ -4,8 +4,8 @@ use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
 use super::model::{
-    CssGlobalCustomVariable, CssModelDeclaration, ResolvedSelector, Rule, RuleId, Selector,
-    SemanticModel, SemanticModelData, Specificity, selector_tokens,
+    CssGlobalCustomVariableData, CssModelDeclarationData, ResolvedSelector, RuleData, RuleId,
+    SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
@@ -13,10 +13,10 @@ use crate::model::AnyRuleStart;
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
     /// All rules, indexed by RuleId
-    all_rules: Vec<Rule>,
+    all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
-    global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariable>,
+    global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -38,7 +38,7 @@ impl SemanticModelBuilder {
         }
     }
 
-    pub fn get_last_parent_selector_rule(&self) -> Option<&Rule> {
+    fn get_last_parent_selector_rule(&self) -> Option<&RuleData> {
         let mut iterator = self.current_rule_stack.iter().rev();
         let mut current_parent_id = iterator
             .next()
@@ -72,7 +72,7 @@ impl SemanticModelBuilder {
         }
     }
 
-    pub fn get_parent_selector_at(&self, index: usize) -> Option<&Rule> {
+    fn get_parent_selector_at(&self, index: usize) -> Option<&RuleData> {
         let mut iterator = self.current_rule_stack.iter().rev();
         let mut current_index = 1;
         let mut current_parent_id = iterator
@@ -117,15 +117,13 @@ impl SemanticModelBuilder {
 
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
+            root: self.root.syntax().as_send().expect("To be a root node"),
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             global_custom_variables: self.global_custom_variables,
             range_to_rule_id: self.range_to_rule_id,
         };
-        SemanticModel::new(
-            data,
-            self.root.syntax().as_send().expect("To be a root node"),
-        )
+        SemanticModel::new(data)
     }
 
     #[inline]
@@ -136,7 +134,7 @@ impl SemanticModelBuilder {
 
                 let parent_id = self.current_rule_stack.last().copied();
 
-                let new_rule = Rule {
+                let new_rule = RuleData {
                     id: new_rule_id,
                     node: AstPtr::new(&node),
                     selectors: Vec::new(),
@@ -209,7 +207,7 @@ impl SemanticModelBuilder {
                     let combined = parent_specificity + specificity;
 
                     for resolved in resolved_selectors {
-                        current_rule.selectors.push(Selector {
+                        current_rule.selectors.push(SelectorData {
                             node: AstPtr::new(&node),
                             resolved,
                             specificity: combined,
@@ -235,7 +233,7 @@ impl SemanticModelBuilder {
                     if is_global_var {
                         self.global_custom_variables.insert(
                             property_name.clone(),
-                            CssGlobalCustomVariable::Root(CssModelDeclaration {
+                            CssGlobalCustomVariableData::Root(CssModelDeclarationData {
                                 declaration: AstPtr::new(&node),
                                 property: AstPtr::new(&property),
                                 value: value.clone(),
@@ -244,7 +242,7 @@ impl SemanticModelBuilder {
                         );
                     }
                     let current_rule = &mut self.all_rules[current_rule_id.index()];
-                    current_rule.declarations.push(CssModelDeclaration {
+                    current_rule.declarations.push(CssModelDeclarationData {
                         declaration: AstPtr::new(&node),
                         property: AstPtr::new(&property),
                         value,
@@ -268,12 +266,12 @@ impl SemanticModelBuilder {
                 if let Ok(property_name) = property.value() {
                     self.global_custom_variables.insert(
                         property_name,
-                        CssGlobalCustomVariable::AtProperty {
-                            property: AstPtr::new(&property),
+                        CssGlobalCustomVariableData::AtProperty {
+                            _property: AstPtr::new(&property),
                             initial_value,
                             syntax,
                             inherits,
-                            range,
+                            _range: range,
                         },
                     );
                 }
@@ -303,7 +301,7 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
 ///
 /// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
 /// `Display` impl can reconstruct canonical whitespace around combinators.
-fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<ResolvedSelector> {
+fn resolve_selector(current: &[CssSyntaxToken], parents: &[SelectorData]) -> Vec<ResolvedSelector> {
     let has_amp = current.iter().any(|t| t.kind() == CssSyntaxKind::AMP);
 
     parents
