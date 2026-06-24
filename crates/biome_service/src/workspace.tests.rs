@@ -1,8 +1,8 @@
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
+    GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
@@ -35,6 +35,35 @@ fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
         .unwrap();
 
     (workspace, project_key)
+}
+
+#[test]
+fn borrowed_file_guard_does_not_close_file() {
+    const SOURCE: &str = "const value = 1;";
+
+    let (workspace, project_key) = create_server();
+    let path = BiomePath::new("file.js");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    {
+        let _guard = FileGuard::borrowed(workspace.as_ref(), project_key, path.clone()).unwrap();
+    }
+
+    let content = workspace
+        .get_file_content(GetFileContentParams { project_key, path })
+        .unwrap();
+
+    assert_eq!(content, SOURCE);
 }
 
 #[test]

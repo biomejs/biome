@@ -1844,6 +1844,7 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
     workspace: &'app W,
     project_key: ProjectKey,
     path: BiomePath,
+    close_on_drop: bool,
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
@@ -1856,6 +1857,20 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             workspace,
             project_key,
             path,
+            close_on_drop: true,
+        })
+    }
+
+    pub fn borrowed(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
+        Ok(Self {
+            workspace,
+            project_key,
+            path,
+            close_on_drop: false,
         })
     }
 
@@ -2034,6 +2049,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
 impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
     fn drop(&mut self) {
+        if !self.close_on_drop {
+            return;
+        }
+
         self.workspace
             .close_file(CloseFileParams {
                 project_key: self.project_key,
