@@ -2,7 +2,7 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use core::str;
-use directories::{BaseDirs, ProjectDirs};
+use directories::ProjectDirs;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -367,12 +367,10 @@ fn vscode_global_directory() -> Option<ProjectDirs> {
 }
 
 fn zed_global_directory() -> Option<PathBuf> {
-    if cfg!(target_os = "macos") {
-        BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed"))
-    } else if cfg!(target_os = "windows") {
-        BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed"))
-    } else {
-        ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf())
+    cfg_select! {
+        target_os = "macos" => directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed")) ,
+        target_os = "windows" => directories::BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed")),
+        _ =>  directories::ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf())
     }
 }
 
@@ -406,13 +404,13 @@ mod tests {
 
         #[cfg(target_os = "macos")]
         {
-            let base = BaseDirs::new().expect("Failed to get base dirs");
+            let base = directories::BaseDirs::new().expect("Failed to get base dirs");
             assert_eq!(dir, base.home_dir().join(".config").join("zed"));
         }
 
         #[cfg(target_os = "windows")]
         {
-            let base = BaseDirs::new().expect("Failed to get base dirs");
+            let base = directories::BaseDirs::new().expect("Failed to get base dirs");
             assert_eq!(dir, base.config_dir().join("Zed"));
         }
 
