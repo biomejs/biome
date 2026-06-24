@@ -770,6 +770,11 @@ pub(crate) struct UpdateSnippetsNodes {
     /// host's nesting level. When `false`, `new_code` already has the
     /// right shape and can be spliced back as-is.
     pub(crate) needs_reindent: bool,
+    /// Ranges inside `new_code` that must not be re-indented: the bodies of
+    /// template literals and multi-line block comments. Lines that begin
+    /// inside one of these ranges are left as-is instead of receiving the
+    /// host element's indentation prefix.
+    pub(crate) verbatim_ranges: Vec<TextRange>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
