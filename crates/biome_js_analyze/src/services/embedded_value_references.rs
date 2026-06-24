@@ -1,20 +1,48 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
 use biome_rowan::{TextRange, TokenText};
 
-/// Service to track value references from non-source snippets (templates).
+/// Service to track references from non-source snippets (templates).
 /// This is the analyzer-side version that only uses biome_rowan primitives.
 #[derive(Debug, Clone)]
-pub struct EmbeddedValueReferences(pub Vec<Vec<(TextRange, TokenText)>>);
+pub struct EmbeddedValueReferences {
+    /// Identifiers used as values.
+    values: Vec<Vec<(TextRange, TokenText)>>,
+    /// Identifiers used only as types (e.g. `icon: IconType`).
+    types: Vec<Vec<(TextRange, TokenText)>>,
+}
 
 impl EmbeddedValueReferences {
-    /// Check if an identifier is used as a value in any tracked non-source snippet
+    pub fn new(
+        values: Vec<Vec<(TextRange, TokenText)>>,
+        types: Vec<Vec<(TextRange, TokenText)>>,
+    ) -> Self {
+        Self { values, types }
+    }
+
+    /// Check if an identifier is used as a value in any tracked non-source snippet.
     pub(crate) fn is_used_as_value(&self, identifier: &str) -> bool {
-        for refs in self.0.iter() {
-            if refs.iter().any(|(_, token)| token.text() == identifier) {
-                return true;
-            }
-        }
-        false
+        self.values
+            .iter()
+            .flatten()
+            .any(|(_, token)| token.text() == identifier)
+    }
+
+    /// Check if an identifier is used only as a type in any tracked non-source snippet.
+    pub(crate) fn is_used_as_type(&self, identifier: &str) -> bool {
+        self.types
+            .iter()
+            .flatten()
+            .any(|(_, token)| token.text() == identifier)
+    }
+
+    /// Check if an identifier is referenced as value or type in any
+    /// tracked non-source snippet.
+    pub(crate) fn is_used(&self, identifier: &str) -> bool {
+        self.values
+            .iter()
+            .chain(&self.types)
+            .flatten()
+            .any(|(_, token)| token.text() == identifier)
     }
 }
 

@@ -1,20 +1,26 @@
 use biome_html_syntax::{
-    AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
+    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingProperty, AnySvelteDirective,
+    HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
     JsxReferenceIdentifier,
 };
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
-    pub references: Vec<Vec<(TextRange, TokenText)>>,
+    /// Identifiers referenced as values.
+    pub value_references: Vec<Vec<(TextRange, TokenText)>>,
+    /// Identifiers referenced only in type position (e.g. `icon: IconType`). Constructs that create a type and a value e.g. `class` aren't tracked.
+    pub type_references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedValueReferencesBuilder {
-    references: Vec<(TextRange, TokenText)>,
+    value_references: Vec<(TextRange, TokenText)>,
+    type_references: Vec<(TextRange, TokenText)>,
 }
 
 impl EmbeddedValueReferences {
@@ -23,19 +29,25 @@ impl EmbeddedValueReferences {
     }
 
     pub(crate) fn finish(&mut self, builder: EmbeddedValueReferencesBuilder) {
-        self.references.push(builder.references);
+        self.value_references.push(builder.value_references);
+        self.type_references.push(builder.type_references);
     }
 }
 
 impl EmbeddedValueReferencesBuilder {
     fn new() -> Self {
         Self {
-            references: Vec::default(),
+            value_references: Vec::default(),
+            type_references: Vec::default(),
         }
     }
 
     pub(crate) fn register_reference(&mut self, range: TextRange, text: TokenText) {
-        self.references.push((range, text));
+        self.value_references.push((range, text));
+    }
+
+    pub(crate) fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
+        self.type_references.push((range, text));
     }
 
     /// Visit a non-source snippet to track value references
@@ -60,21 +72,85 @@ impl EmbeddedValueReferencesBuilder {
 
     /// Visit an HTML root to track component element names as value references.
     ///
-    /// This extracts component names from Vue/Svelte templates like:
+    /// This extracts component names from Vue/Svelte/Astro templates like:
     /// - `<Component />` → tracks `Component`
     /// - `<AvatarPrimitive.Fallback>` → tracks `AvatarPrimitive`
-    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot) {
+    ///
+    /// For Svelte, it also tracks directive names that read a local binding,
+    /// such as `use:action` or the `bind:open` shorthand. Interpolations like
+    /// `style="top: {top}px"` are parsed as embedded JavaScript snippets, so
+    /// their references are collected through the normal snippet path.
+    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
+        let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
             // Check HtmlElement: <Component>...</Component>
             if let Some(element) = HtmlElement::cast_ref(&node) {
                 self.visit_html_element(&element);
             }
-
             // Check HtmlSelfClosingElement: <Component />
             if let Some(element) = HtmlSelfClosingElement::cast_ref(&node) {
                 self.visit_html_self_closing_element(&element);
             }
+            if is_svelte && let Some(directive) = AnySvelteDirective::cast_ref(&node) {
+                self.register_svelte_directive_reference(&directive);
+            }
         }
+    }
+
+    /// Registers the directive name as a value reference when it resolves to a
+    /// local binding. Which directives qualify:
+    ///
+    /// - `use:inView` → tracks `inView` (an action function)
+    /// - `transition:fade`, `in:fly`, `out:fly`, `animate:flip` → tracks the
+    ///   transition/animation function
+    /// - `bind:open` (shorthand, no `={...}`) → tracks `open` (reads the
+    ///   local variable of the same name)
+    /// - `bind:value={expr}` → skipped; the expression is a snippet handled
+    ///   elsewhere, and the directive name `value` is an HTML attribute, not a
+    ///   binding reference
+    /// - `style:color`, `class:active` → skipped; these name CSS
+    ///   properties/classes, not JS bindings
+    fn register_svelte_directive_reference(
+        &mut self,
+        directive: &AnySvelteDirective,
+    ) -> Option<()> {
+        let value = match directive {
+            AnySvelteDirective::SvelteUseDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteTransitionDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteInDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteOutDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteAnimateDirective(d) => d.value().ok()?,
+            AnySvelteDirective::SvelteBindDirective(d) => {
+                let value = d.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
+            AnySvelteDirective::SvelteStyleDirective(_)
+            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+        };
+        self.register_svelte_binding_property(value.property().ok())
+    }
+
+    /// Extracts the identifier from a directive's binding property, if it is a
+    /// plain name. Only `SvelteName` maps to a local variable:
+    ///
+    /// - `bind:open` → property is `SvelteName("open")` → tracks `open`
+    /// - `bind:a.b` → property is `SvelteMemberProperty` → skipped (not a
+    ///   simple local binding)
+    /// - `bind:"literal"` → property is `SvelteLiteral` → skipped
+    fn register_svelte_binding_property(
+        &mut self,
+        property: Option<AnySvelteBindingProperty>,
+    ) -> Option<()> {
+        let token = match property? {
+            AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
+            AnySvelteBindingProperty::SvelteMemberProperty(_)
+            | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+        };
+        self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
     }
 
     fn visit_html_element(&mut self, element: &HtmlElement) -> Option<()> {
@@ -156,14 +232,21 @@ impl EmbeddedValueReferencesBuilder {
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
-        if usage.is_only_type() {
-            return None;
-        }
         let name_token = reference.value_token().ok()?;
-        self.register_reference(
-            name_token.text_trimmed_range(),
-            name_token.token_text_trimmed(),
-        );
+        // Classify by how the reference is used here, not what it declares: a
+        // name in type position (`x: Foo`) goes to the type list, as a value
+        // (`new Foo()`) to the value list. Used both ways, it lands in both.
+        if usage.is_only_type() {
+            self.register_type_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
+        } else {
+            self.register_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
+        }
         Some(())
     }
 
@@ -188,7 +271,7 @@ mod tests {
     }
 
     fn contains_reference(service: &EmbeddedValueReferences, reference: &str) -> bool {
-        for refs in service.references.iter() {
+        for refs in service.value_references.iter() {
             if refs.iter().any(|(_, token)| {
                 let text = token.text();
                 text == reference
@@ -255,10 +338,87 @@ mod tests {
 
         let mut service = EmbeddedValueReferences::default();
         let mut builder = service.builder();
-        builder.visit_html_root(&parsed.tree());
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::vue());
         service.finish(builder);
 
         assert!(contains_reference(&service, "Component"));
         assert!(contains_reference(&service, "AvatarPrimitive"));
+    }
+
+    #[test]
+    fn tracks_type_only_references_separately() {
+        // `IconType` is used only as a type; it must land in type_references,
+        // not references, so useImportType still treats it as type-only while
+        // the unused-* rules see it as used.
+        let source = r#"const x: IconType = foo;"#;
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_non_source_snippet(&parse_js(source));
+        service.finish(builder);
+
+        let in_value = service
+            .value_references
+            .iter()
+            .any(|r| r.iter().any(|(_, t)| t.text() == "IconType"));
+        let in_type = service
+            .type_references
+            .iter()
+            .any(|r| r.iter().any(|(_, t)| t.text() == "IconType"));
+        assert!(!in_value, "IconType should not be a value reference");
+        assert!(in_type, "IconType should be a type reference");
+        // `foo` is a value reference.
+        assert!(contains_reference(&service, "foo"));
+    }
+
+    #[test]
+    fn extracts_svelte_directive_names() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        let source = r#"<div use:inView transition:fade in:fly out:fly animate:flip></div>"#;
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
+        service.finish(builder);
+
+        assert!(contains_reference(&service, "inView"));
+        assert!(contains_reference(&service, "fade"));
+        assert!(contains_reference(&service, "fly"));
+        assert!(contains_reference(&service, "flip"));
+    }
+
+    #[test]
+    fn extracts_svelte_bind_shorthand() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        // `bind:open` without `={...}` is shorthand for `bind:open={open}` — the
+        // local variable `open` must be tracked as a value reference.
+        let source = r#"<Modal bind:open />"#;
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
+        service.finish(builder);
+
+        assert!(contains_reference(&service, "open"));
+    }
+
+    #[test]
+    fn ignores_svelte_bind_with_initializer() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        // `bind:value={expr}` has an explicit initializer; the directive name
+        // itself is not a variable reference (the expression is handled separately).
+        let source = r#"<input bind:value={myVal} />"#;
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedValueReferences::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree(), &HtmlFileSource::svelte());
+        service.finish(builder);
+
+        assert!(!contains_reference(&service, "value"));
     }
 }
