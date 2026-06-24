@@ -250,9 +250,11 @@ impl EmbeddedBuilder {
         }
     }
 
-    /// Registers the left-hand side of a `{@const name = value}` assignment
-    /// as a binding. Only runs when the enclosing embed is a Svelte const
-    /// block; every other Svelte embed leaves assignments alone.
+    /// Registers the left-hand side of a Svelte const-block assignment as a
+    /// binding. Covers both `{@const name = value}` and the markup declaration
+    /// blocks `{const ...}` / `{let ...}` (which share the same embed kind).
+    /// Only runs when the enclosing embed is a Svelte const block; every other
+    /// Svelte embed leaves assignments alone.
     fn visit_svelte_const_assignment(
         &mut self,
         assign: &JsAssignmentExpression,
@@ -262,9 +264,10 @@ impl EmbeddedBuilder {
             return None;
         };
         let left = assign.left().ok()?;
-        let ident = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
-        let token = ident.name_token().ok()?;
-        self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+        // Register every identifier on the left-hand side. This covers a simple
+        // identifier (`a = 1`) as well as object (`{ x, y } = o`) and array
+        // (`[a, b] = arr`) destructuring, including nested and rest patterns.
+        self.visit_svelte_assignment_pattern(left);
         Some(())
     }
 
@@ -335,7 +338,9 @@ impl EmbeddedBuilder {
                         }
                     }
                 }
-                SvelteBlockKind::Const => {}
+                // Const bindings are registered via visit_svelte_const_assignment (assignment-expression path);
+                // Declaration bindings via visit_module_item_list -> visit_js_variable_statement (source-level path).
+                SvelteBlockKind::Const | SvelteBlockKind::Declaration => {}
             },
             EmbedBlockKind::Neutral => return None,
         }

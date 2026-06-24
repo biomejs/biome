@@ -862,6 +862,7 @@ impl<'src> HtmlLexer<'src> {
             b"debug" => DEBUG_KW,
             b"attach" => ATTACH_KW,
             b"const" => CONST_KW,
+            b"let" => LET_KW,
             b"render" => RENDER_KW,
             b"html" => HTML_KW,
             b"key" => KEY_KW,

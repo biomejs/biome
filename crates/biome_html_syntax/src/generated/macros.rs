@@ -216,6 +216,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteDebugBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_DECLARATION_BLOCK => {
+                    let $pattern = unsafe { $crate::SvelteDeclarationBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_DIRECTIVE_MODIFIER => {
                     let $pattern = unsafe { $crate::SvelteDirectiveModifier::new_unchecked(node) };
                     $body

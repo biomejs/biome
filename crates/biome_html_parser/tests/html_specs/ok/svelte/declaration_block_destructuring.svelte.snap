@@ -1,0 +1,66 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{const { x, y } = point}
+{const [first, second] = items}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            keyword_token: CONST_KW@1..7 "const" [] [Whitespace(" ")],
+            declarations: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@7..23 "{ x, y } = point" [] [],
+            },
+            r_curly_token: R_CURLY@23..24 "}" [] [],
+        },
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@24..26 "{" [Newline("\n")] [],
+            keyword_token: CONST_KW@26..32 "const" [] [Whitespace(" ")],
+            declarations: HtmlTextExpression {
+                html_literal_token: HTML_LITERAL@32..55 "[first, second] = items" [] [],
+            },
+            r_curly_token: R_CURLY@55..56 "}" [] [],
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..57
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..56
+    0: SVELTE_DECLARATION_BLOCK@0..24
+      0: L_CURLY@0..1 "{" [] []
+      1: CONST_KW@1..7 "const" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@7..23
+        0: HTML_LITERAL@7..23 "{ x, y } = point" [] []
+      3: R_CURLY@23..24 "}" [] []
+    1: SVELTE_DECLARATION_BLOCK@24..56
+      0: L_CURLY@24..26 "{" [Newline("\n")] []
+      1: CONST_KW@26..32 "const" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@32..55
+        0: HTML_LITERAL@32..55 "[first, second] = items" [] []
+      3: R_CURLY@55..56 "}" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```

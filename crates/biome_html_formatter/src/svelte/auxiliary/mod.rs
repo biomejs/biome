@@ -16,6 +16,7 @@ pub(crate) mod class_directive;
 pub(crate) mod const_block;
 pub(crate) mod curly_destructured_name;
 pub(crate) mod debug_block;
+pub(crate) mod declaration_block;
 pub(crate) mod directive_modifier;
 pub(crate) mod each_as_keyed_item;
 pub(crate) mod each_block;

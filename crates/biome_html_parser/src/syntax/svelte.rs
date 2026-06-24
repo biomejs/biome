@@ -918,6 +918,39 @@ pub(crate) fn parse_const_block(p: &mut HtmlParser, marker: Marker) -> ParsedSyn
     Present(marker.complete(p, SVELTE_CONST_BLOCK))
 }
 
+/// Parses a Svelte markup declaration block: `{let x = ...}` or `{const a = 1, b = 2}`.
+///
+/// These are distinct from `{@const}` ([`SVELTE_CONST_BLOCK`]): they begin with a plain `{`
+/// immediately followed by a `let`/`const` keyword, directly in markup. Since a plain `{` in
+/// markup is otherwise a text expression, we speculatively re-lex the token after `{` as a Svelte
+/// keyword and rewind if it isn't `let`/`const`, letting the caller fall back to a regular text
+/// expression.
+pub(crate) fn parse_svelte_declaration_block(p: &mut HtmlParser) -> ParsedSyntax {
+    if !Svelte.is_supported(p) || !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let checkpoint = p.checkpoint();
+    p.bump_with_context(T!['{'], HtmlLexContext::Svelte);
+
+    if !p.at(T![const]) && !p.at(T![let]) {
+        // Not a declaration block: rewind so the caller can parse a text expression.
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    let keyword = p.cur();
+    p.bump_with_context(keyword, HtmlLexContext::single_expression());
+
+    parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, SVELTE_DECLARATION_BLOCK))
+}
+
 const BLOCK_RECOVER: TokenSet<HtmlSyntaxKind> = token_set!(
     T!['{'],
     T![<],
@@ -1399,6 +1432,7 @@ pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![each],
     T![debug],
     T![const],
+    T![let],
     T![attach],
     T![render],
     T![key],

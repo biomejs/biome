@@ -14,7 +14,8 @@ use crate::syntax::astro::{
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
     SVELTE_KEYWORDS, is_at_svelte_directive_start, parse_attach_attribute, parse_svelte_at_block,
-    parse_svelte_directive, parse_svelte_hash_block, parse_svelte_spread_or_expression,
+    parse_svelte_declaration_block, parse_svelte_directive, parse_svelte_hash_block,
+    parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
     VUE_KEYWORDS, parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
@@ -429,10 +430,12 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
         ),
         T!["{@"] => parse_svelte_at_block(p),
         T!["{#"] => parse_svelte_hash_block(p),
-        T!['{'] => parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
-            let m = p.start();
-            p.bump_remap(HTML_LITERAL);
-            Present(m.complete(p, HTML_CONTENT))
+        T!['{'] => parse_svelte_declaration_block(p).or_else(|| {
+            parse_single_text_expression(p, HtmlLexContext::Regular).or_else(|| {
+                let m = p.start();
+                p.bump_remap(HTML_LITERAL);
+                Present(m.complete(p, HTML_CONTENT))
+            })
         }),
         T!["}}"] | T!['}'] => {
             // The closing text expression should be handled by other functions.

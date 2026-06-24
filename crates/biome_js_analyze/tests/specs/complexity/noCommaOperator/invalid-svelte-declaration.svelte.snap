@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-declaration.svelte
+---
+# Input
+```svelte
+<script>
+  const foo = () => 1;
+  const bar = 2;
+</script>
+
+{const result = (foo(), bar)}
+{let alsoInvalid = (foo(), bar)}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-declaration.svelte:6:23 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ {const result = (foo(), bar)}
+      │                       ^
+    7 │ {let alsoInvalid = (foo(), bar)}
+    8 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+```
+invalid-svelte-declaration.svelte:7:26 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    6 │ {const result = (foo(), bar)}
+  > 7 │ {let alsoInvalid = (foo(), bar)}
+      │                          ^
+    8 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```

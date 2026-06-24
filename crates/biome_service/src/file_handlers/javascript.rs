@@ -645,7 +645,7 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
             element_range: chunk.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            text: content_token.token_text().into(),
         },
     })
 }

@@ -1,0 +1,97 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{const}
+{let}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            keyword_token: CONST_KW@1..6 "const" [] [],
+            declarations: missing (required),
+            r_curly_token: R_CURLY@6..7 "}" [] [],
+        },
+        SvelteDeclarationBlock {
+            l_curly_token: L_CURLY@7..9 "{" [Newline("\n")] [],
+            keyword_token: LET_KW@9..12 "let" [] [],
+            declarations: missing (required),
+            r_curly_token: R_CURLY@12..13 "}" [] [],
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..14
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..13
+    0: SVELTE_DECLARATION_BLOCK@0..7
+      0: L_CURLY@0..1 "{" [] []
+      1: CONST_KW@1..6 "const" [] []
+      2: (empty)
+      3: R_CURLY@6..7 "}" [] []
+    1: SVELTE_DECLARATION_BLOCK@7..13
+      0: L_CURLY@7..9 "{" [Newline("\n")] []
+      1: LET_KW@9..12 "let" [] []
+      2: (empty)
+      3: R_CURLY@12..13 "}" [] []
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+declaration_block_empty.svelte:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+  > 1 │ {const}
+      │       ^
+    2 │ {let}
+    3 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ {const}
+      │       ^
+    2 │ {let}
+    3 │ 
+  
+declaration_block_empty.svelte:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+    1 │ {const}
+  > 2 │ {let}
+      │     ^
+    3 │ 
+  
+  i Expected an expression here.
+  
+    1 │ {const}
+  > 2 │ {let}
+      │     ^
+    3 │ 
+  
+```
