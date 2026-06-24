@@ -12,7 +12,7 @@ use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::diagnostic::{ParseDiagnostic, ToDiagnostic, expect_one_of};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Marker, Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Marker, Parser, SyntaxFeature, TokenSet, token_set};
 
 /// Parses a CSS query feature used by `@media` and `@container`.
 #[inline]
@@ -187,7 +187,8 @@ fn parse_query_feature_value_until(
         return Absent;
     };
 
-    if CssSyntaxFeatures::Scss.is_unsupported(p) || !is_at_scss_query_feature_value_tail(p, end_ts)
+    if CssSyntaxFeatures::Scss.is_unsupported(p)
+        || !is_at_scss_query_feature_value_tail(p, &head, end_ts)
     {
         return Present(head);
     }
@@ -199,17 +200,33 @@ fn parse_query_feature_value_until(
 ///
 /// Example: `+ 1px` after `$width` in `@media (max-width: $width + 1px) {}`.
 #[inline]
-fn is_at_scss_query_feature_value_tail(p: &mut CssParser, end_ts: TokenSet<CssSyntaxKind>) -> bool {
+fn is_at_scss_query_feature_value_tail(
+    p: &mut CssParser,
+    head: &CompletedMarker,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> bool {
     // Keep complete CSS values like `aspect-ratio: 16 / 9` on the CSS path.
     // If the parsed head stops on a Sass operator such as `+`, continue from
     // that head as SassScript without reparsing it.
-    if p.at_ts(end_ts) || p.at(T![/]) || !is_at_scss_binary_operator(p) {
+    if p.at_ts(end_ts) || !is_at_scss_binary_operator(p) {
+        return false;
+    }
+
+    if p.at(T![/]) && !is_scss_query_feature_value_head(head.kind(p)) {
         return false;
     }
 
     // Keep dangling operators such as `scroll-state(scrolled: bottom and )`
     // on the CSS/container recovery path instead of parsing them as Sass.
     !p.nth_at_ts(1, QUERY_FEATURE_VALUE_MISSING_RHS_SET.union(end_ts))
+}
+
+#[inline]
+fn is_scss_query_feature_value_head(kind: CssSyntaxKind) -> bool {
+    matches!(
+        kind,
+        SCSS_INTERPOLATED_IDENTIFIER | SCSS_INTERPOLATION | SCSS_VARIABLE
+    )
 }
 
 pub(crate) fn expected_any_query_feature(p: &CssParser, range: TextRange) -> ParseDiagnostic {

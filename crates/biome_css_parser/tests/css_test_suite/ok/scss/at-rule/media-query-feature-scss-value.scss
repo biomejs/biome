@@ -77,3 +77,15 @@ $breakpoint: 30em;
     color: red;
   }
 }
+
+@media screen and (max-width: $breakpoint / 2) {
+  a {
+    color: red;
+  }
+}
+
+@media screen and (max-width: #{$breakpoint} / 2) {
+  a {
+    color: red;
+  }
+}

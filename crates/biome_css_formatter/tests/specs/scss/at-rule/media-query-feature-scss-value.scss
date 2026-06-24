@@ -19,3 +19,7 @@ $breakpoint:30em;
 @container   ( max-width :  $breakpoint ){a{color:red;}}
 
 @container   ( max-width :  #{$breakpoint}+1px ){a{color:red;}}
+
+@media   screen   and   ( max-width : $breakpoint/2 ){a{color:red;}}
+
+@media   screen   and   ( max-width : #{$breakpoint}/2 ){a{color:red;}}
