@@ -29,7 +29,7 @@ expression: with_options.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"noSvelteUnnecessaryStateWrap": {
 					"level": "error",
