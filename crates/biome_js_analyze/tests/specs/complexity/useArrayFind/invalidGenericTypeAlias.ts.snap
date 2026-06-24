@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Index<0>` substitutes to the literal `0`, so this reads the first filtered element.
+type Index<T extends number> = T;
+const first: Index<0> = 0;
+[1, 2, 3].filter(x => x > 1)[first];
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    2 │ type Index<T extends number> = T;
+    3 │ const first: Index<0> = 0;
+  > 4 │ [1, 2, 3].filter(x => x > 1)[first];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```

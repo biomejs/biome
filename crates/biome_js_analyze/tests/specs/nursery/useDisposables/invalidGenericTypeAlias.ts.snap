@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Id<Disposable>` substitutes to `Disposable`, so the result should be held with `using`.
+type Id<T> = T;
+declare function open(): Id<Disposable>;
+const handle = open();
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    2 │ type Id<T> = T;
+    3 │ declare function open(): Id<Disposable>;
+  > 4 │ const handle = open();
+      │       ^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The object implements the Disposable interface, which is intended to be disposed after use with using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    2 2 │   type Id<T> = T;
+    3 3 │   declare function open(): Id<Disposable>;
+    4   │ - const·handle·=·open();
+      4 │ + using·handle·=·open();
+    5 5 │   
+  
+
+```

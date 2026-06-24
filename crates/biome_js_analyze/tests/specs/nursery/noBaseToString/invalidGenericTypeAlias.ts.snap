@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Id<{ a: number }>` substitutes to the object type, which has no custom stringification.
+type Id<T> = T;
+declare const obj: Id<{ a: number }>;
+String(obj);
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:8 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+    2 │ type Id<T> = T;
+    3 │ declare const obj: Id<{ a: number }>;
+  > 4 │ String(obj);
+      │        ^^^
+    5 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

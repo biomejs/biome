@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Maybe<string>` substitutes to `string | null`, so `||` should be `??`.
+type Maybe<T> = T | null;
+declare const value: Maybe<string>;
+const result = value || 'default';
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:22 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    2 │ type Maybe<T> = T | null;
+    3 │ declare const value: Maybe<string>;
+  > 4 │ const result = value || 'default';
+      │                      ^^
+    5 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

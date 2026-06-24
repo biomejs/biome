@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `MaybeAsync<string>` substitutes to `Promise<string> | undefined`, so the Promise must be handled.
+type MaybeAsync<T> = Promise<T> | undefined;
+declare function getWork(): MaybeAsync<string>;
+async function main() {
+	getWork();
+}
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:5:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ declare function getWork(): MaybeAsync<string>;
+    4 │ async function main() {
+  > 5 │ 	getWork();
+      │ 	^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    5 │ → await·getWork();
+      │   ++++++          
+
+```

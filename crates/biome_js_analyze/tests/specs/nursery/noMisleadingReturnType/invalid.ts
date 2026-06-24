@@ -204,3 +204,105 @@ async function asyncUnionBothReturns(b: boolean): Promise<string | null> {
 function partialAbsorbUnion(b: boolean): "a" | "b" | string | null { if (b) return "a"; return null; }
 
 function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }
+
+type Maybe<T> = T | null;
+function genericAliasUnion(): Maybe<string> { return "hello"; }
+
+type Either<L, R> = L | R;
+function genericAliasMultiParam(): Either<string, number> { return "hello"; }
+
+type Wrap<T> = Maybe<T>;
+function nestedGenericAliasUnion(): Wrap<string> { return "hello"; }
+
+type Boxed<T> = { value: T } | null;
+function genericAliasObjectVariant(): Boxed<string> { return { value: "x" }; }
+
+type MaybeLiteral<T> = T | null;
+function genericAliasLiteralUnionAsConst(): MaybeLiteral<"hello"> { return "hello" as const; }
+
+type EitherLiteral<L, R> = L | R;
+function genericAliasLiteralMultiParamAsConst(): EitherLiteral<"hello", number> { return "hello" as const; }
+
+type WrapLiteral<T> = MaybeLiteral<T>;
+function nestedGenericAliasLiteralUnionAsConst(): WrapLiteral<"hello"> { return "hello" as const; }
+
+type BoxedLiteral<T> = { value: T } | null;
+function genericAliasObjectLiteralVariantAsConst(): BoxedLiteral<"x"> { return { value: "x" as const }; }
+
+function genericAliasLiteralUnionNoConst(): MaybeLiteral<"hello"> { return "hello"; }
+
+function genericAliasLiteralMultiParamNoConst(): EitherLiteral<"hello", number> { return "hello"; }
+
+function nestedGenericAliasLiteralUnionNoConst(): WrapLiteral<"hello"> { return "hello"; }
+
+function genericAliasObjectLiteralVariantNoConst(): BoxedLiteral<"x"> { return { value: "x" }; }
+
+type IdAlias<T> = T;
+function genericIdentityAlias(): IdAlias<string> { return "hello" as const; }
+
+function mixedIndexAndNamedWiden(): { id: number; [key: string]: number } {
+	return { id: 1 as const, count: 2 as const };
+}
+
+function namedOnlyWithExtraInferredMember(): { id: number } {
+	const result = { id: 1 as const, extra: "ignored" as const };
+	return result;
+}
+
+type Pair<A, B = string> = A | B;
+function genericAliasDefaultParam(b: boolean): Pair<number> {
+	if (b) return 1;
+	return 2;
+}
+
+function recordIndexSignatureWiden(): Record<string, string> {
+	return { a: "x" as const };
+}
+
+type TaggedMaybe<T> =
+	| { kind: "extra"; value: T extends string ? string : number }
+	| { kind: "ok"; value: null };
+function unknownDoesNotMaskDiscriminant(): TaggedMaybe<number> {
+	return { kind: "ok", value: null };
+}
+function unknownDoesNotMaskDiscriminantReversed(): TaggedMaybe<number> {
+	return { value: null, kind: "ok" };
+}
+
+// A non-generic conditional has a constant condition, so both branches are unioned (as before this
+// rule); `NonGenericConditional` is `"a" | "b"`, and returning only "a" is misleading.
+type NonGenericConditional = string extends string ? "a" | "b" : never;
+function nonGenericConditionalReturnsSubset(): NonGenericConditional { return "a"; }
+
+type ChoicePlainOptional = { optional?: string } | { required: number };
+function choicePlainOptional(): ChoicePlainOptional {
+	return { required: 1 as const };
+}
+
+type ChoiceGenericOptional<T> = { optional?: T } | { required: number };
+function choiceGenericOptional(): ChoiceGenericOptional<string> {
+	return { required: 1 as const };
+}
+
+async function asyncGenericAliasUnion(): Promise<Maybe<string>> {
+	return "x";
+}
+
+type EntryOrNull = { id: string; meta: unknown } | null;
+function readEntry(): EntryOrNull {
+	return { id: "x", meta: 1 };
+}
+
+type OptionsOrNull = { retries?: number } | null;
+function getOptions(): OptionsOrNull {
+	return {};
+}
+
+type StringMapOrNull = Record<string, string> | null;
+function getStringMap(): StringMapOrNull {
+	return {};
+}
+
+function unknownConstMemberKeepsSiblingMisleading(): { a: object; b: unknown } {
+	return { a: { x: 1 }, b: 2 as const };
+}

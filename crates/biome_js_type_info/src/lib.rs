@@ -15,7 +15,7 @@ mod type_data;
 mod type_store;
 
 pub use conditionals::*;
-pub use flattening::MAX_FLATTEN_DEPTH;
+pub use flattening::{MAX_ALIAS_CHAIN_DEPTH, MAX_FLATTEN_DEPTH, instantiated_generic_alias};
 pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
 pub use resolver::*;

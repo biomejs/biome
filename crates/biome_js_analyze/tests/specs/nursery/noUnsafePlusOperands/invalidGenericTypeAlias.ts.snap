@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Identity<bigint>` substitutes to `bigint`, so adding it to a number mixes numeric types.
+type Identity<T> = T;
+declare const big: Identity<bigint>;
+declare const num: number;
+const mixed = big + num;
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:5:15 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Numeric + operations must use either two bigint values or two number values.
+  
+    3 │ declare const big: Identity<bigint>;
+    4 │ declare const num: number;
+  > 5 │ const mixed = big + num;
+      │               ^^^^^^^^^
+    6 │ 
+  
+  i This operation mixes number with bigint.
+  
+    3 │ declare const big: Identity<bigint>;
+    4 │ declare const num: number;
+  > 5 │ const mixed = big + num;
+      │               ^^^^^^^^^
+    6 │ 
+  
+  i Convert one side so both operands use the same numeric type before applying + or +=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
