@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 207
 expression: snapshot
 ---
 
@@ -117,11 +116,11 @@ CssRoot {
 media_feature_scss_expression.css:1:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `+`
-
+  
   > 1 │ @media screen and (max-width: 1 + 2) {}
       │                                 ^
-    2 │
-
+    2 │ 
+  
   i Remove +
-
+  
 ```
