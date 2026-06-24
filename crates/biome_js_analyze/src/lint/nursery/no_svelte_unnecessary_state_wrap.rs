@@ -78,9 +78,6 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    ///
-    /// #### Invalid
-    ///
     /// ```svelte,expect_diagnostic,use_options
     /// <script>
     /// import { SvelteMap } from "svelte/reactivity";
