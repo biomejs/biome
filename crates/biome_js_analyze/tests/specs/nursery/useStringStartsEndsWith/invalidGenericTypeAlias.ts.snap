@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Id<string>` substitutes to `string`, so these index comparisons can use startsWith/endsWith.
+type Id<T> = T;
+declare const text: Id<string>;
+text[0] === "a";
+text[text.length - 1] === "z";
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+    2 │ type Id<T> = T;
+    3 │ declare const text: Id<string>;
+  > 4 │ text[0] === "a";
+      │ ^^^^^^^^^^^^^^^
+    5 │ text[text.length - 1] === "z";
+    6 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+    2 2 │   type Id<T> = T;
+    3 3 │   declare const text: Id<string>;
+    4   │ - text[0]·===·"a";
+      4 │ + text.startsWith("a");
+    5 5 │   text[text.length - 1] === "z";
+    6 6 │   
+  
+
+```
+
+```
+invalidGenericTypeAlias.ts:5:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string suffix.
+  
+    3 │ declare const text: Id<string>;
+    4 │ text[0] === "a";
+  > 5 │ text[text.length - 1] === "z";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+    3 3 │   declare const text: Id<string>;
+    4 4 │   text[0] === "a";
+    5   │ - text[text.length·-·1]·===·"z";
+      5 │ + text.endsWith("z");
+    6 6 │   
+  
+
+```

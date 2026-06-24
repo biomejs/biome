@@ -33,6 +33,7 @@ biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }
 biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
+boxcar               = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
 indexmap             = { workspace = true }

@@ -16,7 +16,9 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_
 use biome_html_parser::HtmlParserOptions;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::{
+    GLOBAL_RESOLVER, TypeData, TypeMemberKind, TypeReference, TypeResolver, TypeResolverLevel,
+};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
@@ -1036,6 +1038,805 @@ fn test_resolve_return_value_of_function() {
         TypeData::Union(union) => assert_eq!(union.types().len(), 4),
         _ => panic!("expected a union type"),
     }
+}
+
+#[test]
+fn test_resolve_generic_type_alias_instantiation() {
+    // `Maybe<string>` should resolve to `string | null`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Maybe<T> = T | null;
+
+        export function getName(): Maybe<string> {
+            return "biome";
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_name_id = resolver
+        .resolve_type_of(&Text::new_static("getName"), ScopeId::GLOBAL)
+        .expect("getName not found");
+    let get_name_ty = resolver.resolved_type_for_id(get_name_id);
+    let return_ty = get_name_ty
+        .as_function()
+        .expect("getName must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_name_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert_eq!(
+        return_ty.flattened_union_variants().count(),
+        2,
+        "expected exactly `string | null`, got: {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+        "expected a `string` variant in {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_null()),
+        "expected a `null` variant in {return_ty:?}",
+    );
+}
+
+#[test]
+fn test_collects_generic_type_alias_instantiation_lazily() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Maybe<T> = T | null;
+
+        export function getName(): Maybe<string> {
+            return "biome";
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let types = index_module.types();
+    let has_lazy_application = types.iter().any(|ty| {
+        let TypeData::InstanceOf(instance) = ty else {
+            return false;
+        };
+        instance.type_parameters.len() == 1
+            && !is_generic_parameter_reference(&types, &instance.type_parameters[0])
+            && matches!(
+                instance.ty,
+                TypeReference::Resolved(_) | TypeReference::Import(_)
+            )
+    });
+    assert!(
+        has_lazy_application,
+        "expected collection to preserve `Maybe<string>` as a generic application"
+    );
+    assert!(
+        !has_string_null_union(&types),
+        "collection should not eagerly instantiate `Maybe<string>`"
+    );
+
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+    let get_name_id = resolver
+        .resolve_type_of(&Text::new_static("getName"), ScopeId::GLOBAL)
+        .expect("getName not found");
+    let get_name_ty = resolver.resolved_type_for_id(get_name_id);
+    let return_ty = get_name_ty
+        .as_function()
+        .expect("getName must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_name_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert_eq!(
+        return_ty.flattened_union_variants().count(),
+        2,
+        "expected lazy `Maybe<string>` to resolve to `string | null`, got: {return_ty:?}",
+    );
+    assert!(return_ty.has_variant(|ty| ty.is_string_or_string_literal()));
+    assert!(return_ty.has_variant(|ty| ty.is_null()));
+}
+
+fn is_generic_parameter_reference(types: &[&TypeData], reference: &TypeReference) -> bool {
+    matches!(
+        reference,
+        TypeReference::Resolved(resolved)
+            if resolved.level() == TypeResolverLevel::Thin
+                && types
+                    .get(resolved.index())
+                    .is_some_and(|ty| matches!(**ty, TypeData::Generic(_)))
+    )
+}
+
+fn has_string_null_union(types: &[&TypeData]) -> bool {
+    types.iter().any(|ty| {
+        let TypeData::Union(union) = ty else {
+            return false;
+        };
+        union
+            .types()
+            .iter()
+            .any(|reference| resolves_to(types, reference, |ty| matches!(ty, TypeData::String)))
+            && union
+                .types()
+                .iter()
+                .any(|reference| resolves_to(types, reference, |ty| matches!(ty, TypeData::Null)))
+    })
+}
+
+fn resolves_to(
+    types: &[&TypeData],
+    reference: &TypeReference,
+    predicate: impl Fn(&TypeData) -> bool,
+) -> bool {
+    match reference {
+        TypeReference::Resolved(resolved) if resolved.level() == TypeResolverLevel::Thin => {
+            types.get(resolved.index()).is_some_and(|ty| predicate(ty))
+        }
+        TypeReference::Resolved(resolved) if resolved.level() == TypeResolverLevel::Global => {
+            GLOBAL_RESOLVER
+                .get_by_resolved_id(*resolved)
+                .is_some_and(|resolved| predicate(resolved.as_raw_data()))
+        }
+        _ => false,
+    }
+}
+
+#[test]
+fn test_resolve_nested_generic_type_alias() {
+    // Nested alias: `Wrap<string>` → `Maybe<string>` → `string | null`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Maybe<T> = T | null;
+        type Wrap<T> = Maybe<T>;
+
+        export function getName(): Wrap<string> {
+            return "biome";
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_name_id = resolver
+        .resolve_type_of(&Text::new_static("getName"), ScopeId::GLOBAL)
+        .expect("getName not found");
+    let get_name_ty = resolver.resolved_type_for_id(get_name_id);
+    let return_ty = get_name_ty
+        .as_function()
+        .expect("getName must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_name_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert_eq!(
+        return_ty.flattened_union_variants().count(),
+        2,
+        "expected exactly `string | null`, got: {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+        "expected a `string` variant in {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_null()),
+        "expected a `null` variant in {return_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_composite_generic_type_alias() {
+    // The composite union variant `{ value: T }` substitutes too.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Boxed<T> = { value: T } | null;
+
+        export function getBox(): Boxed<string> {
+            return { value: "biome" };
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_box_id = resolver
+        .resolve_type_of(&Text::new_static("getBox"), ScopeId::GLOBAL)
+        .expect("getBox not found");
+    let get_box_ty = resolver.resolved_type_for_id(get_box_id);
+    let return_ty = get_box_ty
+        .as_function()
+        .expect("getBox must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_box_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert_eq!(
+        return_ty.flattened_union_variants().count(),
+        2,
+        "expected exactly `{{ value: string }} | null`, got: {return_ty:?}",
+    );
+    let value_ty = return_ty
+        .flattened_union_variants()
+        .find_map(|variant| variant.find_member_type("value"))
+        .expect("expected an object variant with a `value` member");
+    assert!(
+        value_ty.is_string_or_string_literal(),
+        "expected `value: string` after substitution, got: {value_ty:?}",
+    );
+}
+
+#[test]
+fn test_generic_type_alias_does_not_substitute_shadowed_parameter() {
+    // The inner `<T>` of `make` shadows the alias parameter: `plain` is
+    // substituted, the shadowed `make` return type stays generic.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Alias<T> = { plain: T; make: <T>() => T };
+
+        export function get(): Alias<string> {
+            return { plain: "biome", make: () => { throw 0; } };
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_id = resolver
+        .resolve_type_of(&Text::new_static("get"), ScopeId::GLOBAL)
+        .expect("get not found");
+    let get_ty = resolver.resolved_type_for_id(get_id);
+    let return_ty = get_ty
+        .as_function()
+        .expect("get must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    let plain_ty = return_ty
+        .find_member_type("plain")
+        .expect("expected a `plain` member");
+    assert!(
+        plain_ty.is_string_or_string_literal(),
+        "the alias parameter must be substituted in `plain`, got: {plain_ty:?}",
+    );
+
+    let make_ty = return_ty
+        .find_member_type("make")
+        .expect("expected a `make` member");
+    let make_return_ty = make_ty
+        .as_function()
+        .and_then(|function| function.return_type.as_type())
+        .and_then(|return_ref| make_ty.resolve(return_ref))
+        .expect("expected `make` to be a function with a return type");
+    let make_return_data = make_return_ty
+        .resolved_data()
+        .map(|data| data.as_raw_data().clone());
+    assert!(
+        !make_return_ty.is_string_or_string_literal()
+            && !matches!(
+                make_return_data,
+                None | Some(TypeData::Unknown | TypeData::UnknownKeyword)
+            ),
+        "the shadowed inner parameter must stay un-substituted, got: {make_return_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_generic_class_alias_substitutes_type_argument() {
+    // `Box<T>` carries its `T` as an instance argument, not a binder, so
+    // the argument substitutes through the alias body.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        class Box<T> {
+            value: T;
+        }
+        type Aliased<T> = Box<T>;
+
+        export function get(): Aliased<string> {
+            return new Box();
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_id = resolver
+        .resolve_type_of(&Text::new_static("get"), ScopeId::GLOBAL)
+        .expect("get not found");
+    let get_ty = resolver.resolved_type_for_id(get_id);
+    let return_ty = get_ty
+        .as_function()
+        .expect("get must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    let type_argument = match return_ty
+        .resolved_data()
+        .map(|data| data.as_raw_data().clone())
+    {
+        Some(TypeData::InstanceOf(instance)) => instance.type_parameters.first().cloned(),
+        _ => None,
+    }
+    .and_then(|argument| return_ty.resolve(&argument))
+    .expect("expected `Box<...>` with a type argument");
+    assert!(
+        type_argument.is_string_or_string_literal(),
+        "expected `Box<string>` after substitution, got: {type_argument:?}",
+    );
+}
+
+#[test]
+fn test_resolve_recursive_generic_type_alias() {
+    // Recursive alias (recursion deferred behind an object member) must
+    // instantiate and terminate.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Tree<T> = { value: T; next: Tree<T> | null };
+
+        export function getTree(): Tree<string> {
+            return { value: "biome", next: null };
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_tree_id = resolver
+        .resolve_type_of(&Text::new_static("getTree"), ScopeId::GLOBAL)
+        .expect("getTree not found");
+    let get_tree_ty = resolver.resolved_type_for_id(get_tree_id);
+    let return_ty = get_tree_ty
+        .as_function()
+        .expect("getTree must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_tree_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    let value_ty = return_ty
+        .find_member_type("value")
+        .expect("expected a `value` member");
+    assert!(
+        value_ty.is_string_or_string_literal(),
+        "expected `value: string` after substitution, got: {value_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_deep_generic_alias_chain_does_not_overflow() {
+    // A long chain of generic-alias applications (`type W1<T> = W0<T>; ...`) re-enters the
+    // instantiation path once per level. `MAX_ALIAS_CHAIN_DEPTH` must bound that recursion so a
+    // pathological chain resolves (deep levels stay opaque) instead of overflowing the stack.
+    const DEPTH: usize = 600;
+    let mut source = String::from("type W0<T> = T;\n");
+    for i in 1..=DEPTH {
+        source.push_str(&format!("type W{i}<T> = W{}<T>;\n", i - 1));
+    }
+    source.push_str(&format!(
+        "export function deep(): W{DEPTH}<string> {{ return \"biome\"; }}\n"
+    ));
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.clone()));
+
+    let deep_id = resolver
+        .resolve_type_of(&Text::new_static("deep"), ScopeId::GLOBAL)
+        .expect("deep not found");
+    let deep_ty = resolver.resolved_type_for_id(deep_id);
+    // Resolving the return annotation must terminate without overflowing the stack.
+    let _ = deep_ty
+        .as_function()
+        .expect("deep must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| deep_ty.resolve(return_ty));
+}
+
+#[test]
+fn test_resolve_imported_generic_type_alias() {
+    // Imported generic alias: must keep resolving, not collapse to `unknown`.
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/types.ts".into(), "export type Maybe<T> = T | null;\n");
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import type { Maybe } from "./types";
+
+        export function getName(): Maybe<string> {
+            return "biome";
+        }
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/types.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_name_id = resolver
+        .resolve_type_of(&Text::new_static("getName"), ScopeId::GLOBAL)
+        .expect("getName not found");
+    let get_name_ty = resolver.resolved_type_for_id(get_name_id);
+    let return_ty = get_name_ty
+        .as_function()
+        .expect("getName must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_name_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert!(
+        !matches!(
+            return_ty
+                .resolved_data()
+                .map(|data| data.as_raw_data().clone()),
+            None | Some(TypeData::Unknown | TypeData::UnknownKeyword)
+        ),
+        "imported generic type alias must not resolve to unknown, got: {return_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_generic_conditional_alias_is_unknown() {
+    // A generic conditional alias cannot be evaluated before its parameter
+    // is bound, so it lowers to `unknown` rather than a spurious union.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Cond<T> = T extends string ? T : null;
+
+        export function getValue(): Cond<number> {
+            return null;
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_value_id = resolver
+        .resolve_type_of(&Text::new_static("getValue"), ScopeId::GLOBAL)
+        .expect("getValue not found");
+    let get_value_ty = resolver.resolved_type_for_id(get_value_id);
+    let return_ty = get_value_ty
+        .as_function()
+        .expect("getValue must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_value_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert!(
+        matches!(
+            return_ty
+                .resolved_data()
+                .map(|data| data.as_raw_data().clone()),
+            Some(TypeData::Unknown | TypeData::UnknownKeyword),
+        ),
+        "generic conditional alias must lower to unknown, got: {return_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_generic_conditional_alias_with_identical_branches() {
+    // Identical conditional branches resolve to `string` without evaluating the
+    // condition; a condition-dependent alias would collapse to `unknown`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Same<T> = T extends 1 ? string : string;
+
+        export function getValue(): Same<number> {
+            return "biome";
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        assert!(
+            return_ty.is_string_or_string_literal(),
+            "identical conditional branches must resolve to `string`, got: {return_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_resolve_generic_alias_with_default_parameter() {
+    // `Pair<number>` supplies only `A`; `B` falls back to its declared default
+    // `string`, so the alias expands to `number | string`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Pair<A, B = string> = A | B;
+
+        export function get(): Pair<number> {
+            return 1;
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let get_id = resolver
+        .resolve_type_of(&Text::new_static("get"), ScopeId::GLOBAL)
+        .expect("get not found");
+    let get_ty = resolver.resolved_type_for_id(get_id);
+    let return_ty = get_ty
+        .as_function()
+        .expect("get must be a function")
+        .return_type
+        .as_type()
+        .and_then(|return_ty| get_ty.resolve(return_ty))
+        .expect("expected a resolvable return type");
+
+    assert_eq!(
+        return_ty.flattened_union_variants().count(),
+        2,
+        "expected exactly `number | string`, got: {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_number_or_number_literal()),
+        "expected a `number` variant in {return_ty:?}",
+    );
+    assert!(
+        return_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+        "expected a `string` variant in {return_ty:?}",
+    );
+}
+
+#[test]
+fn test_resolve_generic_alias_default_references_earlier_parameter() {
+    // The default `B = A` references an earlier parameter, so `Pair<number>`
+    // expands to `number | number` = `number`, not a dangling `number | A`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Pair<A, B = A> = A | B;
+
+        export function getValue(): Pair<number> {
+            return 1;
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        // `number | number` collapses to a single `number`; a leaked `B = A`
+        // would instead surface as a `number | A` union.
+        assert!(
+            return_ty.is_number_or_number_literal(),
+            "expected `Pair<number>` to collapse to `number`, got: {return_ty:?}",
+        );
+        assert!(
+            !return_ty.is_generic(),
+            "`Pair<number>` must not leave a dangling generic, got: {return_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_resolve_nested_generic_alias_does_not_leak() {
+    // The `number` argument must flow through the nested `Inner<T>` instantiation, so
+    // `Outer<number>` resolves to `number | undefined` with no leaked or generic variant.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Inner<T> = T | undefined;
+        type Outer<T> = Inner<T> | T;
+
+        export function getValue(): Outer<number> {
+            return 1;
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        assert_eq!(
+            return_ty.flattened_union_variants().count(),
+            2,
+            "expected exactly `number | undefined`, got: {return_ty:?}",
+        );
+        assert!(
+            return_ty.has_variant(|ty| ty.is_number_or_number_literal()),
+            "expected a `number` variant, got: {return_ty:?}",
+        );
+        assert!(
+            !return_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+            "`Outer<number>` must not leak a `string` variant, got: {return_ty:?}",
+        );
+        assert!(
+            !return_ty.has_variant(|ty| ty.is_generic()),
+            "`Outer<number>` must not leave a dangling generic variant, got: {return_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_distinct_generic_aliases_do_not_leak_substitutions() {
+    // Two aliases each declare their own `<T>`. Instantiating one must not
+    // bleed into the other.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type First<T> = T | null;
+        type Second<T> = T | undefined;
+
+        export function getFirst(): First<string> {
+            return "biome";
+        }
+        export function getSecond(): Second<number> {
+            return 1;
+        }
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolve_return = |name: &'static str| {
+        let function_id = resolver
+            .resolve_type_of(&Text::new_static(name), ScopeId::GLOBAL)
+            .unwrap_or_else(|| panic!("{name} not found"));
+        let function_ty = resolver.resolved_type_for_id(function_id);
+        function_ty
+            .as_function()
+            .unwrap_or_else(|| panic!("{name} must be a function"))
+            .return_type
+            .as_type()
+            .and_then(|return_ty| function_ty.resolve(return_ty))
+            .expect("expected a resolvable return type")
+    };
+
+    let first_ty = resolve_return("getFirst");
+    assert!(
+        first_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+        "`First<string>` must contain `string`, got: {first_ty:?}",
+    );
+    assert!(
+        first_ty.has_variant(|ty| ty.is_null()),
+        "`First<string>` must contain `null`, got: {first_ty:?}",
+    );
+
+    let second_ty = resolve_return("getSecond");
+    assert!(
+        second_ty.has_variant(|ty| ty.is_number_or_number_literal()),
+        "`Second<number>` must contain `number`, got: {second_ty:?}",
+    );
+    assert!(
+        !second_ty.has_variant(|ty| ty.is_string_or_string_literal()),
+        "`Second<number>` must not leak `string` from `First`, got: {second_ty:?}",
+    );
 }
 
 #[test]
@@ -4060,4 +4861,234 @@ fn test_property_const_assertion_flows_through_module_resolver() {
         .expect("value type")
         .to_data();
     assert_eq!(value_type.to_string(), "string: x");
+}
+
+#[test]
+fn test_generic_identity_alias_substitutes_to_the_argument() {
+    // `type Id<T> = T`: the alias-body-is-a-parameter fast path returns
+    // the argument directly instead of wrapping it in `InstanceOf`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Id<T> = T;
+
+        export function getValue(): Id<string> {
+            return "biome";
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        assert!(
+            return_ty.is_string_or_string_literal(),
+            "expected `Id<string>` to resolve to `string`, got: {return_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_substituted_type_data_preserves_unchanged_prefix() {
+    // Mid-list substitution: `keep: Keep` is unchanged, `value: T` is
+    // substituted. An off-by-one in the prefix copy would corrupt `keep`.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        class Keep {}
+        type Alias<T> = { keep: Keep; value: T };
+
+        export function getValue(): Alias<string> {
+            return { keep: new Keep(), value: "biome" };
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        let keep_ty = return_ty
+            .find_member_type("keep")
+            .expect("expected a `keep` member after substitution");
+        let keep_data = keep_ty
+            .resolved_data()
+            .map(|data| data.as_raw_data().clone());
+        assert!(
+            matches!(keep_data, Some(TypeData::InstanceOf(_))),
+            "the unchanged `keep` prefix must survive as a class instance, got: {keep_ty:?}",
+        );
+        let value_ty = return_ty
+            .find_member_type("value")
+            .expect("expected a `value` member after substitution");
+        assert!(
+            value_ty.is_string_or_string_literal(),
+            "the substituted `value` must resolve to `string`, got: {value_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_substitutions_visible_in_preserves_unshadowed_substitutions() {
+    // `mid`'s inner `<B>` shadows the outer `B`, but `substitutions_visible_in` must still substitute
+    // the unshadowed `outerA`/`outerC`. Top-level `a`/`c` use a separate pass, so only `mid` exposes
+    // a filter-to-empty bug.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Triple<A, B, C> = {
+            a: A;
+            mid: <B>() => { outerA: A; localB: B; outerC: C };
+            c: C;
+        };
+
+        export function getValue(): Triple<string, number, boolean> {
+            return {
+                a: "biome",
+                mid: () => { throw 0; },
+                c: true,
+            };
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        let a_ty = return_ty
+            .find_member_type("a")
+            .expect("expected an `a` member");
+        assert!(
+            a_ty.is_string_or_string_literal(),
+            "outer `A` must be substituted to `string`, got: {a_ty:?}",
+        );
+        let c_ty = return_ty
+            .find_member_type("c")
+            .expect("expected a `c` member");
+        let c_data = c_ty.resolved_data().map(|data| data.as_raw_data().clone());
+        assert!(
+            matches!(c_data, Some(TypeData::Boolean | TypeData::Literal(_))),
+            "outer `C` must be substituted to `boolean`, got: {c_ty:?}",
+        );
+
+        let mid_ty = return_ty
+            .find_member_type("mid")
+            .expect("expected a `mid` member");
+        let mid_return = mid_ty
+            .as_function()
+            .and_then(|function| function.return_type.as_type())
+            .and_then(|return_ref| mid_ty.resolve(return_ref))
+            .expect("`mid` must be a function with a return type");
+
+        // Shadowed inner `B` stays generic, not the outer `number`.
+        let local_b = mid_return
+            .find_member_type("localB")
+            .expect("expected a `localB` member inside `mid`'s return");
+        assert!(
+            !local_b.is_number_or_number_literal(),
+            "the shadowed inner `B` must not collapse to the outer `number`, got: {local_b:?}",
+        );
+
+        // Unshadowed `A`/`C` still substitute inside the shadowed scope;
+        // a filter-to-empty bug would leave them generic here.
+        let outer_a = mid_return
+            .find_member_type("outerA")
+            .expect("expected an `outerA` member inside `mid`'s return");
+        assert!(
+            outer_a.is_string_or_string_literal(),
+            "unshadowed `A` must still substitute to `string` inside the shadowed scope, got: {outer_a:?}",
+        );
+        let outer_c = mid_return
+            .find_member_type("outerC")
+            .expect("expected an `outerC` member inside `mid`'s return");
+        let outer_c_data = outer_c
+            .resolved_data()
+            .map(|data| data.as_raw_data().clone());
+        assert!(
+            matches!(outer_c_data, Some(TypeData::Boolean | TypeData::Literal(_))),
+            "unshadowed `C` must still substitute to `boolean` inside the shadowed scope, got: {outer_c:?}",
+        );
+    });
+}
+
+#[test]
+fn test_generic_type_alias_any_argument_collapses_union() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Maybe<T> = T | null;
+
+        export function getValue(): Maybe<any> {
+            return "biome";
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        assert!(
+            return_ty.is_any_keyword(),
+            "expected `Maybe<any>` to collapse to `any`, got: {return_ty:?}",
+        );
+    });
+}
+
+#[test]
+fn test_builtin_utility_record_keeps_instance_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export function getValue(): Record<string, string> {
+            return { a: "biome" };
+        }
+        "#,
+    );
+
+    with_resolved_return_type(fs, &["/src/index.ts"], "getValue", |return_ty| {
+        let TypeData::Object(object) = &*return_ty else {
+            panic!("expected `Record<string, string>` to resolve to an object, got: {return_ty:?}");
+        };
+        let index_signature = object
+            .members
+            .iter()
+            .find(|member| matches!(member.kind, TypeMemberKind::IndexSignature(_)))
+            .expect("expected an index signature");
+        let value_ty = return_ty
+            .resolve(&index_signature.ty)
+            .expect("expected an index signature value type");
+        assert!(
+            value_ty.is_string_or_string_literal(),
+            "expected string index signature value, got: {value_ty:?}",
+        );
+    });
+}
+
+/// Resolves the named function exported from `/src/index.ts` and yields its
+/// return type to the assertion closure.
+fn with_resolved_return_type(
+    fs: MemoryFileSystem,
+    paths: &[&str],
+    function_name: &'static str,
+    assert_return_ty: impl FnOnce(biome_js_type_info::Type),
+) {
+    let added_paths: Vec<_> = paths.iter().map(|path| BiomePath::new(*path)).collect();
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db));
+
+    let function_id = resolver
+        .resolve_type_of(&Text::new_static(function_name), ScopeId::GLOBAL)
+        .unwrap_or_else(|| panic!("{function_name} not found"));
+    let function_ty = resolver.resolved_type_for_id(function_id);
+    let return_ty = function_ty
+        .as_function()
+        .unwrap_or_else(|| panic!("{function_name} must be a function"))
+        .return_type
+        .as_type()
+        .and_then(|return_ref| function_ty.resolve(return_ref))
+        .expect("expected a resolvable return type");
+
+    assert_return_ty(return_ty);
 }

@@ -950,6 +950,10 @@ impl TypeResolver for JsModuleInfoCollector {
         }
     }
 
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        false
+    }
+
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),

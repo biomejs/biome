@@ -19,10 +19,10 @@ use biome_js_syntax::{
     JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
     JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInterfaceDeclaration,
-    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 
@@ -688,13 +688,25 @@ impl TypeData {
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
             AnyTsType::TsConditionalType(ty) => {
-                // We don't attempt to evaluate the condition, so we simply
-                // infer a union of both the possibilities.
+                let true_type = ty.true_type();
+                let false_type = ty.false_type();
+
+                // A conditional in a generic alias body depends on an unbound type parameter, so it
+                // cannot be evaluated until the alias is monomorphized; lower it to `unknown` rather
+                // than union both branches (which would invent a variant the instantiated type never
+                // produces). A non-generic (constant) conditional unions both branches as before;
+                // identical branches dedup to that single branch.
+                if !conditional_branches_are_identical(&true_type, &false_type)
+                    && conditional_in_generic_alias(&ty)
+                {
+                    return Self::unknown();
+                }
+
                 let types = Box::new([
-                    ty.true_type()
+                    true_type
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
-                    ty.false_type()
+                    false_type
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
                 ]);
@@ -2884,6 +2896,31 @@ fn type_from_function_body(
     }
 }
 
+/// `true` when both result branches are syntactically identical, so the conditional
+/// resolves to that branch regardless of whether its condition can be evaluated.
+fn conditional_branches_are_identical(
+    true_type: &SyntaxResult<AnyTsType>,
+    false_type: &SyntaxResult<AnyTsType>,
+) -> bool {
+    match (true_type, false_type) {
+        (Ok(true_type), Ok(false_type)) => {
+            true_type.syntax().text_trimmed() == false_type.syntax().text_trimmed()
+        }
+        _ => false,
+    }
+}
+
+/// `true` when the conditional sits in the body of a generic type alias, whose type parameter leaves
+/// the condition unevaluable until the alias is monomorphized. Such a conditional is left opaque; a
+/// non-generic (constant) conditional unions both branches instead.
+fn conditional_in_generic_alias(conditional: &TsConditionalType) -> bool {
+    conditional
+        .syntax()
+        .ancestors()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .is_some_and(|alias| alias.type_parameters().is_some())
+}
+
 /// Checks for TypeScript's special `const` assertion target.
 fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     let Some(reference_type) = type_annotation.as_ts_reference_type() else {
@@ -2957,69 +2994,138 @@ fn type_data_from_const_assertion_expression(
     apply_deep_const(resolver, inner_type)
 }
 
-/// Applies const assertion conversion to inferred tuple and object types.
-fn apply_deep_const(resolver: &mut dyn TypeResolver, inner_type: TypeData) -> TypeData {
-    apply_deep_const_inner(resolver, inner_type, 0)
-}
-
-/// Recursively applies `as const` to tuple elements and object members.
-fn apply_deep_const_inner(
-    resolver: &mut dyn TypeResolver,
-    inner_type: TypeData,
-    depth: usize,
-) -> TypeData {
-    if depth >= MAX_CONST_ASSERTION_DEPTH {
-        return inner_type;
+/// Applies `as const` to tuple elements and object members, descending nested tuples/objects up to
+/// `MAX_CONST_ASSERTION_DEPTH`. Iterative; members are interned innermost-first so type ids stay stable.
+fn apply_deep_const(resolver: &mut dyn TypeResolver, root: TypeData) -> TypeData {
+    // A tuple/object whose member types are being transformed. `out.len()` is the index of the next
+    // member to transform.
+    enum Frame {
+        Tuple {
+            src: Box<[TupleElementType]>,
+            out: Vec<TupleElementType>,
+            depth: usize,
+        },
+        Object {
+            prototype: Option<TypeReference>,
+            src: Box<[TypeMember]>,
+            out: Vec<TypeMember>,
+            depth: usize,
+        },
     }
 
-    match inner_type {
-        TypeData::Tuple(tuple) => {
-            let elements = tuple
-                .elements()
-                .iter()
-                .map(|element| TupleElementType {
-                    ty: apply_deep_const_reference(resolver, &element.ty, depth + 1),
+    // A tuple/object becomes a frame; any other type is a leaf left unchanged.
+    fn frame_of(data: TypeData, depth: usize) -> Option<Frame> {
+        match data {
+            TypeData::Tuple(tuple) => {
+                let Tuple(src) = *tuple;
+                Some(Frame::Tuple {
+                    out: Vec::with_capacity(src.len()),
+                    src,
+                    depth,
+                })
+            }
+            TypeData::Object(object) => {
+                let Object { prototype, members } = *object;
+                Some(Frame::Object {
+                    prototype,
+                    out: Vec::with_capacity(members.len()),
+                    src: members,
+                    depth,
+                })
+            }
+            _ => None,
+        }
+    }
+
+    fn depth_of(frame: &Frame) -> usize {
+        match frame {
+            Frame::Tuple { depth, .. } | Frame::Object { depth, .. } => *depth,
+        }
+    }
+
+    // The next original member type, or `None` once the frame is complete.
+    fn next_member(frame: &Frame) -> Option<TypeReference> {
+        match frame {
+            Frame::Tuple { src, out, .. } => src.get(out.len()).map(|element| element.ty.clone()),
+            Frame::Object { src, out, .. } => src.get(out.len()).map(|member| member.ty.clone()),
+        }
+    }
+
+    // Records the transformed type for the current member (object members become const-asserted).
+    fn commit(frame: &mut Frame, ty: TypeReference) {
+        match frame {
+            Frame::Tuple { src, out, .. } => {
+                let element = &src[out.len()];
+                out.push(TupleElementType {
+                    ty,
                     name: element.name.clone(),
                     is_optional: element.is_optional,
                     is_rest: element.is_rest,
-                })
-                .collect();
-            TypeData::Tuple(Box::new(Tuple(elements)))
+                });
+            }
+            Frame::Object { src, out, .. } => {
+                let kind = src[out.len()].kind.clone().with_const_asserted();
+                out.push(TypeMember { kind, ty });
+            }
         }
-        TypeData::Object(object) => TypeData::Object(Box::new(Object {
-            prototype: object.prototype.clone(),
-            members: object
-                .members
-                .iter()
-                .map(|member| TypeMember {
-                    kind: member.kind.clone().with_const_asserted(),
-                    ty: apply_deep_const_reference(resolver, &member.ty, depth + 1),
-                })
-                .collect(),
-        })),
-        _ => inner_type,
-    }
-}
-
-/// Resolves a type reference, applies const assertion conversion, and stores the result.
-fn apply_deep_const_reference(
-    resolver: &mut dyn TypeResolver,
-    type_reference: &TypeReference,
-    depth: usize,
-) -> TypeReference {
-    if depth >= MAX_CONST_ASSERTION_DEPTH {
-        return type_reference.clone();
     }
 
-    let Some(inner_type) = resolver
-        .resolve_and_get(type_reference)
-        .map(|resolved| resolved.to_data())
-    else {
-        return type_reference.clone();
-    };
+    fn rebuild(frame: Frame) -> TypeData {
+        match frame {
+            Frame::Tuple { out, .. } => TypeData::Tuple(Box::new(Tuple(out.into_boxed_slice()))),
+            Frame::Object { prototype, out, .. } => TypeData::Object(Box::new(Object {
+                prototype,
+                members: out.into_boxed_slice(),
+            })),
+        }
+    }
 
-    let inner_type = apply_deep_const_inner(resolver, inner_type, depth);
-    resolver.reference_to_owned_data(inner_type)
+    if !matches!(root, TypeData::Tuple(_) | TypeData::Object(_)) {
+        return root;
+    }
+
+    let mut stack = vec![frame_of(root, 0).expect("root is a tuple or object")];
+    // The interned reference of the frame that just finished, waiting to be slotted into its parent.
+    let mut child: Option<TypeReference> = None;
+
+    loop {
+        if let Some(reference) = child.take() {
+            commit(
+                stack.last_mut().expect("parent of the finished frame"),
+                reference,
+            );
+        }
+
+        match next_member(stack.last().expect("active frame")) {
+            None => {
+                let rebuilt = rebuild(stack.pop().expect("active frame"));
+                if stack.is_empty() {
+                    return rebuilt;
+                }
+                child = Some(resolver.reference_to_owned_data(rebuilt));
+            }
+            Some(member_ref) => {
+                let depth = depth_of(stack.last().expect("active frame")) + 1;
+                if depth >= MAX_CONST_ASSERTION_DEPTH {
+                    commit(stack.last_mut().expect("active frame"), member_ref);
+                    continue;
+                }
+                let Some(data) = resolver
+                    .resolve_and_get(&member_ref)
+                    .map(|resolved| resolved.to_data())
+                else {
+                    commit(stack.last_mut().expect("active frame"), member_ref);
+                    continue;
+                };
+                if matches!(data, TypeData::Tuple(_) | TypeData::Object(_)) {
+                    stack.push(frame_of(data, depth).expect("tuple or object"));
+                } else {
+                    let reference = resolver.reference_to_owned_data(data);
+                    commit(stack.last_mut().expect("active frame"), reference);
+                }
+            }
+        }
+    }
 }
 
 #[inline]

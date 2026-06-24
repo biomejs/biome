@@ -764,6 +764,10 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
                             if types_match(&annotated_type, &inferred_type) {
                                 continue;
                             }
+                            // An `unknown` element covers any value; not a misleading widening.
+                            if matches!(&*annotated_type, TypeData::UnknownKeyword) {
+                                continue;
+                            }
                             if is_base_type_of_literal(&annotated_type, &inferred_type) {
                                 has_widening = true;
                             } else {
@@ -795,69 +799,63 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
                 return false;
             }
 
-            let annotated_index_signature = annotated_object.members.iter().find(|member| {
-                matches!(
-                    member.kind,
-                    TypeMemberKind::IndexSignature(_)
-                )
-            });
-            if let Some(index_signature_member) = annotated_index_signature
-                && let Some(index_signature_value_type) =
-                    annotated.resolve(&index_signature_member.ty)
-            {
-                let mut index_signature_has_widening = false;
-                let all_inferred_covered = inferred_members.iter().all(|inferred_member| {
-                    if inferred_member.is_const_asserted() {
-                        return false;
-                    }
-                    if let Some(inferred_type) = inferred.resolve(&inferred_member.ty) {
-                        if types_match(&index_signature_value_type, &inferred_type) {
-                            return true;
-                        }
-                        if is_base_type_of_literal(&index_signature_value_type, &inferred_type) {
-                            index_signature_has_widening = true;
-                            return true;
-                        }
-                    }
-                    false
-                });
-                if !(all_inferred_covered && index_signature_has_widening) {
-                    return false;
-                }
-                has_widening = true;
-                continue;
-            }
+            // Match each inferred member to the annotation member of the same name, or to the
+            // index signature value when only the index covers it.
+            let index_signature_value = annotated_object
+                .members
+                .iter()
+                .find(|member| matches!(member.kind, TypeMemberKind::IndexSignature(_)))
+                .and_then(|member| annotated.resolve(&member.ty));
 
-            for annotated_member in annotated_object.members.iter() {
-                let annotated_name = match &annotated_member.kind {
-                    TypeMemberKind::Named(name)
-                    | TypeMemberKind::NamedOptional(name) => name,
-                    _ => continue,
+            for inferred_member in inferred_members.iter() {
+                let annotated_type = match inferred_member.kind.name() {
+                    Some(name) => match annotated_object
+                        .members
+                        .iter()
+                        .find(|member| member.kind.has_name(&name))
+                    {
+                        Some(member) => annotated.resolve(&member.ty),
+                        None => index_signature_value.clone(),
+                    },
+                    None => index_signature_value.clone(),
                 };
-                let Some(inferred_member) = inferred_members
-                    .iter()
-                    .find(|member| member.kind.has_name(annotated_name))
-                else {
-                    return false;
+                // An inferred member the annotation neither names nor covers by index is an
+                // excess property; it does not affect whether the rest is literal widening.
+                let Some(annotated_type) = annotated_type else {
+                    continue;
                 };
+                // An `unknown` member accepts any value, so it is never a misleading widening.
+                // Checked before the const bail so a const-asserted `unknown` member is still skipped.
+                if matches!(&*annotated_type, TypeData::UnknownKeyword) {
+                    continue;
+                }
                 if inferred_member.is_const_asserted() {
                     return false;
                 }
-                match (
-                    annotated.resolve(&annotated_member.ty),
-                    inferred.resolve(&inferred_member.ty),
-                ) {
-                    (Some(annotated_type), Some(inferred_type)) => {
-                        if types_match(&annotated_type, &inferred_type) {
-                            continue;
-                        }
-                        if is_base_type_of_literal(&annotated_type, &inferred_type) {
-                            has_widening = true;
-                        } else {
-                            stack.push((annotated_type, inferred_type));
-                        }
-                    }
-                    _ => return false,
+                let Some(inferred_type) = inferred.resolve(&inferred_member.ty) else {
+                    return false;
+                };
+                if types_match(&annotated_type, &inferred_type) {
+                    continue;
+                }
+                if is_base_type_of_literal(&annotated_type, &inferred_type) {
+                    has_widening = true;
+                } else {
+                    stack.push((annotated_type, inferred_type));
+                }
+            }
+
+            // Every required named annotation member must be present, otherwise the inferred
+            // value is missing a property and is not merely a widening of the annotation.
+            for annotated_member in annotated_object.members.iter() {
+                let TypeMemberKind::Named(name) = &annotated_member.kind else {
+                    continue;
+                };
+                if !inferred_members
+                    .iter()
+                    .any(|member| member.kind.has_name(name))
+                {
+                    return false;
                 }
             }
         }
@@ -1682,19 +1680,67 @@ fn type_member_affects_instance_shape(member: &biome_js_type_info::TypeMember) -
         && !member.is_index_signature_with_ty(|_| true)
 }
 
-/// Compares non-union type pairs using a work stack. Compound types
-/// (Instance params, Object properties) are decomposed into sub-pairs
-/// and pushed back onto the stack for further comparison.
+/// Outcome of [`compare_nonunion_coverage`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum NonUnionCoverage {
+    /// Annotation is strictly wider (e.g. `string` vs `"hello"`).
+    Wider,
+    /// Decomposed and matched without widening.
+    Matches,
+    /// Shapes incompatible (e.g. tuple vs object).
+    Mismatch,
+    /// Inconclusive (iteration cap or `unknown`): proves neither coverage nor a mismatch.
+    Indeterminate,
+}
+
+/// Returns `true` when the annotation is strictly wider than the inferred type.
 fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
+    matches!(
+        compare_nonunion_coverage(annotated, inferred),
+        NonUnionCoverage::Wider,
+    )
+}
+
+/// `true` if the variant matches or is wider than the inferred type; inconclusive doesn't count.
+fn variant_covers_type(annotated: &Type, inferred: &Type) -> bool {
+    types_match(annotated, inferred)
+        || matches!(
+            compare_nonunion_coverage(annotated, inferred),
+            NonUnionCoverage::Wider | NonUnionCoverage::Matches,
+        )
+}
+
+/// `true` only on an exact match, not when the variant merely widens the inferred type.
+fn variant_matches_without_widening(annotated: &Type, inferred: &Type) -> bool {
+    types_match(annotated, inferred)
+        || matches!(
+            compare_nonunion_coverage(annotated, inferred),
+            NonUnionCoverage::Matches,
+        )
+}
+
+/// `true` only on a definite mismatch; a match, a wider cover, or an inconclusive result are `false`.
+fn variant_definitely_uncovered(annotated: &Type, inferred: &Type) -> bool {
+    !types_match(annotated, inferred)
+        && matches!(
+            compare_nonunion_coverage(annotated, inferred),
+            NonUnionCoverage::Mismatch,
+        )
+}
+
+/// Structurally compares two non-union types with a work stack, decomposing compound
+/// shapes into sub-pairs. See [`NonUnionCoverage`] for the outcomes.
+fn compare_nonunion_coverage(annotated: &Type, inferred: &Type) -> NonUnionCoverage {
     let mut stack: Vec<(Type, Type)> =
         vec![(annotated.clone(), resolve_generic_chain(inferred))];
     let mut found_wider = false;
+    let mut saw_unknown = false;
     let mut iterations = 0usize;
 
     while let Some((ann, inf)) = stack.pop() {
         iterations += 1;
         if iterations > MAX_TYPE_TRAVERSAL_ITERATIONS {
-            return false;
+            return NonUnionCoverage::Indeterminate;
         }
 
         if is_base_type_of_literal(&ann, &inf) {
@@ -1703,6 +1749,26 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
         }
 
         if types_match(&ann, &inf) {
+            continue;
+        }
+
+        // Annotation-side `unknown` covers any value, so the pair matches. Flagging it uncertain
+        // would hide a real extra variant (the `null` in `{ a: string; b: unknown } | null`).
+        if matches!(&*ann, TypeData::UnknownKeyword) {
+            continue;
+        }
+        // Inferred-side or failed-inference `unknown` is neither match nor mismatch; record the
+        // uncertainty and keep scanning so a definite sibling mismatch still wins.
+        if matches!(&*ann, TypeData::Unknown)
+            || matches!(&*inf, TypeData::Unknown | TypeData::UnknownKeyword)
+        {
+            saw_unknown = true;
+            continue;
+        }
+        // A leftover type parameter (alias too deep to monomorphize) is unknown, not a mismatch;
+        // treat it as uncertain so a partial expansion can't invent an extra variant.
+        if matches!(&*ann, TypeData::Generic(_)) || matches!(&*inf, TypeData::Generic(_)) {
+            saw_unknown = true;
             continue;
         }
 
@@ -1717,34 +1783,34 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
                     _ => false,
                 };
                 if !same_base {
-                    return false;
+                    return NonUnionCoverage::Mismatch;
                 }
                 let ann_params = &ann_inst.type_parameters;
                 let inf_params = &inf_inst.type_parameters;
                 if ann_params.len() != inf_params.len() || ann_params.is_empty() {
-                    return false;
+                    return NonUnionCoverage::Mismatch;
                 }
                 for (ann_p, inf_p) in ann_params.iter().zip(inf_params.iter()) {
                     match (ann.resolve(ann_p), inf.resolve(inf_p)) {
                         (Some(a), Some(b)) => stack.push((a, resolve_generic_chain(&b))),
-                        _ => return false,
+                        _ => return NonUnionCoverage::Mismatch,
                     }
                 }
             }
 
             (TypeData::Object(ann_obj), TypeData::Object(inf_obj)) => {
                 if !push_object_pairs(&ann, ann_obj, &inf, inf_obj, &mut stack) {
-                    return false;
+                    return NonUnionCoverage::Mismatch;
                 }
             }
 
             (TypeData::Object(ann_obj), TypeData::Literal(lit)) => match lit.as_ref() {
                 Literal::Object(inf_lit) => {
-                    if !push_object_literal_pairs(&ann, ann_obj, inf_lit, &mut stack) {
-                        return false;
+                    if !push_object_literal_pairs(&ann, ann_obj, &inf, inf_lit, &mut stack) {
+                        return NonUnionCoverage::Mismatch;
                     }
                 }
-                _ => return false,
+                _ => return NonUnionCoverage::Mismatch,
             },
 
             (TypeData::ObjectKeyword, _) if is_strictly_narrower_than_object_keyword(&inf) =>
@@ -1756,25 +1822,44 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
                 let ann_elems = ann_tuple.elements();
                 let inf_elems = inf_tuple.elements();
                 if ann_elems.len() != inf_elems.len() || ann_elems.is_empty() {
-                    return false;
+                    return NonUnionCoverage::Mismatch;
                 }
                 for (ann_e, inf_e) in ann_elems.iter().zip(inf_elems.iter()) {
                     match (ann.resolve(&ann_e.ty), inf.resolve(&inf_e.ty)) {
                         (Some(a), Some(b)) => stack.push((a, resolve_generic_chain(&b))),
-                        _ => return false,
+                        _ => return NonUnionCoverage::Mismatch,
                     }
                 }
             }
 
-            _ => return false,
+            _ => return NonUnionCoverage::Mismatch,
         }
     }
 
-    found_wider
+    if saw_unknown {
+        // A mismatch would have returned early, so a surviving `unknown` means inconclusive.
+        NonUnionCoverage::Indeterminate
+    } else if found_wider {
+        NonUnionCoverage::Wider
+    } else {
+        NonUnionCoverage::Matches
+    }
 }
 
-/// Pushes property type pairs onto the work stack for pairwise comparison.
-/// Also handles index signatures, which arise from `Record<K,V>` annotations.
+/// Whether every member is optional or an index signature, so `{}` satisfies the object
+/// vacuously. Uses the canonical [`TypeMember::is_optional`], not hand-matched member kinds.
+fn object_is_vacuously_satisfiable(object: &biome_js_type_info::Object) -> bool {
+    object.members.iter().all(|member| {
+        member.is_optional()
+            || matches!(
+                member.kind,
+                TypeMemberKind::IndexSignature(_) | TypeMemberKind::ConstAssertedIndexSignature(_)
+            )
+    })
+}
+
+/// Pairs each inferred member with the same-named annotation member, else the index
+/// signature value, else skips it. `false` if a required named annotation member is absent.
 fn push_object_pairs(
     annotated: &Type,
     ann_obj: &biome_js_type_info::Object,
@@ -1782,71 +1867,142 @@ fn push_object_pairs(
     inf_obj: &biome_js_type_info::Object,
     stack: &mut Vec<(Type, Type)>,
 ) -> bool {
-    if ann_obj.members.is_empty() || inf_obj.members.is_empty() {
+    if ann_obj.members.is_empty() {
         return false;
     }
+    if inf_obj.members.is_empty() {
+        // An empty `{}` return satisfies the variant only if it has no required members.
+        return object_is_vacuously_satisfiable(ann_obj);
+    }
 
-    let ann_index_sig = ann_obj.members.iter().find(|m| {
-        matches!(m.kind, TypeMemberKind::IndexSignature(_))
-    });
-    if let Some(sig_member) = ann_index_sig
-        && let Some(sig_value_ty) = annotated.resolve(&sig_member.ty)
-    {
-        for inf_m in inf_obj.members.iter() {
-            match inferred.resolve(&inf_m.ty) {
-                Some(inf_ty) => stack.push((sig_value_ty.clone(), resolve_generic_chain(&inf_ty))),
-                None => return false,
+    let index_signature_value = ann_obj
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::IndexSignature(_)))
+        .and_then(|member| annotated.resolve(&member.ty));
+
+    let mut compared_any = false;
+    for inferred_member in inf_obj.members.iter() {
+        let ann_ty = match inferred_member.kind.name() {
+            Some(name) => {
+                let named_ann_member = ann_obj
+                    .members
+                    .iter()
+                    .find(|member| member.kind.has_name(&name));
+                match named_ann_member {
+                    Some(member) => annotated.resolve(&member.ty),
+                    None => index_signature_value.clone(),
+                }
             }
-        }
-        return true;
+            // Unnamed inferred member = index signature; pair it with the annotation's
+            // index value so `Record<string, string>` vs `Record<string, "x">` compares.
+            None if matches!(
+                inferred_member.kind,
+                TypeMemberKind::IndexSignature(_) | TypeMemberKind::ConstAssertedIndexSignature(_)
+            ) => {
+                index_signature_value.clone()
+            }
+            None => continue,
+        };
+        let Some(ann_ty) = ann_ty else { continue };
+        let Some(inf_ty) = inferred.resolve(&inferred_member.ty) else {
+            return false;
+        };
+        compared_any = true;
+        stack.push((ann_ty, resolve_generic_chain(&inf_ty)));
     }
 
     for ann_member in ann_obj.members.iter() {
         let ann_name = match &ann_member.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name) => name,
+            TypeMemberKind::Named(name) => name,
+            TypeMemberKind::NamedOptional(_) => continue,
             _ => continue,
         };
-        let inf_member = inf_obj.members.iter().find(|m| m.kind.has_name(ann_name));
-        let Some(inf_member) = inf_member else {
+        if !inf_obj
+            .members
+            .iter()
+            .any(|member| member.kind.has_name(ann_name))
+        {
             return false;
-        };
-        match (annotated.resolve(&ann_member.ty), inferred.resolve(&inf_member.ty)) {
-            (Some(a), Some(b)) => stack.push((a, resolve_generic_chain(&b))),
-            _ => return false,
         }
     }
 
-    true
+    // Disjoint objects (no comparable member) are not a match.
+    compared_any
 }
 
+/// Like [`push_object_pairs`] but for an inferred object literal. Inferred members resolve
+/// through `inferred`, not `annotated`, so substituted generic members compare correctly.
 fn push_object_literal_pairs(
     annotated: &Type,
     ann_obj: &biome_js_type_info::Object,
+    inferred: &Type,
     inf_lit: &biome_js_type_info::ObjectLiteral,
     stack: &mut Vec<(Type, Type)>,
 ) -> bool {
-    if ann_obj.members.is_empty() || inf_lit.members().is_empty() {
+    if ann_obj.members.is_empty() {
         return false;
     }
+    if inf_lit.members().is_empty() {
+        // An empty `{}` literal satisfies the variant only if it has no required members.
+        return object_is_vacuously_satisfiable(ann_obj);
+    }
 
-    for ann_member in ann_obj.members.iter() {
-        let ann_name = match &ann_member.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name) => name,
-            _ => continue,
+    let index_signature_value = ann_obj
+        .members
+        .iter()
+        .find(|member| matches!(member.kind, TypeMemberKind::IndexSignature(_)))
+        .and_then(|member| annotated.resolve(&member.ty));
+
+    let mut compared_any = false;
+    for inferred_member in inf_lit.members() {
+        let ann_ty = match inferred_member.kind.name() {
+            Some(name) => {
+                let named_ann_member = ann_obj
+                    .members
+                    .iter()
+                    .find(|member| member.kind.has_name(&name));
+                match named_ann_member {
+                    Some(member) => annotated.resolve(&member.ty),
+                    None => index_signature_value.clone(),
+                }
+            }
+            // An unnamed inferred member is an index signature; pair it
+            // with the annotation's index signature value type.
+            None if matches!(
+                inferred_member.kind,
+                TypeMemberKind::IndexSignature(_) | TypeMemberKind::ConstAssertedIndexSignature(_)
+            ) => {
+                index_signature_value.clone()
+            }
+            None => continue,
         };
-        let inf_member = inf_lit.members().iter().find(|m| m.kind.has_name(ann_name));
-        let Some(inf_member) = inf_member else {
+        let Some(ann_ty) = ann_ty else { continue };
+        let Some(inf_ty) = inferred.resolve(&inferred_member.ty) else {
             return false;
         };
-        match (annotated.resolve(&ann_member.ty), annotated.resolve(&inf_member.ty)) {
-            (Some(a), Some(b)) => stack.push((a, resolve_generic_chain(&b))),
-            _ => return false,
+        compared_any = true;
+        stack.push((ann_ty, resolve_generic_chain(&inf_ty)));
+    }
+
+    // A required annotation member missing from the literal is a shape mismatch.
+    for ann_member in ann_obj.members.iter() {
+        let ann_name = match &ann_member.kind {
+            TypeMemberKind::Named(name) => name,
+            TypeMemberKind::NamedOptional(_) => continue,
+            _ => continue,
+        };
+        if !inf_lit
+            .members()
+            .iter()
+            .any(|member| member.kind.has_name(ann_name))
+        {
+            return false;
         }
     }
 
-    true
+    // Disjoint objects (no comparable member) are not a match.
+    compared_any
 }
 
 /// Checks whether `annotated` is strictly wider than `inferred`.
@@ -1895,7 +2051,7 @@ fn is_union_wider_than_returns(annotated: &Type, returns: &[Type]) -> bool {
     let all_covered = returns.iter().all(|ret| {
         annotated
             .flattened_union_variants()
-            .any(|ann_v| types_match(&ann_v, ret) || is_nonunion_wider(&ann_v, ret))
+            .any(|ann_v| variant_covers_type(&ann_v, ret))
     });
 
     if !all_covered {
@@ -1904,16 +2060,23 @@ fn is_union_wider_than_returns(annotated: &Type, returns: &[Type]) -> bool {
 
     let variants: Vec<Type> = annotated.flattened_union_variants().collect();
 
+    // A variant is "extra" only when every return is a definite mismatch; a timed-out
+    // (`Indeterminate`) return leaves its status unknown, so it never counts as extra.
     let has_extra = variants.iter().any(|ann_v| {
-        !returns
+        returns
             .iter()
-            .any(|ret| types_match(ann_v, ret) || is_nonunion_wider(ann_v, ret))
+            .all(|ret| variant_definitely_uncovered(ann_v, ret))
     });
 
-    // A return already matched directly by another variant is not treated as
-    // misleadingly widened.
+    // A return is not misleadingly widened if some variant matches it exactly or covers it
+    // by benign property-literal widening (the `is_only_property_literal_widening` excuse).
     let has_wider_variant = returns.iter().any(|ret| {
-        !variants.iter().any(|ann_v| types_match(ann_v, ret))
+        !variants
+            .iter()
+            .any(|ann_v| variant_matches_without_widening(ann_v, ret))
+            && !variants
+                .iter()
+                .any(|ann_v| is_only_property_literal_widening(ann_v, std::slice::from_ref(ret)))
             && variants.iter().any(|ann_v| is_nonunion_wider(ann_v, ret))
     });
 
@@ -1928,12 +2091,12 @@ fn is_union_wider(annotated: &Type, inferred: &Type) -> bool {
         inferred.flattened_union_variants().all(|inf_v| {
             annotated
                 .flattened_union_variants()
-                .any(|ann_v| types_match(&ann_v, &inf_v) || is_nonunion_wider(&ann_v, &inf_v))
+                .any(|ann_v| variant_covers_type(&ann_v, &inf_v))
         })
     } else {
         annotated
             .flattened_union_variants()
-            .any(|ann_v| types_match(&ann_v, inferred) || is_nonunion_wider(&ann_v, inferred))
+            .any(|ann_v| variant_covers_type(&ann_v, inferred))
     };
 
     if !all_inferred_covered {
@@ -1956,17 +2119,18 @@ fn is_union_wider(annotated: &Type, inferred: &Type) -> bool {
             {
                 let subsumed = ann_variants.iter().any(|other| {
                     !std::ptr::eq(*ann_v as *const Type, other as *const Type)
-                        && (types_match(other, &constraint)
-                            || is_nonunion_wider(other, &constraint))
+                        && variant_covers_type(other, &constraint)
                 });
                 return !subsumed;
             }
             true
         })
+        // A variant is "extra" only when every inferred variant definitively fails to
+        // cover it; an inconclusive (timed-out) comparison is not such evidence.
         .any(|ann_v| {
-            !inf_variants
+            inf_variants
                 .iter()
-                .any(|inf_v| types_match(ann_v, inf_v) || is_nonunion_wider(ann_v, inf_v))
+                .all(|inf_v| variant_definitely_uncovered(ann_v, inf_v))
         })
 }
 

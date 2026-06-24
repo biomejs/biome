@@ -1519,6 +1519,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "boxcar",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
