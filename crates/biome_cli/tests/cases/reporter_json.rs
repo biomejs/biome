@@ -232,3 +232,58 @@ fn reports_diagnostics_json_with_escaped_quotes() {
         result,
     ));
 }
+
+// A file whose name literally contains backslashes mimics a Windows-style path
+// in `location.path`. The backslashes must be escaped so the report stays valid
+// JSON. See https://github.com/biomejs/biome/issues/9899
+const MAIN_WITH_BACKSLASH_PATH: &str = r#"function NaN() {}"#;
+
+#[test]
+fn reports_diagnostics_json_with_backslash_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new(r"src\app\main.ts");
+    fs.insert(file_path.into(), MAIN_WITH_BACKSLASH_PATH.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--reporter=json-pretty", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_diagnostics_json_with_backslash_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn reports_diagnostics_json_compact_with_backslash_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new(r"src\app\main.ts");
+    fs.insert(file_path.into(), MAIN_WITH_BACKSLASH_PATH.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--reporter=json", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_diagnostics_json_compact_with_backslash_path",
+        fs,
+        console,
+        result,
+    ));
+}

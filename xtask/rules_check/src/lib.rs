@@ -30,7 +30,8 @@ use biome_languages::{
     javascript::{JsEmbeddingKind, JsFileSource},
 };
 use biome_ruledoc_utils::{
-    AnalyzerServicesBuilder, CodeBlock, DiagnosticWriter, OptionsParsingMode, parse_rule_options,
+    AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
+    OptionsParsingMode, parse_rule_options,
 };
 use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
@@ -254,7 +255,7 @@ fn assert_lint(
 
     // Record the diagnostics emitted by the lint rule to later check if
     // what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::default();
+    let mut diagnostics = DiagnosticConsoleWriter::default();
 
     let document_file_source = if rule_language == "html" {
         // HACK: Force HTML analysis for rules that come from the HTML analyzer
@@ -549,6 +550,8 @@ fn parse_documentation(
 ) -> anyhow::Result<()> {
     let parser = Parser::new(rule_metadata.docs);
 
+    let mut diagnostics_writer = DiagnosticConsoleWriter::default();
+
     let mut test_runner = TestRunner::new(group, rule_metadata.name, rule_metadata.language);
 
     // Track the last configuration options block that was encountered
@@ -568,8 +571,14 @@ fn parse_documentation(
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
                     if test.options != OptionsParsingMode::NoOptions {
-                        last_options =
-                            parse_rule_options(group, &rule_metadata, category, &test, &block)?;
+                        last_options = parse_rule_options(
+                            group,
+                            &rule_metadata,
+                            category,
+                            &test,
+                            &block,
+                            &mut diagnostics_writer,
+                        )?;
                     } else {
                         if let Some(file_path) = test.explicit_file_path() {
                             test_runner

@@ -38,8 +38,8 @@ use crate::workspace::{
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
-    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
-    RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
+    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, PLUGIN_GROUP, Queryable,
+    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -1431,6 +1431,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                             self.enabled_rules.extend(selector.as_rule_filters());
                         }
                     }
+                    AnalyzerSelector::Plugin => {}
                 }
             }
         }
@@ -1448,6 +1449,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                             self.disabled_rules.extend(selector.as_rule_filters());
                         }
                     }
+                    AnalyzerSelector::Plugin => {}
                 }
             }
         }
@@ -1633,6 +1635,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
                             self.enabled_rules.extend(domain.as_rule_filters());
                         }
                     }
+                    AnalyzerSelector::Plugin => {}
                 }
             }
         }
@@ -1651,6 +1654,8 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
                             self.disabled_rules.extend(domain.as_rule_filters());
                         }
                     }
+                    // Plugins are lint-only; ignore them for assists.
+                    AnalyzerSelector::Plugin => {}
                 }
             }
         }
@@ -1955,9 +1960,26 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
                     AnalyzerSelector::Domain(domain) => {
                         enabled_rules.extend(domain.as_rule_filters())
                     }
+                    // Plugins are configured through the `plugins` field, not `rules`.
+                    AnalyzerSelector::Plugin => {}
                 }
             }
         }
+
+        // Plugins run by default. Turn them off by adding the reserved `plugin` group to
+        // `disabled_rules`, which `AnalysisFilter::plugins_enabled` reads. Plugins are
+        // disabled when explicitly skipped, or when `--only` restricts the run to other
+        // selectors. `--skip` takes precedence over `--only`, matching rule semantics.
+        let only_excludes_plugins = self
+            .only
+            .is_some_and(|only| !only.is_empty() && !only.contains(&AnalyzerSelector::Plugin));
+        let plugins_skipped = self
+            .skip
+            .is_some_and(|skip| skip.contains(&AnalyzerSelector::Plugin));
+        if only_excludes_plugins || plugins_skipped {
+            disabled_rules.push(RuleFilter::Group(PLUGIN_GROUP));
+        }
+
         let mut syntax = SyntaxVisitor::default();
 
         biome_js_analyze::visit_registry(&mut syntax);

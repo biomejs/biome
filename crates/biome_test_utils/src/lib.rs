@@ -180,7 +180,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
         settings
             .merge_with_configuration(
                 configuration,
@@ -230,7 +230,7 @@ where
         Default::default()
     } else {
         let configuration = loaded_configuration.configuration;
-        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        let mut settings = projects.get_mut_root_settings(key).unwrap_or_default();
         settings
             .merge_with_configuration(
                 configuration,

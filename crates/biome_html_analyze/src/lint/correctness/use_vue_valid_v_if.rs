@@ -86,7 +86,7 @@ impl Rule for UseVueValidVIf {
         match node {
             AnyVueDirective::VueDirective(vue_directive) => {
                 // Check if this is a v-if directive
-                if vue_directive.name_token().ok()?.text_trimmed() != "v-if" {
+                if !vue_directive.is_if() {
                     return None;
                 }
 

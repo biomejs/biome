@@ -197,6 +197,7 @@ pub fn parse_rule_options(
     category: RuleCategory,
     block: &CodeBlock,
     code: &str,
+    diagnostics_writer: &mut dyn DiagnosticWriter,
 ) -> anyhow::Result<Option<Configuration>> {
     let DocumentFileSource::Json(file_source) = block.document_file_source() else {
         bail!(
@@ -205,10 +206,6 @@ pub fn parse_rule_options(
         );
     };
 
-    // Record the diagnostics emitted during configuration parsing to later check
-    // if what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::default();
-
     let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
 
     if parse.has_errors() {
@@ -216,12 +213,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics.write_parse_error(error);
+            diagnostics_writer.write_parse_error(error);
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics();
             bail!("Please fix the parse errors above.");
         };
     }
@@ -318,11 +315,12 @@ pub fn parse_rule_options(
                 .and_then(|v| get_first_member(v, group))
                 .and_then(|v| get_first_member(v, rule_metadata.name))
                 .map(|v| AstNode::range(&v).start());
-            diagnostics.subtract_offset = wrapped_offset
-                .zip(original_offset)
-                .and_then(|(wrapped, original)| wrapped.checked_sub(original))
-                .unwrap_or_default();
-
+            diagnostics_writer.subtract_offset(
+                wrapped_offset
+                    .zip(original_offset)
+                    .and_then(|(wrapped, original)| wrapped.checked_sub(original))
+                    .unwrap_or_default(),
+            );
             synthetic_root
         }
         OptionsParsingMode::FullConfiguration => {
@@ -354,12 +352,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics.write_diagnostic(error);
+            diagnostics_writer.write_diagnostic(error);
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics();
             bail!("Please fix the configuration errors above.");
         };
     }

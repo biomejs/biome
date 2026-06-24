@@ -15758,6 +15758,10 @@
 			"description": "Options for the `useNullishCoalescing` rule.",
 			"type": "object",
 			"properties": {
+				"ignoreBooleanCoercion": {
+					"description": "Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).",
+					"type": ["boolean", "null"]
+				},
 				"ignoreConditionalTests": {
 					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
 					"type": ["boolean", "null"]

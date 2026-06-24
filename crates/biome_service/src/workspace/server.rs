@@ -1579,14 +1579,17 @@ impl Workspace for WorkspaceServer {
             if let Some(workspace_directory) = &workspace_directory {
                 self.projects
                     .get_nested_settings(project_key, workspace_directory.as_path())
+                    .map(|settings| (*settings).clone())
                     .unwrap_or_default()
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }
         } else {
-            self.projects
+            (*self
+                .projects
                 .get_root_settings(project_key)
-                .ok_or_else(WorkspaceError::no_project)?
+                .ok_or_else(WorkspaceError::no_project)?)
+            .clone()
         };
         settings.module_graph_resolution_kind = module_graph_resolution_kind;
 
@@ -1626,7 +1629,7 @@ impl Workspace for WorkspaceServer {
             self.projects.set_nested_settings(
                 project_key,
                 nested_workspace_directory.clone(),
-                settings,
+                settings.clone(),
             );
             self.refresh_pnpm_workspace_catalogs_for_scope(
                 project_key,
@@ -3183,12 +3186,12 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             .projects
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
-        let mut settings = self
+        let settings = self
             .projects
             .get_root_settings(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let vcs_settings = &mut settings.vcs_settings;
+        let vcs_settings = &settings.vcs_settings;
 
         if !vcs_settings.is_enabled() || !vcs_settings.should_use_ignore_file() {
             return Ok(());
@@ -3199,6 +3202,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
             project_path.as_path() != path.parent().unwrap()
         });
+
+        let mut payload = vec![];
         for path in filtered_paths {
             let is_in_project_path = path.starts_with(&project_path);
 
@@ -3207,12 +3212,13 @@ impl WorkspaceScannerBridge for WorkspaceServer {
 
             if vcs_settings.is_ignore_file(path) && is_in_project_path {
                 let content = self.fs.read_file_from_path(path)?;
-                let patterns = content.lines().collect::<Vec<_>>();
-                vcs_settings.store_nested_ignore_patterns(dir_ignore_file, patterns.as_slice())?;
+                let patterns = content.lines().map(String::from).collect::<Vec<_>>();
+                payload.push((dir_ignore_file.to_path_buf(), patterns));
             }
         }
 
-        self.projects.set_root_settings(project_key, settings);
+        self.projects
+            .store_nested_ignore_patterns(project_key, payload)?;
 
         Ok(())
     }

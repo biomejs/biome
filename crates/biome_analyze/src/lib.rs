@@ -809,6 +809,9 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
 
 type SignalHandler<'a, L, Break> = &'a mut dyn FnMut(&dyn AnalyzerSignal<L>) -> ControlFlow<Break>;
 
+/// Reserved group name used to select analyzer plugins through [RuleFilter::Group].
+pub const PLUGIN_GROUP: &str = "plugin";
+
 /// Allow filtering a single rule or group of rules by their names
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum RuleFilter<'a> {
@@ -930,6 +933,15 @@ impl<'analysis> AnalysisFilter<'analysis> {
                 .iter()
                 .any(|filter| filter.match_rule::<R>())
     }
+
+    /// Return `true` if analyzer plugins match this filter.
+    pub fn match_plugins(&self) -> bool {
+        self.categories.is_lint()
+            && !self
+                .disabled_rules
+                .iter()
+                .any(|filter| matches!(filter, RuleFilter::Group(group) if *group == PLUGIN_GROUP))
+    }
 }
 
 /// Utility type to be used as a default value for the `B` generic type on
@@ -959,3 +971,50 @@ pub enum Never {}
 /// (`Option<Never>` has a size of 0 and can be elided, while `Option<()>` has
 /// a size of 1 as it still need to store a discriminant)
 pub type ControlFlow<B = Never> = ops::ControlFlow<B>;
+
+#[cfg(test)]
+mod tests {
+    use crate::{AnalysisFilter, PLUGIN_GROUP, RuleCategories, RuleCategory, RuleFilter};
+
+    fn lint_filter<'a>(
+        enabled: Option<&'a [RuleFilter<'a>]>,
+        disabled: &'a [RuleFilter<'a>],
+    ) -> AnalysisFilter<'a> {
+        AnalysisFilter {
+            categories: RuleCategories::all(),
+            enabled_rules: enabled,
+            disabled_rules: disabled,
+            range: None,
+        }
+    }
+
+    #[test]
+    fn plugins_match_by_default() {
+        // Normal run: rules are enabled by config, plugins are not in `disabled_rules`.
+        let enabled = [RuleFilter::Rule("suspicious", "noDebugger")];
+        assert!(lint_filter(Some(&enabled), &[]).match_plugins());
+        assert!(lint_filter(None, &[]).match_plugins());
+    }
+
+    #[test]
+    fn plugins_do_not_match_when_group_is_disabled() {
+        // The caller adds the reserved `plugin` group to `disabled_rules` when `--only`
+        // excludes plugins or `--skip=plugin` is used.
+        let disabled = [RuleFilter::Group(PLUGIN_GROUP)];
+        assert!(!lint_filter(None, &disabled).match_plugins());
+
+        // Disabling wins even if the group also appears in `enabled_rules`.
+        let enabled = [RuleFilter::Group(PLUGIN_GROUP)];
+        assert!(!lint_filter(Some(&enabled), &disabled).match_plugins());
+    }
+
+    #[test]
+    fn plugins_do_not_match_outside_lint() {
+        // Plugins are lint diagnostics; an assist-only pass must not run them.
+        let filter = AnalysisFilter {
+            categories: RuleCategories::from(RuleCategory::Action),
+            ..AnalysisFilter::default()
+        };
+        assert!(!filter.match_plugins());
+    }
+}
