@@ -410,7 +410,7 @@ impl Rule for NoUnusedVariables {
         // suppress every diagnostic. Template usage is handled by the
         // reference check below.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
-            && embedded_bindings.contains_binding(binding_name)
+            && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))

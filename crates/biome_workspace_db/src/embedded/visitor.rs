@@ -1,11 +1,12 @@
 use crate::embedded::bindings::EmbeddedBinding;
-use crate::embedded::references::EmbeddedValueReference;
+use crate::embedded::references::{EmbeddedTypeReference, EmbeddedValueReference};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
-    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding, AnySvelteBlock,
-    AnySvelteBlockItem, AnySvelteDestructuredName, AnySvelteEachName, AnyVueVForBinding,
-    AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement, HtmlRoot,
-    HtmlSelfClosingElement, VueVForIdentifierBinding, VueVForValue,
+    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
+    AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
+    AnySvelteDirective, AnySvelteEachName, AnyVueVForBinding, AnyVueVForBindingListElement,
+    AnyVueVForDestructuredBinding, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
+    VueVForIdentifierBinding, VueVForValue,
 };
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -114,11 +115,45 @@ pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
     file: ParsedSource,
 ) -> Vec<Vec<EmbeddedValueReference>> {
-    let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
+    let Some(builder) = collect_embedded_references(db, file) else {
         return Vec::new();
     };
 
-    let mut references = Vec::new();
+    vec![
+        builder
+            .value_references
+            .into_iter()
+            .map(|(range, text)| EmbeddedValueReference { range, text })
+            .collect(),
+    ]
+}
+
+#[salsa::tracked(returns(ref))]
+pub fn embedded_type_references_from_source(
+    db: &dyn LanguageDb,
+    file: ParsedSource,
+) -> Vec<Vec<EmbeddedTypeReference>> {
+    let Some(builder) = collect_embedded_references(db, file) else {
+        return Vec::new();
+    };
+
+    vec![
+        builder
+            .type_references
+            .into_iter()
+            .map(|(range, text)| EmbeddedTypeReference { range, text })
+            .collect(),
+    ]
+}
+
+fn collect_embedded_references(
+    db: &dyn LanguageDb,
+    file: ParsedSource,
+) -> Option<EmbeddedReferencesBuilder> {
+    let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
+        return None;
+    };
+
     let mut builder = EmbeddedReferencesBuilder::new();
 
     for snippet in file.snippets(db) {
@@ -137,17 +172,10 @@ pub fn embedded_references_from_source(
         && html_file_source.supports_components()
     {
         let html_root: HtmlRoot = file.parsed(db).tree();
-        builder.visit_html_root(&html_root);
+        builder.visit_html_root(&html_root, &html_file_source);
     }
 
-    references.push(
-        builder
-            .references
-            .into_iter()
-            .map(|(range, text)| EmbeddedValueReference { range, text })
-            .collect(),
-    );
-    references
+    Some(builder)
 }
 
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
@@ -1058,18 +1086,24 @@ impl EmbeddedBindingsBuilder {
 
 #[derive(Debug)]
 struct EmbeddedReferencesBuilder {
-    references: Vec<(TextRange, TokenText)>,
+    value_references: Vec<(TextRange, TokenText)>,
+    type_references: Vec<(TextRange, TokenText)>,
 }
 
 impl EmbeddedReferencesBuilder {
     fn new() -> Self {
         Self {
-            references: Vec::default(),
+            value_references: Vec::default(),
+            type_references: Vec::default(),
         }
     }
 
     fn register_reference(&mut self, range: TextRange, text: TokenText) {
-        self.references.push((range, text));
+        self.value_references.push((range, text));
+    }
+
+    fn register_type_reference(&mut self, range: TextRange, text: TokenText) {
+        self.type_references.push((range, text));
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot) {
@@ -1091,7 +1125,8 @@ impl EmbeddedReferencesBuilder {
         }
     }
 
-    fn visit_html_root(&mut self, root: &HtmlRoot) {
+    fn visit_html_root(&mut self, root: &HtmlRoot, file_source: &HtmlFileSource) {
+        let is_svelte = file_source.is_svelte();
         for node in root.syntax().descendants() {
             if let Some(element) = HtmlElement::cast_ref(&node) {
                 self.visit_html_element(&element);
@@ -1100,7 +1135,49 @@ impl EmbeddedReferencesBuilder {
             if let Some(element) = HtmlSelfClosingElement::cast_ref(&node) {
                 self.visit_html_self_closing_element(&element);
             }
+
+            if is_svelte && let Some(directive) = AnySvelteDirective::cast_ref(&node) {
+                self.register_svelte_directive_reference(&directive);
+            }
         }
+    }
+
+    fn register_svelte_directive_reference(
+        &mut self,
+        directive: &AnySvelteDirective,
+    ) -> Option<()> {
+        let value = match directive {
+            AnySvelteDirective::SvelteUseDirective(directive) => directive.value().ok()?,
+            AnySvelteDirective::SvelteTransitionDirective(directive) => directive.value().ok()?,
+            AnySvelteDirective::SvelteInDirective(directive) => directive.value().ok()?,
+            AnySvelteDirective::SvelteOutDirective(directive) => directive.value().ok()?,
+            AnySvelteDirective::SvelteAnimateDirective(directive) => directive.value().ok()?,
+            AnySvelteDirective::SvelteBindDirective(directive) => {
+                let value = directive.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
+            AnySvelteDirective::SvelteStyleDirective(_)
+            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+        };
+
+        self.register_svelte_binding_property(value.property().ok())
+    }
+
+    fn register_svelte_binding_property(
+        &mut self,
+        property: Option<AnySvelteBindingProperty>,
+    ) -> Option<()> {
+        let token = match property? {
+            AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
+            AnySvelteBindingProperty::SvelteMemberProperty(_)
+            | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+        };
+
+        self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
     }
 
     fn visit_html_element(&mut self, element: &HtmlElement) -> Option<()> {
@@ -1171,14 +1248,18 @@ impl EmbeddedReferencesBuilder {
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
-        if usage.is_only_type() {
-            return None;
-        }
         let name_token = reference.value_token().ok()?;
-        self.register_reference(
-            name_token.text_trimmed_range(),
-            name_token.token_text_trimmed(),
-        );
+        if usage.is_only_type() {
+            self.register_type_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
+        } else {
+            self.register_reference(
+                name_token.text_trimmed_range(),
+                name_token.token_text_trimmed(),
+            );
+        }
         Some(())
     }
 

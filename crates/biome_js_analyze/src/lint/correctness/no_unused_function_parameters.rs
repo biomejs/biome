@@ -1,4 +1,4 @@
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -136,9 +136,9 @@ impl Rule for NoUnusedFunctionParameters {
         let ignore_rest_siblings = ctx.options().ignore_rest_siblings();
 
         let name = binding.name_token().ok()?;
-        let name = name.text_trimmed();
+        let name_text = name.text_trimmed();
 
-        if name.starts_with('_') {
+        if name_text.starts_with('_') {
             return None;
         }
 
@@ -147,8 +147,8 @@ impl Rule for NoUnusedFunctionParameters {
         // template is a separate parse with no shared symbols, so a name clash
         // can hide a real unused parameter — a false negative, never a false
         // positive on a used one.
-        if let Some(refs) = ctx.get_service::<EmbeddedValueReferences>()
-            && refs.is_used(name)
+        if let Some(embedded) = ctx.get_service::<EmbeddedService>()
+            && embedded.is_used(name.token_text_trimmed())
         {
             return None;
         }

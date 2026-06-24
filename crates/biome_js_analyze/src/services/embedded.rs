@@ -4,7 +4,9 @@ use biome_rowan::TokenText;
 use biome_workspace_db::embedded::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
-use biome_workspace_db::embedded::references::{InternedReference, is_value_reference_used};
+use biome_workspace_db::embedded::references::{
+    InternedReference, is_reference_used, is_type_reference_used, is_value_reference_used,
+};
 use camino::Utf8PathBuf;
 use std::rc::Rc;
 
@@ -37,6 +39,20 @@ impl EmbeddedService {
 
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         is_value_reference_used(
+            self.db.as_ref(),
+            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+        )
+    }
+
+    pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
+        is_type_reference_used(
+            self.db.as_ref(),
+            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+        )
+    }
+
+    pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
+        is_reference_used(
             self.db.as_ref(),
             InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
         )
