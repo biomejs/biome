@@ -117,6 +117,22 @@ declare_source_rule! {
     /// <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">Hello, world!</textarea>
     /// ```
     ///
+    /// ### `sortFirst`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. Listed attributes take precedence over the category-based ordering.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortFirst": ["type"]
+    ///     }
+    /// }
+    /// ```
+    /// ```html,use_options,expect_diagnostic
+    /// <input id="name" name="name" type="text" />
+    /// ```
+    ///
     pub UseSortedAttributes {
         version: "next",
         name: "useSortedAttributes",
@@ -140,8 +156,12 @@ impl Rule for UseSortedAttributes {
         let mut current_attr_group = AttributeGroup::default();
         let mut attr_groups = Vec::new();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = get_comparator(sort_by);
+        let base = get_comparator(sort_by);
+        let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
+        };
 
         // Convert to boolean-based comparator for is_sorted_by
         let boolean_comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
@@ -202,8 +222,12 @@ impl Rule for UseSortedAttributes {
         let mut mutation = ctx.root().begin();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = get_comparator(sort_by);
+        let base = get_comparator(sort_by);
+        let comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
+        };
 
         for (SortableHtmlAttribute(attr), SortableHtmlAttribute(sorted_attr)) in
             zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)

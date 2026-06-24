@@ -38,6 +38,27 @@ pub trait SortableAttribute {
             (None, None) => Ordering::Equal,
         }
     }
+
+    fn sort_first_index(&self, sort_first: &[Box<str>]) -> usize {
+        self.name()
+            .and_then(|name| {
+                sort_first
+                    .iter()
+                    .position(|listed| listed.as_ref() == name.text_trimmed())
+            })
+            .unwrap_or(sort_first.len())
+    }
+
+    fn cmp_sort_first(
+        &self,
+        other: &Self,
+        sort_first: &[Box<str>],
+        base: impl Fn(&Self, &Self) -> Ordering,
+    ) -> Ordering {
+        self.sort_first_index(sort_first)
+            .cmp(&other.sort_first_index(sort_first))
+            .then_with(|| base(self, other))
+    }
 }
 
 #[derive(Clone)]
