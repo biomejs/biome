@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+function Component() {
+    return (
+        <div>
+            <div>
+                <div>
+                    <div>
+                        <div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <div>
+                                            <div>
+                                                <div>
+                                                    <span>Too deeply nested!</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:14:49 lint/nursery/noExcessiveNestedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX element is nested too deeply.
+  
+    12 │                                         <div>
+    13 │                                             <div>
+  > 14 │                                                 <div>
+       │                                                 ^^^^^
+  > 15 │                                                     <span>Too deeply nested!</span>
+  > 16 │                                                 </div>
+       │                                                 ^^^^^^
+    17 │                                             </div>
+    18 │                                         </div>
+  
+  i Elements nested 11 levels deep are harder to read and maintain. The configured maximum is 10.
+  
+  i Extract deeply nested JSX into separate components to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+function Component() {
+    return (
+        <a>
+            <b1>
+                <c1>
+                    <d1>
+                        <span>D1 child (suppressed)</span>
+                    </d1>
+                    <d2>
+                        <span>D2 child (suppressed)</span>
+                    </d2>
+                </c1>
+            </b1>
+        </a>
+    );
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:7:21 lint/nursery/noExcessiveNestedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX element is nested too deeply.
+  
+     5 │             <b1>
+     6 │                 <c1>
+   > 7 │                     <d1>
+       │                     ^^^^
+   > 8 │                         <span>D1 child (suppressed)</span>
+   > 9 │                     </d1>
+       │                     ^^^^^
+    10 │                     <d2>
+    11 │                         <span>D2 child (suppressed)</span>
+  
+  i Elements nested 4 levels deep are harder to read and maintain. The configured maximum is 3.
+  
+  i Extract deeply nested JSX into separate components to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:21 lint/nursery/noExcessiveNestedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX element is nested too deeply.
+  
+     8 │                         <span>D1 child (suppressed)</span>
+     9 │                     </d1>
+  > 10 │                     <d2>
+       │                     ^^^^
+  > 11 │                         <span>D2 child (suppressed)</span>
+  > 12 │                     </d2>
+       │                     ^^^^^
+    13 │                 </c1>
+    14 │             </b1>
+  
+  i Elements nested 4 levels deep are harder to read and maintain. The configured maximum is 3.
+  
+  i Extract deeply nested JSX into separate components to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
