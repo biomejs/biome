@@ -51,8 +51,9 @@ use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
 use inline::EmphasisContext;
 use link_block::{at_link_block, parse_link_block};
 use list::{
-    at_bullet_list_item, at_order_list_item, marker_followed_by_whitespace_or_eol,
-    parse_bullet_list_item, parse_order_list_item, textual_starts_with_ordered_marker,
+    at_bullet_list_item, at_order_list_item, at_sibling_list_marker,
+    marker_followed_by_whitespace_or_eol, parse_bullet_list_item, parse_order_list_item,
+    textual_starts_with_ordered_marker,
 };
 use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
@@ -1842,6 +1843,13 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
                 return true;
             }
             if at_order_list_item(p) && can_ordered_marker_interrupt_paragraph(p) {
+                return true;
+            }
+            // Siblings sit at the enclosing item's marker indent, which can
+            // fall below its content indent when the marker is followed by more
+            // than one space or a tab. Check there too, so they aren't absorbed
+            // as lazy paragraph continuation.
+            if at_sibling_list_marker(p) {
                 return true;
             }
         }
