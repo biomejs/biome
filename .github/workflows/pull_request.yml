@@ -99,7 +99,14 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run tests
+      - name: Run tests on ${{ matrix.os }}
+        if: matrix.os == 'depot-windows-2022-16'
+        env:
+          CARGO_PROFILE_TEST_DEBUG: "0"
+          CARGO_INCREMENTAL: "0"
+        run: cargo test --workspace --features=js_plugin
+      - name: Run tests on ${{ matrix.os }}
+        if: matrix.os != 'depot-windows-2022-16'
         run: cargo test --workspace --features=js_plugin
 
   e2e-tests:
