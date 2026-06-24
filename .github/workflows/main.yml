@@ -108,6 +108,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests on ${{ matrix.os }}
+        if: matrix.os == 'depot-windows-2022-16'
+        env:
+          CARGO_PROFILE_TEST_DEBUG: "0"
+          CARGO_INCREMENTAL: "0"
         run: cargo test --workspace --features=js_plugin
 
   coverage:
