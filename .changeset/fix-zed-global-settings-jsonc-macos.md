@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed Biome reporting parse errors for comments and trailing commas in Zed's global settings file (`~/.config/zed/settings.json`) on macOS and Windows. Biome's scanner resolved Zed's config directory using platform conventions, but Zed uses `~/.config/zed` on macOS and `%APPDATA%\Zed` on Windows, so the file is now correctly recognized as JSONC.
+Fixed an issue where Biome was resolving [the well-known Zed settings file](https://biomejs.dev/guides/configure-biome/#well-known-files) from the wrong location on macOS and Windows. 
