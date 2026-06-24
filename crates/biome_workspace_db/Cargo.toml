@@ -1,0 +1,30 @@
+[package]
+name                 = "biome_workspace_db"
+version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "The Biome Database"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+
+[dependencies]
+biome_db           = { workspace = true }
+biome_html_syntax  = { workspace = true }
+biome_js_syntax    = { workspace = true }
+biome_languages    = { workspace = true }
+biome_module_graph = { workspace = true }
+biome_rowan        = { workspace = true }
+boxcar             = { workspace = true }
+camino             = { workspace = true }
+papaya             = { workspace = true }
+salsa              = { workspace = true }
+
+[dev-dependencies]
+biome_html_parser = { path = "../biome_html_parser" }
+biome_js_parser   = { path = "../biome_js_parser", features = ["tests"] }
+
+[lints]
+workspace = true

@@ -33,6 +33,7 @@ camino               = { workspace = true }
 crossbeam            = { workspace = true }
 futures              = "0.3.32"
 papaya               = { workspace = true }
+parking_lot          = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

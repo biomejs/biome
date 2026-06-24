@@ -2,7 +2,6 @@ use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoK
 use biome_db::Db;
 use camino::{Utf8Path, Utf8PathBuf};
 
-pub mod project_database;
 pub mod queries;
 
 /// Extends `Db` with module-graph-specific lookups.

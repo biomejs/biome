@@ -3,19 +3,60 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleFilter,
 };
+use biome_db::ParsedSource;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
-use biome_js_parser::{JsParserOptions, parse};
+use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_languages::JsFileSource;
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
+use std::rc::Rc;
 use std::slice;
 use std::sync::Arc;
+
+#[salsa::db]
+#[derive(Default)]
+struct TestDb {
+    parsed: Option<ParsedSource>,
+    storage: Storage<Self>,
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
+    let mut db = TestDb::default();
+    let parsed = ParsedSource::new(
+        &db,
+        Utf8PathBuf::new(),
+        parsed.syntax().as_send().unwrap().into(),
+        0,
+        vec![],
+    );
+    db.parsed = Some(parsed);
+    Rc::new(db)
+}
 
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
     let manifest = PackageJson::default().with_dependencies(dependencies);
@@ -62,13 +103,12 @@ fn quick_test() {
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let db = module_graph_for_test_file(file_path.as_path(), project_layout.as_ref());
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-    let services = crate::JsAnalyzerServices::from((
-        module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
-        project_layout,
-        JsFileSource::tsx(),
-        Some(semantic_model),
-    ));
+    let services =
+        crate::JsAnalyzerServices::from((db.rc_module_db(), project_layout, JsFileSource::tsx()))
+            .with_semantic_model(&semantic_model)
+            .with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),
@@ -132,7 +172,7 @@ function App() {
         );
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
-    let services = JsAnalyzerServices::default();
+    let services = JsAnalyzerServices::default().with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),

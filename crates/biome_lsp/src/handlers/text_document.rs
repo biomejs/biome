@@ -66,7 +66,7 @@ pub(crate) async fn did_open(
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
-        editor_features: Some(session.extension_settings.read().unwrap().editor_features()),
+        editor_features: Some(session.extension_settings.read().editor_features()),
     })?;
 
     session.insert_document(url.clone(), doc);

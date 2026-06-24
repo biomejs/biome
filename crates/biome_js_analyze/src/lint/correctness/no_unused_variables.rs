@@ -1,6 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -373,12 +372,9 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
-        let embedded_bindings = ctx
-            .get_service::<EmbeddedBindings>()
-            .expect("embedded bindings service");
-        let embedded_references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded references service");
+        let embedded = ctx
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
 
         let file_source = ctx.source_type::<JsFileSource>();
 
@@ -403,8 +399,9 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        let binding_name = binding.name_token().ok()?;
-        let binding_name = binding_name.text_trimmed();
+        let binding_name_token = binding.name_token().ok()?;
+        let binding_name = binding_name_token.text_trimmed();
+        let binding_token_text = binding_name_token.token_text_trimmed();
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
@@ -413,7 +410,7 @@ impl Rule for NoUnusedVariables {
         // suppress every diagnostic. Template usage is handled by the
         // reference check below.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
-            && embedded_bindings.contains_binding(binding_name)
+            && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
@@ -427,7 +424,7 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded_references.is_used(binding_name);
+        let is_used_as_reference = embedded.is_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;

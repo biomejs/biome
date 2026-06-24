@@ -1,7 +1,7 @@
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
-    services::embedded_value_references::EmbeddedValueReferences,
+    services::embedded::EmbeddedService,
     services::semantic::Semantic,
 };
 use biome_analyze::{
@@ -189,8 +189,8 @@ impl Rule for UseImportType {
         }
         let model = ctx.model();
         let references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded value references service");
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
@@ -822,13 +822,15 @@ pub enum ImportTypeFix {
 fn is_only_used_as_type(
     model: &SemanticModel,
     binding: &JsIdentifierBinding,
-    references: &EmbeddedValueReferences,
+    references: &EmbeddedService,
 ) -> bool {
-    let name = binding.name_token().ok();
-    let name_str = name.as_ref().map(|t| t.text_trimmed());
+    let name = binding.name_token().ok().map(|token| token.token_text_trimmed());
 
     // Used as a value in the template → not type-only.
-    if name_str.is_some_and(|n| references.is_used_as_value(n)) {
+    if name
+        .as_ref()
+        .is_some_and(|name| references.is_used_as_value(name.clone()))
+    {
         return false;
     }
 
@@ -849,7 +851,7 @@ fn is_only_used_as_type(
     }
 
     // No script references: type-only if the template uses it as a type.
-    name_str.is_some_and(|n| references.is_used_as_type(n))
+    name.is_some_and(|name| references.is_used_as_type(name))
 }
 
 #[derive(Debug)]
@@ -864,7 +866,7 @@ fn named_import_type_fix(
     model: &SemanticModel,
     named_specifiers: &JsNamedImportSpecifiers,
     has_type_token: bool,
-    value_refs: &EmbeddedValueReferences,
+    value_refs: &EmbeddedService,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {
