@@ -96,30 +96,25 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         //  c {}
         let force_flat = self.options.force_flat || has_trailing_separator_line_comment(node);
         let child_options = ComplexSelectorOptions { force_flat };
+        let should_flatten = (has_leading_comments && !is_selector_list_first_child) || force_flat;
+        let selector_separator = format_once(|f| {
+            if should_flatten {
+                write!(f, [space()])
+            } else {
+                write!(f, [soft_line_break_or_space()])
+            }
+        });
 
-        if (has_leading_comments && !is_selector_list_first_child) || force_flat {
-            write!(
-                f,
-                [
-                    format_selector(&left, child_options),
-                    space(),
-                    formatted_combinator,
-                    space(),
-                    format_selector(&right, child_options)
-                ]
-            )
-        } else {
-            write!(
-                f,
-                [
-                    format_selector(&left, child_options),
-                    soft_line_break_or_space(),
-                    formatted_combinator,
-                    space(),
-                    format_selector(&right, child_options)
-                ]
-            )
-        }
+        write!(
+            f,
+            [
+                format_selector(&left, child_options),
+                selector_separator,
+                formatted_combinator,
+                space(),
+                format_selector(&right, child_options)
+            ]
+        )
     }
 }
 
