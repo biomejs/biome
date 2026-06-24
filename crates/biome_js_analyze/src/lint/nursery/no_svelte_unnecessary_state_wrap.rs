@@ -4,9 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsCallExpression, JsFileSource, JsImport,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsCallExpression, JsImport,
     JsVariableDeclarator,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions;
 
@@ -158,7 +159,8 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         }
 
         // Callee must be the `$state` rune.
-        let callee_ident = call.callee().ok()?.as_js_identifier_expression()?;
+        let callee = call.callee().ok()?;
+        let callee_ident = callee.as_js_identifier_expression()?;
         if callee_ident.name().ok()?.value_token().ok()?.text_trimmed() != "$state" {
             return None;
         }
