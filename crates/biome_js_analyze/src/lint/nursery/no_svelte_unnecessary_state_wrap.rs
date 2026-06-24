@@ -158,9 +158,7 @@ impl Rule for NoSvelteUnnecessaryStateWrap {
         }
 
         // Callee must be the `$state` rune.
-        let AnyJsExpression::JsIdentifierExpression(callee_ident) = call.callee().ok()? else {
-            return None;
-        };
+        let callee_ident = call.callee().ok()?.as_js_identifier_expression()?;
         if callee_ident.name().ok()?.value_token().ok()?.text_trimmed() != "$state" {
             return None;
         }
