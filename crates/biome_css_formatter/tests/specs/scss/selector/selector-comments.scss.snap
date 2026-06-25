@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/selector/selector-comments.scss
+---
+
+# Input
+
+```scss
+[href]:hover &,// hover
+[href]:focus &,// focus
+[href]:active &{.tooltip{opacity:1;}}
+
+.powerPathNavigator .helm button.pressedButton,// pressed
+.powerPathNavigator .helm button:active:not(.disabledButton){}
+
+```
+
+
+# Formatted
+
+```scss
+[href]:hover &, // hover
+[href]:focus &, // focus
+[href]:active & {
+	.tooltip {
+		opacity: 1;
+	}
+}
+
+.powerPathNavigator .helm button.pressedButton, // pressed
+.powerPathNavigator .helm button:active:not(.disabledButton) {
+}
+
+```
