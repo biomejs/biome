@@ -7772,7 +7772,7 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"resolvePath\": \"config\" }\n  ]\n}\n```",
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolvePath\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
 				{ "description": "A plain path to the plugin.", "type": "string" },
 				{
@@ -7784,9 +7784,9 @@
 		"PluginResolvePath": {
 			"oneOf": [
 				{
-					"description": "Resolve relative paths from the consuming workspace.",
+					"description": "Resolve relative paths from the consuming project.",
 					"type": "string",
-					"const": "workspace"
+					"const": "project"
 				},
 				{
 					"description": "Resolve relative paths from the configuration file that declared the plugin.",
@@ -7806,7 +7806,7 @@
 				},
 				"path": { "description": "The path to the plugin.", "type": "string" },
 				"resolvePath": {
-					"description": "Controls how relative plugin paths are resolved.",
+					"description": "Controls how plugin paths are resolved.\n\nWhen omitted, relative plugin paths are resolved from the consuming\nproject.",
 					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
 				}
 			},
