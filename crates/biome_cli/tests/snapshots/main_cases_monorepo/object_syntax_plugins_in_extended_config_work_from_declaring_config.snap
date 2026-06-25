@@ -1,0 +1,61 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 549
+expression: redactor(content)
+---
+## `packages/mobile/biome.json`
+
+```json
+{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }
+```
+
+## `biome.json`
+
+```json
+{ "root": true }
+```
+
+## `packages/mobile/src/file.js`
+
+```js
+Object.assign({}, a, b);
+
+```
+
+## `packages/tools/biome-plugins/no-object-assign.grit`
+
+```grit
+`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}
+```
+
+## `packages/tools/biome.shared.jsonc`
+
+```jsonc
+{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }
+```
+
+# Emitted Messages
+
+```block
+packages/mobile/src/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer object spread instead of Object.assign()
+  
+  > 1 │ Object.assign({}, a, b);
+      │ ^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

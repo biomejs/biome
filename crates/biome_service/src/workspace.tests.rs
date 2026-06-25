@@ -926,6 +926,7 @@ fn correctly_scope_plugin_with_includes() {
                             biome_glob::NormalizedGlob::from_str("**/src/**/*.ts").unwrap(),
                             biome_glob::NormalizedGlob::from_str("!**/*.test.ts").unwrap(),
                         ]),
+                        resolve_path: None,
                     },
                 )])),
                 ..Default::default()
