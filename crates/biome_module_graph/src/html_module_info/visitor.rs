@@ -71,11 +71,7 @@ impl<'a> HtmlModuleVisitor<'a> {
                 continue;
             };
             if let Some(element) = HtmlElement::cast(node.clone()) {
-                self.visit_html_element(
-                    element,
-                    &mut referenced_classes,
-                    &mut imported_stylesheets,
-                );
+                self.visit_html_element(element, &mut referenced_classes);
             } else if let Some(element) = HtmlSelfClosingElement::cast(node) {
                 self.visit_self_closing_element(
                     element,
@@ -172,7 +168,6 @@ impl<'a> HtmlModuleVisitor<'a> {
         &self,
         element: HtmlElement,
         referenced_classes: &mut Vec<CssClassReference>,
-        _imported_stylesheets: &mut Vec<ResolvedPath>,
     ) {
         let Ok(opening) = element.opening_element() else {
             return;
