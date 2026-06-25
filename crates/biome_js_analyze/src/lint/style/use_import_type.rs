@@ -1,7 +1,7 @@
 use crate::{
     JsRuleAction,
     react::{ReactLibrary, is_global_react_import, is_jsx_factory_import},
-    services::embedded_value_references::EmbeddedValueReferences,
+    services::embedded::EmbeddedService,
     services::semantic::Semantic,
 };
 use biome_analyze::{
@@ -189,8 +189,8 @@ impl Rule for UseImportType {
         }
         let model = ctx.model();
         let references = ctx
-            .get_service::<EmbeddedValueReferences>()
-            .expect("embedded value references service");
+            .get_service::<EmbeddedService>()
+            .expect("embedded service");
         let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
@@ -822,26 +822,36 @@ pub enum ImportTypeFix {
 fn is_only_used_as_type(
     model: &SemanticModel,
     binding: &JsIdentifierBinding,
-    references: &EmbeddedValueReferences,
+    references: &EmbeddedService,
 ) -> bool {
-    // First check if the binding is used as a value in embedded non-source snippets (templates)
-    if let Ok(name_token) = binding.name_token()
-        && references.is_used_as_value(name_token.text_trimmed())
+    let name = binding.name_token().ok().map(|token| token.token_text_trimmed());
+
+    // Used as a value in the template → not type-only.
+    if name
+        .as_ref()
+        .is_some_and(|name| references.is_used_as_value(name.clone()))
     {
         return false;
     }
 
-    // Then check semantic model for type-only usage
-    let mut result = false;
+    let mut has_reference = false;
+    let mut all_type_only = true;
     for reference in binding.all_references(model) {
-        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax()) {
-            result = reference.is_only_type();
-            if !result {
-                break;
-            }
+        has_reference = true;
+        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax())
+            && !reference.is_only_type()
+        {
+            all_type_only = false;
+            break;
         }
     }
-    result
+
+    if has_reference {
+        return all_type_only;
+    }
+
+    // No script references: type-only if the template uses it as a type.
+    name.is_some_and(|name| references.is_used_as_type(name))
 }
 
 #[derive(Debug)]
@@ -856,7 +866,7 @@ fn named_import_type_fix(
     model: &SemanticModel,
     named_specifiers: &JsNamedImportSpecifiers,
     has_type_token: bool,
-    value_refs: &EmbeddedValueReferences,
+    value_refs: &EmbeddedService,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {

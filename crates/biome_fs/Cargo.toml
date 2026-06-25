@@ -20,7 +20,7 @@ crossbeam         = { workspace = true }
 directories       = { workspace = true }
 enumflags2        = { workspace = true, features = ["serde"] }
 papaya            = { workspace = true }
-parking_lot       = { version = "0.12.5", features = ["arc_lock"] }
+parking_lot       = { workspace = true, features = ["arc_lock"] }
 path-absolutize   = { workspace = true }
 rayon             = { workspace = true }
 rustc-hash        = { workspace = true }

@@ -2,13 +2,14 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
     Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
+use biome_db::ParsedSource;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
-use biome_languages::{JsFileSource, javascript::ModuleKind};
+use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
@@ -19,8 +20,10 @@ use biome_test_utils::{
     project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
+use salsa::Storage;
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
@@ -28,6 +31,49 @@ tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,json
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
+
+#[salsa::db]
+#[derive(Default)]
+struct TestDb {
+    parsed: Option<ParsedSource>,
+    source_type: Option<DocumentFileSource>,
+    storage: Storage<Self>,
+}
+
+#[salsa::db]
+impl LanguageDb for TestDb {
+    fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+        Some(DocumentFileSource::Js(JsFileSource::tsx()))
+    }
+}
+
+#[salsa::db]
+impl biome_db::Db for TestDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        self.parsed
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestDb {}
+
+fn embedded_db(
+    parsed: &AnyJsRoot,
+    path: impl Into<Utf8PathBuf>,
+    source_type: &JsFileSource,
+) -> Rc<dyn LanguageDb> {
+    let mut db = TestDb::default();
+    let parsed = ParsedSource::new(
+        &db,
+        path.into(),
+        parsed.syntax().as_send().unwrap().into(),
+        0,
+        vec![],
+    );
+    db.parsed = Some(parsed);
+    db.source_type = Some(DocumentFileSource::from(*source_type));
+    Rc::new(db)
+}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
 struct NeedsModuleGraph<'a> {
@@ -212,11 +258,12 @@ pub(crate) fn analyze_and_snap(
 
     let mut services = JsAnalyzerServices::default()
         .with_source_type(source_type)
-        .with_semantic_model(semantic_model)
-        .with_project_layout(project_layout.clone());
+        .with_semantic_model(&semantic_model)
+        .with_project_layout(project_layout.clone())
+        .with_language_db(embedded_db(&root, input_file, &source_type));
     if needs_module_graph {
         let module_db = module_graph_for_test_file(input_file, &project_layout);
-        services = services.with_module_db(module_db);
+        services = services.with_module_db(module_db.rc_module_db());
     }
 
     let (_, errors) =

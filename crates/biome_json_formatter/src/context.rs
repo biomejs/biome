@@ -127,9 +127,8 @@ impl schemars::JsonSchema for TrailingCommas {
 }
 
 impl JsonFormatOptions {
-    pub fn new(file_source: JsonFileSource) -> Self {
+    pub fn new() -> Self {
         Self {
-            _file_source: file_source,
             trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }

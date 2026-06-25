@@ -33,150 +33,45 @@ info: markdown/list/tab.md
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -5,7 +5,7 @@
- - Text
-   - foo
-     - foo
--      - bar
-+    - bar
- 
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -14,7 +14,7 @@
  - Text
  
+   ```
+-  foo
++  	foo
+   ```
+ 
+ - Text
+```
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -1,5 +1,4 @@
- [
--  source_position(0),
-   "-",
-   source_position(1),
-   " ",
-@@ -23,7 +22,6 @@
-     hard_line_break,
-     empty_line
-   ]),
--  source_position(25),
-   "-",
-   source_position(26),
-   " ",
-@@ -32,85 +30,76 @@
-     "Text",
-     hard_line_break,
-     hard_line_break,
--    source_position(34),
-+    source_position(35),
-     "-",
--    source_position(35),
-+    source_position(36),
-     " ",
-     align(2, [
--      source_position(36),
-+      source_position(37),
-       "foo",
--      hard_line_break,
-       hard_line_break,
--      source_position(44),
--      "-",
-+      source_position(43),
-+      "- ",
-       source_position(45),
--      " ",
--      align(2, [
--        source_position(46),
--        "foo",
--        hard_line_break,
--        source_position(54),
--        "- ",
--        source_position(56),
--        "bar",
--        hard_line_break,
--        hard_line_break
--      ]),
-+      "foo",
-+      hard_line_break,
-+      source_position(51),
-+      "- ",
-+      source_position(53),
-+      "bar",
-+      hard_line_break,
-       hard_line_break
-     ]),
-     empty_line
-   ]),
--  source_position(61),
-   "-",
--  source_position(62),
-+  source_position(59),
-   " ",
-   align(2, [
--    source_position(63),
-+    source_position(60),
-     "Text",
-     hard_line_break,
-     empty_line,
--    source_position(71),
-+    source_position(68),
-     "# ",
--    source_position(72),
-+    source_position(69),
-     "foo",
-     empty_line
-   ]),
--  source_position(78),
-   "-",
--  source_position(79),
-+  source_position(76),
-   " ",
-   align(2, [
--    source_position(80),
-+    source_position(77),
-     "Text",
-     hard_line_break,
-     empty_line,
--    source_position(88),
-+    source_position(85),
-     "```",
-     hard_line_break,
--    source_position(94),
-+    source_position(90),
-     "	",
--    source_position(95),
-+    source_position(91),
-     "foo",
-     hard_line_break,
-     hard_line_break,
--    source_position(101),
-+    source_position(97),
-     "```",
-     empty_line
-   ]),
--  source_position(106),
-   "-",
--  source_position(107),
-+  source_position(103),
-   " ",
-   align(2, [
--    source_position(108),
-+    source_position(104),
-     "Text",
-     hard_line_break,
-     empty_line,
--    source_position(116),
-+    source_position(112),
-     "`",
--    source_position(117),
-+    source_position(113),
-     "foo",
--    source_position(120),
-+    source_position(116),
-     "`",
-     hard_line_break,
-     hard_line_break
+# Output
 
+```md
+- Text
+
+  [title](link)
+
+- Text
+  - foo
+  - foo
+  - bar
+
+- Text
+
+  # foo
+
+- Text
+
+  ```
+  	foo
+  ```
+
+- Text
+
+  `foo`
 ```

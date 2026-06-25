@@ -41,6 +41,7 @@ serde                    = { workspace = true }
 
 [dev-dependencies]
 biome_js_parser = { path = "../biome_js_parser" }
+biome_languages = { path = "../biome_languages", features = ["lang_js"] }
 insta           = { workspace = true }
 serde_json      = { workspace = true }
 

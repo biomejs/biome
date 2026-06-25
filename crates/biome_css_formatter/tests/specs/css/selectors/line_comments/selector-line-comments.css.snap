@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/selectors/line_comments/selector-line-comments.css
+---
+
+# Input
+
+```css
+.powerPathNavigator .helm button.pressedButton,// pressed
+.powerPathNavigator .helm button:active:not(.disabledButton){}
+
+```
+
+
+# Options
+
+```json
+{
+  "css": {
+    "parser": {
+      "allowWrongLineComments": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```css
+.powerPathNavigator .helm button.pressedButton, // pressed
+.powerPathNavigator .helm button:active:not(.disabledButton) {
+}
+
+```

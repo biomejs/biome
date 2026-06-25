@@ -21,6 +21,7 @@ use self::{
     unknown::UnknownFileHandler,
 };
 use crate::WorkspaceError;
+use crate::embed::types::EmbedContent;
 pub use crate::file_handlers::astro::AstroFileHandler;
 #[cfg(feature = "lang_graphql")]
 use crate::file_handlers::graphql::GraphqlFileHandler;
@@ -29,11 +30,10 @@ pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
-use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, DefinitionReference, DocumentServices, FixAction, FixFileMode,
-    FixFileResult, GetSyntaxTreeResult, GoToDefinitionResult, PatternId, PullActionsResult,
-    PullDiagnosticsAndActionsResult, RenameResult, SearchQuery,
+    CodeAction, DefinitionReference, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+    GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
+    RenameResult, SearchQuery,
 };
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
@@ -45,6 +45,7 @@ use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::CssLanguage;
+use biome_db::{AnyParsedSource, ParsedSnippet};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -64,13 +65,13 @@ use biome_languages::DocumentFileSource;
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
-use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_text_edit::TextEdit;
-use camino::Utf8Path;
+use biome_workspace_db::WorkspaceDb;
+use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
@@ -83,13 +84,13 @@ use std::sync::Arc;
 use tracing::trace;
 
 pub struct FixAllParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) module_db: ProjectDatabase,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -98,7 +99,6 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     /// The initial indentation level to apply when printing formatted code.
     /// Used by embedded language handlers (Svelte, Vue) to preserve
@@ -126,19 +126,20 @@ pub struct ParseResult {
 
 #[derive(Default)]
 pub struct ParseEmbedResult {
-    pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
+    pub(crate) nodes: Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
+}
+
+pub(crate) struct ParseEmbeddedParams<'a> {
+    pub(crate) any_parse: &'a AnyParse,
+    pub(crate) path: &'a BiomePath,
+    pub(crate) file_source: &'a DocumentFileSource,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
+    pub(crate) node_cache: &'a mut NodeCache,
 }
 
 type Parse =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes = fn(
-    &AnyParse,
-    &BiomePath,
-    &DocumentFileSource,
-    &SettingsWithEditor,
-    &mut NodeCache,
-    &mut EmbeddedBuilder,
-) -> ParseEmbedResult;
+type ParseEmbeddedNodes = fn(ParseEmbeddedParams) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -147,18 +148,20 @@ pub struct ParserCapabilities {
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParse, TextSize) -> String;
+type DebugSyntaxTree = fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnyParsedSource, TextSize, WorkspaceDb) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo =
-    fn(&BiomePath, Option<AnyParse>, ProjectDatabase) -> Result<String, WorkspaceError>;
-type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
-type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes =
+    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugSemanticModel =
+    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -177,22 +180,19 @@ pub struct DebugCapabilities {
 }
 
 pub(crate) struct LintParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_db: ProjectDatabase,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
-    pub(crate) diagnostic_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     pub(crate) max_diagnostics: Option<u32>,
     pub(crate) diagnostic_level: Severity,
@@ -203,23 +203,19 @@ pub(crate) struct LintParams<'a> {
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
-    pub(crate) module_db: ProjectDatabase,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
-    pub(crate) diagnostic_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
-    // Services attached to the current embedded snippet, when diagnostics are run on snippets.
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 #[derive(Debug, Default)]
@@ -249,7 +245,7 @@ pub(crate) struct ProcessLint<'a> {
 impl<'a> ProcessLint<'a> {
     pub(crate) fn new(params: &LintParams<'a>) -> Self {
         Self {
-            diagnostic_count: params.parse.diagnostics().len() as u32,
+            diagnostic_count: params.parsed_source.diagnostics(&params.workspace_db).len() as u32,
             errors: Default::default(),
             warnings: Default::default(),
             infos: Default::default(),
@@ -266,7 +262,7 @@ impl<'a> ProcessLint<'a> {
                 .as_ref()
                 .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
-            diagnostic_offset: params.diagnostic_offset,
+            diagnostic_offset: params.parsed_source.diagnostic_offset(&params.workspace_db),
             max_diagnostics: params.max_diagnostics,
             diagnostic_level: params.diagnostic_level,
             enforce_assist: params.enforce_assist,
@@ -740,11 +736,11 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parse: AnyParse,
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
-    pub(crate) module_db: ProjectDatabase,
+    pub(crate) workspace_db: WorkspaceDb,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -753,13 +749,9 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
-    pub(crate) action_offset: Option<TextSize>,
-    pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
     /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
     pub(crate) compute_actions: bool,
-    // Services attached to the current embedded snippet, when actions are run on snippets.
-    pub(crate) snippet_services: Option<&'a DocumentServices>,
     pub(crate) analyzer_cache: &'a AnalyzerVisitorCache,
 }
 
@@ -775,8 +767,15 @@ pub(crate) struct UpdateSnippetsNodes {
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
-type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
-type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
+type Rename = fn(
+    &BiomePath,
+    AnyParsedSource,
+    TextSize,
+    String,
+    WorkspaceDb,
+) -> Result<RenameResult, WorkspaceError>;
+type UpdateSnippets =
+    fn(AnyParsedSource, WorkspaceDb, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 type PullDiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
 
 #[derive(Default)]
@@ -798,38 +797,35 @@ pub struct AnalyzerCapabilities {
 type Format = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
     TextRange,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
     TextSize,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
 
 type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &SettingsWithEditor,
-    Vec<FormatEmbedNode>,
+    Vec<ParsedSnippet>,
+    WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
-
-#[derive(Debug)]
-pub(crate) struct FormatEmbedNode {
-    pub(crate) range: TextRange,
-    pub(crate) node: AnyParse,
-    pub(crate) source: DocumentFileSource,
-}
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -848,10 +844,11 @@ type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParse,
+    AnyParsedSource,
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
+    WorkspaceDb,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -874,18 +871,18 @@ pub(crate) struct EditorCapabilities {
     pub(crate) resolve_definition: Option<ResolveDefinition>,
 }
 
-pub(crate) struct ResolveBindingParams<'a> {
-    pub(crate) parse: AnyParse,
+pub(crate) struct ResolveBindingParams {
+    pub(crate) parsed_source: AnyParsedSource,
     pub(crate) cursor_offset: TextSize,
-    pub(crate) services: &'a DocumentServices,
+    pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) path: Utf8PathBuf,
 }
 
 pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) definition_ref: &'a DefinitionReference,
-    pub(crate) module_db: &'a dyn ModuleDb,
-    pub(crate) offset: Option<TextSize>,
-    pub(crate) services: &'a DocumentServices,
+    pub(crate) workspace_db: WorkspaceDb,
+    pub(crate) parsed_source: AnyParsedSource,
 }
 
 type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;

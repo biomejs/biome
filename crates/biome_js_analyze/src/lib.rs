@@ -3,8 +3,7 @@
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
-use crate::services::embedded_bindings::EmbeddedBindings;
-use crate::services::embedded_value_references::EmbeddedValueReferences;
+use crate::services::embedded::EmbeddedService;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
@@ -16,13 +15,14 @@ use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
-use biome_languages::JsFileSource;
-use biome_module_graph::{ModuleDb, ModuleResolver, ProjectDatabase};
+use biome_languages::{JsFileSource, LanguageDb};
+use biome_module_graph::{ModuleDb, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
 mod a11y;
@@ -49,101 +49,68 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 });
 
 #[derive(Default)]
-pub struct JsAnalyzerServices {
-    module_db: Option<ProjectDatabase>,
+pub struct JsAnalyzerServices<'a> {
+    module_db: Option<Rc<dyn ModuleDb>>,
+    language_db: Option<Rc<dyn LanguageDb>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
-    embedded_value_references: Vec<Vec<(TextRange, TokenText)>>,
-    semantic_model: Option<SemanticModel>,
+    semantic_model: Option<&'a SemanticModel>,
 }
 
-impl
-    From<(
-        ProjectDatabase,
-        Arc<ProjectLayout>,
-        JsFileSource,
-        Option<SemanticModel>,
-    )> for JsAnalyzerServices
-{
-    fn from(
-        (module_db, project_layout, source_type, semantic_model): (
-            ProjectDatabase,
-            Arc<ProjectLayout>,
-            JsFileSource,
-            Option<SemanticModel>,
-        ),
-    ) -> Self {
-        Self {
-            module_db: Some(module_db),
-            project_layout,
-            source_type,
-            embedded_bindings: Default::default(),
-            embedded_value_references: Default::default(),
-            semantic_model,
-        }
-    }
-}
-
-impl From<(ProjectDatabase, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices<'_> {
     fn from(
         (module_db, project_layout, source_type): (
-            ProjectDatabase,
+            Rc<dyn ModuleDb>,
             Arc<ProjectLayout>,
             JsFileSource,
         ),
     ) -> Self {
         Self {
             module_db: Some(module_db),
+            language_db: None,
             project_layout,
             source_type,
-            embedded_bindings: Default::default(),
-            embedded_value_references: Default::default(),
             semantic_model: None,
         }
     }
 }
 
-impl From<&AnyJsRoot> for JsAnalyzerServices {
+impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
+            language_db: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
-            embedded_bindings: Default::default(),
-            embedded_value_references: Default::default(),
             semantic_model: None,
         }
     }
 }
 
-impl JsAnalyzerServices {
+impl<'a> JsAnalyzerServices<'a> {
     pub fn with_source_type(mut self, source_type: JsFileSource) -> Self {
         self.source_type = source_type;
         self
     }
 
-    pub fn with_semantic_model(mut self, model: SemanticModel) -> Self {
+    pub fn with_semantic_model(mut self, model: &'a SemanticModel) -> Self {
         self.semantic_model = Some(model);
         self
     }
 
-    pub fn with_module_db(mut self, module_db: ProjectDatabase) -> Self {
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
         self
     }
 
     pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
         self.project_layout = project_layout;
         self
-    }
-
-    pub fn set_embedded_bindings(&mut self, bindings: Vec<Vec<(TextRange, TokenText)>>) {
-        self.embedded_bindings = bindings;
-    }
-
-    pub fn set_embedded_value_references(&mut self, refs: Vec<Vec<(TextRange, TokenText)>>) {
-        self.embedded_value_references = refs;
     }
 }
 
@@ -198,10 +165,9 @@ where
 
     let JsAnalyzerServices {
         module_db,
+        language_db: embedded_db,
         project_layout,
         source_type,
-        embedded_bindings,
-        embedded_value_references,
         semantic_model,
     } = services;
 
@@ -265,13 +231,14 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    services.insert_service(EmbeddedBindings(embedded_bindings));
-    services.insert_service(EmbeddedValueReferences(embedded_value_references));
+    if let Some(embedded_db) = embedded_db {
+        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
+    }
     // If a pre-built model is available (workspace open_file/change_file path),
     // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
     // interleaved with the analyzer's syntax-phase traversal (single pass).
     if let Some(semantic_model) = semantic_model {
-        services.insert_service(semantic_model);
+        services.insert_service(semantic_model.clone());
     }
 
     (

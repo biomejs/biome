@@ -90,7 +90,7 @@ pub(crate) struct SemanticModelData {
     // Index bindings by range start
     pub(crate) bindings_by_start: FxHashMap<TextSize, BindingId>,
     // All bindings that were exported
-    pub(crate) exported: FxHashSet<TextSize>,
+    pub(crate) exported: FxHashSet<BindingId>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
     /// All globals references
@@ -160,7 +160,9 @@ impl SemanticModelData {
     }
 
     pub fn is_exported(&self, range: TextRange) -> bool {
-        self.exported.contains(&range.start())
+        self.bindings_by_start
+            .get(&range.start())
+            .is_some_and(|id| self.exported.contains(id))
     }
 
     pub fn has_exports(&self) -> bool {
@@ -170,7 +172,28 @@ impl SemanticModelData {
 
 impl PartialEq for SemanticModelData {
     fn eq(&self, other: &Self) -> bool {
-        self.root == other.root
+        self.flavor == other.flavor
+            && self.scopes.len() == other.scopes.len()
+            && self.bindings.len() == other.bindings.len()
+            && self.exported.len() == other.exported.len()
+            && self.unresolved_references.len() == other.unresolved_references.len()
+            && self.globals.len() == other.globals.len()
+            // Scope tree structure (not ranges)
+            && self.scopes.iter().zip(other.scopes.iter()).all(|(a, b)| {
+            a.parent == b.parent
+                && a.children == b.children
+                && a.is_closure == b.is_closure
+                && a.bindings.len() == b.bindings.len()
+                && a.bindings_by_name == b.bindings_by_name
+        })
+            // Binding semantics (not ranges)
+            && self.bindings.iter().zip(other.bindings.iter()).all(|(a, b)| {
+            a.declaration_kind == b.declaration_kind
+                && a.references.len() == b.references.len()
+                && a.export_ranges.len() == b.export_ranges.len()
+                && a.references.iter().zip(b.references.iter())
+                .all(|(ra, rb)| ra.ty == rb.ty)
+        })
     }
 }
 
@@ -181,7 +204,7 @@ impl Eq for SemanticModelData {}
 /// - Declarations
 ///
 /// See `SemanticModelData` for more information about the internals.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SemanticModel {
     pub(crate) data: Arc<SemanticModelData>,
 }
@@ -322,14 +345,10 @@ impl SemanticModel {
     }
 
     pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
-        self.data
-            .exported
-            .iter()
-            .filter_map(|declared_at| self.data.bindings_by_start.get(declared_at).copied())
-            .map(|id| Binding {
-                data: self.data.clone(),
-                id,
-            })
+        self.data.exported.iter().map(|&id| Binding {
+            data: self.data.clone(),
+            id,
+        })
     }
 
     /// Returns the [Binding] of a reference.

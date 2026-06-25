@@ -1100,7 +1100,7 @@ fn unused_suppression_has_correct_span_in_vue_file() {
     fs.insert(
         file.into(),
         r#"<template>
-  <div>Hello</div>
+  <div>{{ mdiSquareOutline }}</div>
 </template>
 
 <script lang="ts" setup>

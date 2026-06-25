@@ -52,7 +52,7 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
 
     fn query(&self) -> Vec<RawSyntaxKind>;
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult;
+    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult;
 
     /// Returns true if this plugin should run on the given file path.
     fn applies_to_file(&self, _path: &Utf8Path) -> bool {

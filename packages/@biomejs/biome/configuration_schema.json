@@ -5509,6 +5509,27 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteUnnecessaryStateWrapConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteUnnecessaryStateWrapOptions" }
+			]
+		},
+		"NoSvelteUnnecessaryStateWrapOptions": {
+			"type": "object",
+			"properties": {
+				"additionalReactiveClasses": {
+					"description": "Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"allowReassign": {
+					"description": "When `true`, allows `$state()` wrapping for variables that are reassigned after declaration.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoSvgWithoutTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6769,6 +6790,13 @@
 					"description": "Disallow dependencies that are known to have better alternatives.\nSee https://biomejs.dev/linter/rules/no-restricted-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRestrictedDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteUnnecessaryStateWrap": {
+					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteUnnecessaryStateWrapConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9986,6 +10014,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSuspiciousSemicolonInJsxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteUnnecessaryStateWrapOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteUnnecessaryStateWrapOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15758,6 +15796,10 @@
 			"description": "Options for the `useNullishCoalescing` rule.",
 			"type": "object",
 			"properties": {
+				"ignoreBooleanCoercion": {
+					"description": "Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).",
+					"type": ["boolean", "null"]
+				},
 				"ignoreConditionalTests": {
 					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
 					"type": ["boolean", "null"]

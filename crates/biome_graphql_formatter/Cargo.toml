@@ -25,6 +25,7 @@ name    = "graphql_formatter"
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_graphql_syntax = { workspace = true }
+biome_languages      = { workspace = true, features = ["lang_graphql"] }
 biome_rowan          = { workspace = true }
 biome_suppression    = { workspace = true }
 

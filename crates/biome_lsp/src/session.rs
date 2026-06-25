@@ -34,10 +34,10 @@ use camino::Utf8PathBuf;
 use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
 use papaya::{HashMap, HashSet};
+use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
 use std::sync::Arc;
-use std::sync::RwLock;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use tokio::spawn;
@@ -258,7 +258,7 @@ impl Session {
         });
 
         {
-            let mut this_workspace_folders = self.workspace_folders.write().unwrap();
+            let mut this_workspace_folders = self.workspace_folders.write();
             *this_workspace_folders = workspace_folders;
         }
 
@@ -657,7 +657,6 @@ impl Session {
             && self
                 .extension_settings
                 .read()
-                .unwrap()
                 .editor_features()
                 .contains(EditorFeature::GotoDefinition);
         info!("Can register gotoDefinition: {result}");
@@ -667,7 +666,7 @@ impl Session {
 
     /// Get the current workspace folders
     pub(crate) fn get_workspace_folders(&self) -> Option<Vec<WorkspaceFolder>> {
-        self.workspace_folders.read().unwrap().clone()
+        self.workspace_folders.read().clone()
     }
 
     pub(crate) fn update_workspace_folders(
@@ -675,7 +674,7 @@ impl Session {
         added: Vec<WorkspaceFolder>,
         removed: Vec<WorkspaceFolder>,
     ) {
-        let mut workspace_folders = self.workspace_folders.write().unwrap();
+        let mut workspace_folders = self.workspace_folders.write();
 
         if let Some(ref mut folders) = *workspace_folders {
             if !removed.is_empty() {
@@ -731,10 +730,7 @@ impl Session {
 
     /// Returns the configuration path set by the user in the extension settings
     pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
-        self.extension_settings
-            .read()
-            .ok()
-            .and_then(|s| s.configuration_path())
+        self.extension_settings.read().configuration_path()
     }
 
     /// Resolves the user-provided `configurationPath` setting to an absolute path.
@@ -1244,7 +1240,7 @@ impl Session {
                 if let Some(client_configuration) = client_configuration {
                     info!("Loaded client configuration: {client_configuration:#?}");
 
-                    let mut config = self.extension_settings.write().unwrap();
+                    let mut config = self.extension_settings.write();
                     if let Err(err) = config.set_workspace_settings(client_configuration) {
                         error!("Couldn't set client configuration: {}", err);
                     }
@@ -1257,7 +1253,7 @@ impl Session {
                     .get(CONFIGURATION_SECTION)
                     .cloned()
                     .unwrap_or(settings);
-                let mut config = self.extension_settings.write().unwrap();
+                let mut config = self.extension_settings.write();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);
                 }
@@ -1327,31 +1323,23 @@ impl Session {
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
-        self.extension_settings
-            .read()
-            .unwrap()
-            .requires_configuration()
+        self.extension_settings.read().requires_configuration()
     }
 
     pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
         self.extension_settings
             .read()
-            .unwrap()
             .scan_kind_from_editor_features()
     }
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {
-        self.extension_settings.read().unwrap().inline_config()
+        self.extension_settings.read().inline_config()
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
         let disabled_for = |status: ConfigurationStatus| match status {
             ConfigurationStatus::Loaded => false,
-            ConfigurationStatus::Missing => self
-                .extension_settings
-                .read()
-                .unwrap()
-                .requires_configuration(),
+            ConfigurationStatus::Missing => self.extension_settings.read().requires_configuration(),
             ConfigurationStatus::Error
             | ConfigurationStatus::EditorConfigError
             | ConfigurationStatus::PluginError => false,

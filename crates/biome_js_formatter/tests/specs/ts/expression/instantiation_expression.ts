@@ -1,0 +1,17 @@
+const a = makeFactory<Value>;
+const b = obj.makeFactory<Value>;
+
+// Parentheses around await/yield must be kept, otherwise the type
+// arguments would bind to the inner expression and change the meaning.
+async function withAwait() {
+  const c = (await makeFactory)<Value>;
+}
+
+function* withYield() {
+  const d = (yield* makeFactory)<Value>;
+  const e = (yield makeFactory)<Value>;
+}
+
+// Parentheses around other lower-precedence expressions must be kept too.
+const f = (cond ? a : b)<Value>;
+const g = (x++)<Value>;

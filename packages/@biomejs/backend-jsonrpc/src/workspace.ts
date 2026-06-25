@@ -2529,6 +2529,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	* Disallow unnecessary $state wrapping of reactive classes.
+See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap 
+	 */
+	noSvelteUnnecessaryStateWrap?: NoSvelteUnnecessaryStateWrapConfiguration;
+	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
 	 */
@@ -4729,6 +4734,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoSvelteUnnecessaryStateWrapConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6603,6 +6611,11 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
 }
+export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteUnnecessaryStateWrapOptions;
+}
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
@@ -8302,6 +8315,16 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export interface NoSvelteUnnecessaryStateWrapOptions {
+	/**
+	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
+	 */
+	additionalReactiveClasses?: string[];
+	/**
+	 * When `true`, allows `$state()` wrapping for variables that are reassigned after declaration.
+	 */
+	allowReassign?: boolean;
+}
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -8434,6 +8457,10 @@ export type UseNamedCaptureGroupOptions = {};
  * Options for the `useNullishCoalescing` rule.
  */
 export interface UseNullishCoalescingOptions {
+	/**
+	 * Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+	 */
+	ignoreBooleanCoercion?: boolean;
 	/**
 	 * Ignore `||` expressions in conditional test positions (default: `true`).
 	 */
@@ -9670,6 +9697,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"

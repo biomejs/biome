@@ -442,11 +442,14 @@ version = "0.0.0"
 dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
+ "biome_db",
  "biome_formatter",
  "biome_languages",
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "rustc-hash 2.1.2",
+ "salsa",
 ]
 
 [[package]]
@@ -466,6 +469,10 @@ dependencies = [
 name = "biome_db"
 version = "0.0.1"
 dependencies = [
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "camino",
  "salsa",
 ]
 
@@ -964,6 +971,7 @@ dependencies = [
  "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
+ "biome_db",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -979,6 +987,7 @@ dependencies = [
  "biome_module_graph",
  "biome_module_replacements",
  "biome_package",
+ "biome_parser",
  "biome_plugin_loader",
  "biome_project_layout",
  "biome_resolver",
@@ -991,6 +1000,7 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
+ "biome_workspace_db",
  "bitvec",
  "camino",
  "codspeed-criterion-compat",
@@ -1004,6 +1014,7 @@ dependencies = [
  "regex",
  "roaring",
  "rustc-hash 2.1.2",
+ "salsa",
  "schemars",
  "serde",
  "smallvec",
@@ -1111,6 +1122,7 @@ name = "biome_js_semantic"
 version = "0.5.7"
 dependencies = [
  "biome_console",
+ "biome_db",
  "biome_diagnostics",
  "biome_formatter",
  "biome_js_parser",
@@ -1118,9 +1130,11 @@ dependencies = [
  "biome_jsdoc_comment",
  "biome_languages",
  "biome_rowan",
+ "camino",
  "insta",
  "rust-lapper",
  "rustc-hash 2.1.2",
+ "salsa",
  "smallvec",
 ]
 
@@ -1323,10 +1337,12 @@ name = "biome_languages"
 version = "0.1.0"
 dependencies = [
  "biome_console",
+ "biome_db",
  "biome_rowan",
  "biome_string_case",
  "camino",
  "directories",
+ "salsa",
  "schemars",
  "serde",
  "tracing",
@@ -1363,6 +1379,7 @@ dependencies = [
  "crossbeam",
  "futures",
  "papaya",
+ "parking_lot",
  "rustc-hash 2.1.2",
  "serde",
  "serde_json",
@@ -1521,6 +1538,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
@@ -1706,6 +1724,7 @@ dependencies = [
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
@@ -1715,6 +1734,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_test_utils",
+ "biome_workspace_db",
  "camino",
 ]
 
@@ -1775,6 +1795,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
+ "biome_workspace_db",
  "biome_yaml_formatter",
  "biome_yaml_parser",
  "biome_yaml_syntax",
@@ -1898,6 +1919,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_string_case",
+ "biome_workspace_db",
  "camino",
  "countme",
  "json_comments",
@@ -1957,6 +1979,24 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "biome_workspace_db"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_module_graph",
+ "biome_rowan",
+ "boxcar",
+ "camino",
+ "papaya",
+ "salsa",
 ]
 
 [[package]]
@@ -2077,7 +2117,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cow-utils",
- "dashmap 6.2.1",
+ "dashmap 6.1.0",
  "dynify",
  "fast-float2",
  "float16",
@@ -2087,7 +2127,7 @@ dependencies = [
  "hashbrown 0.16.1",
  "icu_normalizer 2.0.0",
  "indexmap",
- "intrusive-collections",
+ "intrusive-collections 0.9.7",
  "itertools 0.14.0",
  "num-bigint",
  "num-integer",
@@ -2506,7 +2546,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2741,9 +2781,9 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "6.2.1"
+version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6361d5c062261c78a176addb82d4c821ae42bed6089de0e12603cd25de2059c"
+checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -3367,9 +3407,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.4.14"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "171fefbc92fe4a4de27e0698d6a5b392d6a0e333506bc49133760b3bcf948733"
+checksum = "2f44da3a8150a6703ed5d34e164b875fd14c2cdab9af1252a9a1020bde2bdc54"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -3431,11 +3471,11 @@ dependencies = [
 
 [[package]]
 name = "hashlink"
-version = "0.10.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7382cf6263419f2d8df38c55d7da83da5c18aef87fc7a7fc1fb1e344edfe14c1"
+checksum = "a5081f264ed7adee96ea4b4778b6bb9da0a7228b084587aa3bd3ff05da7c5a3b"
 dependencies = [
- "hashbrown 0.15.5",
+ "hashbrown 0.17.0",
 ]
 
 [[package]]
@@ -3505,9 +3545,9 @@ checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
 name = "hyper"
-version = "1.10.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb92f162bf56536459fc83c79b974bb12837acfed43d6bc370a7916d0ae15ecc"
+checksum = "6299f016b246a94207e63da54dbe807655bf9e00044f73ded42c3ac5305fbcca"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -3907,6 +3947,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "intrusive-collections"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b719c59241cfaac1042a6d26787e28ed7ee4a4e21a5a907786f54222d1b0062"
+dependencies = [
+ "memoffset",
+]
+
+[[package]]
 name = "inventory"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3920,6 +3969,16 @@ name = "ipnet"
 version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2"
+
+[[package]]
+name = "iri-string"
+version = "0.7.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25e659a4bb38e810ebc252e53b5814ff908a8c58c2a9ce2fae1bbec24cbf4e20"
+dependencies = [
+ "memchr",
+ "serde",
+]
 
 [[package]]
 name = "is-terminal"
@@ -4083,12 +4142,11 @@ dependencies = [
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.44"
+version = "0.1.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "667f4fec20f29dfc6bc7357c582d91796c169ad7e2fce709468aefeb2c099870"
+checksum = "2d1eacfa31c33ec25e873c136ba5669f00f9866d0688bea7be4d3f7e43067df6"
 dependencies = [
  "cc",
- "libc",
 ]
 
 [[package]]
@@ -4210,9 +4268,9 @@ dependencies = [
 
 [[package]]
 name = "mimalloc"
-version = "0.1.48"
+version = "0.1.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1ee66a4b64c74f4ef288bcbb9192ad9c3feaad75193129ac8509af543894fd8"
+checksum = "b3627c4272df786b9260cabaa46aec1d59c93ede723d4c3ef646c503816b0640"
 dependencies = [
  "libmimalloc-sys",
 ]
@@ -4406,9 +4464,9 @@ checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.112"
+version = "0.9.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57d55af3b3e226502be1526dfdba67ab0e9c96fc293004e79576b2b9edb0dbdb"
+checksum = "b47e7e6bb2c38cd930d25a23b40fa52e068c10e85f3e03a7f5ba5aaca5713695"
 dependencies = [
  "cc",
  "libc",
@@ -5276,9 +5334,9 @@ checksum = "dd29631678d6fb0903b69223673e122c32e9ae559d0960a38d574695ebc0ea15"
 
 [[package]]
 name = "salsa"
-version = "0.26.2"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4612ff789805e65c87e9b38cb749a293212a615af065bed8a2001086801498c3"
+checksum = "ffbaab832e2ea754afda4a738f987dd1e8bd30c9e5d8c981ee6a3934386095e2"
 dependencies = [
  "boxcar",
  "crossbeam-queue",
@@ -5286,7 +5344,7 @@ dependencies = [
  "hashbrown 0.17.0",
  "hashlink",
  "indexmap",
- "intrusive-collections",
+ "intrusive-collections 0.10.2",
  "inventory",
  "parking_lot",
  "portable-atomic",
@@ -5302,15 +5360,15 @@ dependencies = [
 
 [[package]]
 name = "salsa-macro-rules"
-version = "0.26.2"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58e354cbac6939b9b09cd9c11fb419a53e64b4a0f755d929f56a09f4cc752e41"
+checksum = "de6872462ac73d39969a836273c24163e6a26a4e08f5114fcd80e25af30ea9c6"
 
 [[package]]
 name = "salsa-macros"
-version = "0.26.2"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3067861075c2b80608f84ad49fb88f2c7610b94cdf8b4201e79ddee87f8980c8"
+checksum = "76bc78ffaf65b1a9175818592c5130aa10b1bb245a905722fd4db87cea8a8457"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6110,20 +6168,20 @@ dependencies = [
 
 [[package]]
 name = "tower-http"
-version = "0.6.11"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cfcf7e2740e6fc6d4d688b4ef00650406bb94adf4731e43c096c3a19fe40840"
+checksum = "d4e6559d53cc268e5031cd8429d05415bc4cb4aefc4aa5d6cc35fbf5b924a1f8"
 dependencies = [
  "bitflags 2.9.3",
  "bytes",
  "futures-util",
  "http",
  "http-body",
+ "iri-string",
  "pin-project-lite",
  "tower",
  "tower-layer",
  "tower-service",
- "url",
 ]
 
 [[package]]
@@ -6139,7 +6197,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f0e711655c89181a6bc6a2cc348131fcd9680085f5b06b6af13427a393a6e72"
 dependencies = [
  "bytes",
- "dashmap 6.2.1",
+ "dashmap 6.1.0",
  "futures",
  "httparse",
  "ls-types",

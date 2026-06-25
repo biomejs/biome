@@ -39,7 +39,6 @@ pub(crate) fn goto_definition(
     let enabled = session
         .extension_settings
         .read()
-        .unwrap()
         .editor_features()
         .contains(EditorFeature::GotoDefinition);
 
