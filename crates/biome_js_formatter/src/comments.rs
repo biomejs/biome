@@ -623,6 +623,7 @@ fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
             AnyJsRoot::JsExpressionSnippet(_) => false,
             AnyJsRoot::JsExpressionTemplateRoot(_) => false,
             AnyJsRoot::JsSvelteSnippetRoot(_) => false,
+            AnyJsRoot::JsSvelteDeclarationRoot(_) => false,
             AnyJsRoot::JsModule(module) => {
                 module.directives().is_empty() && module.items().is_empty()
             }
