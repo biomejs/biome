@@ -357,7 +357,7 @@ impl SemanticEventExtractor {
                 );
             }
 
-            JS_EXPRESSION_TEMPLATE_ROOT | JS_SVELTE_SNIPPET_ROOT => {
+            JS_EXPRESSION_TEMPLATE_ROOT | JS_SVELTE_SNIPPET_ROOT | JS_SVELTE_DECLARATION_ROOT => {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
@@ -940,6 +940,7 @@ impl SemanticEventExtractor {
             | JS_SCRIPT
             | JS_EXPRESSION_TEMPLATE_ROOT
             | JS_SVELTE_SNIPPET_ROOT
+            | JS_SVELTE_DECLARATION_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
