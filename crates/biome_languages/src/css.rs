@@ -230,15 +230,22 @@ impl CssFileSource {
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        // Be careful with definition files, because `Path::extension()` only
-        // returns the extension after the _last_ dot:
-        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        // Be careful with files that use more than one dot in their extension,
+        // such as CSS modules, because `Path::extension()` only returns the
+        // extension after the _last_ dot.
+        //
+        // We assume the file extensions are case-insensitive, so the file name
+        // and extension are normalized to lowercase before pattern matching.
+        let file_name = path
+            .file_name()
+            .map(|file_name| file_name.to_ascii_lowercase_cow())
+            .ok_or(FileSourceError::MissingFileName)?;
         if file_name.ends_with(".module.css") {
             return Self::try_from_extension("module.css");
         }
 
         match path.extension() {
-            Some(extension) => Self::try_from_extension(extension),
+            Some(extension) => Self::try_from_extension(&extension.to_ascii_lowercase_cow()),
             None => Err(FileSourceError::MissingFileExtension),
         }
     }
@@ -286,5 +293,31 @@ impl TryFrom<&Utf8Path> for CssFileSource {
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
         Self::try_from_extension(&extension.to_ascii_lowercase_cow())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detects_css_modules_case_insensitively() {
+        let source = CssFileSource::try_from(Utf8Path::new("Foo.MODULE.CSS")).unwrap();
+        assert!(source.is_css_modules());
+
+        let source = CssFileSource::try_from(Utf8Path::new("foo.Module.css")).unwrap();
+        assert!(source.is_css_modules());
+
+        let source = CssFileSource::try_from(Utf8Path::new("foo.module.css")).unwrap();
+        assert!(source.is_css_modules());
+    }
+
+    #[test]
+    fn plain_css_is_not_detected_as_css_modules() {
+        let source = CssFileSource::try_from(Utf8Path::new("foo.css")).unwrap();
+        assert!(!source.is_css_modules());
+
+        let source = CssFileSource::try_from(Utf8Path::new("Foo.CSS")).unwrap();
+        assert!(!source.is_css_modules());
     }
 }
