@@ -1,0 +1,92 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 549
+expression: redactor(content)
+---
+## `node_modules/@shared/config/biome.jsonc`
+
+```json
+{
+  "root": false,
+  "plugins": [
+    { "path": "./grit/no-object-assign.grit", "resolvePath": "config" }
+  ],
+  "linter": { "enabled": true }
+}
+```
+
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
+## `node_modules/@shared/config/grit/no-object-assign.grit`
+
+```grit
+`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+    "name": "@shared/config",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    }
+}
+```
+
+## `test.js`
+
+```js
+const merged = Object.assign({}, a, b);
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer object spread instead of Object.assign()
+  
+  > 1 │ const merged = Object.assign({}, a, b);
+      │                ^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+test.js:1:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable merged is unused.
+  
+  > 1 │ const merged = Object.assign({}, a, b);
+      │       ^^^^^^
+    2 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend merged with an underscore.
+  
+    1   │ - const·merged·=·Object.assign({},·a,·b);
+      1 │ + const·_merged·=·Object.assign({},·a,·b);
+    2 2 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

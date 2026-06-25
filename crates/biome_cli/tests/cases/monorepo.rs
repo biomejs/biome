@@ -818,7 +818,8 @@ fn plugins_from_root_config_work_in_child_config_extends_root() {
 
 #[test]
 fn object_syntax_plugins_in_extended_config_work_from_declaring_config() {
-    let mut fs = TemporaryFs::new("object_syntax_plugins_in_extended_config_work");
+    let mut fs =
+        TemporaryFs::new("object_syntax_plugins_in_extended_config_work_from_declaring_config");
 
     fs.create_file("biome.json", r#"{ "root": true }"#);
 
@@ -860,7 +861,47 @@ fn object_syntax_plugins_in_extended_config_work_from_declaring_config() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "object_syntax_plugins_in_extended_config_work",
+        "object_syntax_plugins_in_extended_config_work_from_declaring_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn object_syntax_plugins_in_extended_config_missing_plugin_reports_error() {
+    let mut fs =
+        TemporaryFs::new("object_syntax_plugins_in_extended_config_missing_plugin_reports_error");
+
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+
+    fs.create_file(
+        "packages/tools/biome.shared.jsonc",
+        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }"#,
+    );
+
+    fs.create_file(
+        "packages/mobile/biome.json",
+        r#"{ "root": false, "extends": ["../tools/biome.shared.jsonc"] }"#,
+    );
+    fs.create_file("packages/mobile/src/file.js", "Object.assign({}, a, b);\n");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                &format!("{}/packages/mobile/src/file.js", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "object_syntax_plugins_in_extended_config_missing_plugin_reports_error",
         fs.create_mem(),
         console,
         result,
