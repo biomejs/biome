@@ -26,7 +26,7 @@ biome_line_index     = { workspace = true }
 biome_lsp_converters = { workspace = true }
 biome_resolver       = { workspace = true }
 biome_rowan          = { workspace = true }
-biome_service        = { workspace = true, features = ["lang_graphql", "plugins"] }
+biome_service        = { workspace = true, features = ["stable"] }
 biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true, features = ["serde"] }
 camino               = { workspace = true }
