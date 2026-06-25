@@ -91,6 +91,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             is_function_signature: false,
             kind: SvelteFileKind::Component,
             is_const_block: false,
+            declaration_block: None,
         });
     }
 

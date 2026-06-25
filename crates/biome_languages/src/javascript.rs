@@ -137,6 +137,16 @@ pub enum SvelteFileKind {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+pub enum SvelteVariableKind {
+    #[default]
+    Let,
+    Const,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum JsEmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
@@ -171,6 +181,8 @@ pub enum JsEmbeddingKind {
 
         /// Whether this is a `{@const name = value}` block.
         is_const_block: bool,
+
+        declaration_block: Option<SvelteVariableKind>,
     },
     #[default]
     None,
@@ -251,6 +263,14 @@ impl JsEmbeddingKind {
                 ..
             }
         )
+    }
+    pub const fn as_svelte_declaration_block(&self) -> Option<SvelteVariableKind> {
+        match self {
+            Self::Svelte {
+                declaration_block, ..
+            } => *declaration_block,
+            _ => None,
+        }
     }
 }
 
@@ -349,6 +369,7 @@ impl JsFileSource {
             is_function_signature: false,
             kind: SvelteFileKind::Component,
             is_const_block: false,
+            declaration_block: None,
         })
     }
 
@@ -468,6 +489,10 @@ impl JsFileSource {
         self.embedding_kind.is_svelte_const_block()
     }
 
+    pub const fn as_svelte_declaration_block(&self) -> Option<SvelteVariableKind> {
+        self.embedding_kind.as_svelte_declaration_block()
+    }
+
     pub const fn as_embedding_kind(&self) -> &JsEmbeddingKind {
         &self.embedding_kind
     }
@@ -558,6 +583,7 @@ impl JsFileSource {
                 is_function_signature: false,
                 kind: SvelteFileKind::SourceModule,
                 is_const_block: false,
+                declaration_block: None,
             }));
         }
 
@@ -692,5 +718,23 @@ mod tests {
 
         assert!(source.is_svelte_source_module());
         assert!(!source.is_typescript());
+    }
+
+    #[test]
+    fn svelte_declaration_block_kind_roundtrips() {
+        let kind = JsEmbeddingKind::Svelte {
+            is_source: false,
+            kind: SvelteFileKind::Component,
+            is_function_signature: false,
+            is_const_block: false,
+            declaration_block: Some(SvelteVariableKind::Const),
+        };
+        assert_eq!(
+            kind.as_svelte_declaration_block(),
+            Some(SvelteVariableKind::Const)
+        );
+
+        let none = JsEmbeddingKind::None;
+        assert_eq!(none.as_svelte_declaration_block(), None);
     }
 }

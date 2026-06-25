@@ -87,6 +87,7 @@ impl SvelteFileHandler {
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
                             is_const_block: false,
+                            declaration_block: None,
                         }),
                 )
             })

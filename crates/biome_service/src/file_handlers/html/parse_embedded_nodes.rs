@@ -978,6 +978,7 @@ fn parse_matched_embed(
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
                             is_const_block: false,
+                            declaration_block: None,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -1012,6 +1013,7 @@ fn parse_matched_embed(
                                 block_kind,
                                 EmbedBlockKind::Svelte(SvelteBlockKind::Const)
                             ),
+                            declaration_block: None,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -1050,6 +1052,7 @@ fn parse_matched_embed(
                                 is_function_signature: false,
                                 kind: SvelteFileKind::Component,
                                 is_const_block: false,
+                                declaration_block: None,
                             });
                         }
                     }
