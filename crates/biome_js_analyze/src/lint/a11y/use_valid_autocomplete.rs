@@ -59,7 +59,7 @@ declare_lint_rule! {
 }
 
 // Sorted for binary search
-const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
+const VALID_AUTOCOMPLETE_VALUES: [&str; 57] = [
     "additional-name",
     "address-level1",
     "address-level2",
@@ -109,6 +109,8 @@ const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
     "tel-country-code",
     "tel-extension",
     "tel-local",
+    "tel-local-prefix",
+    "tel-local-suffix",
     "tel-national",
     "transaction-amount",
     "transaction-currency",
@@ -116,6 +118,31 @@ const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
     "username",
     "webauthn",
 ];
+
+// Sorted for binary search
+const CONTACT_HINT_TOKENS: [&str; 5] = ["fax", "home", "mobile", "pager", "work"];
+
+// Sorted for binary search
+const CONTACT_FIELD_TOKENS: [&str; 10] = [
+    "email",
+    "impp",
+    "tel",
+    "tel-area-code",
+    "tel-country-code",
+    "tel-extension",
+    "tel-local",
+    "tel-local-prefix",
+    "tel-local-suffix",
+    "tel-national",
+];
+
+fn is_contact_hint_token(value: &str) -> bool {
+    CONTACT_HINT_TOKENS.binary_search(&value).is_ok()
+}
+
+fn is_contact_field_token(value: &str) -> bool {
+    CONTACT_FIELD_TOKENS.binary_search(&value).is_ok()
+}
 
 // Sorted for binary search
 const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
@@ -183,12 +210,13 @@ impl Rule for UseValidAutocomplete {
             )
             .note(markup! {
                 "The autocomplete attribute only accepts a certain number of specific fixed values."
-        }).note(markup!{
+            })
+            .note(markup!{
             "Follow the links for more information,
   "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose">"WCAG 1.3.5"</Hyperlink>"
   "<Hyperlink href="https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill">"HTML Living Standard autofill"</Hyperlink>"
   "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete">"HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN"</Hyperlink>""
-        })
+            })
     )
     }
 }
@@ -205,16 +233,40 @@ fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
                 || VALID_AUTOCOMPLETE_VALUES.binary_search(&first).is_ok()
         }
         2.. => {
-            // SAFETY: the size of the slice is superior or equal to `2`
-            let first = autocomplete_values[0];
-            let second = autocomplete_values[1];
-            first.starts_with("section-")
-                || ["billing", "shipping"].contains(&first)
-                    && (BILLING_AND_SHIPPING_ADDRESS.contains(&second)
-                        || VALID_AUTOCOMPLETE_VALUES.binary_search(&second).is_ok())
-                || autocomplete_values
-                    .iter()
-                    .all(|val| VALID_AUTOCOMPLETE_VALUES.binary_search(val).is_ok())
+            let mut index = 0;
+
+            if autocomplete_values[index].starts_with("section-") {
+                index += 1;
+            }
+
+            let has_billing_or_shipping = autocomplete_values
+                .get(index)
+                .is_some_and(|value| matches!(*value, "billing" | "shipping"));
+
+            if has_billing_or_shipping {
+                index += 1;
+            }
+
+            if index >= autocomplete_values.len() {
+                return false;
+            }
+
+            if autocomplete_values
+                .get(index)
+                .is_some_and(|value| is_contact_hint_token(value))
+            {
+                index += 1;
+
+                return autocomplete_values.len() == index + 1
+                    && autocomplete_values
+                        .get(index)
+                        .is_some_and(|value| is_contact_field_token(value));
+            }
+
+            autocomplete_values[index..].iter().all(|val| {
+                VALID_AUTOCOMPLETE_VALUES.binary_search(val).is_ok()
+                    || has_billing_or_shipping && BILLING_AND_SHIPPING_ADDRESS.contains(val)
+            })
         }
     }
 }
@@ -222,5 +274,7 @@ fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
 #[test]
 fn test_order() {
     assert!(VALID_AUTOCOMPLETE_VALUES.is_sorted());
+    assert!(CONTACT_HINT_TOKENS.is_sorted());
+    assert!(CONTACT_FIELD_TOKENS.is_sorted());
     assert!(BILLING_AND_SHIPPING_ADDRESS.is_sorted());
 }
