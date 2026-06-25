@@ -1,15 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#[cfg(any(
-    feature = "lang_css",
-    feature = "lang_graphql",
-    feature = "lang_html",
-    feature = "lang_js",
-    feature = "lang_json"
-))]
-use crate::analyzer::RuleAssistConfiguration;
-use crate::analyzer::RuleAssistPlainConfiguration;
 use crate::analyzer::presets::PresetConfig;
+use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
 use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};

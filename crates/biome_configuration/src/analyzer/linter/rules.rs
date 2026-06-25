@@ -2,16 +2,9 @@
 
 use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{
-    GroupPlainConfiguration, RuleGroupExt, RulePlainConfiguration, SeverityOrGroup,
+    GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
+    RulePlainConfiguration, SeverityOrGroup,
 };
-#[cfg(any(
-    feature = "lang_css",
-    feature = "lang_graphql",
-    feature = "lang_html",
-    feature = "lang_js",
-    feature = "lang_json"
-))]
-use crate::analyzer::{RuleConfiguration, RuleFixConfiguration};
 use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};

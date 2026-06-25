@@ -10509,69 +10509,7 @@ export type GetModuleGraphParams = {};
 export interface GetModuleGraphResult {
 	data: Record<string, SerializedModuleInfo>;
 }
-export type SerializedModuleInfo =
-	| { js: SerializedJsModuleInfo }
-	| { css: SerializedCssModuleInfo }
-	| { html: SerializedHtmlModuleInfo };
-export interface SerializedJsModuleInfo {
-	/**
-	 * Dynamic imports.
-	 */
-	dynamicImports: string[];
-	/**
-	 * Exported symbols.
-	 */
-	exports: string[];
-	/**
-	 * CSS class names referenced in JSX `className` or `class` attributes.
-	 */
-	referencedClasses: string[];
-	/**
-	* Map of all the paths from static imports in the module.
-
-Maps from the source specifier name to the absolute path it resolves to.
-Specifiers that could not be resolved to an absolute will map to the
-specifier itself.
-
-## Example
-
-```json
-{
-  "./foo": "/absolute/path/to/foo.js",
-  "react": "react"
-}
-``` 
-	 */
-	staticImportPaths: Record<string, string>;
-	/**
-	* Map of all static imports found in the module.
-
-Maps from the local imported name to the absolute path it resolves to. 
-	 */
-	staticImports: Record<string, string>;
-}
-export interface SerializedCssModuleInfo {
-	/**
-	 * Set of all CSS class names defined in this file.
-	 */
-	classes: string[];
-	/**
-	* Map of all static imports found in the module.
-
-Maps from the local imported name to the absolute path it resolves to. 
-	 */
-	imports: string[];
-}
-export interface SerializedHtmlModuleInfo {
-	/**
-	 * CSS class names referenced in `class` attributes.
-	 */
-	referencedClasses: string[];
-	/**
-	 * CSS class names defined in `<style>` blocks.
-	 */
-	styleClasses: string[];
-}
+export type SerializedModuleInfo = {};
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
