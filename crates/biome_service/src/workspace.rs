@@ -62,10 +62,9 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::DocumentFileSource;
-use biome_module_graph::SerializedModuleInfo;
 use biome_resolver::FsWithResolverProxy;
+use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
@@ -93,6 +92,7 @@ pub use crate::{
 use schemars::{Schema, SchemaGenerator};
 
 pub mod db;
+use crate::module_graph::SerializedModuleInfo;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
@@ -237,10 +237,7 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) =
-            settings.as_ref().experimental_full_html_support
-            && experimental_full_html_support.value()
-        {
+        if settings.as_ref().experimental_full_html_support_enabled() {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
@@ -1279,6 +1276,8 @@ pub struct GoToDefinitionResult {
 }
 
 impl GoToDefinitionResult {
+    // Used only by language-gated logic.
+    #[allow(dead_code)]
     pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
         if !self.matches.iter().any(|(p, r)| *p == path && *r == range) {
             self.matches.push((path, range));

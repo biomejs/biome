@@ -1,4 +1,4 @@
-use biome_module_graph::PathInfoCache;
+use crate::module_graph::PathInfoCache;
 use biome_workspace_db::WorkspaceDbHandle;
 
 /// Represents the state of the database in the workspace.

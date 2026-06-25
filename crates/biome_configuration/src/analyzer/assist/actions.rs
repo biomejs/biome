@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::presets::PresetConfig;
 #[cfg(any(
     feature = "lang_css",
     feature = "lang_graphql",
@@ -10,6 +9,7 @@ use crate::analyzer::presets::PresetConfig;
 ))]
 use crate::analyzer::RuleAssistConfiguration;
 use crate::analyzer::RuleAssistPlainConfiguration;
+use crate::analyzer::presets::PresetConfig;
 use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};

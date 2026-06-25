@@ -3,41 +3,63 @@
 mod bench_case;
 
 pub use bench_case::BenchCase;
+#[cfg(feature = "html_embeds")]
+use biome_analyze::RuleCategories;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, RuleCategories};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
+#[cfg(feature = "html_embeds")]
 use biome_configuration::HtmlConfiguration;
+#[cfg(feature = "html_embeds")]
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
+#[cfg(feature = "lang_css")]
 use biome_css_parser::CssParserOptions;
+#[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
+#[cfg(feature = "html_embeds")]
+use biome_fs::MemoryFileSystem;
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_parser::HtmlParserOptions;
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;
+#[cfg(feature = "lang_js")]
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
+#[cfg(feature = "type_inference")]
 use biome_js_type_info::{TypeData, TypeResolver};
-use biome_json_parser::ParseDiagnostic;
 use biome_languages::DocumentFileSource;
-use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_js_module,
-};
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
+use biome_module_graph::HtmlEmbeddedContent;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use biome_module_graph::resolve_css_module;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_module_graph::resolve_js_module;
+#[cfg(feature = "module_graph")]
+use biome_module_graph::{ModuleInfoKind, PathInfoCache};
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
+use biome_parser::diagnostic::ParseDiagnostic;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+#[cfg(feature = "html_embeds")]
+use biome_service::Workspace;
+use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::projects::Projects;
-use biome_service::settings::{
-    ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
-};
+#[cfg(feature = "html_embeds")]
+use biome_service::settings::ModuleGraphResolutionKind;
+use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+#[cfg(feature = "html_embeds")]
 use biome_service::test_utils::setup_workspace_and_open_project;
+#[cfg(feature = "html_embeds")]
 use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
-use biome_service::{Workspace, WorkspaceError};
 use biome_string_case::StrLikeExtension;
+#[cfg(feature = "module_graph")]
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -256,6 +278,7 @@ where
 ///
 /// The `project_layout` should be initialized in advance if you want any
 /// manifest files to be discovered.
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
@@ -285,17 +308,20 @@ pub fn module_graph_for_test_file(
         db.insert_module(path.as_path().to_path_buf(), md);
     }
 
-    let css_paths = get_css_like_paths_in_dir(&dir);
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    for (path, root) in css_roots {
-        let (module_info, _, _) =
-            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
-        let md = biome_module_graph::ModuleInfo::new(
-            &db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Css(module_info),
-        );
-        db.insert_module(path.as_path().to_path_buf(), md);
+    #[cfg(feature = "lang_css")]
+    {
+        let css_paths = get_css_like_paths_in_dir(&dir);
+        let css_roots = get_css_added_paths(&fs, &css_paths);
+        for (path, root) in css_roots {
+            let (module_info, _, _) =
+                resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+            let md = biome_module_graph::ModuleInfo::new(
+                &db,
+                path.as_path().to_path_buf(),
+                ModuleInfoKind::Css(module_info),
+            );
+            db.insert_module(path.as_path().to_path_buf(), md);
+        }
     }
 
     db
@@ -308,6 +334,7 @@ pub fn module_graph_for_test_file(
 /// spec tests by having both sides of the cross-file reference available:
 /// - CSS files provide class definitions.
 /// - JS/JSX files provide `className` references.
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
 pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
@@ -330,24 +357,27 @@ pub fn module_graph_for_css_test_file(
         db.insert_module(path.as_path().to_path_buf(), md);
     }
 
-    let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-    for (path, root, semantic_model) in js_roots {
-        let (module_info, _, _) = resolve_js_module(
-            root,
-            path,
-            &fs,
-            project_layout,
-            semantic_model,
-            &path_info_cache,
-            false,
-        );
-        let md = biome_module_graph::ModuleInfo::new(
-            &db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Js(module_info),
-        );
-        db.insert_module(path.as_path().to_path_buf(), md);
+    #[cfg(feature = "lang_js")]
+    {
+        let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
+        let js_roots = get_added_js_paths(&fs, &js_paths);
+        for (path, root, semantic_model) in js_roots {
+            let (module_info, _, _) = resolve_js_module(
+                root,
+                path,
+                &fs,
+                project_layout,
+                semantic_model,
+                &path_info_cache,
+                false,
+            );
+            let md = biome_module_graph::ModuleInfo::new(
+                &db,
+                path.as_path().to_path_buf(),
+                ModuleInfoKind::Js(module_info),
+            );
+            db.insert_module(path.as_path().to_path_buf(), md);
+        }
     }
 
     db
@@ -364,6 +394,7 @@ pub fn module_graph_for_css_test_file(
 /// This enables project-domain HTML rules (e.g. `noUndeclaredClasses`) to work
 /// in spec tests with real module graph data, identical to what the LSP/CLI
 /// would compute.
+#[cfg(all(feature = "module_graph", feature = "html_embeds"))]
 pub fn module_graph_for_html_test_file(
     input_file: &Utf8Path,
     _project_layout: &ProjectLayout,
@@ -422,6 +453,7 @@ pub fn module_graph_for_html_test_file(
 }
 
 /// Recursively collects all file paths under `dir` into `out`.
+#[cfg(all(feature = "module_graph", feature = "html_embeds"))]
 fn collect_all_files_in_dir(dir: &Utf8Path, out: &mut Vec<Utf8PathBuf>) {
     let Ok(entries) = std::fs::read_dir(dir.as_std_path()) else {
         return;
@@ -438,6 +470,7 @@ fn collect_all_files_in_dir(dir: &Utf8Path, out: &mut Vec<Utf8PathBuf>) {
     }
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
 fn get_css_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
     std::fs::read_dir(dir)
         .unwrap()
@@ -457,6 +490,7 @@ fn get_css_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
+#[cfg(feature = "lang_js")]
 pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
@@ -497,6 +531,7 @@ pub fn get_added_js_paths<'a>(
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
+#[cfg(feature = "lang_css")]
 pub fn get_css_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
@@ -529,6 +564,7 @@ pub fn get_css_added_paths<'a>(
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
 pub fn get_html_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
@@ -559,6 +595,7 @@ pub fn get_html_added_paths<'a>(
         .collect()
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
 fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
     std::fs::read_dir(dir)
         .unwrap()
@@ -712,6 +749,7 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
     String::from_utf8(buffer).unwrap()
 }
 
+#[cfg(feature = "type_inference")]
 pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
     let mut registered_types = String::new();
     let mut resolver = Some(resolver);
@@ -733,6 +771,7 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
     }
 }
 
+#[cfg(feature = "type_inference")]
 pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
     if types.is_empty() {
         return;
@@ -826,7 +865,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
 /// This function analyzes the parsing result of a file and panic with a
 /// detailed message if it contains any error-level diagnostic, bogus nodes,
 /// empty list slots or missing required children
-pub fn assert_errors_are_absent<L: ServiceLanguage>(
+pub fn assert_errors_are_absent<L: biome_rowan::Language>(
     program: &SyntaxNode<L>,
     diagnostics: &[ParseDiagnostic],
     path: &Utf8Path,
@@ -1111,6 +1150,7 @@ pub fn assert_diagnostics_expectation_from_content(
 ///
 /// Returns a snapshot string in the standard analyzer snapshot format
 /// (`# Input` / `# Diagnostics`).
+#[cfg(feature = "html_embeds")]
 pub fn analyze_with_workspace(
     input_file: &Utf8Path,
     input_code: String,
@@ -1243,31 +1283,41 @@ pub fn analyze_with_workspace(
 /// Builds a `Configuration` for workspace-based tests.
 ///
 /// Enables full HTML support and merges in `.options.json` if present.
+#[cfg(feature = "html_embeds")]
 fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
-    let html_full_support = HtmlConfiguration {
-        experimental_full_support_enabled: Some(biome_configuration::bool::Bool(true)),
-        ..Default::default()
-    };
-    let mut config = Configuration {
-        html: Some(html_full_support),
-        ..Default::default()
-    };
+    let mut config = Configuration::default();
+
+    #[cfg(feature = "lang_html")]
+    {
+        config.html = Some(HtmlConfiguration {
+            experimental_full_support_enabled: Some(biome_configuration::bool::Bool(true)),
+            ..Default::default()
+        });
+    }
 
     // Load and merge .options.json if present
     let options_path = input_file.with_extension("options.json");
     if let Ok(options_content) = std::fs::read_to_string(&options_path) {
         match serde_json::from_str::<Configuration>(&options_content) {
             Ok(options_config) => {
-                // Preserve our HTML full support setting, merge everything else
-                let html_setting = config.html.clone();
-                config = options_config;
-                if config.html.is_none() {
-                    config.html = html_setting;
-                } else if let Some(ref mut html) = config.html
-                    && html.experimental_full_support_enabled.is_none()
+                #[cfg(not(feature = "lang_html"))]
                 {
-                    html.experimental_full_support_enabled =
-                        html_setting.and_then(|h| h.experimental_full_support_enabled);
+                    config = options_config;
+                }
+
+                #[cfg(feature = "lang_html")]
+                {
+                    // Preserve our HTML full support setting, merge everything else
+                    let html_setting = config.html.clone();
+                    config = options_config;
+                    if config.html.is_none() {
+                        config.html = html_setting;
+                    } else if let Some(ref mut html) = config.html
+                        && html.experimental_full_support_enabled.is_none()
+                    {
+                        html.experimental_full_support_enabled =
+                            html_setting.and_then(|h| h.experimental_full_support_enabled);
+                    }
                 }
             }
             Err(err) => {
@@ -1284,6 +1334,7 @@ fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
 ///
 /// Returns the list of virtual paths that were inserted (excluding config sidecars
 /// like package.json/tsconfig.json, which don't need indexing).
+#[cfg(feature = "html_embeds")]
 fn insert_sidecar_files(
     fs: &MemoryFileSystem,
     input_file: &Utf8Path,

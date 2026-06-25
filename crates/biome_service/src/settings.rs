@@ -1,27 +1,35 @@
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+#[cfg(feature = "lang_css")]
+use biome_configuration::CssConfiguration;
+#[cfg(feature = "lang_js")]
+use biome_configuration::JsConfiguration;
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+#[cfg(feature = "lang_html")]
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
+#[cfg(feature = "lang_js")]
 use biome_configuration::javascript::{
     ExperimentalEmbeddedSnippetsEnabled, ExperimentalPnpmCatalogsEnabled, JsxRuntime,
 };
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
-    DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, JsConfiguration, JsonConfiguration,
-    LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
-    OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist,
-    push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, ConfigurationSource, DEFAULT_SCANNER_IGNORE_ENTRIES,
+    ExtendedConfigurations, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
+    JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
+#[cfg(feature = "lang_css")]
 use biome_css_formatter::context::CssFormatOptions;
+#[cfg(feature = "lang_css")]
 use biome_css_parser::{CssModulesKind, CssParserOptions};
+#[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
@@ -35,15 +43,21 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 #[cfg(feature = "lang_grit")]
 use biome_grit_syntax::GritLanguage;
+#[cfg(feature = "lang_html")]
 use biome_html_formatter::HtmlFormatOptions;
+#[cfg(feature = "lang_html")]
 use biome_html_parser::HtmlParserOptions;
+#[cfg(feature = "lang_html")]
 use biome_html_syntax::HtmlLanguage;
+#[cfg(feature = "lang_js")]
 use biome_js_formatter::context::JsFormatOptions;
+#[cfg(feature = "lang_js")]
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
+#[cfg(feature = "lang_js")]
 use biome_js_parser::JsParserOptions;
+#[cfg(feature = "lang_js")]
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_formatter::context::TrailingCommas as JsonTrailingCommas;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
@@ -85,26 +99,43 @@ pub struct Settings {
     pub vcs_settings: VcsSettings,
 
     // TODO: remove once HTML full support is stable
+    #[cfg(feature = "lang_html")]
     pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 
     // TODO: remove once embedded snippets support is stable
+    #[cfg(feature = "lang_js")]
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
 
     // TODO: remove once pnpm workspace catalogs support is stable
+    #[cfg(feature = "lang_js")]
     pub experimental_pnpm_catalogs_enabled: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 impl Settings {
     pub fn experimental_full_html_support_enabled(&self) -> bool {
-        self.experimental_full_html_support
-            .unwrap_or_default()
-            .value()
+        #[cfg(feature = "lang_html")]
+        {
+            self.experimental_full_html_support
+                .unwrap_or_default()
+                .value()
+        }
+        #[cfg(not(feature = "lang_html"))]
+        {
+            false
+        }
     }
 
     pub fn experimental_js_embedded_snippets_enabled(&self) -> bool {
-        self.experimental_js_embedded_snippets_enabled
-            .unwrap_or_default()
-            .value()
+        #[cfg(feature = "lang_js")]
+        {
+            self.experimental_js_embedded_snippets_enabled
+                .unwrap_or_default()
+                .value()
+        }
+        #[cfg(not(feature = "lang_js"))]
+        {
+            false
+        }
     }
 
     pub fn source(&self) -> Option<Configuration> {
@@ -178,6 +209,7 @@ impl Settings {
         }
 
         // javascript settings
+        #[cfg(feature = "lang_js")]
         if let Some(javascript) = configuration.javascript {
             self.experimental_js_embedded_snippets_enabled =
                 javascript.experimental_embedded_snippets_enabled;
@@ -192,6 +224,7 @@ impl Settings {
             self.languages.json = json.into()
         }
         // css settings
+        #[cfg(feature = "lang_css")]
         if let Some(css) = configuration.css {
             self.languages.css = css.into()
         }
@@ -201,6 +234,7 @@ impl Settings {
             self.languages.graphql = graphql.into()
         }
         // html settings
+        #[cfg(feature = "lang_html")]
         if let Some(html) = configuration.html {
             self.experimental_full_html_support = html.experimental_full_support_enabled;
             self.languages.html = html.into();
@@ -257,9 +291,16 @@ impl Settings {
     /// `catalog:` dependency versions.
     #[inline]
     pub fn use_pnpm_workspace_catalogs(&self) -> bool {
-        self.experimental_pnpm_catalogs_enabled
-            .unwrap_or_default()
-            .value()
+        #[cfg(feature = "lang_js")]
+        {
+            self.experimental_pnpm_catalogs_enabled
+                .unwrap_or_default()
+                .value()
+        }
+        #[cfg(not(feature = "lang_js"))]
+        {
+            false
+        }
     }
 
     /// Retrieves the settings of the linter
@@ -692,6 +733,7 @@ pub struct OverrideFormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    #[cfg(feature = "lang_js")]
     pub trailing_commas: Option<TrailingCommas>,
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -710,6 +752,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
             expand: conf.expand,
+            #[cfg(feature = "lang_js")]
             trailing_commas: conf.trailing_commas,
             trailing_newline: conf.trailing_newline,
         }
@@ -811,11 +854,14 @@ pub struct OverrideFilesSettings {
 /// Static map of language names to language-specific settings
 #[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
+    #[cfg(feature = "lang_js")]
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
+    #[cfg(feature = "lang_css")]
     pub css: LanguageSettings<CssLanguage>,
     #[cfg(feature = "lang_graphql")]
     pub graphql: LanguageSettings<GraphqlLanguage>,
+    #[cfg(feature = "lang_html")]
     pub html: LanguageSettings<HtmlLanguage>,
     #[cfg(feature = "lang_grit")]
     pub grit: LanguageSettings<GritLanguage>,
@@ -825,6 +871,7 @@ pub struct LanguageListSettings {
     pub yaml: LanguageSettings<biome_yaml_syntax::YamlLanguage>,
 }
 
+#[cfg(feature = "lang_js")]
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JsConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
@@ -878,6 +925,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
@@ -947,6 +995,7 @@ impl From<biome_configuration::GritConfiguration> for LanguageSettings<GritLangu
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     fn from(html: HtmlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
@@ -1491,6 +1540,7 @@ pub struct OverrideSettings {
 
 impl OverrideSettings {
     /// It scans the current override rules and return the formatting options that of the first override is matched
+    #[cfg(feature = "lang_js")]
     pub fn override_js_format_options(
         &self,
         path: &Utf8Path,
@@ -1504,6 +1554,7 @@ impl OverrideSettings {
         options
     }
 
+    #[cfg(feature = "lang_js")]
     pub fn override_js_globals(
         &self,
         path: &BiomePath,
@@ -1525,6 +1576,7 @@ impl OverrideSettings {
             .unwrap_or_default()
     }
 
+    #[cfg(feature = "lang_js")]
     pub fn override_jsx_runtime(&self, path: &BiomePath, base_setting: JsxRuntime) -> JsxRuntime {
         self.patterns
             .iter()
@@ -1553,6 +1605,7 @@ impl OverrideSettings {
         }
     }
 
+    #[cfg(feature = "lang_html")]
     pub fn apply_override_html_format_options(
         &self,
         path: &Utf8Path,
@@ -1565,6 +1618,7 @@ impl OverrideSettings {
         }
     }
 
+    #[cfg(feature = "lang_js")]
     pub fn apply_override_js_parser_options(&self, path: &Utf8Path, options: &mut JsParserOptions) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1585,6 +1639,7 @@ impl OverrideSettings {
         }
     }
 
+    #[cfg(feature = "lang_html")]
     pub(crate) fn apply_override_html_parser_options(
         &self,
         path: &Utf8Path,
@@ -1598,6 +1653,7 @@ impl OverrideSettings {
     }
 
     /// Scans the override rules and returns the parser options of the first matching override.
+    #[cfg(feature = "lang_css")]
     pub fn apply_override_css_parser_options(
         &self,
         path: &Utf8Path,
@@ -1611,6 +1667,7 @@ impl OverrideSettings {
     }
 
     /// Scans and aggregates all the overrides into a single [CssFormatOptions]
+    #[cfg(feature = "lang_css")]
     pub fn apply_override_css_format_options(
         &self,
         path: &Utf8Path,
@@ -1672,6 +1729,7 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
+                    #[cfg(feature = "lang_js")]
                     push_to_analyzer_rules(
                         rules,
                         biome_js_analyze::METADATA.deref(),
@@ -1682,6 +1740,7 @@ impl OverrideSettings {
                         biome_json_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_css")]
                     push_to_analyzer_rules(
                         rules,
                         biome_css_analyze::METADATA.deref(),
@@ -1693,6 +1752,7 @@ impl OverrideSettings {
                         biome_graphql_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_html")]
                     push_to_analyzer_rules(
                         rules,
                         biome_html_analyze::METADATA.deref(),
@@ -1701,6 +1761,7 @@ impl OverrideSettings {
                 }
 
                 if let Some(actions) = pattern.assist.actions.as_ref() {
+                    #[cfg(feature = "lang_js")]
                     push_to_analyzer_assist(
                         actions,
                         biome_js_analyze::METADATA.deref(),
@@ -1711,6 +1772,7 @@ impl OverrideSettings {
                         biome_json_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_css")]
                     push_to_analyzer_assist(
                         actions,
                         biome_css_analyze::METADATA.deref(),
@@ -1722,6 +1784,7 @@ impl OverrideSettings {
                         biome_graphql_analyze::METADATA.deref(),
                         &mut analyzer_rules,
                     );
+                    #[cfg(feature = "lang_html")]
                     push_to_analyzer_assist(
                         actions,
                         biome_html_analyze::METADATA.deref(),
@@ -1761,6 +1824,7 @@ impl OverrideSettingPattern {
         !self.includes.is_unset() && self.includes.matches(file_path)
     }
 
+    #[cfg(feature = "lang_js")]
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
         let js_formatter = &self.languages.javascript.formatter;
         let formatter = &self.formatter;
@@ -1842,11 +1906,6 @@ impl OverrideSettingPattern {
         }
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
-        } else if let Some(trailing_commas) = formatter.trailing_commas {
-            options.set_trailing_commas(match trailing_commas {
-                TrailingCommas::All | TrailingCommas::Es5 => JsonTrailingCommas::All,
-                TrailingCommas::None => JsonTrailingCommas::None,
-            });
         }
         if let Some(expand_lists) = json_formatter.expand.or(formatter.expand) {
             options.set_expand(expand_lists);
@@ -1869,6 +1928,7 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_css")]
     fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
         let css_formatter = &self.languages.css.formatter;
         let formatter = &self.formatter;
@@ -1963,6 +2023,7 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_html")]
     fn apply_overrides_to_html_format_options(&self, options: &mut HtmlFormatOptions) {
         let html_formatter = &self.languages.html.formatter;
         let formatter = &self.formatter;
@@ -2021,6 +2082,7 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_js")]
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         let js_parser = &self.languages.javascript.parser;
 
@@ -2042,6 +2104,7 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_html")]
     fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParserOptions) {
         let html_parser = &self.languages.html.parser;
 
@@ -2055,6 +2118,7 @@ impl OverrideSettingPattern {
         }
     }
 
+    #[cfg(feature = "lang_css")]
     fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
         let css_parser = &self.languages.css.parser;
 
@@ -2102,6 +2166,7 @@ pub fn to_override_settings(
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
                 expand: formatter.expand,
+                #[cfg(feature = "lang_js")]
                 trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
             })
@@ -2130,16 +2195,25 @@ pub fn to_override_settings(
             .unwrap_or_default();
 
         let mut languages = LanguageListSettings::default();
+        #[cfg(feature = "lang_js")]
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
+        #[cfg(feature = "lang_css")]
         let css = pattern.css.take().unwrap_or_default();
+        #[cfg(feature = "lang_html")]
         let html = pattern.html.take().unwrap_or_default();
 
-        languages.javascript =
-            to_javascript_language_settings(javascript, &current_settings.languages.javascript);
+        #[cfg(feature = "lang_js")]
+        {
+            languages.javascript =
+                to_javascript_language_settings(javascript, &current_settings.languages.javascript);
+        }
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
-        languages.css = to_css_language_settings(css, &current_settings.languages.css);
+        #[cfg(feature = "lang_css")]
+        {
+            languages.css = to_css_language_settings(css, &current_settings.languages.css);
+        }
         #[cfg(feature = "lang_graphql")]
         {
             let graphql = pattern.graphql.take().unwrap_or_default();
@@ -2152,7 +2226,10 @@ pub fn to_override_settings(
             let grit = pattern.grit.take().unwrap_or_default();
             languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
         }
-        languages.html = to_html_language_settings(html, &current_settings.languages.html);
+        #[cfg(feature = "lang_html")]
+        {
+            languages.html = to_html_language_settings(html, &current_settings.languages.html);
+        }
 
         let pattern_setting = OverrideSettingPattern {
             includes: OverrideIncludes::new(working_directory.clone(), pattern.includes),
@@ -2171,6 +2248,7 @@ pub fn to_override_settings(
     Ok(override_settings)
 }
 
+#[cfg(feature = "lang_js")]
 fn to_javascript_language_settings(
     mut conf: JsConfiguration,
     parent_settings: &LanguageSettings<JsLanguage>,
@@ -2222,6 +2300,7 @@ fn to_json_language_settings(
     language_setting
 }
 
+#[cfg(feature = "lang_css")]
 fn to_css_language_settings(
     mut conf: CssConfiguration,
     parent_settings: &LanguageSettings<CssLanguage>,
@@ -2287,6 +2366,7 @@ fn to_grit_language_settings(
 
     language_setting
 }
+#[cfg(feature = "lang_html")]
 fn to_html_language_settings(
     mut conf: HtmlConfiguration,
     _parent_settings: &LanguageSettings<HtmlLanguage>,

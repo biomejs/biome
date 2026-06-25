@@ -40,7 +40,7 @@ rustc-hash                = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }
 biome_json_parser   = { path = "../biome_json_parser" }
-biome_test_utils    = { path = "../biome_test_utils" }
+biome_test_utils    = { path = "../biome_test_utils", features = ["lang_json"] }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }

@@ -17,7 +17,14 @@ pub struct LintRulesVisitor {
     pub groups: BTreeMap<&'static str, BTreeMap<&'static str, biome_analyze::RuleMetadata>>,
     /// Mapping from domain to group/rule
     /// e.g next => (<group>/<rule>, <group>/<rule>)
-    #[allow(dead_code)]
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`dead_code` is feature-dependent here; `expect(dead_code)` is unfulfilled when language features use this field."
+    )]
+    #[allow(
+        dead_code,
+        reason = "`domains` is only used when feature-gated visitors populate rule domains."
+    )]
     pub domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
 }
 

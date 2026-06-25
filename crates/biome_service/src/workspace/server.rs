@@ -2,12 +2,21 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
-use crate::embed::types::EmbedContent;
+use crate::embed::EmbedContent;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, Features,
     FixAllParams, LintParams, LintResults, ParseEmbeddedParams, ParseResult, ResolveBindingParams,
     ResolveDefinitionParams, UpdateSnippetsNodes,
 };
+use crate::module_graph::ModuleDependencies;
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+use crate::module_graph::resolve_css_module;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use crate::module_graph::resolve_js_module;
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
+use crate::module_graph::{HtmlEmbeddedContent, resolve_html_module};
+#[cfg(feature = "module_graph")]
+use crate::module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
@@ -37,30 +46,36 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_css_syntax::AnyCssRoot;
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_diagnostics::{
-    Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
+    Diagnostic, DiagnosticExt, Error, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
+#[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_semantic::js_semantic_model;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_js_syntax::AnyJsRoot;
 use biome_json_parser::JsonParserOptions;
+#[cfg(feature = "lang_css")]
+use biome_languages::CssFileSource;
+#[cfg(feature = "lang_js")]
+use biome_languages::JsFileSource;
+#[cfg(feature = "lang_css")]
 use biome_languages::css::CssVariant;
+#[cfg(feature = "lang_js")]
 use biome_languages::javascript::{JsEmbeddingKind, LanguageVariant, ModuleKind};
-use biome_languages::{
-    CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource, LanguageDb,
-};
-use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
-};
-use biome_package::{Catalogs, PackageJson, PackageType};
+use biome_languages::{DocumentFileSource, JsonFileSource, LanguageDb};
+#[cfg(feature = "lang_js")]
+use biome_package::PackageType;
+use biome_package::{Catalogs, PackageJson};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
@@ -300,7 +315,9 @@ impl WorkspaceServer {
         path_source: DocumentFileSource,
     ) -> bool {
         match (document_file_source, path_source) {
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
             (DocumentFileSource::Js(_), DocumentFileSource::Html(_)) => true,
+            #[cfg(feature = "lang_js")]
             (DocumentFileSource::Js(_), DocumentFileSource::Js(path_source)) => {
                 !matches!(path_source.as_embedding_kind(), JsEmbeddingKind::None)
             }
@@ -470,6 +487,7 @@ impl WorkspaceServer {
             )
         };
 
+        #[cfg(feature = "lang_js")]
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
                 Some("js") => {
@@ -500,6 +518,7 @@ impl WorkspaceServer {
             }
         }
 
+        #[cfg(feature = "lang_css")]
         if let DocumentFileSource::Css(css) = &mut source {
             if settings
                 .as_ref()
@@ -716,30 +735,48 @@ impl WorkspaceServer {
 
         // Resolve the correct capabilities for the definition side based on
         // the definition reference kind (e.g., CssClass -> CSS handler, Local -> Same handler).
-        let resolve_capabilities = |def_ref: &Option<DefinitionReference>,
-                                    default_caps: Capabilities|
-         -> Capabilities {
-            match def_ref {
-                None => default_caps,
-                Some(def_ref) => match def_ref {
-                    DefinitionReference::Local { .. }
-                    | DefinitionReference::Import { .. }
-                    | DefinitionReference::HtmlComponent { .. } => default_caps,
-                    DefinitionReference::LocalEmbedded { to_language, .. } => match to_language {
-                        LocalEmbeddedLanguage::Js => {
-                            self.features
-                                .get_deprecated_capabilities(DocumentFileSource::Js(
-                                    JsFileSource::tsx(),
-                                ))
+        let resolve_capabilities =
+            |def_ref: &Option<DefinitionReference>, default_caps: Capabilities| -> Capabilities {
+                match def_ref {
+                    None => default_caps,
+                    Some(def_ref) => match def_ref {
+                        DefinitionReference::Local { .. }
+                        | DefinitionReference::Import { .. }
+                        | DefinitionReference::HtmlComponent { .. } => default_caps,
+                        DefinitionReference::LocalEmbedded { to_language, .. } => match to_language
+                        {
+                            LocalEmbeddedLanguage::Js => {
+                                #[cfg(feature = "lang_js")]
+                                {
+                                    self.features.get_deprecated_capabilities(
+                                        DocumentFileSource::Js(JsFileSource::tsx()),
+                                    )
+                                }
+                                #[cfg(not(feature = "lang_js"))]
+                                {
+                                    self.features
+                                        .get_deprecated_capabilities(DocumentFileSource::Unknown)
+                                }
+                            }
+                        },
+                        // Html components are defined in JavaScript part of the file, so we need a JS handler.
+                        DefinitionReference::CssClass { .. } => {
+                            #[cfg(feature = "lang_css")]
+                            {
+                                self.features
+                                    .get_deprecated_capabilities(DocumentFileSource::Css(
+                                        CssFileSource::css(),
+                                    ))
+                            }
+                            #[cfg(not(feature = "lang_css"))]
+                            {
+                                self.features
+                                    .get_deprecated_capabilities(DocumentFileSource::Unknown)
+                            }
                         }
                     },
-                    // Html components are defined in JavaScript part of the file, so we need a JS handler.
-                    DefinitionReference::CssClass { .. } => self
-                        .features
-                        .get_deprecated_capabilities(DocumentFileSource::Css(CssFileSource::css())),
-                },
-            }
-        };
+                }
+            };
 
         if let Some(resolve_binding) = capabilities.editors.resolve_binding {
             let result = resolve_binding(ResolveBindingParams {
@@ -1200,15 +1237,17 @@ impl WorkspaceServer {
     /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
     /// are determined.
     #[tracing::instrument(level = "debug", skip(self))]
+    #[cfg(feature = "module_graph")]
     fn update_module_graph_internal(
         &self,
         path: &BiomePath,
         update_kind: UpdateKind,
         infer_types: bool,
-    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
+    ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         let db = self.get_db();
         match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
+                #[cfg(feature = "lang_js")]
                 if let Some(js_root) = root.clone().into_language_root::<AnyJsRoot>(&db) {
                     let semantic_model = js_semantic_model(&db, &root);
                     let (module_info, deps, diagnostics) = resolve_js_module(
@@ -1221,8 +1260,11 @@ impl WorkspaceServer {
                         infer_types,
                     );
                     self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
-                    Ok((deps, diagnostics))
-                } else if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(&db) {
+                    return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
+                }
+
+                #[cfg(feature = "lang_css")]
+                if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(&db) {
                     let (module_info, deps, diagnostics) = resolve_css_module(
                         css_root,
                         path,
@@ -1231,8 +1273,12 @@ impl WorkspaceServer {
                         &self.db_state.path_info_cache,
                     );
                     self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
-                    Ok((deps, diagnostics))
-                } else if let Some(html_root) = root.clone().into_language_root::<HtmlRoot>(&db) {
+                    return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
+                }
+
+                #[cfg(feature = "lang_html")]
+                if let Some(html_root) = root.clone().into_language_root::<HtmlRoot>(&db) {
+                    #[cfg(feature = "html_embeds")]
                     let embedded_content: Vec<HtmlEmbeddedContent> = self
                         .get_parse(path)
                         .map(|doc| {
@@ -1261,6 +1307,8 @@ impl WorkspaceServer {
                                 .collect()
                         })
                         .unwrap_or_default();
+                    #[cfg(not(feature = "html_embeds"))]
+                    let embedded_content: Vec<HtmlEmbeddedContent> = Vec::new();
 
                     let (module_info, deps, diagnostics) = resolve_html_module(
                         html_root,
@@ -1271,16 +1319,28 @@ impl WorkspaceServer {
                         &self.db_state.path_info_cache,
                     );
                     self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
-                    Ok((deps, diagnostics))
-                } else {
-                    Ok(Default::default())
+                    return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
+
+                let _ = (&db, root, infer_types);
+                Ok(Default::default())
             }
             UpdateKind::Removed => {
                 self.db_remove_module(path)?;
                 Ok(Default::default())
             }
         }
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    #[cfg(not(feature = "module_graph"))]
+    fn update_module_graph_internal(
+        &self,
+        _path: &BiomePath,
+        _update_kind: UpdateKind,
+        _infer_types: bool,
+    ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
+        Ok(Default::default())
     }
 
     /// Returns a clone of the database. This is usually used to **read** data from it.
@@ -1298,7 +1358,7 @@ impl WorkspaceServer {
         path: &Utf8Path,
         update_kind: UpdateKind,
         project_key: ProjectKey,
-    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
+    ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
             self.update_project_layout(&path, &update_kind, project_key)?;
@@ -1354,6 +1414,7 @@ impl WorkspaceServer {
     }
 
     /// Stores a [ModuleInfo] in the database
+    #[cfg(feature = "module_graph")]
     fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
         let db = self.db_state.handle.to_db();
         let module_info = ModuleInfo::new(&db, path.to_path_buf(), kind);
@@ -1366,6 +1427,7 @@ impl WorkspaceServer {
     }
 
     /// Removes a [ModuleInfo] from the database
+    #[cfg(feature = "module_graph")]
     fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         self.db_state.path_info_cache.remove(path);
         let db = self.db_state.handle.to_db();
@@ -2910,26 +2972,34 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
-        let parsed = self.get_parse(params.path.as_path())?;
-        let settings = self
-            .projects
-            .get_settings_based_on_path(params.project_key, &params.path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let update_kind = match params.update_kind {
-            super::UpdateKind::AddOrUpdate => {
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into())
-            }
-            super::UpdateKind::Remove => UpdateKind::Removed,
-        };
+        #[cfg(feature = "module_graph")]
+        {
+            let parsed = self.get_parse(params.path.as_path())?;
+            let settings = self
+                .projects
+                .get_settings_based_on_path(params.project_key, &params.path)
+                .ok_or_else(WorkspaceError::no_project)?;
+            let update_kind = match params.update_kind {
+                super::UpdateKind::AddOrUpdate => {
+                    UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into())
+                }
+                super::UpdateKind::Remove => UpdateKind::Removed,
+            };
 
-        // TODO: handle diagnostics here
-        self.update_module_graph_internal(
-            &params.path,
-            update_kind,
-            settings.module_graph_resolution_kind.is_modules_and_types(),
-        )?;
+            // TODO: handle diagnostics here
+            self.update_module_graph_internal(
+                &params.path,
+                update_kind,
+                settings.module_graph_resolution_kind.is_modules_and_types(),
+            )?;
 
-        Ok(())
+            Ok(())
+        }
+        #[cfg(not(feature = "module_graph"))]
+        {
+            let _ = params;
+            Ok(())
+        }
     }
 
     fn fs(&self) -> &dyn FsWithResolverProxy {
@@ -3011,10 +3081,17 @@ impl Workspace for WorkspaceServer {
         _params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
         let db = self.get_db();
+        #[cfg(feature = "module_graph")]
         let mut data = FxHashMap::default();
+        #[cfg(feature = "module_graph")]
         db.for_each_module(&mut |path, kind| {
             data.insert(path.as_str().to_string(), kind.dump());
         });
+        #[cfg(not(feature = "module_graph"))]
+        let data = {
+            let _ = db;
+            FxHashMap::default()
+        };
         Ok(GetModuleGraphResult { data })
     }
 }
@@ -3059,7 +3136,16 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                     .into_iter()
                     .any(|package_path| package_path.starts_with(workspace_root))
             }),
-            _ => self.module_db().contains(path),
+            _ => {
+                #[cfg(feature = "module_graph")]
+                {
+                    self.module_db().contains(path)
+                }
+                #[cfg(not(feature = "module_graph"))]
+                {
+                    false
+                }
+            }
         }
     }
 
@@ -3068,7 +3154,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
         trigger: IndexTrigger,
-    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
+    ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         self.open_file_internal(
             OpenFileReason::Index(trigger),
             OpenFileParams {
@@ -3267,7 +3353,7 @@ pub(super) struct InternalOpenFileResult {
     /// Dependencies we discovered of the opened file.
     pub dependencies: ModuleDependencies,
 
-    pub diagnostics: Vec<ModuleDiagnostic>,
+    pub diagnostics: Vec<Error>,
 }
 
 /// Reports the reason why a file is being opened/indexed.

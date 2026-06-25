@@ -1,6 +1,6 @@
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
-use biome_css_syntax::{TextRange, TextSize};
+#[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
 use biome_js_semantic::js_semantic_model;
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
@@ -8,11 +8,16 @@ use biome_js_syntax::{
     AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
+#[cfg(feature = "module_graph")]
 use biome_module_graph::{
     JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo, find_js_exported_symbol,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
+#[cfg(feature = "module_graph")]
+use biome_rowan::TextRange;
+use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
+#[cfg(feature = "module_graph")]
 use biome_workspace_db::WorkspaceDb;
+#[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 use std::ops::Add;
 
@@ -161,6 +166,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         DefinitionReference::Local { range } => {
             result.store(params.path.clone(), *range);
         }
+        #[cfg(feature = "module_graph")]
         DefinitionReference::Import {
             local_name,
             specifier,
@@ -173,6 +179,9 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 &mut result,
             );
         }
+        #[cfg(not(feature = "module_graph"))]
+        DefinitionReference::Import { .. } => return None,
+        #[cfg(feature = "module_graph")]
         DefinitionReference::HtmlComponent { local_name, source } => {
             resolve_import_definition(
                 local_name,
@@ -182,6 +191,8 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 &mut result,
             );
         }
+        #[cfg(not(feature = "module_graph"))]
+        DefinitionReference::HtmlComponent { .. } => return None,
         DefinitionReference::LocalEmbedded { range, .. } => {
             let offset = params.parsed_source.diagnostic_offset(&params.workspace_db);
             if let Some(offset) = offset {
@@ -196,6 +207,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
 }
 
 /// Resolves an imported symbol to its definition in the target module.
+#[cfg(feature = "module_graph")]
 fn resolve_import_definition(
     local_name: &str,
     specifier: &str,

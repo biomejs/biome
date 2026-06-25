@@ -31,11 +31,11 @@ pub mod vcs;
 #[cfg(feature = "lang_yaml")]
 pub mod yaml;
 
+use crate::analyzer::RuleDomains;
 #[cfg(feature = "cli")]
 use crate::analyzer::assist::assist_configuration;
 use crate::analyzer::assist::{Actions, AssistConfiguration};
 use crate::analyzer::presets::PresetConfig;
-use crate::analyzer::RuleDomains;
 use crate::bool::Bool;
 #[cfg(feature = "lang_css")]
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
@@ -323,9 +323,11 @@ impl Configuration {
                     {
                         let mut actions = Actions::default();
                         actions.source = Some(crate::analyzer::assist::Source {
-                            organize_imports: Some(crate::analyzer::RuleAssistConfiguration::Plain(
-                                crate::analyzer::RuleAssistPlainConfiguration::On,
-                            )),
+                            organize_imports: Some(
+                                crate::analyzer::RuleAssistConfiguration::Plain(
+                                    crate::analyzer::RuleAssistPlainConfiguration::On,
+                                ),
+                            ),
                             ..Default::default()
                         });
                         actions

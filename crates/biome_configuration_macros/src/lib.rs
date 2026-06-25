@@ -38,7 +38,14 @@ pub fn lint_group_structs(_input: TokenStream) -> TokenStream {
 }
 
 fn collect_lint_rules() -> LintRulesVisitor {
-    #[allow(unused_mut)]
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`unused_mut` is feature-dependent here; `expect(unused_mut)` is unfulfilled when language features mutate this visitor."
+    )]
+    #[allow(
+        unused_mut,
+        reason = "The visitor is mutated only when at least one language feature registers lint rules."
+    )]
     let mut lint_visitor = LintRulesVisitor::default();
     #[cfg(feature = "lang_js")]
     biome_js_analyze::visit_registry(&mut lint_visitor);
@@ -76,7 +83,14 @@ pub fn assist_group_structs(_input: TokenStream) -> TokenStream {
 }
 
 fn collect_assist_rules() -> AssistActionsVisitor {
-    #[allow(unused_mut)]
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`unused_mut` is feature-dependent here; `expect(unused_mut)` is unfulfilled when language features mutate this visitor."
+    )]
+    #[allow(
+        unused_mut,
+        reason = "The visitor is mutated only when at least one language feature registers assist rules."
+    )]
     let mut assist_visitor = AssistActionsVisitor::default();
     #[cfg(feature = "lang_js")]
     biome_js_analyze::visit_registry(&mut assist_visitor);
