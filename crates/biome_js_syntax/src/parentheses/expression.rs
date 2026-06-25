@@ -954,6 +954,8 @@ fn update_or_lower_expression_needs_parens(
         parent.kind(),
         JsSyntaxKind::JS_EXTENDS_CLAUSE
             | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            // Instantiation expression
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
             // Callee
             | JsSyntaxKind::JS_CALL_EXPRESSION
             | JsSyntaxKind::JS_NEW_EXPRESSION
