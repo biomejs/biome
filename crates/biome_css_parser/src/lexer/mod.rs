@@ -69,7 +69,8 @@ pub enum CssLexContext {
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
-    /// Applied when lexing Tailwind CSS utility names in `@utility`.
+    /// Applied when lexing Tailwind CSS utility and variant names in
+    /// `@utility` and `@variant`.
     TailwindUtilityName,
 }
 
@@ -1547,6 +1548,22 @@ impl<'src> CssLexer<'src> {
     fn consume_token_tailwind_utility_name(&mut self, current: u8) -> CssSyntaxKind {
         if self.is_ident_start() {
             return self.consume_identifier_with_slash(true);
+        }
+
+        // Tailwind utility and variant names may start with a digit, such as
+        // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
+        // CSS lexer would split that into a number and an identifier, so consume
+        // the whole run as a single identifier here.
+        if current.is_ascii_digit() {
+            while let Some(byte) = self.current_byte() {
+                if byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_' || !byte.is_ascii()
+                {
+                    self.advance_byte_or_char(byte);
+                } else {
+                    break;
+                }
+            }
+            return T![ident];
         }
 
         self.consume_token(current)
