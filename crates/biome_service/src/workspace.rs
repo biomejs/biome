@@ -1277,7 +1277,11 @@ pub struct GoToDefinitionResult {
 
 impl GoToDefinitionResult {
     // Used only by language-gated logic.
-    #[allow(dead_code)]
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`dead_code` is feature-dependent here; `expect(dead_code)` is unfulfilled when language features use this method."
+    )]
+    #[allow(dead_code, reason = "This method is used only by language-gated logic.")]
     pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
         if !self.matches.iter().any(|(p, r)| *p == path && *r == range) {
             self.matches.push((path, range));

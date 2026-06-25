@@ -321,16 +321,17 @@ impl Configuration {
                 actions: Some({
                     #[cfg(feature = "lang_js")]
                     {
-                        let mut actions = Actions::default();
-                        actions.source = Some(crate::analyzer::assist::Source {
-                            organize_imports: Some(
-                                crate::analyzer::RuleAssistConfiguration::Plain(
-                                    crate::analyzer::RuleAssistPlainConfiguration::On,
+                        Actions {
+                            source: Some(crate::analyzer::assist::Source {
+                                organize_imports: Some(
+                                    crate::analyzer::RuleAssistConfiguration::Plain(
+                                        crate::analyzer::RuleAssistPlainConfiguration::On,
+                                    ),
                                 ),
-                            ),
+                                ..Default::default()
+                            }),
                             ..Default::default()
-                        });
-                        actions
+                        }
                     }
                     #[cfg(not(feature = "lang_js"))]
                     {

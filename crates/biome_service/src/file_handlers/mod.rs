@@ -1027,7 +1027,14 @@ impl Features {
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
-            #[allow(unreachable_patterns)]
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
             _ => self.unknown.capabilities(),
         }
     }
@@ -1052,7 +1059,14 @@ impl Features {
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
-            #[allow(unreachable_patterns)]
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
             _ => self.unknown.capabilities(),
         }
     }
