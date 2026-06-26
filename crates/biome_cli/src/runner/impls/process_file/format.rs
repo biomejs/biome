@@ -186,6 +186,10 @@ impl ProcessFile for FormatProcessFile {
 
         if file_features.is_ignored() {
             console.append(markup! {{content}});
+            // Write error last because files may generally be long
+            console.error(markup! {
+                <Warn>"The content was not formatted because the path `"{biome_path.as_str()}"` is ignored."</Warn>
+            });
             return Ok(());
         }
 
