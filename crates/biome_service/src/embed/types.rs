@@ -1,7 +1,7 @@
-use biome_html_syntax::AnySvelteBlock;
+use biome_html_syntax::{AnySvelteBlock, HtmlSyntaxKind};
 #[cfg(feature = "lang_graphql")]
 use biome_languages::GraphqlFileSource;
-use biome_languages::javascript::Language;
+use biome_languages::javascript::{Language, SvelteVariableKind};
 use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_rowan::{TextRange, TextSize, TokenText};
 
@@ -143,8 +143,7 @@ pub(crate) enum SvelteBlockKind {
     Snippet,
     /// `{@const name = value}` block in Svelte (parsed as assignment expression).
     Const,
-    /// `{let ...}` / `{const ...}` markup declaration block (parsed as a JS declaration).
-    Declaration,
+    Declaration(SvelteVariableKind),
 }
 
 impl From<&AnySvelteBlock> for EmbedBlockKind {
@@ -158,36 +157,16 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
             AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
-            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
+            AnySvelteBlock::SvelteDeclarationBlock(block) => {
+                let kind = match block.keyword_token().map(|token| token.kind()) {
+                    Ok(HtmlSyntaxKind::CONST_KW) => SvelteVariableKind::Const,
+                    _ => SvelteVariableKind::Let,
+                };
+                Self::Svelte(SvelteBlockKind::Declaration(kind))
+            }
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
-    }
-}
-
-/// The text of an embed site. Usually a zero-copy `TokenText` slice from the
-/// host CST, but Svelte declaration blocks synthesize `keyword + declarations`,
-/// which spans two tokens and must be owned.
-#[derive(Debug, Clone)]
-pub(crate) enum EmbeddedText {
-    /// Zero-copy slice of a single host token.
-    Token(TokenText),
-    /// Owned text synthesized from more than one token.
-    Owned(Box<str>),
-}
-
-impl EmbeddedText {
-    pub fn text(&self) -> &str {
-        match self {
-            Self::Token(t) => t.text(),
-            Self::Owned(s) => s,
-        }
-    }
-}
-
-impl From<TokenText> for EmbeddedText {
-    fn from(value: TokenText) -> Self {
-        Self::Token(value)
     }
 }
 
@@ -205,7 +184,7 @@ pub(crate) struct EmbedContent {
     pub content_offset: TextSize,
 
     /// The raw text of the embedded content.
-    pub text: EmbeddedText,
+    pub text: TokenText,
 }
 
 impl EmbedCandidate {

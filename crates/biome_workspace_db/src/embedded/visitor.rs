@@ -15,7 +15,7 @@ use biome_js_syntax::{
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
     JsImport, JsModuleItemList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -468,6 +468,10 @@ impl EmbeddedBindingsBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_snippet_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteDeclarationRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_declaration_root(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -488,6 +492,22 @@ impl EmbeddedBindingsBuilder {
         // identifier (`a = 1`) as well as object (`{ x, y } = o`) and array
         // (`[a, b] = arr`) destructuring, including nested and rest patterns.
         self.visit_svelte_assignment_pattern(left);
+        Some(())
+    }
+
+    fn visit_svelte_declaration_root(
+        &mut self,
+        root: &JsSvelteDeclarationRoot,
+        embed_block_kind: Option<&EmbeddedBlockKind>,
+    ) -> Option<()> {
+        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration) = embed_block_kind? else {
+            return None;
+        };
+        for declarator in root.declarations().iter().flatten() {
+            if let Ok(id) = declarator.id() {
+                self.visit_any_js_binding_pattern(&id);
+            }
+        }
         Some(())
     }
 

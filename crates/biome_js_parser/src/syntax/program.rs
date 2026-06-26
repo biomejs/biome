@@ -1,7 +1,7 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::parse_statements;
+use super::stmt::{parse_statements, parse_svelte_declarator_list};
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
@@ -13,7 +13,7 @@ use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_languages::javascript::ModuleKind;
+use biome_languages::javascript::{ModuleKind, SvelteVariableKind};
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -37,6 +37,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     // are handlers, and all other expressions are inline statements.
     if p.source_type().is_vue_event_handler() {
         return parse_vue_event_handler(p, m);
+    }
+
+    if let Some(kind) = p.source_type().as_embedding_kind().as_svelte_declaration_block() {
+        return parse_svelte_declaration_root(p, m, kind);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -201,4 +205,25 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SVELTE_SNIPPET_ROOT)
+}
+
+fn parse_svelte_declaration_root(
+    p: &mut JsParser,
+    m: Marker,
+    kind: SvelteVariableKind,
+) -> CompletedMarker {
+    let is_const = matches!(kind, SvelteVariableKind::Const);
+    parse_svelte_declarator_list(p, is_const).or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+    }
+
+    m.complete(p, JS_SVELTE_DECLARATION_ROOT)
 }

@@ -1,12 +1,11 @@
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
 use crate::embed::types::{
-    EmbedBlockKind, EmbedCandidate, EmbedContent, EmbeddedText, GuestLanguage, HostLanguage,
-    SvelteBlockKind,
+    EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssLanguage, TextRange, TextSize};
+use biome_css_syntax::{CssLanguage, TextSize};
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDirective,
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
@@ -415,7 +414,9 @@ fn parse_svelte_blocks(
                 }
             }
             AnySvelteBlock::SvelteDeclarationBlock(declaration_block) => {
-                if let Some(candidate) = build_svelte_declaration_candidate(declaration_block) {
+                if let Some(candidate) =
+                    build_svelte_declaration_candidate(declaration_block, &svelte_block)
+                {
                     ctx.parse_and_push(
                         &candidate,
                         &doc_file_source,
@@ -608,7 +609,7 @@ fn build_text_expression_directive_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text().into(),
+            text: content_token.token_text(),
         },
         is_event_handler: false,
         is_class_attribute: false,
@@ -634,7 +635,7 @@ fn build_attribute_expression_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text().into(),
+            text: content_token.token_text(),
         },
         is_event_handler: false,
         is_class_attribute,
@@ -651,7 +652,7 @@ fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<E
             element_range: element.range(),
             content_range,
             content_offset: content_range.start(),
-            text: content_token.token_text_trimmed().into(),
+            text: content_token.token_text_trimmed(),
         },
     })
 }
@@ -666,7 +667,7 @@ fn build_svelte_name_candidate(svelte_name: &SvelteName) -> Option<EmbedCandidat
             element_range: token.text_trimmed_range(),
             content_range: token.text_range(),
             content_offset: token.text_range().start(),
-            text: token.token_text().into(),
+            text: token.token_text(),
         },
         block_kind: EmbedBlockKind::Neutral,
     })
@@ -682,50 +683,26 @@ fn build_svelte_text_expression_candidate(
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text().into(),
+            text: content_token.token_text(),
         },
         block_kind: EmbedBlockKind::from(svelte_block),
     })
 }
 
-/// Build an embed candidate for a Svelte `{let ...}` / `{const ...}` block.
-///
-/// The JS parser is fed `keyword + " " + declarations` (e.g. `const a = 1, b = 2`)
-/// so it parses a `JsVariableStatement` instead of an assignment expression.
-///
-/// `content_offset` is anchored to `declarations_start - (keyword_len + 1)` so every
-/// character of the declarations part maps back to the original source exactly,
-/// regardless of how much whitespace the source had after the keyword.
 fn build_svelte_declaration_candidate(
     declaration_block: &SvelteDeclarationBlock,
+    svelte_block: &AnySvelteBlock,
 ) -> Option<EmbedCandidate> {
-    let keyword = declaration_block.keyword_token().ok()?;
     let declarations = declaration_block.declarations().ok()?;
     let content_token = declarations.html_literal_token().ok()?;
-
-    // In valid Svelte markup there is no trivia between `{` and the keyword, so
-    // text_trimmed() == text() and prefix_len (keyword + single space) is exact.
-    let keyword_text = keyword.text_trimmed();
-    let decls_text = content_token.text_trimmed();
-    let text = format!("{keyword_text} {decls_text}");
-
-    let prefix_len = TextSize::of(keyword_text) + TextSize::from(1); // keyword + single space
-    let decls_start = content_token.text_trimmed_range().start();
-    // Unreachable for well-formed parses: `{` + keyword always precede the
-    // declarations, so prefix_len < decls_start. `?` avoids panicking on corrupt trees.
-    let content_offset = decls_start.checked_sub(prefix_len)?;
-
     Some(EmbedCandidate::TextExpression {
         content: EmbedContent {
             element_range: declaration_block.range(),
-            content_range: TextRange::new(
-                content_offset,
-                content_offset + TextSize::of(text.as_str()),
-            ),
-            content_offset,
-            text: EmbeddedText::Owned(text.into_boxed_str()),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
         },
-        block_kind: EmbedBlockKind::Svelte(SvelteBlockKind::Declaration),
+        block_kind: EmbedBlockKind::from(svelte_block),
     })
 }
 
@@ -749,7 +726,7 @@ fn build_vue_directive_candidate(
             element_range: initializer.range(),
             content_range: token_range,
             content_offset: inner_offset,
-            text: inner_text.into(),
+            text: inner_text,
         },
         is_event_handler,
         is_class_attribute: false,
@@ -768,7 +745,7 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
             element_range: expression.range(),
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
-            text: content_token.token_text().into(),
+            text: content_token.token_text(),
         },
         block_kind: EmbedBlockKind::Neutral,
     })
@@ -838,7 +815,7 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
             content_offset: value_token.text_range().start(),
             // Use full token text (including trivia) to match the untrimmed content_offset.
             // The parser needs text and offset to be consistent.
-            text: value_token.token_text().into(),
+            text: value_token.token_text(),
         },
     })
 }
@@ -992,11 +969,10 @@ fn parse_matched_embed(
                     true
                 }
                 EmbedCandidate::TextExpression { block_kind, .. } => {
-                    let is_svelte_declaration = ctx.host_file_source.is_svelte()
-                        && matches!(
-                            block_kind,
-                            EmbedBlockKind::Svelte(SvelteBlockKind::Declaration)
-                        );
+                    let declaration_block = match block_kind {
+                        EmbedBlockKind::Svelte(SvelteBlockKind::Declaration(kind)) => Some(*kind),
+                        _ => None,
+                    };
                     if ctx.host_file_source.is_astro() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
                             frontmatter: false,
@@ -1006,14 +982,14 @@ fn parse_matched_embed(
                         let is_function_signature =
                             matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                            is_source: is_svelte_declaration,
+                            is_source: declaration_block.is_some(),
                             is_function_signature,
                             kind: SvelteFileKind::Component,
                             is_const_block: matches!(
                                 block_kind,
                                 EmbedBlockKind::Svelte(SvelteBlockKind::Const)
                             ),
-                            declaration_block: None,
+                            declaration_block,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
@@ -1023,7 +999,7 @@ fn parse_matched_embed(
                             allow_statements: false,
                         });
                     }
-                    is_svelte_declaration
+                    declaration_block.is_some()
                 }
                 EmbedCandidate::Directive {
                     is_event_handler,
