@@ -1,14 +1,16 @@
 use crate::analyzer::assist::AssistEnabled;
 use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+#[cfg(feature = "lang_html")]
 use crate::html::HtmlConfiguration;
 use crate::max_size::MaxSize;
-use crate::{CssConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration, Rules};
+use crate::{GritConfiguration, Rules};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
+#[cfg(feature = "lang_js")]
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
@@ -31,16 +33,19 @@ pub struct OverridePattern {
     pub includes: Option<OverrideGlobs>,
 
     /// Specific configuration for the JavaScript language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub javascript: Option<JsConfiguration>,
+    #[cfg_attr(feature = "lang_js", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg(feature = "lang_js")]
+    pub javascript: Option<crate::JsConfiguration>,
 
     /// Specific configuration for the Json language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub json: Option<JsonConfiguration>,
+    #[cfg(feature = "lang_json")]
+    #[cfg_attr(feature = "lang_json", serde(skip_serializing_if = "Option::is_none"))]
+    pub json: Option<crate::JsonConfiguration>,
 
     /// Specific configuration for the CSS language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub css: Option<CssConfiguration>,
+    #[cfg_attr(feature = "lang_css", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg(feature = "lang_css")]
+    pub css: Option<crate::CssConfiguration>,
 
     /// Specific configuration for the Graphql language
     #[cfg(feature = "lang_graphql")]
@@ -55,7 +60,8 @@ pub struct OverridePattern {
     pub grit: Option<GritConfiguration>,
 
     /// Specific configuration for the GritQL language
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "lang_html")]
+    #[cfg_attr(feature = "lang_html", serde(skip_serializing_if = "Option::is_none"))]
     pub html: Option<HtmlConfiguration>,
 
     /// Specific configuration for the Json language
@@ -206,6 +212,7 @@ pub struct OverrideFormatterConfiguration {
     pub expand: Option<Expand>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+    #[cfg(feature = "lang_js")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",

@@ -1,6 +1,7 @@
-use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
-use crate::embed::types::{
-    EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, SvelteBlockKind,
+use crate::embed::EmbedContent;
+use crate::embed::html::{
+    EmbedBlockKind, EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch, GuestLanguage,
+    SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult, ParseEmbeddedParams};
@@ -891,7 +892,7 @@ impl EmbedParseContext<'_, '_> {
                 guest: GuestLanguage::from_js_source(embedded_file_source),
             }
         } else {
-            EmbedDetectorsRegistry::detect_match(HostLanguage::Html, candidate, doc_file_source)?
+            EmbedDetectorsRegistry::detect_match(candidate, doc_file_source)?
         };
         parse_matched_embed(candidate, &embed_match, self, embedded_file_source)
     }
@@ -1035,7 +1036,6 @@ fn parse_matched_embed(
 
                     false
                 }
-                _ => false,
             };
 
             let doc_source = DocumentFileSource::Js(js_source);
@@ -1102,11 +1102,6 @@ fn parse_matched_embed(
                 node: (parse.into(), content, doc_source),
                 js_file_source: None,
             })
-        }
-        #[cfg(feature = "lang_graphql")]
-        GuestLanguage::GraphQL => {
-            // GraphQL embeds are only used by the JS handler, not HTML
-            None
         }
     }
 }

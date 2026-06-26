@@ -6,7 +6,6 @@ use biome_configuration::diagnostics::{
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
-use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Severity, Visit, category,
@@ -15,8 +14,10 @@ use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 #[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
+#[cfg(feature = "lang_js")]
 use biome_js_analyze::utils::rename::RenameError;
 use biome_languages::DocumentFileSource;
+use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
@@ -75,6 +76,7 @@ pub enum WorkspaceError {
     ProtectedFile(ProtectedFile),
 
     /// Error thrown when Biome cannot rename a symbol.
+    #[cfg(feature = "lang_js")]
     RenameError(RenameError),
 
     /// The file could not be analyzed because a rule caused an error.
@@ -785,7 +787,7 @@ mod test {
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
     use biome_languages::DocumentFileSource;
-    use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
+    use biome_module_graph::JsModuleInfoDiagnostic;
     use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -896,8 +898,8 @@ mod test {
 
     #[test]
     fn module_diagnostic() {
-        let diagnostics = ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit())
-            .with_file_path("example.js");
+        let diagnostics =
+            JsModuleInfoDiagnostic::exceeded_types_limit().with_file_path("example.js");
         snap_diagnostic("module_diagnostic", diagnostics);
     }
 }

@@ -50,7 +50,7 @@ biome_suppression         = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
-biome_workspace_db        = { workspace = true }
+biome_workspace_db        = { workspace = true, features = ["html_embeds"] }
 bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }
@@ -71,7 +71,7 @@ biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_parser        = { path = "../biome_parser" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
-biome_test_utils    = { path = "../biome_test_utils" }
+biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 salsa               = { workspace = true }

@@ -15,6 +15,7 @@ mod scanner;
 mod utils;
 
 mod embed;
+mod module_graph;
 
 #[cfg(any(test, feature = "testing"))]
 pub mod test_utils;
@@ -28,6 +29,7 @@ use biome_fs::OsFileSystem;
 use biome_resolver::FsWithResolverProxy;
 
 pub use diagnostics::{TransportError, WorkspaceError, extension_error};
+#[cfg(feature = "lang_js")]
 pub use file_handlers::JsFormatterSettings;
 pub use scanner::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
 pub use workspace::{Workspace, WorkspaceServer};

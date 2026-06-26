@@ -11,12 +11,12 @@ mod workspace_bridges;
 mod test_utils;
 
 use crate::diagnostics::Panic;
+use crate::module_graph::ModuleDependencies;
 use crate::projects::ProjectKey;
 use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
-use biome_module_graph::ModuleDependencies;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};

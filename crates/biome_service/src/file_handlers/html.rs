@@ -1,4 +1,5 @@
 mod go_to;
+#[cfg(feature = "html_embeds")]
 mod parse_embedded_nodes;
 
 use super::{
@@ -7,9 +8,13 @@ use super::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
+#[cfg(not(feature = "html_embeds"))]
+use super::{ParseEmbedResult, ParseEmbeddedParams};
 use crate::configuration::to_analyzer_rules;
-use crate::embed::types::EmbedContent;
+#[cfg(feature = "html_embeds")]
+use crate::embed::EmbedContent;
 use crate::file_handlers::html::go_to::{resolve_binding_html, resolve_definition};
+#[cfg(feature = "html_embeds")]
 use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
@@ -30,13 +35,18 @@ use biome_configuration::html::{
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParseVue,
     HtmlParserConfiguration,
 };
+#[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
 use biome_db::{AnyParsedSource, ParsedSnippet};
+#[cfg(feature = "html_embeds")]
+use biome_formatter::FormatElement;
+#[cfg(feature = "html_embeds")]
 use biome_formatter::format_element::{Interned, LineMode};
+#[cfg(feature = "html_embeds")]
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, FormatElement, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, Printed, TrailingNewline,
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::{HtmlAnalyzerServices, analyze};
@@ -50,9 +60,13 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+#[cfg(feature = "html_embeds")]
 use biome_js_syntax::JsLanguage;
+#[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "html_embeds")]
 use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
+#[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
 use biome_workspace_db::WorkspaceDb;
@@ -411,7 +425,13 @@ fn parse(
     }
 }
 
+#[cfg(not(feature = "html_embeds"))]
+fn parse_embedded_nodes(_params: ParseEmbeddedParams) -> ParseEmbedResult {
+    ParseEmbedResult::default()
+}
+
 /// Result of parsing a matched embed.
+#[cfg(feature = "html_embeds")]
 struct ParsedEmbed {
     /// The parsed snippet + file source, ready to push to `nodes`.
     node: (AnyParse, EmbedContent, DocumentFileSource),
@@ -422,6 +442,7 @@ struct ParsedEmbed {
 /// Shared parsing context passed to `parse_matched_embed`.
 /// Groups the arguments that stay constant across all embed parses within a
 /// single `parse_embedded_nodes` invocation.
+#[cfg(feature = "html_embeds")]
 struct EmbedParseContext<'a, 'b> {
     cache: &'a mut NodeCache,
     biome_path: &'a BiomePath,
@@ -477,6 +498,7 @@ fn format(
     }
 }
 
+#[cfg(feature = "html_embeds")]
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -568,6 +590,25 @@ fn format_embedded(
     }
 }
 
+#[cfg(not(feature = "html_embeds"))]
+fn format_embedded(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParsedSource,
+    settings: &SettingsWithEditor,
+    embedded_nodes: Vec<ParsedSnippet>,
+    workspace_db: WorkspaceDb,
+) -> Result<Printed, WorkspaceError> {
+    let _ = embedded_nodes;
+    format(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        workspace_db,
+    )
+}
+
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
@@ -604,7 +645,16 @@ fn lint(params: LintParams) -> LintResults {
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
     let html_services = HtmlAnalyzerServices {
-        module_db: Some(params.workspace_db.rc_module_db()),
+        module_db: {
+            #[cfg(feature = "module_graph")]
+            {
+                Some(params.workspace_db.rc_module_db())
+            }
+            #[cfg(not(feature = "module_graph"))]
+            {
+                None
+            }
+        },
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -679,7 +729,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let html_services = HtmlAnalyzerServices {
-        module_db: Some(workspace_db.rc_module_db()),
+        module_db: {
+            #[cfg(feature = "module_graph")]
+            {
+                Some(workspace_db.rc_module_db())
+            }
+            #[cfg(not(feature = "module_graph"))]
+            {
+                None
+            }
+        },
         project_layout: Some(project_layout),
     };
 
@@ -776,7 +835,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         loop {
             let mut pending_actions = Vec::new();
             let html_services = HtmlAnalyzerServices {
-                module_db: Some(params.workspace_db.rc_module_db()),
+                module_db: {
+                    #[cfg(feature = "module_graph")]
+                    {
+                        Some(params.workspace_db.rc_module_db())
+                    }
+                    #[cfg(not(feature = "module_graph"))]
+                    {
+                        None
+                    }
+                },
                 project_layout: Some(params.project_layout.clone()),
             };
 
@@ -834,7 +902,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     loop {
         let mut pending_actions = Vec::new();
         let html_services = HtmlAnalyzerServices {
-            module_db: Some(params.workspace_db.rc_module_db()),
+            module_db: {
+                #[cfg(feature = "module_graph")]
+                {
+                    Some(params.workspace_db.rc_module_db())
+                }
+                #[cfg(not(feature = "module_graph"))]
+                {
+                    None
+                }
+            },
             project_layout: Some(params.project_layout.clone()),
         };
 
@@ -863,7 +940,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     // Phase 2: all rules for final diagnostics
     {
         let html_services = HtmlAnalyzerServices {
-            module_db: Some(params.workspace_db.rc_module_db()),
+            module_db: {
+                #[cfg(feature = "module_graph")]
+                {
+                    Some(params.workspace_db.rc_module_db())
+                }
+                #[cfg(not(feature = "module_graph"))]
+                {
+                    None
+                }
+            },
             project_layout: Some(params.project_layout.clone()),
         };
         let (_, _) = analyze(

@@ -30,12 +30,11 @@ biome_deserialize_macros   = { workspace = true }
 biome_diagnostics          = { workspace = true }
 biome_formatter            = { workspace = true, features = ["serde"] }
 biome_glob                 = { workspace = true, features = ["schema"] }
-biome_html_formatter       = { workspace = true, features = ["serde"] }
-biome_html_syntax          = { workspace = true }
-biome_js_formatter         = { workspace = true, features = ["serde"] }
-biome_json_formatter       = { workspace = true, features = ["serde"] }
-biome_json_parser          = { workspace = true }
-biome_json_syntax          = { workspace = true }
+biome_html_formatter       = { workspace = true, features = ["serde"], optional = true }
+biome_html_syntax          = { workspace = true, optional = true }
+biome_js_formatter         = { workspace = true, features = ["serde"], optional = true }
+biome_json_formatter       = { workspace = true, features = ["serde"], optional = true }
+biome_json_syntax          = { workspace = true, optional = true }
 biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
@@ -49,9 +48,10 @@ schemars                   = { workspace = true, optional = true }
 serde                      = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-criterion    = { package = "codspeed-criterion-compat", version = "=3.0.5" }
-insta        = { workspace = true }
-tests_macros = { workspace = true }
+biome_json_parser = { path = "../biome_json_parser" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+insta             = { workspace = true }
+tests_macros      = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
@@ -61,7 +61,11 @@ mimalloc = { workspace = true }
 
 [features]
 cli          = ["dep:bpaf"]
+lang_css     = ["biome_configuration_macros/lang_css"]
 lang_graphql = ["biome_configuration_macros/lang_graphql"]
+lang_html    = ["biome_configuration_macros/lang_html", "dep:biome_html_formatter", "dep:biome_html_syntax"]
+lang_js      = ["biome_configuration_macros/lang_js", "dep:biome_js_formatter"]
+lang_json    = ["biome_configuration_macros/lang_json", "dep:biome_json_formatter"]
 lang_md      = []
 lang_yaml    = ["dep:biome_yaml_syntax"]
 plugins      = ["dep:biome_plugin_loader"]
@@ -77,7 +81,11 @@ schema       = [
   "biome_rule_options/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
+  "lang_css",
   "lang_graphql",
+  "lang_html",
+  "lang_js",
+  "lang_json",
   "plugins",
 ]
 test-utils   = []

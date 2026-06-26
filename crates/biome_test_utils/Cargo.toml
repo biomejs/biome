@@ -17,23 +17,23 @@ publish              = false
 biome_analyze        = { workspace = true }
 biome_configuration  = { workspace = true }
 biome_console        = { workspace = true }
-biome_css_parser     = { workspace = true }
-biome_css_syntax     = { workspace = true }
+biome_css_parser     = { workspace = true, optional = true }
+biome_css_syntax     = { workspace = true, optional = true }
 biome_db             = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
-biome_html_parser    = { workspace = true }
-biome_html_syntax    = { workspace = true }
-biome_js_analyze     = { workspace = true }
-biome_js_parser      = { workspace = true }
-biome_js_semantic    = { workspace = true }
-biome_js_type_info   = { workspace = true }
-biome_json_parser    = { workspace = true }
+biome_html_parser    = { workspace = true, optional = true }
+biome_html_syntax    = { workspace = true, optional = true }
+biome_js_analyze     = { workspace = true, optional = true }
+biome_js_parser      = { workspace = true, optional = true }
+biome_js_semantic    = { workspace = true, optional = true }
+biome_js_type_info   = { workspace = true, optional = true }
 biome_languages      = { workspace = true }
-biome_module_graph   = { workspace = true }
+biome_module_graph   = { workspace = true, optional = true }
 biome_package        = { workspace = true }
+biome_parser         = { workspace = true }
 biome_project_layout = { workspace = true }
 biome_rowan          = { workspace = true, features = ["countme"] }
 biome_service        = { workspace = true, features = ["testing"] }
@@ -49,7 +49,44 @@ ureq                 = { workspace = true }
 url                  = { workspace = true }
 
 [features]
-lang_graphql = ["biome_service/lang_graphql"]
+html_embeds    = [
+  "biome_service/html_embeds",
+  "biome_workspace_db/html_embeds",
+  "lang_css",
+  "lang_html",
+  "lang_js",
+  "lang_json"
+]
+js_embeds      = ["biome_service/js_embeds", "lang_css", "lang_graphql", "lang_js"]
+lang_css       = [
+  "biome_configuration/lang_css",
+  "biome_languages/lang_css",
+  "biome_service/lang_css",
+  "dep:biome_css_parser",
+  "dep:biome_css_syntax"
+]
+lang_graphql   = ["biome_configuration/lang_graphql", "biome_languages/lang_graphql", "biome_service/lang_graphql"]
+lang_grit      = ["biome_languages/lang_grit", "biome_service/lang_grit"]
+lang_html      = [
+  "biome_configuration/lang_html",
+  "biome_languages/lang_html",
+  "biome_service/lang_html",
+  "dep:biome_html_parser",
+  "dep:biome_html_syntax"
+]
+lang_js        = [
+  "biome_configuration/lang_js",
+  "biome_languages/lang_js",
+  "biome_service/lang_js",
+  "dep:biome_js_analyze",
+  "dep:biome_js_parser",
+  "dep:biome_js_semantic"
+]
+lang_json      = ["biome_configuration/lang_json", "biome_languages/lang_json", "biome_service/lang_json"]
+lang_md        = ["biome_configuration/lang_md", "biome_languages/lang_md", "biome_service/lang_md"]
+lang_yaml      = ["biome_configuration/lang_yaml", "biome_languages/lang_yaml", "biome_service/lang_yaml"]
+module_graph   = ["biome_service/module_graph", "biome_workspace_db/module_graph", "dep:biome_module_graph"]
+type_inference = ["biome_service/type_inference", "dep:biome_js_type_info", "lang_js", "module_graph"]
 
 [lints]
 workspace = true

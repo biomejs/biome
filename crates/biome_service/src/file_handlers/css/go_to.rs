@@ -4,6 +4,7 @@ use biome_css_semantic::db::css_semantic_model;
 use biome_css_syntax::CssClassSelector;
 use biome_fs::BiomePath;
 use biome_languages::LanguageDb;
+#[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, find_css_class_definition};
 use biome_rowan::AstNode;
 use std::ops::Add;
@@ -14,6 +15,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
     let mut result = GoToDefinitionResult::default();
     if let DefinitionReference::CssClass { class_name } = params.definition_ref {
         let path = params.path.as_path();
+        #[cfg(feature = "module_graph")]
         if let Some(module) = params.workspace_db.module_for_path(path) {
             for (css_path, mut range, content_offset) in find_css_class_definition(
                 &params.workspace_db,

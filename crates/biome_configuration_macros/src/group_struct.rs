@@ -1,17 +1,14 @@
-use std::collections::BTreeMap;
-
-use biome_analyze::{FixKind, RuleCategory, RuleMetadata};
+use crate::to_capitalized;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::quote;
-
-use crate::to_capitalized;
+use std::collections::BTreeMap;
 
 pub fn generate_group_struct(
     group: &str,
-    rules: &BTreeMap<&'static str, RuleMetadata>,
-    kind: RuleCategory,
+    rules: &BTreeMap<&'static str, biome_analyze::RuleMetadata>,
+    kind: biome_analyze::RuleCategory,
 ) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
     let mut lines_non_domain_rule_as_filter = Vec::new();
@@ -63,7 +60,7 @@ pub fn generate_group_struct(
             }
 
             let kebab_rule_name = Case::Kebab.convert(rule);
-            let url = if kind == RuleCategory::Action {
+            let url = if kind == biome_analyze::RuleCategory::Action {
                 format!("https://biomejs.dev/assist/actions/{}", kebab_rule_name)
             } else {
                 format!("https://biomejs.dev/linter/rules/{}", kebab_rule_name)
@@ -81,9 +78,9 @@ pub fn generate_group_struct(
         let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
         let rule_config_type = quote::format_ident!(
             "{}",
-            if kind == RuleCategory::Action {
+            if kind == biome_analyze::RuleCategory::Action {
                 "RuleAssistConfiguration"
-            } else if metadata.fix_kind != FixKind::None {
+            } else if metadata.fix_kind != biome_analyze::FixKind::None {
                 "RuleFixConfiguration"
             } else {
                 "RuleConfiguration"
@@ -197,11 +194,11 @@ pub fn generate_group_struct(
 
     let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
 
-    let get_configuration_function = if kind == RuleCategory::Action {
+    let get_configuration_function = if kind == biome_analyze::RuleCategory::Action {
         quote! {
             pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
                 match rule_name {
-                    #( #get_rule_configuration_line ),*,
+                    #( #get_rule_configuration_line, )*
                     _ => None
                 }
             }
@@ -210,14 +207,14 @@ pub fn generate_group_struct(
         quote! {
             fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
                 match rule_name {
-                    #( #get_rule_configuration_line ),*,
+                    #( #get_rule_configuration_line, )*
                     _ => None
                 }
             }
         }
     };
 
-    if kind == RuleCategory::Action {
+    if kind == biome_analyze::RuleCategory::Action {
         quote! {
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]

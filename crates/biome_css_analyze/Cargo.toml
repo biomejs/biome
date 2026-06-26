@@ -46,7 +46,7 @@ biome_css_parser    = { path = "../biome_css_parser" }
 biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
 biome_fs            = { path = "../biome_fs" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
-biome_test_utils    = { path = "../biome_test_utils" }
+biome_test_utils    = { path = "../biome_test_utils", features = ["lang_css", "lang_js", "module_graph"] }
 camino              = { workspace = true }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }

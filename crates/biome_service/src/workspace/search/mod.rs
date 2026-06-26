@@ -4,10 +4,10 @@ pub(crate) mod grit;
 use crate::WorkspaceError;
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PatternId;
-use biome_css_syntax::TextRange;
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
+use biome_rowan::TextRange;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 

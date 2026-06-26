@@ -613,7 +613,16 @@ fn lint(params: LintParams) -> LintResults {
             &params.parsed_source,
         )),
         file_source,
-        module_db: Some(params.workspace_db.rc_module_db()),
+        module_db: {
+            #[cfg(feature = "module_graph")]
+            {
+                Some(params.workspace_db.rc_module_db())
+            }
+            #[cfg(not(feature = "module_graph"))]
+            {
+                None
+            }
+        },
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -693,7 +702,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let css_services = CssAnalyzerServices {
         semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
         file_source,
-        module_db: Some(workspace_db.rc_module_db()),
+        module_db: {
+            #[cfg(feature = "module_graph")]
+            {
+                Some(workspace_db.rc_module_db())
+            }
+            #[cfg(not(feature = "module_graph"))]
+            {
+                None
+            }
+        },
         project_layout: Some(project_layout),
     };
 
@@ -789,7 +807,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             let css_services = CssAnalyzerServices {
                 semantic_model: None,
                 file_source,
-                module_db: Some(params.workspace_db.rc_module_db()),
+                module_db: {
+                    #[cfg(feature = "module_graph")]
+                    {
+                        Some(params.workspace_db.rc_module_db())
+                    }
+                    #[cfg(not(feature = "module_graph"))]
+                    {
+                        None
+                    }
+                },
                 project_layout: Some(params.project_layout.clone()),
             };
 
@@ -845,7 +872,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source,
-            module_db: Some(params.workspace_db.rc_module_db()),
+            module_db: {
+                #[cfg(feature = "module_graph")]
+                {
+                    Some(params.workspace_db.rc_module_db())
+                }
+                #[cfg(not(feature = "module_graph"))]
+                {
+                    None
+                }
+            },
             project_layout: Some(params.project_layout.clone()),
         };
 
@@ -893,7 +929,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source,
-            module_db: Some(params.workspace_db.rc_module_db()),
+            module_db: {
+                #[cfg(feature = "module_graph")]
+                {
+                    Some(params.workspace_db.rc_module_db())
+                }
+                #[cfg(not(feature = "module_graph"))]
+                {
+                    None
+                }
+            },
             project_layout: Some(params.project_layout.clone()),
         };
 

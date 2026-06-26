@@ -31,13 +31,13 @@ biome_suppression    = { workspace = true }
 
 [dev-dependencies]
 biome_configuration  = { path = "../biome_configuration" }
-biome_formatter_test = { path = "../biome_formatter_test" }
+biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_graphql"] }
 biome_fs             = { path = "../biome_fs" }
 biome_graphql_parser = { path = "../biome_graphql_parser" }
 biome_languages      = { path = "../biome_languages", features = ["lang_graphql"] }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_graphql"] }
-biome_test_utils     = { path = "../biome_test_utils" }
+biome_test_utils     = { path = "../biome_test_utils", features = ["lang_graphql"] }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
