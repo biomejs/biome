@@ -8,6 +8,12 @@
 <div v-bind="props"></div>
 <Foo v-bind="props" />
 
+<!-- Vue 3.4+ same-name shorthand: `:foo` is equivalent to `:foo="foo"`. -->
+<Foo :foo />
+<Foo :foo-bar />
+<Foo v-bind:foo />
+<Foo v-bind:foo-bar />
+
 <!-- Valid modifiers from the rule: prop, camel, sync, attr -->
 <div v-bind:foo.prop="bar"></div>
 <div v-bind:foo.camel="bar"></div>
