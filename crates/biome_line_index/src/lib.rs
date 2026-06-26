@@ -123,6 +123,53 @@ mod tests {
         check_conversion!(line_index: WideLineCol { line: 0, col: 27 } => TextSize::from(33));
     }
 
+    #[test]
+    fn avx2_matches_scalar_line_index() {
+        let source = line_index_test_source();
+        let Some(line_index) = LineIndex::new_avx2(&source) else {
+            return;
+        };
+
+        assert_eq!(line_index, LineIndex::new(&source));
+    }
+
+    #[test]
+    fn sse42_matches_scalar_line_index() {
+        let source = line_index_test_source();
+        let Some(line_index) = LineIndex::new_sse42(&source) else {
+            return;
+        };
+
+        assert_eq!(line_index, LineIndex::new(&source));
+    }
+
+    #[test]
+    fn neon_matches_scalar_line_index() {
+        let source = line_index_test_source();
+        let Some(line_index) = LineIndex::new_neon(&source) else {
+            return;
+        };
+
+        assert_eq!(line_index, LineIndex::new(&source));
+    }
+
+    fn line_index_test_source() -> String {
+        [
+            "short",
+            &"a".repeat(15),
+            &"a".repeat(16),
+            &"a".repeat(17),
+            &"a".repeat(31),
+            &"a".repeat(32),
+            &"a".repeat(33),
+            "emoji 😀 before chunk boundary",
+            "emoji near chunk boundary aaaaaaaaaaaaaaaaaaaaa😀",
+            "multi-byte accents àéîøü",
+            "multiple\nlines\nwith unicode 👍\nend",
+        ]
+        .join("\n")
+    }
+
     #[ignore]
     #[test]
     fn test_every_chars() {
