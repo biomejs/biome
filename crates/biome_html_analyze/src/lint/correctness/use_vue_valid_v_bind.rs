@@ -139,7 +139,7 @@ impl Rule for UseVueValidVBind {
 
 fn find_invalid_modifiers(modifiers: &VueModifierList) -> Option<TextRange> {
     for modifier in modifiers {
-        if !VALID_MODIFIERS.contains(&modifier.modifier_token().ok()?.text()) {
+        if !VALID_MODIFIERS.contains(&modifier.modifier_token().ok()?.text_trimmed()) {
             return Some(modifier.range());
         }
     }
