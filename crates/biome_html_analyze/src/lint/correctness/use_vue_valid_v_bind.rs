@@ -16,7 +16,8 @@ declare_lint_rule! {
     /// - The directive has neither a value nor a static argument from which to
     ///   derive one. E.g. `<div v-bind></div>` or `<div v-bind:[foo]></div>`.
     ///   `v-bind:foo` and `:foo` are accepted because they are valid Vue 3.4+
-    ///   same-name shorthand for `:foo="foo"`.
+    ///   [same-name shorthand](https://vuejs.org/guide/essentials/template-syntax.html#same-name-shorthand)
+    ///   for `:foo="foo"`.
     /// - The directive has invalid modifiers. E.g. `<div v-bind:aaa.bbb="ccc"></div>`
     ///
     /// ## Examples
@@ -150,6 +151,8 @@ fn find_invalid_modifiers(modifiers: &VueModifierList) -> Option<TextRange> {
 /// (e.g. `foo` in `:foo`), as opposed to a dynamic expression
 /// (e.g. `[foo]` in `:[foo]`). Only static arguments can be the
 /// source of a Vue 3.4+ same-name shorthand binding.
+///
+/// See <https://vuejs.org/guide/essentials/template-syntax.html#same-name-shorthand>.
 fn is_static_arg(arg: &VueDirectiveArgument) -> bool {
     matches!(
         arg.arg().ok(),
