@@ -71,9 +71,7 @@ pub(crate) async fn did_open(
 
     session.insert_document(url.clone(), doc);
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
 }
@@ -186,7 +184,7 @@ fn resolve_workspace_base_path(session: &Session, project_path: &Utf8Path) -> Ut
 /// Handler for `textDocument/didChange` LSP notification
 #[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
-    session: &Session,
+    session: &Arc<Session>,
     params: lsp::DidChangeTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
@@ -234,9 +232,7 @@ pub(crate) async fn did_change(
         editor_features: None,
     })?;
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
 }
@@ -287,6 +283,7 @@ pub(crate) async fn did_close(
     params: lsp::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
     let uri = params.text_document.uri;
+    session.close_diagnostics(&uri);
     let path = session.file_path(&uri)?;
     let Some(project_key) = session.remove_document(&uri) else {
         debug!("Document wasn't open: {}", uri.as_str());
