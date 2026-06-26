@@ -58,11 +58,14 @@ biome_js_parser      = { path = "../biome_js_parser" }
 biome_json_parser    = { path = "../biome_json_parser" }
 biome_json_value     = { path = "../biome_json_value" }
 biome_service        = { path = "../biome_service", features = ["testing"] }
-biome_test_utils     = { path = "../biome_test_utils" }
 biome_workspace_db   = { path = "../biome_workspace_db" }
 divan                = { package = "codspeed-divan-compat", version = "=4.4.1" }
 insta                = { workspace = true }
 walkdir              = { workspace = true }
+
+[dev-dependencies.biome_test_utils]
+path     = "../biome_test_utils"
+features = ["lang_css", "lang_html", "lang_js", "module_graph", "type_inference"]
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

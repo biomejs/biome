@@ -12,10 +12,10 @@ categories.workspace = true
 
 [dependencies]
 biome_db           = { workspace = true }
-biome_html_syntax  = { workspace = true }
-biome_js_syntax    = { workspace = true }
+biome_html_syntax  = { workspace = true, optional = true }
+biome_js_syntax    = { workspace = true, optional = true }
 biome_languages    = { workspace = true }
-biome_module_graph = { workspace = true }
+biome_module_graph = { workspace = true, optional = true }
 biome_rowan        = { workspace = true }
 boxcar             = { workspace = true }
 camino             = { workspace = true }
@@ -25,6 +25,10 @@ salsa              = { workspace = true }
 [dev-dependencies]
 biome_html_parser = { path = "../biome_html_parser" }
 biome_js_parser   = { path = "../biome_js_parser", features = ["tests"] }
+
+[features]
+html_embeds  = ["biome_languages/lang_html", "biome_languages/lang_js", "dep:biome_html_syntax", "dep:biome_js_syntax"]
+module_graph = ["dep:biome_module_graph"]
 
 [lints]
 workspace = true

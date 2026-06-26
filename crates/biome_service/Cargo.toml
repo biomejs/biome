@@ -18,13 +18,13 @@ development = ["biome_service"]
 
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
-biome_configuration      = { workspace = true }
+biome_configuration      = { workspace = true, features = ["lang_json"] }
 biome_console            = { workspace = true }
-biome_css_analyze        = { workspace = true }
-biome_css_formatter      = { workspace = true }
-biome_css_parser         = { workspace = true }
-biome_css_semantic       = { workspace = true }
-biome_css_syntax         = { workspace = true }
+biome_css_analyze        = { workspace = true, optional = true }
+biome_css_formatter      = { workspace = true, optional = true }
+biome_css_parser         = { workspace = true, optional = true }
+biome_css_semantic       = { workspace = true, optional = true }
+biome_css_syntax         = { workspace = true, optional = true }
 biome_db                 = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_diagnostics        = { workspace = true, features = ["camino"] }
@@ -39,27 +39,27 @@ biome_grit_formatter     = { workspace = true, optional = true }
 biome_grit_parser        = { workspace = true, optional = true }
 biome_grit_patterns      = { workspace = true, features = ["serde"], optional = true }
 biome_grit_syntax        = { workspace = true, optional = true }
-biome_html_analyze       = { workspace = true }
-biome_html_factory       = { workspace = true }
-biome_html_formatter     = { workspace = true, features = ["serde"] }
-biome_html_parser        = { workspace = true }
-biome_html_syntax        = { workspace = true }
-biome_js_analyze         = { workspace = true }
-biome_js_factory         = { workspace = true }
-biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_js_parser          = { workspace = true }
-biome_js_semantic        = { workspace = true }
-biome_js_syntax          = { workspace = true }
-biome_js_type_info       = { workspace = true }
+biome_html_analyze       = { workspace = true, optional = true }
+biome_html_factory       = { workspace = true, optional = true }
+biome_html_formatter     = { workspace = true, features = ["serde"], optional = true }
+biome_html_parser        = { workspace = true, optional = true }
+biome_html_syntax        = { workspace = true, optional = true }
+biome_js_analyze         = { workspace = true, optional = true }
+biome_js_factory         = { workspace = true, optional = true }
+biome_js_formatter       = { workspace = true, features = ["serde"], optional = true }
+biome_js_parser          = { workspace = true, optional = true }
+biome_js_semantic        = { workspace = true, optional = true }
+biome_js_syntax          = { workspace = true, optional = true }
+biome_js_type_info       = { workspace = true, optional = true }
 biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
-biome_languages          = { workspace = true, features = ["lang_css", "lang_html", "lang_js", "lang_json"] }
+biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_markdown_formatter = { workspace = true, optional = true }
 biome_markdown_parser    = { workspace = true, optional = true }
 biome_markdown_syntax    = { workspace = true, optional = true }
-biome_module_graph       = { workspace = true, features = ["serde"] }
+biome_module_graph       = { workspace = true, features = ["serde"], optional = true }
 biome_package            = { workspace = true }
 biome_parser             = { workspace = true }
 biome_plugin_loader      = { workspace = true, optional = true }
@@ -73,7 +73,6 @@ biome_workspace_db       = { workspace = true }
 biome_yaml_formatter     = { workspace = true, features = ["serde"], optional = true }
 biome_yaml_parser        = { workspace = true, optional = true }
 biome_yaml_syntax        = { workspace = true, optional = true }
-boxcar                   = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
@@ -101,10 +100,21 @@ biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]
+# To parse snippets and embeds inside HTML files
+html_embeds    = ["biome_workspace_db/html_embeds", "lang_css", "lang_html", "lang_js", "lang_json"]
 # JavaScript embeds
-js_embeds    = ["lang_graphql"]
-js_plugin    = ["biome_plugin_loader/js_plugin", "plugins"]
-lang_graphql = [
+js_embeds      = ["lang_css", "lang_graphql", "lang_js"]
+js_plugin      = ["biome_plugin_loader/js_plugin", "plugins"]
+lang_css       = [
+  "biome_configuration/lang_css",
+  "biome_languages/lang_css",
+  "dep:biome_css_analyze",
+  "dep:biome_css_formatter",
+  "dep:biome_css_parser",
+  "dep:biome_css_semantic",
+  "dep:biome_css_syntax"
+]
+lang_graphql   = [
   "biome_configuration/lang_graphql",
   "biome_languages/lang_graphql",
   "dep:biome_graphql_analyze",
@@ -112,30 +122,55 @@ lang_graphql = [
   "dep:biome_graphql_parser",
   "dep:biome_graphql_syntax"
 ]
-lang_grit    = [
+lang_grit      = [
   "biome_languages/lang_grit",
   "dep:biome_grit_formatter",
   "dep:biome_grit_parser",
   "dep:biome_grit_patterns",
   "dep:biome_grit_syntax",
 ]
-lang_md      = [
+lang_html      = [
+  "biome_configuration/lang_html",
+  "biome_languages/lang_html",
+  "dep:biome_html_analyze",
+  "dep:biome_html_factory",
+  "dep:biome_html_formatter",
+  "dep:biome_html_parser",
+  "dep:biome_html_syntax"
+]
+lang_js        = [
+  "biome_configuration/lang_js",
+  "biome_languages/lang_js",
+  "dep:biome_js_analyze",
+  "dep:biome_js_factory",
+  "dep:biome_js_formatter",
+  "dep:biome_js_parser",
+  "dep:biome_js_semantic",
+  "dep:biome_js_syntax",
+]
+lang_json      = [
+  "biome_configuration/lang_json",
+  "biome_languages/lang_json",
+]
+lang_md        = [
   "biome_configuration/lang_md",
   "biome_languages/lang_md",
   "dep:biome_markdown_formatter",
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
-lang_scss    = ["biome_css_syntax/scss"]
-lang_yaml    = [
+lang_scss      = ["biome_css_syntax/scss"]
+lang_yaml      = [
   "biome_configuration/lang_yaml",
   "biome_languages/lang_yaml",
   "dep:biome_yaml_formatter",
   "dep:biome_yaml_parser",
   "dep:biome_yaml_syntax"
 ]
-plugins      = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
-schema       = [
+# TODO does it need lang_js, lang_html and lang_css? To verify
+module_graph   = ["biome_workspace_db/module_graph", "dep:biome_module_graph"]
+plugins        = ["biome_configuration/plugins", "dep:biome_plugin_loader", "lang_grit"]
+schema         = [
   "biome_configuration/schema",
   "biome_css_syntax/schema",
   "biome_formatter/schema",
@@ -155,11 +190,30 @@ schema       = [
   "biome_yaml_formatter/schema",
   "biome_yaml_syntax/schema",
   "dep:schemars",
+  "lang_css",
   # Enables file source schema generation
   "lang_graphql",
-  "lang_grit"
+  "lang_grit",
+  "lang_html",
+  "lang_js",
+  "lang_json",
+  "module_graph",
+  "type_inference"
 ]
-testing      = []
+# Features that are shipped by CLI, LSP and WASM
+stable         = [
+  "html_embeds",
+  "js_embeds",
+  "lang_css",
+  "lang_graphql",
+  "lang_js",
+  "module_graph",
+  "plugins",
+  "type_inference"
+]
+testing        = []
+# TODO does it needs lang_js ? to verify
+type_inference = ["dep:biome_js_type_info", "lang_js", "module_graph"]
 
 [lints]
 workspace = true

@@ -1,32 +1,46 @@
+// Some structs are used conditionally in some language-gated functions, so we
+// add this **allow**.
+#![allow(dead_code)]
+
+#[cfg(feature = "lang_js")]
 pub mod astro;
+#[cfg(feature = "lang_css")]
 pub(crate) mod css;
 #[cfg(feature = "lang_graphql")]
 pub(crate) mod graphql;
 #[cfg(feature = "lang_grit")]
 pub(crate) mod grit;
+#[cfg(feature = "lang_html")]
 pub(crate) mod html;
 mod ignore;
+#[cfg(feature = "lang_js")]
 pub(crate) mod javascript;
 pub(crate) mod json;
 #[cfg(feature = "lang_md")]
 pub(crate) mod md;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub mod svelte;
 mod unknown;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub mod vue;
 #[cfg(feature = "lang_yaml")]
 pub(crate) mod yaml;
 
-use self::{
-    css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
-    unknown::UnknownFileHandler,
-};
+#[cfg(feature = "lang_css")]
+use self::css::CssFileHandler;
+#[cfg(feature = "lang_js")]
+use self::javascript::JsFileHandler;
+use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
-use crate::embed::types::EmbedContent;
+use crate::embed::EmbedContent;
+#[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
 #[cfg(feature = "lang_graphql")]
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub use crate::file_handlers::svelte::SvelteFileHandler;
+#[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
@@ -43,7 +57,9 @@ use biome_analyze::{
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
+#[cfg(feature = "lang_css")]
 use biome_css_analyze::METADATA as css_metadata;
+#[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
 use biome_db::{AnyParsedSource, ParsedSnippet};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
@@ -53,27 +69,34 @@ use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "lang_html")]
 use biome_html_syntax::HtmlLanguage;
+#[cfg(feature = "lang_js")]
 use biome_js_analyze::METADATA as js_metadata;
+#[cfg(feature = "lang_js")]
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{
-    AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList, TextRange, TextSize,
-};
+#[cfg(feature = "lang_js")]
+use biome_js_syntax::{AnyJsModuleItem, JsLanguage, JsxAttribute, JsxAttributeList};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
+#[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
     JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
 };
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TokenText};
+#[cfg(feature = "lang_js")]
+use biome_rowan::TokenText;
+use biome_rowan::{BatchMutation, NodeCache, SendNode, SyntaxNode, TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
+#[cfg(feature = "lang_html")]
 use html::HtmlFileHandler;
+#[cfg(feature = "lang_js")]
 pub use javascript::JsFormatterSettings;
 use papaya::HashMap;
 use rustc_hash::{FxHashSet, FxHasher};
@@ -898,15 +921,21 @@ pub(crate) trait ExtensionHandler {
 
 /// Features available for each language
 pub(crate) struct Features {
+    #[cfg(feature = "lang_js")]
     js: JsFileHandler,
     json: JsonFileHandler,
+    #[cfg(feature = "lang_css")]
     css: CssFileHandler,
+    #[cfg(feature = "lang_js")]
     astro: AstroFileHandler,
+    #[cfg(all(feature = "lang_js", feature = "lang_html"))]
     vue: VueFileHandler,
+    #[cfg(all(feature = "lang_js", feature = "lang_html"))]
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
     #[cfg(feature = "lang_graphql")]
     graphql: GraphqlFileHandler,
+    #[cfg(feature = "lang_html")]
     html: HtmlFileHandler,
     #[cfg(feature = "lang_grit")]
     grit: grit::GritFileHandler,
@@ -920,14 +949,20 @@ pub(crate) struct Features {
 impl Features {
     pub(crate) fn new() -> Self {
         Self {
+            #[cfg(feature = "lang_js")]
             js: JsFileHandler {},
             json: JsonFileHandler {},
+            #[cfg(feature = "lang_css")]
             css: CssFileHandler {},
+            #[cfg(feature = "lang_js")]
             astro: AstroFileHandler {},
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
             svelte: SvelteFileHandler {},
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
             vue: VueFileHandler {},
             #[cfg(feature = "lang_graphql")]
             graphql: GraphqlFileHandler {},
+            #[cfg(feature = "lang_html")]
             html: HtmlFileHandler {},
             #[cfg(feature = "lang_grit")]
             grit: grit::GritFileHandler {},
@@ -952,25 +987,37 @@ impl Features {
         language_hint: DocumentFileSource,
     ) -> Capabilities {
         match language_hint {
+            #[cfg(feature = "lang_js")]
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 JsEmbeddingKind::Astro { .. } => self.astro.capabilities(),
+                #[cfg(feature = "lang_html")]
                 JsEmbeddingKind::Vue { .. } => self.vue.capabilities(),
+                #[cfg(not(feature = "lang_html"))]
+                JsEmbeddingKind::Vue { .. } => self.js.capabilities(),
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
                 JsEmbeddingKind::Svelte {
                     kind: SvelteFileKind::SourceModule,
                     ..
                 } => self.js.capabilities(),
+                #[cfg(feature = "lang_html")]
                 JsEmbeddingKind::Svelte {
                     kind: SvelteFileKind::Component,
                     ..
                 } => self.svelte.capabilities(),
+                #[cfg(not(feature = "lang_html"))]
+                JsEmbeddingKind::Svelte {
+                    kind: SvelteFileKind::Component,
+                    ..
+                } => self.js.capabilities(),
                 JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
+            #[cfg(feature = "lang_css")]
             DocumentFileSource::Css(_) => self.css.capabilities(),
             #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            #[cfg(feature = "lang_html")]
             DocumentFileSource::Html(_) => self.html.capabilities(),
             #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
@@ -980,17 +1027,29 @@ impl Features {
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
+            _ => self.unknown.capabilities(),
         }
     }
 
     /// Returns the [Capabilities] associated with a document source.
     pub(crate) fn get_real_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
+            #[cfg(feature = "lang_js")]
             DocumentFileSource::Js(_) => self.js.capabilities(),
             DocumentFileSource::Json(_) => self.json.capabilities(),
+            #[cfg(feature = "lang_css")]
             DocumentFileSource::Css(_) => self.css.capabilities(),
             #[cfg(feature = "lang_graphql")]
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            #[cfg(feature = "lang_html")]
             DocumentFileSource::Html(_) => self.html.capabilities(),
             #[cfg(feature = "lang_grit")]
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
@@ -1000,6 +1059,15 @@ impl Features {
             DocumentFileSource::Yaml(_) => self.yaml.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
+            #[expect(
+                clippy::allow_attributes,
+                reason = "`unreachable_patterns` is feature-dependent here; `expect(unreachable_patterns)` is unfulfilled in reduced language builds."
+            )]
+            #[allow(
+                unreachable_patterns,
+                reason = "The fallback is reachable when dependency feature unification exposes source variants without enabling their handlers."
+            )]
+            _ => self.unknown.capabilities(),
         }
     }
 }
@@ -1030,12 +1098,14 @@ pub(crate) fn is_diagnostic_error(
 }
 
 #[derive(Default)]
+#[cfg(feature = "lang_js")]
 pub struct ParsedLangAndSetup {
     language: Language,
     variant: LanguageVariant,
     setup: bool,
 }
 
+#[cfg(feature = "lang_js")]
 fn get_module_item_attributes(item: AnyJsModuleItem) -> Option<JsxAttributeList> {
     let expression = item
         .as_any_js_statement()?
@@ -1047,6 +1117,7 @@ fn get_module_item_attributes(item: AnyJsModuleItem) -> Option<JsxAttributeList>
     Some(opening_element.attributes())
 }
 
+#[cfg(feature = "lang_js")]
 fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
     let attribute_value = attribute.initializer()?.value().ok()?;
     let attribute_inner_string = attribute_value.as_jsx_string()?.inner_string_text().ok()?;
@@ -1059,6 +1130,7 @@ fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
 /// matched by regular expressions.
 ///
 // TODO: We should change the parser when HTMLish languages are supported.
+#[cfg(feature = "lang_js")]
 pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
     script_opening_tag: &str,
 ) -> ParsedLangAndSetup {
@@ -1123,6 +1195,7 @@ struct SyntaxVisitor<'a> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1160,6 +1233,7 @@ impl RegistryVisitor<JsonLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1199,6 +1273,7 @@ impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
@@ -1460,6 +1535,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1506,6 +1582,7 @@ impl RegistryVisitor<JsonLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1555,6 +1632,7 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
@@ -1694,6 +1772,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     }
 }
 
+#[cfg(feature = "lang_js")]
 impl RegistryVisitor<JsLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -1725,6 +1804,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_css")]
 impl RegistryVisitor<CssLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -1758,6 +1838,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+#[cfg(feature = "lang_html")]
 impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
@@ -1982,11 +2063,14 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         let mut syntax = SyntaxVisitor::default();
 
+        #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut syntax);
+        #[cfg(feature = "lang_css")]
         biome_css_analyze::visit_registry(&mut syntax);
         biome_json_analyze::visit_registry(&mut syntax);
         #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut syntax);
+        #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
@@ -2032,11 +2116,14 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             &mut analyzer_options,
         );
 
+        #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut lint);
+        #[cfg(feature = "lang_css")]
         biome_css_analyze::visit_registry(&mut lint);
         biome_json_analyze::visit_registry(&mut lint);
         #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut lint);
+        #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut lint);
         let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
@@ -2044,11 +2131,14 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         let mut assist = AssistsVisitor::new(self.only, self.skip, self.settings, self.path);
 
+        #[cfg(feature = "lang_js")]
         biome_js_analyze::visit_registry(&mut assist);
+        #[cfg(feature = "lang_css")]
         biome_css_analyze::visit_registry(&mut assist);
         biome_json_analyze::visit_registry(&mut assist);
         #[cfg(feature = "lang_graphql")]
         biome_graphql_analyze::visit_registry(&mut assist);
+        #[cfg(feature = "lang_html")]
         biome_html_analyze::visit_registry(&mut assist);
         let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =
             assist.finish();
