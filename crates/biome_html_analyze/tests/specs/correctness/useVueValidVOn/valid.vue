@@ -55,7 +55,7 @@
   <!-- Object syntax: arg-less v-on with a value spreads the object's
        listeners onto the element. -->
   <div v-on="$listeners"></div>
-  <div v-on="{ click: onClick, mouseenter: onHover }"></div>
+  <div v-on="listeners"></div>
 
   <!-- Component event handlers -->
   <MyComponent @click="handler" @custom-event="customHandler"></MyComponent>
