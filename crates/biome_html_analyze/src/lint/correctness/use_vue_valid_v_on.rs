@@ -12,7 +12,9 @@ declare_lint_rule! {
     /// Enforce valid `v-on` directives with proper arguments, modifiers, and handlers.
     ///
     /// This rule reports v-on directives in the following cases:
-    /// - The directive does not have an event name. E.g. `<div v-on="foo"></div>`
+    /// - The directive has neither an event name nor a value (an arg-less
+    ///   `v-on` with a value is the object syntax, e.g. `<div v-on="$listeners"></div>`,
+    ///   which is valid).
     /// - The directive has invalid modifiers. E.g. `<div v-on:click.bogus="foo"></div>`
     /// - The directive is missing a handler expression, **unless one of the
     ///   verb modifiers (`stop`, `prevent`) is present**. The verb modifiers
@@ -72,8 +74,10 @@ impl Rule for UseVueValidVOn {
                     return None;
                 }
 
-                // Check for missing event name
-                if vue_directive.arg().is_none() {
+                // Check for missing event name. An arg-less `v-on` is the
+                // object syntax (`v-on="$listeners"`); only flag when there
+                // is also no value to spread.
+                if vue_directive.arg().is_none() && vue_directive.initializer().is_none() {
                     return Some(ViolationKind::MissingEventName);
                 }
 
