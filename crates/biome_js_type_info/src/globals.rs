@@ -1,7 +1,3 @@
-//! Hardcoded global definitions.
-
-// FIXME: Implement inference from type definitions: https://github.com/biomejs/biome/issues/5977
-
 use std::{
     borrow::Cow,
     sync::{Arc, LazyLock},
@@ -19,8 +15,8 @@ use crate::{
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
+use crate::generated::global_types::set_generated_global_type_data;
 
-// Re-export all type ID constants from globals_ids
 pub use super::globals_ids::*;
 
 pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -28,92 +24,6 @@ pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_
 
 pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
-
-pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
-    (0..NUM_PREDEFINED_TYPES)
-        .map(TypeId::new)
-        .map(|id| {
-            let name = global_type_name(id).unwrap_or("unknown");
-            TypeMember {
-                kind: TypeMemberKind::Named(Text::new_static(name)),
-                ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
-            }
-        })
-        .collect()
-});
-
-// TODO(tidefield): Generate this function in codegen
-// Returns a string for formatting global IDs in test snapshots.
-pub fn global_type_name(id: TypeId) -> Option<&'static str> {
-    use crate::globals_ids::*;
-    // TODO(tidefield): Enforce exhaustiveness in this list
-    match id {
-        UNKNOWN_ID => Some(UNKNOWN_ID_NAME),
-        UNDEFINED_ID => Some(UNDEFINED_ID_NAME),
-        VOID_ID => Some(VOID_ID_NAME),
-        CONDITIONAL_ID => Some(CONDITIONAL_ID_NAME),
-        NUMBER_ID => Some(NUMBER_ID_NAME),
-        STRING_ID => Some(STRING_ID_NAME),
-        INSTANCEOF_ARRAY_T_ID => Some(INSTANCEOF_ARRAY_T_ID_NAME),
-        INSTANCEOF_ARRAY_U_ID => Some(INSTANCEOF_ARRAY_U_ID_NAME),
-        ARRAY_ID => Some(ARRAY_ID_NAME),
-        ARRAY_FILTER_ID => Some(ARRAY_FILTER_ID_NAME),
-        ARRAY_FOREACH_ID => Some(ARRAY_FOREACH_ID_NAME),
-        ARRAY_MAP_ID => Some(ARRAY_MAP_ID_NAME),
-        GLOBAL_ID => Some(GLOBAL_ID_NAME),
-        INSTANCEOF_PROMISE_ID => Some(INSTANCEOF_PROMISE_ID_NAME),
-        PROMISE_ID => Some(PROMISE_ID_NAME),
-        PROMISE_CONSTRUCTOR_ID => Some(PROMISE_CONSTRUCTOR_ID_NAME),
-        PROMISE_CATCH_ID => Some(PROMISE_CATCH_ID_NAME),
-        PROMISE_FINALLY_ID => Some(PROMISE_FINALLY_ID_NAME),
-        PROMISE_THEN_ID => Some(PROMISE_THEN_ID_NAME),
-        PROMISE_ALL_ID => Some(PROMISE_ALL_ID_NAME),
-        PROMISE_ALL_SETTLED_ID => Some(PROMISE_ALL_SETTLED_ID_NAME),
-        PROMISE_ANY_ID => Some(PROMISE_ANY_ID_NAME),
-        PROMISE_RACE_ID => Some(PROMISE_RACE_ID_NAME),
-        PROMISE_REJECT_ID => Some(PROMISE_REJECT_ID_NAME),
-        PROMISE_RESOLVE_ID => Some(PROMISE_RESOLVE_ID_NAME),
-        PROMISE_TRY_ID => Some(PROMISE_TRY_ID_NAME),
-        BIGINT_STRING_LITERAL_ID => Some(BIGINT_STRING_LITERAL_ID_NAME),
-        BOOLEAN_STRING_LITERAL_ID => Some(BOOLEAN_STRING_LITERAL_ID_NAME),
-        FUNCTION_STRING_LITERAL_ID => Some(FUNCTION_STRING_LITERAL_ID_NAME),
-        NUMBER_STRING_LITERAL_ID => Some(NUMBER_STRING_LITERAL_ID_NAME),
-        OBJECT_STRING_LITERAL_ID => Some(OBJECT_STRING_LITERAL_ID_NAME),
-        STRING_STRING_LITERAL_ID => Some(STRING_STRING_LITERAL_ID_NAME),
-        SYMBOL_STRING_LITERAL_ID => Some(SYMBOL_STRING_LITERAL_ID_NAME),
-        UNDEFINED_STRING_LITERAL_ID => Some(UNDEFINED_STRING_LITERAL_ID_NAME),
-        TYPEOF_OPERATOR_RETURN_UNION_ID => Some(TYPEOF_OPERATOR_RETURN_UNION_ID_NAME),
-        T_ID => Some(T_ID_NAME),
-        U_ID => Some(U_ID_NAME),
-        CONDITIONAL_CALLBACK_ID => Some(CONDITIONAL_CALLBACK_ID_NAME),
-        MAP_CALLBACK_ID => Some(MAP_CALLBACK_ID_NAME),
-        VOID_CALLBACK_ID => Some(VOID_CALLBACK_ID_NAME),
-        FETCH_ID => Some(FETCH_ID_NAME),
-        INSTANCEOF_REGEXP_ID => Some(INSTANCEOF_REGEXP_ID_NAME),
-        REGEXP_ID => Some(REGEXP_ID_NAME),
-        REGEXP_EXEC_ID => Some(REGEXP_EXEC_ID_NAME),
-        INSTANCEOF_SYMBOL_ID => Some(INSTANCEOF_SYMBOL_ID_NAME),
-        SYMBOL_ID => Some(SYMBOL_ID_NAME),
-        SYMBOL_DISPOSE_ID => Some(SYMBOL_DISPOSE_ID_NAME),
-        SYMBOL_ASYNC_DISPOSE_ID => Some(SYMBOL_ASYNC_DISPOSE_ID_NAME),
-        DISPOSABLE_ID => Some(DISPOSABLE_ID_NAME),
-        DISPOSABLE_DISPOSE_ID => Some(DISPOSABLE_DISPOSE_ID_NAME),
-        ASYNC_DISPOSABLE_ID => Some(ASYNC_DISPOSABLE_ID_NAME),
-        ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID => Some(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME),
-        INSTANCEOF_DATE_ID => Some(INSTANCEOF_DATE_ID_NAME),
-        DATE_ID => Some(DATE_ID_NAME),
-        INSTANCEOF_MAP_ID => Some(INSTANCEOF_MAP_ID_NAME),
-        MAP_ID => Some(MAP_ID_NAME),
-        INSTANCEOF_SET_ID => Some(INSTANCEOF_SET_ID_NAME),
-        SET_ID => Some(SET_ID_NAME),
-        INSTANCEOF_WEAK_MAP_ID => Some(INSTANCEOF_WEAK_MAP_ID_NAME),
-        WEAK_MAP_ID => Some(WEAK_MAP_ID_NAME),
-        INSTANCEOF_ERROR_ID => Some(INSTANCEOF_ERROR_ID_NAME),
-        ERROR_ID => Some(ERROR_ID_NAME),
-        BOOLEAN_ID => Some(BOOLEAN_ID_NAME),
-        _ => None,
-    }
-}
 
 /// Resolver that is limited to resolving symbols in the global scope.
 ///
@@ -125,27 +35,32 @@ pub struct GlobalsResolver {
 }
 
 impl Default for GlobalsResolver {
+    /// Generated globals take precedence; manual definitions only fill missing slots.
     fn default() -> Self {
+        // Builds a named instance member resolving to `id` in the global resolver.
         let member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::Named(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
+        // Builds a named static member resolving to `id` in the global resolver.
         let static_member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
+        // Builds an empty-body global `Class` with `name` and `type_parameters`.
         let class = |name: &'static str, type_parameters: Box<[TypeReference]>| {
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static(name)),
                 type_parameters,
                 extends: None,
-                implements: [].into(),
+                implements: Box::default(),
                 members: Box::default(),
             }))
         };
 
+        // Builds a one-argument `Array.prototype` method named after `id`.
         let array_method_definition =
             |id: TypeId,
              param_type_id: TypeId,
@@ -168,6 +83,8 @@ impl Default for GlobalsResolver {
                 })
             };
 
+        // Builds a zero-argument `Promise` method named after `id` that returns
+        // an instance of `Promise`.
         let promise_method_definition = |id: TypeId| {
             TypeData::from(Function {
                 is_async: false,
@@ -178,42 +95,38 @@ impl Default for GlobalsResolver {
             })
         };
 
+        // Builds a string-literal `TypeData` whose value is the static text
+        // `value`.
         let string_literal = |value: &'static str| -> TypeData {
             TypeData::from(Literal::String(Text::new_static(value).into()))
         };
 
-        let mut builder = GlobalsResolverBuilder::with_capacity(NUM_PREDEFINED_TYPES);
+        let mut builder = GlobalsResolverBuilder::default();
+        set_generated_global_type_data(&mut builder);
 
-        // Primitive types
-        builder.set_type_data(UNKNOWN_ID, TypeData::Unknown);
-        builder.set_type_data(UNDEFINED_ID, TypeData::Undefined);
-        builder.set_type_data(VOID_ID, TypeData::VoidKeyword);
-        builder.set_type_data(CONDITIONAL_ID, TypeData::Conditional);
-        builder.set_type_data(NUMBER_ID, TypeData::Number);
-        builder.set_type_data(STRING_ID, TypeData::String);
-        builder.set_type_data(BOOLEAN_ID, TypeData::Boolean);
+        builder.set_manual_type_data(UNKNOWN_ID_GLOBAL_TYPE_ID, || TypeData::Unknown);
+        builder.set_manual_type_data(UNDEFINED_ID_GLOBAL_TYPE_ID, || TypeData::Undefined);
+        builder.set_manual_type_data(VOID_ID_GLOBAL_TYPE_ID, || TypeData::VoidKeyword);
+        builder.set_manual_type_data(CONDITIONAL_ID_GLOBAL_TYPE_ID, || TypeData::Conditional);
+        builder.set_manual_type_data(NUMBER_ID_GLOBAL_TYPE_ID, || TypeData::Number);
+        builder.set_manual_type_data(STRING_ID_GLOBAL_TYPE_ID, || TypeData::String);
+        builder.set_manual_type_data(BOOLEAN_ID_GLOBAL_TYPE_ID, || TypeData::Boolean);
 
-        // TODO(tidefield): Use biome parser to parse Typescript .d.ts files
-        // and generate the following `TypeData`s as much as possible
-
-        builder.set_type_data(
-            INSTANCEOF_ARRAY_T_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID)),
-        );
-        builder.set_type_data(
-            INSTANCEOF_ARRAY_U_ID,
+        builder.set_manual_type_data(INSTANCEOF_ARRAY_T_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID))
+        });
+        builder.set_manual_type_data(INSTANCEOF_ARRAY_U_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeInstance {
                 ty: TypeReference::from(GLOBAL_ARRAY_ID),
                 type_parameters: [GLOBAL_U_ID.into()].into(),
-            }),
-        );
-        builder.set_type_data(
-            ARRAY_ID,
+            })
+        });
+        builder.set_manual_type_data(ARRAY_ID_GLOBAL_TYPE_ID, || {
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static("Array")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
-                implements: [].into(),
+                implements: Box::default(),
                 members: Box::new([
                     member("filter", ARRAY_FILTER_ID),
                     member("forEach", ARRAY_FOREACH_ID),
@@ -223,48 +136,42 @@ impl Default for GlobalsResolver {
                         ty: GLOBAL_NUMBER_ID.into(),
                     },
                 ]),
-            })),
-        );
-        builder.set_type_data(
-            ARRAY_FILTER_ID,
+            }))
+        });
+        builder.set_manual_type_data(ARRAY_FILTER_ID_GLOBAL_TYPE_ID, || {
             array_method_definition(
                 ARRAY_FILTER_ID,
                 CONDITIONAL_CALLBACK_ID,
                 INSTANCEOF_ARRAY_T_ID,
                 Default::default(),
-            ),
-        );
-        builder.set_type_data(
-            ARRAY_FOREACH_ID,
+            )
+        });
+        builder.set_manual_type_data(ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, || {
             array_method_definition(
                 ARRAY_FOREACH_ID,
                 VOID_CALLBACK_ID,
                 VOID_ID,
                 Default::default(),
-            ),
-        );
-        builder.set_type_data(
-            ARRAY_MAP_ID,
+            )
+        });
+        builder.set_manual_type_data(ARRAY_MAP_ID_GLOBAL_TYPE_ID, || {
             array_method_definition(
                 ARRAY_MAP_ID,
                 MAP_CALLBACK_ID,
                 INSTANCEOF_ARRAY_U_ID,
                 [GLOBAL_U_ID.into()].into(),
-            ),
-        );
-        builder.set_type_data(GLOBAL_ID, TypeData::Global);
-        builder.set_type_data(
-            INSTANCEOF_PROMISE_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
-        );
-        // Promise class
-        builder.set_type_data(
-            PROMISE_ID,
+            )
+        });
+        builder.set_manual_type_data(GLOBAL_ID_GLOBAL_TYPE_ID, || TypeData::Global);
+        builder.set_manual_type_data(INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID))
+        });
+        builder.set_manual_type_data(PROMISE_ID_GLOBAL_TYPE_ID, || {
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static("Promise")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
-                implements: [].into(),
+                implements: Box::default(),
                 members: Box::new([
                     TypeMember {
                         kind: TypeMemberKind::Constructor,
@@ -281,11 +188,10 @@ impl Default for GlobalsResolver {
                     static_member("resolve", PROMISE_RESOLVE_ID),
                     static_member("try", PROMISE_TRY_ID),
                 ]),
-            })),
-        );
+            }))
+        });
 
-        builder.set_type_data(
-            PROMISE_CONSTRUCTOR_ID,
+        builder.set_manual_type_data(PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -298,44 +204,63 @@ impl Default for GlobalsResolver {
                 })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-            }),
-        );
-        builder.set_type_data(
-            PROMISE_CATCH_ID,
-            promise_method_definition(PROMISE_CATCH_ID),
-        );
-        builder.set_type_data(
-            PROMISE_FINALLY_ID,
-            promise_method_definition(PROMISE_FINALLY_ID),
-        );
-        builder.set_type_data(PROMISE_THEN_ID, promise_method_definition(PROMISE_THEN_ID));
-        builder.set_type_data(PROMISE_ALL_ID, promise_method_definition(PROMISE_ALL_ID));
-        builder.set_type_data(
-            PROMISE_ALL_SETTLED_ID,
-            promise_method_definition(PROMISE_ALL_SETTLED_ID),
-        );
-        builder.set_type_data(PROMISE_ANY_ID, promise_method_definition(PROMISE_ANY_ID));
-        builder.set_type_data(PROMISE_RACE_ID, promise_method_definition(PROMISE_RACE_ID));
-        builder.set_type_data(
-            PROMISE_REJECT_ID,
-            promise_method_definition(PROMISE_REJECT_ID),
-        );
-        builder.set_type_data(
-            PROMISE_RESOLVE_ID,
-            promise_method_definition(PROMISE_RESOLVE_ID),
-        );
-        builder.set_type_data(PROMISE_TRY_ID, promise_method_definition(PROMISE_TRY_ID));
-        // String literals for typeof operator
-        builder.set_type_data(BIGINT_STRING_LITERAL_ID, string_literal("bigint"));
-        builder.set_type_data(BOOLEAN_STRING_LITERAL_ID, string_literal("boolean"));
-        builder.set_type_data(FUNCTION_STRING_LITERAL_ID, string_literal("function"));
-        builder.set_type_data(NUMBER_STRING_LITERAL_ID, string_literal("number"));
-        builder.set_type_data(OBJECT_STRING_LITERAL_ID, string_literal("object"));
-        builder.set_type_data(STRING_STRING_LITERAL_ID, string_literal("string"));
-        builder.set_type_data(SYMBOL_STRING_LITERAL_ID, string_literal("symbol"));
-        builder.set_type_data(UNDEFINED_STRING_LITERAL_ID, string_literal("undefined"));
-        builder.set_type_data(
-            TYPEOF_OPERATOR_RETURN_UNION_ID,
+            })
+        });
+        builder.set_manual_type_data(PROMISE_CATCH_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_CATCH_ID)
+        });
+        builder.set_manual_type_data(PROMISE_FINALLY_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_FINALLY_ID)
+        });
+        builder.set_manual_type_data(PROMISE_THEN_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_THEN_ID)
+        });
+        builder.set_manual_type_data(PROMISE_ALL_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_ALL_ID)
+        });
+        builder.set_manual_type_data(PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_ALL_SETTLED_ID)
+        });
+        builder.set_manual_type_data(PROMISE_ANY_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_ANY_ID)
+        });
+        builder.set_manual_type_data(PROMISE_RACE_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_RACE_ID)
+        });
+        builder.set_manual_type_data(PROMISE_REJECT_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_REJECT_ID)
+        });
+        builder.set_manual_type_data(PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_RESOLVE_ID)
+        });
+        builder.set_manual_type_data(PROMISE_TRY_ID_GLOBAL_TYPE_ID, || {
+            promise_method_definition(PROMISE_TRY_ID)
+        });
+        builder.set_manual_type_data(BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("bigint")
+        });
+        builder.set_manual_type_data(BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("boolean")
+        });
+        builder.set_manual_type_data(FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("function")
+        });
+        builder.set_manual_type_data(NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("number")
+        });
+        builder.set_manual_type_data(OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("object")
+        });
+        builder.set_manual_type_data(STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("string")
+        });
+        builder.set_manual_type_data(SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("symbol")
+        });
+        builder.set_manual_type_data(UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID, || {
+            string_literal("undefined")
+        });
+        builder.set_manual_type_data(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID, || {
             TypeData::Union(Box::new(Union(Box::new([
                 GLOBAL_BIGINT_STRING_LITERAL_ID.into(),
                 GLOBAL_BOOLEAN_STRING_LITERAL_ID.into(),
@@ -345,38 +270,32 @@ impl Default for GlobalsResolver {
                 GLOBAL_STRING_STRING_LITERAL_ID.into(),
                 GLOBAL_SYMBOL_STRING_LITERAL_ID.into(),
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
-            ])))),
-        );
-        // Generic type parameters
-        builder.set_type_data(
-            T_ID,
+            ]))))
+        });
+        builder.set_manual_type_data(T_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("T"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
-            }),
-        );
-        builder.set_type_data(
-            U_ID,
+            })
+        });
+        builder.set_manual_type_data(U_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("U"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
-            }),
-        );
-        // Callback functions
-        builder.set_type_data(
-            CONDITIONAL_CALLBACK_ID,
+            })
+        });
+        builder.set_manual_type_data(CONDITIONAL_CALLBACK_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::new_static(CONDITIONAL_CALLBACK_ID_NAME)),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
-            }),
-        );
-        builder.set_type_data(
-            MAP_CALLBACK_ID,
+            })
+        });
+        builder.set_manual_type_data(MAP_CALLBACK_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
@@ -389,125 +308,111 @@ impl Default for GlobalsResolver {
                 })]
                 .into(),
                 return_type: ReturnType::Type(GLOBAL_U_ID.into()),
-            }),
-        );
-        builder.set_type_data(
-            VOID_CALLBACK_ID,
+            })
+        });
+        builder.set_manual_type_data(VOID_CALLBACK_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::new_static(VOID_CALLBACK_ID_NAME)),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-            }),
-        );
-        // Fetch function
-        builder.set_type_data(
-            FETCH_ID,
+            })
+        });
+        builder.set_manual_type_data(FETCH_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::new_static(FETCH_ID_NAME)),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            }),
-        );
-        builder.set_type_data(
-            INSTANCEOF_REGEXP_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID)),
-        );
-        builder.set_type_data(
-            REGEXP_ID,
+            })
+        });
+        builder.set_manual_type_data(INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_REGEXP_ID))
+        });
+        builder.set_manual_type_data(REGEXP_ID_GLOBAL_TYPE_ID, || {
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static(REGEXP_ID_NAME)),
                 type_parameters: Box::default(),
                 extends: None,
-                implements: [].into(),
+                implements: Box::default(),
                 members: Box::new([member("exec", REGEXP_EXEC_ID)]),
-            })),
-        );
-        builder.set_type_data(
-            REGEXP_EXEC_ID,
+            }))
+        });
+        builder.set_manual_type_data(REGEXP_EXEC_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: Some(Text::new_static(REGEXP_EXEC_ID_NAME)),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
-            }),
-        );
-        builder.set_type_data(
-            INSTANCEOF_DATE_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID)),
-        );
-        builder.set_type_data(DATE_ID, class(DATE_ID_NAME, Box::default()));
-        builder.set_type_data(
-            INSTANCEOF_MAP_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID)),
-        );
-        builder.set_type_data(
-            MAP_ID,
+            })
+        });
+        builder.set_manual_type_data(INSTANCEOF_DATE_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID))
+        });
+        builder.set_manual_type_data(DATE_ID_GLOBAL_TYPE_ID, || {
+            class(DATE_ID_NAME, Box::default())
+        });
+        builder.set_manual_type_data(INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID))
+        });
+        builder.set_manual_type_data(MAP_ID_GLOBAL_TYPE_ID, || {
             class(
                 MAP_ID_NAME,
                 Box::new([
                     TypeReference::from(GLOBAL_T_ID),
                     TypeReference::from(GLOBAL_U_ID),
                 ]),
-            ),
-        );
-        builder.set_type_data(
-            INSTANCEOF_SET_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_SET_ID)),
-        );
-        builder.set_type_data(
-            SET_ID,
-            class(SET_ID_NAME, Box::new([TypeReference::from(GLOBAL_T_ID)])),
-        );
-        builder.set_type_data(
-            INSTANCEOF_WEAK_MAP_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID)),
-        );
-        builder.set_type_data(
-            WEAK_MAP_ID,
+            )
+        });
+        builder.set_manual_type_data(INSTANCEOF_SET_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_SET_ID))
+        });
+        builder.set_manual_type_data(SET_ID_GLOBAL_TYPE_ID, || {
+            class(SET_ID_NAME, Box::new([TypeReference::from(GLOBAL_T_ID)]))
+        });
+        builder.set_manual_type_data(INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
+        });
+        builder.set_manual_type_data(WEAK_MAP_ID_GLOBAL_TYPE_ID, || {
             class(
                 WEAK_MAP_ID_NAME,
                 Box::new([
                     TypeReference::from(GLOBAL_T_ID),
                     TypeReference::from(GLOBAL_U_ID),
                 ]),
-            ),
-        );
-        builder.set_type_data(
-            INSTANCEOF_ERROR_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID)),
-        );
-        builder.set_type_data(ERROR_ID, class(ERROR_ID_NAME, Box::default()));
-        // Known symbols
-        builder.set_type_data(
-            INSTANCEOF_SYMBOL_ID,
-            TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID)),
-        );
-        builder.set_type_data(
-            SYMBOL_ID,
+            )
+        });
+        builder.set_manual_type_data(INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
+        });
+        builder.set_manual_type_data(ERROR_ID_GLOBAL_TYPE_ID, || {
+            class(ERROR_ID_NAME, Box::default())
+        });
+        builder.set_manual_type_data(INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, || {
+            TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
+        });
+        builder.set_manual_type_data(SYMBOL_ID_GLOBAL_TYPE_ID, || {
             TypeData::Class(Box::new(Class {
                 name: Some(Text::new_static(SYMBOL_ID_NAME)),
                 type_parameters: Box::default(),
                 extends: None,
-                implements: [].into(),
+                implements: Box::default(),
                 members: Box::new([
                     static_member("dispose", SYMBOL_DISPOSE_ID),
                     static_member("asyncDispose", SYMBOL_ASYNC_DISPOSE_ID),
                 ]),
-            })),
-        );
-        builder.set_type_data(SYMBOL_DISPOSE_ID, TypeData::Symbol);
-        builder.set_type_data(SYMBOL_ASYNC_DISPOSE_ID, TypeData::Symbol);
-        builder.set_type_data(
-            DISPOSABLE_ID,
+            }))
+        });
+        builder.set_manual_type_data(SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
+        builder.set_manual_type_data(SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
+        builder.set_manual_type_data(DISPOSABLE_ID_GLOBAL_TYPE_ID, || {
             TypeData::Interface(Box::new(Interface {
                 name: Text::new_static(DISPOSABLE_ID_NAME),
                 type_parameters: Box::default(),
-                extends: [].into(),
+                extends: Box::default(),
                 members: Box::new([TypeMember {
                     kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
                         GLOBAL_SYMBOL_DISPOSE_ID,
@@ -515,24 +420,22 @@ impl Default for GlobalsResolver {
                     ty: ResolvedTypeId::new(TypeResolverLevel::Global, DISPOSABLE_DISPOSE_ID)
                         .into(),
                 }]),
-            })),
-        );
-        builder.set_type_data(
-            DISPOSABLE_DISPOSE_ID,
+            }))
+        });
+        builder.set_manual_type_data(DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID, || {
             TypeData::Function(Box::new(Function {
                 is_async: false,
                 type_parameters: Default::default(),
                 name: None,
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-            })),
-        );
-        builder.set_type_data(
-            ASYNC_DISPOSABLE_ID,
+            }))
+        });
+        builder.set_manual_type_data(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, || {
             TypeData::Interface(Box::new(Interface {
                 name: Text::new_static(ASYNC_DISPOSABLE_ID_NAME),
                 type_parameters: Box::default(),
-                extends: [].into(),
+                extends: Box::default(),
                 members: Box::new([TypeMember {
                     kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
                         GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
@@ -543,18 +446,17 @@ impl Default for GlobalsResolver {
                     )
                     .into(),
                 }]),
-            })),
-        );
-        builder.set_type_data(
-            ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
+            }))
+        });
+        builder.set_manual_type_data(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, || {
             TypeData::Function(Box::new(Function {
                 is_async: true,
                 type_parameters: Default::default(),
                 name: None,
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            })),
-        );
+            }))
+        });
 
         builder.build()
     }

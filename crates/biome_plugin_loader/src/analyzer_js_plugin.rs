@@ -100,7 +100,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult {
+    fn evaluate(&self, _node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -240,7 +240,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/foo.js".into()))
+                plugin.evaluate(parse.syntax().into(), "/foo.js".into())
             })
         };
 
@@ -254,7 +254,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/bar.js".into()))
+                plugin.evaluate(parse.syntax().into(), "/bar.js".into())
             })
         };
 

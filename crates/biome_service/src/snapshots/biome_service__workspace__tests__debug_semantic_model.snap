@@ -35,7 +35,7 @@ Scope {
       Scope: ScopeId(2)
       Imported: false
       Exported: false
-      Kind: HoistedValue
+      Kind: Function
       ident: foo
     }
     Scope {

@@ -3,6 +3,7 @@
 mod conditionals;
 mod flattening;
 mod format_type_info;
+pub(crate) mod generated;
 mod globals;
 mod globals_builder;
 pub(crate) mod globals_ids;

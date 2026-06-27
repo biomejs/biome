@@ -31,6 +31,7 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_rowan::TextRange;
 
 pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support Astro
@@ -232,6 +233,34 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
     })
 }
 
+/// Parses `<?instruction foo="bar" ?>
+fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<?]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let start_range = p.cur_range();
+    p.bump_with_context(T![<?], inside_tag_context(p));
+
+    let name_range = p.cur_range();
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if start_range.end() != name_range.start() {
+        p.error(expected_no_spaces(
+            p,
+            TextRange::new(start_range.end(), name_range.start()),
+        ));
+    }
+
+    AttributeList.parse_list(p);
+
+    p.expect(T![?>]);
+
+    Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -244,9 +273,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
         && !is_possible_component(p, opening_tag_name.as_str());
+    // In Svelte files, <pre> must be parsed as a regular element so that
+    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
+    // nodes for variable-reference tracking.  The HTML formatter's
+    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
+    // printed verbatim, so removing <pre> from the embedded-language path
+    // here has no effect on formatting output.
+    let is_pre = opening_tag_name.eq_ignore_ascii_case("pre");
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !(is_pre && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -383,6 +420,7 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
+        T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
@@ -466,7 +504,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![?>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(

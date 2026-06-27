@@ -60,7 +60,7 @@ impl Rule for UseVueValidVBind {
         let node = ctx.query();
         match node {
             AnyVueDirective::VueDirective(vue_directive) => {
-                if vue_directive.name_token().ok()?.text_trimmed() != "v-bind" {
+                if !vue_directive.is_binding() {
                     return None;
                 }
 

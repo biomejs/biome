@@ -780,10 +780,24 @@ impl AnyParse {
         }
     }
 
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    /// Retrieves the root node of the parsed syntax tree.
+    ///
+    /// Returns `None` for [AnyParse::EmbeddedNode]
+    pub fn into_language_root<N>(self) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
         match self {
-            Self::Node(node) => node.into_serde_diagnostics(offset),
-            Self::EmbeddedNode(node) => node.into_serde_diagnostics(offset),
+            Self::Node(node) => node.root.clone().into_language_root::<N>(),
+            Self::EmbeddedNode(_) => None,
+        }
+    }
+
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+        match self {
+            Self::Node(node) => node.into_serde_diagnostics(),
+            Self::EmbeddedNode(node) => node.into_serde_diagnostics(),
         }
     }
 
@@ -830,24 +844,20 @@ impl AnyParse {
     /// ## Panic
     ///
     /// It panics if this node is a [EmbeddedSendNode]
-    pub fn unwrap_into_send_node(self) -> SendNode {
-        if let Self::Node(node) = self {
-            node.into_root()
-        } else {
-            panic!("Calling unwrap_into_send_node on an embedded node isn't a valid operation")
-        }
-    }
-
-    /// Returns a [SendNode] that can be sent across threads
-    ///
-    /// ## Panic
-    ///
-    /// It panics if this node is a [EmbeddedSendNode]
     pub fn unwrap_as_send_node(&self) -> SendNode {
         if let Self::Node(node) = self {
             node.clone().into_root()
         } else {
             panic!("Calling unwrap_as_send_node on an embedded node isn't a valid operation")
+        }
+    }
+
+    /// Returns a [SendNode] that can be sent across threads
+    pub fn as_send_node(&self) -> Option<SendNode> {
+        if let Self::Node(node) = self {
+            Some(node.clone().into_root())
+        } else {
+            None
         }
     }
 
@@ -955,15 +965,9 @@ impl NodeParse {
     }
 
     /// This function transforms diagnostics coming from the parser into serializable diagnostics
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
-            .map(|mut diag| {
-                if let Some(offset) = offset {
-                    diag.set_location_offset(offset)
-                }
-                diag
-            })
             .map(SerdeDiagnostic::new)
             .collect()
     }
@@ -1000,13 +1004,11 @@ impl EmbeddedNodeParse {
         &self.diagnostics
     }
 
-    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
             .map(|mut diag| {
-                if let Some(offset) = offset {
-                    diag.set_location_offset(offset)
-                }
+                diag.set_location_offset(self.root.offset());
                 diag
             })
             .map(SerdeDiagnostic::new)

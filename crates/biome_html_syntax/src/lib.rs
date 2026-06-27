@@ -11,6 +11,7 @@ mod string_ext;
 mod svg;
 mod syntax_node;
 mod text_ext;
+mod vue_ext;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;

@@ -235,7 +235,7 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	/**
 	 * Allows to apply a custom configuration.
 	 *
-	 * If fails when the configuration is incorrect.
+	 * It fails when the configuration is incorrect.
 	 *
 	 * @param projectKey The identifier of the project
 	 * @param configuration
@@ -301,7 +301,7 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	): FormatDebugResult<Diagnostic>;
 
 	/**
-	 * If formats some content.
+	 * It formats some content.
 	 *
 	 * @param projectKey The identifier of the project
 	 * @param content The content to format

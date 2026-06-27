@@ -457,10 +457,149 @@ fn flattened_call(
             }
         }
         callee => {
-            let function = resolve_callee_to_function(callee, resolver, depth)?;
+            let function = match select_overload(&callee, &expr.arguments, resolver) {
+                OverloadSelection::Selected(function) => function,
+                // The callee is an overload set, but no signature accepts the
+                // arguments. Its result type is unknown, so we must *not* fall
+                // back to silently picking the first call signature.
+                OverloadSelection::NoMatch => return None,
+                OverloadSelection::NotOverloaded => {
+                    resolve_callee_to_function(callee, resolver, depth)?
+                }
+            };
             flattened_function_call(expr, &function, resolver)
         }
     }
+}
+
+/// Outcome of [`select_overload`].
+enum OverloadSelection {
+    /// The callee is not an overload set (it carries fewer than two call
+    /// signatures); resolve it through the regular single-signature path.
+    NotOverloaded,
+    /// The callee is an overload set, but no signature accepts the arguments,
+    /// so the call's result type is unknown — notably *not* the first
+    /// signature's return type.
+    NoMatch,
+    /// A signature was selected for the given arguments.
+    Selected(Box<Function>),
+}
+
+/// Selects an overload when the callee is an object or interface carrying more
+/// than one call signature. This is the shape produced for a set of same-name
+/// function declarations, but it also applies to a hand-written interface with
+/// multiple call signatures.
+///
+/// Mirroring TypeScript, the first signature whose parameters accept the
+/// arguments wins, in declaration order. The three-way result lets the caller
+/// tell a non-overloaded callee (fall back to single-signature resolution)
+/// apart from an overloaded callee with no matching signature (the result is
+/// unknown, so the caller must *not* fall back to the first signature).
+fn select_overload(
+    callee: &TypeData,
+    arguments: &[CallArgumentType],
+    resolver: &dyn TypeResolver,
+) -> OverloadSelection {
+    let resolved = ResolvedTypeData::from((ResolverId::from_level(resolver.level()), callee));
+    let signatures: Vec<TypeReference> = resolved
+        .all_members(resolver)
+        .filter(|member| member.kind().is_call_signature())
+        .map(|member| member.to_member().deref_ty(resolver).into_owned())
+        .collect();
+    if signatures.len() < 2 {
+        return OverloadSelection::NotOverloaded;
+    }
+
+    signatures
+        .iter()
+        .find_map(|signature| {
+            match resolver
+                .resolve_and_get(signature)
+                .map(ResolvedTypeData::to_data)
+            {
+                Some(TypeData::Function(function))
+                    if signature_accepts_arguments(&function, arguments, resolver) =>
+                {
+                    Some(function)
+                }
+                _ => None,
+            }
+        })
+        .map_or(OverloadSelection::NoMatch, OverloadSelection::Selected)
+}
+
+/// Narrow applicability heuristic used for overload selection.
+///
+/// This is deliberately **not** a general assignability check: beyond an arity
+/// check, it only disambiguates overloads that differ by whether a callback
+/// argument returns a promise, which is the case that matters for
+/// promise-related rules. Any argument whose shape it does not understand (e.g.
+/// a non-function parameter/argument pair) places no constraint, so the first
+/// arity-compatible signature in declaration order wins.
+///
+/// Callers must therefore treat a `true` result as "this signature is *not
+/// ruled out*", not as "the arguments are assignable". When real assignability
+/// infrastructure exists, replace this body with `is_assignable_to` per
+/// parameter; the [`select_overload`] seam around it does not need to change.
+// TODO: generalize to a real assignability check once available.
+fn signature_accepts_arguments(
+    function: &Function,
+    arguments: &[CallArgumentType],
+    resolver: &dyn TypeResolver,
+) -> bool {
+    let parameters = &function.parameters;
+    let accepts_rest = parameters.last().is_some_and(FunctionParameter::is_rest);
+    let required = parameters
+        .iter()
+        .filter(|parameter| !parameter.is_optional() && !parameter.is_rest())
+        .count();
+    if arguments.len() < required || (!accepts_rest && arguments.len() > parameters.len()) {
+        return false;
+    }
+
+    parameters
+        .iter()
+        .zip(arguments)
+        .all(|(parameter, argument)| {
+            let (CallArgumentType::Argument(argument) | CallArgumentType::Spread(argument)) =
+                argument;
+            match (
+                resolve_function(parameter.ty(), resolver),
+                resolve_function(argument, resolver),
+            ) {
+                (Some(parameter_fn), Some(argument_fn)) => {
+                    function_returns_promise(&parameter_fn, resolver)
+                        == function_returns_promise(&argument_fn, resolver)
+                }
+                _ => true,
+            }
+        })
+}
+
+fn resolve_function(ty: &TypeReference, resolver: &dyn TypeResolver) -> Option<Box<Function>> {
+    match resolver.resolve_and_get(ty)?.to_data() {
+        TypeData::Function(function) => Some(function),
+        // Callable interfaces/objects: `interface Cb { (): Promise<void> }`
+        TypeData::Interface(interface) => interface
+            .members
+            .iter()
+            .find(|m| m.kind.is_call_signature())
+            .and_then(|m| resolve_function(&m.ty, resolver)),
+        TypeData::Object(object) => object
+            .members
+            .iter()
+            .find(|m| m.kind.is_call_signature())
+            .and_then(|m| resolve_function(&m.ty, resolver)),
+        _ => None,
+    }
+}
+
+fn function_returns_promise(function: &Function, resolver: &dyn TypeResolver) -> bool {
+    function
+        .return_type
+        .as_type()
+        .and_then(|return_ty| resolver.resolve_and_get(return_ty))
+        .is_some_and(|resolved| resolved.is_promise_instance(resolver))
 }
 
 fn flattened_destructure(

@@ -4391,3 +4391,167 @@ fn should_not_choke_on_recursive_function_call() {
         result,
     ));
 }
+
+#[test]
+fn only_should_skip_plugin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noDebugger", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_should_skip_plugin",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_plugin_runs_only_plugins() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=plugin", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_plugin_runs_only_plugins",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn skip_plugin_skips_plugins() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noManualZIndex.grit"]
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noManualZIndex.grit"),
+        br#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(
+        file_path.into(),
+        br#"const merged = Object.assign({}, a, b);
+debugger"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--skip=plugin", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "skip_plugin_skips_plugins",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn only_per_plugin_selector_is_rejected() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), b"debugger");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=plugin/foo", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "only_per_plugin_selector_is_rejected",
+        fs,
+        console,
+        result,
+    ));
+}

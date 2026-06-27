@@ -117,7 +117,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
                     .token_text_trimmed(),
             ),
             AnyVueDirective::VueDirective(d) => {
-                if d.name_token().ok()?.text_trimmed() != "v-bind" {
+                if !d.is_binding() {
                     return None;
                 }
                 Some(

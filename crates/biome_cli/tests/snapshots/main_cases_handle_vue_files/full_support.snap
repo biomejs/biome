@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -18,7 +19,6 @@ expression: redactor(content)
 
 ```vue
 <script>
-import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -64,16 +64,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.vue:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:9:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-     8 │ </script>
-     9 │ 
-  > 10 │ <html>
+     7 │ </script>
+     8 │ 
+   > 9 │ <html>
        │ ^^^^^^
-    11 │ 	<head>
-    12 │ 		<title>Svelte</title>
+    10 │ 	<head>
+    11 │ 		<title>Svelte</title>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -81,16 +81,16 @@ file.vue:10:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━�
 ```
 
 ```block
-file.vue:19:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:18:15 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Generic font family missing.
   
-    17 │ <style>
-    18 │ #id {
-  > 19 │ 	font-family: comic-sans;
+    16 │ <style>
+    17 │ #id {
+  > 18 │ 	font-family: comic-sans;
        │ 	             ^^^^^^^^^^
-    20 │ }
-    21 │ .class {
+    19 │ }
+    20 │ .class {
   
   i Consider adding a generic font family as a fallback.
   

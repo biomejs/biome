@@ -198,8 +198,12 @@ HtmlRoot {
                                         r_angle_token: R_ANGLE@201..202 ">" [] [],
                                     },
                                     children: HtmlElementList [
-                                        HtmlEmbeddedContent {
-                                            value_token: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] [],
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@202..203 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@203..232 "JSON.stringify(data, null, 2)" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@232..233 "}" [] [],
                                         },
                                     ],
                                     closing_element: HtmlClosingElement {
@@ -489,8 +493,11 @@ HtmlRoot {
                     2: HTML_ATTRIBUTE_LIST@201..201
                     3: R_ANGLE@201..202 ">" [] []
                   1: HTML_ELEMENT_LIST@202..233
-                    0: HTML_EMBEDDED_CONTENT@202..233
-                      0: HTML_LITERAL@202..233 "{JSON.stringify(data, null, 2)}" [] []
+                    0: HTML_SINGLE_TEXT_EXPRESSION@202..233
+                      0: L_CURLY@202..203 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@203..232
+                        0: HTML_LITERAL@203..232 "JSON.stringify(data, null, 2)" [] []
+                      2: R_CURLY@232..233 "}" [] []
                   2: HTML_CLOSING_ELEMENT@233..239
                     0: L_ANGLE@233..234 "<" [] []
                     1: SLASH@234..235 "/" [] []

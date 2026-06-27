@@ -147,7 +147,7 @@ fn has_dynamic_attribute(element: &AnyHtmlTagElement, name: &str) -> bool {
             } else if let Some(vue_directive) = attr.as_any_vue_directive() {
                 // Check for v-bind:type="foo" (longhand)
                 let directive_arg = if let Some(dir) = vue_directive.as_vue_directive()
-                    && dir.name_token().ok()?.text_trimmed() == "v-bind"
+                    && dir.is_binding()
                 {
                     dir.arg()
                 } else if let Some(dir) = vue_directive.as_vue_v_bind_shorthand_directive() {

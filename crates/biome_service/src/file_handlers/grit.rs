@@ -16,6 +16,7 @@ use biome_configuration::grit::{
     GritAssistConfiguration, GritAssistEnabled, GritFormatterConfiguration, GritFormatterEnabled,
     GritLinterConfiguration, GritLinterEnabled,
 };
+use biome_db::AnyParsedSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
@@ -24,8 +25,8 @@ use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenAtOffset};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use tracing::debug_span;
 
@@ -324,9 +325,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: GritSyntaxNode = parse.syntax();
-    let tree: GritRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: GritSyntaxNode = parse.syntax(&workspace_db);
+    let tree: GritRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -336,28 +341,30 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -370,13 +377,14 @@ fn format(
 fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let printed = biome_grit_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -385,13 +393,14 @@ fn format_range(
 fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
 
     let range = tree.text_range();
     if offset < range.start() || offset > range.end() {
@@ -423,9 +432,7 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
         .entered();
-    let diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
@@ -447,7 +454,7 @@ fn lint(params: LintParams) -> LintResults {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let tree: GritRoot = params.parse.tree();
+    let tree: GritRoot = params.parsed_source.tree(&params.workspace_db);
     let code = if params.should_format {
         format_node(
             params

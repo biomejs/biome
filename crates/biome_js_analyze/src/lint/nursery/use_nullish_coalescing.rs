@@ -7,9 +7,10 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression,
-    JsSyntaxKind, JsWhileStatement, OperatorPrecedence, T,
+    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
+    JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
+    JsWhileStatement, OperatorPrecedence, T,
 };
 use biome_js_type_info::{ConditionalType, TypeData};
 use biome_rowan::{
@@ -155,6 +156,38 @@ declare_lint_rule! {
     /// declare const b: string;
     /// declare let assigned: string | null;
     /// assigned ||= b && 'fallback';
+    /// ```
+    ///
+    /// ### ignoreBooleanCoercion
+    ///
+    /// Ignore `||` and `||=` used inside a `Boolean()` call, where coalescing on
+    /// falsy values is intentional. Default: `false`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreBooleanCoercion": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// `||` and `||=` outside a `Boolean()` call are still reported.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-boolean-coercion.ts
+    /// declare const maybeString: string | null;
+    /// const value = maybeString || 'default';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// `||` and `||=` inside a `Boolean()` call are not reported.
+    ///
+    /// ```ts,use_options,file=valid-boolean-coercion.ts
+    /// declare const a: string | null;
+    /// declare const b: string;
+    /// const r = Boolean(a || b);
     /// ```
     ///
     pub UseNullishCoalescing {
@@ -399,6 +432,12 @@ fn run_logical_or(
         return None;
     }
 
+    if options.ignore_boolean_coercion()
+        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(logical.clone()))
+    {
+        return None;
+    }
+
     let left = logical.left().ok()?;
     let left_ty = ctx.type_of_expression(&left);
 
@@ -428,6 +467,12 @@ fn run_logical_or_assignment(
     if options.ignore_mixed_logical_expressions()
         && is_in_mixed_logical_tree(AnyJsLogicalOrLikeExpression::from(assignment.clone()))
             .is_some_and(|mixed| mixed)
+    {
+        return None;
+    }
+
+    if options.ignore_boolean_coercion()
+        && is_in_boolean_call_context(&AnyJsLogicalOrLikeExpression::from(assignment.clone()))
     {
         return None;
     }
@@ -604,6 +649,30 @@ fn operand_reaches_logical_and(operand: SyntaxResult<AnyJsExpression>) -> bool {
             _ => false,
         }
     })
+}
+
+/// Returns `true` when the `||`/`||=` expression is boolean-coerced by an
+/// enclosing `Boolean(...)` call, where coalescing on falsy values is the
+/// intended behavior.
+///
+/// It skips parenthesized and logical-expression ancestors (both `||` and `&&`,
+/// since the coerced value still flows into the call) so that
+/// `Boolean(a || b || c)` and `Boolean(x && (a || b))` are both treated as
+/// coerced, then inspects the first ancestor that is neither. That ancestor must
+/// be the argument list of a `Boolean(...)` call for the expression to be
+/// considered coerced.
+fn is_in_boolean_call_context(node: &AnyJsLogicalOrLikeExpression) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| {
+            !(JsParenthesizedExpression::can_cast(ancestor.kind())
+                || JsLogicalExpression::can_cast(ancestor.kind()))
+        })
+        .and_then(JsCallArgumentList::cast)
+        .and_then(|list| list.parent::<JsCallArguments>())
+        .and_then(|args| args.parent::<JsCallExpression>())
+        .is_some_and(|call| call.has_callee("Boolean"))
 }
 
 fn is_in_test_position(logical: &JsLogicalExpression) -> bool {

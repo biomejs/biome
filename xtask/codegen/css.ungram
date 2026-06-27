@@ -190,6 +190,7 @@ AnyCssSubSelector =
 	| CssAttributeSelector
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
+	| CssNestedSelector
 	| CssBogusSubSelector
 
 // * {}

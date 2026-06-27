@@ -64,3 +64,21 @@ fn parse_nested_selector(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, CSS_NESTED_SELECTOR))
 }
+
+/// Parses a `&` (nesting selector) appearing as a sub-selector, e.g. the
+/// trailing `&` in `h1&`. Unlike [parse_nested_selector], this never produces
+/// a `ScssParentSelector`, since `AnyCssSubSelector` only allows
+/// `CssNestedSelector`; the SCSS parent-selector suffix syntax (`&-100`,
+/// `&#{$state}`) is only meaningful when `&` opens a compound selector.
+#[inline]
+pub(crate) fn parse_nested_selector_as_sub_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_nested_selector(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let context = selector_lex_context(p);
+    p.bump_with_context(T![&], context);
+
+    Present(m.complete(p, CSS_NESTED_SELECTOR))
+}

@@ -59,7 +59,7 @@ impl Rule for UseVueValidVOn {
 
         match node {
             AnyVueDirective::VueDirective(vue_directive) => {
-                if vue_directive.name_token().ok()?.text_trimmed() != "v-on" {
+                if !vue_directive.is_event_listener() {
                     return None;
                 }
 

@@ -177,7 +177,7 @@ pub(crate) fn analyze_and_snap(
     if needs_module_graph {
         let module_db =
             module_graph_for_css_test_file(input_file, &services.project_layout.clone().unwrap());
-        services = services.with_module_db(module_db);
+        services = services.with_module_db(module_db.rc_module_db());
     }
 
     let (_, errors) =

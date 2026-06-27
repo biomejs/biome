@@ -1,0 +1,167 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+[data-smth="true"] {
+	h1& {
+		color: red;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@0..1 "[" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..10 "data-smth" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@10..11 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@11..17 "\"true\"" [] [],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@17..19 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@19..20 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@20..24 "h1" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssNestedSelector {
+                                            amp_token: AMP@24..26 "&" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@26..27 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@27..35 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@37..40 "red" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@40..41 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@41..44 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@44..46 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..47
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..46
+    0: CSS_QUALIFIED_RULE@0..46
+      0: CSS_SELECTOR_LIST@0..19
+        0: CSS_COMPOUND_SELECTOR@0..19
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..19
+            0: CSS_ATTRIBUTE_SELECTOR@0..19
+              0: L_BRACK@0..1 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@1..10
+                0: (empty)
+                1: CSS_IDENTIFIER@1..10
+                  0: IDENT@1..10 "data-smth" [] []
+              2: CSS_ATTRIBUTE_MATCHER@10..17
+                0: EQ@10..11 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@11..17
+                  0: CSS_STRING@11..17
+                    0: CSS_STRING_LITERAL@11..17 "\"true\"" [] []
+                2: (empty)
+              3: R_BRACK@17..19 "]" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@19..46
+        0: L_CURLY@19..20 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@20..44
+          0: CSS_NESTED_QUALIFIED_RULE@20..44
+            0: CSS_RELATIVE_SELECTOR_LIST@20..26
+              0: CSS_RELATIVE_SELECTOR@20..26
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@20..26
+                  0: CSS_NESTED_SELECTOR_LIST@20..20
+                  1: CSS_TYPE_SELECTOR@20..24
+                    0: (empty)
+                    1: CSS_IDENTIFIER@20..24
+                      0: IDENT@20..24 "h1" [Newline("\n"), Whitespace("\t")] []
+                  2: CSS_SUB_SELECTOR_LIST@24..26
+                    0: CSS_NESTED_SELECTOR@24..26
+                      0: AMP@24..26 "&" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_OR_RULE_BLOCK@26..44
+              0: L_CURLY@26..27 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@27..41
+                0: CSS_DECLARATION_WITH_SEMICOLON@27..41
+                  0: CSS_DECLARATION@27..40
+                    0: CSS_GENERIC_PROPERTY@27..40
+                      0: CSS_IDENTIFIER@27..35
+                        0: IDENT@27..35 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@35..37 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..40
+                        0: CSS_IDENTIFIER@37..40
+                          0: IDENT@37..40 "red" [] []
+                    1: (empty)
+                  1: SEMICOLON@40..41 ";" [] []
+              2: R_CURLY@41..44 "}" [Newline("\n"), Whitespace("\t")] []
+        2: R_CURLY@44..46 "}" [Newline("\n")] []
+  2: EOF@46..47 "" [Newline("\n")] []
+
+```

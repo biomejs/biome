@@ -71,6 +71,14 @@ pub(crate) fn expected_matching_closing_tag(p: &HtmlParser, range: TextRange) ->
     expected_node("matching closing tag", range, p).into_diagnostic(p)
 }
 
+pub(crate) fn expected_no_spaces(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Processing instruction name can't have a leading space.",
+        range,
+    )
+    .with_hint("Remove the leading space.")
+}
+
 /// The parser was encountered a tag that does not have a name.
 ///
 /// ```html

@@ -26,7 +26,8 @@ rustc-hash                = { workspace = true }
 [dev-dependencies]
 biome_js_formatter = { path = "../biome_js_formatter" }
 biome_js_parser    = { path = "../biome_js_parser" }
-biome_test_utils   = { path = "../biome_test_utils" }
+biome_languages    = { path = "../biome_languages", features = ["lang_js"] }
+biome_test_utils   = { path = "../biome_test_utils", features = ["type_inference"] }
 insta              = { workspace = true }
 
 [lints]

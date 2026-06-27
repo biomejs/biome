@@ -16117,6 +16117,7 @@ pub enum AnyCssSubSelector {
     CssBogusSubSelector(CssBogusSubSelector),
     CssClassSelector(CssClassSelector),
     CssIdSelector(CssIdSelector),
+    CssNestedSelector(CssNestedSelector),
     CssPseudoClassSelector(CssPseudoClassSelector),
     CssPseudoElementSelector(CssPseudoElementSelector),
 }
@@ -16142,6 +16143,12 @@ impl AnyCssSubSelector {
     pub fn as_css_id_selector(&self) -> Option<&CssIdSelector> {
         match &self {
             Self::CssIdSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_nested_selector(&self) -> Option<&CssNestedSelector> {
+        match &self {
+            Self::CssNestedSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -41570,6 +41577,11 @@ impl From<CssIdSelector> for AnyCssSubSelector {
         Self::CssIdSelector(node)
     }
 }
+impl From<CssNestedSelector> for AnyCssSubSelector {
+    fn from(node: CssNestedSelector) -> Self {
+        Self::CssNestedSelector(node)
+    }
+}
 impl From<CssPseudoClassSelector> for AnyCssSubSelector {
     fn from(node: CssPseudoClassSelector) -> Self {
         Self::CssPseudoClassSelector(node)
@@ -41586,6 +41598,7 @@ impl AstNode for AnyCssSubSelector {
         .union(CssBogusSubSelector::KIND_SET)
         .union(CssClassSelector::KIND_SET)
         .union(CssIdSelector::KIND_SET)
+        .union(CssNestedSelector::KIND_SET)
         .union(CssPseudoClassSelector::KIND_SET)
         .union(CssPseudoElementSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -41595,6 +41608,7 @@ impl AstNode for AnyCssSubSelector {
                 | CSS_BOGUS_SUB_SELECTOR
                 | CSS_CLASS_SELECTOR
                 | CSS_ID_SELECTOR
+                | CSS_NESTED_SELECTOR
                 | CSS_PSEUDO_CLASS_SELECTOR
                 | CSS_PSEUDO_ELEMENT_SELECTOR
         )
@@ -41605,6 +41619,7 @@ impl AstNode for AnyCssSubSelector {
             CSS_BOGUS_SUB_SELECTOR => Self::CssBogusSubSelector(CssBogusSubSelector { syntax }),
             CSS_CLASS_SELECTOR => Self::CssClassSelector(CssClassSelector { syntax }),
             CSS_ID_SELECTOR => Self::CssIdSelector(CssIdSelector { syntax }),
+            CSS_NESTED_SELECTOR => Self::CssNestedSelector(CssNestedSelector { syntax }),
             CSS_PSEUDO_CLASS_SELECTOR => {
                 Self::CssPseudoClassSelector(CssPseudoClassSelector { syntax })
             }
@@ -41621,6 +41636,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => it.syntax(),
             Self::CssClassSelector(it) => it.syntax(),
             Self::CssIdSelector(it) => it.syntax(),
+            Self::CssNestedSelector(it) => it.syntax(),
             Self::CssPseudoClassSelector(it) => it.syntax(),
             Self::CssPseudoElementSelector(it) => it.syntax(),
         }
@@ -41631,6 +41647,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => it.into_syntax(),
             Self::CssClassSelector(it) => it.into_syntax(),
             Self::CssIdSelector(it) => it.into_syntax(),
+            Self::CssNestedSelector(it) => it.into_syntax(),
             Self::CssPseudoClassSelector(it) => it.into_syntax(),
             Self::CssPseudoElementSelector(it) => it.into_syntax(),
         }
@@ -41643,6 +41660,7 @@ impl std::fmt::Debug for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNestedSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementSelector(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -41655,6 +41673,7 @@ impl From<AnyCssSubSelector> for SyntaxNode {
             AnyCssSubSelector::CssBogusSubSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssIdSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssNestedSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoElementSelector(it) => it.into_syntax(),
         }

@@ -101,7 +101,12 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             }
         };
 
-        execution.can_handle(file_features)
+        let can_handle = execution.can_handle(file_features.clone());
+        if can_handle {
+            ctx.insert_file_features(biome_path.clone(), file_features);
+        }
+
+        can_handle
     }
 
     /// This function wraps the [process_file] function implementing the traversal

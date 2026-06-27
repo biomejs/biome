@@ -1,5 +1,65 @@
 # @biomejs/biome
 
+## 2.5.1
+
+### Patch Changes
+
+- [#10722](https://github.com/biomejs/biome/pull/10722) [`f8a303d`](https://github.com/biomejs/biome/commit/f8a303d08b6b22f56edb8ff5e7caa665532d613a) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed CSS formatter output for comments between import media queries.
+
+  ```diff
+  -@import url("print.css") print,
+  -/* comment */
+  -screen;
+  +@import url("print.css") print, /* comment */ screen;
+  ```
+
+- [#10738](https://github.com/biomejs/biome/pull/10738) [`9fdc560`](https://github.com/biomejs/biome/commit/9fdc5600997ef59ca7ed55ac212473de9bdb0b2a) Thanks [@JamBalaya56562](https://github.com/JamBalaya56562)! - Fixed [#9899](https://github.com/biomejs/biome/issues/9899): the `json` and `json-pretty` reporters now escape backslashes in a diagnostic's `location.path`. Previously, paths containing backslashes (such as Windows-style paths) were emitted unescaped, producing invalid JSON.
+
+  ```diff
+  -    "path": "src\account\setup-passkey.tsx",
+  +    "path": "src\\account\\setup-passkey.tsx",
+  ```
+
+- [#10626](https://github.com/biomejs/biome/pull/10626) [`5f837df`](https://github.com/biomejs/biome/commit/5f837df033afc34d43b398aeddc06c1d4fa491d9) Thanks [@tom-groves](https://github.com/tom-groves)! - Fixed [#10625](https://github.com/biomejs/biome/issues/10625): `biome migrate` no longer emits an invalid trailing comma when a renamed rule (such as `noConsoleLog` → `noConsole`) is the last member of its rule group. Previously this produced malformed output that aborted the migration of a strict-JSON `biome.json` with a parsing error.
+
+- [#10535](https://github.com/biomejs/biome/pull/10535) [`c245f9d`](https://github.com/biomejs/biome/commit/c245f9d9e239471d5437cd08f9cfa4601a85abd5) Thanks [@Mokto](https://github.com/Mokto)! - Fixed a false positive in [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) for Svelte files where variables referenced inside `{@html expr}` blocks were incorrectly reported as unused.
+
+- [#10668](https://github.com/biomejs/biome/pull/10668) [`a0f197e`](https://github.com/biomejs/biome/commit/a0f197eb1a6974539927f105ff1dde1f51d07d74) Thanks [@Netail](https://github.com/Netail)! - The `biome init` command has been updated to include a more up-to-date URL to [the first-party extensions page](https://biomejs.dev/editors/first-party-extensions/).
+
+- [#10667](https://github.com/biomejs/biome/pull/10667) [`d8c3e87`](https://github.com/biomejs/biome/commit/d8c3e878d53515c02bd6c5cb899b2eaec046c542) Thanks [@Netail](https://github.com/Netail)! - Fixed [#10664](https://github.com/biomejs/biome/issues/10664): [useErrorCause](https://biomejs.dev/linter/rules/use-error-cause/) now correctly detects a shorthand property.
+
+- [#10696](https://github.com/biomejs/biome/pull/10696) [`ef2373f`](https://github.com/biomejs/biome/commit/ef2373f29be15673705884d345c9af189e30b581) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9566](https://github.com/biomejs/biome/issues/9566). Improved how the Biome Language Server loads multiple configuration files inside a workspace.
+
+- [#10705](https://github.com/biomejs/biome/pull/10705) [`4ccb410`](https://github.com/biomejs/biome/commit/4ccb410dc00a6fb243934dad2e8681a9d5d9529e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10652](https://github.com/biomejs/biome/issues/10652). Biome plugins are now properly filtered when using `--only` and `--skip` flags.
+
+- [#10669](https://github.com/biomejs/biome/pull/10669) [`aa0a6eb`](https://github.com/biomejs/biome/commit/aa0a6eb8007493961cd578f04201248c15fd809a) Thanks [@Netail](https://github.com/Netail)! - Fixed [#10651](https://github.com/biomejs/biome/issues/10651): [useInlineScriptId](https://biomejs.dev/linter/rules/use-inline-script-id/) now correctly trims trivia to detect if an id attribute has been set.
+
+- [#10689](https://github.com/biomejs/biome/pull/10689) [`844b1be`](https://github.com/biomejs/biome/commit/844b1be60ded28bf4c650d85806919ceb57bc402) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10658](https://github.com/biomejs/biome/issues/10658). The issue was caused by the "Go-to definition" editor feature, which was enabled by default. The feature is now **disabled by default**. To work, the feature triggers the scanner to build the module graph. This caused memory leak issues in cases where Biome starts in the home directory to modify files.
+
+  If you relied on this new feature, you must now turn on using the [editor settings] of the extension e.g. [Zed](https://biomejs.dev/reference/zed/#goto_definition) and [VSCode](https://biomejs.dev/reference/vscode/#biomegotodefinition).
+
+- [#10695](https://github.com/biomejs/biome/pull/10695) [`043fbb5`](https://github.com/biomejs/biome/commit/043fbb514f1b96c5b723cd86c8db4b9bc9f03631) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10674](https://github.com/biomejs/biome/issues/10674). Biome now throws an error when the field `level` is missing from a rule option.
+
+- [#10712](https://github.com/biomejs/biome/pull/10712) [`5941df2`](https://github.com/biomejs/biome/commit/5941df2a0d6904e487e73d4dc7231dcaf7b3a2f0) Thanks [@Conaclos](https://github.com/Conaclos)! - Improved the diagnostic and the documentation of [`useFlatMap`](https://biomejs.dev/linter/rules/use-flat-map/).
+
+- [#10615](https://github.com/biomejs/biome/pull/10615) [`23814f1`](https://github.com/biomejs/biome/commit/23814f1ad8430df906a39323ee31d27d7b9ca17b) Thanks [@qwertycxz](https://github.com/qwertycxz)! - Improved the DX the JSON schema when it's used by certain code editors like VSCode.
+
+- [#10688](https://github.com/biomejs/biome/pull/10688) [`ec69489`](https://github.com/biomejs/biome/commit/ec694896a0c75176aca040392e3309df1b2e963d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the Biome Daemon did not correctly shut down when the editor was closed during an in-progress operation, especially while scanning.
+
+- [#10701](https://github.com/biomejs/biome/pull/10701) [`6c2e0d7`](https://github.com/biomejs/biome/commit/6c2e0d7bba1cbc457a42adf6c982a773bc7e4605) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10694](https://github.com/biomejs/biome/issues/10694). The Biome Language Server no longer prints an error when the user hovers a variable imported from node_modules.
+
+- [#10681](https://github.com/biomejs/biome/pull/10681) [`888515b`](https://github.com/biomejs/biome/commit/888515b088cde688a95680362a619221c023f9d0) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [`useExportType`](https://biomejs.dev/linter/rules/use-export-type/) that reported useless details in some diagnostics.
+
+- [#10220](https://github.com/biomejs/biome/pull/10220) [`3694a13`](https://github.com/biomejs/biome/commit/3694a135a9976915889988c36d9eb40d679f06e6) Thanks [@theBGuy](https://github.com/theBGuy)! - Fixed [`useAnchorContent`](https://biomejs.dev/linter/rules/use-anchor-content/) false positive for `<a>` elements used as render prop values (e.g. `render={<a href="..." />}`), a pattern where the receiving component renders its children inside the anchor element.
+
+- [#10702](https://github.com/biomejs/biome/pull/10702) [`98823fb`](https://github.com/biomejs/biome/commit/98823fb2e70095b09e1ca4bb9733850bbe8ff33f) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#10612](https://github.com/biomejs/biome/issues/10612). The Biome parser now correctly parses processing instructions. The following SVG doesn't throw errors anymore:
+
+  ```svg
+  <?xml version="1.0" encoding="UTF-8" ?>
+
+  <svg></svg>
+  ```
+
 ## 2.5.0
 
 ### Minor Changes

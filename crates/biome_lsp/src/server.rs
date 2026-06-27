@@ -390,6 +390,9 @@ impl LanguageServer for LSPServer {
     }
 
     async fn shutdown(&self) -> LspResult<()> {
+        if self.stop_on_disconnect {
+            self.session.broadcast_shutdown();
+        }
         Ok(())
     }
 

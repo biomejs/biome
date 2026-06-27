@@ -1,41 +1,41 @@
 // should not generate diagnostics
 
 try {
-  throw new Error("Original error");
+	throw new Error("Original error");
 } catch (err) {
-  throw new Error("Wrapper error", { cause: err });
+	throw new Error("Wrapper error", { cause: err });
 }
 
 try {
-  throw new Error("Original error");
+	throw new Error("Original error");
 } catch (err) {
-  console.error("Caught error:", err);
+	console.error("Caught error:", err);
 }
 
 
 class CustomError extends Error {
-  constructor(message, options) {
-    super(message, options);
-    this.name = "CustomError";
-  }
+	constructor(message, options) {
+		super(message, options);
+		this.name = "CustomError";
+	}
 }
 try {
-  throw new Error("Original error");
+	throw new Error("Original error");
 } catch (err) {
-  throw new CustomError("Custom failure", { cause: err });
+	throw new CustomError("Custom failure", { cause: err });
 }
 
 
 try {
-  throw new Error("Original error");
+	throw new Error("Original error");
 } catch (err) {
-  throw new Error(`Failed to process: ${err.message}`, { cause: err });
+	throw new Error(`Failed to process: ${err.message}`, { cause: err });
 }
 
 try {
-    doSomething();
+	doSomething();
 } catch (e) {
-    console.error(e);
+	console.error(e);
 }
 
 try {
@@ -46,4 +46,10 @@ try {
 			throw new Error("Something went wrong");
 		}
 	};
+}
+
+try {
+	throw new Error("Original error");
+} catch (cause) {
+	throw new Error("Wrapper error", { cause });
 }

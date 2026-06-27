@@ -34,8 +34,14 @@ similar-asserts     = { workspace = true }
 [dev-dependencies]
 
 [features]
-lang_md   = ["biome_service/lang_md"]
-lang_yaml = ["biome_service/lang_yaml"]
+lang_css     = ["biome_service/lang_css"]
+lang_graphql = ["biome_service/lang_graphql"]
+lang_grit    = ["biome_service/lang_grit"]
+lang_html    = ["biome_service/lang_html"]
+lang_js      = ["biome_service/lang_js"]
+lang_json    = ["biome_service/lang_json"]
+lang_md      = ["biome_service/lang_md"]
+lang_yaml    = ["biome_service/lang_yaml"]
 
 [lints]
 workspace = true

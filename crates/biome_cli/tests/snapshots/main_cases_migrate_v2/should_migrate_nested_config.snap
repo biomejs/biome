@@ -28,7 +28,7 @@ expression: redactor(content)
   i Configuration file can be updated.
   
   - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"root":·false,"linter":·{·"rules":·{·"preset"·:"none"·}·}·}
+  + {·"root":·false,"linter":·{·"rules":·{·"preset":·"none"·}·}·}
   
 
 ```
@@ -39,7 +39,7 @@ expression: redactor(content)
   i Configuration file can be updated.
   
   - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"linter":·{·"rules":·{·"preset"·:"none"·}·}·}
+  + {·"linter":·{·"rules":·{·"preset":·"none"·}·}·}
   
 
 ```
@@ -50,7 +50,7 @@ expression: redactor(content)
   i Configuration file can be updated.
   
   - {·"linter":·{·"rules":·{·"recommended":·true·}·}·}
-  + {·"root":·false,"linter":·{·"rules":·{·"preset"·:"none"·}·}·}
+  + {·"root":·false,"linter":·{·"rules":·{·"preset":·"none"·}·}·}
   
 
 ```

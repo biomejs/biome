@@ -89,29 +89,42 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
             return p.line_start_leading_indent();
         }
 
-        // If the current token still contains the preserved pre-marker
-        // indentation, measure to the first non-whitespace character on the
-        // line. Measuring to the current token start would incorrectly report
-        // column 0 for nested list markers.
-        if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            return p.line_start_leading_indent();
-        }
-
-        // Virtual line start: compute actual column from source text.
-        // The leading whitespace was consumed as trivia, but we need the
-        // real column for indented code block detection in nested lists.
         let source = p.source().source_text();
         let pos: usize = p.cur_range().start().into();
 
         // Find the start of the current line
         let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
 
-        // Count columns from line start to current position
+        // Whether the line's leading whitespace (the run before the first
+        // non-whitespace character) contains a tab. This is true both when the
+        // tab sits before the cursor and when it is the current token itself.
+        let leading_has_tab = source[line_start..]
+            .chars()
+            .take_while(|c| matches!(c, ' ' | '\t'))
+            .any(|c| c == '\t');
+
+        if !leading_has_tab {
+            // Pure-space indentation: keep the original behavior. When the
+            // current token still carries the pre-marker indentation, measure
+            // to the first non-whitespace via the standard helper; otherwise
+            // count characters up to the cursor (no tabs means each one
+            // advances the column by one).
+            if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                return p.line_start_leading_indent();
+            }
+            return source[line_start..pos].chars().count();
+        }
+
+        // Leading whitespace contains a tab: compute the marker column across
+        // the full run, because part of the whitespace may already be consumed
+        // as trivia. For ` \t- foo`, the tab expands to column 4 regardless of
+        // the consumed space, so the marker indent is 4, not 1.
         let mut column = 0;
-        for c in source[line_start..pos].chars() {
+        for c in source[line_start..].chars() {
             match c {
                 '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
-                _ => column += 1,
+                ' ' => column += 1,
+                _ => break,
             }
         }
         column
@@ -157,6 +170,60 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
     while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
         p.bump(MD_TEXTUAL_LITERAL);
     }
+}
+
+/// Detect a sibling list item at the enclosing item's marker indent.
+///
+/// `at_bullet_list_item` and `at_order_list_item` check from the content indent,
+/// which suits child detection but misses siblings when the marker is followed
+/// by more than one space or a tab, since the marker indent then sits below the
+/// content indent.
+///
+/// Returns true only when an enclosing list item exists and a bullet or ordered
+/// marker sits on the current line at that indent.
+pub(crate) fn at_sibling_list_marker(p: &mut MarkdownParser) -> bool {
+    let marker_indent = p.state().list_item_marker_indent;
+    if marker_indent == 0 {
+        return false;
+    }
+    p.lookahead(|p| {
+        if !p.at_line_start() {
+            return false;
+        }
+        let indent = p.line_start_leading_indent();
+        if indent != marker_indent {
+            return false;
+        }
+        skip_leading_whitespace_tokens(p);
+
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            if !is_single_dash_setext_marker(p.cur_text()) {
+                return false;
+            }
+            p.bump_remap(T![-]);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
+            let text = p.cur_text();
+            p.bump_remap(if text == "-" {
+                T![-]
+            } else if text == "*" {
+                T![*]
+            } else {
+                T![+]
+            });
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        false
+    })
 }
 
 fn skip_list_marker_indent(p: &mut MarkdownParser) {

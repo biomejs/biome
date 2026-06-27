@@ -133,9 +133,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
     match vue {
         // Longhand directive: v-bind:foo
         AnyVueDirective::VueDirective(directive) => {
-            let name_token = directive.name_token().ok()?;
-            let name = name_token.text_trimmed();
-            if name != "v-bind" {
+            if !directive.is_binding() {
                 return None;
             }
 

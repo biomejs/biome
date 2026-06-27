@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -36,6 +37,28 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+file.astro:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable x is unused.
+  
+    1 │ ---
+  > 2 │ const x = 5;
+      │       ^
+    3 │ ---
+    4 │ <div>{ return x }</div>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend x with an underscore.
+  
+    1   │ - const·x·=·5;
+      1 │ + const·_x·=·5;
+    2 2 │   
+  
+
+```
+
+```block
 file.astro:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a valid expression in template syntax
@@ -53,4 +76,5 @@ file.astro:4:8 parse ━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

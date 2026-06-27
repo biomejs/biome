@@ -41,16 +41,16 @@ declare_lint_rule! {
     /// ### Disallowed patterns
     /// A full list of constructs linted by this rule are as follows:
     ///
-    /// | Pattern                                        | Target              | Example                       |
-    /// | ---------------------------------------------- | ------------------- | ----------------------------- |
-    /// | Double negation[^1]                            | `Boolean`           | `!!value       `              |
-    /// | Unary plus                                     | `Number`            | `+value`                      |
-    /// | Double unary negation                          | `Number`            | `-(-value)`                   |
-    /// | Subtraction with zero[^2]                      | `Number`            | `value - 0`                   |
-    /// | Multiplication with one[^2]                    | `Number`            | `value * 1`                   |
-    /// | Division with one[^2]                          | `Number`            | `value / 1`                   |
-    /// | Concatenation with an empty string[^2]         | `String`            | `value + ""`, ``value + `` `` |
-    /// | Bitwise NOT with `indexOf`[^3]                 | Check against `-1`  | `~arr.indexOf(value)`         |
+    /// | Pattern                                        | Target              | Example                          |
+    /// | ---------------------------------------------- | ------------------- | -------------------------------- |
+    /// | Double negation[^1]                            | `Boolean`           | `!!value`                        |
+    /// | Unary plus                                     | `Number`            | `+value`                         |
+    /// | Double unary negation                          | `Number`            | `-(-value)`                      |
+    /// | Subtraction with zero[^2]                      | `Number`            | `value - 0`                      |
+    /// | Multiplication with one[^2]                    | `Number`            | `value * 1`                      |
+    /// | Division with one[^2]                          | `Number`            | `value / 1`                      |
+    /// | Concatenation with an empty string[^2]         | `String`            | `value + ""`, ```value + `` ```  |
+    /// | Bitwise NOT with `indexOf`[^3]                 | Check against `-1`  | `~arr.indexOf(value)`            |
     ///
     /// [^1]: Unless the `allowDoubleNegation` option is set to `true`, in which case it is ignored.
     ///
