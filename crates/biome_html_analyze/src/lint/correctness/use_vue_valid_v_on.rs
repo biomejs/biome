@@ -13,15 +13,16 @@ declare_lint_rule! {
     ///
     /// This rule reports v-on directives in the following cases:
     /// - The directive has neither an event name nor a value (an arg-less
-    ///   `v-on` with a value is the object syntax, e.g. `<div v-on="$listeners"></div>`,
-    ///   which is valid).
+    ///   `v-on` with a value is the
+    ///   [object syntax](https://vuejs.org/api/built-in-directives.html#v-on),
+    ///   e.g. `<div v-on="$listeners"></div>`, which is valid).
     /// - The directive has invalid modifiers. E.g. `<div v-on:click.bogus="foo"></div>`
     /// - The directive is missing a handler expression, **unless one of the
-    ///   verb modifiers (`stop`, `prevent`) is present**. The verb modifiers
-    ///   carry an intrinsic side effect (`event.stopPropagation()` /
-    ///   `event.preventDefault()`) and are valid Vue syntax without a handler.
-    ///   E.g. `<div v-on:click></div>` is invalid but `<div @click.stop></div>`
-    ///   is valid.
+    ///   [verb modifiers](https://vuejs.org/guide/essentials/event-handling.html#event-modifiers)
+    ///   (`stop`, `prevent`) is present**. The verb modifiers carry an intrinsic
+    ///   side effect (`event.stopPropagation()` / `event.preventDefault()`) and
+    ///   are valid Vue syntax without a handler. E.g. `<div v-on:click></div>`
+    ///   is invalid but `<div @click.stop></div>` is valid.
     ///
     /// ## Examples
     ///
@@ -211,6 +212,8 @@ fn find_invalid_modifiers(
 ///
 /// This mirrors `eslint-plugin-vue`'s `VERB_MODIFIERS` set, which the
 /// upstream `valid-v-on` rule uses for the same purpose.
+///
+/// See <https://vuejs.org/guide/essentials/event-handling.html#event-modifiers>.
 fn has_verb_modifier(modifiers: &VueModifierList) -> bool {
     for modifier in modifiers {
         if modifier
