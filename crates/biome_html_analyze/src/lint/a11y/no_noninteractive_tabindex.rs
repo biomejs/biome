@@ -3,6 +3,7 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
@@ -76,27 +77,36 @@ impl Rule for NoNoninteractiveTabindex {
             return None;
         }
 
-        let tabindex_attribute = node.find_attribute_by_name("tabindex")?;
+        let tabindex_attribute = node.find_attribute_or_vue_binding("tabindex")?;
+        let tabindex_html_attribute = tabindex_attribute.as_html_attribute()?;
 
-        let is_negative = tabindex_attribute
+        let value = tabindex_html_attribute
             .initializer()
             .and_then(|init| init.value().ok())
-            .and_then(|value| value.string_value())
-            .is_some_and(|value| is_negative_tabindex(&value));
+            .and_then(|value| value.as_static_value())?;
 
-        if is_negative {
+        if is_negative_tabindex(value.text()) {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role");
-        if let Some(role_attr) = role_attribute {
-            let role_value = role_attr.initializer()?.value().ok()?.string_value()?;
-            let role = AriaRole::from_roles(role_value.trim());
+        let role_attribute = node.find_attribute_or_vue_binding("role");
+        if let Some(role_attribute) = role_attribute {
+            match role_attribute {
+                AnyHtmlAttribute::HtmlAttribute(html_attribute) => {
+                    let role_value = html_attribute
+                        .initializer()?
+                        .value()
+                        .ok()?
+                        .as_static_value()?;
+                    let role = AriaRole::from_roles(role_value.text().trim());
 
-            if let Some(aria_role) = role
-                && aria_role.is_interactive()
-            {
-                return None;
+                    if let Some(aria_role) = role
+                        && aria_role.is_interactive()
+                    {
+                        return None;
+                    }
+                }
+                _ => return None,
             }
         }
 
@@ -105,7 +115,7 @@ impl Rule for NoNoninteractiveTabindex {
 
         Some(RuleState {
             attribute_range,
-            attribute: tabindex_attribute,
+            attribute: tabindex_html_attribute.clone(),
             element_name,
         })
     }

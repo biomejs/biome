@@ -68,17 +68,15 @@ impl Rule for NoRedundantAlt {
             return None;
         }
 
-        let alt = node
-            .find_attribute_by_name("alt")?
-            .initializer()?
-            .value()
-            .ok()?;
+        let alt_attribute = node.find_attribute_by_name("alt")?;
+        let alt_html_attribute = alt_attribute.as_html_attribute()?;
+        let initializer = alt_html_attribute.initializer()?.value().ok()?;
 
-        match alt {
+        match initializer {
             AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_) => None,
             AnyHtmlAttributeInitializer::HtmlString(ref value) => {
                 let inner_string_text = value.inner_string_text().ok()?;
-                is_redundant_alt(inner_string_text.text()).then_some(alt)
+                is_redundant_alt(inner_string_text.text()).then_some(initializer)
             }
             AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => value
                 .elements()
@@ -90,7 +88,7 @@ impl Rule for NoRedundantAlt {
                     AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
                 })
                 .any(|t| is_redundant_alt(t.text_trimmed()))
-                .then_some(alt),
+                .then_some(initializer),
             AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }

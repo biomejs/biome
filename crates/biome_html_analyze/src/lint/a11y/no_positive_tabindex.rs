@@ -65,14 +65,15 @@ impl Rule for NoPositiveTabindex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
         let tabindex_attribute = element.find_attribute_by_name("tabindex")?;
-        let initializer = tabindex_attribute.initializer()?;
+        let tabindex_html_attribute = tabindex_attribute.as_html_attribute()?;
+        let initializer = tabindex_html_attribute.initializer()?;
         let value = initializer.value().ok()?;
-        let string_value = value.string_value()?;
+        let string_value = value.as_static_value()?;
         let value_range = value.range();
 
-        if !is_tabindex_valid(&string_value) {
+        if !is_tabindex_valid(string_value.text()) {
             return Some(NoPositiveTabindexState {
-                attribute: tabindex_attribute,
+                attribute: tabindex_html_attribute.clone(),
                 value_range,
             });
         }

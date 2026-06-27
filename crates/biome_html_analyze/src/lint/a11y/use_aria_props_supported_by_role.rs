@@ -59,8 +59,18 @@ impl Rule for UseAriaPropsSupportedByRole {
 
         let role = node
             .find_attribute_by_name("role")
-            .and_then(|attribute| attribute.initializer()?.value().ok()?.as_static_value())
-            .and_then(|value| AriaRole::from_roles(value.text()))
+            .and_then(|attribute| {
+                if let AnyHtmlAttribute::HtmlAttribute(html_attribute) = attribute {
+                    html_attribute
+                        .initializer()?
+                        .value()
+                        .ok()?
+                        .as_static_value()
+                        .and_then(|value| AriaRole::from_roles(value.text()))
+                } else {
+                    None
+                }
+            })
             .or_else(|| ctx.aria_roles().get_implicit_role(node));
 
         let role_attributes = role.map_or(Default::default(), |role| role.attributes());
@@ -80,7 +90,7 @@ impl Rule for UseAriaPropsSupportedByRole {
             };
             // Allow null/undefined values regardless of the role
             if attribute
-                .value()
+                .as_static_value()
                 .is_some_and(|f| matches!(f.text(), "null" | "undefined"))
             {
                 continue;

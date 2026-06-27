@@ -8,6 +8,8 @@ expression: invalid.svelte
 <input type="submit" accesskey="s" value="Submit" />
 <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
 <button accesskey="n">Next</button>
+<button accesskey={accesskeyValue}>Next</button>
+<button {accesskey}>Next</button>
 
 ```
 
@@ -42,7 +44,7 @@ invalid.svelte:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
   > 3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
       │                               ^^^^^^^^^^^^^
     4 │ <button accesskey="n">Next</button>
-    5 │ 
+    5 │ <button accesskey={accesskeyValue}>Next</button>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
@@ -62,7 +64,8 @@ invalid.svelte:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
     3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
   > 4 │ <button accesskey="n">Next</button>
       │         ^^^^^^^^^^^^^
-    5 │ 
+    5 │ <button accesskey={accesskeyValue}>Next</button>
+    6 │ <button {accesskey}>Next</button>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
@@ -70,5 +73,46 @@ invalid.svelte:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
   
     4 │ <button·accesskey="n">Next</button>
       │         -------------              
+
+```
+
+```
+invalid.svelte:5:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+    4 │ <button accesskey="n">Next</button>
+  > 5 │ <button accesskey={accesskeyValue}>Next</button>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <button {accesskey}>Next</button>
+    7 │ 
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    5 │ <button·accesskey={accesskeyValue}>Next</button>
+      │         --------------------------              
+
+```
+
+```
+invalid.svelte:6:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    4 │ <button accesskey="n">Next</button>
+    5 │ <button accesskey={accesskeyValue}>Next</button>
+  > 6 │ <button {accesskey}>Next</button>
+      │         ^^^^^^^^^^^
+    7 │ 
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    6 │ <button·{accesskey}>Next</button>
+      │         -----------              
 
 ```

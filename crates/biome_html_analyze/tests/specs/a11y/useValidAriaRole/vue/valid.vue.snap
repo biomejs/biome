@@ -14,5 +14,7 @@ expression: valid.vue
 <div role="switch row" />
 <div />
 <div role="tabpanel row" />
+<div v-bind:role="roleValue" />
+<div :role="roleValue" />
 
 ```

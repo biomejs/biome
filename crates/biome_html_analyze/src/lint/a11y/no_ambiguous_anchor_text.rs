@@ -111,8 +111,9 @@ impl Rule for NoAmbiguousAnchorText {
 }
 
 fn get_aria_label(node: &AnyHtmlTagElement) -> Option<String> {
-    let attribute = node.attributes().find_by_name("aria-label")?;
-    let initializer = attribute.initializer()?;
+    let attribute = node.attributes().find_attribute_by_name("aria-label")?;
+    let html_attribute = attribute.as_html_attribute()?;
+    let initializer = html_attribute.initializer()?;
     let value = initializer.value().ok()?;
     let html_string = value.as_html_string()?;
     let text = html_string.inner_string_text().ok()?;
@@ -125,8 +126,9 @@ fn get_img_alt(node: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option
         return None;
     }
 
-    let attribute = node.attributes().find_by_name("alt")?;
-    let initializer = attribute.initializer()?;
+    let attribute = node.attributes().find_attribute_by_name("alt")?;
+    let html_attribute = attribute.as_html_attribute()?;
+    let initializer = html_attribute.initializer()?;
     let value = initializer.value().ok()?;
     let html_string = value.as_html_string()?;
     let text = html_string.inner_string_text().ok()?;

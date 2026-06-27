@@ -138,11 +138,12 @@ fn has_caption_track(html_child_list: &HtmlElementList, source_type: &HtmlFileSo
             }
 
             let kind_attr = child.find_attribute_by_name("kind")?;
+            let kind_attr = kind_attr.as_html_attribute()?;
             let initializer = kind_attr.initializer()?;
             let value = initializer.value().ok()?;
-            let string_value = value.string_value()?;
+            let string_value = value.as_static_value()?;
 
-            if string_value.eq_ignore_ascii_case("captions") {
+            if string_value.text().eq_ignore_ascii_case("captions") {
                 Some(())
             } else {
                 None

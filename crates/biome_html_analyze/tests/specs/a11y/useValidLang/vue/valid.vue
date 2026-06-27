@@ -7,3 +7,5 @@
 <html lang="nn"></html>
 <html lang="zh-Hant"></html>
 <html lang="zh-Hans-CN"></html>
+<html v-bind:lang="langValue"></html>
+<html :lang="langValue"></html>

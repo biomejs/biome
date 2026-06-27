@@ -71,7 +71,8 @@ impl Rule for UseValidLang {
         }
 
         let attribute = node.find_attribute_by_name("lang")?;
-        let attribute_value = attribute.initializer()?.value().ok()?;
+        let html_attribute = attribute.as_html_attribute()?;
+        let attribute_value = html_attribute.initializer()?.value().ok()?;
         let attribute_static_value = attribute_value.as_static_value()?;
         let attribute_text = attribute_static_value.text();
         let mut split_value = attribute_text.split('-');

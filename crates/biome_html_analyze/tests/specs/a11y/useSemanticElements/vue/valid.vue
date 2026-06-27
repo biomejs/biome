@@ -38,3 +38,5 @@
 <input role="textbox" type="text" />
 <th role="columnheader" scope="col"></th>
 <th role="rowheader" scope="row"></th>
+<th v-bind:role="roleValue" scope="row"></th>
+<th :role="roleValue" scope="row"></th>

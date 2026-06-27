@@ -22,7 +22,7 @@ declare_lint_rule! {
     /// including the empty fragment `#` both with and without attached logic. With logic attached, an anchor
     /// with an invalid `href` usually behaves like an action and should be a `button`, because that's likely
     /// what the user wants. Without logic, `href="#"` still points to no real target and can cause scroll
-    /// position and keyboard focus to fall out of sync. Prefer linking to an actual destination, such as 
+    /// position and keyboard focus to fall out of sync. Prefer linking to an actual destination, such as
     /// `href="#top"`.
     ///
     /// Anchor `<a></a>` elements should be used for navigation, while `<button></button>` should be
@@ -89,21 +89,25 @@ impl Rule for UseValidAnchor {
         if (file_source.is_html() && name.eq_ignore_ascii_case("a"))
             || (!file_source.is_html() && name == "a")
         {
-            let anchor_attribute = node.find_attribute_by_name("href");
-            let on_click_attribute = node.find_attribute_by_name("onclick");
+            let anchor_attribute = node.find_attribute_or_vue_binding("href");
+            let on_click_attribute = node.find_attribute_or_vue_event_binding("onclick");
 
             match (anchor_attribute, on_click_attribute) {
                 (Some(anchor_attribute), _) => {
-                    if anchor_attribute.initializer().is_none() {
+                    if anchor_attribute
+                        .as_html_attribute()
+                        .is_some_and(|attr| attr.initializer().is_none())
+                    {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
 
                     let attribute_value = anchor_attribute
+                        .as_html_attribute()?
                         .initializer()?
                         .value()
                         .ok()?
-                        .string_value()?;
-                    let static_value = attribute_value.trim().to_ascii_lowercase_cow();
+                        .as_static_value()?;
+                    let static_value = attribute_value.text().trim().to_ascii_lowercase_cow();
 
                     if static_value.is_empty()
                         || static_value == "#"

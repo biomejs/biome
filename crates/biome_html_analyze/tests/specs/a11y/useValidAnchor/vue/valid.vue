@@ -4,3 +4,5 @@
 <Link :href="somewhere">ok</Link>
 <Link href="https://example.com">ok</Link>
 <Link href="#">ok</Link>
+<a v-bind:href="hrefValue">Home</a>
+<a :href="hrefValue">Home</a>

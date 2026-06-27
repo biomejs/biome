@@ -77,7 +77,8 @@ impl Rule for NoAriaHiddenOnFocusable {
         // Tabindex overrides native focusability: negative removes from tab order,
         // non-negative makes the element focusable regardless of element type.
         if let Some(tabindex_attr) = element.find_attribute_by_name("tabindex")
-            && let Some(tabindex_value) = get_tabindex_value(&tabindex_attr)
+            && let Some(html_attribute) = tabindex_attr.as_html_attribute()
+            && let Some(tabindex_value) = get_tabindex_value(html_attribute)
         {
             if tabindex_value < 0 {
                 return None;
@@ -132,8 +133,8 @@ impl Rule for NoAriaHiddenOnFocusable {
 /// Non-integer values (e.g., `tabindex="abc"`) are ignored and treated as if
 /// tabindex was not set.
 fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
-    let value = attribute.value()?;
-    value.trim().parse::<i32>().ok()
+    let value = attribute.as_static_value()?;
+    value.text().trim().parse::<i32>().ok()
 }
 
 /// Returns whether the element is natively focusable per the HTML spec.
@@ -168,8 +169,8 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
     if is_html_tag(element, source_type, "input") {
         let is_hidden = element
             .find_attribute_by_name("type")
-            .and_then(|attr| attr.value())
-            .is_some_and(|value| value.trim().eq_ignore_ascii_case("hidden"));
+            .and_then(|attr| attr.as_static_value())
+            .is_some_and(|value| value.text().trim().eq_ignore_ascii_case("hidden"));
         return Some(!is_hidden);
     }
 
@@ -192,10 +193,10 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
 fn has_contenteditable_true(element: &AnyHtmlTagElement) -> bool {
     element
         .find_attribute_by_name("contenteditable")
-        .is_some_and(|attr| match attr.value() {
+        .is_some_and(|attr| match attr.as_static_value() {
             None => true, // bare attribute = True state per HTML spec
             Some(value) => {
-                let trimmed = value.trim();
+                let trimmed = value.text().trim();
                 trimmed.is_empty()
                     || trimmed.eq_ignore_ascii_case("true")
                     || trimmed.eq_ignore_ascii_case("plaintext-only")

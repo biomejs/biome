@@ -6,7 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::HtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{AstNode, Text};
+use biome_html_syntax::static_value::StaticValue;
+use biome_rowan::AstNode;
 use biome_rule_options::use_aria_props_for_role::UseAriaPropsForRoleOptions;
 
 declare_lint_rule! {
@@ -58,7 +59,7 @@ declare_lint_rule! {
 #[derive(Default, Debug)]
 pub struct UseAriaPropsForRoleState {
     missing_aria_props: Box<[&'static str]>,
-    attribute: Option<(HtmlAttribute, Text)>,
+    attribute: Option<(HtmlAttribute, StaticValue)>,
 }
 
 impl Rule for UseAriaPropsForRole {
@@ -71,8 +72,13 @@ impl Rule for UseAriaPropsForRole {
         let node = ctx.query();
 
         let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_name = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role = AriaRole::from_roles(role_attribute_name.trim());
+        let role_html_attribute = role_attribute.as_html_attribute()?;
+        let role_attribute_name = role_html_attribute
+            .initializer()?
+            .value()
+            .ok()?
+            .as_static_value()?;
+        let role = AriaRole::from_roles(role_attribute_name.text().trim());
         let missing_aria_props: Vec<_> = role
             .into_iter()
             .flat_map(|role| role.required_attributes().iter())
@@ -88,14 +94,14 @@ impl Rule for UseAriaPropsForRole {
         }
 
         Some(UseAriaPropsForRoleState {
-            attribute: Some((role_attribute, role_attribute_name)),
+            attribute: Some((role_html_attribute.clone(), role_attribute_name)),
             missing_aria_props: missing_aria_props.into_boxed_slice(),
         })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         state.attribute.as_ref().map(|(attribute, role_name)| {
-            let role_name = role_name.trim();
+            let role_name = role_name.text().trim();
             RuleDiagnostic::new(
                 rule_category!(),
                 attribute.range(),

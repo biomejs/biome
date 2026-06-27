@@ -9,6 +9,7 @@ expression: valid.astro
 <!-- img with alt -->
 <img src="image.png" alt="A beautiful landscape" />
 <img src="photo.jpg" alt="Profile picture" />
+<img src="photo.jpg" alt={altValue} />
 
 <!-- img with empty alt (decorative) -->
 <img src="decorative.png" alt="" />

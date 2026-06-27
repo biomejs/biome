@@ -73,8 +73,13 @@ impl Rule for UseSemanticElements {
         let node = ctx.query();
 
         let role_attribute = node.find_attribute_by_name("role")?;
-        let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_value = role_value.trim();
+        let role_html_attribute = role_attribute.as_html_attribute()?;
+        let role_value = role_html_attribute
+            .initializer()?
+            .value()
+            .ok()?
+            .as_static_value()?;
+        let role_value = role_value.text().trim();
 
         let role = AriaRole::from_roles(role_value)?;
 
@@ -105,7 +110,13 @@ impl Rule for UseSemanticElements {
                     is_html_tag(node, source_type, instance.element.as_str())
                         && instance.attributes.iter().all(|required_attr| {
                             node.find_attribute_by_name(required_attr.attribute.as_str())
-                                .and_then(|attr| attr.initializer()?.value().ok()?.string_value())
+                                .and_then(|attr| {
+                                    attr.as_html_attribute()?
+                                        .initializer()?
+                                        .value()
+                                        .ok()?
+                                        .as_static_value()
+                                })
                                 .is_some_and(|value| {
                                     if is_html {
                                         value.text().eq_ignore_ascii_case(required_attr.value)
@@ -119,12 +130,12 @@ impl Rule for UseSemanticElements {
             return None;
         }
 
-        Some(role_attribute)
+        Some(role_html_attribute.clone())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let role_value = state.initializer()?.value().ok()?.string_value()?;
-        let role_value = role_value.trim();
+        let role_value = state.initializer()?.value().ok()?.as_static_value()?;
+        let role_value = role_value.text().trim();
         let role = AriaRole::from_roles(role_value)?;
 
         Some(

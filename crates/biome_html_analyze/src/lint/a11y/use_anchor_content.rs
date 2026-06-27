@@ -222,10 +222,14 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                 }
                 Some(name) if name.eq_ignore_ascii_case("input") => {
                     let is_hidden = element.find_attribute_by_name("type").is_some_and(|attr| {
-                        attr.initializer()
+                        let Some(html_attribute) = attr.as_html_attribute() else {
+                            return false;
+                        };
+                        html_attribute
+                            .initializer()
                             .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_some_and(|s| s.eq_ignore_ascii_case("hidden"))
+                            .and_then(|value| value.as_static_value())
+                            .is_some_and(|s| s.text().eq_ignore_ascii_case("hidden"))
                     });
                     !is_hidden
                 }

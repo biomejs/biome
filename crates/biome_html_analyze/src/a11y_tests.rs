@@ -264,63 +264,72 @@ mod attribute_value_equals {
     fn exact_lowercase_match() {
         let element = parse_first_element(r#"<input type="hidden" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn uppercase_value_matches_lowercase() {
         let element = parse_first_element(r#"<input type="HIDDEN" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn lowercase_value_matches_uppercase() {
         let element = parse_first_element(r#"<input type="hidden" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(attribute_value_equals_ignore_case(&attr, "HIDDEN"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(attribute_value_equals_ignore_case(attr, "HIDDEN"));
     }
 
     #[test]
     fn mixed_case_matches() {
         let element = parse_first_element(r#"<input type="HiDdEn" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn different_value_no_match() {
         let element = parse_first_element(r#"<input type="text" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(!attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(!attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn empty_value_matches_empty() {
         let element = parse_first_element(r#"<input type="" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(attribute_value_equals_ignore_case(&attr, ""));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(attribute_value_equals_ignore_case(attr, ""));
     }
 
     #[test]
     fn empty_value_no_match_non_empty() {
         let element = parse_first_element(r#"<input type="" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(!attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(!attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn partial_match_no_match() {
         let element = parse_first_element(r#"<input type="hidden-field" />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(!attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(!attribute_value_equals_ignore_case(attr, "hidden"));
     }
 
     #[test]
     fn value_with_whitespace_no_match() {
         let element = parse_first_element(r#"<input type=" hidden " />"#);
         let attr = element.find_attribute_by_name("type").unwrap();
-        assert!(!attribute_value_equals_ignore_case(&attr, "hidden"));
+        let attr = attr.as_html_attribute().unwrap();
+        assert!(!attribute_value_equals_ignore_case(attr, "hidden"));
     }
 }
 

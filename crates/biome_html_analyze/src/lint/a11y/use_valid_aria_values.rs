@@ -92,11 +92,13 @@ impl Rule for UseValidAriaValues {
         if let Ok(aria_property) = AriaAttribute::from_str(&name_ref) {
             // For valueless attributes like <div aria-hidden>, treat as "true"
             // per HTML spec (boolean attribute presence = true).
-            let value_text = html_attr.value();
-            let value_str = match &value_text {
-                Some(v) => v.text(),
-                None => "true",
+            let static_value = if html_attr.initializer().is_some() {
+                Some(html_attr.as_static_value()?)
+            } else {
+                None
             };
+            let value_str = static_value.as_ref().map_or("true", |v| v.text());
+
             if !aria_property.value_type().contains(value_str) {
                 return Some(UseValidAriaValuesState {
                     attribute_name: name,

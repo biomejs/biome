@@ -84,8 +84,9 @@ impl Rule for UseValidAutocomplete {
             return None;
         }
 
-        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
-        let autocomplete_val = autocomplete_attribute
+        let autocomplete_attribute = node.attributes().find_attribute_by_name("autocomplete")?;
+        let autocomplete_html_attribute = autocomplete_attribute.as_html_attribute()?;
+        let autocomplete_val = autocomplete_html_attribute
             .initializer()?
             .value()
             .ok()?

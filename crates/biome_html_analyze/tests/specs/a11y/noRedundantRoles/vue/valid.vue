@@ -15,6 +15,8 @@
 
   <!-- Native elements with non-redundant roles -->
   <article role="presentation"></article>
+  <article v-bind:role="roleValue"></article>
+  <article :role="roleValue"></article>
   <span></span>
   <div></div>
 </template>

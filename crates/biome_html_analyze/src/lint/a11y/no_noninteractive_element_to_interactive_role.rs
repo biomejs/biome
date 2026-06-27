@@ -75,7 +75,8 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         }
 
         let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute
+        let role_html_attribute = role_attribute.as_html_attribute()?;
+        let role_attribute_static_value = role_html_attribute
             .initializer()?
             .value()
             .ok()?

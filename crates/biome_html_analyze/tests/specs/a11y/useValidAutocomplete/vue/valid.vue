@@ -11,3 +11,5 @@
 <Foo autocomplete="bar"></Foo>
 <Input type="text" autocomplete="name" />
 <Input type="text" autocomplete="baz" />
+<input type="text" v-bind:autocomplete="autocompleteValue" />
+<input type="text" :autocomplete="autocompleteValue" />

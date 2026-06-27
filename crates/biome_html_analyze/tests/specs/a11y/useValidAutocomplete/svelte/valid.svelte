@@ -9,6 +9,7 @@
 <input type="text" autocomplete="section-somewhere shipping work email" />
 <input type="text" autocomplete />
 <input type="text" autocomplete={autocompl} />
+<input type="text" {autocomplete} />
 <input type="text" autocomplete={autocompl || "name" } />
 <input type="text" autocomplete={autocompl || "foo" } />
 <input type={isEmail ? "email" : "text" } autocomplete="none" />

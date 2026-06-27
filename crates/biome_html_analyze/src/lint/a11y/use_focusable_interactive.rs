@@ -66,7 +66,11 @@ impl Rule for UseFocusableInteractive {
             let role_attribute = node.find_attribute_by_name("role");
             if let Some(role_attribute) = role_attribute {
                 let tabindex_attribute = node.find_attribute_by_name("tabindex");
-                let role_attribute_value = role_attribute.initializer()?.value().ok()?;
+                let role_attribute_value = role_attribute
+                    .as_html_attribute()?
+                    .initializer()?
+                    .value()
+                    .ok()?;
                 let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
                 if role.is_interactive() && !role.is_composite() && tabindex_attribute.is_none() {
                     return Some(());
@@ -79,7 +83,8 @@ impl Rule for UseFocusableInteractive {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
+        let role_html_attribute = role_attribute.as_html_attribute()?;
+        let role_attribute_value = role_html_attribute.initializer()?.value().ok()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

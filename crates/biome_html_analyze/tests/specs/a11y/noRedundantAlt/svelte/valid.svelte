@@ -4,6 +4,7 @@
 <img alt={photo} />
 <img alt={image} />
 <img alt="{altText}" />
+<img {alt} />
 <!-- Static prefix contains no redundant words -->
 <img alt="portrait of {person}" />
 <img alt="{description} taken in {year}" />
