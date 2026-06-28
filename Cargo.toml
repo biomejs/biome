@@ -112,7 +112,7 @@ biome_languages              = { path = "./crates/biome_languages", version = "0
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.26", features = ["derive"] }
-camino                       = "1.2.2"
+camino                       = "1.2.4"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.4"
