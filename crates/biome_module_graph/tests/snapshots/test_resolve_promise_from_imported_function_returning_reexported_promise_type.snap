@@ -3,32 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/reexport.ts` (Module 2)
-
-## Source
-
-```ts
-export { PromisedResult } from "./promisedResult.ts";
-```
-
-## Module Info
-
-```
-Exports {
-  "PromisedResult" => {
-    ExportReexport => Reexport(
-      Specifier: "./promisedResult.ts"
-      Resolved path: "/src/promisedResult.ts"
-      Import Symbol: PromisedResult
-    )
-  }
-}
-Imports {
-  No imports
-}
-```
-
-
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -61,6 +35,76 @@ Module TypeId(0) => Import Symbol: returnPromiseResult from "/src/returnPromiseR
 
 Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
 ```
+
+# `/src/promisedResult.ts` (Module 3)
+
+## Source
+
+```ts
+export type PromisedResult = Promise<{ result: true | false }>;
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportOwnExport => JsOwnExport::Binding(12..26)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+PromisedResult  => BindingTypeData {
+  Types Module(0) TypeId(3),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => bool: true
+
+Module TypeId(1) => bool: false
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["result": boolean]
+}
+
+Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
+```
+
+# `/src/reexport.ts` (Module 2)
+
+## Source
+
+```ts
+export { PromisedResult } from "./promisedResult.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportReexport => Reexport(
+      Specifier: "./promisedResult.ts"
+      Resolved path: "/src/promisedResult.ts"
+      Import Symbol: PromisedResult
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
 
 # `/src/returnPromiseResult.ts` (Module 1)
 
@@ -136,50 +180,6 @@ Module TypeId(7) => sync Function "returnPromiseResult" {
   }
   returns: Module(0) TypeId(4)
 }
-```
-
-# `/src/promisedResult.ts` (Module 3)
-
-## Source
-
-```ts
-export type PromisedResult = Promise<{ result: true | false }>;
-```
-
-## Module Info
-
-```
-Exports {
-  "PromisedResult" => {
-    ExportOwnExport => JsOwnExport::Binding(12..26)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-PromisedResult  => BindingTypeData {
-  Types Module(0) TypeId(3),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => bool: true
-
-Module TypeId(1) => bool: false
-
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["result": boolean]
-}
-
-Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
 ```
 
 # Module Resolver

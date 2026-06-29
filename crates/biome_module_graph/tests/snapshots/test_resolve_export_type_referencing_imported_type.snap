@@ -3,50 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/promisedResult.ts`
-
-## Source
-
-```ts
-export type PromisedResult = Promise<{ result: true | false }>;
-```
-
-## Module Info
-
-```
-Exports {
-  "PromisedResult" => {
-    ExportOwnExport => JsOwnExport::Binding(12..26)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-PromisedResult  => BindingTypeData {
-  Types Module(0) TypeId(3),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => bool: true
-
-Module TypeId(1) => bool: false
-
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["result": boolean]
-}
-
-Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
-```
-
 # `/src/index.ts`
 
 ## Source
@@ -121,4 +77,48 @@ Module TypeId(7) => sync Function "returnPromiseResult" {
   }
   returns: Module(0) TypeId(4)
 }
+```
+
+# `/src/promisedResult.ts`
+
+## Source
+
+```ts
+export type PromisedResult = Promise<{ result: true | false }>;
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportOwnExport => JsOwnExport::Binding(12..26)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+PromisedResult  => BindingTypeData {
+  Types Module(0) TypeId(3),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => bool: true
+
+Module TypeId(1) => bool: false
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["result": boolean]
+}
+
+Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
 ```

@@ -3,6 +3,39 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { returnPromiseResult } from "./returnPromiseResult.ts";
+
+const promise = returnPromiseResult();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "returnPromiseResult" => {
+    Specifier: "./returnPromiseResult.ts"
+    Resolved path: "/src/returnPromiseResult.ts"
+    Import Symbol: returnPromiseResult
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"
+
+Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
+```
+
 # `/src/promisedResult.ts` (Module 2)
 
 ## Source
@@ -45,39 +78,6 @@ Module TypeId(2) => Object {
 }
 
 Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
-```
-
-# `/src/index.ts` (Not imported by resolver)
-
-## Source
-
-```ts
-import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-const promise = returnPromiseResult();
-```
-
-## Module Info
-
-```
-Exports {
-  No exports
-}
-Imports {
-  "returnPromiseResult" => {
-    Specifier: "./returnPromiseResult.ts"
-    Resolved path: "/src/returnPromiseResult.ts"
-    Import Symbol: returnPromiseResult
-  }
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"
-
-Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
 ```
 
 # `/src/returnPromiseResult.ts` (Module 1)

@@ -3,28 +3,35 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/app.css`
+# `/src/App.vue`
 
 ## Source
 
-```css
-.app {
-	color: red;
-}
-.btn {
-	padding: 8px;
-}
+```vue
+<template>
+  <div class="app"><Button /></div>
+</template>
+
+<script>
+import "./app.css";
+import Button from "./Button.vue";
+</script>
 ```
 
 ## Module Info
 
 ```
-Classes {
-  app,
-  btn,
+StyleClasses {
+  No style classes
 }
-Imports {
-  No imports
+ReferencedClasses {
+  app,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  No script imports
 }
 ```
 
@@ -61,34 +68,27 @@ ScriptImports {
 ```
 
 
-# `/src/App.vue`
+# `/src/app.css`
 
 ## Source
 
-```vue
-<template>
-  <div class="app"><Button /></div>
-</template>
-
-<script>
-import "./app.css";
-import Button from "./Button.vue";
-</script>
+```css
+.app {
+	color: red;
+}
+.btn {
+	padding: 8px;
+}
 ```
 
 ## Module Info
 
 ```
-StyleClasses {
-  No style classes
-}
-ReferencedClasses {
+Classes {
   app,
+  btn,
 }
-LinkedStylesheets {
-  No linked stylesheets
-}
-ScriptImports {
-  No script imports
+Imports {
+  No imports
 }
 ```

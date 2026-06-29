@@ -2,6 +2,7 @@
 
 mod snap;
 
+use std::collections::BTreeMap;
 use std::fs::read_link;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -4020,7 +4021,7 @@ fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {
 
 /// Converts a `&[(&str, &str)]` file list into the owned form expected by
 /// [`ModuleGraphSnapshot::from_files`].
-fn files_to_snapshot_vec(files: &[(&str, &str)]) -> Vec<(String, String)> {
+fn files_to_snapshot_vec(files: &[(&str, &str)]) -> BTreeMap<String, String> {
     files
         .iter()
         .map(|(path, content)| ((*path).to_string(), (*content).to_string()))

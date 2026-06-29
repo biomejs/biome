@@ -3,32 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/global.css`
-
-## Source
-
-```css
-.layout {
-	display: flex;
-}
-.hero {
-	font-size: 2rem;
-}
-```
-
-## Module Info
-
-```
-Classes {
-  hero,
-  layout,
-}
-Imports {
-  No imports
-}
-```
-
-
 # `/src/Hero.astro`
 
 ## Source
@@ -87,5 +61,31 @@ LinkedStylesheets {
 }
 ScriptImports {
   No script imports
+}
+```
+
+
+# `/src/global.css`
+
+## Source
+
+```css
+.layout {
+	display: flex;
+}
+.hero {
+	font-size: 2rem;
+}
+```
+
+## Module Info
+
+```
+Classes {
+  hero,
+  layout,
+}
+Imports {
+  No imports
 }
 ```

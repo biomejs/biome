@@ -3,62 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/index.ts` (Not imported by resolver)
-
-## Source
-
-```ts
-import type { Bar } from "./bar.ts";
-import { foo } from "./foo.ts";
-
-const bar: Bar = { bar: "bar" };
-
-const stringyBar = bar.bar;
-
-const result = foo(bar.bar, 1);
-```
-
-## Module Info
-
-```
-Exports {
-  No exports
-}
-Imports {
-  "Bar" => {
-    Specifier: "./bar.ts"
-    Resolved path: "/src/bar.ts"
-    Import Symbol: Bar
-  }
-  "foo" => {
-    Specifier: "./foo.ts"
-    Resolved path: "/src/foo.ts"
-    Import Symbol: foo
-  }
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => string: bar
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["bar": Module(0) TypeId(0)]
-}
-
-Module TypeId(2) => instanceof Import Symbol: Bar from "/src/bar.ts"
-
-Module TypeId(3) => Module(0) TypeId(2).bar
-
-Module TypeId(4) => Import Symbol: foo from "/src/foo.ts"
-
-Module TypeId(5) => number: 1
-
-Module TypeId(6) => Call Module(0) TypeId(4)(Module(0) TypeId(3)Module(0) TypeId(5))
-```
-
 # `/src/bar.ts` (Module 1)
 
 ## Source
@@ -153,6 +97,62 @@ Module TypeId(3) => sync Function "foo" {
   }
   returns: Module(0) TypeId(0)
 }
+```
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import type { Bar } from "./bar.ts";
+import { foo } from "./foo.ts";
+
+const bar: Bar = { bar: "bar" };
+
+const stringyBar = bar.bar;
+
+const result = foo(bar.bar, 1);
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "Bar" => {
+    Specifier: "./bar.ts"
+    Resolved path: "/src/bar.ts"
+    Import Symbol: Bar
+  }
+  "foo" => {
+    Specifier: "./foo.ts"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: foo
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => string: bar
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["bar": Module(0) TypeId(0)]
+}
+
+Module TypeId(2) => instanceof Import Symbol: Bar from "/src/bar.ts"
+
+Module TypeId(3) => Module(0) TypeId(2).bar
+
+Module TypeId(4) => Import Symbol: foo from "/src/foo.ts"
+
+Module TypeId(5) => number: 1
+
+Module TypeId(6) => Call Module(0) TypeId(4)(Module(0) TypeId(3)Module(0) TypeId(5))
 ```
 
 # Module Resolver
