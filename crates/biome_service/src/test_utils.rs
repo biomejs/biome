@@ -5,10 +5,11 @@ use crossbeam::channel::{Receiver, unbounded};
 use tokio::sync::watch;
 
 use crate::projects::ProjectKey;
+use crate::workspace::WorkspaceServer;
 use crate::workspace::{
     NoopQueryProvider, OpenProjectParams, OpenProjectResult, ServiceNotification,
 };
-use crate::{WatcherInstruction, Workspace, WorkspaceServer};
+use crate::{WatcherInstruction, Workspace};
 
 /// Convenience call for setting up the workspace and opening a project.
 ///

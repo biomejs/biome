@@ -13,7 +13,7 @@ use biome_service::workspace::{
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetFileContentParams,
     SupportsFeatureParams,
 };
-use biome_service::{WorkspaceError, extension_error};
+use biome_service::{Workspace, WorkspaceError, extension_error};
 use std::ops::Sub;
 use tower_lsp_server::ls_types::*;
 

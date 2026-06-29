@@ -4,11 +4,12 @@
 #[cfg(feature = "html_embeds")]
 pub mod embedded;
 
-use biome_db::ParsedSource;
+use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
+use biome_parser::AnyParse;
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -51,6 +52,31 @@ impl WorkspaceDb {
 
     pub fn update_file(&mut self, path: &Utf8Path, file: ParsedSource) {
         self.files.pin().update(path.to_path_buf(), |_| file);
+    }
+
+    pub fn insert_or_update_file(
+        &mut self,
+        path: &Utf8Path,
+        parsed: AnyParse,
+        document_source_index: usize,
+        snippets: Vec<ParsedSnippet>,
+    ) -> ParsedSource {
+        if let Some(file) = self.get_file(path) {
+            salsa::Setter::to(file.set_parsed(self), parsed);
+            salsa::Setter::to(file.set_document_source_index(self), document_source_index);
+            salsa::Setter::to(file.set_snippets(self), snippets);
+            file
+        } else {
+            let file = ParsedSource::new(
+                self,
+                path.to_path_buf(),
+                parsed,
+                document_source_index,
+                snippets,
+            );
+            self.insert_file(path, file);
+            file
+        }
     }
 
     #[cfg(feature = "module_graph")]
@@ -96,21 +122,16 @@ impl WorkspaceDb {
     }
 
     /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        self.files
-            .pin()
-            .update(path.to_path_buf(), |parsed_source| {
-                let mut any_parse = parsed_source.parsed(self).clone();
-                any_parse.set_new_root(new_root.clone());
-
-                ParsedSource::new(
-                    self,
-                    path.to_path_buf(),
-                    any_parse,
-                    parsed_source.document_source_index(self),
-                    parsed_source.snippets(self).clone(),
-                )
-            });
+    pub fn update_parsed_root(
+        &mut self,
+        path: &Utf8Path,
+        new_root: SendNode,
+    ) -> Option<ParsedSource> {
+        let parsed_source = self.get_file(path)?;
+        let mut any_parse = parsed_source.parsed(self).clone();
+        any_parse.set_new_root(new_root);
+        salsa::Setter::to(parsed_source.set_parsed(self), any_parse);
+        Some(parsed_source)
     }
 
     #[cfg(feature = "module_graph")]
@@ -133,29 +154,6 @@ impl WorkspaceDb {
         }
         #[cfg(not(feature = "module_graph"))]
         let _ = path;
-    }
-}
-
-/// This handler is exclusively used for cloning operations (reading operations).
-/// Writing operations still go through [WorkspaceDb].
-#[derive(Clone, Default)]
-pub struct WorkspaceDbHandle {
-    files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
-    #[cfg(feature = "module_graph")]
-    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
-    file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
-    storage: salsa::StorageHandle<WorkspaceDb>,
-}
-
-impl WorkspaceDbHandle {
-    pub fn to_db(&self) -> WorkspaceDb {
-        WorkspaceDb {
-            files: self.files.clone(),
-            file_sources: self.file_sources.clone(),
-            #[cfg(feature = "module_graph")]
-            modules: self.modules.clone(),
-            storage: self.storage.clone().into_storage(),
-        }
     }
 }
 

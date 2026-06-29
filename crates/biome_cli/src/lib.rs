@@ -3,13 +3,13 @@
 //! # Module
 //!
 //! This is where the main CLI session starts. The module is responsible
-//! to parse commands and arguments, redirect the execution of the commands and
-//! execute the traversal of directory and files, based on the command that were passed.
+//! for parsing commands and arguments, redirecting the execution of the commands, and
+//!  executing the traversal of directory and files, based on the command that was passed.
 
 #![deny(clippy::use_self)]
 
 use biome_console::{ColorMode, Console};
-use biome_service::{App, Workspace, WorkspaceRef};
+use biome_service::{App, ThreadSafeWorkspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
 use std::env;
 
@@ -57,7 +57,7 @@ pub struct CliSession<'app> {
 
 impl<'app> CliSession<'app> {
     pub fn new(
-        workspace: &'app dyn Workspace,
+        workspace: &'app dyn ThreadSafeWorkspace,
         console: &'app mut dyn Console,
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {

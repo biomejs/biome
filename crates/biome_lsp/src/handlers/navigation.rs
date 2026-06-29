@@ -6,6 +6,7 @@ use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::TextRange;
+use biome_service::Workspace;
 use biome_service::settings::EditorFeature;
 use std::str::FromStr;
 use tower_lsp_server::ls_types::*;

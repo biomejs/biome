@@ -118,7 +118,7 @@ impl Drop for WatcherInstructionChannel {
     }
 }
 
-/// Watcher to keep the [crate::WorkspaceServer] in sync with the filesystem state.
+/// Watcher to keep the workspace in sync with the filesystem state.
 ///
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
 /// The watcher watches the same directories as those scanned by the scanner, so
@@ -479,17 +479,12 @@ impl Watcher {
     #[tracing::instrument(level = "debug", skip(self, workspace))]
     fn unwatch_folder(&mut self, workspace: &impl WorkspaceWatcherBridge, path: Utf8PathBuf) {
         if let Some(mut watcher_paths) = self.watcher.as_mut().map(|w| w.paths_mut()) {
-            workspace.remove_watched_folders(|watched_path| {
-                if watched_path.starts_with(path.as_std_path()) {
-                    if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
-                        // TODO: Improve error propagation.
-                        warn!("Error unwatching path {}: {error}", watched_path);
-                    }
-                    true
-                } else {
-                    false
+            for watched_path in workspace.remove_watched_folders_under(&path) {
+                if let Err(error) = watcher_paths.remove(watched_path.as_std_path()) {
+                    // TODO: Improve error propagation.
+                    warn!("Error unwatching path {}: {error}", watched_path);
                 }
-            });
+            }
 
             if let Err(error) = watcher_paths.commit() {
                 // TODO: Improve error propagation.

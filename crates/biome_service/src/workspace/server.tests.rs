@@ -1,6 +1,7 @@
 use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
+use crate::v2::snapshots::{FixFileCommit, FixFileFinishCommit, StagedCommitResult};
 use crate::workspace::UpdateSettingsParams;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
@@ -13,6 +14,7 @@ use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
 use biome_rowan::TextSize;
 use camino::Utf8Path;
+use salsa::plumbing::AsId;
 use std::str::FromStr;
 
 #[test]
@@ -71,6 +73,167 @@ fn commonjs_file_rejects_import_statement() {
         }
         Err(error) => panic!("File not available: {error}"),
     }
+}
+
+#[test]
+fn change_file_on_owner_reuses_parsed_source_input() {
+    let fs = MemoryFileSystem::default();
+    let (mut workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    let path = BiomePath::new("/project/a.js");
+
+    workspace
+        .open_file_on_owner(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: "let value = 1;".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let before = workspace.get_parse(path.as_path()).unwrap();
+
+    workspace
+        .change_file_on_owner(ChangeFileParams {
+            project_key,
+            path: path.clone(),
+            content: "let value = 2;".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let after = workspace.get_parse(path.as_path()).unwrap();
+
+    assert_eq!(before.as_id(), after.as_id());
+}
+
+#[test]
+fn file_features_snapshot_matches_direct_result() {
+    let fs = MemoryFileSystem::default();
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    let path = BiomePath::new("/project/a.js");
+
+    let direct = workspace
+        .file_features(SupportsFeatureParams {
+            project_key,
+            path: path.clone(),
+            features: FeatureName::all(),
+            inline_config: None,
+            skip_ignore_check: false,
+            not_requested_features: FeatureName::empty(),
+        })
+        .unwrap();
+    let snapshot = workspace
+        .prepare_file_features(SupportsFeatureParams {
+            project_key,
+            path,
+            features: FeatureName::all(),
+            inline_config: None,
+            skip_ignore_check: false,
+            not_requested_features: FeatureName::empty(),
+        })
+        .unwrap()
+        .into_worker_task()
+        .run()
+        .unwrap();
+
+    assert_eq!(direct, snapshot);
+}
+
+#[test]
+fn path_is_ignored_snapshot_matches_direct_result() {
+    let fs = MemoryFileSystem::default();
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    let path = BiomePath::new("/project/a.js");
+
+    let direct = workspace
+        .is_path_ignored(PathIsIgnoredParams {
+            project_key,
+            path: path.clone(),
+            is_dir: false,
+            features: FeatureName::all(),
+            ignore_kind: IgnoreKind::Ancestors,
+        })
+        .unwrap();
+    let snapshot = workspace
+        .prepare_path_is_ignored(PathIsIgnoredParams {
+            project_key,
+            path,
+            is_dir: false,
+            features: FeatureName::all(),
+            ignore_kind: IgnoreKind::Ancestors,
+        })
+        .unwrap()
+        .into_worker_task()
+        .run()
+        .unwrap();
+
+    assert_eq!(direct, snapshot);
+}
+
+#[test]
+fn fix_file_commit_reports_stale_after_owner_mutation() {
+    let fs = MemoryFileSystem::default();
+    let (mut workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    let path = BiomePath::new("/project/a.js");
+
+    workspace
+        .open_file_on_owner(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: "let value = 1;".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let revision = workspace.state_revision();
+
+    workspace
+        .change_file_on_owner(ChangeFileParams {
+            project_key,
+            path: path.clone(),
+            content: "let value = 2;".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let commit = FixFileCommit::Finish(Box::new(FixFileFinishCommit {
+        params: FixFileParams {
+            project_key,
+            path: path.clone(),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: false,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories: RuleCategories::default(),
+            suppression_reason: None,
+            inline_config: None,
+        },
+        revision,
+        result: FixFileResult::default(),
+    }));
+    let outcome = workspace.commit_fix_file(commit).unwrap();
+    let StagedCommitResult::Stale(params) = outcome else {
+        panic!("expected stale fix_file commit");
+    };
+
+    assert_eq!(params.path, path);
 }
 
 #[test]

@@ -4,6 +4,7 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
 use biome_languages::DocumentFileSource;
+use biome_service::Workspace;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
     IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,

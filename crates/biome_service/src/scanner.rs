@@ -20,11 +20,10 @@ use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalSco
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
-use rayon::Scope;
 use rustc_hash::FxHashSet;
+use std::collections::VecDeque;
 use std::hash::RandomState;
 use std::panic::catch_unwind;
-use std::sync::Mutex;
 use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
@@ -254,7 +253,6 @@ impl Scanner {
             // The traversal context is scoped to ensure all the channels it
             // contains are properly closed once scanning finishes.
             let mut ctx = ScanContext {
-                workspace,
                 project_key,
                 interner,
                 diagnostics_sender,
@@ -266,7 +264,7 @@ impl Scanner {
             };
 
             let (_duration, folders_to_watch) =
-                scan_dependencies(project_path, dependencies, &mut ctx);
+                scan_dependencies(workspace, project_path, dependencies, &mut ctx);
 
             let _ = self
                 .watcher_tx
@@ -340,7 +338,6 @@ impl Scanner {
         // contains are properly closed once scanning finishes.
         #[cfg_attr(target_family = "wasm", allow(unused_mut))]
         let mut ctx = ScanContext {
-            workspace,
             project_key,
             interner,
             diagnostics_sender,
@@ -361,13 +358,12 @@ impl Scanner {
             let ScanFolderResult {
                 mut duration,
                 configuration_files,
-            } = self.scan_folder(folder, &ctx);
+            } = self.scan_folder(workspace, folder, &mut ctx);
 
-            let dependencies_mutex = mem::take(&mut ctx.dependencies);
-            let dependencies = dependencies_mutex.into_inner().unwrap();
+            let dependencies = mem::take(&mut ctx.dependencies);
             if !dependencies.is_empty() {
                 let (dependencies_duration, folders_to_watch) =
-                    scan_dependencies(folder, dependencies.into_iter().collect(), &mut ctx);
+                    scan_dependencies(workspace, folder, dependencies, &mut ctx);
 
                 duration += dependencies_duration;
 
@@ -394,7 +390,7 @@ impl Scanner {
                 duration,
                 configuration_files,
                 ..
-            } = self.scan_folder(folder, &ctx);
+            } = self.scan_folder(workspace, folder, &mut ctx);
 
             // Close the diagnostics channel before collecting to avoid a deadlock on WASM.
             drop(ctx);
@@ -413,62 +409,91 @@ impl Scanner {
     /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
     ///
     /// Returns the duration of the process and the evaluated paths.
-    #[instrument(level = "debug", skip(self, ctx))]
+    #[instrument(level = "debug", skip(self, workspace, ctx))]
     fn scan_folder<W: WorkspaceScannerBridge>(
         &self,
+        workspace: &W,
         folder: &Utf8Path,
-        ctx: &ScanContext<W>,
+        ctx: &mut ScanContext,
     ) -> ScanFolderResult {
         let start = web_time::Instant::now();
 
-        let workspace = ctx.workspace;
         let fs = workspace.fs();
+        let traversal_ctx: &ScanContext = ctx;
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-            scope.evaluate(ctx, folder.to_path_buf());
+            scope.evaluate(traversal_ctx, folder.to_path_buf());
         }));
 
-        let mut evaluated_paths: Vec<_> = ctx
-            .evaluated_paths()
-            .iter()
-            .map(|p| BiomePath::new(p.as_path()))
-            .collect();
+        let mut evaluated_paths: Vec<_> = ctx.evaluated_paths().iter().cloned().collect();
         let mut configs = Vec::new();
         let mut manifests = Vec::new();
         let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
         let mut ignore_paths = Vec::new();
+        let mut ignored_folders = FxHashSet::<Utf8PathBuf>::default();
         let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
 
-        evaluated_paths.sort_unstable();
+        evaluated_paths.sort_unstable_by(|left, right| {
+            left.components()
+                .count()
+                .cmp(&right.components().count())
+                .then_with(|| left.cmp(right))
+        });
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
         // project.
         for path in evaluated_paths {
+            if has_ignored_ancestor(&path, &ignored_folders) {
+                continue;
+            }
+
+            let path_kind = path.path_kind();
+            let is_ignored = workspace
+                .is_ignored(
+                    ctx.project_key,
+                    &ctx.scan_kind,
+                    &path,
+                    IndexRequestKind::Explicit(ctx.trigger),
+                    Some(path_kind),
+                )
+                .unwrap_or(false);
+            if is_ignored {
+                if path_kind.is_dir() {
+                    ignored_folders.insert(path.into());
+                }
+                continue;
+            }
+
             if path.is_config() {
                 configs.push(path);
             } else if path.is_manifest() {
                 manifests.push(path);
             } else if path.is_ignore() {
                 ignore_paths.push(path);
-            } else if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
-                folders_to_watch.insert(path.into());
+            } else if path_kind.is_dir() {
+                if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
+                    folders_to_watch.insert(path.into());
+                }
             } else {
                 handleable_paths.push(path);
             }
         }
+
+        if ctx.watch && fs.symlink_path_kind(folder).is_ok_and(PathKind::is_dir) {
+            folders_to_watch.insert(folder.to_path_buf());
+        }
+
         let _ = self
             .watcher_tx
             .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &configs {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &manifests {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
+        for path in &configs {
+            let dependencies = open_file(workspace, ctx, path.clone(), ctx.trigger);
+            extend_dependencies(&mut ctx.dependencies, dependencies);
+        }
+        for path in &manifests {
+            let dependencies = open_file(workspace, ctx, path.clone(), ctx.trigger);
+            extend_dependencies(&mut ctx.dependencies, dependencies);
+        }
 
         let result = workspace.update_project_config_files(ctx.project_key, &configs);
         match result {
@@ -487,11 +512,10 @@ impl Scanner {
             ctx.send_diagnostic(error);
         }
 
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &handleable_paths {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
+        for path in handleable_paths {
+            let dependencies = open_file(workspace, ctx, path, ctx.trigger);
+            extend_dependencies(&mut ctx.dependencies, dependencies);
+        }
 
         ScanFolderResult {
             duration: start.elapsed(),
@@ -530,15 +554,38 @@ struct ScanFolderResult {
     pub configuration_files: Vec<BiomePath>,
 }
 
-#[instrument(level = "debug", skip(ctx))]
+fn has_ignored_ancestor(path: &BiomePath, ignored_folders: &FxHashSet<Utf8PathBuf>) -> bool {
+    path.ancestors()
+        .skip(1)
+        .any(|ancestor| ignored_folders.contains(ancestor))
+}
+
+fn extend_dependencies(target: &mut ModuleDependencies, dependencies: ModuleDependencies) {
+    for dependency in dependencies {
+        push_dependency(target, dependency);
+    }
+}
+
+#[cfg(feature = "module_graph")]
+fn push_dependency(target: &mut ModuleDependencies, dependency: Utf8PathBuf) {
+    target.insert(dependency);
+}
+
+#[cfg(not(feature = "module_graph"))]
+fn push_dependency(target: &mut ModuleDependencies, dependency: Utf8PathBuf) {
+    target.push(dependency);
+}
+
+#[instrument(level = "debug", skip(workspace, ctx))]
 fn scan_dependencies<W: WorkspaceScannerBridge>(
+    workspace: &W,
     project_path: &Utf8Path,
     dependencies: ModuleDependencies,
-    ctx: &mut ScanContext<W>,
+    ctx: &mut ScanContext,
 ) -> (Duration, FxHashSet<Utf8PathBuf>) {
     let start = web_time::Instant::now();
 
-    let dependencies: Vec<_> = dependencies
+    let dependencies: ModuleDependencies = dependencies
         .into_iter()
         .filter(|dependency_path| dependency_path.starts_with(project_path))
         .collect();
@@ -546,7 +593,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
     // First collect all the folders of the given dependencies.
     let mut folders: FxHashSet<_> = {
         let mut folders = FxHashSet::default();
-        for dependency_path in &dependencies {
+        for dependency_path in dependencies.iter() {
             for ancestor in dependency_path.ancestors().skip(1) {
                 if ancestor == project_path {
                     break;
@@ -562,55 +609,30 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
         folders.into_iter().map(Utf8Path::to_path_buf).collect()
     };
 
-    rayon::scope(|s| {
-        fn index_dependency<'a, W: WorkspaceScannerBridge>(
-            s: &Scope<'a>,
-            ctx: &'a ScanContext<'a, W>,
-            dependency_path: Utf8PathBuf,
-        ) {
-            let dependencies = open_file(ctx, BiomePath::new(dependency_path), ctx.trigger);
-            ctx.dependencies
-                .lock()
-                .unwrap()
-                .extend(dependencies.clone());
-
-            for dependency_path in dependencies {
-                let is_ignored = ctx
-                    .workspace
-                    .is_ignored(
-                        ctx.project_key,
-                        &ctx.scan_kind,
-                        &dependency_path,
-                        IndexRequestKind::Dependency(ctx.trigger),
-                        None,
-                    )
-                    .unwrap_or(true);
-                if !is_ignored {
-                    s.spawn(move |s| index_dependency(s, ctx, dependency_path));
-                }
-            }
+    let mut dependency_queue: VecDeque<_> = dependencies.into_iter().collect();
+    while let Some(dependency_path) = dependency_queue.pop_front() {
+        let is_ignored = workspace
+            .is_ignored(
+                ctx.project_key,
+                &ctx.scan_kind,
+                &dependency_path,
+                IndexRequestKind::Dependency(ctx.trigger),
+                None,
+            )
+            .unwrap_or(true);
+        if is_ignored {
+            continue;
         }
 
-        for dependency_path in dependencies {
-            let is_ignored = ctx
-                .workspace
-                .is_ignored(
-                    ctx.project_key,
-                    &ctx.scan_kind,
-                    &dependency_path,
-                    IndexRequestKind::Dependency(ctx.trigger),
-                    None,
-                )
-                .unwrap_or(true);
-            if !is_ignored {
-                s.spawn(|s| index_dependency(s, ctx, dependency_path));
-            }
+        let dependencies = open_file(workspace, ctx, BiomePath::new(dependency_path), ctx.trigger);
+        for dependency in dependencies {
+            dependency_queue.push_back(dependency.clone());
+            push_dependency(&mut ctx.dependencies, dependency);
         }
-    });
+    }
 
     // Extend the folders with those of the transitive dependencies.
-    let dependencies_mutex = mem::take(&mut ctx.dependencies);
-    let dependencies = dependencies_mutex.into_inner().unwrap();
+    let dependencies = mem::take(&mut ctx.dependencies);
     for dependency_path in dependencies {
         for ancestor in dependency_path.ancestors().skip(1) {
             if ancestor == project_path {
@@ -663,10 +685,7 @@ impl DiagnosticsCollector {
 }
 
 /// Context object shared between directory traversal tasks.
-pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
-    /// [Workspace] instance.
-    pub(crate) workspace: &'app W,
-
+pub(crate) struct ScanContext {
     /// Key of the project within which this scanner is active.
     project_key: ProjectKey,
 
@@ -689,7 +708,7 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
     watch: bool,
 
     /// Dependencies discovered during scanning.
-    dependencies: Mutex<Vec<Utf8PathBuf>>,
+    dependencies: ModuleDependencies,
 }
 
 #[derive(Debug, Clone, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -755,14 +774,14 @@ impl ScanKind {
     }
 }
 
-impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
+impl ScanContext {
     /// Send a message to the display thread
     pub(crate) fn send_diagnostic(&self, diagnostic: impl Into<Diagnostic>) {
         self.diagnostics_sender.send(diagnostic.into()).ok();
     }
 }
 
-impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
+impl TraversalContext for ScanContext {
     fn interner(&self) -> &PathInterner {
         &self.interner
     }
@@ -775,33 +794,12 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
         self.send_diagnostic(Diagnostic::new(error));
     }
 
-    // This is the main filtering logic applied by the scanner.
-    //
-    // Whether the scanner handles a file or not is based on:
-    // - The file path and whether that path is being ignored, and/or whether
-    //   the path belongs to a dependency.
-    // - The kind of file system entry the path points to.
-    // - The kind of scan we are performing.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        match self.workspace.is_ignored(
-            self.project_key,
-            &self.scan_kind,
-            path,
-            IndexRequestKind::Explicit(self.trigger),
-            Some(path.path_kind()),
-        ) {
-            Ok(is_ignored) => !is_ignored,
-            Err(_) => {
-                // Pretend we can handle it so we can give a meaningful error
-                // when it fails.
-                true
-            }
-        }
+        !path.path_kind().is_symlink()
     }
 
     fn handle_path(&self, path: BiomePath) {
-        let dependencies = open_file(self, path, self.trigger);
-        self.dependencies.lock().unwrap().extend(dependencies);
+        self.store_path(path);
     }
 
     fn store_path(&self, path: BiomePath) {
@@ -809,7 +807,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     }
 
     fn should_store_dirs(&self) -> bool {
-        self.watch
+        true
     }
 }
 
@@ -819,14 +817,12 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
 /// The call to the workspace method is also wrapped in a [catch_unwind] block
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file<W: WorkspaceScannerBridge>(
-    ctx: &ScanContext<W>,
+    workspace: &W,
+    ctx: &ScanContext,
     path: BiomePath,
     trigger: IndexTrigger,
 ) -> ModuleDependencies {
-    match catch_unwind(|| {
-        ctx.workspace
-            .index_file(ctx.project_key, path.clone(), trigger)
-    }) {
+    match catch_unwind(|| workspace.index_file(ctx.project_key, path.clone(), trigger)) {
         Ok(Ok((dependencies, diagnostics))) => {
             for diagnostic in diagnostics {
                 ctx.push_diagnostic(diagnostic.with_file_path(path.as_str()));

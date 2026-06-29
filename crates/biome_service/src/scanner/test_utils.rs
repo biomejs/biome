@@ -124,9 +124,17 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         newly_watched
     }
 
-    fn remove_watched_folders(&self, mut callback: impl FnMut(&Utf8Path) -> bool) {
-        self.watched_folders.pin().retain(|path| !callback(path));
+    fn remove_watched_folders_under(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        let mut removed_paths = Vec::new();
+        self.watched_folders.pin().retain(|watched_path| {
+            let should_remove = watched_path.starts_with(path);
+            if should_remove {
+                removed_paths.push(watched_path.to_path_buf());
+            }
+            !should_remove
+        });
         self.tx.send(()).expect("can send notification");
+        removed_paths
     }
 
     fn unload_file(

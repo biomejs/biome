@@ -92,9 +92,9 @@ pub(crate) fn run_server(
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
     let cancellation = factory.cancellation();
 
-    let workspace = factory.workspace();
+    let watcher_handle = factory.watcher_handle();
     rt.spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        watcher_handle.start_watcher(watcher);
     });
 
     rt.block_on(async move {

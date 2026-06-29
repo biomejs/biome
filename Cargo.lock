@@ -1991,6 +1991,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_languages",
  "biome_module_graph",
+ "biome_parser",
  "biome_rowan",
  "boxcar",
  "camino",

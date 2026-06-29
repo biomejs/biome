@@ -21,7 +21,7 @@ use biome_service::workspace::{
     GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
     SupportsFeatureParams,
 };
-use biome_service::{WorkspaceError, extension_error};
+use biome_service::{Workspace, WorkspaceError, extension_error};
 use serde_json::Value;
 use std::borrow::Cow;
 use std::collections::HashMap;

@@ -31,6 +31,9 @@ use std::process::{ExitCode, Termination};
 /// Generic errors thrown during biome operations
 #[derive(Deserialize, Diagnostic, Serialize)]
 pub enum WorkspaceError {
+    /// The operation was cancelled because the workspace was updated.
+    Cancelled(Cancelled),
+
     /// Thrown when Biome can't read a generic file.
     CantReadFile(CantReadFile),
 
@@ -130,6 +133,10 @@ impl WorkspaceError {
         Self::CantReadFile(CantReadFile { path })
     }
 
+    pub fn cancelled(reason: String) -> Self {
+        Self::Cancelled(Cancelled { reason })
+    }
+
     pub fn invalid_pattern() -> Self {
         Self::SearchError(SearchError::InvalidPattern(InvalidPattern))
     }
@@ -199,6 +206,19 @@ impl WorkspaceError {
     pub fn feature_not_enabled() -> Self {
         Self::FeatureNotEnabled(FeatureNotEnabledDiagnostic {})
     }
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[diagnostic(
+    category = "internalError/cancelled",
+    severity = Information,
+    message(
+        message("The workspace operation was cancelled: "<Info>{self.reason}</Info>),
+        description = "The workspace operation was cancelled: {reason}",
+    ),
+)]
+pub struct Cancelled {
+    pub reason: String,
 }
 
 impl Error for WorkspaceError {}

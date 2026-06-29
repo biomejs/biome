@@ -19,6 +19,7 @@ mod module_graph;
 
 #[cfg(any(test, feature = "testing"))]
 pub mod test_utils;
+mod v2;
 
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -32,7 +33,7 @@ pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 #[cfg(feature = "lang_js")]
 pub use file_handlers::JsFormatterSettings;
 pub use scanner::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
-pub use workspace::{Workspace, WorkspaceServer};
+pub use workspace::{ThreadSafeWorkspace, Workspace};
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {
@@ -63,12 +64,12 @@ impl<'app> App<'app> {
 }
 
 pub enum WorkspaceRef<'app> {
-    Owned(Box<dyn Workspace>),
-    Borrowed(&'app dyn Workspace),
+    Owned(Box<dyn ThreadSafeWorkspace>),
+    Borrowed(&'app dyn ThreadSafeWorkspace),
 }
 
 impl<'app> Deref for WorkspaceRef<'app> {
-    type Target = dyn Workspace + 'app;
+    type Target = dyn ThreadSafeWorkspace + 'app;
 
     fn deref(&self) -> &Self::Target {
         match self {

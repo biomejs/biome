@@ -5,7 +5,7 @@ use crate::runner::handler::Handler;
 use crate::runner::process_file::{Message, MessageStat, ProcessFile};
 use biome_diagnostics::{Error, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
-use biome_service::Workspace;
+use biome_service::ThreadSafeWorkspace;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::FeaturesSupported;
 use camino::Utf8PathBuf;
@@ -37,7 +37,7 @@ pub trait Crawler<Output> {
     #[expect(clippy::too_many_arguments)]
     fn crawl(
         execution: &dyn Execution,
-        workspace: &dyn Workspace,
+        workspace: &dyn ThreadSafeWorkspace,
         fs: &dyn FileSystem,
         project_key: ProjectKey,
         inputs: Vec<CrawlPath>,
@@ -125,7 +125,7 @@ pub trait CrawlerContext: TraversalContext {
     /// Send a message to the display thread
     fn push_message(&self, msg: Message);
     fn fs(&self) -> &dyn FileSystem;
-    fn workspace(&self) -> &dyn Workspace;
+    fn workspace(&self) -> &dyn ThreadSafeWorkspace;
     fn project_key(&self) -> ProjectKey;
     fn execution(&self) -> &dyn Execution;
     fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported);
@@ -137,7 +137,7 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     /// Shared instance of [FileSystem]
     pub(crate) fs: &'app dyn FileSystem,
     /// Instance of [Workspace] used by this instance of the CLI
-    pub(crate) workspace: &'ctx dyn Workspace,
+    pub(crate) workspace: &'ctx dyn ThreadSafeWorkspace,
     /// Key of the project in which we're traversing.
     pub(crate) project_key: ProjectKey,
     /// File paths interner cache used by the filesystem traversal
@@ -204,7 +204,7 @@ where
         self.fs
     }
 
-    fn workspace(&self) -> &dyn Workspace {
+    fn workspace(&self) -> &dyn ThreadSafeWorkspace {
         self.workspace
     }
 
@@ -233,7 +233,7 @@ where
     #[expect(clippy::too_many_arguments)]
     pub(crate) fn new(
         fs: &'app dyn FileSystem,
-        workspace: &'ctx dyn Workspace,
+        workspace: &'ctx dyn ThreadSafeWorkspace,
         project_key: ProjectKey,
         interner: PathInterner,
         sender: Sender<Message>,

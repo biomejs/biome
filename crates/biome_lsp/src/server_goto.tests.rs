@@ -118,9 +118,9 @@ async fn goto_definition_cross_file(
 
     let factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
+    let watcher_handle = factory.watcher_handle();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        watcher_handle.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();

@@ -11,7 +11,7 @@ use super::*;
 
 /// Trait used to give access to workspace functionality required by the
 /// scanner.
-pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
+pub(crate) trait WorkspaceScannerBridge: RefUnwindSafe {
     /// Returns a reference to the [`FileSystem`].
     fn fs(&self) -> &dyn FileSystem;
 
@@ -161,12 +161,10 @@ pub trait WorkspaceWatcherBridge {
     /// Returns `true` if the folder was not yet watched, `false` otherwise.
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool;
 
-    /// Removes watched folders from the workspace.
+    /// Removes watched folders that are inside the given path.
     ///
-    /// `callback` is invoked for every currently watched folder with the path
-    /// of said folder. Folders for which the `callback` returns `true` are
-    /// removed, others are retained.
-    fn remove_watched_folders(&self, callback: impl FnMut(&Utf8Path) -> bool);
+    /// Returns the paths that were removed.
+    fn remove_watched_folders_under(&self, path: &Utf8Path) -> Vec<Utf8PathBuf>;
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
@@ -288,8 +286,16 @@ where
     }
 
     #[inline]
-    fn remove_watched_folders(&self, callback: impl FnMut(&Utf8Path) -> bool) {
-        self.scanner.remove_watched_folders(callback)
+    fn remove_watched_folders_under(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        let mut removed_paths = Vec::new();
+        self.scanner.remove_watched_folders(|watched_path| {
+            let should_remove = watched_path.starts_with(path);
+            if should_remove {
+                removed_paths.push(watched_path.to_path_buf());
+            }
+            should_remove
+        });
+        removed_paths
     }
 
     #[inline]

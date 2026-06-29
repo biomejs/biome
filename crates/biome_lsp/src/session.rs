@@ -11,8 +11,6 @@ use biome_diagnostics::{PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
-use biome_service::Workspace;
-use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
@@ -22,6 +20,7 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
+use biome_service::workspace::WorkspaceHandle;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
@@ -29,6 +28,7 @@ use biome_service::workspace::{
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
+use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -90,7 +90,7 @@ pub(crate) struct Session {
     /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
-    pub(crate) workspace: Arc<dyn Workspace>,
+    pub(crate) workspace: WorkspaceHandle,
 
     /// Configuration status tracked independently per project key.
     configuration_status: HashMap<ProjectKey, ConfigurationStatus>,
@@ -218,7 +218,7 @@ impl Session {
     pub(crate) fn new(
         key: SessionKey,
         client: Client,
-        workspace: Arc<dyn Workspace>,
+        workspace: WorkspaceHandle,
         cancellation: Arc<Notify>,
         service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
@@ -1269,6 +1269,9 @@ impl Session {
     /// Broadcast a shutdown signal to all active connections
     pub(crate) fn broadcast_shutdown(&self) {
         self.cancellation.notify_one();
+        if let Err(error) = self.workspace.shutdown() {
+            warn!("Couldn't shut down workspace owner: {error}");
+        }
     }
 
     pub(crate) fn failsafe_rage(&self, params: RageParams) -> RageResult {
@@ -1370,8 +1373,7 @@ impl Session {
 mod tests {
     use super::*;
     use biome_fs::MemoryFileSystem;
-    use biome_service::WorkspaceServer;
-    use biome_service::workspace::NoopQueryProvider;
+    use biome_service::workspace::{NoopQueryProvider, server_with_watcher};
     use crossbeam::channel::bounded;
     use std::sync::Mutex;
     use tokio::sync::Notify;
@@ -1395,19 +1397,19 @@ mod tests {
     fn create_test_session() -> Arc<Session> {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
-        let workspace = Arc::new(WorkspaceServer::new(
+        let (workspace, _) = server_with_watcher(
             Arc::new(MemoryFileSystem::default()),
             watcher_tx,
             service_tx,
             Arc::new(NoopQueryProvider {}),
             None,
-        ));
+        );
 
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
 
         let slot = session_slot.clone();
-        let workspace = workspace.clone();
+        let workspace = workspace;
         let cancellation = cancellation.clone();
         let service_rx = service_rx.clone();
 

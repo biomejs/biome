@@ -3552,9 +3552,9 @@ export function bar() {
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
+    let watcher_handle = factory.watcher_handle();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        watcher_handle.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3781,9 +3781,9 @@ export function bar() {
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
+    let watcher_handle = factory.watcher_handle();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        watcher_handle.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3965,9 +3965,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
-    let workspace = factory.workspace();
+    let watcher_handle = factory.watcher_handle();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        watcher_handle.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();

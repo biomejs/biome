@@ -13,7 +13,7 @@ use biome_service::workspace::{
     FeaturesSupported, FileExistsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
-use biome_service::{Workspace, WorkspaceError};
+use biome_service::{ThreadSafeWorkspace, Workspace, WorkspaceError};
 
 #[derive(Debug)]
 pub(crate) enum FileStatus {
@@ -248,7 +248,7 @@ impl ProcessFile for () {
 
 /// Small wrapper that holds information and operations around the current processed file
 pub(crate) struct WorkspaceFile<'ctx, 'app> {
-    guard: FileGuard<'app, dyn Workspace + 'ctx>,
+    guard: FileGuard<'app, dyn ThreadSafeWorkspace + 'ctx>,
     file: Box<dyn File>,
     pub(crate) path: BiomePath,
 }
@@ -298,7 +298,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         }
     }
 
-    pub(crate) fn guard(&self) -> &FileGuard<'app, dyn Workspace + 'ctx> {
+    pub(crate) fn guard(&self) -> &FileGuard<'app, dyn ThreadSafeWorkspace + 'ctx> {
         &self.guard
     }
 
@@ -337,7 +337,7 @@ mod tests {
         FeatureName, FeaturesBuilder, FeaturesSupported, FileContent, GetFileContentParams,
         OpenFileParams, OpenProjectParams, OpenProjectResult, SupportKind, server,
     };
-    use biome_service::{Workspace, WorkspaceError};
+    use biome_service::{ThreadSafeWorkspace, WorkspaceError};
     use camino::Utf8PathBuf;
     use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
     use std::hash::RandomState;
@@ -393,7 +393,7 @@ mod tests {
 
     struct TestContext<'a> {
         fs: Arc<MemoryFileSystem>,
-        workspace: &'a dyn Workspace,
+        workspace: &'a dyn ThreadSafeWorkspace,
         project_key: ProjectKey,
         execution: TestExecution,
         interner: PathInterner,
@@ -416,7 +416,7 @@ mod tests {
             self.fs.as_ref()
         }
 
-        fn workspace(&self) -> &dyn Workspace {
+        fn workspace(&self) -> &dyn ThreadSafeWorkspace {
             self.workspace
         }
 

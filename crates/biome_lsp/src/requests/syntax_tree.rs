@@ -1,4 +1,5 @@
 use crate::{diagnostics::LspError, session::Session};
+use biome_service::Workspace;
 use biome_service::workspace::{
     FeaturesBuilder, GetSyntaxTreeParams, IgnoreKind, PathIsIgnoredParams,
 };

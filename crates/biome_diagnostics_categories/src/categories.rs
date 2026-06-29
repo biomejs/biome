@@ -583,6 +583,7 @@ define_categories! {
     "internalError/fs",
     "internalError/panic",
     "internalError/db",
+    "internalError/cancelled",
     "reporter/parse",
     "reporter/format",
     "reporter/violations",

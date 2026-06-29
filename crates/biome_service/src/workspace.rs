@@ -30,12 +30,11 @@
 //!
 //! # Implementations
 //!
-//! Currently the [Workspace] trait is implemented for a single `WorkspaceServer`
-//! type. However it is eventually intended to also be implemented for a
-//! potential `WorkspaceClient` type and to operate on a remote workspace
-//! server through a transport layer. This would allow the CLI and Language
-//! Server process to share a the same [Workspace] instance in a common daemon
-//! process for instance
+//! The [Workspace] trait is implemented by client handles. In-process clients
+//! use [WorkspaceHandle] to send requests to an owner thread, while daemon
+//! clients use `WorkspaceClient` to operate on a remote workspace server through
+//! a transport layer. This allows the CLI and Language Server process to share
+//! the same workspace instance in a common daemon process.
 //!
 //! # Errors
 //!
@@ -67,11 +66,11 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
-use crossbeam::channel::bounded;
+use crossbeam::channel::{Sender, bounded};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-pub use server::WorkspaceServer;
+pub(crate) use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::{
     borrow::Cow,
@@ -84,6 +83,7 @@ use std::{
 use tokio::sync::watch;
 use tracing::debug;
 
+pub use crate::v2::{WorkspaceHandle, WorkspaceWatcher};
 pub use crate::{
     WorkspaceError, file_handlers::Capabilities, projects::ProjectKey, scanner::ScanKind,
     settings::Settings,
@@ -1191,7 +1191,7 @@ pub enum FixFileMode {
     ApplySuppressions,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileParams {
@@ -1563,7 +1563,7 @@ pub struct GetModuleGraphResult {
     pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
-pub trait Workspace: Send + Sync + RefUnwindSafe {
+pub trait Workspace: RefUnwindSafe {
     // #region PROJECT-LEVEL METHODS
 
     /// Opens a project within the workspace.
@@ -1810,8 +1810,16 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     // #endregion
 }
 
+/// Workspace instance that can be shared across threads.
+pub trait ThreadSafeWorkspace: Workspace + Send + Sync {}
+
+impl<T> ThreadSafeWorkspace for T where T: Workspace + Send + Sync {}
+
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(
+    fs: Arc<dyn FsWithResolverProxy>,
+    threads: Option<usize>,
+) -> Box<dyn ThreadSafeWorkspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
     let search_provider = cfg_select! {
@@ -1820,20 +1828,33 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
         }
         _ => NoopQueryProvider {}
     };
-    Box::new(WorkspaceServer::new(
+
+    crate::v2::server(
         fs,
         watcher_tx,
         service_tx,
         Arc::new(search_provider),
         threads,
-    ))
+    )
+}
+
+/// Convenience function for constructing a server-backed [Workspace] and a
+/// watcher handle with caller-provided channels.
+pub fn server_with_watcher(
+    fs: Arc<dyn FsWithResolverProxy>,
+    watcher_tx: Sender<crate::scanner::WatcherInstruction>,
+    notification_tx: watch::Sender<ServiceNotification>,
+    search_provider: Arc<dyn SearchQuery>,
+    threads: Option<usize>,
+) -> (WorkspaceHandle, WorkspaceWatcher) {
+    crate::v2::server_with_watcher(fs, watcher_tx, notification_tx, search_provider, threads)
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
 pub fn client<T>(
     transport: T,
     fs: Box<dyn FsWithResolverProxy>,
-) -> Result<Box<dyn Workspace>, WorkspaceError>
+) -> Result<Box<dyn ThreadSafeWorkspace>, WorkspaceError>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {

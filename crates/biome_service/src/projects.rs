@@ -3,7 +3,7 @@ use crate::file_handlers::Capabilities;
 use crate::settings::{Settings, SettingsWithEditor, VcsIgnoredPatterns};
 use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
 use biome_configuration::vcs::VcsClientKind;
-use biome_fs::{ConfigName, FileSystem};
+use biome_fs::ConfigName;
 use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -17,7 +17,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
 pub struct GetFileFeaturesParams<'a> {
-    pub fs: &'a dyn FileSystem,
     pub project_key: ProjectKey,
     pub path: &'a Utf8Path,
     pub requested_features: FeatureName,
@@ -29,7 +28,7 @@ pub struct GetFileFeaturesParams<'a> {
 }
 
 /// The information tracked for each project.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 struct ProjectData {
     /// The root path of the project. This path should be **absolute**.
     path: Utf8PathBuf,
@@ -43,6 +42,68 @@ struct ProjectData {
     /// Optional nested settings, usually populated in monorepo
     /// projects.
     nested_settings: BTreeMap<Utf8PathBuf, Arc<Settings>>,
+}
+
+/// A snapshot of the current project, safe to send across threads.
+#[derive(Clone, Debug)]
+pub(crate) struct ProjectSnapshot(ProjectData);
+
+impl ProjectSnapshot {
+    /// Returns [Settings] that should be applied to the given path
+    pub(crate) fn settings_based_on_path(&self, file_path: &Utf8Path) -> Arc<Settings> {
+        for (project_path, settings) in &self.0.nested_settings {
+            if file_path.starts_with(project_path) {
+                return settings.clone();
+            }
+        }
+
+        self.0.root_settings.clone()
+    }
+
+    pub(crate) fn is_top_level_config(&self, path: &Utf8Path) -> bool {
+        path.file_name().is_some_and(|file_name| {
+            ConfigName::file_names()
+                .iter()
+                .any(|this_file| *this_file == file_name)
+        }) && path
+            .parent()
+            .is_some_and(|dir_path| dir_path == self.0.path)
+    }
+
+    pub(crate) fn is_ignored(
+        &self,
+        path: &Utf8Path,
+        is_dir: bool,
+        features: FeatureName,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
+        let project_data = ProjectDataView::from(&self.0);
+        is_ignored(&project_data, path, is_dir, features, ignore_kind)
+    }
+
+    pub(crate) fn get_file_features(
+        &self,
+        params: GetFileFeaturesParams<'_>,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        let project_data = ProjectDataView::from(&self.0);
+        get_file_features(&project_data, params)
+    }
+}
+
+struct ProjectDataView<'a> {
+    path: &'a Utf8Path,
+    root_settings: &'a Settings,
+    nested_settings: &'a BTreeMap<Utf8PathBuf, Arc<Settings>>,
+}
+
+impl<'a> From<&'a ProjectData> for ProjectDataView<'a> {
+    fn from(data: &'a ProjectData) -> Self {
+        Self {
+            path: &data.path,
+            root_settings: data.root_settings.as_ref(),
+            nested_settings: &data.nested_settings,
+        }
+    }
 }
 
 /// Type that holds all the settings and information for different projects
@@ -156,6 +217,13 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
+    pub(crate) fn snapshot(&self, project_key: ProjectKey) -> Option<ProjectSnapshot> {
+        self.0
+            .pin()
+            .get(&project_key)
+            .map(|data| ProjectSnapshot(data.clone()))
+    }
+
     /// Returns a dereferenced pointer to the root settings. This inefficient and shouldn't be used other than testing.
     pub fn get_mut_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
         self.0
@@ -222,104 +290,21 @@ impl Projects {
             return false;
         };
 
-        let is_ignored_by_top_level_config =
-            is_ignored_by_top_level_config(project_data, path, is_dir, ignore_kind);
-
-        // If there are specific features enabled, but all of them ignore the
-        // path, then we treat the path as ignored too.
-        let is_ignored_by_features = !features.is_empty()
-            && features.iter().all(|feature| {
-                project_data
-                    .root_settings
-                    .is_path_ignored_for_feature(path, feature)
-            });
-
-        is_ignored_by_top_level_config || is_ignored_by_features
+        let project_data = ProjectDataView::from(project_data);
+        is_ignored(&project_data, path, is_dir, features, ignore_kind)
     }
 
     #[inline(always)]
     pub fn get_file_features(
         &self,
-        GetFileFeaturesParams {
-            fs: _,
-            project_key,
-            path,
-            requested_features,
-            language,
-            capabilities,
-            handle,
-            skip_ignore_check,
-            not_requested_features: denied_features,
-        }: GetFileFeaturesParams<'_>,
+        params: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let data = self.0.pin();
         let project_data = data
-            .get(&project_key)
+            .get(&params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
-        let settings = handle.as_ref();
-        let mut file_features = FeaturesSupported::default()
-            .with_capabilities(capabilities)
-            .with_not_requested_features(denied_features)
-            .with_settings_and_language(handle, path, capabilities);
-
-        if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
-            file_features.ignore_not_supported();
-        } else if path.file_name().is_some_and(|file_name| {
-            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
-        }) && path
-            .parent()
-            .is_some_and(|dir_path| dir_path == project_data.path)
-        {
-            // Never ignore Biome's top-level config file
-        } else if !skip_ignore_check {
-            let is_ignored = {
-                let is_ignored_by_top_level_config = is_ignored_by_top_level_config(
-                    project_data,
-                    path,
-                    false,
-                    IgnoreKind::Ancestors,
-                );
-
-                // If there are specific features enabled, but all of them ignore the
-                // path, then we treat the path as ignored too.
-                let is_ignored_by_features = !requested_features.is_empty()
-                    && requested_features.iter().all(|feature| {
-                        project_data
-                            .root_settings
-                            .is_path_ignored_for_feature(path, feature)
-                    });
-
-                is_ignored_by_top_level_config || is_ignored_by_features
-            };
-
-            if is_ignored {
-                file_features.set_ignored_for_all_features();
-            } else {
-                for feature in requested_features.iter() {
-                    if project_data
-                        .root_settings
-                        .is_path_ignored_for_feature(path, feature)
-                        || settings.is_path_ignored_for_feature(path, feature)
-                    {
-                        file_features.set_ignored(feature);
-                    }
-                }
-            }
-        }
-
-        drop(data);
-
-        // If the file is not ignored by at least one feature, then check that
-        // the file is not protected.
-        //
-        // Protected files must be ignored.
-        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
-            file_features.set_protected_for_all_features();
-        }
-
-        Ok(FileFeaturesResult {
-            features_supported: file_features,
-        })
+        let project_data = ProjectDataView::from(project_data);
+        get_file_features(&project_data, params)
     }
 
     /// Sets the root settings for the given project.
@@ -436,6 +421,106 @@ fn is_ignored_by_top_level_config(
     is_dir: bool,
     ignore_kind: IgnoreKind,
 ) -> bool {
+    let project_data = ProjectDataView::from(project_data);
+    is_ignored_by_top_level_config_from_parts(&project_data, path, is_dir, ignore_kind)
+}
+
+#[inline]
+fn is_ignored(
+    project_data: &ProjectDataView<'_>,
+    path: &Utf8Path,
+    is_dir: bool,
+    features: FeatureName,
+    ignore_kind: IgnoreKind,
+) -> bool {
+    let is_ignored_by_top_level_config =
+        is_ignored_by_top_level_config_from_parts(project_data, path, is_dir, ignore_kind);
+
+    // If there are specific features enabled, but all of them ignore the
+    // path, then we treat the path as ignored too.
+    let is_ignored_by_features = !features.is_empty()
+        && features.iter().all(|feature| {
+            project_data
+                .root_settings
+                .is_path_ignored_for_feature(path, feature)
+        });
+
+    is_ignored_by_top_level_config || is_ignored_by_features
+}
+
+#[inline]
+fn get_file_features(
+    project_data: &ProjectDataView<'_>,
+    GetFileFeaturesParams {
+        project_key: _,
+        path,
+        requested_features,
+        language,
+        capabilities,
+        handle,
+        skip_ignore_check,
+        not_requested_features: denied_features,
+    }: GetFileFeaturesParams<'_>,
+) -> Result<FileFeaturesResult, WorkspaceError> {
+    let settings = handle.as_ref();
+    let mut file_features = FeaturesSupported::default()
+        .with_capabilities(capabilities)
+        .with_not_requested_features(denied_features)
+        .with_settings_and_language(handle, path, capabilities);
+
+    if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
+        file_features.ignore_not_supported();
+    } else if path.file_name().is_some_and(|file_name| {
+        file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+    }) && path
+        .parent()
+        .is_some_and(|dir_path| dir_path == project_data.path)
+    {
+        // Never ignore Biome's top-level config file
+    } else if !skip_ignore_check {
+        let is_ignored = is_ignored(
+            project_data,
+            path,
+            false,
+            requested_features,
+            IgnoreKind::Ancestors,
+        );
+
+        if is_ignored {
+            file_features.set_ignored_for_all_features();
+        } else {
+            for feature in requested_features.iter() {
+                if project_data
+                    .root_settings
+                    .is_path_ignored_for_feature(path, feature)
+                    || settings.is_path_ignored_for_feature(path, feature)
+                {
+                    file_features.set_ignored(feature);
+                }
+            }
+        }
+    }
+
+    // If the file is not ignored by at least one feature, then check that
+    // the file is not protected.
+    //
+    // Protected files must be ignored.
+    if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
+        file_features.set_protected_for_all_features();
+    }
+
+    Ok(FileFeaturesResult {
+        features_supported: file_features,
+    })
+}
+
+#[inline]
+fn is_ignored_by_top_level_config_from_parts(
+    project_data: &ProjectDataView<'_>,
+    path: &Utf8Path,
+    is_dir: bool,
+    ignore_kind: IgnoreKind,
+) -> bool {
     // First check if the path is ignored by the `files.includes` setting
     // relevant to the given `path`.
     let includes = project_data
@@ -464,7 +549,7 @@ fn is_ignored_by_top_level_config(
     }
 
     let root_path = match ignore_kind {
-        IgnoreKind::Ancestors => Some(project_data.path.as_path()),
+        IgnoreKind::Ancestors => Some(project_data.path),
         IgnoreKind::Path => None,
     };
     // VCS settings are used from the root settings, regardless of what

@@ -12,8 +12,9 @@ use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
     CloseProjectParams, GritSearchQuery, RageEntry, RageParams, RageResult, ServiceNotification,
+    WorkspaceHandle, WorkspaceWatcher, server_with_watcher,
 };
-use biome_service::{WatcherInstruction, WorkspaceServer};
+use biome_service::{WatcherInstruction, Workspace};
 use crossbeam::channel::{Sender, bounded};
 use futures::FutureExt;
 use futures::future::ready;
@@ -635,7 +636,10 @@ pub struct ServerFactory {
     cancellation: Arc<Notify>,
 
     /// [Workspace] instance shared between all clients.
-    workspace: Arc<WorkspaceServer>,
+    workspace: WorkspaceHandle,
+
+    /// Handle used by the file watcher to send workspace updates.
+    watcher: WorkspaceWatcher,
 
     /// The sessions of the connected clients indexed by session key.
     sessions: Sessions,
@@ -668,15 +672,18 @@ impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let (workspace, watcher) = server_with_watcher(
+            Arc::new(OsFileSystem::default()),
+            instruction_tx,
+            service_tx,
+            Arc::new(biome_service::workspace::GritSearchQuery::default()),
+            None,
+        );
+
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(
-                Arc::new(OsFileSystem::default()),
-                instruction_tx,
-                service_tx,
-                Arc::new(biome_service::workspace::GritSearchQuery::default()),
-                None,
-            )),
+            workspace,
+            watcher,
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -689,15 +696,18 @@ impl ServerFactory {
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let (workspace, watcher) = server_with_watcher(
+            fs,
+            watcher_tx,
+            service_tx,
+            Arc::new(GritSearchQuery::default()),
+            None,
+        );
+
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(
-                fs,
-                watcher_tx,
-                service_tx,
-                Arc::new(GritSearchQuery::default()),
-                None,
-            )),
+            workspace,
+            watcher,
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
@@ -783,8 +793,13 @@ impl ServerFactory {
     }
 
     /// Returns the workspace used by this server.
-    pub fn workspace(&self) -> Arc<WorkspaceServer> {
+    pub fn workspace_handle(&self) -> WorkspaceHandle {
         self.workspace.clone()
+    }
+
+    /// Returns the watcher handle used by this server.
+    pub fn watcher_handle(&self) -> WorkspaceWatcher {
+        self.watcher.clone()
     }
 }
 
