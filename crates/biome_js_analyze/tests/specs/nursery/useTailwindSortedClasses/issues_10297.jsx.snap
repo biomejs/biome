@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issues_10297.jsx
+---
+# Input
+```jsx
+function Example({ isActive }) {
+	return (
+		<>
+			<span className={`map-panel-basemap-map-a${isActive ? ' active' : ''}`} />
+			<span className={`map-panel-basemap-map-a${isActive ? ' active ' : ''}map-panel-overlay`} />
+			<span className={`${isActive ? 'active ' : ''}map-panel-basemap-map-a`} />
+			<span className={`map-panel-basemap-map-a ${isActive ? ' active ' : ''} map-panel-overlay`} />
+		</>
+	);
+}
+
+```
+
+# Diagnostics
+```
+issues_10297.jsx:7:59 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    5 │ 			<span className={`map-panel-basemap-map-a${isActive ? ' active ' : ''}map-panel-overlay`} />
+    6 │ 			<span className={`${isActive ? 'active ' : ''}map-panel-basemap-map-a`} />
+  > 7 │ 			<span className={`map-panel-basemap-map-a ${isActive ? ' active ' : ''} map-panel-overlay`} />
+      │ 			                                                       ^^^^^^^^^^
+    8 │ 		</>
+    9 │ 	);
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    7 │ → → → <span·className={`map-panel-basemap-map-a·${isActive·?·'·active·'·:·''}·map-panel-overlay`}·/>
+      │                                                               -      -                              
+
+```
