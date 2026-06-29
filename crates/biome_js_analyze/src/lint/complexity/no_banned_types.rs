@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList, TsObjectType,
-    TsReferenceType, TsTypeConstraintClause,
+    AnyTsType, JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList,
+    TsObjectType, TsReferenceType, TsTypeConstraintClause, TsUnionType, TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_banned_types::NoBannedTypesOptions;
@@ -192,10 +192,11 @@ impl Rule for NoBannedTypes {
                 // type NonNull<T> = T & {}
                 // ```
                 if ts_object_type.members().is_empty()
-                    && (ts_object_type.parent::<TsTypeConstraintClause>().is_none()
-                        && ts_object_type
-                            .parent::<TsIntersectionTypeElementList>()
-                            .is_none())
+                    && ts_object_type.parent::<TsTypeConstraintClause>().is_none()
+                    && ts_object_type
+                        .parent::<TsIntersectionTypeElementList>()
+                        .is_none()
+                    && !is_empty_object_in_nullable_constraint(ts_object_type)
                 {
                     return Some(State {
                         banned_type: BannedType::EmptyObject,
@@ -264,6 +265,52 @@ impl Rule for NoBannedTypes {
             mutation,
         ))
     }
+}
+
+/// Returns `true` when the empty object type is used to express a non-nullish
+/// constraint, i.e. it is a member of a `{} | null` or `{} | undefined` union
+/// that constrains a type parameter (`<T extends {} | null>`). These are common
+/// idioms for "any value except `undefined`/`null`", just like the already
+/// allowed `<T extends {}>` form.
+///
+/// `{} | null | undefined` is intentionally not allowed: it collapses to
+/// `unknown`, which is exactly the kind of misleading usage the rule warns
+/// about, so it keeps being reported.
+fn is_empty_object_in_nullable_constraint(ts_object_type: &TsObjectType) -> bool {
+    let Some(union) = ts_object_type
+        .parent::<TsUnionTypeVariantList>()
+        .and_then(|variants| variants.parent::<TsUnionType>())
+    else {
+        return false;
+    };
+
+    if union.parent::<TsTypeConstraintClause>().is_none() {
+        return false;
+    }
+
+    let mut empty_object_seen = false;
+    let mut nullish_seen = false;
+    for variant in union.types() {
+        match variant {
+            Ok(AnyTsType::TsObjectType(object)) if object.members().is_empty() => {
+                if empty_object_seen {
+                    return false;
+                }
+                empty_object_seen = true;
+            }
+            // Reject `{} | null | undefined`: a second nullish member makes the
+            // union equivalent to `unknown`.
+            Ok(AnyTsType::TsNullLiteralType(_) | AnyTsType::TsUndefinedType(_)) => {
+                if nullish_seen {
+                    return false;
+                }
+                nullish_seen = true;
+            }
+            _ => return false,
+        }
+    }
+
+    empty_object_seen && nullish_seen
 }
 
 declare_node_union! {

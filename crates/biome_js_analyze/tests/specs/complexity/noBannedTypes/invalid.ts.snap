@@ -50,6 +50,10 @@ const curly1: {
 
 const curly2: {} = { a: 'string' };
 
+// `{} | null | undefined` collapses to `unknown`, so the empty object type is
+// still reported even inside a constraint.
+function stillBanned<T extends {} | null | undefined>(value: T) {}
+
 ```
 
 # Diagnostics
@@ -750,6 +754,29 @@ invalid.ts:45:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
   > 45 │ const curly2: {} = { a: 'string' };
        │               ^^
     46 │ 
+    47 │ // `{} | null | undefined` collapses to `unknown`, so the empty object type is
+  
+  i '{}' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
+    - If you want a type meaning "any arbitrary object", use 'object' instead.
+    - If you want a type meaning "any value", use 'unknown' instead.
+    - If you want a type meaning "an object whose properties cannot be used", use '{ [k: keyof any]: never }' or 'Record<keyof any, never>' instead.
+    - If you want a type meaning "an object that cannot contain any properties whatsoever", use '{ [uniqueSymbol]?: never }' with an unexported unique symbol in the same file.
+  
+  i If that's really what you want, use an inline disable comment.
+  
+
+```
+
+```
+invalid.ts:49:32 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    47 │ // `{} | null | undefined` collapses to `unknown`, so the empty object type is
+    48 │ // still reported even inside a constraint.
+  > 49 │ function stillBanned<T extends {} | null | undefined>(value: T) {}
+       │                                ^^
+    50 │ 
   
   i '{}' accepts any non-nullish value, including non-object primitives like '123' and 'true'.
     - If you want a type meaning "any arbitrary object", use 'object' instead.

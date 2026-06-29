@@ -31,3 +31,9 @@ type PhoneNumber = number | null | undefined;
 type NonNullablePhoneNumber = PhoneNumber & {};
 
 function consumeNonNullableValue<T extends {}>(value: T) {}
+
+// `{}` in a constraint union with a single nullish member expresses a
+// non-undefined / non-null type, just like `<T extends {}>` (#8434).
+function nonNull<T extends {} | null>(value: T) {}
+function nonUndefined<T extends {} | undefined>(value: T) {}
+type NonNullAlias<T extends {} | null> = T;

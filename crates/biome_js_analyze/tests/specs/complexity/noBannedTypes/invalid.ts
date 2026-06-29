@@ -43,3 +43,7 @@ const curly1: {
 } = 1;
 
 const curly2: {} = { a: 'string' };
+
+// `{} | null | undefined` collapses to `unknown`, so the empty object type is
+// still reported even inside a constraint.
+function stillBanned<T extends {} | null | undefined>(value: T) {}
