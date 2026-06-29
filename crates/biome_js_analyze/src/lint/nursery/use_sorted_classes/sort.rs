@@ -274,13 +274,10 @@ impl TemplateLiteralSpaceContext {
             return None;
         }
 
-        let Some(template_element) = string_literal
+        let template_element = string_literal
             .syntax()
             .ancestors()
-            .find_map(JsTemplateElement::cast)
-        else {
-            return None;
-        };
+            .find_map(JsTemplateElement::cast)?;
         let syntax = template_element.syntax();
 
         let prefix_is_var = syntax
