@@ -3915,6 +3915,10 @@ fn test_astro_component_imports_snapshot() {
 <style>
   .hero { color: navy; }
 </style>
+
+<style is:global>
+  .hero { color: navy; }
+</style>
 "#,
         ),
         (

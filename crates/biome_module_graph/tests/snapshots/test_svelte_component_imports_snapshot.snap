@@ -30,7 +30,8 @@ LinkedStylesheets {
   No linked stylesheets
 }
 ScriptImports {
-  No script imports
+  "./Card.svelte" => /src/Card.svelte,
+  "./theme.css" => /src/theme.css,
 }
 ```
 
@@ -54,7 +55,7 @@ ScriptImports {
 
 ```
 StyleClasses {
-  No style classes
+  card (Local),
 }
 ReferencedClasses {
   card,

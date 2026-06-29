@@ -15,13 +15,18 @@ expression: content
 <style>
   .hero { color: navy; }
 </style>
+
+<style is:global>
+  .hero { color: navy; }
+</style>
 ```
 
 ## Module Info
 
 ```
 StyleClasses {
-  No style classes
+  hero (Local),
+  hero (Global),
 }
 ReferencedClasses {
   hero,
@@ -60,7 +65,8 @@ LinkedStylesheets {
   No linked stylesheets
 }
 ScriptImports {
-  No script imports
+  "./Hero.astro" => /src/Hero.astro,
+  "./global.css" => /src/global.css,
 }
 ```
 
