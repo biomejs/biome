@@ -84,7 +84,9 @@ impl ReactComponentInfo {
     ) -> Option<Self> {
         let name = function_declaration.name()?;
 
-        if function_declaration.param_count()? > REACT_COMPONENT_PARAMS_LIMIT {
+        if function_declaration.param_count()? > REACT_COMPONENT_PARAMS_LIMIT
+            && !function_declaration.is_forward_ref_signature()
+        {
             return None;
         }
 
@@ -495,6 +497,41 @@ impl AnyJsFunctionOrMethodDeclaration {
             Self::JsMethodObjectMember(method) => method.parameters(),
         };
         parameters.ok().map(|params| params.items().len())
+    }
+
+    /// Returns `true` when the declaration has the canonical `forwardRef` render
+    /// signature: exactly two parameters whose second parameter is the
+    /// identifier `ref`. React passes the forwarded ref as the second argument,
+    /// so such a component legitimately takes two parameters even though a plain
+    /// function component takes a single `props` parameter. Without this, the
+    /// component is not recognized and hooks called at its top level are
+    /// wrongly flagged by `useHookAtTopLevel` (see #9195).
+    fn is_forward_ref_signature(&self) -> bool {
+        let parameters = match self {
+            Self::JsFunctionExportDefaultDeclaration(decl) => decl.parameters(),
+            Self::JsFunctionDeclaration(decl) => decl.parameters(),
+            Self::JsMethodClassMember(method) => method.parameters(),
+            Self::JsMethodObjectMember(method) => method.parameters(),
+        };
+        let Ok(parameters) = parameters else {
+            return false;
+        };
+        let items = parameters.items();
+        if items.len() != 2 {
+            return false;
+        }
+        let Some(Ok(second)) = items.iter().nth(1) else {
+            return false;
+        };
+        second
+            .as_any_js_formal_parameter()
+            .and_then(|formal| formal.as_js_formal_parameter())
+            .and_then(|formal| formal.binding().ok())
+            .as_ref()
+            .and_then(|binding| binding.as_any_js_binding())
+            .and_then(|binding| binding.as_js_identifier_binding())
+            .and_then(|ident| ident.name_token().ok())
+            .is_some_and(|name| name.text_trimmed() == "ref")
     }
 
     fn start_range(&self) -> TextRange {

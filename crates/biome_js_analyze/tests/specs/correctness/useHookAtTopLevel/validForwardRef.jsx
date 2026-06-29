@@ -1,0 +1,24 @@
+/* should not generate diagnostics */
+import { forwardRef } from "react";
+
+// All of these are valid: the hook is called at the top level of a React
+// component whose second parameter is the `ref` of a `forwardRef` component.
+
+// 1. forwardRef wrapping an arrow expression (wrapper visible at initializer)
+const ArrowForwardRef = forwardRef((props, ref) => {
+	useEffect(() => {}, []);
+	return <div ref={ref} />;
+});
+
+// 2. forwardRef wrapping an anonymous function expression
+const FnExprForwardRef = forwardRef(function (props, ref) {
+	useEffect(() => {}, []);
+	return <div ref={ref} />;
+});
+
+// 3. A two-parameter function *declaration* forwarded separately
+function DeclForwardRef(props, ref) {
+	useEffect(() => {}, []);
+	return <div ref={ref} />;
+}
+const Forwarded = forwardRef(DeclForwardRef);
