@@ -91,6 +91,7 @@ use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
+use std::ops::Deref;
 use std::panic::RefUnwindSafe;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -148,8 +149,36 @@ pub struct WorkspaceServer {
 
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
+}
 
+/// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
+///
+/// Used when creating a fresh new server.
+pub struct LocalWorkspace {
+    server: WorkspaceServer,
     db_state: db::DbState,
+}
+
+/// A reference to
+pub struct WorkspaceServerWithDb<'a> {
+    server: &'a WorkspaceServer,
+    db_state: &'a db::DbState,
+}
+
+impl Deref for LocalWorkspace {
+    type Target = WorkspaceServer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.server
+    }
+}
+
+impl Deref for WorkspaceServerWithDb<'_> {
+    type Target = WorkspaceServer;
+
+    fn deref(&self) -> &Self::Target {
+        self.server
+    }
 }
 
 fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
@@ -220,6 +249,12 @@ fn resolve_git_common_dir(fs: &dyn FsWithResolverProxy, git_dir: &Utf8Path) -> U
 /// could lead too hard to debug issues)
 impl RefUnwindSafe for WorkspaceServer {}
 
+/// See [WorkspaceServer] for the unwind-safety rationale.
+impl RefUnwindSafe for LocalWorkspace {}
+
+/// See [WorkspaceServer] for the unwind-safety rationale.
+impl RefUnwindSafe for WorkspaceServerWithDb<'_> {}
+
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
@@ -244,13 +279,109 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+        }
+    }
+
+    pub fn with_db_state<'a>(&'a self, db_state: &'a db::DbState) -> WorkspaceServerWithDb<'a> {
+        WorkspaceServerWithDb {
+            server: self,
+            db_state,
+        }
+    }
+
+    /// Starts the watcher.
+    ///
+    /// This method will not return until the watcher stops.
+    pub fn start_watcher(&self, db_state: &db::DbState, watcher: Watcher) {
+        self.with_db_state(db_state).start_watcher(watcher);
+    }
+}
+
+impl LocalWorkspace {
+    /// Creates a new local [Workspace] backed by an in-process [WorkspaceServer].
+    pub fn new(
+        fs: Arc<dyn FsWithResolverProxy>,
+        watcher_tx: Sender<WatcherInstruction>,
+        notification_tx: watch::Sender<ServiceNotification>,
+        search_provider: Arc<dyn SearchQuery>,
+        threads: Option<usize>,
+    ) -> Self {
+        Self {
+            server: WorkspaceServer::new(fs, watcher_tx, notification_tx, search_provider, threads),
             db_state: db::DbState::default(),
         }
     }
 
+    fn as_workspace(&self) -> WorkspaceServerWithDb<'_> {
+        self.server.with_db_state(&self.db_state)
+    }
+
+    /// Starts the watcher.
+    ///
+    /// This method will not return until the watcher stops.
+    pub fn start_watcher(&self, watcher: Watcher) {
+        self.as_workspace().start_watcher(watcher);
+    }
+
+    /// Returns the module db for use in tests.
+    #[cfg(feature = "testing")]
+    pub fn get_module_db_for_test(&self) -> WorkspaceDb {
+        self.as_workspace().get_module_db_for_test()
+    }
+
+    /// Indexes a list of files into the module graph for test purposes.
+    #[cfg(feature = "testing")]
+    pub fn index_files_for_test(
+        &self,
+        project_key: ProjectKey,
+        files: impl IntoIterator<Item = (BiomePath, DocumentFileSource)>,
+    ) {
+        self.as_workspace().index_files_for_test(project_key, files);
+    }
+
+    #[cfg(test)]
+    fn get_db(&self) -> WorkspaceDb {
+        self.as_workspace().get_db()
+    }
+
+    #[cfg(test)]
+    fn open_file_internal(
+        &self,
+        reason: OpenFileReason,
+        params: OpenFileParams,
+    ) -> Result<InternalOpenFileResult, WorkspaceError> {
+        self.as_workspace().open_file_internal(reason, params)
+    }
+
+    #[cfg(test)]
+    fn get_parse(&self, path: &Utf8Path) -> Result<ParsedSource, WorkspaceError> {
+        self.as_workspace().get_parse(path)
+    }
+
+    pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
+        self.as_workspace().db_get_parse_diagnostics(path)
+    }
+
+    #[cfg(test)]
+    fn get_file_source(
+        &self,
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> DocumentFileSource {
+        self.as_workspace()
+            .get_file_source(path, experimental_full_html_support)
+    }
+
+    #[cfg(test)]
+    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
+        self.as_workspace().get_snippets(path)
+    }
+}
+
+impl WorkspaceServerWithDb<'_> {
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> WorkspaceDb {
-        self.db_state.handle.to_db()
+        self.db_state.shared_db.fork()
     }
 
     /// Returns the module db for use in tests.
@@ -711,7 +842,7 @@ impl WorkspaceServer {
     fn get_parse(&self, path: &Utf8Path) -> Result<ParsedSource, WorkspaceError> {
         self.assert_parse(path)?;
 
-        let db = self.db_state.handle.to_db();
+        let db = self.db_state.shared_db.fork();
         db.get_file(path)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
     }
@@ -1259,7 +1390,9 @@ impl WorkspaceServer {
                         &self.db_state.path_info_cache,
                         infer_types,
                     );
-                    self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
+                    let module_info =
+                        ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Js(module_info));
+                    db.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1272,7 +1405,9 @@ impl WorkspaceServer {
                         &self.project_layout,
                         &self.db_state.path_info_cache,
                     );
-                    self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
+                    let module_info =
+                        ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Css(module_info));
+                    db.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1280,7 +1415,11 @@ impl WorkspaceServer {
                 if let Some(html_root) = root.clone().into_language_root::<HtmlRoot>(&db) {
                     #[cfg(feature = "html_embeds")]
                     let embedded_content: Vec<HtmlEmbeddedContent> = self
-                        .get_parse(path)
+                        .assert_parse(path)
+                        .and_then(|()| {
+                            db.get_file(path)
+                                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
+                        })
                         .map(|doc| {
                             doc.snippets(&db)
                                 .iter()
@@ -1318,7 +1457,9 @@ impl WorkspaceServer {
                         &self.project_layout,
                         &self.db_state.path_info_cache,
                     );
-                    self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
+                    let module_info =
+                        ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Html(module_info));
+                    db.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1326,7 +1467,8 @@ impl WorkspaceServer {
                 Ok(Default::default())
             }
             UpdateKind::Removed => {
-                self.db_remove_module(path)?;
+                self.db_state.path_info_cache.remove(path);
+                db.remove_module(path);
                 Ok(Default::default())
             }
         }
@@ -1345,7 +1487,7 @@ impl WorkspaceServer {
 
     /// Returns a clone of the database. This is usually used to **read** data from it.
     fn get_db(&self) -> WorkspaceDb {
-        self.db_state.handle.to_db()
+        self.db_state.shared_db.fork()
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -1413,32 +1555,15 @@ impl WorkspaceServer {
         db.insert_source(document_file_source)
     }
 
-    /// Stores a [ModuleInfo] in the database
-    #[cfg(feature = "module_graph")]
-    fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
-        let db = self.db_state.handle.to_db();
-        let module_info = ModuleInfo::new(&db, path.to_path_buf(), kind);
-        db.insert_module(path.to_path_buf(), module_info);
-    }
-
     fn db_update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        let db = self.db_state.handle.to_db();
+        let db = self.db_state.shared_db.fork();
         db.update_parsed_root(path, new_root);
-    }
-
-    /// Removes a [ModuleInfo] from the database
-    #[cfg(feature = "module_graph")]
-    fn db_remove_module(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        self.db_state.path_info_cache.remove(path);
-        let db = self.db_state.handle.to_db();
-        db.remove_module(path);
-        Ok(())
     }
 
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         self.db_state.path_info_cache.remove(path);
-        self.db_state.handle.to_db().unload_path(path);
+        self.db_state.shared_db.fork().unload_path(path);
     }
 
     /// Adds a [AnyParsedSource] to the database
@@ -1449,7 +1574,7 @@ impl WorkspaceServer {
         language_index: usize,
         snippets: Vec<(AnyParse, EmbedContent, usize)>,
     ) -> ParsedSource {
-        let mut db = self.db_state.handle.to_db();
+        let mut db = self.db_state.shared_db.fork();
 
         let parsed_snippets = snippets
             .into_iter()
@@ -1513,7 +1638,7 @@ impl WorkspaceServer {
         path: &Utf8Path,
     ) -> Result<(ParsedSource, Vec<ParsedSnippet>), WorkspaceError> {
         self.assert_parse(path)?;
-        let db = self.db_state.handle.to_db();
+        let db = self.db_state.shared_db.fork();
         db.get_file(path)
             .map(|parsed_source| (parsed_source, parsed_source.snippets(&db).clone()))
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
@@ -1525,7 +1650,7 @@ impl WorkspaceServer {
         path: &Utf8Path,
         experimental_full_html_support: bool,
     ) -> DocumentFileSource {
-        let db = self.db_state.handle.to_db();
+        let db = self.db_state.shared_db.fork();
         db.get_file(path)
             .and_then(|parsed_source| {
                 db.source_from_index(parsed_source.document_source_index(&db))
@@ -1538,14 +1663,70 @@ impl WorkspaceServer {
 
     #[cfg(test)]
     fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
-        let db = self.db_state.handle.to_db();
+        let db = self.db_state.shared_db.fork();
         db.parsed_snippets_for_path(path)
     }
 
     // #endregion
 }
 
-impl Workspace for WorkspaceServer {
+macro_rules! delegate_workspace_methods {
+    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
+        $(
+            fn $name(&self, $params: $params_ty) -> $return_ty {
+                self.as_workspace().$name($params)
+            }
+        )*
+    };
+}
+
+impl Workspace for LocalWorkspace {
+    delegate_workspace_methods! {
+        fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
+        fn scan_project(params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
+        fn update_settings(params: UpdateSettingsParams) -> Result<UpdateSettingsResult, WorkspaceError>;
+        fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
+        fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
+        fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
+        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
+        fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
+        fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
+        fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
+        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
+        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
+        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+        fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
+        fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
+        fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
+        fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
+        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
+        fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
+        fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
+        fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
+        fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
+        fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
+        fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
+        fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
+        fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
+        fn get_type_info(params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+        fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
+        fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+        fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
+        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
+    }
+
+    fn fs(&self) -> &dyn FsWithResolverProxy {
+        self.server.fs.as_ref()
+    }
+
+    fn server_info(&self) -> Option<&ServerInfo> {
+        None
+    }
+}
+
+impl Workspace for WorkspaceServerWithDb<'_> {
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
         let path = if params.open_uninitialized {
             let path = params.path.to_path_buf();
@@ -2790,6 +2971,7 @@ impl Workspace for WorkspaceServer {
             }
 
             let new_root = update_snippets(parse.into(), workspace_db.clone(), new_snippets)?;
+            drop(workspace_db);
             self.db_update_parsed_root(path.as_path(), new_root);
             workspace_db = self.get_db();
             parse = workspace_db
@@ -3096,7 +3278,7 @@ impl Workspace for WorkspaceServer {
     }
 }
 
-impl WorkspaceScannerBridge for WorkspaceServer {
+impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     #[inline]
     fn fs(&self) -> &dyn biome_fs::FileSystem {
         self.fs.as_ref()
@@ -3345,6 +3527,89 @@ impl WorkspaceScannerBridge for WorkspaceServer {
 
         // Finally unloads the path itself.
         self.unload_file(path, project_key)
+    }
+}
+
+impl WorkspaceScannerBridge for LocalWorkspace {
+    #[inline]
+    fn fs(&self) -> &dyn biome_fs::FileSystem {
+        self.server.fs.as_ref()
+    }
+
+    #[inline]
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.server.projects.find_project_for_path(path)
+    }
+
+    #[inline]
+    fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
+        self.server.projects.get_project_path(project_key)
+    }
+
+    #[inline]
+    fn is_ignored(
+        &self,
+        project_key: ProjectKey,
+        scan_kind: &ScanKind,
+        path: &Utf8Path,
+        request_kind: IndexRequestKind,
+        path_kind: Option<PathKind>,
+    ) -> Result<bool, WorkspaceError> {
+        self.as_workspace()
+            .is_ignored(project_key, scan_kind, path, request_kind, path_kind)
+    }
+
+    #[inline]
+    fn is_indexed(&self, path: &Utf8Path) -> bool {
+        self.as_workspace().is_indexed(path)
+    }
+
+    fn index_file(
+        &self,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
+        trigger: IndexTrigger,
+    ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
+        self.as_workspace().index_file(project_key, path, trigger)
+    }
+
+    fn update_project_config_files(
+        &self,
+        project_key: ProjectKey,
+        files: &[BiomePath],
+    ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
+        self.as_workspace()
+            .update_project_config_files(project_key, files)
+    }
+
+    fn update_project_ignore_files(
+        &self,
+        project_key: ProjectKey,
+        files: &[BiomePath],
+    ) -> Result<(), WorkspaceError> {
+        self.as_workspace()
+            .update_project_ignore_files(project_key, files)
+    }
+
+    #[inline]
+    fn notify(&self, notification: ServiceNotification) {
+        self.server.notification_tx.send(notification).ok();
+    }
+
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+        self.as_workspace().unload_file(path, project_key)
+    }
+
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+        self.as_workspace().unload_path(path, project_key)
     }
 }
 

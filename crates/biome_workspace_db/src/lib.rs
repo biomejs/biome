@@ -136,10 +136,12 @@ impl WorkspaceDb {
     }
 }
 
-/// This handler is exclusively used for cloning operations (reading operations).
-/// Writing operations still go through [WorkspaceDb].
+/// Shared state for creating operation-local [WorkspaceDb] forks.
+///
+/// This type contains no Salsa local state. Each call to [Self::fork] creates a
+/// database value with fresh Salsa local state and shared workspace data.
 #[derive(Clone, Default)]
-pub struct WorkspaceDbHandle {
+pub struct SharedWorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -147,8 +149,8 @@ pub struct WorkspaceDbHandle {
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
-impl WorkspaceDbHandle {
-    pub fn to_db(&self) -> WorkspaceDb {
+impl SharedWorkspaceDb {
+    pub fn fork(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
             file_sources: self.file_sources.clone(),

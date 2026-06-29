@@ -18,7 +18,8 @@ use biome_service::{Watcher, WatcherOptions};
 use futures::channel::mpsc::channel;
 use std::collections::{BTreeMap, HashMap};
 use std::str::FromStr;
-use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Barrier};
 use std::time::Duration;
 use tokio::task::spawn_blocking;
 use tokio::time::sleep;
@@ -33,6 +34,71 @@ use tower_lsp_server::ls_types::{
     TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit,
     WorkspaceFolder,
 };
+
+#[salsa::input(debug)]
+struct CancellationInput {
+    value: u32,
+}
+
+#[salsa::tracked]
+fn cancellable_query(db: &dyn salsa::Database, input: CancellationInput) -> u32 {
+    if CANCELLABLE_QUERY_ATTEMPTS.fetch_add(1, Ordering::SeqCst) == 0 {
+        CANCELLABLE_QUERY_STARTED.wait();
+        CANCELLABLE_QUERY_CONTINUE.wait();
+        db.unwind_if_revision_cancelled();
+    }
+
+    input.value(db)
+}
+
+#[salsa::db]
+#[derive(Clone, Default)]
+struct CancellationTestDb {
+    storage: salsa::Storage<Self>,
+}
+
+#[salsa::db]
+impl salsa::Database for CancellationTestDb {}
+
+static CANCELLABLE_QUERY_STARTED: Barrier = Barrier::new(2);
+static CANCELLABLE_QUERY_CONTINUE: Barrier = Barrier::new(2);
+static CANCELLABLE_QUERY_ATTEMPTS: AtomicUsize = AtomicUsize::new(0);
+
+#[test]
+fn catches_real_salsa_query_cancellation() {
+    CANCELLABLE_QUERY_ATTEMPTS.store(0, Ordering::SeqCst);
+
+    let db = CancellationTestDb::default();
+    let token = salsa::Database::cancellation_token(&db);
+    let input = CancellationInput::new(&db, 1);
+
+    let result = std::thread::scope(|scope| {
+        scope.spawn(|| {
+            CANCELLABLE_QUERY_STARTED.wait();
+            token.cancel();
+            CANCELLABLE_QUERY_CONTINUE.wait();
+        });
+
+        super::catch_lsp_operation(|| cancellable_query(&db, input))
+    });
+
+    assert!(
+        matches!(result, Ok(Err(salsa::Cancelled::Local))),
+        "{result:?}"
+    );
+    assert_eq!(CANCELLABLE_QUERY_ATTEMPTS.load(Ordering::SeqCst), 1);
+}
+
+#[test]
+fn catches_regular_panics_as_panic_errors() {
+    let result: std::result::Result<
+        std::result::Result<(), salsa::Cancelled>,
+        biome_diagnostics::panic::PanicError,
+    > = super::catch_lsp_operation(|| panic!("boom"));
+
+    let error = result.expect_err("regular panic should be caught as a panic error");
+    assert!(error.info.contains("boom"), "{error:?}");
+}
 
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
@@ -3643,8 +3709,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3872,8 +3939,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -4056,8 +4124,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();

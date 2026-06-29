@@ -11,7 +11,6 @@ use biome_diagnostics::{PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
-use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
@@ -22,6 +21,7 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
+use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
@@ -29,6 +29,7 @@ use biome_service::workspace::{
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
+use biome_service::{Workspace, WorkspaceServer};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -117,7 +118,8 @@ pub(crate) struct Session {
     /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
-    pub(crate) workspace: Arc<dyn Workspace>,
+    pub(crate) workspace: Arc<WorkspaceServer>,
+    db_state: Arc<DbState>,
 
     /// Configuration status tracked independently per project key.
     configuration_status: HashMap<ProjectKey, ConfigurationStatus>,
@@ -248,7 +250,8 @@ impl Session {
     pub(crate) fn new(
         key: SessionKey,
         client: Client,
-        workspace: Arc<dyn Workspace>,
+        workspace: Arc<WorkspaceServer>,
+        db_state: Arc<DbState>,
         cancellation: Arc<Notify>,
         service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
@@ -258,6 +261,7 @@ impl Session {
             client,
             initialize_params: OnceCell::default(),
             workspace,
+            db_state,
             configuration_status: Default::default(),
             projects: Default::default(),
             documents: Default::default(),
@@ -271,6 +275,10 @@ impl Session {
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
         }
+    }
+
+    pub(crate) fn workspace(&self) -> impl Workspace + '_ {
+        self.workspace.with_db_state(&self.db_state)
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
@@ -573,7 +581,7 @@ impl Session {
 
         let FileFeaturesResult {
             features_supported: file_features,
-        } = self.workspace.file_features(SupportsFeatureParams {
+        } = self.workspace().file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
@@ -602,7 +610,7 @@ impl Session {
                     categories = categories.with_assist();
                 }
             }
-            let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
+            let result = self.workspace().pull_diagnostics(PullDiagnosticsParams {
                 project_key: doc.project_key,
                 path: biome_path.clone(),
                 categories: categories.build(),
@@ -627,7 +635,7 @@ impl Session {
                 };
                 get_start.and_then(|f| {
                     let content = self
-                        .workspace
+                        .workspace()
                         .get_file_content(GetFileContentParams {
                             project_key: doc.project_key,
                             path: biome_path.clone(),
@@ -1058,7 +1066,7 @@ impl Session {
         let session = self.clone();
 
         spawn_blocking(move || {
-            let result = session.workspace.scan_project(ScanProjectParams {
+            let result = session.workspace().scan_project(ScanProjectParams {
                 project_key,
                 watch: scan_kind.is_project() || scan_kind.is_type_aware(),
                 force,
@@ -1179,15 +1187,15 @@ impl Session {
         base_path: ConfigurationPathHint,
         force: bool,
     ) -> ConfigurationStatus {
-        let loaded_configuration = match load_configuration(self.workspace.fs(), base_path.clone())
-        {
-            Ok(loaded_configuration) => loaded_configuration,
-            Err(err) => {
-                error!("Couldn't load the configuration file, reason:\n {err}");
-                self.client.log_message(MessageType::ERROR, &err).await;
-                return ConfigurationStatus::Error;
-            }
-        };
+        let loaded_configuration =
+            match load_configuration(self.workspace().fs(), base_path.clone()) {
+                Ok(loaded_configuration) => loaded_configuration,
+                Err(err) => {
+                    error!("Couldn't load the configuration file, reason:\n {err}");
+                    self.client.log_message(MessageType::ERROR, &err).await;
+                    return ConfigurationStatus::Error;
+                }
+            };
         if !loaded_configuration.loaded_location.is_in_project() {
             let config_path = loaded_configuration
                 .file_path
@@ -1197,7 +1205,8 @@ impl Session {
                 ConfigurationPathHint::FromLsp(path)
                 | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
                 ConfigurationPathHint::FromUser(path) => {
-                    let fs = self.workspace.fs();
+                    let workspace = self.workspace();
+                    let fs = workspace.fs();
                     if fs.path_is_file(path) {
                         path.parent()
                             .map_or("<unknown>".to_string(), |p| p.to_string())
@@ -1240,7 +1249,8 @@ impl Session {
             return ConfigurationStatus::Missing;
         }
 
-        let fs = self.workspace.fs();
+        let workspace = self.workspace();
+        let fs = workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
             let (editorconfig, editorconfig_diagnostics) = {
@@ -1314,7 +1324,7 @@ impl Session {
         let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
             None => {
-                let register_result = self.workspace.open_project(OpenProjectParams {
+                let register_result = self.workspace().open_project(OpenProjectParams {
                     path: project_path.as_path().into(),
                     open_uninitialized: true,
                 });
@@ -1331,8 +1341,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
-        // We give the editor priority
-        let scan_kind = if !self.scan_kind_from_editor_features().is_none() {
+        // We give priority to the scan kind requested by the user.
+        let scan_kind = if scan_kind.is_project() || scan_kind.is_type_aware() {
+            scan_kind
+        } else if !self.scan_kind_from_editor_features().is_none() {
             self.scan_kind_from_editor_features()
         } else if scan_kind.is_none() {
             ScanKind::KnownFiles
@@ -1340,7 +1352,7 @@ impl Session {
             scan_kind
         };
 
-        let result = self.workspace.update_settings(UpdateSettingsParams {
+        let result = self.workspace().update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path
                 .as_ref()
@@ -1428,7 +1440,7 @@ impl Session {
     }
 
     pub(crate) fn failsafe_rage(&self, params: RageParams) -> RageResult {
-        self.workspace.rage(params).unwrap_or_else(|err| {
+        self.workspace().rage(params).unwrap_or_else(|err| {
             let entries = vec![
                 RageEntry::section("Workspace"),
                 RageEntry::markup(markup! {
@@ -1558,6 +1570,7 @@ mod tests {
             Arc::new(NoopQueryProvider {}),
             None,
         ));
+        let db_state = Arc::new(DbState::default());
 
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
@@ -1572,6 +1585,7 @@ mod tests {
                 SessionKey(0),
                 client,
                 workspace.clone(),
+                db_state.clone(),
                 cancellation.clone(),
                 service_rx.clone(),
             ));

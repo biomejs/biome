@@ -5,6 +5,7 @@ use anyhow::Context;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
+use biome_service::Workspace;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
@@ -27,7 +28,7 @@ pub(crate) fn format(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(None);
     }
 
@@ -35,7 +36,7 @@ pub(crate) fn format(
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
+    } = session.workspace().file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -47,7 +48,7 @@ pub(crate) fn format(
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -55,14 +56,14 @@ pub(crate) fn format(
         return Ok(None);
     }
 
-    let printed = session.workspace.format_file(FormatFileParams {
+    let printed = session.workspace().format_file(FormatFileParams {
         project_key: doc.project_key,
         path: path.clone(),
         inline_config: session.inline_config(),
     })?;
 
     let mut output = printed.into_code();
-    let input = session.workspace.get_file_content(GetFileContentParams {
+    let input = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -101,14 +102,14 @@ pub(crate) fn format_range(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(None);
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
+    } = session.workspace().file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -120,7 +121,7 @@ pub(crate) fn format_range(
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -137,7 +138,7 @@ pub(crate) fn format_range(
                 url.as_str()
             )
         })?;
-    let content = session.workspace.get_file_content(GetFileContentParams {
+    let content = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -161,7 +162,7 @@ pub(crate) fn format_range(
         format_range
     };
 
-    let formatted = session.workspace.format_range(FormatRangeParams {
+    let formatted = session.workspace().format_range(FormatRangeParams {
         project_key: doc.project_key,
         path: path.clone(),
         range: format_range,
@@ -197,14 +198,14 @@ pub(crate) fn format_on_type(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(None);
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
+    } = session.workspace().file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -216,7 +217,7 @@ pub(crate) fn format_on_type(
         return notify_user(file_features, path);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -233,14 +234,14 @@ pub(crate) fn format_on_type(
             )
         })?;
 
-    let formatted = session.workspace.format_on_type(FormatOnTypeParams {
+    let formatted = session.workspace().format_on_type(FormatOnTypeParams {
         project_key: doc.project_key,
         path: path.clone(),
         offset,
         inline_config: session.inline_config(),
     })?;
 
-    let content = session.workspace.get_file_content(GetFileContentParams {
+    let content = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;

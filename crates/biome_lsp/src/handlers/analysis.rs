@@ -13,6 +13,7 @@ use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::Workspace;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
@@ -50,7 +51,6 @@ fn fix_all_kind() -> CodeActionKind {
         uri = display(& params.text_document.uri.as_str()),
         range = debug(params.range),
         only = debug(& params.context.only),
-        diagnostics = debug(& params.context.diagnostics)
     ), err)]
 pub(crate) fn code_actions(
     session: &Session,
@@ -63,11 +63,11 @@ pub(crate) fn code_actions(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
+    if session.workspace().is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         is_dir: false,
         project_key: doc.project_key,
@@ -79,7 +79,7 @@ pub(crate) fn code_actions(
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = &session.workspace.file_features(SupportsFeatureParams {
+    } = &session.workspace().file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -103,7 +103,7 @@ pub(crate) fn code_actions(
         categories = categories.with_assist();
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -130,7 +130,7 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
-    let content = session.workspace.get_file_content(GetFileContentParams {
+    let content = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -164,7 +164,7 @@ pub(crate) fn code_actions(
     };
     debug!("Cursor range {:?}", &cursor_range);
     let supports_resolve = session.supports_code_action_resolve();
-    let result = match session.workspace.pull_actions(PullActionsParams {
+    let result = match session.workspace().pull_actions(PullActionsParams {
         project_key: doc.project_key,
         path: path.clone(),
         range: Some(cursor_range),
@@ -427,7 +427,7 @@ pub(crate) fn code_action_resolve(
     let rule_selector =
         AnalyzerSelector::Rule(resolve_data.rule.context("The rule doesn't exist")?);
 
-    let result = session.workspace.pull_actions(PullActionsParams {
+    let result = session.workspace().pull_actions(PullActionsParams {
         project_key: resolve_data.project_key,
         path: path.clone(),
         range: Some(resolve_data.range),
@@ -526,11 +526,11 @@ fn fix_all(
     };
     let analyzer_features = FeaturesBuilder::new().with_linter().with_assist().build();
 
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
+    if session.workspace().is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         is_dir: false,
         project_key: doc.project_key,
@@ -542,7 +542,7 @@ fn fix_all(
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace.file_features(SupportsFeatureParams {
+    } = session.workspace().file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features: FeaturesBuilder::new()
@@ -556,7 +556,7 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
+    if session.workspace().is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         is_dir: false,
         project_key: doc.project_key,
@@ -566,7 +566,7 @@ fn fix_all(
         return Ok(None);
     }
 
-    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -590,7 +590,7 @@ fn fix_all(
         )));
     }
 
-    let fixed = session.workspace.fix_file(FixFileParams {
+    let fixed = session.workspace().fix_file(FixFileParams {
         project_key: doc.project_key,
         path: path.clone(),
         fix_file_mode: FixFileMode::SafeFixes,
@@ -607,7 +607,7 @@ fn fix_all(
     } else {
         match path.as_path().extension() {
             Some(extension) => {
-                let input = session.workspace.get_file_content(GetFileContentParams {
+                let input = session.workspace().get_file_content(GetFileContentParams {
                     project_key: doc.project_key,
                     path: path.clone(),
                 })?;

@@ -93,10 +93,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = services.module_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         services,
         plugins,
