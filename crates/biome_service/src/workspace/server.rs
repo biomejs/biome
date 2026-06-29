@@ -381,7 +381,7 @@ impl LocalWorkspace {
 impl WorkspaceServerWithDb<'_> {
     /// Returns a clone of the project database for passing to analyzers.
     fn module_db(&self) -> WorkspaceDb {
-        self.db_state.shared_db.fork()
+        self.db_state.fork()
     }
 
     /// Returns the module db for use in tests.
@@ -842,7 +842,7 @@ impl WorkspaceServerWithDb<'_> {
     fn get_parse(&self, path: &Utf8Path) -> Result<ParsedSource, WorkspaceError> {
         self.assert_parse(path)?;
 
-        let db = self.db_state.shared_db.fork();
+        let db = self.db_state.fork();
         db.get_file(path)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
     }
@@ -1392,7 +1392,7 @@ impl WorkspaceServerWithDb<'_> {
                     );
                     let module_info =
                         ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Js(module_info));
-                    db.insert_module(path.to_path_buf(), module_info);
+                    self.db_state.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1407,7 +1407,7 @@ impl WorkspaceServerWithDb<'_> {
                     );
                     let module_info =
                         ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Css(module_info));
-                    db.insert_module(path.to_path_buf(), module_info);
+                    self.db_state.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1459,7 +1459,7 @@ impl WorkspaceServerWithDb<'_> {
                     );
                     let module_info =
                         ModuleInfo::new(&db, path.to_path_buf(), ModuleInfoKind::Html(module_info));
-                    db.insert_module(path.to_path_buf(), module_info);
+                    self.db_state.insert_module(path.to_path_buf(), module_info);
                     return Ok((deps, diagnostics.into_iter().map(Into::into).collect()));
                 }
 
@@ -1468,7 +1468,7 @@ impl WorkspaceServerWithDb<'_> {
             }
             UpdateKind::Removed => {
                 self.db_state.path_info_cache.remove(path);
-                db.remove_module(path);
+                self.db_state.remove_module(path);
                 Ok(Default::default())
             }
         }
@@ -1487,7 +1487,7 @@ impl WorkspaceServerWithDb<'_> {
 
     /// Returns a clone of the database. This is usually used to **read** data from it.
     fn get_db(&self) -> WorkspaceDb {
-        self.db_state.shared_db.fork()
+        self.db_state.fork()
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -1551,19 +1551,17 @@ impl WorkspaceServerWithDb<'_> {
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
     fn db_add_source(&self, document_file_source: DocumentFileSource) -> usize {
-        let mut db = self.get_db();
-        db.insert_source(document_file_source)
+        self.db_state.insert_source(document_file_source)
     }
 
     fn db_update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        let db = self.db_state.shared_db.fork();
-        db.update_parsed_root(path, new_root);
+        self.db_state.update_parsed_root(path, new_root);
     }
 
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         self.db_state.path_info_cache.remove(path);
-        self.db_state.shared_db.fork().unload_path(path);
+        self.db_state.unload_path(path);
     }
 
     /// Adds a [AnyParsedSource] to the database
@@ -1574,31 +1572,8 @@ impl WorkspaceServerWithDb<'_> {
         language_index: usize,
         snippets: Vec<(AnyParse, EmbedContent, usize)>,
     ) -> ParsedSource {
-        let mut db = self.db_state.shared_db.fork();
-
-        let parsed_snippets = snippets
-            .into_iter()
-            .map(|(parse, content, index)| {
-                ParsedSnippet::new(
-                    &db,
-                    parse,
-                    content.element_range,
-                    content.content_range,
-                    content.content_offset,
-                    index,
-                )
-            })
-            .collect();
-
-        let parsed_file = ParsedSource::new(
-            &db,
-            path.to_path_buf().clone(),
-            parsed,
-            language_index,
-            parsed_snippets,
-        );
-        db.insert_file(path, parsed_file);
-        parsed_file
+        self.db_state
+            .update_parsed_file(path, parsed, language_index, snippets)
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -1638,7 +1613,7 @@ impl WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
     ) -> Result<(ParsedSource, Vec<ParsedSnippet>), WorkspaceError> {
         self.assert_parse(path)?;
-        let db = self.db_state.shared_db.fork();
+        let db = self.db_state.fork();
         db.get_file(path)
             .map(|parsed_source| (parsed_source, parsed_source.snippets(&db).clone()))
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
@@ -1650,7 +1625,7 @@ impl WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         experimental_full_html_support: bool,
     ) -> DocumentFileSource {
-        let db = self.db_state.shared_db.fork();
+        let db = self.db_state.fork();
         db.get_file(path)
             .and_then(|parsed_source| {
                 db.source_from_index(parsed_source.document_source_index(&db))
@@ -1663,7 +1638,7 @@ impl WorkspaceServerWithDb<'_> {
 
     #[cfg(test)]
     fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
-        let db = self.db_state.shared_db.fork();
+        let db = self.db_state.fork();
         db.parsed_snippets_for_path(path)
     }
 
