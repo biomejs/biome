@@ -42,19 +42,6 @@ mod staged;
 
 pub use handle::{WorkspaceHandle, WorkspaceWatcher};
 
-pub(crate) fn server(
-    fs: Arc<dyn FsWithResolverProxy>,
-    watcher_tx: crossbeam::channel::Sender<crate::scanner::WatcherInstruction>,
-    notification_tx: tokio::sync::watch::Sender<crate::workspace::ServiceNotification>,
-    search_provider: Arc<dyn crate::workspace::SearchQuery>,
-    threads: Option<usize>,
-) -> Box<dyn crate::workspace::ThreadSafeWorkspace> {
-    let (handle, _) =
-        server_with_watcher(fs, watcher_tx, notification_tx, search_provider, threads);
-
-    Box::new(handle)
-}
-
 pub(crate) fn server_with_watcher(
     fs: Arc<dyn FsWithResolverProxy>,
     watcher_tx: crossbeam::channel::Sender<crate::scanner::WatcherInstruction>,

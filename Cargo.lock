@@ -1809,6 +1809,7 @@ dependencies = [
  "insta",
  "notify",
  "papaya",
+ "parking_lot",
  "rayon",
  "regex",
  "rustc-hash 2.1.2",

@@ -30,11 +30,11 @@
 //!
 //! # Implementations
 //!
-//! The [Workspace] trait is implemented by client handles. In-process clients
-//! use [WorkspaceHandle] to send requests to an owner thread, while daemon
-//! clients use `WorkspaceClient` to operate on a remote workspace server through
-//! a transport layer. This allows the CLI and Language Server process to share
-//! the same workspace instance in a common daemon process.
+//! The [Workspace] trait is implemented by local servers and client handles.
+//! Batch CLI commands use a direct [WorkspaceServer], daemon/LSP sessions use
+//! [WorkspaceHandle] to send requests to an owner thread, and daemon clients use
+//! `WorkspaceClient` to operate on a remote workspace server through a transport
+//! layer.
 //!
 //! # Errors
 //!
@@ -68,6 +68,7 @@ use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::{Sender, bounded};
 use enumflags2::{BitFlags, bitflags};
+use parking_lot::Mutex;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 pub(crate) use server::WorkspaceServer;
@@ -1815,7 +1816,203 @@ pub trait ThreadSafeWorkspace: Workspace + Send + Sync {}
 
 impl<T> ThreadSafeWorkspace for T where T: Workspace + Send + Sync {}
 
-/// Convenience function for constructing a server instance of [Workspace]
+struct LocalWorkspace {
+    server: Mutex<WorkspaceServer>,
+    fs: Arc<dyn FsWithResolverProxy>,
+}
+
+impl RefUnwindSafe for LocalWorkspace {}
+
+impl LocalWorkspace {
+    fn new(server: WorkspaceServer, fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self {
+            server: Mutex::new(server),
+            fs,
+        }
+    }
+
+    fn with_server<R>(&self, f: impl FnOnce(&WorkspaceServer) -> R) -> R {
+        let server = self.server.lock();
+        f(&server)
+    }
+}
+
+impl Workspace for LocalWorkspace {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
+        self.with_server(|server| server.open_project(params))
+    }
+
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
+        self.with_server(|server| server.scan_project(params))
+    }
+
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
+        self.with_server(|server| server.update_settings(params))
+    }
+
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        self.with_server(|server| server.close_project(params))
+    }
+
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError> {
+        self.with_server(|server| server.open_file(params))
+    }
+
+    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
+        self.with_server(|server| server.file_exists(params))
+    }
+
+    fn file_features(
+        &self,
+        params: SupportsFeatureParams,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        self.with_server(|server| server.file_features(params))
+    }
+
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
+        self.with_server(|server| server.is_path_ignored(params))
+    }
+
+    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_file_content(params))
+    }
+
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        self.with_server(|server| server.check_file_size(params))
+    }
+
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {
+        self.with_server(|server| server.change_file(params))
+    }
+
+    fn pull_diagnostics(
+        &self,
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
+        self.with_server(|server| server.pull_diagnostics(params))
+    }
+
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
+        self.with_server(|server| server.pull_actions(params))
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.with_server(|server| server.pull_diagnostics_and_actions(params))
+    }
+
+    fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
+        self.with_server(|server| server.format_file(params))
+    }
+
+    fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
+        self.with_server(|server| server.format_range(params))
+    }
+
+    fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
+        self.with_server(|server| server.format_on_type(params))
+    }
+
+    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+        self.with_server(|server| server.fix_file(params))
+    }
+
+    fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
+        self.with_server(|server| server.rename(params))
+    }
+
+    fn go_to_definition(
+        &self,
+        params: GoToDefinitionParams,
+    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError> {
+        self.with_server(|server| server.go_to_definition(params))
+    }
+
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
+        self.with_server(|server| server.close_file(params))
+    }
+
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        self.with_server(|server| server.update_module_graph(params))
+    }
+
+    fn fs(&self) -> &dyn FsWithResolverProxy {
+        self.fs.as_ref()
+    }
+
+    fn parse_pattern(
+        &self,
+        params: ParsePatternParams,
+    ) -> Result<ParsePatternResult, WorkspaceError> {
+        self.with_server(|server| server.parse_pattern(params))
+    }
+
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
+        self.with_server(|server| server.search_pattern(params))
+    }
+
+    fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError> {
+        self.with_server(|server| server.drop_pattern(params))
+    }
+
+    fn get_syntax_tree(
+        &self,
+        params: GetSyntaxTreeParams,
+    ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+        self.with_server(|server| server.get_syntax_tree(params))
+    }
+
+    fn get_control_flow_graph(
+        &self,
+        params: GetControlFlowGraphParams,
+    ) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_control_flow_graph(params))
+    }
+
+    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_formatter_ir(params))
+    }
+
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_type_info(params))
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_registered_types(params))
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        self.with_server(|server| server.get_semantic_model(params))
+    }
+
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
+        self.with_server(|server| server.get_module_graph(params))
+    }
+
+    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
+        self.with_server(|server| server.rage(params))
+    }
+
+    fn server_info(&self) -> Option<&ServerInfo> {
+        None
+    }
+}
+
+/// Convenience function for constructing a local server instance of [Workspace].
 pub fn server(
     fs: Arc<dyn FsWithResolverProxy>,
     threads: Option<usize>,
@@ -1829,13 +2026,15 @@ pub fn server(
         _ => NoopQueryProvider {}
     };
 
-    crate::v2::server(
-        fs,
+    let server = WorkspaceServer::new(
+        fs.clone(),
         watcher_tx,
         service_tx,
         Arc::new(search_provider),
         threads,
-    )
+    );
+
+    Box::new(LocalWorkspace::new(server, fs))
 }
 
 /// Convenience function for constructing a server-backed [Workspace] and a

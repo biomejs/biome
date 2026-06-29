@@ -5,6 +5,8 @@ use crate::v2::snapshots::{FixFileCommit, StagedCommitResult, StagedWorkerTask};
 use crate::workspace::{FixFileParams, FixFileResult};
 use std::marker::PhantomData;
 
+type CommitResult<O, P, W> = Result<StagedCommitResult<O, P, W>, WorkspaceError>;
+
 /// A workspace operation that runs on a worker and finishes on the owner.
 pub(crate) trait StagedOperation: Send + 'static {
     type Params: Clone + Send + 'static;
@@ -24,7 +26,7 @@ pub(crate) trait StagedOperation: Send + 'static {
     fn commit(
         server: &mut WorkspaceServer,
         commit: Self::WorkerCommit,
-    ) -> Result<StagedCommitResult<Self::Output, Self::Params, Self::WorkerCommit>, WorkspaceError>;
+    ) -> CommitResult<Self::Output, Self::Params, Self::WorkerCommit>;
 
     /// Runs the original operation on the owner when worker retries are exhausted.
     fn fallback(

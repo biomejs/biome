@@ -61,13 +61,11 @@ impl ProjectSnapshot {
     }
 
     pub(crate) fn is_top_level_config(&self, path: &Utf8Path) -> bool {
-        path.file_name().is_some_and(|file_name| {
-            ConfigName::file_names()
-                .iter()
-                .any(|this_file| *this_file == file_name)
-        }) && path
-            .parent()
-            .is_some_and(|dir_path| dir_path == self.0.path)
+        path.file_name()
+            .is_some_and(|file_name| ConfigName::file_names().contains(&file_name))
+            && path
+                .parent()
+                .is_some_and(|dir_path| dir_path == self.0.path)
     }
 
     pub(crate) fn is_ignored(
