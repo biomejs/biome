@@ -2,16 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `nested/biome.json`
-
-```json
-{ "formatter": { "enabled": false } }
-```
-
 ## `biome.json`
 
 ```json
 { "files": { "includes": ["**/*.js", "!nested/biome.json"] } }
+```
+
+## `nested/biome.json`
+
+```json
+{ "formatter": { "enabled": false } }
 ```
 
 ## `a.js`

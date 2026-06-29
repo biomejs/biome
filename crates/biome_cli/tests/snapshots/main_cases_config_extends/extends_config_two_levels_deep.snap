@@ -2,15 +2,6 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `sub-project/sub-sub-project/biome.jsonc`
-
-```json
-{
-  "extends": ["../../biome.jsonc"],
-  "root": false
-}
-```
-
 ## `biome.jsonc`
 
 ```json
@@ -26,6 +17,15 @@ expression: redactor(content)
       }
     }
   }
+}
+```
+
+## `sub-project/sub-sub-project/biome.jsonc`
+
+```json
+{
+  "extends": ["../../biome.jsonc"],
+  "root": false
 }
 ```
 

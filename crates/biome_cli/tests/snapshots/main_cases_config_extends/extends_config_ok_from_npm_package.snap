@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/format/biome", "@shared/linter/biome"] }
+```
+
 ## `node_modules/@shared/format/biome.json`
 
 ```json
@@ -12,12 +18,6 @@ expression: redactor(content)
 
 ```json
 { "linter": { "enabled": false } }
-```
-
-## `biome.json`
-
-```json
-{ "extends": ["@shared/format/biome", "@shared/linter/biome"] }
 ```
 
 ## `node_modules/@shared/format/package.json`
