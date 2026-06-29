@@ -3,46 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/bar.ts` (Module 1)
-
-## Source
-
-```ts
-export type Bar = { bar: "bar" };
-```
-
-## Module Info
-
-```
-Exports {
-  "Bar" => {
-    ExportOwnExport => JsOwnExport::Binding(21..24)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-Bar  => BindingTypeData {
-  Types Module(0) TypeId(1),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => string: bar
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["bar": Module(0) TypeId(0)]
-}
-```
-
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -97,6 +57,46 @@ Module TypeId(4) => Import Symbol: foo from "/src/foo.ts"
 Module TypeId(5) => number: 1
 
 Module TypeId(6) => Call Module(0) TypeId(4)(Module(0) TypeId(3)Module(0) TypeId(5))
+```
+
+# `/src/bar.ts` (Module 1)
+
+## Source
+
+```ts
+export type Bar = { bar: "bar" };
+```
+
+## Module Info
+
+```
+Exports {
+  "Bar" => {
+    ExportOwnExport => JsOwnExport::Binding(21..24)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+Bar  => BindingTypeData {
+  Types Module(0) TypeId(1),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => string: bar
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["bar": Module(0) TypeId(0)]
+}
 ```
 
 # `/src/foo.ts` (Module 2)

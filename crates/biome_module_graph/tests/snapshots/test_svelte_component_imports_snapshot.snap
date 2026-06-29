@@ -48,7 +48,7 @@ Imports {
 
 ```
 StyleClasses {
-  card (Local),
+  No style classes
 }
 ReferencedClasses {
   card,
@@ -89,7 +89,6 @@ LinkedStylesheets {
   No linked stylesheets
 }
 ScriptImports {
-  "./Card.svelte" => /src/Card.svelte,
-  "./theme.css" => /src/theme.css,
+  No script imports
 }
 ```

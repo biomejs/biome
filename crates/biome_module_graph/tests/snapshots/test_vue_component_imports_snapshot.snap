@@ -47,7 +47,7 @@ Imports {
 
 ```
 StyleClasses {
-  btn (Local),
+  No style classes
 }
 ReferencedClasses {
   btn,
@@ -89,7 +89,6 @@ LinkedStylesheets {
   No linked stylesheets
 }
 ScriptImports {
-  "./Button.vue" => /src/Button.vue,
-  "./app.css" => /src/app.css,
+  No script imports
 }
 ```

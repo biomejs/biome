@@ -47,7 +47,7 @@ Imports {
 
 ```
 StyleClasses {
-  hero (Local),
+  No style classes
 }
 ReferencedClasses {
   hero,
@@ -86,7 +86,6 @@ LinkedStylesheets {
   No linked stylesheets
 }
 ScriptImports {
-  "./Hero.astro" => /src/Hero.astro,
-  "./global.css" => /src/global.css,
+  No script imports
 }
 ```

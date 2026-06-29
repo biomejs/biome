@@ -3,51 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/bar.ts` (Module 3)
-
-## Source
-
-```ts
-export function bar(): string {
-	return "bar";
-}
-```
-
-## Module Info
-
-```
-Exports {
-  "bar" => {
-    ExportOwnExport => JsOwnExport::Binding(25..28)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-bar => BindingTypeData {
-  Types Module(0) TypeId(1),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => string: bar
-
-Module TypeId(1) => sync Function "bar" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: string
-}
-```
-
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -94,6 +49,72 @@ Module TypeId(3) => Module(0) TypeId(2).bar
 Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
 ```
 
+# `/src/reexports.ts` (Module 1)
+
+## Source
+
+```ts
+export * from "./foo.ts";
+export * from "./bar.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+
+# `/src/bar.ts` (Module 3)
+
+## Source
+
+```ts
+export function bar(): string {
+	return "bar";
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "bar" => {
+    ExportOwnExport => JsOwnExport::Binding(25..28)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+bar => BindingTypeData {
+  Types Module(0) TypeId(1),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => string: bar
+
+Module TypeId(1) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+```
+
 # `/src/foo.ts` (Module 2)
 
 ## Source
@@ -138,27 +159,6 @@ Module TypeId(1) => sync Function "foo" {
   returns: number
 }
 ```
-
-# `/src/reexports.ts` (Module 1)
-
-## Source
-
-```ts
-export * from "./foo.ts";
-export * from "./bar.ts";
-```
-
-## Module Info
-
-```
-Exports {
-  No exports
-}
-Imports {
-  No imports
-}
-```
-
 
 # Module Resolver
 
