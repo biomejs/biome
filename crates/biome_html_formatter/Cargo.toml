@@ -40,7 +40,7 @@ biome_service        = { path = "../biome_service", features = ["lang_html"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_html"] }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion            = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 similar-asserts      = { workspace = true }
 tests_macros         = { workspace = true }
 
