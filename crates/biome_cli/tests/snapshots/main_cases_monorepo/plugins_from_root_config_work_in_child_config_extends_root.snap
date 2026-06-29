@@ -2,11 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/mobile/biome.json`
+## `biome.json`
 
 ```json
 {
-  "extends": "//",
+  "root": true,
+  "plugins": ["./biome/no-object-assign.grit"],
   "linter": {
     "enabled": true,
     "rules": {
@@ -16,12 +17,11 @@ expression: redactor(content)
 }
 ```
 
-## `biome.json`
+## `packages/mobile/biome.json`
 
 ```json
 {
-  "root": true,
-  "plugins": ["./biome/no-object-assign.grit"],
+  "extends": "//",
   "linter": {
     "enabled": true,
     "rules": {

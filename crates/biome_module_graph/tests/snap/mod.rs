@@ -12,11 +12,11 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_test_utils::{dump_registered_module_types, dump_registered_types};
 use camino::Utf8PathBuf;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub struct ModuleGraphSnapshot<'a> {
     module_db: &'a dyn ModuleDb,
-    files: Vec<(String, String)>,
+    files: BTreeMap<String, String>,
     resolver: Option<&'a ModuleResolver>,
 }
 
@@ -43,7 +43,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
     ///
     /// Use this when the [`MemoryFileSystem`] has been moved into a
     /// [`WorkspaceServer`] and is no longer directly accessible.
-    pub fn from_files(module_db: &'a dyn ModuleDb, files: Vec<(String, String)>) -> Self {
+    pub fn from_files(module_db: &'a dyn ModuleDb, files: BTreeMap<String, String>) -> Self {
         Self {
             module_db,
             files,
@@ -60,7 +60,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
 
     pub fn assert_snapshot(&self, test_name: &str) {
         let mut content = String::new();
-        let files: Vec<_> = self.files.clone();
+        let files = self.files.clone();
         for (file_name, source_code) in &files {
             let file_name = Utf8PathBuf::from(file_name.as_str());
             let extension = file_name.extension().unwrap_or_default();
