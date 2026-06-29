@@ -76,7 +76,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install cargo-deny
-        uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2.82.0
+        uses: taiki-e/install-action@682e7d9e49c5e653d371fc6adbda67653461378a # v2.82.4
         with:
           tool: cargo-deny
       - run: cargo deny check bans
