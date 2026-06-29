@@ -716,6 +716,18 @@ impl ServerFactory {
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::lsp()))
+    }
+
+    /// Constructor for CLI socket tests.
+    ///
+    /// These tests exercise CLI traversal through the socket transport, but
+    /// should keep the CLI database update strategy.
+    pub fn new_cli_test_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::default()))
+    }
+
+    fn new_with_fs_and_db_state(fs: Arc<dyn FsWithResolverProxy>, db_state: Arc<DbState>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
@@ -727,7 +739,7 @@ impl ServerFactory {
                 Arc::new(GritSearchQuery::default()),
                 None,
             )),
-            db_state: Arc::new(DbState::lsp()),
+            db_state,
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
