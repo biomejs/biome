@@ -1,0 +1,237 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@variant 2xl {
+	max-width: 1400px;
+}
+
+@utility container {
+	padding-inline: 1rem;
+	margin-inline: auto;
+
+	@variant 2xl {
+		max-width: 1400px;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwVariantAtRule {
+                variant_token: VARIANT_KW@1..9 "variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@9..13 "2xl" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@13..14 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@14..25 "max-width" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@27..31 "1400" [] [],
+                                            unit_token: IDENT@31..33 "px" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@33..34 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@34..36 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..39 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@39..47 "utility" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@47..57 "container" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@57..58 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@58..74 "padding-inline" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@74..76 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@76..77 "1" [] [],
+                                            unit_token: IDENT@77..80 "rem" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@80..81 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@81..96 "margin-inline" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@96..98 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@98..102 "auto" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@102..103 ";" [] [],
+                        },
+                        CssAtRule {
+                            at_token: AT@103..107 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            rule: TwVariantAtRule {
+                                variant_token: VARIANT_KW@107..115 "variant" [] [Whitespace(" ")],
+                                name: CssIdentifier {
+                                    value_token: IDENT@115..119 "2xl" [] [Whitespace(" ")],
+                                },
+                                block: CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@119..120 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@120..132 "max-width" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    },
+                                                    colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@134..138 "1400" [] [],
+                                                            unit_token: IDENT@138..140 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@140..141 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@141..144 "}" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@144..146 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@146..147 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..147
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..146
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: TW_VARIANT_AT_RULE@1..36
+        0: VARIANT_KW@1..9 "variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@9..13
+          0: IDENT@9..13 "2xl" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@13..36
+          0: L_CURLY@13..14 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@14..34
+            0: CSS_DECLARATION_WITH_SEMICOLON@14..34
+              0: CSS_DECLARATION@14..33
+                0: CSS_GENERIC_PROPERTY@14..33
+                  0: CSS_IDENTIFIER@14..25
+                    0: IDENT@14..25 "max-width" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@25..27 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@27..33
+                    0: CSS_REGULAR_DIMENSION@27..33
+                      0: CSS_NUMBER_LITERAL@27..31 "1400" [] []
+                      1: IDENT@31..33 "px" [] []
+                1: (empty)
+              1: SEMICOLON@33..34 ";" [] []
+          2: R_CURLY@34..36 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@36..146
+      0: AT@36..39 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_UTILITY_AT_RULE@39..146
+        0: UTILITY_KW@39..47 "utility" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@47..57
+          0: IDENT@47..57 "container" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@57..146
+          0: L_CURLY@57..58 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@58..144
+            0: CSS_DECLARATION_WITH_SEMICOLON@58..81
+              0: CSS_DECLARATION@58..80
+                0: CSS_GENERIC_PROPERTY@58..80
+                  0: CSS_IDENTIFIER@58..74
+                    0: IDENT@58..74 "padding-inline" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@74..76 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@76..80
+                    0: CSS_REGULAR_DIMENSION@76..80
+                      0: CSS_NUMBER_LITERAL@76..77 "1" [] []
+                      1: IDENT@77..80 "rem" [] []
+                1: (empty)
+              1: SEMICOLON@80..81 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@81..103
+              0: CSS_DECLARATION@81..102
+                0: CSS_GENERIC_PROPERTY@81..102
+                  0: CSS_IDENTIFIER@81..96
+                    0: IDENT@81..96 "margin-inline" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@96..98 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@98..102
+                    0: CSS_IDENTIFIER@98..102
+                      0: IDENT@98..102 "auto" [] []
+                1: (empty)
+              1: SEMICOLON@102..103 ";" [] []
+            2: CSS_AT_RULE@103..144
+              0: AT@103..107 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: TW_VARIANT_AT_RULE@107..144
+                0: VARIANT_KW@107..115 "variant" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@115..119
+                  0: IDENT@115..119 "2xl" [] [Whitespace(" ")]
+                2: CSS_DECLARATION_OR_RULE_BLOCK@119..144
+                  0: L_CURLY@119..120 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@120..141
+                    0: CSS_DECLARATION_WITH_SEMICOLON@120..141
+                      0: CSS_DECLARATION@120..140
+                        0: CSS_GENERIC_PROPERTY@120..140
+                          0: CSS_IDENTIFIER@120..132
+                            0: IDENT@120..132 "max-width" [Newline("\n"), Whitespace("\t\t")] []
+                          1: COLON@132..134 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@134..140
+                            0: CSS_REGULAR_DIMENSION@134..140
+                              0: CSS_NUMBER_LITERAL@134..138 "1400" [] []
+                              1: IDENT@138..140 "px" [] []
+                        1: (empty)
+                      1: SEMICOLON@140..141 ";" [] []
+                  2: R_CURLY@141..144 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@144..146 "}" [Newline("\n")] []
+  2: EOF@146..147 "" [Newline("\n")] []
+
+```
