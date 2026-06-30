@@ -5,13 +5,20 @@ expression: invalid.css
 # Input
 ```css
 /* should generate diagnostics */
-.card {
+.size {
 	width: 100%;
 	min-width: 20rem;
 	max-width: 80rem;
 	height: 40vh;
 	min-height: 12rem;
 	max-height: 90vh;
+}
+
+.position {
+	top: 0;
+	right: 1rem;
+	bottom: 2rem;
+	left: 3rem;
 }
 ```
 
@@ -22,7 +29,7 @@ invalid.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━━
   ! Use logical CSS properties over physical ones.
   
     1 │ /* should generate diagnostics */
-    2 │ .card {
+    2 │ .size {
   > 3 │ 	width: 100%;
       │ 	^^^^^
     4 │ 	min-width: 20rem;
@@ -42,7 +49,7 @@ invalid.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
-    2 │ .card {
+    2 │ .size {
     3 │ 	width: 100%;
   > 4 │ 	min-width: 20rem;
       │ 	^^^^^^^^^
@@ -126,13 +133,96 @@ invalid.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
-    6 │ 	height: 40vh;
-    7 │ 	min-height: 12rem;
-  > 8 │ 	max-height: 90vh;
-      │ 	^^^^^^^^^^
-    9 │ }
+     6 │ 	height: 40vh;
+     7 │ 	min-height: 12rem;
+   > 8 │ 	max-height: 90vh;
+       │ 	^^^^^^^^^^
+     9 │ }
+    10 │ 
   
   i Replace max-height with max-block-size.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:12:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    11 │ .position {
+  > 12 │ 	top: 0;
+       │ 	^^^
+    13 │ 	right: 1rem;
+    14 │ 	bottom: 2rem;
+  
+  i Replace top with inset-block-start.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:13:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    11 │ .position {
+    12 │ 	top: 0;
+  > 13 │ 	right: 1rem;
+       │ 	^^^^^
+    14 │ 	bottom: 2rem;
+    15 │ 	left: 3rem;
+  
+  i Replace right with inset-inline-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:14:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    12 │ 	top: 0;
+    13 │ 	right: 1rem;
+  > 14 │ 	bottom: 2rem;
+       │ 	^^^^^^
+    15 │ 	left: 3rem;
+    16 │ }
+  
+  i Replace bottom with inset-block-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:15:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    13 │ 	right: 1rem;
+    14 │ 	bottom: 2rem;
+  > 15 │ 	left: 3rem;
+       │ 	^^^^
+    16 │ }
+  
+  i Replace left with inset-inline-start.
   
   i Logical properties adapt better to different writing modes and layout directions.
   

@@ -1,9 +1,16 @@
 /* should generate diagnostics */
-.card {
+.size {
 	width: 100%;
 	min-width: 20rem;
 	max-width: 80rem;
 	height: 40vh;
 	min-height: 12rem;
 	max-height: 90vh;
+}
+
+.position {
+	top: 0;
+	right: 1rem;
+	bottom: 2rem;
+	left: 3rem;
 }

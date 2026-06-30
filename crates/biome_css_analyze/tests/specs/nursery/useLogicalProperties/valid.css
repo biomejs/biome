@@ -1,5 +1,5 @@
 /* should not generate diagnostics */
-.card {
+.size {
 	inline-size: 100%;
 	min-inline-size: 20rem;
 	max-inline-size: 80rem;
@@ -7,4 +7,11 @@
 	min-block-size: 12rem;
 	max-block-size: 90vh;
 	color: red;
+}
+
+.position {
+	inset-block-start: 0;
+	inset-inline-end: 1rem;
+	inset-block-end: 2rem;
+	inset-inline-start: 3rem;
 }

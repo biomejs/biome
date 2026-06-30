@@ -9,11 +9,11 @@ use biome_rule_options::use_logical_properties::UseLogicalPropertiesOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Enforce logical sizing properties over physical sizing properties.
+    /// Enforce logical properties over physical properties.
     ///
-    /// Physical properties such as `width` and `height` are tied to writing direction.
-    /// Logical properties such as `inline-size` and `block-size` adapt more consistently
-    /// across different writing modes.
+    /// Physical properties such as `width`, `height`, `top`, `left`, etc. are tied to writing direction.
+    /// Logical properties such as `inline-size`, `block-size`, `inset-block-start`, `inset-inline-start`, etc.
+    /// adapt more consistently across different writing modes.
     ///
     /// ## Examples
     ///
@@ -25,11 +25,23 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   top: 0;
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
     /// p {
     ///   inline-size: 100%;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   inset-block-start: 0;
     /// }
     /// ```
     ///
@@ -89,12 +101,18 @@ pub struct UseLogicalPropertiesState {
 
 fn physical_to_logical_property(property: &str) -> Option<&'static str> {
     match property {
+        // Sizing properties
         "width" => Some("inline-size"),
         "min-width" => Some("min-inline-size"),
         "max-width" => Some("max-inline-size"),
         "height" => Some("block-size"),
         "min-height" => Some("min-block-size"),
         "max-height" => Some("max-block-size"),
+        // Positioning properties
+        "top" => Some("inset-block-start"),
+        "right" => Some("inset-inline-end"),
+        "bottom" => Some("inset-block-end"),
+        "left" => Some("inset-inline-start"),
         _ => None,
     }
 }
