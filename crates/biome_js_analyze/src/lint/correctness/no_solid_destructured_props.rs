@@ -181,7 +181,9 @@ fn is_inside_jsx_component(parameters: &JsParameters) -> Option<bool> {
     }
 
     if let Some(function_declaration) = JsFunctionExportDefaultDeclaration::cast(parent.clone()) {
-        let id = function_declaration.id()?;
+        let Some(id) = function_declaration.id() else {
+            return Some(true);
+        };
         let id = id.as_js_identifier_binding()?;
         let text = id.name_token().ok()?;
 
