@@ -11,9 +11,10 @@ use biome_string_case::StrLikeExtension;
 declare_lint_rule! {
     /// Enforce logical properties over physical properties.
     ///
-    /// Physical properties such as `width`, `height`, `top`, `left`, etc. are tied to writing direction.
-    /// Logical properties such as `inline-size`, `block-size`, `inset-block-start`, `inset-inline-start`, etc.
-    /// adapt more consistently across different writing modes.
+    /// Physical properties such as `width`, `height`, `top`, `left`, `margin-top`, `padding-left`, etc.
+    /// are tied to writing direction. Logical properties such as `inline-size`, `block-size`,
+    /// `inset-block-start`, `margin-block-start`, `padding-inline-end`, etc. adapt more consistently
+    /// across different writing modes.
     ///
     /// ## Examples
     ///
@@ -31,6 +32,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   margin-left: 1rem;
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -42,6 +49,12 @@ declare_lint_rule! {
     /// ```css
     /// p {
     ///   inset-block-start: 0;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   margin-inline-start: 1rem;
     /// }
     /// ```
     ///
@@ -113,6 +126,16 @@ fn physical_to_logical_property(property: &str) -> Option<&'static str> {
         "right" => Some("inset-inline-end"),
         "bottom" => Some("inset-block-end"),
         "left" => Some("inset-inline-start"),
+        // Margin properties
+        "margin-top" => Some("margin-block-start"),
+        "margin-right" => Some("margin-inline-end"),
+        "margin-bottom" => Some("margin-block-end"),
+        "margin-left" => Some("margin-inline-start"),
+        // Padding properties
+        "padding-top" => Some("padding-block-start"),
+        "padding-right" => Some("padding-inline-end"),
+        "padding-bottom" => Some("padding-block-end"),
+        "padding-left" => Some("padding-inline-start"),
         _ => None,
     }
 }

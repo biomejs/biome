@@ -14,3 +14,17 @@
 	bottom: 2rem;
 	left: 3rem;
 }
+
+.margin {
+	margin-top: 1rem;
+	margin-right: 2rem;
+	margin-bottom: 3rem;
+	margin-left: 4rem;
+}
+
+.padding {
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-bottom: 15px;
+	padding-left: 20px;
+}

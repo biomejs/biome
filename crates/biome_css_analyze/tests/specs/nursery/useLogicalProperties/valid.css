@@ -15,3 +15,17 @@
 	inset-block-end: 2rem;
 	inset-inline-start: 3rem;
 }
+
+.margin {
+	margin-block-start: 1rem;
+	margin-inline-end: 2rem;
+	margin-block-end: 3rem;
+	margin-inline-start: 4rem;
+}
+
+.padding {
+	padding-block-start: 5px;
+	padding-inline-end: 10px;
+	padding-block-end: 15px;
+	padding-inline-start: 20px;
+}

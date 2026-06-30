@@ -20,6 +20,20 @@ expression: invalid.css
 	bottom: 2rem;
 	left: 3rem;
 }
+
+.margin {
+	margin-top: 1rem;
+	margin-right: 2rem;
+	margin-bottom: 3rem;
+	margin-left: 4rem;
+}
+
+.padding {
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-bottom: 15px;
+	padding-left: 20px;
+}
 ```
 
 # Diagnostics
@@ -221,8 +235,174 @@ invalid.css:15:2 lint/nursery/useLogicalProperties ━━━━━━━━━�
   > 15 │ 	left: 3rem;
        │ 	^^^^
     16 │ }
+    17 │ 
   
   i Replace left with inset-inline-start.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:19:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    18 │ .margin {
+  > 19 │ 	margin-top: 1rem;
+       │ 	^^^^^^^^^^
+    20 │ 	margin-right: 2rem;
+    21 │ 	margin-bottom: 3rem;
+  
+  i Replace margin-top with margin-block-start.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:20:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    18 │ .margin {
+    19 │ 	margin-top: 1rem;
+  > 20 │ 	margin-right: 2rem;
+       │ 	^^^^^^^^^^^^
+    21 │ 	margin-bottom: 3rem;
+    22 │ 	margin-left: 4rem;
+  
+  i Replace margin-right with margin-inline-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:21:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    19 │ 	margin-top: 1rem;
+    20 │ 	margin-right: 2rem;
+  > 21 │ 	margin-bottom: 3rem;
+       │ 	^^^^^^^^^^^^^
+    22 │ 	margin-left: 4rem;
+    23 │ }
+  
+  i Replace margin-bottom with margin-block-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:22:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    20 │ 	margin-right: 2rem;
+    21 │ 	margin-bottom: 3rem;
+  > 22 │ 	margin-left: 4rem;
+       │ 	^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Replace margin-left with margin-inline-start.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:26:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    25 │ .padding {
+  > 26 │ 	padding-top: 5px;
+       │ 	^^^^^^^^^^^
+    27 │ 	padding-right: 10px;
+    28 │ 	padding-bottom: 15px;
+  
+  i Replace padding-top with padding-block-start.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:27:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    25 │ .padding {
+    26 │ 	padding-top: 5px;
+  > 27 │ 	padding-right: 10px;
+       │ 	^^^^^^^^^^^^^
+    28 │ 	padding-bottom: 15px;
+    29 │ 	padding-left: 20px;
+  
+  i Replace padding-right with padding-inline-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    26 │ 	padding-top: 5px;
+    27 │ 	padding-right: 10px;
+  > 28 │ 	padding-bottom: 15px;
+       │ 	^^^^^^^^^^^^^^
+    29 │ 	padding-left: 20px;
+    30 │ }
+  
+  i Replace padding-bottom with padding-block-end.
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:29:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    27 │ 	padding-right: 10px;
+    28 │ 	padding-bottom: 15px;
+  > 29 │ 	padding-left: 20px;
+       │ 	^^^^^^^^^^^^
+    30 │ }
+  
+  i Replace padding-left with padding-inline-start.
   
   i Logical properties adapt better to different writing modes and layout directions.
   
