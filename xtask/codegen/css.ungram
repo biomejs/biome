@@ -1536,6 +1536,7 @@ AnyCssQueryFeature =
 AnyCssQueryFeatureName =
 	CssIdentifier
 	| ScssInterpolatedIdentifier
+	| ScssVariable
 
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^

@@ -1,10 +1,12 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_binary_operator, is_at_scss_interpolated_identifier, is_at_scss_interpolation,
-    parse_scss_expression_from_head, parse_scss_interpolated_name,
+    is_at_scss_variable, parse_scss_expression_from_head, parse_scss_interpolated_name,
     parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
+    parse_scss_variable,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_any_value, is_at_identifier, parse_any_value};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -30,7 +32,7 @@ pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_query_feature_name(p: &mut CssParser) -> bool {
-    is_at_scss_interpolated_identifier(p) || is_at_identifier(p)
+    is_at_scss_variable(p) || is_at_scss_interpolated_identifier(p) || is_at_identifier(p)
 }
 
 /// Parses a query feature that starts with a feature name.
@@ -55,7 +57,13 @@ pub(crate) fn parse_query_feature_name(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    parse_scss_interpolated_name(p)
+    if is_at_scss_variable(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_variable, |p, m| {
+            scss_only_syntax_error(p, "SCSS variables", m.range(p))
+        })
+    } else {
+        parse_scss_interpolated_name(p)
+    }
 }
 
 /// Parses a query feature after its name is already parsed.

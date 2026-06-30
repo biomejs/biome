@@ -23,3 +23,9 @@ $breakpoint:30em;
 @media   screen   and   ( max-width : $breakpoint/2 ){a{color:red;}}
 
 @media   screen   and   ( max-width : #{$breakpoint}/2 ){a{color:red;}}
+
+@media   screen   and   ( $width < 600px ){a{color:red;}}
+
+@media   screen   and   ( 100px < $width < 600px ){a{color:red;}}
+
+@media   screen   and   ( $feature : $value ){a{color:red;}}
