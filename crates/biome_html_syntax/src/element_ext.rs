@@ -609,6 +609,16 @@ impl AnyHtmlTagElement {
     pub fn is_custom_component(&self) -> bool {
         self.name().is_ok_and(|it| it.as_html_tag_name().is_none())
     }
+
+    /// Returns `true` if the element is a Svelte special element, such as
+    /// `<svelte:window>`, `<svelte:document>`, `<svelte:body>` or `<svelte:head>`.
+    ///
+    /// These elements are not real DOM elements, so they shouldn't be treated as
+    /// regular HTML tags.
+    pub fn is_svelte_special_element(&self) -> bool {
+        self.tag_name()
+            .is_some_and(|name| name.text().starts_with("svelte:"))
+    }
 }
 
 impl biome_aria::Element for AnyHtmlTagElement {
