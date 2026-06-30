@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+@function fibonacci($n) {
+	$sequence: 0 1;
+	@for $_ from 1 through $n {
+		$new: nth($sequence, length($sequence)) + nth($sequence, length($sequence) - 1);
+		$sequence: append($sequence, $new);
+	}
+	@return nth($sequence, length($sequence));
+}
+
+.sidebar {
+	margin-left: fibonacci(4) * 1px;
+}

@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
@@ -77,6 +78,13 @@ impl Rule for NoUnknownFunction {
     type Options = NoUnknownFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        // SCSS allows user-defined `@function`s and provides built-in module
+        // functions (e.g. `nth`, `length`, `map.get`) that are not CSS value
+        // functions, so this rule does not apply to SCSS.
+        if ctx.source_type::<CssFileSource>().is_scss() {
+            return None;
+        }
+
         let node = ctx.query();
         let binding = node.name().ok().and_then(|name| {
             name.as_css_identifier()
