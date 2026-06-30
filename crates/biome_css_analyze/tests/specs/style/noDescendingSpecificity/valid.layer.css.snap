@@ -1,0 +1,22 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.layer.css
+---
+# Input
+```css
+/* should not generate diagnostics: specificity only matters within a layer */
+@layer one, two;
+
+@layer one {
+	b a {
+		color: green;
+	}
+}
+
+@layer two {
+	a {
+		color: blue;
+	}
+}
+
+```

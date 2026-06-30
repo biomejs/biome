@@ -1,0 +1,14 @@
+/* should not generate diagnostics: specificity only matters within a layer */
+@layer one, two;
+
+@layer one {
+	b a {
+		color: green;
+	}
+}
+
+@layer two {
+	a {
+		color: blue;
+	}
+}

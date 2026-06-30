@@ -3,7 +3,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
-use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
+use biome_css_syntax::{AnyCssRoot, AnyCssSelector, CssLayerDeclaration, CssSyntaxNode};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
@@ -127,6 +127,32 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
     }
 }
 
+/// Computes a cascade-layer scope for a selector. Specificity only matters
+/// within a single `@layer`, so selectors in different layers must not be
+/// compared. Re-opened named layers share a scope; each anonymous
+/// `@layer { ... }` block is treated as its own scope.
+fn layer_scope(node: &CssSyntaxNode) -> String {
+    let mut scopes: Vec<String> = Vec::new();
+    for ancestor in node.ancestors() {
+        let Some(declaration) = CssLayerDeclaration::cast(ancestor) else {
+            continue;
+        };
+        let name = declaration
+            .references()
+            .syntax()
+            .text_trimmed()
+            .to_string();
+        if name.is_empty() {
+            // Anonymous layer: keep each block distinct via its position.
+            scopes.push(format!("@{:?}", declaration.range().start()));
+        } else {
+            scopes.push(name);
+        }
+    }
+    scopes.reverse();
+    scopes.join("/")
+}
+
 /// This function traverses the CSS rules starting from the given rule and checks for selectors that have the same tail selector.
 /// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
@@ -135,7 +161,7 @@ fn find_descending_selector(
     rule: &CssSemanticRule,
     model: &SemanticModel,
     visited_rules: &mut FxHashSet<RuleId>,
-    visited_selectors: &mut FxHashMap<String, (TextRange, Specificity)>,
+    visited_selectors: &mut FxHashMap<(String, String), (TextRange, Specificity)>,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
     if !visited_rules.insert(rule.id()) {
@@ -151,8 +177,10 @@ fn find_descending_selector(
             continue;
         };
 
-        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
-        {
+        // Scope comparisons to the selector's cascade layer.
+        let key = (layer_scope(casted_selector.syntax()), tail_selector_str);
+
+        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&key) {
             if last_specificity > &selector.specificity() {
                 descending_selectors.push(DescendingSelector {
                     high: (*last_text_range, *last_specificity),
@@ -160,10 +188,7 @@ fn find_descending_selector(
                 });
             }
         } else {
-            visited_selectors.insert(
-                tail_selector_str,
-                (selector.range(root), selector.specificity()),
-            );
+            visited_selectors.insert(key, (selector.range(root), selector.specificity()));
         }
     }
 

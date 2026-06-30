@@ -1,0 +1,42 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.layer.css
+---
+# Input
+```css
+@layer one {
+	b a {
+		color: green;
+	}
+	a {
+		color: blue;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.layer.css:5:2 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
+  
+    3 │ 		color: green;
+    4 │ 	}
+  > 5 │ 	a {
+      │ 	^
+    6 │ 		color: blue;
+    7 │ 	}
+  
+  i This selector specificity is (0, 0, 2)
+  
+    1 │ @layer one {
+  > 2 │ 	b a {
+      │ 	^^^
+    3 │ 		color: green;
+    4 │ 	}
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
