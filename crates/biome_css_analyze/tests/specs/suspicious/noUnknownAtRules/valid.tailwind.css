@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

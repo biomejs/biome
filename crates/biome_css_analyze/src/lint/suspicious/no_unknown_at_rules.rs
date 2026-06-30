@@ -4,8 +4,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssUnknownAtRuleName, CssUnknownBlockAtRule, CssUnknownValueAtRule};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions;
+
+/// Tailwind at-rules that Biome does not model as dedicated nodes, so they are
+/// parsed as unknown at-rules. They are valid when Tailwind directives are
+/// enabled and should not be reported.
+const TAILWIND_AT_RULES: &[&str] = &["tailwind"];
 
 declare_lint_rule! {
     /// Disallow unknown at-rules.
@@ -120,6 +126,16 @@ impl Rule for NoUnknownAtRules {
 
         // Check if this unknown at-rule should be ignored
         if should_ignore(&name, ctx.options()) {
+            return None;
+        }
+
+        // Tailwind at-rules such as `@tailwind base;` are valid when Tailwind
+        // directives are enabled, but Biome parses them as unknown at-rules.
+        if ctx.source_type::<CssFileSource>().is_tailwind_css()
+            && TAILWIND_AT_RULES
+                .iter()
+                .any(|rule| name.eq_ignore_ascii_case(rule))
+        {
             return None;
         }
 
