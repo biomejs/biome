@@ -1554,13 +1554,12 @@ impl<'src> CssLexer<'src> {
         // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
         // CSS lexer would split that into a number and an identifier, so consume
         // the whole run as a single identifier here.
-        if current.is_ascii_digit() {
+        let dispatched = lookup_byte(current);
+        if matches!(dispatched, DIG | ZER) {
             while let Some(byte) = self.current_byte() {
-                if byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_' || !byte.is_ascii()
-                {
-                    self.advance_byte_or_char(byte);
-                } else {
-                    break;
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
                 }
             }
             return T![ident];
