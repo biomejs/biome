@@ -25,7 +25,7 @@ name    = "css_formatter"
 biome_css_syntax  = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_formatter   = { workspace = true }
-biome_languages   = { workspace = true, features = ["scss"] }
+biome_languages   = { workspace = true, features = ["lang_css"] }
 biome_rowan       = { workspace = true }
 biome_string_case = { workspace = true }
 biome_suppression = { workspace = true }
@@ -37,6 +37,7 @@ biome_css_syntax     = { path = "../biome_css_syntax", features = ["scss"] }
 biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_css"] }
 biome_fs             = { path = "../biome_fs" }
+biome_languages      = { path = "../biome_languages", features = ["scss"] }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_css"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_css"] }

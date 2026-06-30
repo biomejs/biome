@@ -6,6 +6,7 @@ use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
 };
+use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
@@ -4103,7 +4104,7 @@ fn trailing_newline_html_via_cli() {
 }
 
 #[test]
-fn harness_scss() {
+fn harness_scss_format() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -4116,10 +4117,33 @@ fn harness_scss() {
         Args::from(["format", file_path.as_str()].as_slice()),
     );
 
+    let result = result.expect_err("This test will fail once SCSS support is officially added");
+
     assert!(
-        result.is_err(),
-        "This test will fail once SCSS support is officially added"
+        matches!(result, CliDiagnostic::NoFilesWereProcessed(_)),
+        "Found: {result:?}"
+    )
+}
+
+#[test]
+fn harness_scss_lint() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("format.scss");
+    fs.insert(file_path.into(), "$fff".as_bytes());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
+    let result = result.expect_err("This test will fail once SCSS support is officially added");
+
+    assert!(
+        matches!(result, CliDiagnostic::NoFilesWereProcessed(_)),
+        "Found: {result:?}"
+    )
 }
 
 #[test]
