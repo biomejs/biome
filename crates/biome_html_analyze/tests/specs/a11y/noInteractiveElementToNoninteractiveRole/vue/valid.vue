@@ -10,6 +10,10 @@
 <input type="button" role="button" />
 <input type="button" v-bind:role="roleValue" />
 <input type="button" :role="roleValue" />
+<!-- Static Vue bindings with interactive roles on interactive elements are valid -->
+<input type="button" :role="'button'" />
+<button :role="'button'" />
+<a href="#" v-bind:role="'button'" />
 <input type="checkbox" role="button" />
 <input type="color" role="button" />
 <input type="date" role="button" />

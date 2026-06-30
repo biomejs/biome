@@ -13,6 +13,9 @@ expression: invalid.vue
 <td scope="col"></td>
 <span scope="row"></span>
 <p scope></p>
+<!-- static Vue bindings on non-<th> elements should also be flagged -->
+<div :scope="'col'"></div>
+<td v-bind:scope="'row'"></td>
 
 ```
 
@@ -182,7 +185,7 @@ invalid.vue:8:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
    > 8 │ <span scope="row"></span>
        │       ^^^^^^^^^^^
      9 │ <p scope></p>
-    10 │ 
+    10 │ <!-- static Vue bindings on non-<th> elements should also be flagged -->
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -207,7 +210,8 @@ invalid.vue:9:4 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
      8 │ <span scope="row"></span>
    > 9 │ <p scope></p>
        │    ^^^^^
-    10 │ 
+    10 │ <!-- static Vue bindings on non-<th> elements should also be flagged -->
+    11 │ <div :scope="'col'"></div>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -220,5 +224,56 @@ invalid.vue:9:4 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
   
     9 │ <p·scope></p>
       │    -----     
+
+```
+
+```
+invalid.vue:11:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the scope attribute on elements other than th elements.
+  
+     9 │ <p scope></p>
+    10 │ <!-- static Vue bindings on non-<th> elements should also be flagged -->
+  > 11 │ <div :scope="'col'"></div>
+       │      ^^^^^^^^^^^^^^
+    12 │ <td v-bind:scope="'row'"></td>
+    13 │ 
+  
+  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
+                so it should be placed on th elements to provide accessibility to screen readers.
+  
+  i Follow the links for more information,
+                WCAG 1.3.1
+                WCAG 4.1.1
+  
+  i Unsafe fix: Remove the scope attribute.
+  
+    11 │ <div·:scope="'col'"></div>
+       │      --------------       
+
+```
+
+```
+invalid.vue:12:5 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the scope attribute on elements other than th elements.
+  
+    10 │ <!-- static Vue bindings on non-<th> elements should also be flagged -->
+    11 │ <div :scope="'col'"></div>
+  > 12 │ <td v-bind:scope="'row'"></td>
+       │     ^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
+                so it should be placed on th elements to provide accessibility to screen readers.
+  
+  i Follow the links for more information,
+                WCAG 1.3.1
+                WCAG 4.1.1
+  
+  i Unsafe fix: Remove the scope attribute.
+  
+    12 │ <td·v-bind:scope="'row'"></td>
+       │     --------------------      
 
 ```

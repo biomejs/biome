@@ -58,19 +58,9 @@ impl Rule for UseAriaPropsSupportedByRole {
         }
 
         let role = node
-            .find_attribute_by_name("role")
-            .and_then(|attribute| {
-                if let AnyHtmlAttribute::HtmlAttribute(html_attribute) = attribute {
-                    html_attribute
-                        .initializer()?
-                        .value()
-                        .ok()?
-                        .as_static_value()
-                        .and_then(|value| AriaRole::from_roles(value.text()))
-                } else {
-                    None
-                }
-            })
+            .find_attribute_or_vue_binding("role")
+            .and_then(|attribute| attribute.as_static_value())
+            .and_then(|value| AriaRole::from_roles(value.text()))
             .or_else(|| ctx.aria_roles().get_implicit_role(node));
 
         let role_attributes = role.map_or(Default::default(), |role| role.attributes());

@@ -6,6 +6,39 @@ use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, TokenText};
 use biome_string_case::StrOnlyExtension;
 
+/// Extracts a static value from a Vue directive's binding value.
+///
+/// For Vue bindings like `:attr="'value'"` (HTML string containing a JS string literal),
+/// returns a static value. Returns `None` for dynamic expressions (plain identifiers).
+fn vue_binding_static_value(value: AnyHtmlAttributeInitializer) -> Option<StaticValue> {
+    match value {
+        AnyHtmlAttributeInitializer::HtmlString(ref string) => {
+            let token = string.value_token().ok()?;
+            let text = token.text_trimmed();
+            // Strip the HTML attribute outer quotes to get the JS expression
+            if text.len() < 2 {
+                return None;
+            }
+            let inner = &text[1..text.len() - 1];
+            // Only return a static value if the inner content is a JS string literal
+            // (starts and ends with the same quote character). Plain identifiers like
+            // `roleValue` are dynamic references and should not be treated as static.
+            if inner.len() >= 2
+                && ((inner.starts_with('"') && inner.ends_with('"'))
+                    || (inner.starts_with('\'') && inner.ends_with('\'')))
+            {
+                Some(StaticValue::String(token))
+            } else {
+                None
+            }
+        }
+        AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(expression) => {
+            expression.expression().ok()?.as_static_value()
+        }
+        _ => None,
+    }
+}
+
 impl AnyHtmlAttributeInitializer {
     /// Returns the string value of the attribute, if available, without quotes.
     pub fn as_static_value(&self) -> Option<StaticValue> {
@@ -79,8 +112,25 @@ impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::AnyVueDirective(vue) => match vue {
+                // :attr="..." — shorthand Vue binding
+                AnyVueDirective::VueVBindShorthandDirective(d) => d
+                    .arg()
+                    .ok()
+                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.as_vue_static_argument().cloned())
+                    .and_then(|s| s.name_token().ok())
+                    .map(|t| t.token_text_trimmed()),
+                // v-bind:attr="..." — full Vue binding
+                AnyVueDirective::VueDirective(d) if d.is_binding() => d
+                    .arg()
+                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.as_vue_static_argument().cloned())
+                    .and_then(|s| s.name_token().ok())
+                    .map(|t| t.token_text_trimmed()),
+                _ => None,
+            },
             Self::AnySvelteDirective(_)
-            | Self::AnyVueDirective(_)
             | Self::HtmlAttributeDoubleTextExpression(_)
             | Self::HtmlAttributeSingleTextExpression(_)
             | Self::HtmlBogusAttribute(_)
@@ -93,8 +143,16 @@ impl AnyHtmlAttribute {
     pub fn as_static_value(&self) -> Option<StaticValue> {
         match self {
             Self::HtmlAttribute(attr) => attr.as_static_value(),
+            Self::AnyVueDirective(vue) => match vue {
+                AnyVueDirective::VueVBindShorthandDirective(d) => {
+                    vue_binding_static_value(d.initializer()?.value().ok()?)
+                }
+                AnyVueDirective::VueDirective(d) if d.is_binding() => {
+                    vue_binding_static_value(d.initializer()?.value().ok()?)
+                }
+                _ => None,
+            },
             Self::AnySvelteDirective(_)
-            | Self::AnyVueDirective(_)
             | Self::HtmlAttributeDoubleTextExpression(_)
             | Self::HtmlAttributeSingleTextExpression(_)
             | Self::HtmlBogusAttribute(_)

@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -60,7 +60,7 @@ declare_lint_rule! {
 }
 
 pub struct NoAriaHiddenOnFocusableState {
-    aria_hidden_attribute: HtmlAttribute,
+    aria_hidden_attribute: AnyHtmlAttribute,
 }
 
 impl Rule for NoAriaHiddenOnFocusable {
@@ -76,11 +76,11 @@ impl Rule for NoAriaHiddenOnFocusable {
 
         // Tabindex overrides native focusability: negative removes from tab order,
         // non-negative makes the element focusable regardless of element type.
-        if let Some(tabindex_attr) = element.find_attribute_by_name("tabindex")
-            && let Some(html_attribute) = tabindex_attr.as_html_attribute()
-            && let Some(tabindex_value) = get_tabindex_value(html_attribute)
+        if let Some(tabindex_attr) = element.find_attribute_or_vue_binding("tabindex")
+            && let Some(tabindex_sv) = tabindex_attr.as_static_value()
+            && let Ok(num) = tabindex_sv.text().trim().parse::<i32>()
         {
-            if tabindex_value < 0 {
+            if num < 0 {
                 return None;
             }
             return Some(NoAriaHiddenOnFocusableState {
@@ -127,16 +127,6 @@ impl Rule for NoAriaHiddenOnFocusable {
     }
 }
 
-/// Parses the tabindex attribute value as an integer.
-///
-/// Returns `None` if the attribute has no value or cannot be parsed as an integer.
-/// Non-integer values (e.g., `tabindex="abc"`) are ignored and treated as if
-/// tabindex was not set.
-fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
-    let value = attribute.as_static_value()?;
-    value.text().trim().parse::<i32>().ok()
-}
-
 /// Returns whether the element is natively focusable per the HTML spec.
 ///
 /// Returns `Some(true)` when the element is one of:
@@ -150,7 +140,7 @@ fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
 fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<bool> {
     // <a> and <area> are only focusable when they have an href attribute
     if (is_html_tag(element, source_type, "a") || is_html_tag(element, source_type, "area"))
-        && element.find_attribute_by_name("href").is_some()
+        && element.find_attribute_or_vue_binding("href").is_some()
     {
         return Some(true);
     }
@@ -168,7 +158,7 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
     // <input> is focusable unless type="hidden"
     if is_html_tag(element, source_type, "input") {
         let is_hidden = element
-            .find_attribute_by_name("type")
+            .find_attribute_or_vue_binding("type")
             .and_then(|attr| attr.as_static_value())
             .is_some_and(|value| value.text().trim().eq_ignore_ascii_case("hidden"));
         return Some(!is_hidden);
@@ -192,7 +182,7 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
 /// Ref: <https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable>
 fn has_contenteditable_true(element: &AnyHtmlTagElement) -> bool {
     element
-        .find_attribute_by_name("contenteditable")
+        .find_attribute_or_vue_binding("contenteditable")
         .is_some_and(|attr| match attr.as_static_value() {
             None => true, // bare attribute = True state per HTML spec
             Some(value) => {

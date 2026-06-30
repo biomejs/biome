@@ -15,4 +15,7 @@
 	</div>
 	<button></button>
 	<div role="h1"></div>
+	<!-- static Vue role bindings with interactive roles + tabindex are valid -->
+	<div :role="'button'" tabindex="0"></div>
+	<div v-bind:role="'tab'" tabindex="0"></div>
 </div>

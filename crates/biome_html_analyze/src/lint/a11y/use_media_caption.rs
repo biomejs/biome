@@ -91,7 +91,7 @@ impl Rule for UseMediaCaption {
         }
 
         // Muted videos don't need captions (audio still requires captions)
-        if is_video && node.find_attribute_by_name("muted").is_some() {
+        if is_video && node.find_attribute_or_vue_binding("muted").is_some() {
             return None;
         }
 
@@ -137,11 +137,8 @@ fn has_caption_track(html_child_list: &HtmlElementList, source_type: &HtmlFileSo
                 return None;
             }
 
-            let kind_attr = child.find_attribute_by_name("kind")?;
-            let kind_attr = kind_attr.as_html_attribute()?;
-            let initializer = kind_attr.initializer()?;
-            let value = initializer.value().ok()?;
-            let string_value = value.as_static_value()?;
+            let kind_attr = child.find_attribute_or_vue_binding("kind")?;
+            let string_value = kind_attr.as_static_value()?;
 
             if string_value.text().eq_ignore_ascii_case("captions") {
                 Some(())

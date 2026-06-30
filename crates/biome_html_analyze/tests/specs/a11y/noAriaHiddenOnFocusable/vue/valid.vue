@@ -16,6 +16,10 @@
 	<button v-bind:aria-hidden="ariaHiddenValue"></button>
 	<button :aria-hidden="ariaHiddenValue"></button>
 
+	<!-- Static Vue bindings with non-truthy values should not generate diagnostics -->
+	<button :aria-hidden="'false'">text</button>
+	<button v-bind:aria-hidden="'false'">text</button>
+
   <!-- input type="hidden" is not focusable -->
   <input type="hidden" aria-hidden="true" />
 

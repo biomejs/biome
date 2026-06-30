@@ -64,3 +64,6 @@
 <select class="foo" role="listitem" />
 <textarea class="foo" role="listitem" />
 <tr role="listitem" />
+<!-- static Vue role bindings assigning non-interactive roles to interactive elements should also be flagged -->
+<a href="http://x.y.z" :role="'img'" />
+<button v-bind:role="'none'" />

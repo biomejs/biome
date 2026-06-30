@@ -5,7 +5,9 @@ use biome_aria::AriaRoles;
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement, static_value::StaticValue};
+use biome_html_syntax::{
+    AnyHtmlAttribute, element_ext::AnyHtmlTagElement, static_value::StaticValue,
+};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
@@ -79,20 +81,15 @@ impl Rule for NoRedundantRoles {
             }
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_html_attribute = role_attribute.as_html_attribute()?;
-        let role_attribute_value = role_html_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_value = role_attribute.as_static_value()?;
         let trimmed = role_attribute_value.text().trim();
         let explicit_role = AriaRole::from_roles(trimmed)?;
 
         if AriaRoles.get_implicit_role(node)? == explicit_role {
             let has_multiple_roles = trimmed.split_ascii_whitespace().nth(1).is_some();
             return Some(RuleState {
-                redundant_attribute: role_html_attribute.clone(),
+                redundant_attribute: role_attribute,
                 role_attribute_value,
                 has_multiple_roles,
             });
@@ -129,7 +126,7 @@ impl Rule for NoRedundantRoles {
 }
 
 pub struct RuleState {
-    redundant_attribute: HtmlAttribute,
+    redundant_attribute: AnyHtmlAttribute,
     role_attribute_value: StaticValue,
     has_multiple_roles: bool,
 }

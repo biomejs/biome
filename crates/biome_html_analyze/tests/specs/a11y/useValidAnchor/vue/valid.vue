@@ -6,3 +6,6 @@
 <Link href="#">ok</Link>
 <a v-bind:href="hrefValue">Home</a>
 <a :href="hrefValue">Home</a>
+<!-- Static Vue bindings with valid href are valid -->
+<a :href="'https://example.com'">ok</a>
+<a v-bind:href="'#id'">ok</a>

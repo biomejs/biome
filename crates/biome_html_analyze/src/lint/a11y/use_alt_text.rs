@@ -184,12 +184,9 @@ impl Rule for UseAltText {
 
 /// Check if the element has a type="image" attribute
 fn has_type_image_attribute(element: &AnyHtmlTagElement) -> bool {
-    element.find_attribute_by_name("type").is_some_and(|attr| {
-        let Some(html_attribute) = attr.as_html_attribute() else {
-            return false;
-        };
-        attribute_value_equals_ignore_case(html_attribute, "image")
-    })
+    element
+        .find_attribute_or_vue_binding("type")
+        .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 
 /// Check if the element has a valid alt attribute

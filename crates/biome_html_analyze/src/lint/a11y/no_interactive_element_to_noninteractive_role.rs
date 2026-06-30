@@ -65,13 +65,8 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_html_attribute = role_attribute.as_html_attribute()?;
-        let role_attribute_static_value = role_html_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
 
         // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
@@ -107,7 +102,8 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             }
 
             // a tag without href is considered non-interactive
-            if is_html_tag(node, source_type, "a") && node.find_attribute_by_name("href").is_none()
+            if is_html_tag(node, source_type, "a")
+                && node.find_attribute_or_vue_binding("href").is_none()
             {
                 return None;
             }
@@ -139,7 +135,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);

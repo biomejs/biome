@@ -7,3 +7,7 @@
 <a href="#" tabindex="-1"></a>
 <input tabindex="0" />
 <div></div>
+<!-- Static Vue bindings with non-positive tabindex are valid -->
+<div :tabindex="'0'"></div>
+<div v-bind:tabindex="'0'"></div>
+<div :tabindex="'-1'"></div>

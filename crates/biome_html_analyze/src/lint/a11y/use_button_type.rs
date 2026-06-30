@@ -69,20 +69,21 @@ impl Rule for UseButtonType {
             return Some(UseButtonTypeState { missing_prop: true });
         };
 
-        let html_attribute = attribute.as_html_attribute()?;
+        // Check static value first (works for both HTML and Vue static bindings)
+        if let Some(string_value) = attribute.as_static_value() {
+            return if ALLOWED_BUTTON_TYPES.contains(&string_value.text()) {
+                None
+            } else {
+                Some(UseButtonTypeState {
+                    missing_prop: false,
+                })
+            };
+        }
 
-        let Some(initializer) = html_attribute.initializer() else {
-            return Some(UseButtonTypeState {
-                missing_prop: false,
-            });
-        };
-
-        let value = initializer.value().ok()?;
-
-        if let Some(string_value) = value.as_static_value() {
-            if ALLOWED_BUTTON_TYPES.contains(&string_value.text()) {
-                return None;
-            }
+        // For HTML attributes with no initializer (bare `type` with no value is invalid)
+        if let Some(html_attr) = attribute.as_html_attribute()
+            && html_attr.initializer().is_none()
+        {
             return Some(UseButtonTypeState {
                 missing_prop: false,
             });

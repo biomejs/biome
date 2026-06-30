@@ -13,3 +13,6 @@
 <Input type="text" autocomplete="baz" />
 <input type="text" v-bind:autocomplete="autocompleteValue" />
 <input type="text" :autocomplete="autocompleteValue" />
+<!-- Static Vue bindings with valid autocomplete values are valid -->
+<input type="text" :autocomplete="'name'" />
+<input type="text" v-bind:autocomplete="'email'" />

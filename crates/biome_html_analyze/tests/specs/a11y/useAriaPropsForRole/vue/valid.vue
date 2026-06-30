@@ -12,4 +12,8 @@
 		:aria-valuenow="current"
 	></span>
 	<span role="meter" :aria-valuenow="progress"></span>
+	<!-- static Vue role bindings with all required aria props are valid -->
+	<span :role="'checkbox'" :aria-checked="'true'"></span>
+	<span v-bind:role="'radio'" :aria-checked="'false'"></span>
+	<span :role="'heading'" :aria-level="'2'"></span>
 </template>

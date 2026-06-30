@@ -4,7 +4,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::static_value::StaticValue;
 use biome_rowan::AstNode;
@@ -59,7 +59,7 @@ declare_lint_rule! {
 #[derive(Default, Debug)]
 pub struct UseAriaPropsForRoleState {
     missing_aria_props: Box<[&'static str]>,
-    attribute: Option<(HtmlAttribute, StaticValue)>,
+    attribute: Option<(AnyHtmlAttribute, StaticValue)>,
 }
 
 impl Rule for UseAriaPropsForRole {
@@ -71,13 +71,8 @@ impl Rule for UseAriaPropsForRole {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_html_attribute = role_attribute.as_html_attribute()?;
-        let role_attribute_name = role_html_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_name = role_attribute.as_static_value()?;
         let role = AriaRole::from_roles(role_attribute_name.text().trim());
         let missing_aria_props: Vec<_> = role
             .into_iter()
@@ -94,7 +89,7 @@ impl Rule for UseAriaPropsForRole {
         }
 
         Some(UseAriaPropsForRoleState {
-            attribute: Some((role_html_attribute.clone(), role_attribute_name)),
+            attribute: Some((role_attribute, role_attribute_name)),
             missing_aria_props: missing_aria_props.into_boxed_slice(),
         })
     }

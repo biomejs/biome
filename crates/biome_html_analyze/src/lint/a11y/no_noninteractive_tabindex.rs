@@ -4,7 +4,7 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
-use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
@@ -60,7 +60,7 @@ declare_lint_rule! {
 
 pub struct RuleState {
     attribute_range: TextRange,
-    attribute: HtmlAttribute,
+    attribute: AnyHtmlAttribute,
     element_name: TokenText,
 }
 
@@ -78,44 +78,32 @@ impl Rule for NoNoninteractiveTabindex {
         }
 
         let tabindex_attribute = node.find_attribute_or_vue_binding("tabindex")?;
-        let tabindex_html_attribute = tabindex_attribute.as_html_attribute()?;
 
-        let value = tabindex_html_attribute
-            .initializer()
-            .and_then(|init| init.value().ok())
-            .and_then(|value| value.as_static_value())?;
+        let value = tabindex_attribute.as_static_value()?;
 
         if is_negative_tabindex(value.text()) {
             return None;
         }
 
         let role_attribute = node.find_attribute_or_vue_binding("role");
-        if let Some(role_attribute) = role_attribute {
-            match role_attribute {
-                AnyHtmlAttribute::HtmlAttribute(html_attribute) => {
-                    let role_value = html_attribute
-                        .initializer()?
-                        .value()
-                        .ok()?
-                        .as_static_value()?;
-                    let role = AriaRole::from_roles(role_value.text().trim());
-
-                    if let Some(aria_role) = role
-                        && aria_role.is_interactive()
-                    {
-                        return None;
-                    }
-                }
-                _ => return None,
+        if let Some(role_attribute) = role_attribute
+            && let Some(role_value) = role_attribute.as_static_value()
+        {
+            let role = AriaRole::from_roles(role_value.text().trim());
+            if let Some(aria_role) = role
+                && aria_role.is_interactive()
+            {
+                return None;
             }
         }
+        // For dynamic role bindings (no static value), continue checking
 
         let element_name = node.tag_name()?;
         let attribute_range = tabindex_attribute.range();
 
         Some(RuleState {
             attribute_range,
-            attribute: tabindex_html_attribute.clone(),
+            attribute: tabindex_attribute,
             element_name,
         })
     }

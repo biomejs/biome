@@ -1,8 +1,8 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
-    AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList,
-    HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlProcessingInstruction,
-    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
+    AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttributeList, HtmlElement,
+    HtmlEmbeddedContent, HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement,
+    HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
@@ -197,9 +197,10 @@ impl HtmlSelfClosingElement {
     pub fn find_multiple_attributes_by_name<const N: usize>(
         &self,
         names_to_lookup: &[&str; N],
-    ) -> [Option<HtmlAttribute>; N] {
+    ) -> [Option<AnyHtmlAttribute>; N] {
         self.attributes()
             .find_multiple_attributes_by_name(names_to_lookup)
+            .map(|opt| opt.map(AnyHtmlAttribute::HtmlAttribute))
     }
 
     pub fn find_attribute_or_vue_binding(&self, name_to_lookup: &str) -> Option<AnyHtmlAttribute> {
@@ -253,9 +254,10 @@ impl HtmlOpeningElement {
     pub fn find_multiple_attributes_by_name<const N: usize>(
         &self,
         names_to_lookup: &[&str; N],
-    ) -> [Option<HtmlAttribute>; N] {
+    ) -> [Option<AnyHtmlAttribute>; N] {
         self.attributes()
             .find_multiple_attributes_by_name(names_to_lookup)
+            .map(|opt| opt.map(AnyHtmlAttribute::HtmlAttribute))
     }
 
     pub fn find_attribute_or_vue_binding(&self, name_to_lookup: &str) -> Option<AnyHtmlAttribute> {
@@ -508,7 +510,7 @@ impl AnyHtmlTagElement {
     pub fn find_multiple_attributes_by_name<const N: usize>(
         &self,
         names_to_lookup: &[&str; N],
-    ) -> [Option<HtmlAttribute>; N] {
+    ) -> [Option<AnyHtmlAttribute>; N] {
         match self {
             Self::HtmlOpeningElement(element) => {
                 element.find_multiple_attributes_by_name(names_to_lookup)
@@ -588,12 +590,12 @@ impl biome_aria::Element for AnyHtmlTagElement {
     }
 
     fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
-        Self::attributes(self)
-            .into_iter()
-            .filter_map(|attr| match attr {
-                AnyHtmlAttribute::HtmlAttribute(attr) => Some(attr),
-                _ => None,
-            })
+        Self::attributes(self).into_iter().filter(|attr| {
+            matches!(
+                attr,
+                AnyHtmlAttribute::HtmlAttribute(_) | AnyHtmlAttribute::AnyVueDirective(_)
+            )
+        })
     }
 }
 

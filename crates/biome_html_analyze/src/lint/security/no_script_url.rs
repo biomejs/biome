@@ -71,8 +71,7 @@ impl Rule for NoScriptUrl {
         }
 
         let attrs = element.attributes();
-        let href_attribute = attrs.find_attribute_by_name("href")?;
-        let href_attribute = href_attribute.as_html_attribute()?;
+        let href_attribute = attrs.find_attribute_or_vue_binding("href")?;
         let value = href_attribute.as_static_value()?;
 
         if value

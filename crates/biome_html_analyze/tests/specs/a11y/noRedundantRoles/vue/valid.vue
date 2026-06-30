@@ -17,6 +17,10 @@
   <article role="presentation"></article>
   <article v-bind:role="roleValue"></article>
   <article :role="roleValue"></article>
+  <!-- Static Vue bindings with non-redundant roles are valid -->
+  <article :role="'presentation'"></article>
+  <div :role="'button'"></div>
+  <div v-bind:role="'navigation'"></div>
   <span></span>
   <div></div>
 </template>

@@ -101,12 +101,7 @@ impl Rule for UseValidAnchor {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
 
-                    let attribute_value = anchor_attribute
-                        .as_html_attribute()?
-                        .initializer()?
-                        .value()
-                        .ok()?
-                        .as_static_value()?;
+                    let attribute_value = anchor_attribute.as_static_value()?;
                     let static_value = attribute_value.text().trim().to_ascii_lowercase_cow();
 
                     if static_value.is_empty()

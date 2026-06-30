@@ -9,6 +9,9 @@ expression: invalid.vue
 <a href>invalid</a>
 <a @click="count++">invalid</a>
 <a>invalid</a>
+<!-- static Vue href bindings with invalid values should also be flagged -->
+<a :href="'javascript:void(0)'">invalid</a>
+<a v-bind:href="'javascript:'">invalid</a>
 
 ```
 
@@ -60,7 +63,7 @@ invalid.vue:4:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
   > 4 │ <a @click="count++">invalid</a>
       │    ^^^^^^^^^^^^^^^^
     5 │ <a>invalid</a>
-    6 │ 
+    6 │ <!-- static Vue href bindings with invalid values should also be flagged -->
   
   i Anchor elements should only be used for default sections or page navigation
   
@@ -78,9 +81,47 @@ invalid.vue:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
     4 │ <a @click="count++">invalid</a>
   > 5 │ <a>invalid</a>
       │ ^^^
-    6 │ 
+    6 │ <!-- static Vue href bindings with invalid values should also be flagged -->
+    7 │ <a :href="'javascript:void(0)'">invalid</a>
   
   i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:7:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    5 │ <a>invalid</a>
+    6 │ <!-- static Vue href bindings with invalid values should also be flagged -->
+  > 7 │ <a :href="'javascript:void(0)'">invalid</a>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <a v-bind:href="'javascript:'">invalid</a>
+    9 │ 
+  
+  i The href attribute should be a valid URL
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:8:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a valid value for the attribute href.
+  
+    6 │ <!-- static Vue href bindings with invalid values should also be flagged -->
+    7 │ <a :href="'javascript:void(0)'">invalid</a>
+  > 8 │ <a v-bind:href="'javascript:'">invalid</a>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   

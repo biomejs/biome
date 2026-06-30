@@ -9,6 +9,11 @@ expression: valid.vue
 <div tabindex="-1"></div>
 <div v-bind:tabindex="tabindexValue"></div>
 <div :tabindex="tabindexValue"></div>
+<!-- Static Vue bindings: negative tabindex or interactive role are valid -->
+<div :tabindex="'-1'"></div>
+<div v-bind:tabindex="'-1'"></div>
+<div :tabindex="'0'" role="button"></div>
+<div v-bind:tabindex="'0'" role="button"></div>
 <button tabindex="0"></button>
 <a href="#" tabindex="0"></a>
 <div role="button" tabindex="0"></div>
