@@ -192,6 +192,23 @@ const BILLING_AND_SHIPPING_ADDRESS: phf::Set<&'static str> = phf_set! {
     "street-address",
 };
 
+/// Contact-type qualifiers that may precede a contact field name
+/// (`home work mobile fax pager`), per the WHATWG autofill grammar.
+const CONTACT_TYPE_TOKENS: [&str; 5] = ["home", "work", "mobile", "fax", "pager"];
+
+/// Field names that accept a leading contact-type qualifier: the telephone,
+/// email and messaging tokens from the "contact information" category.
+const CONTACT_FIELD_TOKENS: phf::Set<&'static str> = phf_set! {
+    "email",
+    "impp",
+    "tel",
+    "tel-area-code",
+    "tel-country-code",
+    "tel-extension",
+    "tel-local",
+    "tel-national",
+};
+
 /// Checks if the autocomplete attribute values are valid
 fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
     match autocomplete_values.len() {
@@ -211,9 +228,26 @@ fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
                 || ["billing", "shipping"].contains(&first)
                     && (BILLING_AND_SHIPPING_ADDRESS.contains(second)
                         || VALID_AUTOCOMPLETE_VALUES.contains(second))
+                || is_valid_contact(autocomplete_values)
                 || autocomplete_values
                     .iter()
                     .all(|val| VALID_AUTOCOMPLETE_VALUES.contains(val))
         }
     }
+}
+
+/// A contact-type qualifier (`work`, `home`, ...) followed by one or more
+/// contact field names, optionally trailed by `webauthn`. This mirrors the
+/// WHATWG grammar where `work tel` or `home email` are valid, but the
+/// qualifier only applies to telephone/email/messaging fields (so `home url`
+/// stays invalid).
+fn is_valid_contact(autocomplete_values: &[&str]) -> bool {
+    let [first, rest @ ..] = autocomplete_values else {
+        return false;
+    };
+    CONTACT_TYPE_TOKENS.contains(first)
+        && rest.iter().any(|val| CONTACT_FIELD_TOKENS.contains(val))
+        && rest
+            .iter()
+            .all(|val| CONTACT_FIELD_TOKENS.contains(val) || *val == "webauthn")
 }

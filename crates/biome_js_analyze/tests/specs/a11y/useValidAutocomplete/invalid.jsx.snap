@@ -10,6 +10,7 @@ expression: invalid.jsx
 	<input type="text" autocomplete="name invalid" />
 	<input type="text" autocomplete="invalid name" />
 	<input type="text" autocomplete="home url" />
+	<input type="text" autocomplete="work name" />
 	<Bar autocomplete="baz"></Bar>
 	<Input type="text" autocomplete="baz" />
 	<Input type="text" autoComplete="baz" />
@@ -72,7 +73,7 @@ invalid.jsx:5:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
   > 5 │ 	<input type="text" autocomplete="invalid name" />
       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 	<input type="text" autocomplete="home url" />
-    7 │ 	<Bar autocomplete="baz"></Bar>
+    7 │ 	<input type="text" autocomplete="work name" />
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
@@ -93,8 +94,8 @@ invalid.jsx:6:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
     5 │ 	<input type="text" autocomplete="invalid name" />
   > 6 │ 	<input type="text" autocomplete="home url" />
       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 	<Bar autocomplete="baz"></Bar>
-    8 │ 	<Input type="text" autocomplete="baz" />
+    7 │ 	<input type="text" autocomplete="work name" />
+    8 │ 	<Bar autocomplete="baz"></Bar>
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
@@ -107,16 +108,16 @@ invalid.jsx:6:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:7 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use valid values for the autocomplete attribute.
   
     5 │ 	<input type="text" autocomplete="invalid name" />
     6 │ 	<input type="text" autocomplete="home url" />
-  > 7 │ 	<Bar autocomplete="baz"></Bar>
-      │ 	     ^^^^^^^^^^^^^^^^^^
-    8 │ 	<Input type="text" autocomplete="baz" />
-    9 │ 	<Input type="text" autoComplete="baz" />
+  > 7 │ 	<input type="text" autocomplete="work name" />
+      │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<Bar autocomplete="baz"></Bar>
+    9 │ 	<Input type="text" autocomplete="baz" />
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
@@ -129,16 +130,16 @@ invalid.jsx:7:7 lint/a11y/useValidAutocomplete ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:8:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:7 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use valid values for the autocomplete attribute.
   
      6 │ 	<input type="text" autocomplete="home url" />
-     7 │ 	<Bar autocomplete="baz"></Bar>
-   > 8 │ 	<Input type="text" autocomplete="baz" />
-       │ 	                   ^^^^^^^^^^^^^^^^^^
-     9 │ 	<Input type="text" autoComplete="baz" />
-    10 │ </>
+     7 │ 	<input type="text" autocomplete="work name" />
+   > 8 │ 	<Bar autocomplete="baz"></Bar>
+       │ 	     ^^^^^^^^^^^^^^^^^^
+     9 │ 	<Input type="text" autocomplete="baz" />
+    10 │ 	<Input type="text" autoComplete="baz" />
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
@@ -155,12 +156,34 @@ invalid.jsx:9:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
 
   × Use valid values for the autocomplete attribute.
   
-     7 │ 	<Bar autocomplete="baz"></Bar>
-     8 │ 	<Input type="text" autocomplete="baz" />
-   > 9 │ 	<Input type="text" autoComplete="baz" />
+     7 │ 	<input type="text" autocomplete="work name" />
+     8 │ 	<Bar autocomplete="baz"></Bar>
+   > 9 │ 	<Input type="text" autocomplete="baz" />
        │ 	                   ^^^^^^^^^^^^^^^^^^
-    10 │ </>
-    11 │ 
+    10 │ 	<Input type="text" autoComplete="baz" />
+    11 │ </>
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.jsx:10:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+     8 │ 	<Bar autocomplete="baz"></Bar>
+     9 │ 	<Input type="text" autocomplete="baz" />
+  > 10 │ 	<Input type="text" autoComplete="baz" />
+       │ 	                   ^^^^^^^^^^^^^^^^^^
+    11 │ </>
+    12 │ 
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
