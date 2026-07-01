@@ -41,8 +41,11 @@ impl WorkspaceDb {
     pub fn insert_source(&mut self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
-            .position(|(_, file_source)| *file_source == document_file_source)
-            .unwrap_or_else(|| self.file_sources.push(document_file_source))
+            .find(|(_, file_source)| **file_source == document_file_source)
+            .map_or_else(
+                || self.file_sources.push(document_file_source),
+                |(index, _)| index,
+            )
     }
 
     pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
