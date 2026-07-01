@@ -2040,6 +2040,7 @@ version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_test_utils",
