@@ -287,6 +287,12 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
+    /// Returns whether this type is a thenable (has a callable `then` member).
+    pub fn is_thenable(&self) -> bool {
+        self.find_member_type("then")
+            .is_some_and(|then_ty| then_ty.is_function())
+    }
+
     /// Returns whether this type is an instance of `RegExp`.
     pub fn is_regexp_instance(&self) -> bool {
         self.resolved_data()
