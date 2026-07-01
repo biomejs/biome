@@ -82,6 +82,7 @@ getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 notify                   = { workspace = true, features = ["crossbeam-channel"] }
 papaya                   = { workspace = true }
+parking_lot              = { workspace = true }
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }

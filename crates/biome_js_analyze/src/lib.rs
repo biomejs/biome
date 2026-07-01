@@ -267,10 +267,19 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = services.module_db.clone();
+    let language_db = services.language_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+            if let Some(db) = language_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         plugins,
         services,

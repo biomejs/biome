@@ -34,6 +34,17 @@ use tower_lsp_server::ls_types::{
     WorkspaceFolder,
 };
 
+#[test]
+fn catches_regular_panics_as_panic_errors() {
+    let result: std::result::Result<
+        std::result::Result<(), salsa::Cancelled>,
+        biome_diagnostics::panic::PanicError,
+    > = super::catch_lsp_operation(|| panic!("boom"));
+
+    let error = result.expect_err("regular panic should be caught as a panic error");
+    assert!(error.info.contains("boom"), "{error:?}");
+}
+
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
         range: Range {
@@ -3643,8 +3654,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3872,8 +3884,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -4056,8 +4069,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();

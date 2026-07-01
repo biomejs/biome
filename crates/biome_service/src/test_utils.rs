@@ -8,7 +8,7 @@ use crate::projects::ProjectKey;
 use crate::workspace::{
     NoopQueryProvider, OpenProjectParams, OpenProjectResult, ServiceNotification,
 };
-use crate::{WatcherInstruction, Workspace, WorkspaceServer};
+use crate::{LocalWorkspace, WatcherInstruction, Workspace};
 
 /// Convenience call for setting up the workspace and opening a project.
 ///
@@ -16,7 +16,7 @@ use crate::{WatcherInstruction, Workspace, WorkspaceServer};
 pub fn setup_workspace_and_open_project(
     fs: impl FileSystem + 'static,
     project_path: &str,
-) -> (WorkspaceServer, ProjectKey) {
+) -> (LocalWorkspace, ProjectKey) {
     let (workspace, project_key, ..) =
         setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, project_path);
     (workspace, project_key)
@@ -32,10 +32,10 @@ pub fn setup_workspace_and_open_project(
 pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_receiver(
     fs: impl FileSystem + 'static,
     project_path: &str,
-) -> (WorkspaceServer, ProjectKey, Receiver<WatcherInstruction>) {
+) -> (LocalWorkspace, ProjectKey, Receiver<WatcherInstruction>) {
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    let workspace = WorkspaceServer::new(
+    let workspace = LocalWorkspace::new(
         Arc::new(fs),
         watcher_tx,
         service_tx,

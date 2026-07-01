@@ -4,17 +4,24 @@
 #[cfg(feature = "html_embeds")]
 pub mod embedded;
 
-use biome_db::ParsedSource;
+use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
+use biome_parser::AnyParse;
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
-use salsa::Storage;
+use salsa::{Setter, Storage};
 use std::rc::Rc;
 use std::sync::Arc;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ParsedSourceUpdateMode {
+    Replace,
+    Setters,
+}
 
 /// The database used by the `biome_service` crate.
 ///
@@ -54,6 +61,78 @@ impl WorkspaceDb {
 
     pub fn update_file(&mut self, path: &Utf8Path, file: ParsedSource) {
         self.files.pin().update(path.to_path_buf(), |_| file);
+    }
+
+    pub fn update_file_with_mode(
+        &mut self,
+        path: &Utf8Path,
+        file: ParsedSource,
+        mode: ParsedSourceUpdateMode,
+    ) -> ParsedSource {
+        let parsed = file.parsed(self).clone();
+        let document_source_index = file.document_source_index(self);
+        let snippets = file.snippets(self).clone();
+        self.update_or_insert_file(path, parsed, document_source_index, snippets, mode)
+    }
+
+    pub fn replace_file(
+        &mut self,
+        path: &Utf8Path,
+        parsed: AnyParse,
+        document_source_index: usize,
+        snippets: Vec<ParsedSnippet>,
+    ) -> ParsedSource {
+        let file = ParsedSource::new(
+            self,
+            path.to_path_buf(),
+            parsed,
+            document_source_index,
+            snippets,
+        );
+        self.files.pin().insert(path.to_path_buf(), file);
+        file
+    }
+
+    pub fn upsert_file(
+        &mut self,
+        path: &Utf8Path,
+        parsed: AnyParse,
+        document_source_index: usize,
+        snippets: Vec<ParsedSnippet>,
+    ) -> ParsedSource {
+        self.update_or_insert_file(
+            path,
+            parsed,
+            document_source_index,
+            snippets,
+            ParsedSourceUpdateMode::Setters,
+        )
+    }
+
+    pub fn update_or_insert_file(
+        &mut self,
+        path: &Utf8Path,
+        parsed: AnyParse,
+        document_source_index: usize,
+        snippets: Vec<ParsedSnippet>,
+        mode: ParsedSourceUpdateMode,
+    ) -> ParsedSource {
+        if mode == ParsedSourceUpdateMode::Replace {
+            return self.replace_file(path, parsed, document_source_index, snippets);
+        }
+
+        let existing_file = { self.files.pin().get(path).copied() };
+
+        if let Some(existing_file) = existing_file {
+            existing_file.set_parsed(self).to(parsed);
+            existing_file
+                .set_document_source_index(self)
+                .to(document_source_index);
+            existing_file.set_snippets(self).to(snippets);
+            existing_file
+        } else {
+            self.replace_file(path, parsed, document_source_index, snippets)
+        }
     }
 
     #[cfg(feature = "module_graph")]
@@ -99,21 +178,34 @@ impl WorkspaceDb {
     }
 
     /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root(&self, path: &Utf8Path, new_root: SendNode) {
-        self.files
-            .pin()
-            .update(path.to_path_buf(), |parsed_source| {
-                let mut any_parse = parsed_source.parsed(self).clone();
-                any_parse.set_new_root(new_root.clone());
+    pub fn update_parsed_root(&mut self, path: &Utf8Path, new_root: SendNode) {
+        self.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters);
+    }
 
-                ParsedSource::new(
-                    self,
-                    path.to_path_buf(),
-                    any_parse,
-                    parsed_source.document_source_index(self),
-                    parsed_source.snippets(self).clone(),
-                )
-            });
+    /// It updates the CST of an existing parsed source
+    pub fn update_parsed_root_with_mode(
+        &mut self,
+        path: &Utf8Path,
+        new_root: SendNode,
+        mode: ParsedSourceUpdateMode,
+    ) {
+        if let Some(parsed_source) = self.get_file(path) {
+            let mut any_parse = parsed_source.parsed(self).clone();
+            any_parse.set_new_root(new_root);
+            match mode {
+                ParsedSourceUpdateMode::Replace => {
+                    self.replace_file(
+                        path,
+                        any_parse,
+                        parsed_source.document_source_index(self),
+                        parsed_source.snippets(self).clone(),
+                    );
+                }
+                ParsedSourceUpdateMode::Setters => {
+                    parsed_source.set_parsed(self).to(any_parse);
+                }
+            }
+        }
     }
 
     #[cfg(feature = "module_graph")]
@@ -139,10 +231,12 @@ impl WorkspaceDb {
     }
 }
 
-/// This handler is exclusively used for cloning operations (reading operations).
-/// Writing operations still go through [WorkspaceDb].
+/// Shared state for creating operation-local [WorkspaceDb] forks.
+///
+/// This type contains no Salsa local state. Each call to [Self::fork] creates a
+/// database value with fresh Salsa local state and shared workspace data.
 #[derive(Clone, Default)]
-pub struct WorkspaceDbHandle {
+pub struct SharedWorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -150,8 +244,8 @@ pub struct WorkspaceDbHandle {
     storage: salsa::StorageHandle<WorkspaceDb>,
 }
 
-impl WorkspaceDbHandle {
-    pub fn to_db(&self) -> WorkspaceDb {
+impl SharedWorkspaceDb {
+    pub fn fork(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
             file_sources: self.file_sources.clone(),
@@ -196,5 +290,100 @@ impl LanguageDb for WorkspaceDb {
     /// File sources can be inserted using `insert_source()`.
     fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
         self.file_sources.get(index).copied()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_db::Db;
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_languages::JsFileSource;
+    use salsa::plumbing::AsId;
+    use std::sync::Barrier;
+    use std::sync::mpsc;
+    use std::time::{Duration, Instant};
+
+    static SETTER_READER_STARTED: Barrier = Barrier::new(2);
+
+    fn parse_js(source: &str) -> AnyParse {
+        parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        )
+        .into()
+    }
+
+    #[salsa::tracked]
+    fn blocking_document_source_index(db: &dyn Db, file: ParsedSource) -> usize {
+        SETTER_READER_STARTED.wait();
+
+        let timeout = Instant::now() + Duration::from_secs(2);
+        while Instant::now() < timeout {
+            db.unwind_if_revision_cancelled();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+
+        file.document_source_index(db)
+    }
+
+    #[test]
+    fn upsert_file_updates_existing_input() {
+        let mut db = WorkspaceDb::default();
+        let path = Utf8Path::new("test.js");
+
+        let file = db.upsert_file(path, parse_js("let a = 1;"), 0, vec![]);
+        let updated_file = db.upsert_file(path, parse_js("let b = 2;"), 0, vec![]);
+
+        assert_eq!(file.as_id(), updated_file.as_id());
+        assert_eq!(db.get_file(path).unwrap().as_id(), file.as_id());
+    }
+
+    #[test]
+    fn replace_file_replaces_existing_input() {
+        let mut db = WorkspaceDb::default();
+        let path = Utf8Path::new("test.js");
+
+        let file = db.replace_file(path, parse_js("let a = 1;"), 0, vec![]);
+        let updated_file = db.replace_file(path, parse_js("let b = 2;"), 0, vec![]);
+
+        assert_ne!(file.as_id(), updated_file.as_id());
+        assert_eq!(db.get_file(path).unwrap().as_id(), updated_file.as_id());
+    }
+
+    #[test]
+    fn setter_update_cancels_running_query_without_deadlock() {
+        let mut db = WorkspaceDb::default();
+        let path = Utf8PathBuf::from("test.js");
+        let file = db.upsert_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        let (writer_finished_tx, writer_finished_rx) = mpsc::channel();
+
+        std::thread::scope(|scope| {
+            let reader_db = db.clone();
+            let reader = scope.spawn(move || {
+                salsa::Cancelled::catch(|| blocking_document_source_index(&reader_db, file))
+            });
+
+            let writer_path = path.clone();
+            scope.spawn(move || {
+                SETTER_READER_STARTED.wait();
+                db.upsert_file(&writer_path, parse_js("let b = 2;"), 0, vec![]);
+                writer_finished_tx.send(()).unwrap();
+            });
+
+            assert!(
+                writer_finished_rx
+                    .recv_timeout(Duration::from_secs(3))
+                    .is_ok(),
+                "setter update deadlocked while waiting for a running query"
+            );
+
+            let result = reader.join().unwrap();
+            assert!(
+                matches!(result, Err(salsa::Cancelled::PendingWrite)),
+                "{result:?}"
+            );
+        });
     }
 }
