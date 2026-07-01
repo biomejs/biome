@@ -42,8 +42,9 @@ pub(crate) use function_name::{
 pub(crate) use identifiers::{
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
     is_at_scss_module_member_access, is_at_scss_namespaced_variable, is_at_scss_variable,
-    is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_module_member_access, parse_scss_interpolated_dashed_identifier,
+    is_nth_at_scss_hyphen_interpolated_identifier, is_nth_at_scss_interpolated_dashed_identifier,
+    is_nth_at_scss_interpolated_identifier, is_nth_at_scss_module_member_access,
+    parse_scss_hyphen_interpolated_identifier, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_identifier, parse_scss_interpolated_name,
     parse_scss_interpolation_or_identifier, parse_scss_module_member_access,
     parse_scss_namespaced_variable, parse_scss_selector_custom_identifier,

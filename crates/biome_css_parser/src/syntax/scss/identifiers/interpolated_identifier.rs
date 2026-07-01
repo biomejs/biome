@@ -65,7 +65,7 @@ fn is_at_adjacent_identifier(p: &mut CssParser) -> bool {
 /// such as the hyphen in `#{$a}-#{$b}`.
 #[inline]
 pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
-    p.at(T![-])
+    is_at_identifier_hyphen_part(p)
         && !p.has_preceding_whitespace()
         && is_nth_at_scss_interpolated_identifier(p, 1)
         && !p.has_nth_preceding_whitespace(1)
@@ -74,6 +74,31 @@ pub(super) fn is_at_identifier_hyphen(p: &mut CssParser) -> bool {
 #[inline]
 pub(super) fn parse_identifier_hyphen(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier_hyphen(p) {
+        return Absent;
+    }
+
+    parse_identifier_hyphen_part(p)
+}
+
+/// Returns whether the token at `n` is a raw interpolated-identifier hyphen.
+///
+/// Callers still own context checks like `#{$a}-#{$b}` or `--#{$prop}`.
+#[inline]
+pub(super) fn is_nth_at_identifier_hyphen_part(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![-])
+}
+
+#[inline]
+fn is_at_identifier_hyphen_part(p: &mut CssParser) -> bool {
+    is_nth_at_identifier_hyphen_part(p, 0)
+}
+
+/// Parses a raw `-` as one interpolated-identifier hyphen part.
+///
+/// Call only after a context-specific guard accepts the hyphen.
+#[inline]
+pub(super) fn parse_identifier_hyphen_part(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier_hyphen_part(p) {
         return Absent;
     }
 

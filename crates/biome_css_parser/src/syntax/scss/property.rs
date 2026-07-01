@@ -5,8 +5,9 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 
 use super::{
-    is_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolated_dashed_identifier,
-    is_nth_at_scss_interpolation, parse_scss_interpolated_dashed_identifier,
+    is_at_scss_interpolated_dashed_identifier, is_nth_at_scss_hyphen_interpolated_identifier,
+    is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolation,
+    parse_scss_hyphen_interpolated_identifier, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_identifier,
 };
 
@@ -21,6 +22,7 @@ use super::{
 ///
 /// ```scss
 /// #{$name}: 1px;
+/// -#{$prefix}-radius: 4px;
 /// margin-#{$side}: 1px;
 /// --#{$prop}: 10px;
 /// ```
@@ -35,6 +37,8 @@ pub(crate) fn is_nth_at_scss_interpolated_property(p: &mut CssParser, n: usize) 
         && (
             // `--#{$prop}: 10px;`
             is_nth_at_scss_interpolated_dashed_identifier(p, n)
+            // `-#{$prefix}-radius: 4px;`
+            || is_nth_at_scss_hyphen_interpolated_identifier(p, n)
             // `#{$name}: 1px;`
             || is_nth_at_scss_interpolation(p, n)
             // `margin-#{$side}: 1px;`
@@ -50,6 +54,8 @@ pub(crate) fn parse_scss_interpolated_property_name(p: &mut CssParser) -> Parsed
 
     if is_at_scss_interpolated_dashed_identifier(p) {
         parse_scss_interpolated_dashed_identifier(p)
+    } else if is_nth_at_scss_hyphen_interpolated_identifier(p, 0) {
+        parse_scss_hyphen_interpolated_identifier(p)
     } else {
         parse_scss_interpolated_identifier(p)
     }
