@@ -6,15 +6,15 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
-    JsWhileStatement, OperatorPrecedence, T,
+    AnyJsAssignmentPattern, AnyJsExpression, AnyJsStatement, JsAssignmentExpression,
+    JsAssignmentOperator, JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsConditionalExpression, JsDoWhileStatement, JsExpressionStatement, JsForStatement,
+    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
+    JsUnaryOperator, JsWhileStatement, OperatorPrecedence, T,
 };
 use biome_js_type_info::{ConditionalType, TypeData};
 use biome_rowan::{
-    AstNode, BatchMutationExt, SyntaxResult, TextRange, declare_node_union,
+    AstNode, AstNodeList, BatchMutationExt, Direction, SyntaxResult, TextRange, declare_node_union,
     trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_nullish_coalescing::UseNullishCoalescingOptions;
@@ -223,6 +223,41 @@ declare_lint_rule! {
     /// const value = name || 'default';
     /// ```
     ///
+    /// ### ignoreIfStatements
+    ///
+    /// By default Biome also reports an `if` statement that only assigns to a
+    /// nullish variable, since it can be rewritten as `??=`. Set this to `true`
+    /// to ignore those statements. Default: `false`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreIfStatements": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// `||` and `||=` are still reported when only `if` statements are ignored.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-if-statements.ts
+    /// declare const maybeString: string | null;
+    /// const value = maybeString || 'default';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// An `if` statement performing a nullish assignment is not reported.
+    ///
+    /// ```ts,use_options,file=valid-if-statements.ts
+    /// declare let a: { x: string } | null;
+    /// declare function makeA(): { x: string };
+    /// if (!a) {
+    ///     a = makeA();
+    /// }
+    /// ```
+    ///
     pub UseNullishCoalescing {
         version: "2.4.5",
         name: "useNullishCoalescing",
@@ -237,7 +272,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub UseNullishCoalescingQuery = JsLogicalExpression | JsAssignmentExpression | JsConditionalExpression
+    pub UseNullishCoalescingQuery = JsLogicalExpression | JsAssignmentExpression | JsConditionalExpression | JsIfStatement
 }
 
 declare_node_union! {
@@ -273,6 +308,12 @@ pub enum UseNullishCoalescingState {
         is_positive: bool,
         can_fix: bool,
     },
+    IfStatement {
+        if_range: TextRange,
+        assignment_target: AnyJsAssignmentPattern,
+        assignment_value: AnyJsExpression,
+        can_fix: bool,
+    },
 }
 
 impl Rule for UseNullishCoalescing {
@@ -292,6 +333,7 @@ impl Rule for UseNullishCoalescing {
             UseNullishCoalescingQuery::JsConditionalExpression(ternary) => {
                 run_ternary(ctx, ternary)
             }
+            UseNullishCoalescingQuery::JsIfStatement(if_stmt) => run_if_statement(ctx, if_stmt),
         }
     }
 
@@ -329,6 +371,18 @@ impl Rule for UseNullishCoalescing {
                         "Prefer "<Emphasis>"??"</Emphasis>" over a ternary expression checking for nullish."
                     },
                 ),
+            ),
+            UseNullishCoalescingState::IfStatement { if_range, .. } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    *if_range,
+                    markup! {
+                        "Use "<Emphasis>"??="</Emphasis>" instead of an "<Emphasis>"if"</Emphasis>" statement for nullish assignment."
+                    },
+                )
+                .note(markup! {
+                    "This "<Emphasis>"if"</Emphasis>" statement only assigns when the variable is nullish, which "<Emphasis>"??="</Emphasis>" expresses directly."
+                }),
             ),
         }
     }
@@ -431,6 +485,42 @@ impl Rule for UseNullishCoalescing {
                     new_expr,
                 );
                 markup! { "Replace the ternary with "<Emphasis>"??"</Emphasis>"." }.to_owned()
+            }
+            (
+                UseNullishCoalescingState::IfStatement {
+                    assignment_target,
+                    assignment_value,
+                    can_fix,
+                    ..
+                },
+                UseNullishCoalescingQuery::JsIfStatement(if_stmt),
+            ) => {
+                if !can_fix {
+                    return None;
+                }
+                let target = assignment_target.clone().trim_trivia()?;
+                let value = assignment_value.clone().trim_trivia()?;
+
+                let new_assignment = make::js_assignment_expression(
+                    target,
+                    make::token_decorated_with_space(T![??=]),
+                    value,
+                );
+
+                let new_stmt = make::js_expression_statement(AnyJsExpression::from(new_assignment))
+                    .with_semicolon_token(make::token(T![;]))
+                    .build();
+
+                // Transfer leading/trailing trivia from the original if statement.
+                let new_stmt = AnyJsStatement::from(new_stmt)
+                    .prepend_trivia_pieces(if_stmt.syntax().first_leading_trivia()?.pieces())?
+                    .append_trivia_pieces(if_stmt.syntax().last_trailing_trivia()?.pieces())?;
+
+                mutation.replace_node_discard_trivia(
+                    AnyJsStatement::from(if_stmt.clone()),
+                    new_stmt,
+                );
+                markup! { "Replace the "<Emphasis>"if"</Emphasis>" statement with "<Emphasis>"??="</Emphasis>"." }.to_owned()
             }
             _ => return None,
         };
@@ -537,6 +627,222 @@ fn run_logical_or_assignment(
     Some(UseNullishCoalescingState::LogicalOrAssignment {
         operator_range: assignment.operator_token().ok()?.text_trimmed_range(),
         can_fix,
+    })
+}
+
+fn run_if_statement(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    if_stmt: &JsIfStatement,
+) -> Option<UseNullishCoalescingState> {
+    let options = ctx.options();
+    if options.ignore_if_statements() {
+        return None;
+    }
+
+    // An `else` branch means the statement does more than a nullish fallback.
+    if if_stmt.else_clause().is_some() {
+        return None;
+    }
+
+    let assignment = extract_if_body_assignment(if_stmt)?;
+
+    let left = assignment.left().ok()?;
+    if !matches!(
+        left.syntax().kind(),
+        JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT
+            | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
+            | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT
+    ) {
+        return None;
+    }
+
+    // The test must check the same reference that is assigned in the body.
+    let test = if_stmt.test().ok()?;
+    let (subject, test_kind) = extract_if_null_check(&test)?;
+    if subject.syntax().text_trimmed() != left.syntax().text_trimmed() {
+        return None;
+    }
+
+    let subject_ty = ctx.type_of_expression(&subject);
+    if !is_possibly_nullish(&subject_ty) {
+        return None;
+    }
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &subject_ty) {
+        return None;
+    }
+
+    // The fix to `??=` is only safe when the test catches exactly `null`/`undefined`.
+    // A `!x` truthiness test also catches other falsy values (`0`, `''`, `false`), so it
+    // is only safe when the non-nullish part of the type cannot itself be falsy. A single
+    // strict check (`x === null`) misses the other nullish value, mirroring the ternary path.
+    let type_allows_fix = match test_kind {
+        IfTestKind::Truthiness => is_safe_type_for_replacement(&subject_ty),
+        IfTestKind::Nullish(NullishCheckKind::Loose | NullishCheckKind::Compound) => true,
+        IfTestKind::Nullish(NullishCheckKind::StrictSingle(lit)) => match lit {
+            NullishLiteral::Null => !type_has_undefined(&subject_ty),
+            NullishLiteral::Undefined => !type_has_null(&subject_ty),
+        },
+    };
+
+    // The original `if` evaluates the subject twice (test + assignment) while `??=`
+    // evaluates it once, so the rewrite only preserves semantics when re-evaluating the
+    // reference is side-effect-free and stable (e.g. `getObj().x` or `arr[i++]` are not).
+    // Inner comments would be discarded by the rewrite, so skip the fix in that case too.
+    let can_fix = type_allows_fix
+        && is_stable_reference(&subject)
+        && !if_statement_has_inner_comments(if_stmt);
+
+    Some(UseNullishCoalescingState::IfStatement {
+        if_range: if_stmt.syntax().text_trimmed_range(),
+        assignment_target: assignment.left().ok()?,
+        assignment_value: assignment.right().ok()?,
+        can_fix,
+    })
+}
+
+/// How an `if` condition tests its subject for nullishness.
+#[derive(Clone, Copy)]
+enum IfTestKind {
+    /// `!x` truthiness negation. Catches every falsy value, not only nullish ones.
+    Truthiness,
+    /// A comparison against `null`/`undefined`, carrying the same coverage kinds
+    /// as the ternary path.
+    Nullish(NullishCheckKind),
+}
+
+/// Returns the single plain `=` assignment in an `if` body.
+/// Handles both `if (test) { target = value; }` and `if (test) target = value;`.
+/// `||=`/`??=` bodies are left to the operator logic, avoiding a double report.
+fn extract_if_body_assignment(if_stmt: &JsIfStatement) -> Option<JsAssignmentExpression> {
+    let consequent = if_stmt.consequent().ok()?;
+
+    let expr_stmt = match &consequent {
+        AnyJsStatement::JsBlockStatement(block) => {
+            let statements = block.statements();
+            if statements.len() != 1 {
+                return None;
+            }
+            JsExpressionStatement::cast(statements.into_iter().next()?.into_syntax())?
+        }
+        AnyJsStatement::JsExpressionStatement(expr_stmt) => expr_stmt.clone(),
+        _ => return None,
+    };
+
+    let assignment = expr_stmt
+        .expression()
+        .ok()?
+        .as_js_assignment_expression()?
+        .clone();
+    (assignment.operator().ok()? == JsAssignmentOperator::Assign).then_some(assignment)
+}
+
+/// Classifies an `if` test as a truthiness negation (`!x`) or a nullish comparison,
+/// returning the tested reference and the kind.
+///
+/// Supported tests:
+/// - `!x`
+/// - `x == null` / `x == undefined` (and reversed operands)
+/// - `x === null` / `x === undefined` (and reversed operands)
+/// - `x === null || x === undefined`
+fn extract_if_null_check(test: &AnyJsExpression) -> Option<(AnyJsExpression, IfTestKind)> {
+    match test {
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            if unary.operator().ok()? != JsUnaryOperator::LogicalNot {
+                return None;
+            }
+            let arg = unary.argument().ok()?;
+            is_member_access_like_expr(&arg).then_some((arg, IfTestKind::Truthiness))
+        }
+        AnyJsExpression::JsBinaryExpression(_) => {
+            let (subject, kind) = match test.as_js_binary_expression()?.operator().ok()? {
+                JsBinaryOperator::Equality => {
+                    let (subject, _) =
+                        extract_nullish_comparison_operand(test, JsBinaryOperator::Equality)?;
+                    (subject, NullishCheckKind::Loose)
+                }
+                JsBinaryOperator::StrictEquality => {
+                    let (subject, lit) =
+                        extract_nullish_comparison_operand(test, JsBinaryOperator::StrictEquality)?;
+                    (subject, NullishCheckKind::StrictSingle(lit))
+                }
+                _ => return None,
+            };
+            is_member_access_like_expr(&subject).then_some((subject, IfTestKind::Nullish(kind)))
+        }
+        AnyJsExpression::JsLogicalExpression(logical) => {
+            if logical.operator().ok()? != JsLogicalOperator::LogicalOr {
+                return None;
+            }
+            let left = logical.left().ok()?;
+            let right = logical.right().ok()?;
+            let (left_subject, left_lit) =
+                extract_nullish_comparison_operand(&left, JsBinaryOperator::StrictEquality)?;
+            let (right_subject, right_lit) =
+                extract_nullish_comparison_operand(&right, JsBinaryOperator::StrictEquality)?;
+            if !is_member_access_like_expr(&left_subject)
+                || !expressions_equivalent(&left_subject, &right_subject)
+            {
+                return None;
+            }
+            // Distinct literals (one null, one undefined) cover both nullish values.
+            let kind = if left_lit != right_lit {
+                NullishCheckKind::Compound
+            } else {
+                NullishCheckKind::StrictSingle(left_lit)
+            };
+            Some((left_subject, IfTestKind::Nullish(kind)))
+        }
+        _ => None,
+    }
+}
+
+fn is_member_access_like_expr(expr: &AnyJsExpression) -> bool {
+    matches!(
+        expr,
+        AnyJsExpression::JsIdentifierExpression(_)
+            | AnyJsExpression::JsStaticMemberExpression(_)
+            | AnyJsExpression::JsComputedMemberExpression(_)
+    )
+}
+
+/// Whether re-evaluating `expr` is side-effect-free and yields the same reference.
+/// Rewriting an `if` into `??=` collapses two evaluations of the subject into one, so
+/// the rewrite only preserves semantics for stable references. Calls, updates
+/// (`i++`), and other observable expressions anywhere in the reference are rejected.
+fn is_stable_reference(expr: &AnyJsExpression) -> bool {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(_) | AnyJsExpression::JsThisExpression(_) => true,
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            member.object().is_ok_and(|object| is_stable_reference(&object))
+        }
+        AnyJsExpression::JsComputedMemberExpression(member) => {
+            member.object().is_ok_and(|object| is_stable_reference(&object))
+                && member.member().is_ok_and(|index| is_stable_index(&index))
+        }
+        AnyJsExpression::JsParenthesizedExpression(paren) => {
+            paren.expression().is_ok_and(|inner| is_stable_reference(&inner))
+        }
+        _ => false,
+    }
+}
+
+/// A computed-member index is stable when it is a literal or another stable reference,
+/// so `obj['a']` and `obj[key]` are fixable but `arr[i++]` is not.
+fn is_stable_index(expr: &AnyJsExpression) -> bool {
+    matches!(expr, AnyJsExpression::AnyJsLiteralExpression(_)) || is_stable_reference(expr)
+}
+
+/// Whether the `if` statement carries comments that the `??=` rewrite would discard.
+/// The rewrite preserves the statement's leading trivia (comments above the `if`) and
+/// its trailing trivia, but drops everything in between, so those are ignored here.
+fn if_statement_has_inner_comments(if_stmt: &JsIfStatement) -> bool {
+    let syntax = if_stmt.syntax();
+    let first = syntax.first_token();
+    let last = syntax.last_token();
+    syntax.descendants_tokens(Direction::Next).any(|token| {
+        let is_first = first.as_ref() == Some(&token);
+        let is_last = last.as_ref() == Some(&token);
+        (!is_first && token.has_leading_comments()) || (!is_last && token.has_trailing_comments())
     })
 }
 
