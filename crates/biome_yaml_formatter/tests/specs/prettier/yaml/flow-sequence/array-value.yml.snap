@@ -16,26 +16,35 @@ info: yaml/flow-sequence/array-value.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,17 +1,5 @@
+@@ -1,17 +1,17 @@
  [
--  : [
+   : [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
--  : [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++  ],
+   : [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
--  : [
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++  ],
+   : [
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -      longlonglonglonglonglonglonglonglonglonglong,
 -    ],
-+  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-+  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-+  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++    longlonglonglonglonglonglonglonglonglonglong,
++  ],
  ]
 ```
 
@@ -43,15 +52,20 @@ info: yaml/flow-sequence/array-value.yml
 
 ```yml
 [
-  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-  : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
+  : [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+  ],
+  : [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+  ],
+  : [
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+    longlonglonglonglonglonglonglonglonglonglong,
+  ],
 ]
-```
-
-# Lines exceeding max width of 80 characters
-```
-    2:   : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-    3:   : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
-    4:   : [longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong, longlonglonglonglonglonglonglonglonglonglong],
 ```
