@@ -297,6 +297,7 @@ impl TypeData {
                                 entry.insert(index);
                             }
                         }
+                        continue;
                     }
                     _ => {}
                 }
