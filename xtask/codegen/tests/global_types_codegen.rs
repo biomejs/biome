@@ -14,7 +14,16 @@ use anyhow::{Context as _, Result, bail};
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
-    source::{CanonicalPath, LibEntries, SourceOptions, acquire, discover, parse_lib_entries},
+    compare::compare_lowered_globals,
+    lower::{
+        LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
+        lower_global_types,
+    },
+    manifest::{GlobalDeclarationRole, GlobalManifest, build_global_manifest},
+    source::{
+        CanonicalPath, DiscoveredFile, LibEntries, SourceOptions, acquire, discover,
+        parse_lib_entries,
+    },
 };
 
 const TEMP_CREATE_RETRIES: usize = 32;
@@ -162,6 +171,7 @@ impl Drop for PathCleanup {
         let _ = fs::remove_dir_all(&self.path);
     }
 }
+
 /// Builds a source pin from fixture tag/SHA values.
 fn source_pin(tag: &str, sha: &str) -> SourcePin {
     SourcePin::new(tag, sha)
@@ -203,6 +213,19 @@ fn write_typescript_fixture_files(repo: &Path, lib_entries: &str) -> Result<()> 
         repo.join("lib/lib.second.d.ts"),
         "interface SecondDuplicate {}\n",
     )?;
+    Ok(())
+}
+
+/// Writes placeholder files for every production profile root that a fixture
+/// does not explicitly override.
+fn write_profile_root_placeholders(repo: &Path) -> Result<()> {
+    for filename in xtask_codegen::generate_global_types::source::PROFILE_ROOTS {
+        let path = repo.join("lib").join(filename);
+        if !path.exists() {
+            fs::write(&path, "")?;
+        }
+    }
+
     Ok(())
 }
 
@@ -504,6 +527,29 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
         head,
     })
 }
+
+/// Builds a fixture whose selected lib contains the Error global declarations
+/// used by the generated globals output.
+fn fixture_git_repo_with_error_global() -> Result<FixtureRepo> {
+    let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
+    write_profile_root_placeholders(repo.path())?;
+    let fixture_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(COLLECTOR_FIXTURE_DIR)
+        .join("manifest.error.d.ts");
+    fs::copy(&fixture_path, repo.path().join("lib/lib.es5.d.ts"))
+        .with_context(|| format!("failed to copy {}", fixture_path.display()))?;
+    run_git(repo.path(), &["add", "."])?;
+    run_git(repo.path(), &["commit", "-m", "add error global"])?;
+    let head = git_stdout_trimmed(repo.path(), &["rev-parse", "HEAD"])?;
+    run_git(repo.path(), &["tag", "-f", repo.tag.as_str()])?;
+
+    Ok(FixtureRepo {
+        temp: repo.temp,
+        tag: repo.tag,
+        head,
+    })
+}
+
 /// Seeds the TypeScript cache from a fixture repository using a real git clone.
 fn seed_cache_from_repo(pin: &SourcePin, repo: &Path) -> Result<PathCleanup> {
     let cache_path = typescript_cache_path(pin);
@@ -598,6 +644,36 @@ fn expect_error_contains<T>(result: Result<T>, expected: &str) -> Result<()> {
     );
 
     Ok(())
+}
+
+/// Reads a global-types fixture as a discovered TypeScript declaration file.
+fn discovered_fixture(dts_name: &str) -> Result<DiscoveredFile> {
+    let fixture_root = Path::new(env!("CARGO_MANIFEST_DIR")).join(COLLECTOR_FIXTURE_DIR);
+    let dts_path = fixture_root.join(dts_name);
+    let bytes = fs::read(&dts_path)
+        .with_context(|| format!("failed to read global-types fixture {}", dts_path.display()))?;
+    let canonical_path = CanonicalPath::from_within(&fixture_root, dts_name)?;
+
+    Ok(DiscoveredFile {
+        path: canonical_path,
+        repo_relative: dts_name.to_string(),
+        bytes,
+    })
+}
+
+/// Builds the global declaration manifest from one global-types fixture.
+fn manifest_from_fixture(dts_name: &str) -> Result<GlobalManifest> {
+    let discovered = discovered_fixture(dts_name)?;
+    let output = collect(&discovered);
+    Ok(build_global_manifest(output.records))
+}
+
+/// Lowers one global-types fixture through the manifest pipeline.
+fn lowered_from_fixture(dts_name: &str) -> Result<LoweredGlobalTypes> {
+    let source_files = [discovered_fixture(dts_name)?];
+    let output = collect(&source_files[0]);
+    let manifest = build_global_manifest(output.records);
+    lower_global_types(&manifest, &source_files)
 }
 
 /// Asserts that every expected fragment appears somewhere in an error chain.
@@ -903,6 +979,39 @@ mod tests {
     }
 
     #[test]
+    fn run_emits_error_global_registration() -> Result<()> {
+        let repo = fixture_git_repo_with_error_global()?;
+        let pin = repo.source_pin();
+        let _cache_cleanup = seed_cache_from_repo(&pin, repo.path())?;
+        let workspace = TempDir::new("bgt-workspace")?;
+
+        xtask_codegen::generate_global_types::run_with_workspace_root(
+            &pin,
+            &SourceOptions::default(),
+            workspace.path(),
+        )?;
+
+        let output_path = workspace.path().join(COMMITTED_CODEGEN_PATH);
+        let generated = fs::read_to_string(&output_path)
+            .with_context(|| format!("failed to read {}", output_path.display()))?;
+
+        assert!(generated.contains("crate::globals::ERROR_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("builder.set_type_data("));
+        assert!(generated.contains("crate::TypeData::Constructor("));
+        assert!(generated.contains("crate::TypeData::Function("));
+        assert!(generated.contains("biome_rowan::Text::new_static(\"name\")"));
+        assert!(generated.contains("biome_rowan::Text::new_static(\"message\")"));
+        assert!(generated.contains("crate::TypeMemberKind::NamedOptional("));
+        assert!(generated.contains("\"stack\""));
+        assert!(generated.contains("crate::TypeMemberKind::NamedStatic("));
+        assert!(generated.contains("\"prototype\""));
+
+        Ok(())
+    }
+
+    #[test]
     fn collector_fixture_round_trip() -> Result<()> {
         let fixture_root = Path::new(env!("CARGO_MANIFEST_DIR")).join(COLLECTOR_FIXTURE_DIR);
         assert!(
@@ -962,6 +1071,181 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn manifest_groups_global_type_and_value_roles() -> Result<()> {
+        let manifest = manifest_from_fixture("manifest.error.d.ts")?;
+        let error = manifest
+            .global_group("Error")
+            .expect("Error group should be present");
+        assert!(error.has_role(GlobalDeclarationRole::Type));
+        assert!(error.has_role(GlobalDeclarationRole::Value));
+        assert_eq!(
+            error.declarations().len(),
+            3,
+            "two interfaces and one declare var should merge into Error"
+        );
+
+        let error_constructor = manifest
+            .global_group("ErrorConstructor")
+            .expect("ErrorConstructor group should be present");
+        assert!(error_constructor.has_role(GlobalDeclarationRole::Type));
+        assert!(!error_constructor.has_role(GlobalDeclarationRole::Value));
+
+        let type_error = manifest
+            .global_group("TypeError")
+            .expect("declare global TypeError should be present as a global");
+        assert!(type_error.has_role(GlobalDeclarationRole::Type));
+
+        assert!(
+            manifest.global_group("ExternalError").is_none(),
+            "external module declarations must not enter the global manifest"
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_error_interface_members_to_generated_class() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.error.d.ts")?;
+        let error = lowered
+            .global("Error")
+            .expect("Error should be lowered as the first generated Error global");
+
+        assert_eq!(error.id_constant(), "ERROR_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Class(class) = error.data() else {
+            bail!("Error should lower to class data");
+        };
+        assert_eq!(class.name(), "Error");
+
+        let name = class.member("name").expect("name member should be lowered");
+        assert_eq!(name.kind(), &LoweredMemberKind::Named { optional: false });
+        assert_eq!(
+            name.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+        );
+
+        let message = class
+            .member("message")
+            .expect("message member should be lowered");
+        assert_eq!(
+            message.kind(),
+            &LoweredMemberKind::Named { optional: false }
+        );
+        assert_eq!(
+            message.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+        );
+        let stack = class
+            .member("stack")
+            .expect("stack member should be lowered");
+        assert_eq!(stack.kind(), &LoweredMemberKind::Named { optional: true });
+        assert_eq!(
+            stack.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+        );
+        let prototype = class
+            .member("prototype")
+            .expect("prototype member should be lowered");
+        assert_eq!(prototype.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            prototype.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_ERROR_ID")
+        );
+        assert!(class.member("code").is_none());
+        assert_eq!(
+            class
+                .members()
+                .iter()
+                .filter(|member| matches!(member.kind(), LoweredMemberKind::Constructor))
+                .count(),
+            1
+        );
+        assert_eq!(
+            class
+                .members()
+                .iter()
+                .filter(|member| matches!(member.kind(), LoweredMemberKind::CallSignature))
+                .count(),
+            1
+        );
+
+        let constructor = lowered
+            .global("Error.constructor")
+            .expect("Error constructor helper should be lowered");
+        assert_eq!(
+            constructor.id_constant(),
+            "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"
+        );
+
+        let call = lowered
+            .global("Error.call")
+            .expect("Error call helper should be lowered");
+        assert_eq!(call.id_constant(), "ERROR_CALL_ID_GLOBAL_TYPE_ID");
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.error-extends.d.ts"),
+            "Error interface extends clauses are not supported",
+        )
+    }
+
+    #[test]
+    fn comparator_accepts_error_member_divergence() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.error.d.ts")?;
+
+        compare_lowered_globals(&lowered)?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn comparator_rejects_missing_error_members() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.error-missing-message.d.ts")?;
+
+        expect_error_contains(
+            compare_lowered_globals(&lowered),
+            "missing required Error member message",
+        )
+    }
+
+    #[test]
+    fn comparator_rejects_wrong_error_constructor_return() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.error-wrong-constructor-return.d.ts")?;
+
+        expect_error_contains(
+            compare_lowered_globals(&lowered),
+            "generated Error constructor has unexpected return type",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_unsupported_error_members() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.error-unsupported-index.d.ts"),
+            "index signatures are not supported in the Error global",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_unresolved_error_member_references() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.error-named-reference.d.ts"),
+            "unresolved type reference ErrorOptions in Error global",
+        )
+    }
+
+    #[test]
+    fn lowerer_rejects_unsupported_error_value_declarations() -> Result<()> {
+        expect_error_contains(
+            lowered_from_fixture("manifest.error-unsupported-value.d.ts"),
+            "unsupported value-side Error declaration",
+        )
     }
 
     #[test]
