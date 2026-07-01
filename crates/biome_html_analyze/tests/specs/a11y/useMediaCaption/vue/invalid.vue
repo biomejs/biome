@@ -15,3 +15,6 @@
 <video><track kind="" /></video>
 <!-- muted audio still requires captions -->
 <audio muted></audio>
+<!-- static Vue bindings with non-captions kind should also be flagged -->
+<video><track :kind="'subtitles'" /></video>
+<audio><track v-bind:kind="'metadata'" /></audio>

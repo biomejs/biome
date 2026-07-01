@@ -2,9 +2,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{BatchMutationExt, TextRange};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 use crate::HtmlRuleAction;
@@ -52,7 +52,7 @@ declare_lint_rule! {
 }
 
 pub struct NoPositiveTabindexState {
-    attribute: HtmlAttribute,
+    attribute: AnyHtmlAttribute,
     value_range: TextRange,
 }
 
@@ -64,13 +64,11 @@ impl Rule for NoPositiveTabindex {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let tabindex_attribute = element.find_attribute_by_name("tabindex")?;
-        let initializer = tabindex_attribute.initializer()?;
-        let value = initializer.value().ok()?;
-        let string_value = value.string_value()?;
-        let value_range = value.range();
+        let tabindex_attribute = element.find_attribute_or_vue_binding("tabindex")?;
+        let string_value = tabindex_attribute.as_static_value()?;
+        let value_range = string_value.range();
 
-        if !is_tabindex_valid(&string_value) {
+        if !is_tabindex_valid(string_value.text()) {
             return Some(NoPositiveTabindexState {
                 attribute: tabindex_attribute,
                 value_range,
