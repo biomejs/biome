@@ -424,7 +424,11 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text);
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
@@ -446,8 +450,10 @@ impl Rule for NoUnusedVariables {
             // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
             // parent component. Such a variable may be write-only in the script block but is
             // still meaningful — suppress the diagnostic to avoid a false positive.
-            if matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Svelte { .. })
-                && is_svelte_bindable_prop(binding)
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
             {
                 return None;
             }
