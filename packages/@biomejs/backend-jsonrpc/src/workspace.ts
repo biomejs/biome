@@ -10424,7 +10424,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Angular";
 export type GritVariant = "Standard";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
