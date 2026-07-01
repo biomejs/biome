@@ -11,6 +11,10 @@ async function main() {
 	await extractPrettierTests("vue", {
 		parser: "vue",
 	});
+
+	await extractPrettierTests("angular", {
+		parser: "angular",
+	});
 }
 
 main().catch((err) => {

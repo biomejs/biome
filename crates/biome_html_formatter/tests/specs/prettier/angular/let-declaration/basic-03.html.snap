@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/let-declaration/basic-03.html
+---
+
+# Input
+
+```html
+@let     topLevel    =   value;
+
+@if (condition) {
+  @let         nested    =   value;
+}
+
+<div *ngIf="condition">
+  @let    nestedNgIf    =     value;
+</div>
+
+{{topLevel}}
+
+{{nested}}
+
+{{nestedNgIf}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,9 @@
+-@let topLevel = value;
++@let topLevel = value; @if (condition) { @let nested = value; }
+ 
+-@if (condition) {
+-  @let nested = value;
+-}
++<div *ngIf="condition">@let nestedNgIf = value;</div>
+ 
+-<div *ngIf="condition">
+-  @let nestedNgIf = value;
+-</div>
++{{topLevel}}
+ 
+-{{ topLevel }}
++{{nested}}
+ 
+-{{ nested }}
+-
+-{{ nestedNgIf }}
++{{nestedNgIf}}
+```
+
+# Output
+
+```html
+@let topLevel = value; @if (condition) { @let nested = value; }
+
+<div *ngIf="condition">@let nestedNgIf = value;</div>
+
+{{topLevel}}
+
+{{nested}}
+
+{{nestedNgIf}}
+```
+
+# Errors
+```
+basic-03.html:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     9 │ </div>
+    10 │ 
+  > 11 │ {{topLevel}}
+       │ ^^^^^^^^^^^^
+    12 │ 
+    13 │ {{nested}}
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+basic-03.html:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    11 │ {{topLevel}}
+    12 │ 
+  > 13 │ {{nested}}
+       │ ^^^^^^^^^^
+    14 │ 
+    15 │ {{nestedNgIf}}
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+basic-03.html:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    13 │ {{nested}}
+    14 │ 
+  > 15 │ {{nestedNgIf}}
+       │ ^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

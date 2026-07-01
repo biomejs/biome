@@ -1,0 +1,100 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/start-tag-comments/merge-into-text.html
+---
+
+# Input
+
+```html
+<div>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+  "<strong>seddoeiusmod</strong>".
+</div>
+
+<div>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+  "<strong /*
+comment
+*/>seddoeiusmod</strong>".
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,12 @@
+ <div>
+-  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+-  "<strong>seddoeiusmod</strong>".
++  Lorem ipsum dolor sit amet, consectetur adipiscing elit, "<strong
++    >seddoeiusmod</strong
++  >".
+ </div>
+ 
+ <div>
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+-  "<strong>seddoeiusmod</strong>".
++  "<strong /*
++comment
++*/>seddoeiusmod</strong>".
+ </div>
+```
+
+# Output
+
+```html
+<div>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, "<strong
+    >seddoeiusmod</strong
+  >".
+</div>
+
+<div>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+  "<strong /*
+comment
+*/>seddoeiusmod</strong>".
+</div>
+```
+
+# Errors
+```
+merge-into-text.html:8:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `*`
+  
+     6 │ <div>
+     7 │   Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+   > 8 │   "<strong /*
+       │             ^
+     9 │ comment
+    10 │ */>seddoeiusmod</strong>".
+  
+  i Remove *
+  
+merge-into-text.html:10:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</strong>'.
+  
+     8 │   "<strong /*
+     9 │ comment
+  > 10 │ */>seddoeiusmod</strong>".
+       │                ^^^^^^^^^
+    11 │ </div>
+    12 │ 
+  
+  i Expected a matching closing tag here.
+  
+     8 │   "<strong /*
+     9 │ comment
+  > 10 │ */>seddoeiusmod</strong>".
+       │                ^^^^^^^^^
+    11 │ </div>
+    12 │ 
+  
+
+```

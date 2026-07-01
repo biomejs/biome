@@ -1,0 +1,213 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/content.html
+---
+
+# Input
+
+```html
+<FancyButton [label]="title">
+    @content(icon) {
+      <span>Icon!</span>
+    }
+      @content(description) {
+        <span>Description text</span>
+      }
+  <span>Other children</span>
+   </FancyButton>
+
+<FancyButton [label]="title">
+      @content (items; let item, index) {
+        <span>#{{index}}: {{item}}</span>
+      }
+    </FancyButton>
+
+<FancyList>
+            @content (renderHeader; let _) {
+              <span>Header Content</span>
+            }
+          </FancyList>
+
+<FancyTable>
+            @content (renderRow; let row, idx, isLast) {
+              <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+            }
+          </FancyTable>
+
+<DynamicIf [injector]="injector" [cond]="visible">
+            @content (children; let result) {
+              <child>{{ result }}</child>
+            }
+          </DynamicIf>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,33 +1,32 @@
+ <FancyButton [label]="title">
+-  @content (icon) {
+-    <span>Icon!</span>
+-  }
+-  @content (description) {
+-    <span>Description text</span>
++  @content(icon) {
++  <span>Icon!</span>
++  } @content(description) {
++  <span>Description text</span>
+   }
+   <span>Other children</span>
+ </FancyButton>
+ 
+ <FancyButton [label]="title">
+   @content (items; let item, index) {
+-    <span>#{{ index }}: {{ item }}</span>
++  <span>#{{index}}: {{item}}</span>
+   }
+ </FancyButton>
+ 
+ <FancyList>
+   @content (renderHeader; let _) {
+-    <span>Header Content</span>
++  <span>Header Content</span>
+   }
+ </FancyList>
+ 
+ <FancyTable>
+   @content (renderRow; let row, idx, isLast) {
+-    <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
++  <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+   }
+ </FancyTable>
+ 
+ <DynamicIf [injector]="injector" [cond]="visible">
+   @content (children; let result) {
+-    <child>{{ result }}</child>
++  <child>{{ result }}</child>
+   }
+ </DynamicIf>
+```
+
+# Output
+
+```html
+<FancyButton [label]="title">
+  @content(icon) {
+  <span>Icon!</span>
+  } @content(description) {
+  <span>Description text</span>
+  }
+  <span>Other children</span>
+</FancyButton>
+
+<FancyButton [label]="title">
+  @content (items; let item, index) {
+  <span>#{{index}}: {{item}}</span>
+  }
+</FancyButton>
+
+<FancyList>
+  @content (renderHeader; let _) {
+  <span>Header Content</span>
+  }
+</FancyList>
+
+<FancyTable>
+  @content (renderRow; let row, idx, isLast) {
+  <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+  }
+</FancyTable>
+
+<DynamicIf [injector]="injector" [cond]="visible">
+  @content (children; let result) {
+  <child>{{ result }}</child>
+  }
+</DynamicIf>
+```
+
+# Errors
+```
+content.html:13:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    11 │ <FancyButton [label]="title">
+    12 │       @content (items; let item, index) {
+  > 13 │         <span>#{{index}}: {{item}}</span>
+       │                ^^^^^^^^^
+    14 │       }
+    15 │     </FancyButton>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+content.html:13:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    11 │ <FancyButton [label]="title">
+    12 │       @content (items; let item, index) {
+  > 13 │         <span>#{{index}}: {{item}}</span>
+       │                           ^^^^^^^^
+    14 │       }
+    15 │     </FancyButton>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+content.html:25:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    23 │ <FancyTable>
+    24 │             @content (renderRow; let row, idx, isLast) {
+  > 25 │               <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+       │                     ^^^^^^^^^
+    26 │             }
+    27 │           </FancyTable>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+content.html:25:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    23 │ <FancyTable>
+    24 │             @content (renderRow; let row, idx, isLast) {
+  > 25 │               <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+       │                                 ^^^^^^^^^
+    26 │             }
+    27 │           </FancyTable>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+content.html:25:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    23 │ <FancyTable>
+    24 │             @content (renderRow; let row, idx, isLast) {
+  > 25 │               <span>{{ idx }} - {{ row }} (Last: {{ isLast }})</span>
+       │                                                  ^^^^^^^^^^^^
+    26 │             }
+    27 │           </FancyTable>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+content.html:31:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    29 │ <DynamicIf [injector]="injector" [cond]="visible">
+    30 │             @content (children; let result) {
+  > 31 │               <child>{{ result }}</child>
+       │                      ^^^^^^^^^^^^
+    32 │             }
+    33 │           </DynamicIf>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

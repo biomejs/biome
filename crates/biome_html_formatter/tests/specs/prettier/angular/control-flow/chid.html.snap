@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/chid.html
+---
+
+# Input
+
+```html
+<span>@if (test) {text}</span>
+<div>@if (test) {text}</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,2 @@
+-<span>
+-  @if (test) {
+-    text
+-  }
+-</span>
+-<div>
+-  @if (test) {
+-    text
+-  }
+-</div>
++<span>@if (test) { text}</span>
++<div>@if (test) { text}</div>
+```
+
+# Output
+
+```html
+<span>@if (test) { text}</span>
+<div>@if (test) { text}</div>
+```

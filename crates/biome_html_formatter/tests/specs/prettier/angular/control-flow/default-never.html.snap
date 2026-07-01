@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/default-never.html
+---
+
+# Input
+
+```html
+@switch (   cond.kind) {
+  @default never;
+}
+
+@switch (   cond.kind) {
+  @default never    ;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,2 @@
+-@switch (cond.kind) {
+-  @default never;
+-}
+-
+-@switch (cond.kind) {
+-  @default never;
++@switch ( cond.kind) { @default never; } @switch ( cond.kind) { @default never ;
+ }
+```
+
+# Output
+
+```html
+@switch ( cond.kind) { @default never; } @switch ( cond.kind) { @default never ;
+}
+```
