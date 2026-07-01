@@ -28,3 +28,29 @@
 	padding-bottom: 15px;
 	padding-left: 20px;
 }
+
+.border {
+	border-top: 1px solid red;
+	border-top-color: red;
+	border-top-style: solid;
+	border-top-width: 2px;
+	border-bottom: 3px dashed blue;
+	border-bottom-color: blue;
+	border-bottom-style: dashed;
+	border-bottom-width: 4px;
+	border-left: 5px dotted green;
+	border-left-color: green;
+	border-left-style: dotted;
+	border-left-width: 6px;
+	border-right: 7px double yellow;
+	border-right-color: yellow;
+	border-right-style: double;
+	border-right-width: 8px;
+}
+
+.border-radius {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 8px;
+	border-bottom-left-radius: 12px;
+	border-bottom-right-radius: 16px;
+}

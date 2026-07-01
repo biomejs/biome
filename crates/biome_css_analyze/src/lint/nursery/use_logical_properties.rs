@@ -11,10 +11,11 @@ use biome_string_case::StrLikeExtension;
 declare_lint_rule! {
     /// Enforce logical properties over physical properties.
     ///
-    /// Physical properties such as `width`, `height`, `top`, `left`, `margin-top`, `padding-left`, etc.
-    /// are tied to writing direction. Logical properties such as `inline-size`, `block-size`,
-    /// `inset-block-start`, `margin-block-start`, `padding-inline-end`, etc. adapt more consistently
-    /// across different writing modes.
+    /// Physical properties such as `width`, `height`, `top`, `left`, `margin-top`, `padding-left`,
+    /// `border-top`, `border-left-color`, etc. are tied to writing direction. Logical properties such
+    /// as `inline-size`, `block-size`, `inset-block-start`, `margin-block-start`,
+    /// `padding-inline-end`, `border-block-start`, `border-inline-start-color`, etc. adapt more
+    /// consistently across different writing modes.
     ///
     /// ## Examples
     ///
@@ -38,6 +39,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   border-left: 1px solid;
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -55,6 +62,12 @@ declare_lint_rule! {
     /// ```css
     /// p {
     ///   margin-inline-start: 1rem;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   border-inline-start: 1px solid;
     /// }
     /// ```
     ///
@@ -136,6 +149,31 @@ fn physical_to_logical_property(property: &str) -> Option<&'static str> {
         "padding-right" => Some("padding-inline-end"),
         "padding-bottom" => Some("padding-block-end"),
         "padding-left" => Some("padding-inline-start"),
+        // Border top properties
+        "border-top" => Some("border-block-start"),
+        "border-top-color" => Some("border-block-start-color"),
+        "border-top-style" => Some("border-block-start-style"),
+        "border-top-width" => Some("border-block-start-width"),
+        // Border bottom properties
+        "border-bottom" => Some("border-block-end"),
+        "border-bottom-color" => Some("border-block-end-color"),
+        "border-bottom-style" => Some("border-block-end-style"),
+        "border-bottom-width" => Some("border-block-end-width"),
+        // Border left properties
+        "border-left" => Some("border-inline-start"),
+        "border-left-color" => Some("border-inline-start-color"),
+        "border-left-style" => Some("border-inline-start-style"),
+        "border-left-width" => Some("border-inline-start-width"),
+        // Border right properties
+        "border-right" => Some("border-inline-end"),
+        "border-right-color" => Some("border-inline-end-color"),
+        "border-right-style" => Some("border-inline-end-style"),
+        "border-right-width" => Some("border-inline-end-width"),
+        // Border radius properties
+        "border-top-left-radius" => Some("border-start-start-radius"),
+        "border-top-right-radius" => Some("border-start-end-radius"),
+        "border-bottom-left-radius" => Some("border-end-start-radius"),
+        "border-bottom-right-radius" => Some("border-end-end-radius"),
         _ => None,
     }
 }
