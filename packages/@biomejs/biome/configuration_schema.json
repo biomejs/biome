@@ -15857,6 +15857,10 @@
 					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
 					"type": ["boolean", "null"]
 				},
+				"ignoreIfStatements": {
+					"description": "Whether to ignore `if` statements that only assign to a nullish variable and could be rewritten as `??=` (default: `false`).",
+					"type": ["boolean", "null"]
+				},
 				"ignoreMixedLogicalExpressions": {
 					"description": "Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).",
 					"type": ["boolean", "null"]
