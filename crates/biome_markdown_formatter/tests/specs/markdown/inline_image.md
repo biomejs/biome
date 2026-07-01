@@ -27,3 +27,7 @@
 ![alt with `code`](image.png)
 
 ![alt with `code`](<url>)
+
+![encoded](https://www.google.fr/()foo->bar)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)

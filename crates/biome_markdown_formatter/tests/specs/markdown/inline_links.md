@@ -11,3 +11,7 @@ text with [inline](link) in the middle
 [link with **bold**](url)
 
 [foo](<https://example.com>)
+
+[encoded](https://www.google.fr/()foo->bar)
+
+[encoded](<https://www.google.fr/()foo-%3Ebar>)
