@@ -1,0 +1,91 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@keyframes :local(test)
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssBogusKeyframesName {
+                    items: [
+                        COLON@11..12 ":" [] [],
+                        LOCAL_KW@12..17 "local" [] [],
+                        L_PAREN@17..18 "(" [] [],
+                        IDENT@18..22 "test" [] [],
+                        R_PAREN@22..23 ")" [] [],
+                    ],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..24
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..23
+    0: CSS_AT_RULE@0..23
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..23
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS_KEYFRAMES_NAME@11..23
+          0: COLON@11..12 ":" [] []
+          1: LOCAL_KW@12..17 "local" [] []
+          2: L_PAREN@17..18 "(" [] []
+          3: IDENT@18..22 "test" [] []
+          4: R_PAREN@22..23 ")" [] []
+        2: CSS_BOGUS_BLOCK@23..23
+  2: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_keyframe_disabled_css_modules_at_eof.css:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:local` and `:global` pseudo-classes are not standard CSS features.
+  
+  > 1 │ @keyframes :local(test)
+      │             ^^^^^
+    2 │ 
+  
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
+  
+at_rule_keyframe_disabled_css_modules_at_eof.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+    1 │ @keyframes :local(test)
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ @keyframes :local(test)
+  > 2 │ 
+      │ 
+  
+```

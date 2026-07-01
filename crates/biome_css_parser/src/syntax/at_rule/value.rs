@@ -45,7 +45,7 @@ pub(crate) fn parse_value_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
         // Skip the entire rule to avoid parsing errors.
         // Skip until the next semicolon.
-        while !p.eat(T![;]) {
+        while !p.at(EOF) && !p.eat(T![;]) {
             p.bump_any();
         }
 
