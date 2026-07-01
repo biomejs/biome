@@ -2404,6 +2404,11 @@ See https://biomejs.dev/linter/rules/no-excessive-nested-callbacks
 	 */
 	noExcessiveNestedCallbacks?: NoExcessiveNestedCallbacksConfiguration;
 	/**
+	* Disallow deeply nested JSX elements.
+See https://biomejs.dev/linter/rules/no-excessive-nested-elements 
+	 */
+	noExcessiveNestedElements?: NoExcessiveNestedElementsConfiguration;
+	/**
 	* Limit the number of classes in a selector.
 See https://biomejs.dev/linter/rules/no-excessive-selector-classes 
 	 */
@@ -4654,6 +4659,9 @@ export type NoEmptyObjectKeysConfiguration =
 export type NoExcessiveNestedCallbacksConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveNestedCallbacksOptions;
+export type NoExcessiveNestedElementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestedElementsOptions;
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
@@ -6495,6 +6503,10 @@ export interface RuleWithNoExcessiveNestedCallbacksOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveNestedCallbacksOptions;
 }
+export interface RuleWithNoExcessiveNestedElementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestedElementsOptions;
+}
 export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
@@ -8264,6 +8276,12 @@ export interface NoExcessiveNestedCallbacksOptions {
 	 */
 	max?: number;
 }
+export interface NoExcessiveNestedElementsOptions {
+	/**
+	 * Maximum allowed nesting depth for JSX elements (default: 10)
+	 */
+	maxDepth?: number;
+}
 export interface NoExcessiveSelectorClassesOptions {
 	/**
 	* The maximum number of class selectors allowed in a single selector.
@@ -9633,7 +9651,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9644,6 +9661,7 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
+	| "lint/nursery/noExcessiveNestedElements"
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noIdenticalTestTitle"
@@ -9670,6 +9688,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
@@ -9697,7 +9716,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9713,6 +9731,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"

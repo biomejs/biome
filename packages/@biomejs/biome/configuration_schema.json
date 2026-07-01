@@ -4031,6 +4031,25 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveNestedElementsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveNestedElementsOptions" }
+			]
+		},
+		"NoExcessiveNestedElementsOptions": {
+			"type": "object",
+			"properties": {
+				"maxDepth": {
+					"description": "Maximum allowed nesting depth for JSX elements (default: 10)",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveNestedTestSuitesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6597,6 +6616,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestedElements": {
+					"description": "Disallow deeply nested JSX elements.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-elements",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestedElementsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveSelectorClasses": {
 					"description": "Limit the number of classes in a selector.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-classes",
 					"anyOf": [
@@ -8682,6 +8708,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveNestedCallbacksOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveNestedElementsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveNestedElementsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
