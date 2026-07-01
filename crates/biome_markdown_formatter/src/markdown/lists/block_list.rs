@@ -6,7 +6,9 @@ use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBlockList, MdBullet};
+use biome_markdown_syntax::{
+    AnyMdBlock, AnyMdInline, AnyMdLeafBlock, MdBlockList, MdBullet, MdParagraph,
+};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdBlockList {
@@ -150,6 +152,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut prev_was_header = false;
         let mut prev_was_list = false;
         let mut prev_ends_with_line_break = false;
+        let mut prev_paragraph_has_hard_line = false;
         let content_count = self.node.len() - trailing_count;
         let mut iter = self.node.iter().enumerate().peekable();
         while let Some((index, node)) = iter.next() {
@@ -226,13 +229,21 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                             joiner.entry(&blank_line.format());
                         }
                     }
+                } else if next_is_bull_item {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: true,
+                    }));
+                    if !is_leading && !is_trailing {
+                        if prev_paragraph_has_hard_line {
+                            joiner.entry(&empty_line());
+                        } else {
+                            joiner.entry(&hard_line_break());
+                        }
+                    }
                 } else {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: is_leading || is_trailing || next_is_bull_item,
+                        should_remove: is_leading || is_trailing,
                     }));
-                    if next_is_bull_item {
-                        joiner.entry(&hard_line_break());
-                    }
                 }
                 prev_was_header = false;
             } else {
@@ -242,6 +253,12 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 prev_ends_with_line_break = node
                     .as_any_list_item()
                     .is_some_and(|item| list_ends_with_line_break(&item));
+                prev_paragraph_has_hard_line = match &node {
+                    AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
+                        paragraph_has_inner_hard_line(paragraph)
+                    }
+                    _ => false,
+                };
                 if let Some(list_item) = node.as_any_list_item() {
                     joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                 } else {
@@ -252,6 +269,17 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
         joiner.finish()
     }
+}
+
+fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {
+    let mut items = paragraph.list().iter().peekable();
+    while let Some(item) = items.next() {
+        if matches!(item, AnyMdInline::MdHardLine(_)) && items.peek().is_some() {
+            return true;
+        }
+    }
+
+    false
 }
 
 /// Whether the list terminates its own line.
