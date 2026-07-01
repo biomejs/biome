@@ -24,5 +24,4 @@ other: {a: b}
 
 ## Unimplemented nodes/tokens
 
-" [1, 2, 3" => 4..13
 " {a: b" => 21..27
