@@ -130,13 +130,7 @@ impl AnyHtmlAttribute {
                     .map(|t| t.token_text_trimmed()),
                 _ => None,
             },
-            Self::AnySvelteDirective(_)
-            | Self::HtmlAttributeDoubleTextExpression(_)
-            | Self::HtmlAttributeSingleTextExpression(_)
-            | Self::HtmlBogusAttribute(_)
-            | Self::HtmlSpreadAttribute(_)
-            | Self::AnyAstroDirective(_)
-            | Self::SvelteAttachAttribute(_) => None,
+            _ => None,
         }
     }
 
@@ -152,13 +146,7 @@ impl AnyHtmlAttribute {
                 }
                 _ => None,
             },
-            Self::AnySvelteDirective(_)
-            | Self::HtmlAttributeDoubleTextExpression(_)
-            | Self::HtmlAttributeSingleTextExpression(_)
-            | Self::HtmlBogusAttribute(_)
-            | Self::HtmlSpreadAttribute(_)
-            | Self::AnyAstroDirective(_)
-            | Self::SvelteAttachAttribute(_) => None,
+            _ => None,
         }
     }
 

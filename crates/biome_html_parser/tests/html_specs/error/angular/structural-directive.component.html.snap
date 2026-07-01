@@ -1,0 +1,119 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<p *select="let data; from: source>The data is: {{ data }}</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        L_ANGLE@0..1 "<" [] [],
+                        HtmlTagName {
+                            value_token: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")],
+                        },
+                        HtmlBogus {
+                            items: [
+                                AngularStructuralDirective {
+                                    star_token: STAR@3..4 "*" [] [],
+                                    name: AngularBindingName {
+                                        value_token: HTML_LITERAL@4..10 "select" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@10..11 "=" [] [],
+                                        value: missing (required),
+                                    },
+                                },
+                                HtmlBogusElement {
+                                    items: [
+                                        ERROR_TOKEN@11..63 "\"let data; from: source>The data is: {{ data }}</p>\n" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                HtmlElementList [],
+            ],
+        },
+    ],
+    eof_token: EOF@63..63 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..63
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..63
+    0: HTML_BOGUS_ELEMENT@0..63
+      0: HTML_BOGUS@0..63
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..3
+          0: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")]
+        2: HTML_BOGUS@3..63
+          0: ANGULAR_STRUCTURAL_DIRECTIVE@3..11
+            0: STAR@3..4 "*" [] []
+            1: ANGULAR_BINDING_NAME@4..10
+              0: HTML_LITERAL@4..10 "select" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..11
+              0: EQ@10..11 "=" [] []
+              1: (empty)
+          1: HTML_BOGUS_ELEMENT@11..63
+            0: ERROR_TOKEN@11..63 "\"let data; from: source>The data is: {{ data }}</p>\n" [] []
+      1: HTML_ELEMENT_LIST@63..63
+  4: EOF@63..63 "" [] []
+
+```
+
+## Diagnostics
+
+```
+structural-directive.component.html:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ <p *select="let data; from: source>The data is: {{ data }}</p>
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 
+      │ 
+  
+  i file ends here
+  
+    1 │ <p *select="let data; from: source>The data is: {{ data }}</p>
+  > 2 │ 
+      │ 
+  
+structural-directive.component.html:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    1 │ <p *select="let data; from: source>The data is: {{ data }}</p>
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <p *select="let data; from: source>The data is: {{ data }}</p>
+  > 2 │ 
+      │ 
+  
+```
