@@ -296,6 +296,48 @@ schema + sure()
 }
 
 #[test]
+fn sort_classes_in_template_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "html": { "experimentalFullSupportEnabled": true },
+            "linter": { "rules": { "nursery": { "useSortedClasses": "error" } } }
+        }"#
+        .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+---
+<div class="hover:focus:m-2 bar hover:p-2 px-2 mx-2 foo" />
+<div>{(<div class="hover:focus:m-2 bar hover:p-2 px-2 mx-2 foo" />)}</div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "sort_classes_in_template_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_and_fix_astro_files() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

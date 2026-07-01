@@ -2,7 +2,8 @@ use crate::{
     AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
     AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList,
     HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlProcessingInstruction,
-    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType, inner_string_text,
+    HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, HtmlTextExpression, ScriptType,
+    inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
@@ -780,7 +781,7 @@ mod tests {
 }
 
 declare_node_union! {
-    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent
+    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent | HtmlTextExpression
 }
 
 impl AnyEmbeddedContent {
@@ -788,6 +789,7 @@ impl AnyEmbeddedContent {
         match self {
             Self::HtmlEmbeddedContent(node) => node.value_token().ok(),
             Self::AstroEmbeddedContent(node) => node.content_token(),
+            Self::HtmlTextExpression(node) => node.html_literal_token().ok(),
         }
     }
 }
