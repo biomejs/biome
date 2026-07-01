@@ -424,7 +424,9 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text);
+        let is_used_as_reference = embedded.is_used(binding_token_text)
+            || matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Svelte { .. })
+                && embedded.is_svelte_store_used(binding_name);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;

@@ -78,6 +78,47 @@ pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) 
     })
 }
 
+#[salsa::tracked]
+pub fn is_svelte_store_reference_used(
+    db: &dyn LanguageDb,
+    path: Utf8PathBuf,
+    store_name: String,
+) -> bool {
+    let Some(parsed_source) = db.parsed_source_for_path(&path) else {
+        return false;
+    };
+
+    embedded_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter().any(|value_reference| {
+                svelte_store_reference_name(value_reference.text.text())
+                    .is_some_and(|reference_store_name| reference_store_name == store_name)
+            })
+        })
+}
+
+fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
+    const SVELTE_RUNES: [&str; 7] = [
+        "$bindable",
+        "$derived",
+        "$effect",
+        "$host",
+        "$inspect",
+        "$props",
+        "$state",
+    ];
+
+    if SVELTE_RUNES.contains(&reference_name) {
+        return None;
+    }
+    let store_name = reference_name.strip_prefix('$')?;
+    if store_name.is_empty() || store_name.starts_with('$') {
+        return None;
+    }
+    Some(store_name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
