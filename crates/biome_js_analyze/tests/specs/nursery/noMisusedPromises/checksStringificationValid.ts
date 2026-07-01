@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+
+const promise = Promise.resolve('value');
+
+// Always `await` the Promise before coercing it to a string
+const a = `wtf ${await promise}`;
+
+const b = 'wtf ' + (await promise);
+
+const resolved = await promise;
+const c = `wtf ${resolved}`;
+
+// A tagged template receives the raw value, so no coercion happens
+function tag(strings: TemplateStringsArray, ...values: unknown[]) {
+  return values;
+}
+const d = tag`wtf ${promise}`;
+
+// Numeric addition does not coerce to a string
+const count = 1 + 2;
+
+// String concatenation of plain strings
+const e = 'wtf ' + 'more';

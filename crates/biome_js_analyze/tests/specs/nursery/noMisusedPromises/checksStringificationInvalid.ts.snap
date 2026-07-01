@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checksStringificationInvalid.ts
+---
+# Input
+```ts
+const promise = Promise.resolve('value');
+
+const a = `wtf ${promise}`;
+
+const b = 'wtf ' + promise;
+
+const c = promise + ' wtf';
+
+const d = `${promise} and ${promise}`;
+
+const getData = (): Promise<string> => fetch('/').then((r) => r.text());
+
+const e = `data: ${getData()}`;
+
+const f = 'data: ' + getData();
+
+```
+
+# Diagnostics
+```
+checksStringificationInvalid.ts:3:18 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+    1 │ const promise = Promise.resolve('value');
+    2 │ 
+  > 3 │ const a = `wtf ${promise}`;
+      │                  ^^^^^^^
+    4 │ 
+    5 │ const b = 'wtf ' + promise;
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:5:20 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+    3 │ const a = `wtf ${promise}`;
+    4 │ 
+  > 5 │ const b = 'wtf ' + promise;
+      │                    ^^^^^^^
+    6 │ 
+    7 │ const c = promise + ' wtf';
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:7:11 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+    5 │ const b = 'wtf ' + promise;
+    6 │ 
+  > 7 │ const c = promise + ' wtf';
+      │           ^^^^^^^
+    8 │ 
+    9 │ const d = `${promise} and ${promise}`;
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:9:14 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+     7 │ const c = promise + ' wtf';
+     8 │ 
+   > 9 │ const d = `${promise} and ${promise}`;
+       │              ^^^^^^^
+    10 │ 
+    11 │ const getData = (): Promise<string> => fetch('/').then((r) => r.text());
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:9:29 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+     7 │ const c = promise + ' wtf';
+     8 │ 
+   > 9 │ const d = `${promise} and ${promise}`;
+       │                             ^^^^^^^
+    10 │ 
+    11 │ const getData = (): Promise<string> => fetch('/').then((r) => r.text());
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:13:20 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+    11 │ const getData = (): Promise<string> => fetch('/').then((r) => r.text());
+    12 │ 
+  > 13 │ const e = `data: ${getData()}`;
+       │                    ^^^^^^^^^
+    14 │ 
+    15 │ const f = 'data: ' + getData();
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksStringificationInvalid.ts:15:22 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a string was expected.
+  
+    13 │ const e = `data: ${getData()}`;
+    14 │ 
+  > 15 │ const f = 'data: ' + getData();
+       │                      ^^^^^^^^^
+    16 │ 
+  
+  i A Promise is coerced to "[object Promise]", so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsCallArgumentList, JsCallExpression,
-    JsConditionalExpression, JsNewExpression, JsSyntaxKind,
+    AnyJsCallArgument, AnyJsExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
+    JsCallExpression, JsConditionalExpression, JsNewExpression, JsSyntaxKind, JsTemplateExpression,
 };
 use biome_js_type_info::{Type, TypeMemberKind};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
@@ -97,6 +97,7 @@ pub enum NoMisusedPromisesState {
     Conditional,
     ConditionalReturn,
     Spread,
+    Stringification,
     VoidReturn,
 }
 
@@ -178,6 +179,22 @@ impl Rule for NoMisusedPromises {
                     "Promise needs to be `await`-ed to take its value."
                 }),
             ),
+            NoMisusedPromisesState::Stringification => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "A Promise was found where a string was expected."
+                    },
+                )
+                .note(markup! {
+                    "A Promise is coerced to \"[object Promise]\", so this is "
+                    "most likely a mistake."
+                })
+                .note(markup! {
+                    "You may have intended to `await` the Promise instead."
+                }),
+            ),
         }
     }
 
@@ -217,15 +234,36 @@ fn find_misused_promise_expression(
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
         JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-            if JsConditionalExpression::cast(parent)
-                .is_some_and(|conditional| conditional.test().is_ok_and(|test| test == *expression))
-            => {
-                NoMisusedPromisesState::Conditional
-            }
+            if JsConditionalExpression::cast(parent.clone()).is_some_and(|conditional| {
+                conditional.test().is_ok_and(|test| test == *expression)
+            }) =>
+        {
+            NoMisusedPromisesState::Conditional
+        }
         JsSyntaxKind::JS_DO_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_IF_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_SPREAD => NoMisusedPromisesState::Spread,
         JsSyntaxKind::JS_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
+        // A Promise interpolated in a template literal is coerced to a string,
+        // unless the template is tagged, in which case the raw value is passed
+        // to the tag function and no coercion happens.
+        JsSyntaxKind::JS_TEMPLATE_ELEMENT
+            if parent
+                .ancestors()
+                .find_map(JsTemplateExpression::cast)
+                .is_some_and(|template| template.tag().is_none()) =>
+        {
+            NoMisusedPromisesState::Stringification
+        }
+        // A Promise used as an operand of `+` is coerced to a string, since `+`
+        // on a Promise is only valid when the other operand is a string.
+        JsSyntaxKind::JS_BINARY_EXPRESSION
+            if JsBinaryExpression::cast(parent.clone())
+                .and_then(|binary| binary.operator().ok())
+                .is_some_and(|operator| operator == JsBinaryOperator::Plus) =>
+        {
+            NoMisusedPromisesState::Stringification
+        }
         _ => return None,
     };
 
