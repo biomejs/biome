@@ -75,6 +75,9 @@ markdown/spec/example-63.md
 markdown/spec/example-217.md
 markdown/spec/example-218.md
 
+# The info string of a backtick code fence cannot contain backticks.
+markdown/spec/example-105.md
+
 # It's inline code, it should be change
 # https://github.com/prettier/prettier/issues/19152
 markdown/spec/example-7.md
