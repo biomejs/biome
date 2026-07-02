@@ -15,11 +15,18 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
         let mut needs_space = false;
         for item in self.0 {
             match item {
-                ProseItem::WordGroup(atoms) => {
+                ProseItem::WordGroup {
+                    atoms,
+                    should_escape,
+                } => {
                     if needs_space {
                         write!(f, [space()])?;
                     }
-                    FormatWordGroup(atoms).fmt(f)?;
+                    FormatWordGroup {
+                        atoms,
+                        should_escape: *should_escape,
+                    }
+                    .fmt(f)?;
                     needs_space = true;
                 }
                 ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {

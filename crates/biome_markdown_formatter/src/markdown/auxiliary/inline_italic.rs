@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
+    AnyMdInline, MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdInlineItemList,
+    MdReferenceImage,
 };
 use biome_rowan::AstNode;
 
@@ -58,6 +59,15 @@ fn has_ancestor_italic(node: &MdInlineItalic) -> bool {
         .any(|a| MdInlineItalic::can_cast(a.kind()))
 }
 
+fn is_escaped_star_italic_content(content: &MdInlineItemList) -> bool {
+    let mut items = content.iter();
+    let Some(AnyMdInline::MdTextual(text)) = items.next() else {
+        return false;
+    };
+
+    items.next().is_none() && text.value_token().is_ok_and(|token| token.text() == "\\*")
+}
+
 impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
     fn fmt_fields(&self, node: &MdInlineItalic, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdInlineItalicFields {
@@ -80,6 +90,20 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
 
         if inside_ref_image || self.should_keep_fences {
             return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
+        }
+
+        if l_fence.kind() == MarkdownSyntaxKind::STAR
+            && r_fence.kind() == MarkdownSyntaxKind::STAR
+            && is_escaped_star_italic_content(&content)
+        {
+            return write!(
+                f,
+                [
+                    format_replaced(&l_fence, &text("\\*", Some(l_fence.text_range().start()))),
+                    content.format(),
+                    format_replaced(&r_fence, &text("\\*", Some(r_fence.text_range().start()))),
+                ]
+            );
         }
 
         // Use `*` if inside another italic or near alphanumeric chars; otherwise `_`.
