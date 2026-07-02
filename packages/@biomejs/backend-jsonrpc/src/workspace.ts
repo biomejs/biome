@@ -10186,6 +10186,12 @@ export interface JsFileSource {
 For example, if inside an Astro file, a top-level return statement is allowed. 
 	 */
 	embedding_kind: EmbeddingKind;
+	/**
+	* Marks a Google Apps Script file (detected via the `.gs` extension).
+Apps Script is plain JavaScript running in Google's runtime, so it
+exposes extra service globals (e.g. `SpreadsheetApp`). 
+	 */
+	is_google_apps_script: boolean;
 	language: Language;
 	module_kind: ModuleKind;
 	variant: LanguageVariant;

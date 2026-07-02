@@ -1,5 +1,8 @@
 //! This module tracks all globals variables
 
+pub mod google_apps_script;
+pub use google_apps_script::{GOOGLE_APPS_SCRIPT, is_google_apps_script_global};
+
 pub mod javascript;
 pub use javascript::is_global as is_js_global;
 pub use javascript::is_language_global as is_js_language_global;

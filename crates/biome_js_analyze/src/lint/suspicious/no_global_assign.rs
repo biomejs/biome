@@ -1,11 +1,11 @@
-use crate::globals::is_js_global;
+use crate::globals::{is_google_apps_script_global, is_js_global};
 
 use crate::services::semantic::SemanticServices;
 use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsSyntaxKind, TextRange};
+use biome_js_syntax::{JsFileSource, JsSyntaxKind, TextRange};
 use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
 declare_lint_rule! {
@@ -57,13 +57,19 @@ impl Rule for NoGlobalAssign {
     type Options = NoGlobalAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let source_type = ctx.source_type::<JsFileSource>();
         let global_refs = ctx.query().all_unresolved_references();
         let mut result = Vec::new();
         for global_ref in global_refs {
             let is_write = global_ref.syntax().kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
             if is_write {
                 let identifier = global_ref.syntax().text_trimmed();
-                let is_global_var = is_js_global(identifier.into_text().text());
+                let name = identifier.into_text();
+                let name = name.text();
+                // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
+                // globals too, so reassigning them in a `.gs` file is reported.
+                let is_global_var = is_js_global(name)
+                    || (source_type.is_google_apps_script() && is_google_apps_script_global(name));
                 if is_global_var {
                     result.push(global_ref.range());
                 }
