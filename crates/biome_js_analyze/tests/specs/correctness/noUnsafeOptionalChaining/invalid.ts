@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 new (a?.b as any)();
 (a?.b as any)();
 (a?.b as any).c;
