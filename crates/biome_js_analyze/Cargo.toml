@@ -72,7 +72,7 @@ biome_parser        = { path = "../biome_parser" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta               = { workspace = true, features = ["glob"] }
 salsa               = { workspace = true }
 tests_macros        = { path = "../tests_macros" }

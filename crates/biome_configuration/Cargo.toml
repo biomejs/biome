@@ -49,7 +49,7 @@ serde                      = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true }
 tests_macros      = { workspace = true }
 
