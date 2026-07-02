@@ -519,10 +519,22 @@ impl IntoFormat<JsFormatContext> for JsSyntaxToken {
 #[derive(Debug, Clone)]
 pub struct JsFormatLanguage {
     options: JsFormatOptions,
+    /// Ranges of template chunks whose content was parsed as an embedded
+    /// language. Formatting them is delegated to the corresponding language
+    /// formatter, see [crate::format_node].
+    embedded_node_ranges: Vec<TextRange>,
 }
 impl JsFormatLanguage {
     pub fn new(options: JsFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            embedded_node_ranges: Vec::new(),
+        }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
     }
 }
 
@@ -567,7 +579,7 @@ impl FormatLanguage for JsFormatLanguage {
         let comments = Comments::from_node(root, &JsCommentStyle, source_map.as_ref());
         let mut ctx = JsFormatContext::new(self.options, comments).with_source_map(source_map);
         if delegate_fmt_embedded_nodes {
-            ctx = ctx.with_fmt_embedded_nodes();
+            ctx = ctx.with_embedded_node_ranges(self.embedded_node_ranges);
         }
         ctx
     }
@@ -595,14 +607,21 @@ pub fn format_range(
 /// Formats a JavaScript (and its super languages) file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
+///
+/// `embedded_node_ranges` contains the ranges of template chunks that were
+/// parsed as embedded languages. Their content isn't formatted; instead, the
+/// formatter emits `StartEmbedded`/`EndEmbedded` tags that the caller must
+/// resolve via [Formatted::format_embedded]. Pass an empty [Vec] when
+/// embedded snippets aren't formatted separately.
 pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,
-    delegate_fmt_embedded_nodes: bool,
+    embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<JsFormatContext>> {
+    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
     biome_formatter::format_node(
         root,
-        JsFormatLanguage::new(options),
+        JsFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
         delegate_fmt_embedded_nodes,
     )
 }
