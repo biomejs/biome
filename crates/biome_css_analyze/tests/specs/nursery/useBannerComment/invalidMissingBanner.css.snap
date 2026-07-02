@@ -1,0 +1,39 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 143
+expression: invalidMissingBanner.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a { color: red; }
+
+```
+
+# Diagnostics
+```
+invalidMissingBanner.css:1:1 lint/nursery/useBannerComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file does not start with the required banner comment.
+  
+  > 1 │ /* should generate diagnostics */
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ .a { color: red; }
+    3 │ 
+  
+  i A banner comment communicates licensing, copyright, or ownership information to anyone reading or auditing the file.
+  
+  i Add or update the leading /* ... */ block to match the configured banner.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Insert the required banner comment.
+  
+    1   │ - /*·should·generate·diagnostics·*/
+      1 │ + /*·Copyright·2026·Acme·*/
+      2 │ + 
+    2 3 │   .a { color: red; }
+    3 4 │   
+  
+
+```

@@ -116,6 +116,8 @@ pub enum RuleSource<'a> {
     EslintE18e(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
     EslintGraphql(&'a str),
+    /// Rules from [Eslint Plugin Header](https://github.com/Stuk/eslint-plugin-header)
+    EslintHeader(&'a str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'a str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -226,6 +228,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintBetterTailwindcss(_) => write!(f, "eslint-plugin-better-tailwindcss"),
             Self::EslintE18e(_) => write!(f, "@e18e/eslint-plugin"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
+            Self::EslintHeader(_) => write!(f, "eslint-plugin-header"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -319,6 +322,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintBetterTailwindcss(rule_name)
             | Self::EslintE18e(rule_name)
             | Self::EslintGraphql(rule_name)
+            | Self::EslintHeader(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -382,6 +386,7 @@ impl<'a> RuleSource<'a> {
             | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
+            Self::EslintHeader(_) => "header",
             Self::EslintImport(_) => "import",
             Self::EslintImportAccess(_) => "import-access",
             Self::EslintJest(_) => "jest",
@@ -449,6 +454,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintE18e(_) => "https://github.com/e18e/eslint-plugin".to_string(),
             Self::EslintBetterTailwindcss(rule_name) => format!("https://github.com/schoero/eslint-plugin-better-tailwindcss/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
+            Self::EslintHeader(_) => "https://github.com/Stuk/eslint-plugin-header".to_string(),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),

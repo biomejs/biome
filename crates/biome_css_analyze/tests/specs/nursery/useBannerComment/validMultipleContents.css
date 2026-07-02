@@ -1,0 +1,4 @@
+/* Copyright 2026 Acme Inc. */
+.a { color: red; }
+/* should not generate diagnostics */
+.b { color: blue; }
