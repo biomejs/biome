@@ -84,3 +84,9 @@ markdown/spec/example-7.md
 
 # We don't support angular
 markdown/code/angular/
+
+# Not the same thing, it's a bug
+markdown/spec/example-209.md
+
+# https://github.com/prettier/prettier/issues/19530
+markdown/spec/example-61.md

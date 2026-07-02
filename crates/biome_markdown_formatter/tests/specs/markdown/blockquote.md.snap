@@ -59,6 +59,24 @@ info: markdown/blockquote.md
 >
 baz
 
+> quote continuation
+line
+
+> quote continuation
+> line
+
+> > quote continuation
+line
+
+> > quote continuation
+> > line
+
+> > > quote continuation
+line
+
+> > > quote continuation
+> line
+
 >
 > trimmed quote boundaries
 >
@@ -121,6 +139,24 @@ baz
 > bar
 >
 baz
+
+> quote continuation
+> line
+
+> quote continuation
+> line
+
+> > quote continuation
+> > line
+
+> > quote continuation
+> > line
+
+> > > quote continuation
+> > > line
+
+> > > quote continuation
+> > > line
 
 > trimmed quote boundaries
 

@@ -51,6 +51,24 @@
 >
 baz
 
+> quote continuation
+line
+
+> quote continuation
+> line
+
+> > quote continuation
+line
+
+> > quote continuation
+> > line
+
+> > > quote continuation
+line
+
+> > > quote continuation
+> line
+
 >
 > trimmed quote boundaries
 >

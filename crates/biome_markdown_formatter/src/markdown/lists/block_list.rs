@@ -1,9 +1,8 @@
 use crate::bullet_list::FmtAnyList;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
-use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
-use crate::shared::{TextContext, TextPrintMode};
+use crate::shared::{TextContext, TextPrintMode, format_removed_quote_boundary};
 use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
@@ -140,26 +139,6 @@ impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.quote_boundary_trim = options.quote_boundary_trim;
         self
-    }
-}
-
-fn format_removed_quote_boundary(node: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
-    match node {
-        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) => {
-            write!(
-                f,
-                [newline.format().with_options(FormatMdNewlineOptions {
-                    should_remove: true,
-                })]
-            )
-        }
-        AnyMdBlock::MdQuotePrefix(prefix) => write!(
-            f,
-            [prefix.format().with_options(FormatMdQuotePrefixOptions {
-                should_remove: true,
-            })]
-        ),
-        _ => write!(f, [node.format()]),
     }
 }
 
