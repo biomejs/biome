@@ -55,7 +55,12 @@ fn strip_spaces_after_soft_breaks(stream: &mut Vec<ProseItem>) {
 }
 
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdIndentCodeBlock, MdInlineItemList};
+use biome_markdown_syntax::{
+    AnyMdInline, MarkdownLanguage, MdFencedCodeBlock, MdIndentCodeBlock, MdIndentToken,
+    MdInlineItemList, MdTextual,
+};
+use biome_rowan::AstNodeListIterator;
+use std::iter::{FusedIterator, Peekable};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
@@ -602,68 +607,69 @@ impl FormatMdInlineItemList {
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        let items: Vec<AnyMdInline> = node.iter().collect();
-        let mut is_first = true;
-
-        for (i, item) in items.iter().enumerate() {
+        for item in FencedCodeContentIterator::new(node.iter()) {
             match item {
-                AnyMdInline::MdTextual(md_text) => {
-                    if md_text.is_newline()? {
-                        if is_first {
-                            write!(
-                                f,
-                                [md_text.format().with_options(FormatMdTextualOptions {
-                                    print_mode: TextPrintMode::Remove,
-                                })]
-                            )?;
-                            is_first = false;
-                        } else {
-                            write!(
-                                f,
-                                [
-                                    md_text.format().with_options(FormatMdTextualOptions {
-                                        print_mode: TextPrintMode::Remove,
-                                    }),
-                                    hard_line_break()
-                                ]
-                            )?;
+                FencedCodeContentItem::NewlineRun {
+                    newlines,
+                    is_leading,
+                } => {
+                    let newline_count = newlines.len();
+
+                    for newline in &newlines {
+                        write!(
+                            f,
+                            [newline.format().with_options(FormatMdTextualOptions {
+                                print_mode: TextPrintMode::Remove,
+                            })]
+                        )?;
+                    }
+
+                    if is_leading {
+                        if newline_count > 1 {
+                            write!(f, [empty_line()])?;
                         }
+                    } else if newline_count == 1 {
+                        write!(f, [hard_line_break()])?;
                     } else {
-                        is_first = false;
-                        let token = md_text.value_token()?;
-                        let next_is_newline_or_end = items.get(i + 1).is_none_or(|n| {
-                            matches!(n, AnyMdInline::MdTextual(t) if t.is_newline().unwrap_or_default())
-                        });
-                        if next_is_newline_or_end {
-                            let trimmed = token.text().trim_end();
-                            if trimmed.len() < token.text().len() {
-                                f.context()
-                                    .comments()
-                                    .mark_suppression_checked(md_text.syntax());
-                                write!(
-                                    f,
-                                    [format_replaced(
-                                        &token,
-                                        &text(trimmed, Some(token.text_trimmed_range().start()))
-                                    )]
-                                )?;
-                            } else {
-                                write!(f, [md_text.format()])?;
-                            }
+                        for _ in 0..newline_count {
+                            write!(f, [text("\n", None)])?;
+                        }
+                        write!(f, [hard_line_break()])?;
+                    }
+                }
+                FencedCodeContentItem::Text {
+                    text: md_text,
+                    next_is_newline_or_end,
+                } => {
+                    let token = md_text.value_token()?;
+                    if next_is_newline_or_end {
+                        let trimmed = token.text().trim_end();
+                        if trimmed.len() < token.text().len() {
+                            f.context()
+                                .comments()
+                                .mark_suppression_checked(md_text.syntax());
+                            write!(
+                                f,
+                                [format_replaced(
+                                    &token,
+                                    &text(trimmed, Some(token.text_trimmed_range().start()))
+                                )]
+                            )?;
                         } else {
                             write!(f, [md_text.format()])?;
                         }
+                    } else {
+                        write!(f, [md_text.format()])?;
                     }
                 }
-                AnyMdInline::MdIndentToken(indent) => {
+                FencedCodeContentItem::Indent(indent) => {
                     f.context()
                         .comments()
                         .mark_suppression_checked(indent.syntax());
                     let char_token = indent.md_indent_char_token()?;
                     write!(f, [format_removed(&char_token)])?;
                 }
-                _ => {
-                    is_first = false;
+                FencedCodeContentItem::Other(item) => {
                     write!(f, [item.format()])?;
                 }
             }
@@ -750,6 +756,111 @@ impl FormatMdInlineItemList {
         Ok(())
     }
 }
+
+/// Business-level items for fenced code content inside lists.
+///
+/// The CST stores fenced code content as inline nodes, including source newlines
+/// and list continuation indentation. This enum groups those nodes by the
+/// formatting decision they require before `fmt_fenced_code_block` emits IR.
+enum FencedCodeContentItem {
+    /// One or more consecutive newline textual nodes.
+    ///
+    /// A leading run is the newline sequence immediately after the opening
+    /// fence. Non-leading runs represent literal line breaks inside the code
+    /// content and must preserve their exact blank-line count.
+    NewlineRun {
+        newlines: Vec<MdTextual>,
+        is_leading: bool,
+    },
+    /// A non-newline textual node from the fenced code content.
+    ///
+    /// `next_is_newline_or_end` marks line-final text so trailing spaces can be
+    /// stripped without changing spaces in the middle of a code line.
+    Text {
+        text: MdTextual,
+        next_is_newline_or_end: bool,
+    },
+    /// Source indentation that belongs to list continuation, not code content.
+    ///
+    /// The enclosing list formatter provides indentation structurally with
+    /// `align()`, so these tokens are removed from the printed code content.
+    Indent(MdIndentToken),
+    /// Any other inline node that should keep its own formatter behavior.
+    Other(AnyMdInline),
+}
+
+struct FencedCodeContentIterator {
+    items: Peekable<AstNodeListIterator<MarkdownLanguage, AnyMdInline>>,
+    is_leading: bool,
+}
+
+impl FencedCodeContentIterator {
+    fn new(items: AstNodeListIterator<MarkdownLanguage, AnyMdInline>) -> Self {
+        Self {
+            items: items.peekable(),
+            is_leading: true,
+        }
+    }
+
+    fn next_text(&mut self, text: MdTextual) -> Option<FencedCodeContentItem> {
+        if text.is_newline().ok()? {
+            let is_leading = self.is_leading;
+            self.is_leading = false;
+            let mut newlines = vec![text];
+
+            loop {
+                let next_is_newline = match self.items.peek() {
+                    Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
+                    _ => false,
+                };
+
+                if !next_is_newline {
+                    break;
+                }
+
+                if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
+                    newlines.push(next);
+                }
+            }
+
+            Some(FencedCodeContentItem::NewlineRun {
+                newlines,
+                is_leading,
+            })
+        } else {
+            self.is_leading = false;
+            let next_is_newline_or_end = match self.items.peek() {
+                Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
+                None => true,
+                _ => false,
+            };
+
+            Some(FencedCodeContentItem::Text {
+                text,
+                next_is_newline_or_end,
+            })
+        }
+    }
+}
+
+impl Iterator for FencedCodeContentIterator {
+    type Item = FencedCodeContentItem;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let item = self.items.next()?;
+
+        match item {
+            AnyMdInline::MdTextual(text) => self.next_text(text),
+            AnyMdInline::MdIndentToken(indent) => Some(FencedCodeContentItem::Indent(indent)),
+            item => {
+                self.is_leading = false;
+                Some(FencedCodeContentItem::Other(item))
+            }
+        }
+    }
+}
+
+impl FusedIterator for FencedCodeContentIterator {}
 
 #[derive(Debug, Default)]
 pub(crate) struct FormatMdFormatInlineItemListOptions {

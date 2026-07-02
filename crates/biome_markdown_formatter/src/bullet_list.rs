@@ -190,6 +190,8 @@ impl ListBlockList {
     ) -> FormatResult<()> {
         let breaks = if content.is_list() {
             pending_breaks.min(1)
+        } else if should_separate_fenced_code_block(content) && pending_breaks > 0 {
+            2
         } else {
             pending_breaks
         };
@@ -367,6 +369,31 @@ impl Format<MarkdownFormatContext> for ListBlockList {
         }
         Ok(())
     }
+}
+
+/// Returns `true` for fenced code blocks nested deeply enough in lists that a
+/// blank line keeps the fence separated from the preceding list paragraph.
+///
+/// This is intentionally narrower than "any fenced code block after list
+/// content": shallow list code fences can be followed by regular paragraphs,
+/// and forcing a blank line there changes existing idempotency-sensitive cases.
+fn should_separate_fenced_code_block(content: &AnyMdBlock) -> bool {
+    let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+        AnyMdCodeBlock::MdFencedCodeBlock(block),
+    )) = content
+    else {
+        return false;
+    };
+
+    block
+        .syntax()
+        .ancestors()
+        .filter(|ancestor| {
+            MdBulletListItem::can_cast(ancestor.kind())
+                || MdOrderedListItem::can_cast(ancestor.kind())
+        })
+        .count()
+        >= 3
 }
 
 /// Iterator in charge or formatting a [MdBlockList] that is inside a bullet list
