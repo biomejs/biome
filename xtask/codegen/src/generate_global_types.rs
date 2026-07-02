@@ -5,7 +5,10 @@ use anyhow::bail;
 use std::path::Path;
 
 pub mod collect;
+pub mod compare;
 mod emit;
+pub mod lower;
+pub mod manifest;
 pub mod source;
 
 pub const DEFAULT_TYPESCRIPT_TAG: &str = "v6.0.3";
@@ -62,20 +65,26 @@ pub fn run_with_workspace_root(
     let checkout = source::acquire(pin, opts)?;
     let libs = source::parse_lib_entries(&checkout)?;
     let source_files = source::discover(&checkout, &libs, source::PROFILE_ROOTS)?;
-    collect_discovered_sources(&source_files)?;
+    let records = collect_discovered_sources(&source_files)?;
+    let manifest = manifest::build_global_manifest(records);
+    let lowered = lower::lower_global_types(&manifest, &source_files)?;
+    compare::compare_lowered_globals(&lowered)?;
 
-    emit::emit_global_types(checkout.pin(), workspace_root)?;
+    emit::emit_global_types(checkout.pin(), workspace_root, &lowered)?;
     Ok(())
 }
 
 /// Runs the typed declaration collector over every discovered source and
 /// fails the run if any pinned file produced a fatal parser diagnostic.
-fn collect_discovered_sources(source_files: &[source::DiscoveredFile]) -> anyhow::Result<()> {
+fn collect_discovered_sources(
+    source_files: &[source::DiscoveredFile],
+) -> anyhow::Result<Vec<collect::DeclarationRecord>> {
+    let mut records = Vec::new();
     let mut fatal_diagnostics = Vec::new();
 
     for source_file in source_files {
         let output = collect::collect(source_file);
-        fatal_diagnostics.extend(output.coverage.into_iter().filter_map(|outcome| {
+        fatal_diagnostics.extend(output.coverage.iter().filter_map(|outcome| {
             let collect::CoverageOutcome::Diagnostic(diagnostic) = outcome else {
                 return None;
             };
@@ -94,6 +103,7 @@ fn collect_discovered_sources(source_files: &[source::DiscoveredFile]) -> anyhow
                 )
             })
         }));
+        records.extend(output.records);
     }
 
     if !fatal_diagnostics.is_empty() {
@@ -103,7 +113,7 @@ fn collect_discovered_sources(source_files: &[source::DiscoveredFile]) -> anyhow
         );
     }
 
-    Ok(())
+    Ok(records)
 }
 
 /// Categories that should abort codegen instead of being recorded as

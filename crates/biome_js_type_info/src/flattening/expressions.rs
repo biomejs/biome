@@ -6,10 +6,10 @@ use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
 use crate::{
-    CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData,
-    TypeMember, TypeReference, TypeResolver, TypeofCallExpression, TypeofDestructureExpression,
-    TypeofExpression,
+    CallArgumentType, ConstructorParameter, DestructureField, Function, FunctionParameter, Literal,
+    MAX_FLATTEN_DEPTH, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
+    ResolverId, TypeData, TypeMember, TypeReference, TypeResolver, TypeofCallExpression,
+    TypeofDestructureExpression, TypeofExpression,
     conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
@@ -26,7 +26,6 @@ use crate::{
 pub(super) fn flattened_expression(
     expr: &TypeofExpression,
     resolver: &mut dyn TypeResolver,
-    depth: usize,
 ) -> Option<TypeData> {
     match expr {
         TypeofExpression::Addition(expr) => {
@@ -102,7 +101,7 @@ pub(super) fn flattened_expression(
                 })
         }
         TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
-            Some(callee) => flattened_call(expr, callee.to_data(), resolver, depth),
+            Some(callee) => flattened_call(expr, callee.to_data(), resolver),
             None => None,
         },
         TypeofExpression::Conditional(expr) => {
@@ -186,34 +185,7 @@ pub(super) fn flattened_expression(
                 None
             }
         }
-        TypeofExpression::New(expr) => {
-            let resolved = resolver.resolve_and_get(&expr.callee)?;
-            if let TypeData::Class(class) = resolved.as_raw_data() {
-                let num_args = expr.arguments.len();
-                let constructed_ty = class
-                    .members
-                    .iter()
-                    .find(|member| member.kind.is_constructor())
-                    .and_then(|member| {
-                        let constructor = resolver
-                            .resolve_and_get(&resolved.apply_module_id_to_reference(&member.ty))?;
-                        match constructor.to_data() {
-                            TypeData::Constructor(constructor) => {
-                                // TODO: We might need to make an attempt to match
-                                //       type signatures too.
-                                (constructor.parameters.len() == num_args)
-                                    .then_some(constructor.return_type)
-                                    .flatten()
-                            }
-                            _ => None,
-                        }
-                    })
-                    .unwrap_or_else(|| expr.callee.clone());
-                Some(TypeData::instance_of(constructed_ty))
-            } else {
-                None
-            }
-        }
+        TypeofExpression::New(expr) => flattened_new(expr, resolver),
         TypeofExpression::NullishCoalescing(expr) => {
             let left = resolver.resolve_and_get(&expr.left)?;
             let conditional = ConditionalType::from_resolved_data(left, resolver);
@@ -234,88 +206,17 @@ pub(super) fn flattened_expression(
         }
         TypeofExpression::StaticMember(expr) => {
             let object = resolver.resolve_and_get(&expr.object)?;
-            match object.as_raw_data() {
-                class @ TypeData::Class(_) => {
-                    let member = class
-                        .own_members()
-                        .find(|member| member.has_name(&expr.member) && member.is_static())?;
-                    let member = TypeMember {
-                        kind: member.kind.clone(),
-                        ty: object.apply_module_id_to_reference(&member.ty).into_owned(),
-                    };
-                    Some(TypeData::reference(member.deref_ty(resolver).into_owned()))
-                }
-
-                TypeData::ImportNamespace(module_id) => {
-                    let resolved_id =
-                        resolver.resolve_import_namespace_member(*module_id, &expr.member)?;
-                    resolver
-                        .get_by_resolved_id(resolved_id)
-                        .map(ResolvedTypeData::to_data)
-                }
-
-                TypeData::Tuple(_tuple) => {
-                    // Tuples are just fancy arrays, so make sure methods on
-                    // them can be looked up as such:
-                    let array = resolver
-                        .get_by_resolved_id(GLOBAL_ARRAY_ID)
-                        .expect("Array type must be registered");
-                    let member = array.find_member(resolver, |member| {
-                        member.has_name(&expr.member) && !member.is_static()
-                    })?;
-                    Some(TypeData::reference(member.ty().into_owned()))
-                }
-
-                TypeData::Union(_) => {
-                    // Resolve the requested member across union variants directly.
-                    // Avoid distributing `obj.member` into nested inferred expressions, which can
-                    // cause runaway type growth for patterns like `node = node.parent`.
-                    let mut types = Vec::new();
-                    for variant in object.flattened_union_variants(resolver) {
-                        if variant == GLOBAL_UNDEFINED_ID.into() {
-                            continue;
-                        }
-
-                        let Some(resolved) = resolver.resolve_and_get(&variant) else {
-                            types.push(TypeReference::unknown());
-                            continue;
-                        };
-
-                        if matches!(resolved.as_raw_data(), TypeData::TypeofExpression(_)) {
-                            return None;
-                        }
-
-                        if matches!(resolved.as_raw_data(), TypeData::Unknown) {
-                            types.push(TypeReference::unknown());
-                            continue;
-                        }
-
-                        let Some(member) = resolved
-                            .find_member(resolver, |member| member.has_name(&expr.member))
-                            .or_else(|| {
-                                resolved.find_index_signature_with_ty(resolver, |ty| ty.is_string())
-                            })
-                        else {
-                            continue;
-                        };
-                        types.push(member.deref_ty(resolver).into_owned());
-                    }
-
-                    if types.is_empty() {
-                        Some(TypeData::unknown())
-                    } else {
-                        Some(TypeData::union_of(resolver, types.into_boxed_slice()))
-                    }
-                }
-
-                _ => {
-                    let member = object
-                        .find_member(resolver, |member| member.has_name(&expr.member))
-                        .or_else(|| {
-                            object.find_index_signature_with_ty(resolver, |ty| ty.is_string())
-                        })?;
-                    Some(TypeData::reference(member.deref_ty(resolver).into_owned()))
-                }
+            if let TypeData::TypeofExpression(object_expr) = object.as_raw_data()
+                && should_flatten_static_member_object(object_expr)
+            {
+                let object = flattened_static_member_object_expression(
+                    object_expr.as_ref().clone(),
+                    resolver,
+                )?;
+                let object = resolved_type_data_from_data(&object, resolver)?;
+                flattened_static_member(object, &expr.member, resolver)
+            } else {
+                flattened_static_member(object, &expr.member, resolver)
             }
         }
         TypeofExpression::Super(expr) => {
@@ -350,37 +251,384 @@ pub(super) fn flattened_expression(
     }
 }
 
-/// Resolves a callee type through layers of indirection (`TypeofExpression`,
-/// `InstanceOf`, `Interface`, `Object`) until a `Function` is found.
-///
-/// Each invocation unwraps at most [`MAX_FLATTEN_DEPTH`] non-recursive layers.
-/// Flattening a `TypeofExpression` callee re-enters [`flattened_expression`],
-/// which can cycle back here for self-calling values (e.g. `ctrl = ctrl()`), so
-/// `depth` bounds that recursion and the function bails once it exceeds
-/// [`MAX_FLATTEN_DEPTH`].
-///
-/// Returns `None` if no function can be reached.
+/// Keeps scoped expressions lazy while allowing call/new member chains.
+fn should_flatten_static_member_object(expr: &TypeofExpression) -> bool {
+    matches!(
+        expr,
+        TypeofExpression::Call(_) | TypeofExpression::New(_) | TypeofExpression::StaticMember(_)
+    )
+}
+
+struct FixedStack<T, const CAPACITY: usize> {
+    items: [Option<T>; CAPACITY],
+    len: usize,
+}
+
+impl<T, const CAPACITY: usize> FixedStack<T, CAPACITY> {
+    fn new() -> Self {
+        Self {
+            items: std::array::from_fn(|_| None),
+            len: 0,
+        }
+    }
+
+    fn push(&mut self, item: T) -> Option<()> {
+        if self.len == CAPACITY {
+            return None;
+        }
+
+        self.items[self.len] = Some(item);
+        self.len += 1;
+        Some(())
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.len == 0 {
+            return None;
+        }
+
+        self.len -= 1;
+        self.items[self.len].take()
+    }
+
+    fn last(&self) -> Option<&T> {
+        self.len
+            .checked_sub(1)
+            .and_then(|index| self.items[index].as_ref())
+    }
+}
+
+/// Flattens the base of a lazy call/new/member chain before member lookup.
+fn flattened_static_member_object_expression(
+    mut expr: TypeofExpression,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    let mut pending_members = FixedStack::<Text, MAX_FLATTEN_DEPTH>::new();
+    let mut remaining_depth = MAX_FLATTEN_DEPTH;
+
+    while remaining_depth > 0 {
+        remaining_depth -= 1;
+
+        match expr {
+            TypeofExpression::Call(expr) => {
+                let callee = resolver.resolve_and_get(&expr.callee)?;
+                let object = flattened_call(&expr, callee.to_data(), resolver)?;
+                return apply_static_member_chain(object, pending_members, resolver);
+            }
+            TypeofExpression::New(expr) => {
+                let object = flattened_new(&expr, resolver)?;
+                return apply_static_member_chain(object, pending_members, resolver);
+            }
+            TypeofExpression::StaticMember(member_expr) => {
+                let object = resolver.resolve_and_get(&member_expr.object)?;
+                if let TypeData::TypeofExpression(object_expr) = object.as_raw_data()
+                    && should_flatten_static_member_object(object_expr)
+                {
+                    pending_members.push(member_expr.member)?;
+                    expr = object_expr.as_ref().clone();
+                    continue;
+                }
+
+                let object = flattened_static_member(object, &member_expr.member, resolver)?;
+                return apply_static_member_chain(object, pending_members, resolver);
+            }
+            _ => return None,
+        }
+    }
+
+    None
+}
+
+/// Applies deferred member accesses after the chain base has been flattened.
+fn apply_static_member_chain(
+    mut object: TypeData,
+    mut pending_members: FixedStack<Text, MAX_FLATTEN_DEPTH>,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    while let Some(member) = pending_members.pop() {
+        let resolved = resolved_type_data_from_data(&object, resolver)?;
+        object = flattened_static_member(resolved, &member, resolver)?;
+    }
+
+    Some(object)
+}
+
+/// Resolves references without registering already-owned type data.
+fn resolved_type_data_from_data<'a>(
+    data: &'a TypeData,
+    resolver: &'a dyn TypeResolver,
+) -> Option<ResolvedTypeData<'a>> {
+    match data {
+        TypeData::Reference(reference) => resolver.resolve_and_get(reference),
+        _ => Some(ResolvedTypeData::from((
+            ResolverId::from_level(resolver.level()),
+            data,
+        ))),
+    }
+}
+
+/// Looks up a static member on already-resolved object data.
+fn flattened_static_member(
+    object: ResolvedTypeData,
+    member_name: &Text,
+    resolver: &dyn TypeResolver,
+) -> Option<TypeData> {
+    match object.as_raw_data() {
+        class @ TypeData::Class(_) => {
+            let member = class.own_members().find(|member| {
+                member.has_name(member_name) && member.is_static() && !member.is_constructor()
+            })?;
+            Some(type_data_from_resolved_member(
+                ResolvedTypeMember::from((object.resolver_id(), member)),
+                resolver,
+            ))
+        }
+
+        TypeData::ImportNamespace(module_id) => {
+            let resolved_id = resolver.resolve_import_namespace_member(*module_id, member_name)?;
+            resolver
+                .get_by_resolved_id(resolved_id)
+                .map(ResolvedTypeData::to_data)
+        }
+
+        TypeData::Tuple(_tuple) => {
+            // Tuples are just fancy arrays, so make sure methods on
+            // them can be looked up as such:
+            let array = resolver.get_by_resolved_id(GLOBAL_ARRAY_ID)?;
+            let member = array.find_member(resolver, |member| {
+                member.has_name(member_name) && !member.is_static()
+            })?;
+            Some(type_data_from_resolved_member(member, resolver))
+        }
+
+        TypeData::Union(_) => {
+            // Keep nested inferred expressions lazy; otherwise nested member
+            // chains can grow without adding useful type information.
+            let mut types = None;
+            for variant in object.flattened_union_variants(resolver) {
+                if variant == GLOBAL_UNDEFINED_ID.into() {
+                    continue;
+                }
+
+                let Some(resolved) = resolver.resolve_and_get(&variant) else {
+                    types
+                        .get_or_insert_with(Vec::new)
+                        .push(TypeReference::unknown());
+                    continue;
+                };
+
+                if matches!(resolved.as_raw_data(), TypeData::TypeofExpression(_)) {
+                    return None;
+                }
+
+                if matches!(resolved.as_raw_data(), TypeData::Unknown) {
+                    types
+                        .get_or_insert_with(Vec::new)
+                        .push(TypeReference::unknown());
+                    continue;
+                }
+
+                let Some(member) = resolved
+                    .find_member(resolver, |member| {
+                        static_member_matches(resolved, member, member_name)
+                    })
+                    .or_else(|| {
+                        resolved.find_index_signature_with_ty(resolver, |data| data.is_string())
+                    })
+                else {
+                    continue;
+                };
+                let is_optional = member.kind().is_optional();
+                let member_reference = member.deref_ty(resolver).into_owned();
+                push_member_reference(
+                    types.get_or_insert_with(Vec::new),
+                    member_reference,
+                    is_optional,
+                );
+            }
+
+            if let Some(types) = types {
+                Some(TypeData::union_of(resolver, types.into_boxed_slice()))
+            } else {
+                Some(TypeData::unknown())
+            }
+        }
+
+        _ => {
+            let member = object
+                .find_member(resolver, |member| {
+                    static_member_matches(object, member, member_name)
+                })
+                .or_else(|| {
+                    object.find_index_signature_with_ty(resolver, |data| data.is_string())
+                })?;
+            Some(type_data_from_resolved_member(member, resolver))
+        }
+    }
+}
+
+/// Matches static properties on class values and instance members elsewhere.
+fn static_member_matches(
+    object: ResolvedTypeData,
+    member: &ResolvedTypeMember,
+    name: &str,
+) -> bool {
+    member.has_name(name)
+        && match object.as_raw_data() {
+            TypeData::Class(_) => member.is_static() && !member.kind().is_constructor(),
+            _ => !member.is_static(),
+        }
+}
+
+/// Resolves the instance type produced by a `new` expression.
+fn flattened_new(
+    expr: &crate::TypeofNewExpression,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    let resolved = resolver.resolve_and_get(&expr.callee)?;
+    if let TypeData::Class(class) = resolved.as_raw_data() {
+        let argument_count = expr.arguments.len();
+        let constructed_reference = class
+            .members
+            .iter()
+            .filter(|member| member.kind.is_constructor())
+            .find_map(|member| {
+                let constructor =
+                    resolver.resolve_and_get(&resolved.apply_module_id_to_reference(&member.ty))?;
+                match constructor.to_data() {
+                    TypeData::Constructor(constructor) => {
+                        constructor_accepts_argument_count(&constructor.parameters, argument_count)
+                            .then_some(constructor.return_type)
+                            .flatten()
+                    }
+                    _ => None,
+                }
+            })
+            .unwrap_or_else(|| expr.callee.clone());
+        Some(TypeData::instance_of(constructed_reference))
+    } else {
+        None
+    }
+}
+
+/// Builds the member access result from resolved member metadata.
+fn type_data_from_resolved_member(
+    member: ResolvedTypeMember<'_>,
+    resolver: &dyn TypeResolver,
+) -> TypeData {
+    let is_optional = member.kind().is_optional();
+    let member_reference = member.deref_ty(resolver).into_owned();
+    type_data_from_member_reference(member_reference, is_optional, resolver)
+}
+
+/// Builds the destructured binding type while preserving optional members.
+fn type_data_from_destructured_member(
+    member: ResolvedTypeMember<'_>,
+    resolver: &dyn TypeResolver,
+) -> Option<TypeData> {
+    let member_reference = member.deref_ty(resolver).into_owned();
+    if member.kind().is_optional() {
+        Some(type_data_from_member_reference(
+            member_reference,
+            true,
+            resolver,
+        ))
+    } else {
+        resolver
+            .resolve_and_get(&member_reference)
+            .map(ResolvedTypeData::to_data)
+    }
+}
+
+/// Builds the member access result, including `undefined` for optional members.
+fn type_data_from_member_reference(
+    reference: TypeReference,
+    is_optional: bool,
+    resolver: &dyn TypeResolver,
+) -> TypeData {
+    if is_optional {
+        TypeData::union_of(resolver, [reference, GLOBAL_UNDEFINED_ID.into()].into())
+    } else {
+        TypeData::reference(reference)
+    }
+}
+
+/// Adds a member reference to a union result.
+fn push_member_reference(
+    types: &mut Vec<TypeReference>,
+    reference: TypeReference,
+    is_optional: bool,
+) {
+    types.push(reference);
+    if is_optional {
+        types.push(GLOBAL_UNDEFINED_ID.into());
+    }
+}
+
+enum CalleeContinuation {
+    Call(TypeofCallExpression),
+    Member(Text),
+}
+
+/// Resolves a callee through lazy expression wrappers and callable object
+/// indirections without recursive call flattening. Every wrapper transition
+/// consumes one shared depth step.
 fn resolve_callee_to_function(
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
-    mut depth: usize,
 ) -> Option<Box<Function>> {
-    depth += 1;
-    if depth > MAX_FLATTEN_DEPTH {
-        return None;
-    }
-
     let mut callee = callee;
-    for _ in 0..MAX_FLATTEN_DEPTH {
+    let mut continuations = FixedStack::<CalleeContinuation, MAX_FLATTEN_DEPTH>::new();
+    let mut remaining_steps = MAX_FLATTEN_DEPTH;
+
+    loop {
+        if let TypeData::TypeofExpression(expr) = callee {
+            remaining_steps = remaining_steps.checked_sub(1)?;
+
+            match *expr {
+                TypeofExpression::Call(expr) => {
+                    callee = resolver.resolve_and_get(&expr.callee)?.to_data();
+                    continuations.push(CalleeContinuation::Call(expr))?;
+                    continue;
+                }
+                TypeofExpression::New(expr) => {
+                    callee = flattened_new(&expr, resolver)?;
+                    continue;
+                }
+                TypeofExpression::StaticMember(expr) => {
+                    callee = resolver.resolve_and_get(&expr.object)?.to_data();
+                    continuations.push(CalleeContinuation::Member(expr.member))?;
+                    continue;
+                }
+                expression => {
+                    callee = flattened_expression(&expression, resolver)?;
+                    continue;
+                }
+            }
+        }
+
+        if matches!(continuations.last(), Some(CalleeContinuation::Member(_))) {
+            let member = match continuations.pop()? {
+                CalleeContinuation::Member(member) => member,
+                CalleeContinuation::Call(_) => return None,
+            };
+            let resolved = resolved_type_data_from_data(&callee, resolver)?;
+            callee = flattened_static_member(resolved, &member, resolver)?;
+            continue;
+        }
+
         match callee {
-            TypeData::Function(function) => return Some(function),
-            // Cross-module generic wrappers (e.g. `export const f = trace(asyncFn)`)
-            // are represented as unflattened `TypeofExpression` nodes when imported.
-            // Eagerly flatten them so the underlying function type is reachable.
-            TypeData::TypeofExpression(expr) => {
-                callee = flattened_expression(&expr, resolver, depth)?;
+            TypeData::Function(function) => {
+                if let Some(CalleeContinuation::Call(expr)) = continuations.pop() {
+                    callee = flattened_function_call(&expr, &function, resolver)?;
+                    continue;
+                }
+
+                return Some(function);
             }
             TypeData::InstanceOf(instance) => {
+                remaining_steps = remaining_steps.checked_sub(1)?;
+
                 let instance_callee = resolver.resolve_and_get(&instance.ty)?;
                 callee = if instance_callee.is_function() {
                     instance_callee.to_data()
@@ -392,7 +640,20 @@ fn resolve_callee_to_function(
                         .to_data()
                 };
             }
-            TypeData::Interface(_) | TypeData::Object(_) => {
+            TypeData::Class(_) | TypeData::Interface(_) | TypeData::Object(_) => {
+                remaining_steps = remaining_steps.checked_sub(1)?;
+
+                if let Some(CalleeContinuation::Call(expr)) = continuations.last() {
+                    match select_overload(&callee, &expr.arguments, resolver) {
+                        OverloadSelection::Selected(function) => {
+                            callee = TypeData::Function(function);
+                            continue;
+                        }
+                        OverloadSelection::NoMatch => return None,
+                        OverloadSelection::NotOverloaded => {}
+                    }
+                }
+
                 callee =
                     ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
                         .find_member(resolver, |member| member.kind().is_call_signature())
@@ -400,17 +661,50 @@ fn resolve_callee_to_function(
                         .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
                         .to_data();
             }
-            _ => break,
+            _ => return None,
         }
     }
-    None
+}
+
+/// Matches constructor overloads by arity, including optional and rest params.
+fn constructor_accepts_argument_count(
+    parameters: &[ConstructorParameter],
+    argument_count: usize,
+) -> bool {
+    let required_count = parameters
+        .iter()
+        .filter(|parameter| {
+            !function_parameter_is_optional(&parameter.parameter)
+                && !function_parameter_is_rest(&parameter.parameter)
+        })
+        .count();
+    let has_rest = parameters
+        .iter()
+        .any(|parameter| function_parameter_is_rest(&parameter.parameter));
+
+    required_count <= argument_count && (has_rest || argument_count <= parameters.len())
+}
+
+/// Reads optionality from either supported parameter shape.
+fn function_parameter_is_optional(parameter: &FunctionParameter) -> bool {
+    match parameter {
+        FunctionParameter::Named(parameter) => parameter.is_optional,
+        FunctionParameter::Pattern(parameter) => parameter.is_optional,
+    }
+}
+
+/// Reads rest-parameter status from either supported parameter shape.
+fn function_parameter_is_rest(parameter: &FunctionParameter) -> bool {
+    match parameter {
+        FunctionParameter::Named(parameter) => parameter.is_rest,
+        FunctionParameter::Pattern(parameter) => parameter.is_rest,
+    }
 }
 
 fn flattened_call(
     expr: &TypeofCallExpression,
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
-    depth: usize,
 ) -> Option<TypeData> {
     match callee {
         TypeData::Union(union) => {
@@ -435,7 +729,7 @@ fn flattened_call(
                     _ => {}
                 }
                 if let Some(function) =
-                    resolve_callee_to_function(resolved.to_data(), resolver, depth)
+                    resolve_callee_for_call(resolved.to_data(), &expr.arguments, resolver)
                     && let Some(result) = flattened_function_call(expr, &function, resolver)
                 {
                     return_types.push(result);
@@ -445,30 +739,36 @@ fn flattened_call(
                 0 => None,
                 1 => Some(return_types.into_iter().next().unwrap()),
                 _ => {
-                    let refs: Vec<_> = return_types
+                    let references = return_types
                         .into_iter()
-                        .map(|ty| {
-                            let id = resolver.register_type(Cow::Owned(ty));
-                            TypeReference::from(ResolvedTypeId::new(resolver.level(), id))
+                        .map(|return_type| {
+                            let type_id = resolver.register_type(Cow::Owned(return_type));
+                            TypeReference::from(ResolvedTypeId::new(resolver.level(), type_id))
                         })
-                        .collect();
-                    Some(TypeData::union_of(resolver, refs.into_boxed_slice()))
+                        .collect::<Box<[_]>>();
+                    Some(TypeData::union_of(resolver, references))
                 }
             }
         }
         callee => {
-            let function = match select_overload(&callee, &expr.arguments, resolver) {
-                OverloadSelection::Selected(function) => function,
-                // The callee is an overload set, but no signature accepts the
-                // arguments. Its result type is unknown, so we must *not* fall
-                // back to silently picking the first call signature.
-                OverloadSelection::NoMatch => return None,
-                OverloadSelection::NotOverloaded => {
-                    resolve_callee_to_function(callee, resolver, depth)?
-                }
-            };
+            let function = resolve_callee_for_call(callee, &expr.arguments, resolver)?;
             flattened_function_call(expr, &function, resolver)
         }
+    }
+}
+
+/// Resolves the callable target for a call expression, selecting overloads first.
+fn resolve_callee_for_call(
+    callee: TypeData,
+    arguments: &[CallArgumentType],
+    resolver: &mut dyn TypeResolver,
+) -> Option<Box<Function>> {
+    match select_overload(&callee, arguments, resolver) {
+        OverloadSelection::Selected(function) => Some(function),
+        // The callee is an overload set, but no signature accepts the arguments.
+        // Its result type is unknown, so do not fall back to the first signature.
+        OverloadSelection::NoMatch => None,
+        OverloadSelection::NotOverloaded => resolve_callee_to_function(callee, resolver),
     }
 }
 
@@ -501,31 +801,37 @@ fn select_overload(
     resolver: &dyn TypeResolver,
 ) -> OverloadSelection {
     let resolved = ResolvedTypeData::from((ResolverId::from_level(resolver.level()), callee));
-    let signatures: Vec<TypeReference> = resolved
+    let mut call_signature_count = 0;
+    let mut selected_function = None;
+
+    for member in resolved
         .all_members(resolver)
         .filter(|member| member.kind().is_call_signature())
-        .map(|member| member.to_member().deref_ty(resolver).into_owned())
-        .collect();
-    if signatures.len() < 2 {
-        return OverloadSelection::NotOverloaded;
+    {
+        call_signature_count += 1;
+
+        if selected_function.is_none() {
+            let member = member.to_member();
+            let signature = member.deref_ty(resolver);
+            if let Some(TypeData::Function(function)) = resolver
+                .resolve_and_get(&signature)
+                .map(ResolvedTypeData::to_data)
+                && signature_accepts_arguments(&function, arguments, resolver)
+            {
+                selected_function = Some(function);
+            }
+        }
+
+        if call_signature_count > 1 && selected_function.is_some() {
+            break;
+        }
     }
 
-    signatures
-        .iter()
-        .find_map(|signature| {
-            match resolver
-                .resolve_and_get(signature)
-                .map(ResolvedTypeData::to_data)
-            {
-                Some(TypeData::Function(function))
-                    if signature_accepts_arguments(&function, arguments, resolver) =>
-                {
-                    Some(function)
-                }
-                _ => None,
-            }
-        })
-        .map_or(OverloadSelection::NoMatch, OverloadSelection::Selected)
+    if call_signature_count < 2 {
+        OverloadSelection::NotOverloaded
+    } else {
+        selected_function.map_or(OverloadSelection::NoMatch, OverloadSelection::Selected)
+    }
 }
 
 /// Narrow applicability heuristic used for overload selection.
@@ -540,8 +846,7 @@ fn select_overload(
 /// Callers must therefore treat a `true` result as "this signature is *not
 /// ruled out*", not as "the arguments are assignable". When real assignability
 /// infrastructure exists, replace this body with `is_assignable_to` per
-/// parameter; the [`select_overload`] seam around it does not need to change.
-// TODO: generalize to a real assignability check once available.
+/// parameter; the [`select_overload`] entry point does not need to change.
 fn signature_accepts_arguments(
     function: &Function,
     arguments: &[CallArgumentType],
@@ -623,21 +928,24 @@ fn flattened_destructure(
                     .find_member(resolver, |member| {
                         !member.is_static() && member.has_name(name.text())
                     })
-                    .or_else(|| subject.find_index_signature_with_ty(resolver, |ty| ty.is_string()))
+                    .or_else(|| {
+                        subject.find_index_signature_with_ty(resolver, |data| data.is_string())
+                    })
             })
-            .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
-            .map(ResolvedTypeData::to_data),
+            .and_then(|member| type_data_from_destructured_member(member, resolver)),
         (TypeData::InstanceOf(subject_instance), DestructureField::RestExcept(names)) => resolver
             .resolve_and_get(&resolved.apply_module_id_to_reference(&subject_instance.ty))
             .map(|subject| flattened_rest_object(resolver, subject, names)),
         (subject @ TypeData::Class(_), DestructureField::Name(name)) => {
-            let member_ty = subject
+            let member = subject
                 .own_members()
-                .find(|own_member| own_member.is_static() && own_member.has_name(name.text()))
-                .map(|member| resolved.apply_module_id_to_reference(&member.ty))?;
-            resolver
-                .resolve_and_get(&member_ty)
-                .map(ResolvedTypeData::to_data)
+                .find(|own_member| {
+                    own_member.is_static()
+                        && !own_member.is_constructor()
+                        && own_member.has_name(name.text())
+                })
+                .map(|member| ResolvedTypeMember::from((resolved.resolver_id(), member)))?;
+            type_data_from_destructured_member(member, resolver)
         }
         (subject @ TypeData::Class(_), DestructureField::RestExcept(names)) => {
             let members = subject
@@ -654,10 +962,10 @@ fn flattened_destructure(
         (_, DestructureField::Name(name)) => {
             let member = resolved
                 .find_member(resolver, |member| member.has_name(name.text()))
-                .or_else(|| resolved.find_index_signature_with_ty(resolver, |ty| ty.is_string()))?;
-            resolver
-                .resolve_and_get(&member.deref_ty(resolver))
-                .map(ResolvedTypeData::to_data)
+                .or_else(|| {
+                    resolved.find_index_signature_with_ty(resolver, |data| data.is_string())
+                })?;
+            type_data_from_destructured_member(member, resolver)
         }
         (_, DestructureField::RestExcept(excluded_names)) => {
             Some(flattened_rest_object(resolver, resolved, excluded_names))
@@ -670,46 +978,80 @@ fn flattened_function_call(
     function: &Function,
     resolver: &mut dyn TypeResolver,
 ) -> Option<TypeData> {
-    let return_ty_reference = function.return_type.as_type()?;
-    let mut return_ty = resolver.resolve_and_get(return_ty_reference)?.to_data();
+    let return_type_reference = function.return_type.as_type()?;
+    let mut return_type = resolver.resolve_and_get(return_type_reference)?.to_data();
 
-    let generic_references = match &return_ty {
-        TypeData::InstanceOf(instance) => {
-            let mut generic_references = match resolver.resolve_and_get(&instance.ty) {
-                Some(resolved) if resolved.is_generic() => vec![instance.ty.clone()],
-                _ => Vec::new(),
-            };
-            for param in &instance.type_parameters {
-                match resolver.resolve_and_get(param) {
-                    Some(resolved) if resolved.is_generic() => {
-                        generic_references.push(param.clone())
-                    }
-                    _ => {}
-                }
-            }
-            generic_references
+    let generic_reference = match &return_type {
+        TypeData::InstanceOf(instance)
+            if resolver
+                .resolve_and_get(&instance.ty)
+                .is_some_and(|resolved| resolved.is_generic()) =>
+        {
+            Some(instance.ty.clone())
         }
-        _ => Vec::new(),
+        _ => None,
     };
+    if let Some(generic_reference) = generic_reference {
+        infer_generic_arguments(
+            resolver,
+            &mut return_type,
+            return_type_reference,
+            &generic_reference,
+            function,
+            expr,
+        );
+    }
 
-    // The time complexity is not great on this, but fortunately most functions
-    // have very few generics and not too many arguments either.
-    for generic_reference in generic_references {
-        for (index, param) in function.parameters.iter().enumerate() {
-            if let Some(arg) = expr.arguments.get(index) {
-                infer_generic_arg(
-                    resolver,
-                    &mut return_ty,
-                    return_ty_reference,
-                    &generic_reference,
-                    param,
-                    arg,
-                );
-            }
+    let mut type_parameter_index = 0;
+    while let TypeData::InstanceOf(instance) = &return_type {
+        let generic_reference = {
+            let Some(type_parameter) = instance.type_parameters.get(type_parameter_index) else {
+                break;
+            };
+            type_parameter_index += 1;
+            resolver
+                .resolve_and_get(type_parameter)
+                .is_some_and(|resolved| resolved.is_generic())
+                .then(|| type_parameter.clone())
+        };
+
+        if let Some(generic_reference) = generic_reference {
+            infer_generic_arguments(
+                resolver,
+                &mut return_type,
+                return_type_reference,
+                &generic_reference,
+                function,
+                expr,
+            );
         }
     }
 
-    Some(return_ty)
+    Some(return_type)
+}
+
+fn infer_generic_arguments(
+    resolver: &dyn TypeResolver,
+    target: &mut TypeData,
+    target_reference: &TypeReference,
+    generic_reference: &TypeReference,
+    function: &Function,
+    expr: &TypeofCallExpression,
+) {
+    // The time complexity is not great on this, but fortunately most functions
+    // have very few generics and not too many arguments either.
+    for (index, parameter) in function.parameters.iter().enumerate() {
+        if let Some(argument) = expr.arguments.get(index) {
+            infer_generic_arg(
+                resolver,
+                target,
+                target_reference,
+                generic_reference,
+                parameter,
+                argument,
+            );
+        }
+    }
 }
 
 fn infer_generic_arg(
@@ -835,5 +1177,41 @@ fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
         TypeData::Symbol => TypeData::reference(GLOBAL_SYMBOL_STRING_LITERAL_ID),
         TypeData::Undefined => TypeData::reference(GLOBAL_UNDEFINED_STRING_LITERAL_ID),
         _ => TypeData::reference(GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::NamedFunctionParameter;
+
+    fn constructor_parameter(is_optional: bool, is_rest: bool) -> ConstructorParameter {
+        ConstructorParameter {
+            parameter: FunctionParameter::Named(NamedFunctionParameter {
+                name: Text::new_static("args"),
+                ty: TypeReference::unknown(),
+                is_optional,
+                is_rest,
+            }),
+            accessibility: None,
+        }
+    }
+
+    #[test]
+    fn rest_constructor_accepts_zero_arguments() {
+        let parameters = [constructor_parameter(false, true)];
+
+        assert!(constructor_accepts_argument_count(&parameters, 0));
+    }
+
+    #[test]
+    fn required_constructor_parameter_still_requires_an_argument() {
+        let parameters = [
+            constructor_parameter(false, false),
+            constructor_parameter(false, true),
+        ];
+
+        assert!(!constructor_accepts_argument_count(&parameters, 0));
+        assert!(constructor_accepts_argument_count(&parameters, 1));
     }
 }
