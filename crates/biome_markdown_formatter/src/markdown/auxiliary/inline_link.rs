@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
@@ -18,16 +19,43 @@ impl FormatNodeRule<MdInlineLink> for FormatMdInlineLink {
             l_paren_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                l_brack_token.format(),
+        let mut text_items = text.iter();
+        let single_textual = match text_items.next() {
+            Some(AnyMdInline::MdTextual(textual)) if text_items.next().is_none() => Some(textual),
+            _ => None,
+        };
+
+        let should_escape_text = if let Some(textual) = &single_textual {
+            textual.value_token()?.text() == "*"
+        } else {
+            false
+        };
+
+        let text = format_with(|f| {
+            if should_escape_text && let Some(textual) = &single_textual {
+                textual
+                    .format()
+                    .with_options(FormatMdTextualOptions {
+                        should_escape: true,
+                        ..FormatMdTextualOptions::default()
+                    })
+                    .fmt(f)
+            } else {
                 text.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
                         keep_fences_in_italics: false,
                         text_context: TextContext::Neutral,
-                    }),
+                    })
+                    .fmt(f)
+            }
+        });
+
+        write!(
+            f,
+            [
+                l_brack_token.format(),
+                text,
                 r_brack_token.format(),
                 l_paren_token.format(),
                 format_inline_destination(&destination, TextPrintMode::trim_all())

@@ -8,6 +8,8 @@ info: markdown/inline_links.md
 ```md
 [hello](#world)
 
+[*](#styling-footnote)
+
 [  spaced  ](#link)
 
 [link](https://example.com "title")
@@ -31,6 +33,8 @@ text with [inline](link) in the middle
 
 ```md
 [hello](#world)
+
+[\*](#styling-footnote)
 
 [  spaced  ](#link)
 

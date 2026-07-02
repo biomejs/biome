@@ -1,5 +1,7 @@
 [hello](#world)
 
+[*](#styling-footnote)
+
 [  spaced  ](#link)
 
 [link](https://example.com "title")
