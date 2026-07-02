@@ -1,6 +1,7 @@
 use crate::bullet_list::FmtAnyList;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::FormatRuleWithOptions;
@@ -8,14 +9,12 @@ use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MdBlockList, MdBullet, MdParagraph,
+    MdQuote,
 };
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdBlockList {
-    /// When true, it removes all leading newlines and trailing newlines
-    paragraph_print_mode: TextPrintMode,
-
-    trim: bool,
+    quote_boundary_trim: QuoteBoundaryTrim,
 }
 impl FormatRule<MdBlockList> for FormatMdBlockList {
     type Context = MarkdownFormatContext;
@@ -32,16 +31,27 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             TextContext::Neutral
         };
 
-        if !self.trim {
-            let mut prev_content = PrevContentBlock::None;
-            let mut iter = node.iter().peekable();
+        let should_not_trim = node
+            .syntax()
+            .parent()
+            .is_some_and(|node| MdQuote::can_cast(node.kind()));
 
-            while let Some(node) = iter.next() {
+        if should_not_trim {
+            let quote_trim_range = quote_boundary_trim_range(node, self.quote_boundary_trim);
+            let mut prev_content = PrevContentBlock::None;
+            let mut iter = node.iter().enumerate().peekable();
+
+            while let Some((index, node)) = iter.next() {
+                if !quote_trim_range.contains(&index) {
+                    joiner.entry(&format_with(|f| format_removed_quote_boundary(&node, f)));
+                    continue;
+                }
+
                 match &node {
                     AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
                         prev_content = PrevContentBlock::Paragraph;
                         joiner.entry(&paragraph.format().with_options(FormatMdParagraphOptions {
-                            trim_mode: self.paragraph_print_mode,
+                            trim_mode: TextPrintMode::Pristine,
                             text_context,
                         }));
                     }
@@ -53,7 +63,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     node if node.is_newline() => {
                         if prev_content == PrevContentBlock::Header
-                            && iter.peek().is_some_and(|next| !next.is_newline())
+                            && iter.peek().is_some_and(|(_, next)| !next.is_newline())
                         {
                             let entry =
                                 format_with(|f| write!(f, [node.format(), hard_line_break()]));
@@ -66,7 +76,7 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
 
                     AnyMdBlock::MdQuotePrefix(prefix)
                         if prev_content == PrevContentBlock::Paragraph
-                            && iter.peek().is_some_and(|next| next.is_fenced_block()) =>
+                            && iter.peek().is_some_and(|(_, next)| next.is_fenced_block()) =>
                     {
                         prev_content = PrevContentBlock::Other;
                         let entry = format_with(|f| {
@@ -108,22 +118,132 @@ enum PrevContentBlock {
     Other,
 }
 
-pub(crate) struct FormatMdBlockListOptions {
-    /// Signals how [MdParagraph] should be formatted
-    pub(crate) paragraph_print_mode: TextPrintMode,
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) enum QuoteBoundaryTrim {
+    /// Preserve quote-only boundary lines.
+    #[default]
+    None,
+    /// Remove quote-only lines before blockquote content.
+    Leading,
+    /// Remove quote-only lines before and after blockquote content.
+    LeadingAndTrailing,
+}
 
-    /// When true, leading and trailing newlines are removed
-    pub(crate) trim: bool,
+pub(crate) struct FormatMdBlockListOptions {
+    /// Controls removal of quote-only boundary lines.
+    pub(crate) quote_boundary_trim: QuoteBoundaryTrim,
 }
 
 impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
     type Options = FormatMdBlockListOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.paragraph_print_mode = options.paragraph_print_mode;
-        self.trim = options.trim;
+        self.quote_boundary_trim = options.quote_boundary_trim;
         self
     }
+}
+
+fn format_removed_quote_boundary(node: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
+    match node {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) => {
+            write!(
+                f,
+                [newline.format().with_options(FormatMdNewlineOptions {
+                    should_remove: true,
+                })]
+            )
+        }
+        AnyMdBlock::MdQuotePrefix(prefix) => write!(
+            f,
+            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                should_remove: true,
+            })]
+        ),
+        _ => write!(f, [node.format()]),
+    }
+}
+
+pub(crate) fn quote_boundary_trim_range(
+    node: &MdBlockList,
+    quote_boundary_trim: QuoteBoundaryTrim,
+) -> std::ops::Range<usize> {
+    let start = match quote_boundary_trim {
+        QuoteBoundaryTrim::None => 0,
+        QuoteBoundaryTrim::Leading | QuoteBoundaryTrim::LeadingAndTrailing => {
+            quote_boundary_trim_start(node)
+        }
+    };
+    let end = match quote_boundary_trim {
+        QuoteBoundaryTrim::LeadingAndTrailing => quote_boundary_trim_end(node, start),
+        QuoteBoundaryTrim::None | QuoteBoundaryTrim::Leading => node.len(),
+    };
+
+    start..end
+}
+
+/// Finds the first blocklist entry that belongs to blockquote content.
+///
+/// Quote-only lines at the start of a blockquote do not all have the same CST
+/// shape. The first quote-only line uses the `MdQuote` node's own prefix, so
+/// the content list starts with `MdNewline`. Later quote-only lines are stored
+/// as `MdQuotePrefix` followed by `MdNewline`. The scan trims only those exact
+/// boundary shapes and stops when a quote prefix is followed by real content.
+fn quote_boundary_trim_start(node: &MdBlockList) -> usize {
+    let mut iter = node.iter().enumerate().peekable();
+    let mut start = 0;
+
+    // The first empty line of a blockquote is represented by the quote node's
+    // own prefix plus a leading newline in the content list.
+    if iter.peek().is_some_and(|(_, block)| block.is_newline()) {
+        iter.next();
+        start = 1;
+    }
+
+    // Additional quote-only leading lines are represented as
+    // MdQuotePrefix + MdNewline pairs. Stop as soon as a quote prefix is
+    // followed by real content; that prefix belongs to the content line.
+    while let Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) = iter.next() {
+        if iter.peek().is_some_and(|(_, block)| block.is_newline()) {
+            iter.next();
+            start = prefix_index + 2;
+        } else {
+            break;
+        }
+    }
+
+    start
+}
+
+/// Finds the exclusive end of blockquote content after trailing boundary trim.
+///
+/// Trailing quote-only lines can be represented as a final `MdQuotePrefix`, or
+/// as `MdQuotePrefix` followed by `MdNewline`. The backward scan trims only
+/// those shapes. A newline is not enough by itself: it belongs to a quote-only
+/// boundary only when the previous block-list entry is an `MdQuotePrefix`.
+fn quote_boundary_trim_end(node: &MdBlockList, start: usize) -> usize {
+    let mut iter = node.iter().enumerate();
+    let mut end = node.len();
+
+    loop {
+        match iter.next_back() {
+            // A final MdQuotePrefix is a quote-only trailing line without its
+            // own newline token.
+            Some((index, AnyMdBlock::MdQuotePrefix(_))) if index >= start => {
+                end = index;
+            }
+            // A final newline can belong to a quote-only trailing line only
+            // when it is immediately preceded by an MdQuotePrefix.
+            Some((_, block)) if block.is_newline() => match iter.next_back() {
+                Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) if prefix_index >= start => {
+                    end = prefix_index;
+                }
+                _ => break,
+            },
+            _ => break,
+        }
+    }
+
+    end
 }
 
 pub(crate) struct DefaultBlockListFormatter {

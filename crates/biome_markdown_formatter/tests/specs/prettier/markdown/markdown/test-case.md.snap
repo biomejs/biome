@@ -220,7 +220,15 @@ This paragraph has some `code` in it.
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -112,6 +112,7 @@
+@@ -69,6 +69,7 @@
+ > ## This is a header.
+ > 1. This is the first list item.
+ 2. This is the second list item.
++>
+ > Here's some example code:
+ >
+ >     Markdown.generate();
+@@ -111,6 +112,7 @@
  * Blue
  ```
  
@@ -305,7 +313,7 @@ IR differences:
    source_position(219),
    "
  ",
-@@ -130,1605 +122,1609 @@
+@@ -130,1600 +122,1609 @@
    source_position(223),
    " ",
    source_position(224),
@@ -873,17 +881,15 @@ IR differences:
      hard_line_break,
      hard_line_break
    ]),
--  source_position(1087),
+-  source_position(1089),
 +  source_position(1119),
    ">",
--  source_position(1088),
-+  source_position(1120),
-   "
- ",
--  source_position(1089),
-+  source_position(1121),
-   ">",
 -  source_position(1090),
++  source_position(1120),
++  "
++",
++  source_position(1121),
++  ">",
 +  source_position(1122),
    " ",
 -  source_position(1091),
