@@ -36,6 +36,10 @@ info: markdown/inline_image.md
 
 ![alt with `code`](<url>)
 
+![encoded](https://www.google.fr/()foo->bar)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
+
 ```
 
 
@@ -71,6 +75,10 @@ info: markdown/inline_image.md
 ![alt with `code`](image.png)
 
 ![alt with `code`](url)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
 
 ```
 

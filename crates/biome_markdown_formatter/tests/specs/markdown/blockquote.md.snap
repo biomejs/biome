@@ -55,6 +55,14 @@ info: markdown/blockquote.md
 
 > This is a long long long long long long long long long long long long long long long paragraph in a quote.
 
+> bar
+>
+baz
+
+>
+> trimmed quote boundaries
+>
+
 ```
 
 
@@ -109,6 +117,12 @@ info: markdown/blockquote.md
 > another short
 
 > This is a long long long long long long long long long long long long long long long paragraph in a quote.
+
+> bar
+>
+baz
+
+> trimmed quote boundaries
 
 ```
 

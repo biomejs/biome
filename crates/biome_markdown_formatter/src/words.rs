@@ -1,10 +1,13 @@
 use biome_formatter::prelude::*;
-use biome_formatter::{Format, FormatOptions, FormatResult};
-use biome_markdown_syntax::{AnyMdInline, MdHardLine, MdInlineItemList};
+use biome_formatter::{Format, FormatOptions, FormatResult, write};
+use biome_markdown_syntax::{
+    AnyMdInline, MdHardLine, MdInlineEmphasis, MdInlineItalic, MdInlineItemList,
+    emphasis_ext::{MdEmphasisFence, MdItalicFence},
+};
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
 
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
-use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed};
+use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed, format_replaced};
 
 /// A word slice from a syntax token — stores the text and source position for source maps.
 #[derive(Debug, Clone)]
@@ -51,7 +54,12 @@ pub(crate) enum ProseAtom {
 #[derive(Debug, Clone)]
 pub(crate) enum ProseItem {
     /// One or more adjacent atoms with no whitespace between them (a single "word").
-    WordGroup(Vec<ProseAtom>),
+    WordGroup {
+        /// Adjacent text slices and inline elements printed without separators.
+        atoms: Vec<ProseAtom>,
+        /// Special printing mode for emphasis delimiter runs that must not be emitted raw.
+        escape: WordGroupEscape,
+    },
     /// Whitespace between words — becomes the fill separator.
     Space,
     /// Source line break (\n) — behavior depends on proseWrap mode.
@@ -78,15 +86,23 @@ pub(crate) fn build_word_stream_flat(
 
     // Flush any remaining word group
     if !current_word_group.is_empty() {
-        stream.push(ProseItem::WordGroup(current_word_group));
+        stream.push(ProseItem::WordGroup {
+            atoms: current_word_group,
+            escape: WordGroupEscape::None,
+        });
     }
+
+    mark_words_that_need_escaping(&mut stream);
 
     Ok(WordStreamResult { stream })
 }
 
 fn flush_word_group(stream: &mut Vec<ProseItem>, current: &mut Vec<ProseAtom>) {
     if !current.is_empty() {
-        stream.push(ProseItem::WordGroup(std::mem::take(current)));
+        stream.push(ProseItem::WordGroup {
+            atoms: std::mem::take(current),
+            escape: WordGroupEscape::None,
+        });
     }
 }
 
@@ -224,11 +240,32 @@ fn build_word_stream(
 }
 
 /// Format a single word group (all atoms concatenated without separators).
-pub(crate) struct FormatWordGroup<'a>(pub(crate) &'a [ProseAtom]);
+pub(crate) struct FormatWordGroup<'a> {
+    pub(crate) atoms: &'a [ProseAtom],
+    pub(crate) escape: WordGroupEscape,
+}
 
 impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        for atom in self.0 {
+        if self.escape == WordGroupEscape::EscapeEachMarker {
+            for atom in self.atoms {
+                match atom {
+                    ProseAtom::Word(word) => write!(f, [token("\\"), word])?,
+                    ProseAtom::InlineElement(elem) => elem.format().fmt(f)?,
+                }
+            }
+            return Ok(());
+        }
+
+        if self.escape == WordGroupEscape::EmptyStrongWithEscapedMarker {
+            return fmt_empty_strong_delimiter_run(self.atoms, f);
+        }
+
+        if fmt_unmatched_underscore_delimiter_run(self.atoms, f)? {
+            return Ok(());
+        }
+
+        for atom in self.atoms {
             match atom {
                 ProseAtom::Word(word) => word.fmt(f)?,
                 ProseAtom::InlineElement(elem) => {
@@ -238,4 +275,410 @@ impl Format<MarkdownFormatContext> for FormatWordGroup<'_> {
         }
         Ok(())
     }
+}
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
+pub(crate) enum WordGroupEscape {
+    /// Print the word group normally.
+    #[default]
+    None,
+    /// Prefix each marker atom with a backslash.
+    EscapeEachMarker,
+    /// Print a five-marker delimiter run as strong emphasis around an escaped marker.
+    EmptyStrongWithEscapedMarker,
+}
+
+fn fmt_unmatched_underscore_delimiter_run(
+    atoms: &[ProseAtom],
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    match atoms {
+        [
+            ProseAtom::Word(leading),
+            ProseAtom::InlineElement(AnyMdInline::MdInlineItalic(italic)),
+        ] if is_single_underscore_word(leading) => {
+            fmt_leading_underscore_with_italic(leading, italic, f)
+        }
+        [
+            ProseAtom::InlineElement(AnyMdInline::MdInlineItalic(italic)),
+            ProseAtom::Word(trailing),
+        ] if is_single_underscore_word(trailing) => {
+            fmt_italic_with_trailing_underscore(italic, trailing, f)
+        }
+        [
+            ProseAtom::Word(first),
+            ProseAtom::Word(second),
+            ProseAtom::Word(third),
+            ProseAtom::InlineElement(AnyMdInline::MdInlineItalic(italic)),
+        ] if is_single_underscore_word(first)
+            && is_single_underscore_word(second)
+            && is_single_underscore_word(third) =>
+        {
+            fmt_leading_underscore_run_with_italic(first, second, third, italic, f)
+        }
+        [
+            ProseAtom::Word(leading),
+            ProseAtom::InlineElement(AnyMdInline::MdInlineEmphasis(emphasis)),
+        ] if is_single_underscore_word(leading) => {
+            fmt_leading_underscore_with_emphasis(leading, emphasis, f)
+        }
+        [
+            ProseAtom::InlineElement(AnyMdInline::MdInlineEmphasis(emphasis)),
+            ProseAtom::Word(trailing),
+        ] if is_single_underscore_word(trailing) => {
+            fmt_emphasis_with_trailing_underscore(emphasis, trailing, f)
+        }
+        _ => Ok(false),
+    }
+}
+
+fn is_single_underscore_word(word: &MdWord) -> bool {
+    word.text.text() == "_"
+}
+
+fn fmt_escaped_underscore_word(
+    word: &MdWord,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<()> {
+    write!(f, [token("\\"), word])
+}
+
+fn fmt_leading_underscore_with_italic(
+    leading: &MdWord,
+    italic: &MdInlineItalic,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    if italic.fence()? != MdItalicFence::Underscore {
+        return Ok(false);
+    }
+
+    write!(
+        f,
+        [
+            format_with(|f| fmt_escaped_underscore_word(leading, f)),
+            italic.format()
+        ]
+    )?;
+
+    Ok(true)
+}
+
+fn fmt_italic_with_trailing_underscore(
+    italic: &MdInlineItalic,
+    trailing: &MdWord,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let l_fence = italic.l_fence()?;
+    let r_fence = italic.r_fence()?;
+    if italic.fence()? != MdItalicFence::Underscore {
+        return Ok(false);
+    }
+    f.context().comments().is_suppressed(italic.syntax());
+
+    write!(
+        f,
+        [
+            format_replaced(&l_fence, &text("\\_", Some(l_fence.text_range().start()))),
+            italic.content().format(),
+            format_replaced(&r_fence, &text("\\_", Some(r_fence.text_range().start()))),
+            format_with(|f| fmt_escaped_underscore_word(trailing, f)),
+        ]
+    )?;
+
+    Ok(true)
+}
+
+fn fmt_leading_underscore_run_with_italic(
+    first: &MdWord,
+    second: &MdWord,
+    third: &MdWord,
+    italic: &MdInlineItalic,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let l_fence = italic.l_fence()?;
+    let r_fence = italic.r_fence()?;
+    if italic.fence()? != MdItalicFence::Underscore {
+        return Ok(false);
+    }
+    f.context().comments().is_suppressed(italic.syntax());
+
+    write!(
+        f,
+        [
+            format_with(|f| fmt_escaped_underscore_word(first, f)),
+            second,
+            format_with(|f| fmt_escaped_underscore_word(third, f)),
+            format_replaced(&l_fence, &text("\\_", Some(l_fence.text_range().start()))),
+            italic.content().format(),
+            r_fence.format(),
+        ]
+    )?;
+
+    Ok(true)
+}
+
+fn fmt_leading_underscore_with_emphasis(
+    leading: &MdWord,
+    emphasis: &MdInlineEmphasis,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let l_fence = emphasis.l_fence()?;
+    let r_fence = emphasis.r_fence()?;
+    if emphasis.fence()? != MdEmphasisFence::DoubleUnderscore {
+        return Ok(false);
+    }
+    f.context().comments().is_suppressed(emphasis.syntax());
+
+    write!(
+        f,
+        [
+            format_replaced(&l_fence, &text("**", Some(l_fence.text_range().start()))),
+            format_with(|f| fmt_escaped_underscore_word(leading, f)),
+            emphasis.content().format(),
+            format_replaced(&r_fence, &text("**", Some(r_fence.text_range().start()))),
+        ]
+    )?;
+
+    Ok(true)
+}
+
+fn fmt_emphasis_with_trailing_underscore(
+    emphasis: &MdInlineEmphasis,
+    trailing: &MdWord,
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<bool> {
+    let l_fence = emphasis.l_fence()?;
+    let r_fence = emphasis.r_fence()?;
+    if emphasis.fence()? != MdEmphasisFence::DoubleUnderscore {
+        return Ok(false);
+    }
+    f.context().comments().is_suppressed(emphasis.syntax());
+
+    write!(
+        f,
+        [
+            format_replaced(&l_fence, &text("**", Some(l_fence.text_range().start()))),
+            emphasis.content().format(),
+            format_with(|f| fmt_escaped_underscore_word(trailing, f)),
+            format_replaced(&r_fence, &text("**", Some(r_fence.text_range().start()))),
+        ]
+    )?;
+
+    Ok(true)
+}
+
+#[derive(Debug, Clone, Copy)]
+struct EmptyEmphasisDelimiterRun {
+    delimiter: u8,
+    len: usize,
+}
+
+impl EmptyEmphasisDelimiterRun {
+    fn matches_start_of_word_group(self, atoms: &[ProseAtom]) -> bool {
+        self.matches_word_group_boundary(atoms.iter().map(|atom| match atom {
+            ProseAtom::Word(word) => Some(word.text.text().bytes()),
+            ProseAtom::InlineElement(_) => None,
+        }))
+    }
+
+    fn matches_end_of_word_group(self, atoms: &[ProseAtom]) -> bool {
+        self.matches_word_group_boundary(atoms.iter().rev().map(|atom| match atom {
+            ProseAtom::Word(word) => Some(word.text.text().bytes().rev()),
+            ProseAtom::InlineElement(_) => None,
+        }))
+    }
+
+    fn matches_word_group_boundary<I, B>(self, words: I) -> bool
+    where
+        I: IntoIterator<Item = Option<B>>,
+        B: IntoIterator<Item = u8>,
+    {
+        let mut remaining = self.len;
+
+        for word in words {
+            let Some(bytes) = word else {
+                return false;
+            };
+
+            for byte in bytes {
+                if byte != self.delimiter {
+                    return false;
+                }
+
+                remaining -= 1;
+                if remaining == 0 {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+}
+
+fn mark_words_that_need_escaping(stream: &mut [ProseItem]) {
+    for index in 0..stream.len() {
+        let escape = word_group_escape(stream, index);
+        if let ProseItem::WordGroup {
+            escape: word_group_escape,
+            ..
+        } = &mut stream[index]
+        {
+            *word_group_escape = escape;
+        }
+    }
+}
+
+/// Returns how a word group should print marker-only text.
+///
+/// A word group needs special escaping when every atom is plain text, the whole
+/// group looks like an empty emphasis delimiter run, and the run is not paired
+/// with a matching marker boundary elsewhere in the paragraph:
+///
+/// - `**` or `__`, which looks like empty emphasis.
+/// - `***` or `___`, which looks like an empty combined emphasis/strong run.
+/// - `****` or `____`, which looks like empty strong emphasis.
+/// - `*****` or `_____`, which is printed as strong emphasis containing an
+///   escaped literal marker.
+///
+/// The Markdown parser keeps these marker runs as plain `MdTextual` words.
+/// Although they parse as literal text, printing them raw makes them look like
+/// emphasis delimiters, so the formatter prints an escaped form.
+///
+/// If another word in the paragraph starts or ends with the same marker run,
+/// the run is treated as part of that larger emphasis-like boundary and left
+/// unchanged. This preserves cases such as `** foo bar**`, `**foo bar **`, and
+/// their `_` equivalents.
+///
+/// Inline atoms are excluded because emphasis, links, code spans, and other
+/// structured inline nodes already own their delimiters and escaping rules.
+/// Single markers and runs longer than five are left unchanged because they are
+/// outside this empty-emphasis compatibility case.
+fn word_group_escape(stream: &[ProseItem], index: usize) -> WordGroupEscape {
+    let Some(ProseItem::WordGroup { atoms, .. }) = stream.get(index) else {
+        return WordGroupEscape::None;
+    };
+
+    let Some(delimiter_run) = empty_emphasis_delimiter_run(atoms) else {
+        return WordGroupEscape::None;
+    };
+
+    if has_matching_marker_boundary_before(stream, index, delimiter_run)
+        || has_matching_marker_boundary_after(stream, index, delimiter_run)
+    {
+        return WordGroupEscape::None;
+    }
+
+    match delimiter_run.len {
+        2..=4 => WordGroupEscape::EscapeEachMarker,
+        5 => WordGroupEscape::EmptyStrongWithEscapedMarker,
+        _ => WordGroupEscape::None,
+    }
+}
+
+fn fmt_empty_strong_delimiter_run(
+    atoms: &[ProseAtom],
+    f: &mut Formatter<MarkdownFormatContext>,
+) -> FormatResult<()> {
+    let Some(delimiter_run) = empty_emphasis_delimiter_run(atoms) else {
+        return Ok(());
+    };
+
+    debug_assert_eq!(
+        delimiter_run.len, 5,
+        "empty strong delimiter formatting is selected only for five-marker runs"
+    );
+
+    let mut positions = Vec::with_capacity(delimiter_run.len);
+    for atom in atoms {
+        let ProseAtom::Word(word) = atom else {
+            return Ok(());
+        };
+
+        for index in 0..word.text.text().len() {
+            positions.push(word.source_position + TextSize::from(index as u32));
+        }
+    }
+
+    let escaped_marker = if delimiter_run.delimiter == b'*' {
+        "\\*"
+    } else {
+        "\\_"
+    };
+
+    if positions.len() != 5 {
+        for atom in atoms {
+            if let ProseAtom::Word(word) = atom {
+                word.fmt(f)?;
+            }
+        }
+        return Ok(());
+    }
+
+    // Five marker runs are printed as strong emphasis around an escaped marker:
+    // the first two markers become the opening `**`, the middle marker is
+    // escaped, and the last two markers become the closing `**`.
+    let first = positions[0];
+    let middle = positions[2];
+    let last_start = positions[3];
+
+    write!(
+        f,
+        [
+            text("**", Some(first)),
+            text(escaped_marker, Some(middle)),
+            text("**", Some(last_start)),
+        ]
+    )
+}
+
+fn empty_emphasis_delimiter_run(atoms: &[ProseAtom]) -> Option<EmptyEmphasisDelimiterRun> {
+    let mut delimiter = None;
+    let mut len = 0usize;
+
+    for atom in atoms {
+        let ProseAtom::Word(word) = atom else {
+            return None;
+        };
+
+        for byte in word.text.text().bytes() {
+            if !matches!(byte, b'*' | b'_') {
+                return None;
+            }
+
+            if let Some(delimiter) = delimiter {
+                if delimiter != byte {
+                    return None;
+                }
+            } else {
+                delimiter = Some(byte);
+            }
+
+            len += 1;
+        }
+    }
+
+    delimiter.map(|delimiter| EmptyEmphasisDelimiterRun { delimiter, len })
+}
+
+fn has_matching_marker_boundary_before(
+    stream: &[ProseItem],
+    index: usize,
+    delimiter_run: EmptyEmphasisDelimiterRun,
+) -> bool {
+    stream[..index].iter().any(|item| match item {
+        ProseItem::WordGroup { atoms, .. } => delimiter_run.matches_start_of_word_group(atoms),
+        _ => false,
+    })
+}
+
+fn has_matching_marker_boundary_after(
+    stream: &[ProseItem],
+    index: usize,
+    delimiter_run: EmptyEmphasisDelimiterRun,
+) -> bool {
+    stream[index + 1..].iter().any(|item| match item {
+        ProseItem::WordGroup { atoms, .. } => delimiter_run.matches_end_of_word_group(atoms),
+        _ => false,
+    })
 }

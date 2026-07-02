@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::indent_token::FormatMdIndentTokenOptions;
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{AnyMdInline, MdIndentCodeBlock, MdIndentCodeBlockFields};
@@ -26,7 +27,30 @@ impl FormatNodeRule<MdIndentCodeBlock> for FormatMdIndentCodeBlock {
         let MdIndentCodeBlockFields { content } = node.as_fields();
 
         if !self.in_list {
-            return content.format().fmt(f);
+            let mut at_line_start = true;
+            for item in content.iter() {
+                match &item {
+                    AnyMdInline::MdIndentToken(indent) => {
+                        write!(
+                            f,
+                            [indent.format().with_options(FormatMdIndentTokenOptions {
+                                replace_tabs_with_spaces: at_line_start,
+                            })]
+                        )?;
+                        at_line_start = false;
+                    }
+                    AnyMdInline::MdTextual(text) => {
+                        write!(f, [item.format()])?;
+                        at_line_start = text.is_newline()?;
+                    }
+                    _ => {
+                        write!(f, [item.format()])?;
+                        at_line_start = false;
+                    }
+                }
+            }
+
+            return Ok(());
         }
 
         write!(
