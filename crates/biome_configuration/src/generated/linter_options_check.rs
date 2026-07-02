@@ -957,6 +957,16 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noReactLeakedInterval",
+        TypeId::of::<biome_rule_options::no_react_leaked_interval::NoReactLeakedIntervalOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noReactLeakedTimeout",
+        TypeId::of::<biome_rule_options::no_react_leaked_timeout::NoReactLeakedTimeoutOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noReactNativeDeepImports",
         TypeId::of::<
             biome_rule_options::no_react_native_deep_imports::NoReactNativeDeepImportsOptions,
