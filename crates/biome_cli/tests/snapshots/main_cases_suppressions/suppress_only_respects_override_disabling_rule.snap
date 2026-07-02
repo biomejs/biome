@@ -1,0 +1,49 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["foo/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+## `foo/overridden.js`
+
+```js
+debugger;
+```
+
+## `src/regular.js`
+
+```js
+// biome-ignore lint/suspicious/noDebugger: ignored using `--suppress`
+debugger;
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. Fixed 1 file.
+```
