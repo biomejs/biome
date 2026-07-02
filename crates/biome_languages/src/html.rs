@@ -105,11 +105,17 @@ impl HtmlFileSource {
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        let Some(extension) = path.extension() else {
-            return Err(FileSourceError::MissingFileExtension);
-        };
+        // Be careful with definition files, because `Path::extension()` only
+        // returns the extension after the _last_ dot:
+        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        if file_name.ends_with(".component.html") {
+            return Self::try_from_extension("component.html");
+        }
 
-        Self::try_from_extension(extension)
+        match path.extension() {
+            Some(extension) => Self::try_from_extension(extension),
+            None => Err(FileSourceError::MissingFileExtension),
+        }
     }
 
     /// Try to return the HTML file source corresponding to this file extension
@@ -120,6 +126,7 @@ impl HtmlFileSource {
             "astro" => Ok(Self::astro()),
             "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
+            "component.html" => Ok(Self::angular()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
