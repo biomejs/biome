@@ -207,6 +207,7 @@ pub mod no_react_forward_ref;
 pub mod no_react_native_deep_imports;
 pub mod no_react_native_literal_colors;
 pub mod no_react_native_raw_text;
+pub mod no_react_object_type_as_default_prop;
 pub mod no_react_prop_assignments;
 pub mod no_react_specific_props;
 pub mod no_react_string_refs;

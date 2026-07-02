@@ -2519,6 +2519,11 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
+	* Disallow array, object, and function values as default props.
+See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop 
+	 */
+	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;
+	/**
 	* Disallow string refs in React components.
 See https://biomejs.dev/linter/rules/no-react-string-refs 
 	 */
@@ -4728,6 +4733,9 @@ export type NoReactNativeLiteralColorsConfiguration =
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
+export type NoReactObjectTypeAsDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
 export type NoReactStringRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactStringRefsOptions;
@@ -6603,6 +6611,10 @@ export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
 }
+export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactObjectTypeAsDefaultPropOptions;
+}
 export interface RuleWithNoReactStringRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactStringRefsOptions;
@@ -8313,6 +8325,7 @@ export interface NoReactNativeRawTextOptions {
 	 */
 	skip?: string[];
 }
+export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -9703,6 +9716,7 @@ export type Category =
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
+	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"

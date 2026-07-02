@@ -974,6 +974,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noReactNativeRawText",
         TypeId::of::<biome_rule_options::no_react_native_raw_text::NoReactNativeRawTextOptions>(),
     ));
+    result.push(("nursery", "noReactObjectTypeAsDefaultProp", TypeId::of::<biome_rule_options::no_react_object_type_as_default_prop::NoReactObjectTypeAsDefaultPropOptions>()));
     result.push((
         "correctness",
         "noReactPropAssignments",
