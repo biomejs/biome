@@ -15,16 +15,13 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
         let mut needs_space = false;
         for item in self.0 {
             match item {
-                ProseItem::WordGroup {
-                    atoms,
-                    should_escape,
-                } => {
+                ProseItem::WordGroup { atoms, escape } => {
                     if needs_space {
                         write!(f, [space()])?;
                     }
                     FormatWordGroup {
                         atoms,
-                        should_escape: *should_escape,
+                        escape: *escape,
                     }
                     .fmt(f)?;
                     needs_space = true;
@@ -117,13 +114,15 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         if inside_indent_code_block || self.print_mode.is_fill() {
                             joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                                 print_mode: TextPrintMode::fill(),
+                                ..FormatMdTextualOptions::default()
                             }));
                         } else {
                             let entry = format_with(|f| {
                                 write!(
                                     f,
                                     [text.format().with_options(FormatMdTextualOptions {
-                                        print_mode: TextPrintMode::Remove
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
                                     })]
                                 )
                             });
@@ -135,7 +134,8 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
-                                        print_mode: TextPrintMode::Remove
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
                                     }),
                                     hard_line_break()
                                 ]
@@ -150,6 +150,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                             } else {
                                 TextPrintMode::default()
                             },
+                            ..FormatMdTextualOptions::default()
                         }));
                     }
                 }
@@ -239,7 +240,8 @@ impl FormatMdInlineItemList {
                                 f,
                                 [
                                     md_text.format().with_options(FormatMdTextualOptions {
-                                        print_mode: TextPrintMode::Remove
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
                                     }),
                                     hard_line_break()
                                 ]
@@ -251,6 +253,7 @@ impl FormatMdInlineItemList {
                         // continuation indent).
                         joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
                             print_mode: TextPrintMode::Remove,
+                            ..FormatMdTextualOptions::default()
                         }));
                     } else if seen_new_line
                         && !after_hard_line
@@ -274,12 +277,14 @@ impl FormatMdInlineItemList {
                                 } else {
                                     TextPrintMode::default()
                                 },
+                                ..FormatMdTextualOptions::default()
                             }));
                         } else {
                             // Single excess space before content — remove it.
                             seen_new_line = false;
                             joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
                                 print_mode: TextPrintMode::Remove,
+                                ..FormatMdTextualOptions::default()
                             }));
                         }
                     } else {
@@ -318,18 +323,18 @@ impl FormatMdInlineItemList {
                                     )
                                 }));
                             } else {
-                                joiner.entry(
-                                    &md_text
-                                        .format()
-                                        .with_options(FormatMdTextualOptions { print_mode }),
-                                );
+                                joiner.entry(&md_text.format().with_options(
+                                    FormatMdTextualOptions {
+                                        print_mode,
+                                        ..FormatMdTextualOptions::default()
+                                    },
+                                ));
                             }
                         } else {
-                            joiner.entry(
-                                &md_text
-                                    .format()
-                                    .with_options(FormatMdTextualOptions { print_mode }),
-                            );
+                            joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
+                                print_mode,
+                                ..FormatMdTextualOptions::default()
+                            }));
                         }
                     }
                 }
@@ -397,6 +402,7 @@ impl FormatMdInlineItemList {
             {
                 joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                     print_mode: TextPrintMode::Remove,
+                    ..FormatMdTextualOptions::default()
                 }));
                 continue;
             }
@@ -447,6 +453,7 @@ impl FormatMdInlineItemList {
                     AnyMdInline::MdTextual(text) => {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             print_mode: TextPrintMode::Remove,
+                            ..FormatMdTextualOptions::default()
                         }));
                     }
                     AnyMdInline::MdHardLine(hard_line) => {
@@ -507,6 +514,7 @@ impl FormatMdInlineItemList {
                 AnyMdInline::MdTextual(text) => {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
+                        ..FormatMdTextualOptions::default()
                     }));
                 }
                 AnyMdInline::MdInlineItalic(italic) => {
@@ -539,6 +547,7 @@ impl FormatMdInlineItemList {
                         // info string line — remove it entirely.
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             print_mode: TextPrintMode::Remove,
+                            ..FormatMdTextualOptions::default()
                         }));
                     } else {
                         let token = text.value_token()?;
@@ -547,6 +556,7 @@ impl FormatMdInlineItemList {
                             // Mixed whitespace + newline (e.g. "    \n") — remove.
                             joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                                 print_mode: TextPrintMode::Remove,
+                                ..FormatMdTextualOptions::default()
                             }));
                         } else {
                             // First token has content — keep as-is.
@@ -627,6 +637,7 @@ impl FormatMdInlineItemList {
                             f,
                             [newline.format().with_options(FormatMdTextualOptions {
                                 print_mode: TextPrintMode::Remove,
+                                ..FormatMdTextualOptions::default()
                             })]
                         )?;
                     }
