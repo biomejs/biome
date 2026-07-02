@@ -1081,7 +1081,7 @@ Can be either a plain path string or an object with path and options:
   "plugins": [
     "simple-plugin.grit",
     { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] },
-    { "path": "./local-plugin.grit", "includes": ["src/**\/*.ts"], "resolvePath": "config" }
+    { "path": "./local-plugin.grit", "includes": ["src/**\/*.ts"], "resolutionKind": "config" }
   ]
 }
 ``` 
@@ -1350,12 +1350,15 @@ these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions.
 	 */
 	path: string;
 	/**
-	* Controls how plugin paths are resolved.
+	* Controls how the plugin is resolved.
+
+This only affects plugin resolution. It does not change how `includes`
+are interpreted.
 
 When omitted, relative plugin paths are resolved from the consuming
 project. 
 	 */
-	resolvePath?: PluginResolvePath;
+	resolutionKind?: PluginResolvePath;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration

@@ -236,7 +236,7 @@ fn extends_config_with_object_syntax_plugin_from_npm_package() {
 
     fs.create_file(
         "node_modules/@shared/config/biome.jsonc",
-        r#"{ "root": false, "plugins": [{ "path": "./grit/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }"#,
+        r#"{ "root": false, "plugins": [{ "path": "./grit/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }"#,
     );
     fs.create_file(
         "node_modules/@shared/config/package.json",

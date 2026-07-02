@@ -38,7 +38,7 @@ Object.assign({}, a, b);
 ## `packages/tools/biome.shared.jsonc`
 
 ```jsonc
-{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }
+{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }
 ```
 
 # Emitted Messages

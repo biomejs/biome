@@ -9,7 +9,7 @@ expression: redactor(content)
 {
   "root": false,
   "plugins": [
-    { "path": "./grit/no-object-assign.grit", "resolvePath": "config" }
+    { "path": "./grit/no-object-assign.grit", "resolutionKind": "config" }
   ],
   "linter": { "enabled": true }
 }

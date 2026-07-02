@@ -825,7 +825,7 @@ fn object_syntax_plugins_in_extended_config_work_from_declaring_config() {
 
     fs.create_file(
         "packages/tools/biome.shared.jsonc",
-        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }"#,
+        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }"#,
     );
 
     fs.create_file(
@@ -877,7 +877,7 @@ fn object_syntax_plugins_in_extended_config_missing_plugin_reports_error() {
 
     fs.create_file(
         "packages/tools/biome.shared.jsonc",
-        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolvePath": "config" }], "linter": { "enabled": true } }"#,
+        r#"{ "plugins": [{ "path": "./biome-plugins/no-object-assign.grit", "resolutionKind": "config" }], "linter": { "enabled": true } }"#,
     );
 
     fs.create_file(
