@@ -151,6 +151,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut still_leading = true;
         let mut prev_was_header = false;
         let mut prev_was_list = false;
+        let mut prev_was_html_block = false;
         let mut prev_ends_with_line_break = false;
         let mut prev_paragraph_has_hard_line = false;
         let content_count = self.node.len() - trailing_count;
@@ -234,7 +235,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         should_remove: true,
                     }));
                     if !is_leading && !is_trailing {
-                        if prev_paragraph_has_hard_line {
+                        if prev_was_html_block || prev_paragraph_has_hard_line {
                             joiner.entry(&empty_line());
                         } else {
                             joiner.entry(&hard_line_break());
@@ -250,6 +251,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 still_leading = false;
                 prev_was_header = node.is_any_header();
                 prev_was_list = node.is_list();
+                prev_was_html_block = matches!(
+                    node,
+                    AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_))
+                );
                 prev_ends_with_line_break = node
                     .as_any_list_item()
                     .is_some_and(|item| list_ends_with_line_break(&item));

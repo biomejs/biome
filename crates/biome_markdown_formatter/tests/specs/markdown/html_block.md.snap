@@ -117,6 +117,10 @@ Some text after.
   with multiple lines
 </textarea>
 
+<p>
+
+- list after html
+
 ```
 
 
@@ -233,5 +237,9 @@ Some text after.
   form content
   with multiple lines
 </textarea>
+
+<p>
+
+- list after html
 
 ```

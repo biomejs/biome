@@ -46,17 +46,16 @@ info: markdown/code/indent.md
  - ```
    Fenced Code Block
    Fenced Code Block
-@@ -13,11 +12,10 @@
-   ```
+@@ -14,10 +13,10 @@
  
  <!-- prettier/prettier#3459 -->
-+1. Change to your home directory:
  
 -1.  Change to your home directory:
-+       cd
++1. Change to your home directory:
  
 -        cd
--
++       cd
+ 
 -2.  List the contents:
 +2. List the contents:
  
@@ -81,6 +80,7 @@ info: markdown/code/indent.md
   ```
 
 <!-- prettier/prettier#3459 -->
+
 1. Change to your home directory:
 
        cd
