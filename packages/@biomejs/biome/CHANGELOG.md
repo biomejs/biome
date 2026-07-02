@@ -1,5 +1,17 @@
 # @biomejs/biome
 
+## 2.5.3
+
+### Patch Changes
+
+- [#10815](https://github.com/biomejs/biome/pull/10815) [`86613d5`](https://github.com/biomejs/biome/commit/86613d5b01eb965b460ccefbf27f168d87774aaf) Thanks [@WaterWhisperer](https://github.com/WaterWhisperer)! - Fixed a parser panic reported in [#10708](https://github.com/biomejs/biome/issues/10708): Biome now recovers when unsupported CSS Modules `@value` rules or scoped `@keyframes` names end at EOF.
+
+- [#10827](https://github.com/biomejs/biome/pull/10827) [`098ba41`](https://github.com/biomejs/biome/commit/098ba41c99e6efaac8eb182eec258a567bb00123) Thanks [@Aqu1bp](https://github.com/Aqu1bp)! - Fixed [#10698](https://github.com/biomejs/biome/issues/10698): The [`noUnsafeOptionalChaining`](https://biomejs.dev/linter/rules/no-unsafe-optional-chaining/) rule now reports unsafe optional chains wrapped in TypeScript `as`, `satisfies`, type assertion, and instantiation expressions, such as `new (value?.constructor as Constructor)()`.
+
+- [#10773](https://github.com/biomejs/biome/pull/10773) [`3c6513d`](https://github.com/biomejs/biome/commit/3c6513d4e9a82a195785144caa9d96093c3861ff) Thanks [@otkrickey](https://github.com/otkrickey)! - Fixed [#10772](https://github.com/biomejs/biome/issues/10772): [`useVueValidVOn`](https://biomejs.dev/linter/rules/use-vue-valid-v-on/) no longer reports a missing handler for v-on directives using a verb modifier (`.stop` / `.prevent`) without an expression, e.g. `<div @click.stop></div>`. The rule also accepts the arg-less object syntax `<div v-on="$listeners"></div>` instead of reporting a missing event name.
+
+- [#10820](https://github.com/biomejs/biome/pull/10820) [`bba3092`](https://github.com/biomejs/biome/commit/bba30920715920142e933939f6270feedca933a5) Thanks [@JamBalaya56562](https://github.com/JamBalaya56562)! - Fixed [#10619](https://github.com/biomejs/biome/issues/10619): [`noProcessEnv`](https://biomejs.dev/linter/rules/no-process-env/) now also reports computed (bracket) member access. Previously only dot access was checked, so `process["env"]` and `env["NODE_ENV"]` (where `env` is imported from `node:process`) were missed. Both static and computed accesses are now reported.
+
 ## 2.5.2
 
 ### Patch Changes
