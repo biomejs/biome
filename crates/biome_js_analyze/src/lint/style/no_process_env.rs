@@ -2,9 +2,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, JsImport,
-    JsObjectBindingPatternShorthandProperty, JsStaticMemberExpression, JsVariableDeclarator,
-    global_identifier,
+    AnyJsExpression, AnyJsImportLike, AnyJsMemberExpression, AnyJsNamedImportSpecifier, JsImport,
+    JsObjectBindingPatternShorthandProperty, JsVariableDeclarator, global_identifier,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_process_env::NoProcessEnvOptions;
@@ -52,7 +51,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoProcessEnv {
-    type Query = Semantic<JsStaticMemberExpression>;
+    type Query = Semantic<AnyJsMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoProcessEnvOptions;
@@ -61,17 +60,22 @@ impl Rule for NoProcessEnv {
         let node = ctx.query();
         let model = ctx.model();
         let object = node.object().ok()?;
-        let member = node.member().ok()?.as_js_name()?.to_trimmed_text();
 
         let (reference, name) = global_identifier(&object.as_any_global_identifier_expression()?)?;
 
-        if member.text() == "env" && name.text() == "process" {
+        // `process.env` and its computed form `process["env"]`.
+        if name.text() == "process"
+            && node
+                .member_name()
+                .is_some_and(|member| member.text() == "env")
+        {
             return match model.binding(&reference) {
                 None => Some(()),
                 Some(binding) => is_process_module_import(&binding).then_some(()),
             };
         }
 
+        // `env.X` / `env["X"]` where `env` is imported from `process`/`node:process`.
         model
             .binding(&reference)
             .filter(is_env_from_process)
