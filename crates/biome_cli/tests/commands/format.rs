@@ -264,6 +264,35 @@ fn write() {
 }
 
 #[test]
+fn formats_google_apps_script_gs_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Google Apps Script `.gs` files are plain JavaScript and should be
+    // formatted like any other JS file. See https://github.com/biomejs/biome/issues/8267.
+    let file_path = Utf8Path::new("Code.gs");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formats_google_apps_script_gs_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_shows_parse_diagnostics() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

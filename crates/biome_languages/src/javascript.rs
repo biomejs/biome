@@ -586,6 +586,10 @@ impl JsFileSource {
             "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            // Google Apps Script is plain JavaScript running on the V8 runtime.
+            // It has no ES module system: files share a single global scope and
+            // cannot use `import`/`export`, so it is parsed as a script.
+            "gs" => Ok(Self::js_script()),
 
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -619,6 +623,8 @@ impl JsFileSource {
             "vue" | "vuejs" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
             "svelte" => Ok(Self::svelte()),
+            // Google Apps Script — see the `"gs"` extension mapping above.
+            "appsscript" => Ok(Self::js_script()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
@@ -692,5 +698,21 @@ mod tests {
 
         assert!(source.is_svelte_source_module());
         assert!(!source.is_typescript());
+    }
+
+    #[test]
+    fn detects_google_apps_script_files_as_javascript() {
+        let source = JsFileSource::try_from(Utf8Path::new("Code.gs")).unwrap();
+
+        assert_eq!(source.language, Language::JavaScript);
+        assert_eq!(source.module_kind, ModuleKind::Script);
+    }
+
+    #[test]
+    fn detects_google_apps_script_language_id() {
+        let source = JsFileSource::try_from_language_id("appsscript").unwrap();
+
+        assert_eq!(source.language, Language::JavaScript);
+        assert_eq!(source.module_kind, ModuleKind::Script);
     }
 }
