@@ -4,7 +4,8 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"_____________________________________
+    let source = r#"- * * *
++ - - -
 "#;
     let parse = parse_markdown(source);
 
