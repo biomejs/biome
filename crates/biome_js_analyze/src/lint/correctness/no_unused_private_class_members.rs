@@ -10,13 +10,15 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
-    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsClassMember, AnyJsClassMemberName,
+    AnyJsComputedMember, AnyJsExpression, AnyJsFormalParameter, AnyJsName,
+    AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
+    JsClassDeclaration, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsAccessibilityModifier,
+    TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
-    declare_node_union,
+    TokenText, declare_node_union,
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 
@@ -278,14 +280,10 @@ fn traverse_members_usage(
 
                     false
                 });
-
-                if private_members.is_empty() {
-                    break;
-                }
             }
             Err(node) => {
                 if ts_private_count != 0
-                    && let Some(computed_member) = AnyJsComputedMember::cast(node)
+                    && let Some(computed_member) = AnyJsComputedMember::cast_ref(&node)
                     && matches!(
                         computed_member.object(),
                         Ok(AnyJsExpression::JsThisExpression(_))
@@ -295,7 +293,31 @@ fn traverse_members_usage(
                     private_members.retain(|private_member| private_member.is_private_sharp());
                     ts_private_count = 0;
                 }
+
+                // Handle destructuring from `this`, e.g. `const { myVar } = this;`
+                let destructured_names = get_destructured_names_from_this(&node);
+                if !destructured_names.is_empty() {
+                    private_members.retain(|private_member| {
+                        let Some(name) = private_member.member_name() else {
+                            return true;
+                        };
+
+                        if !destructured_names.iter().any(|n| n.text() == name.text()) {
+                            return true;
+                        }
+
+                        if !private_member.is_private_sharp() {
+                            ts_private_count -= 1;
+                        }
+
+                        false
+                    });
+                }
             }
+        }
+
+        if private_members.is_empty() {
+            break;
         }
     }
 
@@ -372,6 +394,95 @@ fn get_constructor_params(
                     _ => None,
                 })
         })
+}
+
+/// Extract property names from object destructuring patterns where the initializer is `this`.
+///
+/// Handles both declaration patterns (`const { a, b: c } = this;`) and
+/// assignment patterns (`({ a } = this)`).
+fn get_destructured_names_from_this(node: &JsSyntaxNode) -> Vec<TokenText> {
+    let mut names = Vec::new();
+
+    // Handle `const { myVar } = this;`
+    if let Some(declarator) = JsVariableDeclarator::cast_ref(node) {
+        let is_this_init = declarator
+            .initializer()
+            .and_then(|init| init.expression().ok())
+            .is_some_and(|expr| matches!(expr, AnyJsExpression::JsThisExpression(_)));
+
+        if is_this_init
+            && let Ok(AnyJsBindingPattern::JsObjectBindingPattern(pattern)) = declarator.id()
+        {
+            for prop in pattern.properties().iter().flatten() {
+                match prop {
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                        shorthand,
+                    ) => {
+                        if let Some(name) = shorthand
+                            .identifier()
+                            .ok()
+                            .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
+                        {
+                            names.push(name.token_text_trimmed());
+                        }
+                    }
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
+                        if let Some(member_name) = prop
+                            .member()
+                            .ok()
+                            .and_then(|m| m.as_js_literal_member_name()?.name().ok())
+                        {
+                            names.push(member_name);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    // Handle `({ myVar } = this)`
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(node) {
+        let is_this_right = assignment
+            .right()
+            .ok()
+            .is_some_and(|expr| matches!(expr, AnyJsExpression::JsThisExpression(_)));
+
+        if is_this_right
+            && let Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(pattern)) =
+                assignment.left()
+        {
+            for prop in pattern.properties().iter().flatten() {
+                match prop {
+                    AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                        shorthand,
+                    ) => {
+                        if let Some(token) = shorthand
+                            .identifier()
+                            .ok()
+                            .and_then(|id| id.name_token().ok())
+                        {
+                            names.push(token.token_text_trimmed());
+                        }
+                    }
+                    AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                        prop,
+                    ) => {
+                        if let Some(member_name) = prop
+                            .member()
+                            .ok()
+                            .and_then(|m| m.as_js_literal_member_name()?.name().ok())
+                        {
+                            names.push(member_name);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    names
 }
 
 /// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
@@ -515,6 +626,40 @@ impl AnyMember {
                         .name_token()
                         .ok()?
                         .text_range(),
+                ),
+            },
+        }
+    }
+
+    fn member_name(&self) -> Option<TokenText> {
+        match self {
+            Self::AnyJsClassMember(member) => match member {
+                AnyJsClassMember::JsGetterClassMember(member) => {
+                    Some(member.name().ok()?.name()?.into())
+                }
+                AnyJsClassMember::JsMethodClassMember(member) => {
+                    Some(member.name().ok()?.name()?.into())
+                }
+                AnyJsClassMember::JsPropertyClassMember(member) => {
+                    Some(member.name().ok()?.name()?.into())
+                }
+                AnyJsClassMember::JsSetterClassMember(member) => {
+                    Some(member.name().ok()?.name()?.into())
+                }
+                _ => None,
+            },
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .token_text_trimmed(),
                 ),
             },
         }
