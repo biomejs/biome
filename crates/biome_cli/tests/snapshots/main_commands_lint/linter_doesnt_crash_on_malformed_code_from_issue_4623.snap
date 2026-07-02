@@ -83,12 +83,8 @@ issue4623.js:2:2 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Wrap the comments with braces
   
-    1 1 │   <b
-    2 2 │    //
-      3 │ + 
-      4 │ + ·{/*··*/}
-    3 5 │   }
-  
+    2 │ ·{/*··*/}
+      │  + ++++ +
 
 ```
 

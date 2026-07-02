@@ -1,13 +1,15 @@
 use crate::JsRuleAction;
+use crate::utils::batch::JsBatchMutation;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
-use biome_rowan::{BatchMutationExt, TextRange, TextSize};
+use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText, T};
+use biome_rowan::{BatchMutationExt, TextRange, TextSize, TriviaPieceKind};
 use biome_rule_options::no_comment_text::NoCommentTextOptions;
+use std::borrow::Cow;
 use std::ops::Range;
 
 declare_lint_rule! {
@@ -147,21 +149,48 @@ impl Rule for NoCommentText {
         let jsx_value = jsx_value.text();
         let before_comment = &jsx_value[..range.start];
         let after_comment = &jsx_value[range.end..];
-        let new_jsx_value = if jsx_value.as_bytes()[range.start + 1] == b'*' {
-            let comment = &jsx_value[range.start..range.end];
-            format!("{before_comment}{{{comment}}}{after_comment}")
+        // Block comments are kept verbatim, while `// text` is turned into `/* text */`.
+        let comment: Cow<str> = if jsx_value.as_bytes()[range.start + 1] == b'*' {
+            Cow::Borrowed(&jsx_value[range.start..range.end])
         } else {
-            let comment_text = &jsx_value[range.start + 2..range.end].trim();
-            format!("{before_comment}{{/* {comment_text} */}}{after_comment}")
+            let comment_text = jsx_value[range.start + 2..range.end].trim();
+            Cow::Owned(format!("/* {comment_text} */"))
         };
-        let new_jsx_text = AnyJsxChild::JsxText(make::jsx_text(JsSyntaxToken::new_detached(
-            JsSyntaxKind::JSX_TEXT,
-            &new_jsx_value,
-            [],
-            [],
-        )));
+        let comment_kind = if comment.contains(['\n', '\r']) {
+            TriviaPieceKind::MultiLineComment
+        } else {
+            TriviaPieceKind::SingleLineComment
+        };
+        // Emit a real JSX expression container whose `{` token carries the
+        // comment as trivia, so that the fixed tree no longer contains a
+        // `JsxText` matching this rule. Re-emitting the braces as plain JSX
+        // text would make the fix loop of `check --write` wrap its own output
+        // in braces over and over again.
+        let comment_child = AnyJsxChild::JsxExpressionChild(
+            make::jsx_expression_child(
+                make::token(T!['{']).with_trailing_trivia([(comment_kind, comment.as_ref())]),
+                make::token(T!['}']),
+            )
+            .build(),
+        );
+        let mut new_children = Vec::with_capacity(3);
+        if !before_comment.is_empty() {
+            new_children.push(AnyJsxChild::JsxText(make::jsx_text(
+                JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT, before_comment, [], []),
+            )));
+        }
+        new_children.push(comment_child);
+        if !after_comment.is_empty() {
+            new_children.push(AnyJsxChild::JsxText(make::jsx_text(
+                JsSyntaxToken::new_detached(JsSyntaxKind::JSX_TEXT, after_comment, [], []),
+            )));
+        }
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(AnyJsxChild::from(node.clone()), new_jsx_text);
+        if !mutation
+            .add_jsx_elements_replacing_element(&AnyJsxChild::from(node.clone()), new_children)
+        {
+            return None;
+        }
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
