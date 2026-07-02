@@ -1,0 +1,182 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+new (a?.b as any)();
+(a?.b as any)();
+(a?.b as any).c;
+(a?.b satisfies any).c;
+(<any>a?.b)();
+new (a?.b<string>)();
+for (const x of a?.b as any[]);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:7 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new (a?.b as any)();
+      │       ^^
+    3 │ (a?.b as any)();
+    4 │ (a?.b as any).c;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new (a?.b as any)();
+      │ ^^^^^^^^^^^^^^^^^^^
+    3 │ (a?.b as any)();
+    4 │ (a?.b as any).c;
+  
+
+```
+
+```
+invalid.ts:3:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    1 │ /* should generate diagnostics */
+    2 │ new (a?.b as any)();
+  > 3 │ (a?.b as any)();
+      │   ^^
+    4 │ (a?.b as any).c;
+    5 │ (a?.b satisfies any).c;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    1 │ /* should generate diagnostics */
+    2 │ new (a?.b as any)();
+  > 3 │ (a?.b as any)();
+      │              ^^
+    4 │ (a?.b as any).c;
+    5 │ (a?.b satisfies any).c;
+  
+
+```
+
+```
+invalid.ts:4:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    2 │ new (a?.b as any)();
+    3 │ (a?.b as any)();
+  > 4 │ (a?.b as any).c;
+      │   ^^
+    5 │ (a?.b satisfies any).c;
+    6 │ (<any>a?.b)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    2 │ new (a?.b as any)();
+    3 │ (a?.b as any)();
+  > 4 │ (a?.b as any).c;
+      │               ^
+    5 │ (a?.b satisfies any).c;
+    6 │ (<any>a?.b)();
+  
+
+```
+
+```
+invalid.ts:5:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    3 │ (a?.b as any)();
+    4 │ (a?.b as any).c;
+  > 5 │ (a?.b satisfies any).c;
+      │   ^^
+    6 │ (<any>a?.b)();
+    7 │ new (a?.b<string>)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    3 │ (a?.b as any)();
+    4 │ (a?.b as any).c;
+  > 5 │ (a?.b satisfies any).c;
+      │                      ^
+    6 │ (<any>a?.b)();
+    7 │ new (a?.b<string>)();
+  
+
+```
+
+```
+invalid.ts:6:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    4 │ (a?.b as any).c;
+    5 │ (a?.b satisfies any).c;
+  > 6 │ (<any>a?.b)();
+      │        ^^
+    7 │ new (a?.b<string>)();
+    8 │ for (const x of a?.b as any[]);
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    4 │ (a?.b as any).c;
+    5 │ (a?.b satisfies any).c;
+  > 6 │ (<any>a?.b)();
+      │            ^^
+    7 │ new (a?.b<string>)();
+    8 │ for (const x of a?.b as any[]);
+  
+
+```
+
+```
+invalid.ts:7:7 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    5 │ (a?.b satisfies any).c;
+    6 │ (<any>a?.b)();
+  > 7 │ new (a?.b<string>)();
+      │       ^^
+    8 │ for (const x of a?.b as any[]);
+    9 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    5 │ (a?.b satisfies any).c;
+    6 │ (<any>a?.b)();
+  > 7 │ new (a?.b<string>)();
+      │ ^^^^^^^^^^^^^^^^^^^^
+    8 │ for (const x of a?.b as any[]);
+    9 │ 
+  
+
+```
+
+```
+invalid.ts:8:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsafe usage of optional chaining.
+  
+    6 │ (<any>a?.b)();
+    7 │ new (a?.b<string>)();
+  > 8 │ for (const x of a?.b as any[]);
+      │                  ^^
+    9 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    6 │ (<any>a?.b)();
+    7 │ new (a?.b<string>)();
+  > 8 │ for (const x of a?.b as any[]);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+
+```
