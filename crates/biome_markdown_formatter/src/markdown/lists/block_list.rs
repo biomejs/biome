@@ -7,7 +7,7 @@ use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdInline, AnyMdLeafBlock, MdBlockList, MdBullet, MdParagraph,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MdBlockList, MdBullet, MdParagraph,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -152,6 +152,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut prev_was_header = false;
         let mut prev_was_list = false;
         let mut prev_was_html_block = false;
+        let mut prev_was_indent_code_block = false;
         let mut prev_ends_with_line_break = false;
         let mut prev_paragraph_has_hard_line = false;
         let content_count = self.node.len() - trailing_count;
@@ -235,7 +236,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         should_remove: true,
                     }));
                     if !is_leading && !is_trailing {
-                        if prev_was_html_block || prev_paragraph_has_hard_line {
+                        if prev_was_html_block
+                            || prev_was_indent_code_block
+                            || prev_paragraph_has_hard_line
+                        {
                             joiner.entry(&empty_line());
                         } else {
                             joiner.entry(&hard_line_break());
@@ -254,6 +258,12 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 prev_was_html_block = matches!(
                     node,
                     AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_))
+                );
+                prev_was_indent_code_block = matches!(
+                    node,
+                    AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+                        AnyMdCodeBlock::MdIndentCodeBlock(_)
+                    ))
                 );
                 prev_ends_with_line_break = node
                     .as_any_list_item()

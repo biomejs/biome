@@ -9,6 +9,7 @@ pub(crate) struct FormatMdListMarkerPrefix {
     /// Target marker to replace with (e.g. `"-"`). `None` keeps the original.
     target_marker: Option<&'static str>,
     keep_pre_marker: bool,
+    min_post_marker_len: usize,
 }
 impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
     fn fmt_fields(&self, node: &MdListMarkerPrefix, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -53,15 +54,24 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             }
         }
 
+        let post_marker_len = post_marker_space_token
+            .as_ref()
+            .map_or(0, |token| token.text_trimmed().len())
+            .max(self.min_post_marker_len);
+
         if let Some(post_marker_space_token) = post_marker_space_token {
             write!(f, [format_removed(&post_marker_space_token)])?;
 
-            for index in 0..post_marker_space_token.text_trimmed().len() {
+            for index in 0..post_marker_len {
                 let pos = post_marker_space_token
                     .text_trimmed_range()
                     .start()
                     .add(TextSize::from(index as u32));
                 write!(f, [text(" ", Some(pos)),])?;
+            }
+        } else {
+            for _ in 0..post_marker_len {
+                write!(f, [token(" ")])?;
             }
         }
         write!(f, [content_indent.format()])
@@ -73,6 +83,9 @@ pub(crate) struct FormatMdListMarkerPrefixOptions {
     pub(crate) target_marker: Option<&'static str>,
     /// When true, emit pre-marker indent tokens verbatim instead of removing them.
     pub(crate) keep_pre_marker: bool,
+    /// Minimum number of spaces to emit after the list marker.
+    /// Existing longer post-marker spacing is preserved.
+    pub(crate) min_post_marker_len: usize,
 }
 
 impl FormatRuleWithOptions<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
@@ -81,6 +94,7 @@ impl FormatRuleWithOptions<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.target_marker = options.target_marker;
         self.keep_pre_marker = options.keep_pre_marker;
+        self.min_post_marker_len = options.min_post_marker_len;
         self
     }
 }

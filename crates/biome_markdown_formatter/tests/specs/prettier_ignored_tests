@@ -81,3 +81,6 @@ markdown/spec/example-105.md
 # It's inline code, it should be change
 # https://github.com/prettier/prettier/issues/19152
 markdown/spec/example-7.md
+
+# We don't support angular
+markdown/code/angular/

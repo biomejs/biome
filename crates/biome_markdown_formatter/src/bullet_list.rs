@@ -140,6 +140,14 @@ impl Format<MarkdownFormatContext> for ListBullet {
         } else {
             0
         };
+        let min_post_marker_len =
+            if list_marker.is_ordered() && has_indented_code_block_after_content(&content) {
+                // CommonMark indented code blocks use four spaces:
+                // https://spec.commonmark.org/0.31.2/#indented-code-blocks
+                4usize.saturating_sub(marker.text_trimmed().len())
+            } else {
+                0
+            };
 
         write!(
             f,
@@ -148,11 +156,15 @@ impl Format<MarkdownFormatContext> for ListBullet {
                 .with_options(FormatMdListMarkerPrefixOptions {
                     target_marker,
                     keep_pre_marker,
+                    min_post_marker_len,
                 })]
         )?;
 
         // The alignment is the sum of the pre-marker width, the marker width and the post-marker width.
-        let post_marker_len = prefix.post_marker_len().unwrap_or(2) as u8;
+        let post_marker_len = prefix
+            .post_marker_len()
+            .unwrap_or(2)
+            .max(min_post_marker_len) as u8;
         let alignment = pre_marker_width + (marker.text_trimmed().len() as u8) + post_marker_len;
 
         let content = ListBlockList {
@@ -175,6 +187,24 @@ fn first_block_is_dash_thematic_break(content: &MdBlockList) -> bool {
         .find_map(|p| p.as_md_thematic_break_char().cloned())
         .and_then(|c| c.value().ok())
         .is_some_and(|t| t.text_trimmed() == "-")
+}
+
+fn has_indented_code_block_after_content(content: &MdBlockList) -> bool {
+    let mut seen_content = false;
+
+    for content in content.iter() {
+        if content.is_newline() {
+            continue;
+        }
+
+        if content.is_indent_block() {
+            return seen_content;
+        }
+
+        seen_content = true;
+    }
+
+    false
 }
 
 /// It's responsible for formatting a [MdBlockList] that is inside a bullet list
@@ -378,14 +408,11 @@ impl Format<MarkdownFormatContext> for ListBlockList {
 /// content": shallow list code fences can be followed by regular paragraphs,
 /// and forcing a blank line there changes existing idempotency-sensitive cases.
 fn should_separate_fenced_code_block(content: &AnyMdBlock) -> bool {
-    let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
-        AnyMdCodeBlock::MdFencedCodeBlock(block),
-    )) = content
-    else {
+    if !content.is_fenced_block() {
         return false;
-    };
+    }
 
-    block
+    content
         .syntax()
         .ancestors()
         .filter(|ancestor| {

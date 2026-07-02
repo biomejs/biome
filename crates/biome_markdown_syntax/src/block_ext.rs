@@ -12,6 +12,15 @@ impl AnyMdBlock {
         )
     }
 
+    pub const fn is_indent_block(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+                AnyMdCodeBlock::MdIndentCodeBlock(_)
+            ))
+        )
+    }
+
     pub const fn is_list(&self) -> bool {
         matches!(
             self,
