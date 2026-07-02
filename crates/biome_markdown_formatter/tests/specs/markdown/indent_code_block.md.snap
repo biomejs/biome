@@ -7,6 +7,7 @@ info: markdown/indent_code_block.md
 
 ```md
     Top-level indented code
+	Tab-indented code
 
 - following list item
 
@@ -25,6 +26,7 @@ info: markdown/indent_code_block.md
 
 ```md
     Top-level indented code
+    Tab-indented code
 
 - following list item
 
