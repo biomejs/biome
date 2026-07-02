@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/mix.html
+---
+
+# Input
+
+```html
+@if (user.isHuman) {
+<human-profile [data]="user" />
+} @else if (user.isRobot) {
+<!-- robot users are rare, so load their profiles lazily -->
+@defer {
+<robot-profile [data]="user" />
+}
+} @else {
+<p>The profile is unknown!</p>
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,9 @@
+ @if (user.isHuman) {
+-  <human-profile [data]="user" />
++<human-profile [data]="user" />
+ } @else if (user.isRobot) {
+-  <!-- robot users are rare, so load their profiles lazily -->
+-  @defer {
+-    <robot-profile [data]="user" />
+-  }
+-} @else {
+-  <p>The profile is unknown!</p>
++<!-- robot users are rare, so load their profiles lazily -->
++@defer {
++<robot-profile [data]="user" />
++} } @else {
++<p>The profile is unknown!</p>
+ }
+```
+
+# Output
+
+```html
+@if (user.isHuman) {
+<human-profile [data]="user" />
+} @else if (user.isRobot) {
+<!-- robot users are rare, so load their profiles lazily -->
+@defer {
+<robot-profile [data]="user" />
+} } @else {
+<p>The profile is unknown!</p>
+}
+```

@@ -1,0 +1,412 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/angular/first-lf.component.html
+---
+
+# Input
+
+```html
+<textarea>{{ generatedDiscountCodes }}</textarea>
+<textarea>
+{{ generatedDiscountCodes }}</textarea>
+<textarea>
+    {{ generatedDiscountCodes }}</textarea>
+<textarea>  
+{{ generatedDiscountCodes }}</textarea>
+<textarea>  
+    {{ generatedDiscountCodes }}</textarea>
+<textarea>{{ generatedDiscountCodes }}123</textarea>
+<textarea>
+{{ generatedDiscountCodes }}123</textarea>
+<textarea>
+    {{ generatedDiscountCodes }}123</textarea>
+<textarea>  
+{{ generatedDiscountCodes }}123</textarea>
+<textarea>  
+    {{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}</textarea>
+<textarea type="text">
+{{ generatedDiscountCodes }}</textarea>
+<textarea type="text">
+    {{ generatedDiscountCodes }}</textarea>
+<textarea type="text">  
+{{ generatedDiscountCodes }}</textarea>
+<textarea type="text">  
+    {{ generatedDiscountCodes }}</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">
+{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">
+    {{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">  
+{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">  
+    {{ generatedDiscountCodes }}123</textarea>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,44 +1,28 @@
+ <textarea>{{ generatedDiscountCodes }}</textarea>
+-<textarea>{{ generatedDiscountCodes }}</textarea>
+-<textarea>    {{ generatedDiscountCodes }}</textarea>
+ <textarea>
+-  
+-{{ generatedDiscountCodes }}</textarea
+->
++  {{ generatedDiscountCodes }}
++</textarea>
+ <textarea>
+-  
+-    {{ generatedDiscountCodes }}</textarea
+->
++  {{ generatedDiscountCodes }}
++</textarea>
++<textarea> {{ generatedDiscountCodes }}</textarea>
++<textarea> {{ generatedDiscountCodes }}</textarea>
++<textarea>{{ generatedDiscountCodes }}123</textarea>
+ <textarea>{{ generatedDiscountCodes }}123</textarea>
+ <textarea>{{ generatedDiscountCodes }}123</textarea>
+-<textarea>    {{ generatedDiscountCodes }}123</textarea>
+-<textarea>
+-  
+-{{ generatedDiscountCodes }}123</textarea
+->
+-<textarea>
+-  
+-    {{ generatedDiscountCodes }}123</textarea
+->
++<textarea> {{ generatedDiscountCodes }}123</textarea>
++<textarea> {{ generatedDiscountCodes }}123</textarea>
+ <textarea type="text">{{ generatedDiscountCodes }}</textarea>
+-<textarea type="text">{{ generatedDiscountCodes }}</textarea>
+-<textarea type="text">    {{ generatedDiscountCodes }}</textarea>
+ <textarea type="text">
+-  
+-{{ generatedDiscountCodes }}</textarea
+->
++  {{ generatedDiscountCodes }}
++</textarea>
+ <textarea type="text">
+-  
+-    {{ generatedDiscountCodes }}</textarea
+->
++  {{ generatedDiscountCodes }}
++</textarea>
++<textarea type="text"> {{ generatedDiscountCodes }}</textarea>
++<textarea type="text"> {{ generatedDiscountCodes }}</textarea>
++<textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+ <textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+ <textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+-<textarea type="text">    {{ generatedDiscountCodes }}123</textarea>
+-<textarea type="text">
+-  
+-{{ generatedDiscountCodes }}123</textarea
+->
+-<textarea type="text">
+-  
+-    {{ generatedDiscountCodes }}123</textarea
+->
++<textarea type="text"> {{ generatedDiscountCodes }}123</textarea>
++<textarea type="text"> {{ generatedDiscountCodes }}123</textarea>
+```
+
+# Output
+
+```html
+<textarea>{{ generatedDiscountCodes }}</textarea>
+<textarea>
+  {{ generatedDiscountCodes }}
+</textarea>
+<textarea>
+  {{ generatedDiscountCodes }}
+</textarea>
+<textarea> {{ generatedDiscountCodes }}</textarea>
+<textarea> {{ generatedDiscountCodes }}</textarea>
+<textarea>{{ generatedDiscountCodes }}123</textarea>
+<textarea>{{ generatedDiscountCodes }}123</textarea>
+<textarea>{{ generatedDiscountCodes }}123</textarea>
+<textarea> {{ generatedDiscountCodes }}123</textarea>
+<textarea> {{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}</textarea>
+<textarea type="text">
+  {{ generatedDiscountCodes }}
+</textarea>
+<textarea type="text">
+  {{ generatedDiscountCodes }}
+</textarea>
+<textarea type="text"> {{ generatedDiscountCodes }}</textarea>
+<textarea type="text"> {{ generatedDiscountCodes }}</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+<textarea type="text"> {{ generatedDiscountCodes }}123</textarea>
+<textarea type="text"> {{ generatedDiscountCodes }}123</textarea>
+```
+
+# Errors
+```
+first-lf.component.html:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ <textarea>{{ generatedDiscountCodes }}</textarea>
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <textarea>
+    3 │ {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ <textarea>{{ generatedDiscountCodes }}</textarea>
+    2 │ <textarea>
+  > 3 │ {{ generatedDiscountCodes }}</textarea>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <textarea>
+    5 │     {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:5:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    3 │ {{ generatedDiscountCodes }}</textarea>
+    4 │ <textarea>
+  > 5 │     {{ generatedDiscountCodes }}</textarea>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <textarea>··
+    7 │ {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    5 │     {{ generatedDiscountCodes }}</textarea>
+    6 │ <textarea>··
+  > 7 │ {{ generatedDiscountCodes }}</textarea>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <textarea>··
+    9 │     {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:9:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     7 │ {{ generatedDiscountCodes }}</textarea>
+     8 │ <textarea>··
+   > 9 │     {{ generatedDiscountCodes }}</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <textarea>{{ generatedDiscountCodes }}123</textarea>
+    11 │ <textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:10:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     8 │ <textarea>··
+     9 │     {{ generatedDiscountCodes }}</textarea>
+  > 10 │ <textarea>{{ generatedDiscountCodes }}123</textarea>
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <textarea>
+    12 │ {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    10 │ <textarea>{{ generatedDiscountCodes }}123</textarea>
+    11 │ <textarea>
+  > 12 │ {{ generatedDiscountCodes }}123</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <textarea>
+    14 │     {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:14:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    12 │ {{ generatedDiscountCodes }}123</textarea>
+    13 │ <textarea>
+  > 14 │     {{ generatedDiscountCodes }}123</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <textarea>··
+    16 │ {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    14 │     {{ generatedDiscountCodes }}123</textarea>
+    15 │ <textarea>··
+  > 16 │ {{ generatedDiscountCodes }}123</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <textarea>··
+    18 │     {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:18:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    16 │ {{ generatedDiscountCodes }}123</textarea>
+    17 │ <textarea>··
+  > 18 │     {{ generatedDiscountCodes }}123</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <textarea type="text">{{ generatedDiscountCodes }}</textarea>
+    20 │ <textarea type="text">
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:19:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    17 │ <textarea>··
+    18 │     {{ generatedDiscountCodes }}123</textarea>
+  > 19 │ <textarea type="text">{{ generatedDiscountCodes }}</textarea>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <textarea type="text">
+    21 │ {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    19 │ <textarea type="text">{{ generatedDiscountCodes }}</textarea>
+    20 │ <textarea type="text">
+  > 21 │ {{ generatedDiscountCodes }}</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ <textarea type="text">
+    23 │     {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:23:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    21 │ {{ generatedDiscountCodes }}</textarea>
+    22 │ <textarea type="text">
+  > 23 │     {{ generatedDiscountCodes }}</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <textarea type="text">··
+    25 │ {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    23 │     {{ generatedDiscountCodes }}</textarea>
+    24 │ <textarea type="text">··
+  > 25 │ {{ generatedDiscountCodes }}</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ <textarea type="text">··
+    27 │     {{ generatedDiscountCodes }}</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:27:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    25 │ {{ generatedDiscountCodes }}</textarea>
+    26 │ <textarea type="text">··
+  > 27 │     {{ generatedDiscountCodes }}</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ <textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+    29 │ <textarea type="text">
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:28:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    26 │ <textarea type="text">··
+    27 │     {{ generatedDiscountCodes }}</textarea>
+  > 28 │ <textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ <textarea type="text">
+    30 │ {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:30:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    28 │ <textarea type="text">{{ generatedDiscountCodes }}123</textarea>
+    29 │ <textarea type="text">
+  > 30 │ {{ generatedDiscountCodes }}123</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <textarea type="text">
+    32 │     {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:32:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    30 │ {{ generatedDiscountCodes }}123</textarea>
+    31 │ <textarea type="text">
+  > 32 │     {{ generatedDiscountCodes }}123</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <textarea type="text">··
+    34 │ {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:34:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    32 │     {{ generatedDiscountCodes }}123</textarea>
+    33 │ <textarea type="text">··
+  > 34 │ {{ generatedDiscountCodes }}123</textarea>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <textarea type="text">··
+    36 │     {{ generatedDiscountCodes }}123</textarea>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+first-lf.component.html:36:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    34 │ {{ generatedDiscountCodes }}123</textarea>
+    35 │ <textarea type="text">··
+  > 36 │     {{ generatedDiscountCodes }}123</textarea>
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

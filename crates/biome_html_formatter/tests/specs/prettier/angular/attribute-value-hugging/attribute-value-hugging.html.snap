@@ -1,0 +1,133 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/attribute-value-hugging/attribute-value-hugging.html
+---
+
+# Input
+
+```html
+<!-- #17729 -->
+<div
+[foo]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+[foo1]="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+[foo2]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+[string]="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+[add]="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+[number]="100000000000000000000000000000000000000000000000000000000000000000000000000"
+[shortTemplate]="`1
+2`"></div>
+<div
+*foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+*foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+*foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+*string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+*add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+*number="100000000000000000000000000000000000000000000000000000000000000000000000000"
+*shortTemplate="`1
+2`"></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,37 +1,23 @@
+ <!-- #17729 -->
+ <div
+   [foo]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+-  [foo1]="
+-    `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+-    `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+-  "
+-  [foo2]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
++  [foo1]="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
++        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
++  [foo2]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+   [string]="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+-  [add]="
+-    'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
+-    'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
+-  "
+-  [number]="
+-    100000000000000000000000000000000000000000000000000000000000000000000000000
+-  "
++  [add]="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
++  [number]="100000000000000000000000000000000000000000000000000000000000000000000000000"
+   [shortTemplate]="`1
+ 2`"
+ ></div>
+ <div
+   *foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+-  *foo1="
+-    `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+-    `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+-  "
+-  *foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
++  *foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
++        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
++  *foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+   *string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+-  *add="
+-    'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
+-    'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
+-  "
+-  *number="
+-    100000000000000000000000000000000000000000000000000000000000000000000000000
+-  "
++  *add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
++  *number="100000000000000000000000000000000000000000000000000000000000000000000000000"
+   *shortTemplate="`1
+ 2`"
+ ></div>
+```
+
+# Output
+
+```html
+<!-- #17729 -->
+<div
+  [foo]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+  [foo1]="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+  [foo2]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+  [string]="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+  [add]="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+  [number]="100000000000000000000000000000000000000000000000000000000000000000000000000"
+  [shortTemplate]="`1
+2`"
+></div>
+<div
+  *foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+  *foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+  *foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+  *string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+  *add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+  *number="100000000000000000000000000000000000000000000000000000000000000000000000000"
+  *shortTemplate="`1
+2`"
+></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3:   [foo]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+    4:   [foo1]="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+    5:         +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+    6:   [foo2]="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+    7:   [string]="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+    8:   [add]="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+    9:   [number]="100000000000000000000000000000000000000000000000000000000000000000000000000"
+   14:   *foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+   15:   *foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+   16:         +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+   17:   *foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+   18:   *string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+   19:   *add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+   20:   *number="100000000000000000000000000000000000000000000000000000000000000000000000000"
+```

@@ -1,0 +1,175 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/if.html
+---
+
+# Input
+
+```html
+<h3>&#64;if and &#64;else</h3>
+<div>
+<input #checkbox type="checkbox" [checked]="isChecked()" (change)="isChecked.set(checkbox.checked)" id="checkbox"/>
+</div>
+<div>
+@if (isChecked()) {
+<span>Checked</span>
+}
+@else {
+<span>Not checked</span>
+}
+</div>
+
+@if (users$   |   async;   as   users) { {{   users.length   }} }
+@else if (users$   |   async;   as   users) { {{   users.length   }} }
+
+<div *ngIf="users$   |   async;   as   users">{{   users.length   }}</div>
+
+@else {}
+
+
+@if (isDev) {}
+@else             if (test) {}
+
+@if      (foo(     "quotes")) {}
+@else if (foo(     'quotes')) {}
+
+@if ( widthCategory !== undefined && widthCategory >
+topStartToSideStartMaxSize) {
+<app-component />
+}
+
+@if ( widthCategory; as item) {
+}
+
+<div *ngIf="widthCategory; as item"></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -10,34 +10,19 @@
+ </div>
+ <div>
+   @if (isChecked()) {
+-    <span>Checked</span>
++  <span>Checked</span>
+   } @else {
+-    <span>Not checked</span>
++  <span>Not checked</span>
+   }
+ </div>
+-
+-@if (users$ | async; as users) {
+-  {{ users.length }}
+-} @else if (users$ | async; as users) {
+-  {{ users.length }}
+-}
+-
+-<div *ngIf="users$ | async; as users">{{ users.length }}</div>
+-
+-@else {}
+-
+-@if (isDev) {
+-} @else if (test) {}
+-
+-@if (foo("quotes")) {
+-} @else if (foo("quotes")) {}
+-
+-@if (
+-  widthCategory !== undefined && widthCategory > topStartToSideStartMaxSize
+-) {
+-  <app-component />
+-}
++@if (users$ | async; as users) { {{   users.length   }} } @else if (users$ |
++async; as users) { {{   users.length   }} }
+ 
+-@if (widthCategory; as item) {}
++<div *ngIf="users$   |   async;   as   users">{{   users.length   }}</div>
++@else { } @if (isDev) { } @else if (test) { } @if (foo( "quotes")) { } @else if
++(foo( 'quotes')) { } @if ( widthCategory !== undefined && widthCategory >
++topStartToSideStartMaxSize) {
++<app-component />
++} @if ( widthCategory; as item) { }
+ 
+ <div *ngIf="widthCategory; as item"></div>
+```
+
+# Output
+
+```html
+<h3>&#64;if and &#64;else</h3>
+<div>
+  <input
+    #checkbox
+    type="checkbox"
+    [checked]="isChecked()"
+    (change)="isChecked.set(checkbox.checked)"
+    id="checkbox"
+  />
+</div>
+<div>
+  @if (isChecked()) {
+  <span>Checked</span>
+  } @else {
+  <span>Not checked</span>
+  }
+</div>
+@if (users$ | async; as users) { {{   users.length   }} } @else if (users$ |
+async; as users) { {{   users.length   }} }
+
+<div *ngIf="users$   |   async;   as   users">{{   users.length   }}</div>
+@else { } @if (isDev) { } @else if (test) { } @if (foo( "quotes")) { } @else if
+(foo( 'quotes')) { } @if ( widthCategory !== undefined && widthCategory >
+topStartToSideStartMaxSize) {
+<app-component />
+} @if ( widthCategory; as item) { }
+
+<div *ngIf="widthCategory; as item"></div>
+```
+
+# Errors
+```
+if.html:14:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    12 │ </div>
+    13 │ 
+  > 14 │ @if (users$   |   async;   as   users) { {{   users.length   }} }
+       │                                          ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ @else if (users$   |   async;   as   users) { {{   users.length   }} }
+    16 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+if.html:15:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    14 │ @if (users$   |   async;   as   users) { {{   users.length   }} }
+  > 15 │ @else if (users$   |   async;   as   users) { {{   users.length   }} }
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ <div *ngIf="users$   |   async;   as   users">{{   users.length   }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+if.html:17:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    15 │ @else if (users$   |   async;   as   users) { {{   users.length   }} }
+    16 │ 
+  > 17 │ <div *ngIf="users$   |   async;   as   users">{{   users.length   }}</div>
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ @else {}
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```

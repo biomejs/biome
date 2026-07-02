@@ -1,0 +1,110 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/control-flow/ignore.html
+---
+
+# Input
+
+```html
+<!-- prettier-ignore -->
+@if (condition) {
+  Foo
+} @else {
+  Other
+}
+
+
+@if (condition) {
+  Foo
+}
+<!-- prettier-ignore -->
+@else {
+  Other
+}
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,3 +1,3 @@
+ <!-- biome-ignore format: prettier ignore -->
+-@if (condition){ Foo } @else { Other } @if (condition) { Foo }<!-- biome-ignore format: prettier ignore --> @else
+-{ Other }
++@if (condition){ Foo } @else { Other } @if (condition) { Foo }<!-- biome-ignore format: prettier ignore -->
++@else{ Other }
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -8,42 +8,43 @@
+     "@if (condition)"
+   ]),
+   fill([
+-    [source_position(61), "{"],
++    [source_position(62), "{"],
+     [soft_line_break_or_space],
+-    [source_position(63), "Foo"],
++    [source_position(66), "Foo"],
+     [soft_line_break_or_space],
+-    [source_position(67), "}"],
++    [source_position(70), "}"],
+     [soft_line_break_or_space],
+-    [source_position(69), "@else"],
++    [source_position(72), "@else"],
+     [soft_line_break_or_space],
+-    [source_position(75), "{"],
++    [source_position(78), "{"],
++    [soft_line_break_or_space],
++    [source_position(82), "Other"],
+     [soft_line_break_or_space],
+-    [source_position(77), "Other"],
++    [source_position(88), "}"],
+     [soft_line_break_or_space],
+-    [source_position(83), "}"],
++    [source_position(92), "@if"],
+     [soft_line_break_or_space],
+-    [source_position(85), "@if"],
++    [source_position(96), "(condition)"],
+     [soft_line_break_or_space],
+-    [source_position(89), "(condition)"],
++    [source_position(108), "{"],
+     [soft_line_break_or_space],
+-    [source_position(101), "{"]
++    [source_position(112), "Foo"],
++    [soft_line_break_or_space],
++    [source_position(116), "}"]
+   ]),
+-  " ",
+   verbatim([
+-    source_position(103),
+-    "Foo }",
+-    source_position(108),
+-    "<!-- biome-ignore format: prettier ignore -->"
++    source_position(118),
++    "<!-- biome-ignore format: prettier ignore -->",
++    hard_line_break,
++    source_position(164),
++    "@else"
+   ]),
+-  " ",
+   fill([
+-    [source_position(154), "@else"],
++    [source_position(170), "{"],
+     [soft_line_break_or_space],
+-    [source_position(159), "{"],
+-    [soft_line_break_or_space],
+-    [source_position(161), "Other"],
++    [source_position(174), "Other"],
+     [soft_line_break_or_space],
+-    [source_position(167), "}"]
++    [source_position(180), "}"]
+   ]),
+   hard_line_break
+ ]
+\ No newline at end of file
+
+```

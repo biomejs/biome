@@ -1,0 +1,809 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: angular/angular/interpolation.component.html
+---
+
+# Input
+
+```html
+<div>{{ a | b : c:d :e }}</div>
+<div>{{  a | pipe    }}</div>
+<div>{{ 0 - 1 }}</div>
+<div>{{ - 1 }}</div>
+<div>{{ a ? 1 : 2 }}</div>
+<div>{{ a ( 1 ) ( 2 ) }}</div>
+<div>{{ a [ b ] }}</div>
+<div>{{ [ 1 ] }}</div>
+<div>{{ { 'a' : 1 } }}</div>
+<div>{{ { a : 1 } }}</div>
+<div>{{ true }}</div>
+<div>{{ undefined }}</div>
+<div>{{ null }}</div>
+<div>{{ ( 1 ) }}</div>
+<div>{{ 1 }}</div>
+<div>{{  'hello' }}</div>
+<div>{{ a ( 1 , 2 ) }}</div>
+<div>{{ a . b ( 1 , 2 ) }}</div>
+<div>{{ x ! }}</div>
+<div>{{ ! x }}</div>
+<div>{{ ( ( a ) ) }}</div>
+<div>{{ a }}</div>
+<div>{{ a // hello }}</div>
+<div>{{ a . b }}</div>
+<div>{{ a ?. b ( ) }}</div>
+<div>{{ a ?. b }}</div>
+<div>{{  a // hello  }}</div>
+<label for="transmissionLayoutRadioButton">{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label>
+<label for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton">{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label>
+<label for="transmissionLayoutRadioButton">{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}} </label>
+<label for="transmissionLayoutRadioButton"> {{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label>
+<label for="transmissionLayoutRadioButton"> {{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}} </label>
+<div class="Nemo possimus non voluptates dicta accusamus id quia">{{copyTypes[options.copyType]}}</div>
+{{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+<span
+><!--
+--><span
+  >{{a}}</span
+><!--
+--><span
+  >{{b}}</span
+><!--
+--></span>
+<span>
+  {{ aNormalValue | aPipe }}:
+  <strong>{{ aReallyReallySuperLongValue | andASuperLongPipeJustToBreakThis }}</strong>
+</span>
+<p>
+  {{
+      'delete'
+          | translate: {what: ('entities' | translate: {count: array.length})}
+  }}
+</p>
+<p>{{ {a:1+{} } }}</p>
+<p>{{ {a:a==={} } }}</p>
+<p>{{ {a:!{} } }}</p>
+<p>{{ {a:a?b:{} } }}</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -25,41 +25,42 @@
+ <div>{{ a ?. b ( ) }}</div>
+ <div>{{ a ?. b }}</div>
+ <div>{{  a // hello  }}</div>
+-<label for="transmissionLayoutRadioButton">{{
++<label for="transmissionLayoutRadioButton"
++  >{{
+ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+-}}</label>
++}}</label
++>
+ <label
+   for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton"
+   >{{
+ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+-  }}</label
++}}</label
+ >
+ <label for="transmissionLayoutRadioButton"
+   >{{
+ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+-  }}
++}}
+ </label>
+ <label for="transmissionLayoutRadioButton">
+   {{
+ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+-  }}</label
++}}</label
+ >
+ <label for="transmissionLayoutRadioButton">
+   {{
+ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+-  }}
++}}
+ </label>
+ <div class="Nemo possimus non voluptates dicta accusamus id quia">
+   {{copyTypes[options.copyType]}}
+ </div>
+ {{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+ <span
+-  ><!--
+---><span>{{a}}</span
+-  ><!--
+---><span>{{b}}</span
+   ><!--
+---></span>
++--><span>{{a}}</span><!--
++--><span>{{b}}</span><!--
++--></span
++>
+ <span>
+   {{ aNormalValue | aPipe }}:
+   <strong
+```
+
+# Output
+
+```html
+<div>{{ a | b : c:d :e }}</div>
+<div>{{  a | pipe    }}</div>
+<div>{{ 0 - 1 }}</div>
+<div>{{ - 1 }}</div>
+<div>{{ a ? 1 : 2 }}</div>
+<div>{{ a ( 1 ) ( 2 ) }}</div>
+<div>{{ a [ b ] }}</div>
+<div>{{ [ 1 ] }}</div>
+<div>{{ { 'a' : 1 } }}</div>
+<div>{{ { a : 1 } }}</div>
+<div>{{ true }}</div>
+<div>{{ undefined }}</div>
+<div>{{ null }}</div>
+<div>{{ ( 1 ) }}</div>
+<div>{{ 1 }}</div>
+<div>{{  'hello' }}</div>
+<div>{{ a ( 1 , 2 ) }}</div>
+<div>{{ a . b ( 1 , 2 ) }}</div>
+<div>{{ x ! }}</div>
+<div>{{ ! x }}</div>
+<div>{{ ( ( a ) ) }}</div>
+<div>{{ a }}</div>
+<div>{{ a // hello }}</div>
+<div>{{ a . b }}</div>
+<div>{{ a ?. b ( ) }}</div>
+<div>{{ a ?. b }}</div>
+<div>{{  a // hello  }}</div>
+<label for="transmissionLayoutRadioButton"
+  >{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label
+>
+<label
+  for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton"
+  >{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label
+>
+<label for="transmissionLayoutRadioButton"
+  >{{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}
+</label>
+<label for="transmissionLayoutRadioButton">
+  {{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}</label
+>
+<label for="transmissionLayoutRadioButton">
+  {{
+"SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+}}
+</label>
+<div class="Nemo possimus non voluptates dicta accusamus id quia">
+  {{copyTypes[options.copyType]}}
+</div>
+{{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+<span
+  ><!--
+--><span>{{a}}</span><!--
+--><span>{{b}}</span><!--
+--></span
+>
+<span>
+  {{ aNormalValue | aPipe }}:
+  <strong
+    >{{ aReallyReallySuperLongValue | andASuperLongPipeJustToBreakThis }}</strong
+  >
+</span>
+<p>
+  {{
+      'delete'
+          | translate: {what: ('entities' | translate: {count: array.length})}
+  }}
+</p>
+<p>{{ {a:1+{} } }}</p>
+<p>{{ {a:a==={} } }}</p>
+<p>{{ {a:!{} } }}</p>
+<p>{{ {a:a?b:{} } }}</p>
+```
+
+# Errors
+```
+interpolation.component.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ <div>{{ a | b : c:d :e }}</div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    2 │ <div>{{  a | pipe    }}</div>
+    3 │ <div>{{ 0 - 1 }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ <div>{{ a | b : c:d :e }}</div>
+  > 2 │ <div>{{  a | pipe    }}</div>
+      │      ^^^^^^^^^^^^^^^^^^
+    3 │ <div>{{ 0 - 1 }}</div>
+    4 │ <div>{{ - 1 }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    1 │ <div>{{ a | b : c:d :e }}</div>
+    2 │ <div>{{  a | pipe    }}</div>
+  > 3 │ <div>{{ 0 - 1 }}</div>
+      │      ^^^^^^^^^^^
+    4 │ <div>{{ - 1 }}</div>
+    5 │ <div>{{ a ? 1 : 2 }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    2 │ <div>{{  a | pipe    }}</div>
+    3 │ <div>{{ 0 - 1 }}</div>
+  > 4 │ <div>{{ - 1 }}</div>
+      │      ^^^^^^^^^
+    5 │ <div>{{ a ? 1 : 2 }}</div>
+    6 │ <div>{{ a ( 1 ) ( 2 ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    3 │ <div>{{ 0 - 1 }}</div>
+    4 │ <div>{{ - 1 }}</div>
+  > 5 │ <div>{{ a ? 1 : 2 }}</div>
+      │      ^^^^^^^^^^^^^^^
+    6 │ <div>{{ a ( 1 ) ( 2 ) }}</div>
+    7 │ <div>{{ a [ b ] }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    4 │ <div>{{ - 1 }}</div>
+    5 │ <div>{{ a ? 1 : 2 }}</div>
+  > 6 │ <div>{{ a ( 1 ) ( 2 ) }}</div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    7 │ <div>{{ a [ b ] }}</div>
+    8 │ <div>{{ [ 1 ] }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    5 │ <div>{{ a ? 1 : 2 }}</div>
+    6 │ <div>{{ a ( 1 ) ( 2 ) }}</div>
+  > 7 │ <div>{{ a [ b ] }}</div>
+      │      ^^^^^^^^^^^^^
+    8 │ <div>{{ [ 1 ] }}</div>
+    9 │ <div>{{ { 'a' : 1 } }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     6 │ <div>{{ a ( 1 ) ( 2 ) }}</div>
+     7 │ <div>{{ a [ b ] }}</div>
+   > 8 │ <div>{{ [ 1 ] }}</div>
+       │      ^^^^^^^^^^^
+     9 │ <div>{{ { 'a' : 1 } }}</div>
+    10 │ <div>{{ { a : 1 } }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     7 │ <div>{{ a [ b ] }}</div>
+     8 │ <div>{{ [ 1 ] }}</div>
+   > 9 │ <div>{{ { 'a' : 1 } }}</div>
+       │      ^^^^^^^^^^^^^^^^^
+    10 │ <div>{{ { a : 1 } }}</div>
+    11 │ <div>{{ true }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     8 │ <div>{{ [ 1 ] }}</div>
+     9 │ <div>{{ { 'a' : 1 } }}</div>
+  > 10 │ <div>{{ { a : 1 } }}</div>
+       │      ^^^^^^^^^^^^^^^
+    11 │ <div>{{ true }}</div>
+    12 │ <div>{{ undefined }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:11:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+     9 │ <div>{{ { 'a' : 1 } }}</div>
+    10 │ <div>{{ { a : 1 } }}</div>
+  > 11 │ <div>{{ true }}</div>
+       │      ^^^^^^^^^^
+    12 │ <div>{{ undefined }}</div>
+    13 │ <div>{{ null }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:12:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    10 │ <div>{{ { a : 1 } }}</div>
+    11 │ <div>{{ true }}</div>
+  > 12 │ <div>{{ undefined }}</div>
+       │      ^^^^^^^^^^^^^^^
+    13 │ <div>{{ null }}</div>
+    14 │ <div>{{ ( 1 ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:13:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    11 │ <div>{{ true }}</div>
+    12 │ <div>{{ undefined }}</div>
+  > 13 │ <div>{{ null }}</div>
+       │      ^^^^^^^^^^
+    14 │ <div>{{ ( 1 ) }}</div>
+    15 │ <div>{{ 1 }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:14:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    12 │ <div>{{ undefined }}</div>
+    13 │ <div>{{ null }}</div>
+  > 14 │ <div>{{ ( 1 ) }}</div>
+       │      ^^^^^^^^^^^
+    15 │ <div>{{ 1 }}</div>
+    16 │ <div>{{  'hello' }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:15:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    13 │ <div>{{ null }}</div>
+    14 │ <div>{{ ( 1 ) }}</div>
+  > 15 │ <div>{{ 1 }}</div>
+       │      ^^^^^^^
+    16 │ <div>{{  'hello' }}</div>
+    17 │ <div>{{ a ( 1 , 2 ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:16:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    14 │ <div>{{ ( 1 ) }}</div>
+    15 │ <div>{{ 1 }}</div>
+  > 16 │ <div>{{  'hello' }}</div>
+       │      ^^^^^^^^^^^^^^
+    17 │ <div>{{ a ( 1 , 2 ) }}</div>
+    18 │ <div>{{ a . b ( 1 , 2 ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:17:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    15 │ <div>{{ 1 }}</div>
+    16 │ <div>{{  'hello' }}</div>
+  > 17 │ <div>{{ a ( 1 , 2 ) }}</div>
+       │      ^^^^^^^^^^^^^^^^^
+    18 │ <div>{{ a . b ( 1 , 2 ) }}</div>
+    19 │ <div>{{ x ! }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:18:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    16 │ <div>{{  'hello' }}</div>
+    17 │ <div>{{ a ( 1 , 2 ) }}</div>
+  > 18 │ <div>{{ a . b ( 1 , 2 ) }}</div>
+       │      ^^^^^^^^^^^^^^^^^^^^^
+    19 │ <div>{{ x ! }}</div>
+    20 │ <div>{{ ! x }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:19:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    17 │ <div>{{ a ( 1 , 2 ) }}</div>
+    18 │ <div>{{ a . b ( 1 , 2 ) }}</div>
+  > 19 │ <div>{{ x ! }}</div>
+       │      ^^^^^^^^^
+    20 │ <div>{{ ! x }}</div>
+    21 │ <div>{{ ( ( a ) ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:20:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    18 │ <div>{{ a . b ( 1 , 2 ) }}</div>
+    19 │ <div>{{ x ! }}</div>
+  > 20 │ <div>{{ ! x }}</div>
+       │      ^^^^^^^^^
+    21 │ <div>{{ ( ( a ) ) }}</div>
+    22 │ <div>{{ a }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:21:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    19 │ <div>{{ x ! }}</div>
+    20 │ <div>{{ ! x }}</div>
+  > 21 │ <div>{{ ( ( a ) ) }}</div>
+       │      ^^^^^^^^^^^^^^^
+    22 │ <div>{{ a }}</div>
+    23 │ <div>{{ a // hello }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:22:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    20 │ <div>{{ ! x }}</div>
+    21 │ <div>{{ ( ( a ) ) }}</div>
+  > 22 │ <div>{{ a }}</div>
+       │      ^^^^^^^
+    23 │ <div>{{ a // hello }}</div>
+    24 │ <div>{{ a . b }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:23:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    21 │ <div>{{ ( ( a ) ) }}</div>
+    22 │ <div>{{ a }}</div>
+  > 23 │ <div>{{ a // hello }}</div>
+       │      ^^^^^^^^^^^^^^^^
+    24 │ <div>{{ a . b }}</div>
+    25 │ <div>{{ a ?. b ( ) }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:24:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    22 │ <div>{{ a }}</div>
+    23 │ <div>{{ a // hello }}</div>
+  > 24 │ <div>{{ a . b }}</div>
+       │      ^^^^^^^^^^^
+    25 │ <div>{{ a ?. b ( ) }}</div>
+    26 │ <div>{{ a ?. b }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:25:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    23 │ <div>{{ a // hello }}</div>
+    24 │ <div>{{ a . b }}</div>
+  > 25 │ <div>{{ a ?. b ( ) }}</div>
+       │      ^^^^^^^^^^^^^^^^
+    26 │ <div>{{ a ?. b }}</div>
+    27 │ <div>{{  a // hello  }}</div>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:26:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    24 │ <div>{{ a . b }}</div>
+    25 │ <div>{{ a ?. b ( ) }}</div>
+  > 26 │ <div>{{ a ?. b }}</div>
+       │      ^^^^^^^^^^^^
+    27 │ <div>{{  a // hello  }}</div>
+    28 │ <label for="transmissionLayoutRadioButton">{{
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:27:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    25 │ <div>{{ a ?. b ( ) }}</div>
+    26 │ <div>{{ a ?. b }}</div>
+  > 27 │ <div>{{  a // hello  }}</div>
+       │      ^^^^^^^^^^^^^^^^^^
+    28 │ <label for="transmissionLayoutRadioButton">{{
+    29 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:28:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    26 │ <div>{{ a ?. b }}</div>
+    27 │ <div>{{  a // hello  }}</div>
+  > 28 │ <label for="transmissionLayoutRadioButton">{{
+       │                                            ^^
+  > 29 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  > 30 │ }}</label>
+       │ ^^
+    31 │ <label for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton">{{
+    32 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:31:131 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    29 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+    30 │ }}</label>
+  > 31 │ <label for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton">{{
+       │                                                                                                                                   ^^
+  > 32 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  > 33 │ }}</label>
+       │ ^^
+    34 │ <label for="transmissionLayoutRadioButton">{{
+    35 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:34:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    32 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+    33 │ }}</label>
+  > 34 │ <label for="transmissionLayoutRadioButton">{{
+       │                                            ^^
+  > 35 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  > 36 │ }} </label>
+       │ ^^
+    37 │ <label for="transmissionLayoutRadioButton"> {{
+    38 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:37:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    35 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+    36 │ }} </label>
+  > 37 │ <label for="transmissionLayoutRadioButton"> {{
+       │                                             ^^
+  > 38 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  > 39 │ }}</label>
+       │ ^^
+    40 │ <label for="transmissionLayoutRadioButton"> {{
+    41 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:40:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    38 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+    39 │ }}</label>
+  > 40 │ <label for="transmissionLayoutRadioButton"> {{
+       │                                             ^^
+  > 41 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+  > 42 │ }} </label>
+       │ ^^
+    43 │ <div class="Nemo possimus non voluptates dicta accusamus id quia">{{copyTypes[options.copyType]}}</div>
+    44 │ {{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:43:67 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    41 │ "SearchSelection.transmissionLayoutRadioButton" | localize:localizationSection
+    42 │ }} </label>
+  > 43 │ <div class="Nemo possimus non voluptates dicta accusamus id quia">{{copyTypes[options.copyType]}}</div>
+       │                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ {{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+    45 │ <span
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:44:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    42 │ }} </label>
+    43 │ <div class="Nemo possimus non voluptates dicta accusamus id quia">{{copyTypes[options.copyType]}}</div>
+  > 44 │ {{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ <span
+    46 │ ><!--
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:48:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    46 │ ><!--
+    47 │ --><span
+  > 48 │   >{{a}}</span
+       │    ^^^^^
+    49 │ ><!--
+    50 │ --><span
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:51:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    49 │ ><!--
+    50 │ --><span
+  > 51 │   >{{b}}</span
+       │    ^^^^^
+    52 │ ><!--
+    53 │ --></span>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:55:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    53 │ --></span>
+    54 │ <span>
+  > 55 │   {{ aNormalValue | aPipe }}:
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │   <strong>{{ aReallyReallySuperLongValue | andASuperLongPipeJustToBreakThis }}</strong>
+    57 │ </span>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:56:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    54 │ <span>
+    55 │   {{ aNormalValue | aPipe }}:
+  > 56 │   <strong>{{ aReallyReallySuperLongValue | andASuperLongPipeJustToBreakThis }}</strong>
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ </span>
+    58 │ <p>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:59:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    57 │ </span>
+    58 │ <p>
+  > 59 │   {{
+       │   ^^
+  > 60 │       'delete'
+  > 61 │           | translate: {what: ('entities' | translate: {count: array.length})}
+  > 62 │   }}
+       │   ^^
+    63 │ </p>
+    64 │ <p>{{ {a:1+{} } }}</p>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:64:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    62 │   }}
+    63 │ </p>
+  > 64 │ <p>{{ {a:1+{} } }}</p>
+       │    ^^^^^^^^^^^^^^^
+    65 │ <p>{{ {a:a==={} } }}</p>
+    66 │ <p>{{ {a:!{} } }}</p>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:65:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    63 │ </p>
+    64 │ <p>{{ {a:1+{} } }}</p>
+  > 65 │ <p>{{ {a:a==={} } }}</p>
+       │    ^^^^^^^^^^^^^^^^^
+    66 │ <p>{{ {a:!{} } }}</p>
+    67 │ <p>{{ {a:a?b:{} } }}</p>
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:66:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    64 │ <p>{{ {a:1+{} } }}</p>
+    65 │ <p>{{ {a:a==={} } }}</p>
+  > 66 │ <p>{{ {a:!{} } }}</p>
+       │    ^^^^^^^^^^^^^^
+    67 │ <p>{{ {a:a?b:{} } }}</p>
+    68 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+interpolation.component.html:67:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+    65 │ <p>{{ {a:a==={} } }}</p>
+    66 │ <p>{{ {a:!{} } }}</p>
+  > 67 │ <p>{{ {a:a?b:{} } }}</p>
+       │    ^^^^^^^^^^^^^^^^^
+    68 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   34:   for="transmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButtontransmissionLayoutRadioButton"
+   57: {{listRow.NextScheduledSendStatus == 1 || listRow.NextScheduledSendStatus == 2 || listRow.NextScheduledSendStatus == 3}}
+   67:     >{{ aReallyReallySuperLongValue | andASuperLongPipeJustToBreakThis }}</strong
+```
