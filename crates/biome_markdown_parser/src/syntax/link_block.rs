@@ -524,8 +524,50 @@ fn parse_link_destination(p: &mut MarkdownParser) {
         }
     }
 
+    consume_trailing_destination_whitespace(p);
+
     list.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_LINK_DESTINATION);
+}
+
+fn consume_trailing_destination_whitespace(p: &mut MarkdownParser) {
+    let should_consume = p.lookahead(|p| {
+        let mut saw_whitespace = false;
+        while is_space_or_tab_token(p) {
+            p.bump_link_definition();
+            saw_whitespace = true;
+        }
+
+        if !saw_whitespace {
+            return false;
+        }
+
+        if p.at(EOF) {
+            return true;
+        }
+
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                return true;
+            }
+
+            if !title_on_next_line(p) {
+                return true;
+            }
+
+            p.bump_link_definition();
+            skip_whitespace_tokens(p);
+            !skip_title_tokens(p)
+        } else {
+            false
+        }
+    });
+
+    if should_consume {
+        while is_space_or_tab_token(p) {
+            bump_textual_link_def(p);
+        }
+    }
 }
 
 /// Consume the current token as MdTextual using LinkDefinition context.

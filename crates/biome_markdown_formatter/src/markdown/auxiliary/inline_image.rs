@@ -41,7 +41,7 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
         )?;
 
         if let Some(title) = title {
-            write!(f, [space(), title.format()])?;
+            write!(f, [title.format()])?;
         }
 
         write!(f, [r_paren_token.format()])

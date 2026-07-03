@@ -917,15 +917,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
  - [JSX](https://facebook.github.io/jsx/)
  - [Flow](https://flow.org/)
-@@ -74,7 +73,7 @@
- 
- </details>
- 
-----
-+--------------------------------------------------------------------------------
- 
- ## What does Prettier do?
- 
 @@ -118,12 +117,12 @@
  
  <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
@@ -1303,7 +1294,7 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
 
 </details>
 
---------------------------------------------------------------------------------
+---
 
 ## What does Prettier do?
 

@@ -1,8 +1,18 @@
 [hello](#world)
 
+[*](#styling-footnote)
+
 [  spaced  ](#link)
 
 [link](https://example.com "title")
+
+[link](https://example.com "")
+
+[link](https://example.com '')
+
+[link](https://example.com " ")
+
+[link](https://example.com ' ')
 
 [link](https://example.com "  spaced title  ")
 

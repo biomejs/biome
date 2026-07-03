@@ -10,7 +10,8 @@ use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, write};
-use biome_markdown_syntax::list_ext::AnyListItem;
+use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker};
+use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, MarkdownLanguage, MdBlockList, MdBullet,
     MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent, MdIndentCodeBlock,
@@ -49,7 +50,7 @@ impl BulletListPrinter {
         // The marker decision must be the same for every bullet of the list:
         // normalizing only some markers changes the marker mid-list, which
         // splits the list in two per CommonMark.
-        let keep_marker = node
+        let prefer_star_marker = node
             .iter()
             .any(|bullet| first_block_is_dash_thematic_break(&bullet.content()));
         Self {
@@ -57,7 +58,7 @@ impl BulletListPrinter {
                 .iter()
                 .map(|item| ListBullet {
                     node: item,
-                    keep_marker,
+                    prefer_star_marker,
                 })
                 .collect(),
         }
@@ -77,9 +78,9 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
 
 pub(crate) struct ListBullet {
     node: MdBullet,
-    /// When true, the original list marker is preserved instead of being
-    /// normalized to `-`. Computed once per list by [BulletListPrinter].
-    keep_marker: bool,
+    /// When true, unordered list markers are normalized to `*` instead of `-`.
+    /// Computed once per list by [BulletListPrinter].
+    prefer_star_marker: bool,
 }
 
 impl ListBullet {
@@ -123,16 +124,23 @@ impl Format<MarkdownFormatContext> for ListBullet {
         let marker = prefix.marker()?;
         let list_marker = prefix.list_marker()?;
 
+        let is_ordered_marker = list_marker.is_ordered();
+        let is_minus_marker = list_marker.is_minus();
+        let is_star_marker = matches!(&list_marker, ListMarker::Star);
+
         // `* - - -` is a bullet containing a `-` thematic break. Normalizing `*`
-        // to `-` produces `- - - -` which CommonMark 4.1 parses as a thematic
-        // break, not a list item. Same for `+ - - -`. Skip normalization for marker
-        // but still format content through child formatters.
-        let target_marker =
-            if list_marker.is_minus() || self.keep_marker || list_marker.is_ordered() {
-                None
-            } else {
-                Some("-")
-            };
+        // to `-` produces `- ---`, which CommonMark 4.1 parses as a thematic
+        // break, not a list item. Same for `+ - - -`, so use `*` for the whole
+        // unordered list when one item starts with a dash thematic break.
+        let target_marker = if is_ordered_marker {
+            None
+        } else if self.prefer_star_marker {
+            if is_star_marker { None } else { Some("*") }
+        } else if is_minus_marker {
+            None
+        } else {
+            Some("-")
+        };
 
         let keep_pre_marker = self.keep_pre_marker();
         let pre_marker_width = if keep_pre_marker {
@@ -141,7 +149,7 @@ impl Format<MarkdownFormatContext> for ListBullet {
             0
         };
         let min_post_marker_len =
-            if list_marker.is_ordered() && has_indented_code_block_after_content(&content) {
+            if is_ordered_marker && has_indented_code_block_after_content(&content) {
                 // CommonMark indented code blocks use four spaces:
                 // https://spec.commonmark.org/0.31.2/#indented-code-blocks
                 4usize.saturating_sub(marker.text_trimmed().len())
@@ -185,8 +193,10 @@ fn first_block_is_dash_thematic_break(content: &MdBlockList) -> bool {
         .parts()
         .into_iter()
         .find_map(|p| p.as_md_thematic_break_char().cloned())
-        .and_then(|c| c.value().ok())
-        .is_some_and(|t| t.text_trimmed() == "-")
+        .is_some_and(|c| {
+            c.marker()
+                .is_ok_and(|marker| marker == MdThematicBreakMarker::Hyphen)
+        })
 }
 
 fn has_indented_code_block_after_content(content: &MdBlockList) -> bool {
@@ -218,7 +228,9 @@ impl ListBlockList {
         content: &AnyMdBlock,
         f: &mut Formatter<MarkdownFormatContext>,
     ) -> FormatResult<()> {
-        let breaks = if content.is_list() {
+        let breaks = if content.is_thematic_break() && pending_breaks > 0 {
+            2
+        } else if content.is_list() {
             pending_breaks.min(1)
         } else if should_separate_fenced_code_block(content) && pending_breaks > 0 {
             2
@@ -288,6 +300,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let iter = BlockListIterator::new(self.content.iter());
         let mut pending_breaks: u8 = 0;
+        let mut last_content_was_thematic_break = false;
+        let mut last_content_has_trailing_newline = false;
         for item in iter {
             match item {
                 BlockListIteratorItem::WithContinuationIndent {
@@ -332,7 +346,13 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             })]
                     )?;
 
-                    pending_breaks = if middle_block.is_newline() { 2 } else { 1 };
+                    pending_breaks = if content.is_thematic_break() || middle_block.is_newline() {
+                        2
+                    } else {
+                        1
+                    };
+                    last_content_was_thematic_break = content.is_thematic_break();
+                    last_content_has_trailing_newline = middle_block.is_newline();
                 }
 
                 BlockListIteratorItem::OnlyContinuationIndent {
@@ -361,7 +381,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                 should_remove: true
                             })]
                     )?;
-                    pending_breaks = 1;
+                    pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
+                    last_content_was_thematic_break = content.is_thematic_break();
+                    last_content_has_trailing_newline = false;
                 }
 
                 BlockListIteratorItem::Simple((content, quote_prefix)) => {
@@ -381,20 +403,29 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                 should_remove: true
                             })]
                         )?;
+                        if pending_breaks > 0 {
+                            last_content_has_trailing_newline = true;
+                        }
                         pending_breaks += 1;
                     } else {
                         Self::emit_pending_breaks(pending_breaks, &content, f)?;
                         Self::fmt_list_content(&content, f)?;
-                        pending_breaks = 1;
+                        pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
+                        last_content_was_thematic_break = content.is_thematic_break();
+                        last_content_has_trailing_newline = false;
                     }
                 }
             }
         }
 
         if pending_breaks > 0 {
-            match pending_breaks {
-                1 => write!(f, [hard_line_break()])?,
-                _ => write!(f, [empty_line()])?,
+            match (
+                pending_breaks,
+                last_content_was_thematic_break && !last_content_has_trailing_newline,
+            ) {
+                (_, true) => write!(f, [hard_line_break()])?,
+                (1, false) => write!(f, [hard_line_break()])?,
+                (_, false) => write!(f, [empty_line()])?,
             }
         }
         Ok(())

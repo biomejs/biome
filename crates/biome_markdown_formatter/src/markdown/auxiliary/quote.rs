@@ -3,6 +3,7 @@ use crate::markdown::lists::block_list::{
     FormatMdBlockListOptions, QuoteBoundaryTrim, quote_boundary_trim_range,
 };
 use crate::prelude::*;
+use crate::quote::{Quote, should_format_quote_structurally};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdQuote, MdQuoteFields};
 
@@ -10,6 +11,10 @@ use biome_markdown_syntax::{MdQuote, MdQuoteFields};
 pub(crate) struct FormatMdQuote;
 impl FormatNodeRule<MdQuote> for FormatMdQuote {
     fn fmt_fields(&self, node: &MdQuote, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        if should_format_quote_structurally(node)? {
+            return Quote::new(node.clone()).fmt(f);
+        }
+
         let MdQuoteFields { content, prefix } = node.as_fields();
         let prefix = prefix?;
         let quote_boundary_trim = if node.syntax().next_sibling().is_none() {

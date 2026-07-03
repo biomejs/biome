@@ -10,6 +10,14 @@ info: markdown/inline_image.md
 
 ![alt text](image.png "title")
 
+![alt text](image.png "")
+
+![alt text](image.png '')
+
+![alt text](image.png " ")
+
+![alt text](image.png ' ')
+
 ![](image.png)
 
 ![alt text](image.png "title with spaces")
@@ -50,6 +58,14 @@ info: markdown/inline_image.md
 
 ![alt text](image.png "title")
 
+![alt text](image.png)
+
+![alt text](image.png)
+
+![alt text](image.png " ")
+
+![alt text](image.png ' ')
+
 ![](image.png)
 
 ![alt text](image.png "title with spaces")
@@ -84,5 +100,5 @@ info: markdown/inline_image.md
 
 # Lines exceeding max width of 80 characters
 ```
-   23: ![This is a long alt text that describes the image in great detail for accessibility purposes](https://example.com/very/long/path/to/some/deeply/nested/image.png "And a long title too")
+   31: ![This is a long alt text that describes the image in great detail for accessibility purposes](https://example.com/very/long/path/to/some/deeply/nested/image.png "And a long title too")
 ```

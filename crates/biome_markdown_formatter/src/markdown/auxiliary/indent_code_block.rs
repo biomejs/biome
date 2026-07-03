@@ -35,6 +35,7 @@ impl FormatNodeRule<MdIndentCodeBlock> for FormatMdIndentCodeBlock {
                             f,
                             [indent.format().with_options(FormatMdIndentTokenOptions {
                                 replace_tabs_with_spaces: at_line_start,
+                                should_remove: false,
                             })]
                         )?;
                         at_line_start = false;
