@@ -81,6 +81,23 @@ impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
     }
 }
 
+/// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
+pub fn inner_string_text(token: &MarkdownSyntaxToken) -> TokenText {
+    let mut text = token.token_text_trimmed().trim_token();
+    let value = text.text();
+    if token.kind() == MarkdownSyntaxKind::MD_TEXTUAL_LITERAL
+        && value.len() >= 2
+        && (value.starts_with('"') && value.ends_with('"')
+            || value.starts_with('\'') && value.ends_with('\''))
+    {
+        // remove string delimiters
+        // SAFETY: string literal token have a delimiters at the start and the end of the string
+        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        text = text.slice(range);
+    }
+    text
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -129,21 +146,4 @@ mod tests {
             MarkdownSyntaxKind::MD_BOGUS
         );
     }
-}
-
-/// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
-pub fn inner_string_text(token: &MarkdownSyntaxToken) -> TokenText {
-    let mut text = token.token_text_trimmed().trim_token();
-    let value = text.text();
-    if token.kind() == MarkdownSyntaxKind::MD_TEXTUAL_LITERAL
-        && value.len() >= 2
-        && (value.starts_with('"') && value.ends_with('"')
-            || value.starts_with('\'') && value.ends_with('\''))
-    {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
-    }
-    text
 }
