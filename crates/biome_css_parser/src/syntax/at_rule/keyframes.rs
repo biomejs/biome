@@ -120,7 +120,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
 
         // Skip the entire pseudo-class function selector
         // Skip until the next opening curly brace
-        while !p.at(T!['{']) {
+        while !p.at(T!['{']) && !p.at(EOF) {
             p.bump_any();
         }
 

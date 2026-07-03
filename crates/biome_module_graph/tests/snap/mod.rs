@@ -133,7 +133,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     JsParserOptions::default(),
                 );
                 let formatted =
-                    format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
+                    format_node(JsFormatOptions::default(), tree.tree().syntax(), Vec::new())
                         .unwrap()
                         .print()
                         .unwrap();

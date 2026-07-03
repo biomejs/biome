@@ -5,7 +5,8 @@ use biome_workspace_db::embedded::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
 use biome_workspace_db::embedded::references::{
-    InternedReference, is_reference_used, is_type_reference_used, is_value_reference_used,
+    InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
+    is_value_reference_used,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -53,6 +54,16 @@ impl EmbeddedService {
 
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         is_reference_used(
+            self.db.as_ref(),
+            InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
+        )
+    }
+
+    /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
+    ///
+    /// See also: https://svelte.dev/docs/svelte/stores
+    pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
+        is_svelte_store_reference_used(
             self.db.as_ref(),
             InternedReference::new(self.db.as_ref(), self.path.clone(), identifier),
         )

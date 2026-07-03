@@ -25,16 +25,15 @@ Not indented:
 # Error
 ```text
 reformat: formatter output had syntax errors where input had none:
-spec-example-6-1-indentation-spaces.yml:10:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+spec-example-6-1-indentation-spaces.yml:13:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Insufficient indentation in flow collection
   
-     8 │   Flow style: [    # Leading spaces
-     9 │    By two,        # in flow style
-  > 10 │   Also by two,    # are neither
+    11 │     Also by two, # are neither
+    12 │     Still by two, # content nor
+  > 13 │   ] # indentation.
        │   
-    11 │   	Still by two   # content nor
-    12 │     ] # indentation.
+    14 │ 
   
 
 ```
