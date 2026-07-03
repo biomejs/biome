@@ -9,10 +9,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
     JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration,
-    TsTypeAliasDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -424,7 +424,11 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text);
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
@@ -443,6 +447,16 @@ impl Rule for NoUnusedVariables {
         }
 
         if is_unused(model, binding) {
+            // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
+            // parent component. Such a variable may be write-only in the script block but is
+            // still meaningful — suppress the diagnostic to avoid a false positive.
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
+            {
+                return None;
+            }
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
@@ -673,6 +687,57 @@ fn is_declaration_merged_with_used(
         }
         _ => None,
     }
+}
+
+/// Returns `true` if `call` is a call to a simple identifier named `name`.
+fn is_call_to(call: &JsCallExpression, name: &str) -> bool {
+    let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee() else {
+        return false;
+    };
+    ident.name().is_ok_and(|n| n.has_name(name))
+}
+
+/// Returns `true` if the binding is a `$bindable()` shorthand property in a `$props()`
+/// destructuring in a Svelte 5 component.
+///
+/// In Svelte 5, assigning to a `$bindable()` prop reflects the new value back to the parent
+/// component. A variable that appears write-only in the script is therefore intentional and
+/// should not be flagged as unused.
+fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
+    // The binding must be declared as a shorthand property in an object destructuring pattern.
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(shorthand) = decl else {
+        return false;
+    };
+
+    // The shorthand property must have a default initializer `= $bindable(...)`.
+    let Some(init) = shorthand.init() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(call)) = init.expression() else {
+        return false;
+    };
+    if !is_call_to(&call, "$bindable") {
+        return false;
+    }
+
+    // Walk up to find the enclosing `JsVariableDeclarator` whose rhs must be `$props()`.
+    let Some(declarator) = shorthand
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+    let Some(declarator_init) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(props_call)) = declarator_init.expression() else {
+        return false;
+    };
+    is_call_to(&props_call, "$props")
 }
 
 /// Returns `true` if `binding` is considered as unused.
