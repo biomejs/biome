@@ -34,6 +34,7 @@ Another paragraph
 [escaped\]bracket]: /url
 
 [trailing-spaces]: /url   
+[next-definition]: /url
 
 [invalid-trailing]: /url invalid
 
@@ -495,76 +496,102 @@ MdDocument {
                     MdTextual {
                         value_token: MD_TEXTUAL_LITERAL@431..435 "/url" [] [],
                     },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@435..438 "   " [] [],
+                    },
                 ],
             },
             title: missing (optional),
         },
+        MdNewline {
+            value_token: NEWLINE@438..439 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
+            l_brack_token: L_BRACK@439..440 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@440..455 "next-definition" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@455..456 "]" [] [],
+            colon_token: COLON@456..457 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@457..458 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@458..462 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@462..463 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@463..464 "\n" [] [],
+        },
         MdParagraph {
             list: MdInlineItemList [
-                MdHardLine {
-                    value_token: MD_HARD_LINE_LITERAL@435..439 "   \n" [] [],
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@464..481 "[invalid-trailing" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@481..496 "]: /url invalid" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@496..497 "\n" [] [],
                 },
             ],
         },
         MdNewline {
-            value_token: NEWLINE@439..440 "\n" [] [],
+            value_token: NEWLINE@497..498 "\n" [] [],
         },
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@440..457 "[invalid-trailing" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@498..513 "[angle-trailing" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@457..472 "]: /url invalid" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@472..473 "\n" [] [],
-                },
-            ],
-        },
-        MdNewline {
-            value_token: NEWLINE@473..474 "\n" [] [],
-        },
-        MdParagraph {
-            list: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@474..489 "[angle-trailing" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@489..492 "]: " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@513..516 "]: " [] [],
                 },
                 MdInlineHtml {
                     value: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@492..493 "<" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@516..517 "<" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@493..497 "/url" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@517..521 "/url" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@497..498 ">" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@521..522 ">" [] [],
                         },
                     ],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@498..506 " invalid" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@522..530 " invalid" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@506..507 "\n" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@530..531 "\n" [] [],
                 },
             ],
         },
     ],
-    eof_token: EOF@507..507 "" [] [],
+    eof_token: EOF@531..531 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_DOCUMENT@0..507
+0: MD_DOCUMENT@0..531
   0: (empty)
-  1: MD_BLOCK_LIST@0..507
+  1: MD_BLOCK_LIST@0..531
     0: MD_PARAGRAPH@0..31
       0: MD_INLINE_ITEM_LIST@0..31
         0: MD_TEXTUAL@0..30
@@ -843,7 +870,7 @@ MdDocument {
       0: NEWLINE@410..411 "\n" [] []
     33: MD_NEWLINE@411..412
       0: NEWLINE@411..412 "\n" [] []
-    34: MD_LINK_REFERENCE_DEFINITION@412..435
+    34: MD_LINK_REFERENCE_DEFINITION@412..438
       0: MD_INDENT_TOKEN_LIST@412..412
       1: L_BRACK@412..413 "[" [] []
       2: MD_LINK_LABEL@413..428
@@ -852,47 +879,65 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@413..428 "trailing-spaces" [] []
       3: R_BRACK@428..429 "]" [] []
       4: COLON@429..430 ":" [] []
-      5: MD_LINK_DESTINATION@430..435
-        0: MD_INLINE_ITEM_LIST@430..435
+      5: MD_LINK_DESTINATION@430..438
+        0: MD_INLINE_ITEM_LIST@430..438
           0: MD_TEXTUAL@430..431
             0: MD_TEXTUAL_LITERAL@430..431 " " [] []
           1: MD_TEXTUAL@431..435
             0: MD_TEXTUAL_LITERAL@431..435 "/url" [] []
+          2: MD_TEXTUAL@435..438
+            0: MD_TEXTUAL_LITERAL@435..438 "   " [] []
       6: (empty)
-    35: MD_PARAGRAPH@435..439
-      0: MD_INLINE_ITEM_LIST@435..439
-        0: MD_HARD_LINE@435..439
-          0: MD_HARD_LINE_LITERAL@435..439 "   \n" [] []
-    36: MD_NEWLINE@439..440
-      0: NEWLINE@439..440 "\n" [] []
-    37: MD_PARAGRAPH@440..473
-      0: MD_INLINE_ITEM_LIST@440..473
-        0: MD_TEXTUAL@440..457
-          0: MD_TEXTUAL_LITERAL@440..457 "[invalid-trailing" [] []
-        1: MD_TEXTUAL@457..472
-          0: MD_TEXTUAL_LITERAL@457..472 "]: /url invalid" [] []
-        2: MD_TEXTUAL@472..473
-          0: MD_TEXTUAL_LITERAL@472..473 "\n" [] []
-    38: MD_NEWLINE@473..474
-      0: NEWLINE@473..474 "\n" [] []
-    39: MD_PARAGRAPH@474..507
-      0: MD_INLINE_ITEM_LIST@474..507
-        0: MD_TEXTUAL@474..489
-          0: MD_TEXTUAL_LITERAL@474..489 "[angle-trailing" [] []
-        1: MD_TEXTUAL@489..492
-          0: MD_TEXTUAL_LITERAL@489..492 "]: " [] []
-        2: MD_INLINE_HTML@492..498
-          0: MD_INLINE_ITEM_LIST@492..498
-            0: MD_TEXTUAL@492..493
-              0: MD_TEXTUAL_LITERAL@492..493 "<" [] []
-            1: MD_TEXTUAL@493..497
-              0: MD_TEXTUAL_LITERAL@493..497 "/url" [] []
-            2: MD_TEXTUAL@497..498
-              0: MD_TEXTUAL_LITERAL@497..498 ">" [] []
-        3: MD_TEXTUAL@498..506
-          0: MD_TEXTUAL_LITERAL@498..506 " invalid" [] []
-        4: MD_TEXTUAL@506..507
-          0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
-  2: EOF@507..507 "" [] []
+    35: MD_NEWLINE@438..439
+      0: NEWLINE@438..439 "\n" [] []
+    36: MD_LINK_REFERENCE_DEFINITION@439..462
+      0: MD_INDENT_TOKEN_LIST@439..439
+      1: L_BRACK@439..440 "[" [] []
+      2: MD_LINK_LABEL@440..455
+        0: MD_INLINE_ITEM_LIST@440..455
+          0: MD_TEXTUAL@440..455
+            0: MD_TEXTUAL_LITERAL@440..455 "next-definition" [] []
+      3: R_BRACK@455..456 "]" [] []
+      4: COLON@456..457 ":" [] []
+      5: MD_LINK_DESTINATION@457..462
+        0: MD_INLINE_ITEM_LIST@457..462
+          0: MD_TEXTUAL@457..458
+            0: MD_TEXTUAL_LITERAL@457..458 " " [] []
+          1: MD_TEXTUAL@458..462
+            0: MD_TEXTUAL_LITERAL@458..462 "/url" [] []
+      6: (empty)
+    37: MD_NEWLINE@462..463
+      0: NEWLINE@462..463 "\n" [] []
+    38: MD_NEWLINE@463..464
+      0: NEWLINE@463..464 "\n" [] []
+    39: MD_PARAGRAPH@464..497
+      0: MD_INLINE_ITEM_LIST@464..497
+        0: MD_TEXTUAL@464..481
+          0: MD_TEXTUAL_LITERAL@464..481 "[invalid-trailing" [] []
+        1: MD_TEXTUAL@481..496
+          0: MD_TEXTUAL_LITERAL@481..496 "]: /url invalid" [] []
+        2: MD_TEXTUAL@496..497
+          0: MD_TEXTUAL_LITERAL@496..497 "\n" [] []
+    40: MD_NEWLINE@497..498
+      0: NEWLINE@497..498 "\n" [] []
+    41: MD_PARAGRAPH@498..531
+      0: MD_INLINE_ITEM_LIST@498..531
+        0: MD_TEXTUAL@498..513
+          0: MD_TEXTUAL_LITERAL@498..513 "[angle-trailing" [] []
+        1: MD_TEXTUAL@513..516
+          0: MD_TEXTUAL_LITERAL@513..516 "]: " [] []
+        2: MD_INLINE_HTML@516..522
+          0: MD_INLINE_ITEM_LIST@516..522
+            0: MD_TEXTUAL@516..517
+              0: MD_TEXTUAL_LITERAL@516..517 "<" [] []
+            1: MD_TEXTUAL@517..521
+              0: MD_TEXTUAL_LITERAL@517..521 "/url" [] []
+            2: MD_TEXTUAL@521..522
+              0: MD_TEXTUAL_LITERAL@521..522 ">" [] []
+        3: MD_TEXTUAL@522..530
+          0: MD_TEXTUAL_LITERAL@522..530 " invalid" [] []
+        4: MD_TEXTUAL@530..531
+          0: MD_TEXTUAL_LITERAL@530..531 "\n" [] []
+  2: EOF@531..531 "" [] []
 
 ```
