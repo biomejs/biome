@@ -120,13 +120,7 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@92..93 "-" [] [],
                                         },
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@93..106 "reporter=json" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@106..107 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@107..113 "pretty" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@113..114 "`" [] [],
@@ -192,13 +186,7 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@235..236 "-" [] [],
                                         },
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@236..249 "reporter=json" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@249..250 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@250..256 "pretty" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@256..257 "`" [] [],
@@ -2258,12 +2246,8 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@91..92 "-" [] []
                     1: MD_TEXTUAL@92..93
                       0: MD_TEXTUAL_LITERAL@92..93 "-" [] []
-                    2: MD_TEXTUAL@93..106
-                      0: MD_TEXTUAL_LITERAL@93..106 "reporter=json" [] []
-                    3: MD_TEXTUAL@106..107
-                      0: MD_TEXTUAL_LITERAL@106..107 "-" [] []
-                    4: MD_TEXTUAL@107..113
-                      0: MD_TEXTUAL_LITERAL@107..113 "pretty" [] []
+                    2: MD_TEXTUAL@93..113
+                      0: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] []
                   2: BACKTICK@113..114 "`" [] []
                 4: MD_TEXTUAL@114..120
                   0: MD_TEXTUAL_LITERAL@114..120 ". With" [] []
@@ -2306,12 +2290,8 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@234..235 "-" [] []
                     1: MD_TEXTUAL@235..236
                       0: MD_TEXTUAL_LITERAL@235..236 "-" [] []
-                    2: MD_TEXTUAL@236..249
-                      0: MD_TEXTUAL_LITERAL@236..249 "reporter=json" [] []
-                    3: MD_TEXTUAL@249..250
-                      0: MD_TEXTUAL_LITERAL@249..250 "-" [] []
-                    4: MD_TEXTUAL@250..256
-                      0: MD_TEXTUAL_LITERAL@250..256 "pretty" [] []
+                    2: MD_TEXTUAL@236..256
+                      0: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] []
                   2: BACKTICK@256..257 "`" [] []
                 16: MD_TEXTUAL@257..354
                   0: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] []

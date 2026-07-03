@@ -309,13 +309,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@231..232 "(" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@232..240 "invalid " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@240..241 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@241..260 " treated as content" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@232..260 "invalid - treated as content" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@260..261 ")" [] [],
@@ -609,17 +603,13 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@217..231 "Short closing " [] []
         1: MD_TEXTUAL@231..232
           0: MD_TEXTUAL_LITERAL@231..232 "(" [] []
-        2: MD_TEXTUAL@232..240
-          0: MD_TEXTUAL_LITERAL@232..240 "invalid " [] []
-        3: MD_TEXTUAL@240..241
-          0: MD_TEXTUAL_LITERAL@240..241 "-" [] []
-        4: MD_TEXTUAL@241..260
-          0: MD_TEXTUAL_LITERAL@241..260 " treated as content" [] []
-        5: MD_TEXTUAL@260..261
+        2: MD_TEXTUAL@232..260
+          0: MD_TEXTUAL_LITERAL@232..260 "invalid - treated as content" [] []
+        3: MD_TEXTUAL@260..261
           0: MD_TEXTUAL_LITERAL@260..261 ")" [] []
-        6: MD_TEXTUAL@261..262
+        4: MD_TEXTUAL@261..262
           0: MD_TEXTUAL_LITERAL@261..262 ":" [] []
-        7: MD_TEXTUAL@262..263
+        5: MD_TEXTUAL@262..263
           0: MD_TEXTUAL_LITERAL@262..263 "\n" [] []
     21: MD_FENCED_CODE_BLOCK@263..292
       0: MD_INDENT_TOKEN_LIST@263..263

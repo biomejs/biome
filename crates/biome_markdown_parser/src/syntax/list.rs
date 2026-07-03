@@ -2551,6 +2551,14 @@ fn emit_required_continuation_indent(p: &mut MarkdownParser, indent: usize) {
 /// Parse an ATX heading on the first line of list item content.
 /// Returns `true` if a heading was parsed.
 fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> bool {
+    // Inside a list item, `# Bar` sits mid-line, so the lexer produces one
+    // plain-text token for it. Re-lex it as if it were at a line start so the
+    // `#` becomes its own token again (same approach as quote.rs).
+    // This must happen before the lookahead below, because re-lexing clears
+    // any buffered lookahead.
+    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('#') {
+        p.force_relex_at_line_start();
+    }
     let atx_heading_info = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);

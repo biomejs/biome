@@ -279,7 +279,7 @@ fn bang_token() {
     // Exclamation for images
     assert_lex! {
         "!",
-        BANG:1,
+        MD_TEXTUAL_LITERAL:1,
     }
 }
 

@@ -240,7 +240,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -68,30 +68,22 @@
+@@ -56,30 +56,22 @@
  ",
    source_position(154),
    "
@@ -283,7 +283,7 @@ IR differences:
    source_position(193),
    " ",
    source_position(194),
-@@ -101,13 +93,12 @@
+@@ -89,13 +81,12 @@
    source_position(196),
    " ",
    source_position(197),
@@ -299,7 +299,7 @@ IR differences:
    source_position(207),
    " ",
    source_position(208),
-@@ -115,9 +106,10 @@
+@@ -103,9 +94,10 @@
    source_position(209),
    " ",
    source_position(210),
@@ -313,7 +313,7 @@ IR differences:
    source_position(219),
    "
  ",
-@@ -130,1600 +122,1617 @@
+@@ -118,1574 +110,1591 @@
    source_position(223),
    " ",
    source_position(224),
@@ -1453,22 +1453,7 @@ IR differences:
    "<",
 -  source_position(1637),
 +  source_position(1672),
-   "!",
--  source_position(1638),
-+  source_position(1673),
-   "-",
--  source_position(1639),
-+  source_position(1674),
-   "-",
--  source_position(1640),
-+  source_position(1675),
-   " ",
--  source_position(1641),
-+  source_position(1676),
-   "-",
--  source_position(1642),
-+  source_position(1677),
-   "-",
+   "!-- --",
 -  source_position(1643),
 +  source_position(1678),
    ">",
@@ -1987,13 +1972,7 @@ IR differences:
    "shortcut ",
 -  source_position(1984),
 +  source_position(2019),
-   "reference",
--  source_position(1993),
-+  source_position(2028),
-   "-",
--  source_position(1994),
-+  source_position(2029),
-   "style ",
+   "reference-style ",
 -  source_position(2000),
 +  source_position(2035),
    "links.",
@@ -2029,13 +2008,7 @@ IR differences:
    "] ",
 -  source_position(2033),
 +  source_position(2068),
-   "reference",
--  source_position(2042),
-+  source_position(2077),
-   "-",
--  source_position(2043),
-+  source_position(2078),
-   "style ",
+   "reference-style ",
 -  source_position(2049),
 +  source_position(2084),
    "link.",
@@ -2194,13 +2167,7 @@ IR differences:
    "]",
 -  source_position(2244),
 +  source_position(2279),
-   " of two shortcut reference",
--  source_position(2270),
-+  source_position(2305),
-   "-",
--  source_position(2271),
-+  source_position(2306),
-   "style links.",
+   " of two shortcut reference-style links.",
 -  source_position(2283),
 +  source_position(2318),
    "
@@ -2244,13 +2211,7 @@ IR differences:
    "]",
 -  source_position(2313),
 +  source_position(2348),
-   " reference",
--  source_position(2323),
-+  source_position(2358),
-   "-",
--  source_position(2324),
-+  source_position(2359),
-   "style link.",
+   " reference-style link.",
 -  source_position(2335),
 +  source_position(2370),
    "

@@ -74,13 +74,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@35..40 "after" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@40..41 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@41..49 "trailing" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@35..49 "after-trailing" [] [],
                     },
                 ],
             },
@@ -130,13 +124,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@80..86 "normal" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@86..87 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@87..93 "indent" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@80..93 "normal-indent" [] [],
                     },
                 ],
             },
@@ -235,19 +223,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@153..158 "title" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@158..159 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@159..163 "next" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@163..164 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@164..168 "line" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@153..168 "title-next-line" [] [],
                     },
                 ],
             },
@@ -289,19 +265,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@201..207 "single" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@207..208 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@208..213 "quote" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@213..214 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@214..218 "next" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@201..218 "single-quote-next" [] [],
                     },
                 ],
             },
@@ -343,13 +307,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@246..251 "paren" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@251..252 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@252..256 "next" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@246..256 "paren-next" [] [],
                     },
                 ],
             },
@@ -397,13 +355,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@284..292 "balanced" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@292..293 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@293..299 "parens" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@284..299 "balanced-parens" [] [],
                     },
                 ],
             },
@@ -445,13 +397,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@340..346 "nested" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@346..347 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@347..353 "parens" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@340..353 "nested-parens" [] [],
                     },
                 ],
             },
@@ -541,13 +487,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@413..421 "trailing" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@421..422 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@422..428 "spaces" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@413..428 "trailing-spaces" [] [],
                     },
                 ],
             },
@@ -581,13 +521,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@440..441 "[" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@441..448 "invalid" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@448..449 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@449..457 "trailing" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@441..457 "invalid-trailing" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@457..458 "]" [] [],
@@ -612,13 +546,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@474..475 "[" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@475..480 "angle" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@480..481 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@481..489 "trailing" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@475..489 "angle-trailing" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@489..490 "]" [] [],
@@ -678,12 +606,8 @@ MdDocument {
       1: L_BRACK@34..35 "[" [] []
       2: MD_LINK_LABEL@35..49
         0: MD_INLINE_ITEM_LIST@35..49
-          0: MD_TEXTUAL@35..40
-            0: MD_TEXTUAL_LITERAL@35..40 "after" [] []
-          1: MD_TEXTUAL@40..41
-            0: MD_TEXTUAL_LITERAL@40..41 "-" [] []
-          2: MD_TEXTUAL@41..49
-            0: MD_TEXTUAL_LITERAL@41..49 "trailing" [] []
+          0: MD_TEXTUAL@35..49
+            0: MD_TEXTUAL_LITERAL@35..49 "after-trailing" [] []
       3: R_BRACK@49..50 "]" [] []
       4: COLON@50..51 ":" [] []
       5: MD_LINK_DESTINATION@51..56
@@ -714,12 +638,8 @@ MdDocument {
       1: L_BRACK@79..80 "[" [] []
       2: MD_LINK_LABEL@80..93
         0: MD_INLINE_ITEM_LIST@80..93
-          0: MD_TEXTUAL@80..86
-            0: MD_TEXTUAL_LITERAL@80..86 "normal" [] []
-          1: MD_TEXTUAL@86..87
-            0: MD_TEXTUAL_LITERAL@86..87 "-" [] []
-          2: MD_TEXTUAL@87..93
-            0: MD_TEXTUAL_LITERAL@87..93 "indent" [] []
+          0: MD_TEXTUAL@80..93
+            0: MD_TEXTUAL_LITERAL@80..93 "normal-indent" [] []
       3: R_BRACK@93..94 "]" [] []
       4: COLON@94..95 ":" [] []
       5: MD_LINK_DESTINATION@95..100
@@ -783,16 +703,8 @@ MdDocument {
       1: L_BRACK@152..153 "[" [] []
       2: MD_LINK_LABEL@153..168
         0: MD_INLINE_ITEM_LIST@153..168
-          0: MD_TEXTUAL@153..158
-            0: MD_TEXTUAL_LITERAL@153..158 "title" [] []
-          1: MD_TEXTUAL@158..159
-            0: MD_TEXTUAL_LITERAL@158..159 "-" [] []
-          2: MD_TEXTUAL@159..163
-            0: MD_TEXTUAL_LITERAL@159..163 "next" [] []
-          3: MD_TEXTUAL@163..164
-            0: MD_TEXTUAL_LITERAL@163..164 "-" [] []
-          4: MD_TEXTUAL@164..168
-            0: MD_TEXTUAL_LITERAL@164..168 "line" [] []
+          0: MD_TEXTUAL@153..168
+            0: MD_TEXTUAL_LITERAL@153..168 "title-next-line" [] []
       3: R_BRACK@168..169 "]" [] []
       4: COLON@169..170 ":" [] []
       5: MD_LINK_DESTINATION@170..175
@@ -818,16 +730,8 @@ MdDocument {
       1: L_BRACK@200..201 "[" [] []
       2: MD_LINK_LABEL@201..218
         0: MD_INLINE_ITEM_LIST@201..218
-          0: MD_TEXTUAL@201..207
-            0: MD_TEXTUAL_LITERAL@201..207 "single" [] []
-          1: MD_TEXTUAL@207..208
-            0: MD_TEXTUAL_LITERAL@207..208 "-" [] []
-          2: MD_TEXTUAL@208..213
-            0: MD_TEXTUAL_LITERAL@208..213 "quote" [] []
-          3: MD_TEXTUAL@213..214
-            0: MD_TEXTUAL_LITERAL@213..214 "-" [] []
-          4: MD_TEXTUAL@214..218
-            0: MD_TEXTUAL_LITERAL@214..218 "next" [] []
+          0: MD_TEXTUAL@201..218
+            0: MD_TEXTUAL_LITERAL@201..218 "single-quote-next" [] []
       3: R_BRACK@218..219 "]" [] []
       4: COLON@219..220 ":" [] []
       5: MD_LINK_DESTINATION@220..225
@@ -853,12 +757,8 @@ MdDocument {
       1: L_BRACK@245..246 "[" [] []
       2: MD_LINK_LABEL@246..256
         0: MD_INLINE_ITEM_LIST@246..256
-          0: MD_TEXTUAL@246..251
-            0: MD_TEXTUAL_LITERAL@246..251 "paren" [] []
-          1: MD_TEXTUAL@251..252
-            0: MD_TEXTUAL_LITERAL@251..252 "-" [] []
-          2: MD_TEXTUAL@252..256
-            0: MD_TEXTUAL_LITERAL@252..256 "next" [] []
+          0: MD_TEXTUAL@246..256
+            0: MD_TEXTUAL_LITERAL@246..256 "paren-next" [] []
       3: R_BRACK@256..257 "]" [] []
       4: COLON@257..258 ":" [] []
       5: MD_LINK_DESTINATION@258..263
@@ -888,12 +788,8 @@ MdDocument {
       1: L_BRACK@283..284 "[" [] []
       2: MD_LINK_LABEL@284..299
         0: MD_INLINE_ITEM_LIST@284..299
-          0: MD_TEXTUAL@284..292
-            0: MD_TEXTUAL_LITERAL@284..292 "balanced" [] []
-          1: MD_TEXTUAL@292..293
-            0: MD_TEXTUAL_LITERAL@292..293 "-" [] []
-          2: MD_TEXTUAL@293..299
-            0: MD_TEXTUAL_LITERAL@293..299 "parens" [] []
+          0: MD_TEXTUAL@284..299
+            0: MD_TEXTUAL_LITERAL@284..299 "balanced-parens" [] []
       3: R_BRACK@299..300 "]" [] []
       4: COLON@300..301 ":" [] []
       5: MD_LINK_DESTINATION@301..337
@@ -920,12 +816,8 @@ MdDocument {
       1: L_BRACK@339..340 "[" [] []
       2: MD_LINK_LABEL@340..353
         0: MD_INLINE_ITEM_LIST@340..353
-          0: MD_TEXTUAL@340..346
-            0: MD_TEXTUAL_LITERAL@340..346 "nested" [] []
-          1: MD_TEXTUAL@346..347
-            0: MD_TEXTUAL_LITERAL@346..347 "-" [] []
-          2: MD_TEXTUAL@347..353
-            0: MD_TEXTUAL_LITERAL@347..353 "parens" [] []
+          0: MD_TEXTUAL@340..353
+            0: MD_TEXTUAL_LITERAL@340..353 "nested-parens" [] []
       3: R_BRACK@353..354 "]" [] []
       4: COLON@354..355 ":" [] []
       5: MD_LINK_DESTINATION@355..384
@@ -984,12 +876,8 @@ MdDocument {
       1: L_BRACK@412..413 "[" [] []
       2: MD_LINK_LABEL@413..428
         0: MD_INLINE_ITEM_LIST@413..428
-          0: MD_TEXTUAL@413..421
-            0: MD_TEXTUAL_LITERAL@413..421 "trailing" [] []
-          1: MD_TEXTUAL@421..422
-            0: MD_TEXTUAL_LITERAL@421..422 "-" [] []
-          2: MD_TEXTUAL@422..428
-            0: MD_TEXTUAL_LITERAL@422..428 "spaces" [] []
+          0: MD_TEXTUAL@413..428
+            0: MD_TEXTUAL_LITERAL@413..428 "trailing-spaces" [] []
       3: R_BRACK@428..429 "]" [] []
       4: COLON@429..430 ":" [] []
       5: MD_LINK_DESTINATION@430..435
@@ -1009,19 +897,15 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@440..473
         0: MD_TEXTUAL@440..441
           0: MD_TEXTUAL_LITERAL@440..441 "[" [] []
-        1: MD_TEXTUAL@441..448
-          0: MD_TEXTUAL_LITERAL@441..448 "invalid" [] []
-        2: MD_TEXTUAL@448..449
-          0: MD_TEXTUAL_LITERAL@448..449 "-" [] []
-        3: MD_TEXTUAL@449..457
-          0: MD_TEXTUAL_LITERAL@449..457 "trailing" [] []
-        4: MD_TEXTUAL@457..458
+        1: MD_TEXTUAL@441..457
+          0: MD_TEXTUAL_LITERAL@441..457 "invalid-trailing" [] []
+        2: MD_TEXTUAL@457..458
           0: MD_TEXTUAL_LITERAL@457..458 "]" [] []
-        5: MD_TEXTUAL@458..459
+        3: MD_TEXTUAL@458..459
           0: MD_TEXTUAL_LITERAL@458..459 ":" [] []
-        6: MD_TEXTUAL@459..472
+        4: MD_TEXTUAL@459..472
           0: MD_TEXTUAL_LITERAL@459..472 " /url invalid" [] []
-        7: MD_TEXTUAL@472..473
+        5: MD_TEXTUAL@472..473
           0: MD_TEXTUAL_LITERAL@472..473 "\n" [] []
     38: MD_NEWLINE@473..474
       0: NEWLINE@473..474 "\n" [] []
@@ -1029,19 +913,15 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@474..507
         0: MD_TEXTUAL@474..475
           0: MD_TEXTUAL_LITERAL@474..475 "[" [] []
-        1: MD_TEXTUAL@475..480
-          0: MD_TEXTUAL_LITERAL@475..480 "angle" [] []
-        2: MD_TEXTUAL@480..481
-          0: MD_TEXTUAL_LITERAL@480..481 "-" [] []
-        3: MD_TEXTUAL@481..489
-          0: MD_TEXTUAL_LITERAL@481..489 "trailing" [] []
-        4: MD_TEXTUAL@489..490
+        1: MD_TEXTUAL@475..489
+          0: MD_TEXTUAL_LITERAL@475..489 "angle-trailing" [] []
+        2: MD_TEXTUAL@489..490
           0: MD_TEXTUAL_LITERAL@489..490 "]" [] []
-        5: MD_TEXTUAL@490..491
+        3: MD_TEXTUAL@490..491
           0: MD_TEXTUAL_LITERAL@490..491 ":" [] []
-        6: MD_TEXTUAL@491..492
+        4: MD_TEXTUAL@491..492
           0: MD_TEXTUAL_LITERAL@491..492 " " [] []
-        7: MD_INLINE_HTML@492..498
+        5: MD_INLINE_HTML@492..498
           0: MD_INLINE_ITEM_LIST@492..498
             0: MD_TEXTUAL@492..493
               0: MD_TEXTUAL_LITERAL@492..493 "<" [] []
@@ -1049,9 +929,9 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@493..497 "/url" [] []
             2: MD_TEXTUAL@497..498
               0: MD_TEXTUAL_LITERAL@497..498 ">" [] []
-        8: MD_TEXTUAL@498..506
+        6: MD_TEXTUAL@498..506
           0: MD_TEXTUAL_LITERAL@498..506 " invalid" [] []
-        9: MD_TEXTUAL@506..507
+        7: MD_TEXTUAL@506..507
           0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
   2: EOF@507..507 "" [] []
 

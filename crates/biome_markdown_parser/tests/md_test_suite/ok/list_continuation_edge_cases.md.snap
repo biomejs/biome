@@ -60,13 +60,7 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@3..4 ")" [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@4..10 " Quote" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@10..11 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@4..43 " Quote-only blank line inside list item" [] [],
                     },
                 ],
             },
@@ -190,13 +184,7 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@110..111 ")" [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@111..118 " Marker" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@118..119 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@111..151 " Marker-only item followed by blank line" [] [],
                     },
                 ],
             },
@@ -231,13 +219,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@187..188 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@188..203 "only list item." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@157..203 "Outside paragraph after marker-only list item." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@203..204 "\n" [] [],
@@ -489,12 +471,8 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@1..3 " 1" [] []
           1: MD_TEXTUAL@3..4
             0: MD_TEXTUAL_LITERAL@3..4 ")" [] []
-          2: MD_TEXTUAL@4..10
-            0: MD_TEXTUAL_LITERAL@4..10 " Quote" [] []
-          3: MD_TEXTUAL@10..11
-            0: MD_TEXTUAL_LITERAL@10..11 "-" [] []
-          4: MD_TEXTUAL@11..43
-            0: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] []
+          2: MD_TEXTUAL@4..43
+            0: MD_TEXTUAL_LITERAL@4..43 " Quote-only blank line inside list item" [] []
       3: MD_HASH_LIST@43..43
     1: MD_NEWLINE@43..44
       0: NEWLINE@43..44 "\n" [] []
@@ -573,12 +551,8 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@108..110 " 2" [] []
           1: MD_TEXTUAL@110..111
             0: MD_TEXTUAL_LITERAL@110..111 ")" [] []
-          2: MD_TEXTUAL@111..118
-            0: MD_TEXTUAL_LITERAL@111..118 " Marker" [] []
-          3: MD_TEXTUAL@118..119
-            0: MD_TEXTUAL_LITERAL@118..119 "-" [] []
-          4: MD_TEXTUAL@119..151
-            0: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] []
+          2: MD_TEXTUAL@111..151
+            0: MD_TEXTUAL_LITERAL@111..151 " Marker-only item followed by blank line" [] []
       3: MD_HASH_LIST@151..151
     6: MD_NEWLINE@151..152
       0: NEWLINE@151..152 "\n" [] []
@@ -599,13 +573,9 @@ MdDocument {
       0: NEWLINE@156..157 "\n" [] []
     10: MD_PARAGRAPH@157..204
       0: MD_INLINE_ITEM_LIST@157..204
-        0: MD_TEXTUAL@157..187
-          0: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] []
-        1: MD_TEXTUAL@187..188
-          0: MD_TEXTUAL_LITERAL@187..188 "-" [] []
-        2: MD_TEXTUAL@188..203
-          0: MD_TEXTUAL_LITERAL@188..203 "only list item." [] []
-        3: MD_TEXTUAL@203..204
+        0: MD_TEXTUAL@157..203
+          0: MD_TEXTUAL_LITERAL@157..203 "Outside paragraph after marker-only list item." [] []
+        1: MD_TEXTUAL@203..204
           0: MD_TEXTUAL_LITERAL@203..204 "\n" [] []
     11: MD_NEWLINE@204..205
       0: NEWLINE@204..205 "\n" [] []

@@ -142,10 +142,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@156..157 ":" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@157..158 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@158..170 "&notanentity" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@157..170 " &notanentity" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@170..171 "_" [] [],
@@ -157,40 +154,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@175..176 "_" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@176..188 "underscore; " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@188..189 "&" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@189..190 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@190..200 "12345678; " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@200..201 "&" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@201..202 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@202..209 "xGGGG; " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@209..212 "&; " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@212..213 "&" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@213..214 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@214..215 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@215..221 "& foo;" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@176..221 "underscore; &#12345678; &#xGGGG; &; &# & foo;" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@221..222 "\n" [] [],
@@ -203,10 +167,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@223..235 "Edge cases: " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@235..239 "&a; " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@223..239 "Edge cases: &a; " [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@239..240 "(" [] [],
@@ -218,10 +179,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@249..250 ")" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@250..251 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@251..291 "&abcdefghijklmnopqrstuvwxyz01234567890; " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@250..291 " &abcdefghijklmnopqrstuvwxyz01234567890; " [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@291..292 "(" [] [],
@@ -322,67 +280,39 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@155..156 ")" [] []
         4: MD_TEXTUAL@156..157
           0: MD_TEXTUAL_LITERAL@156..157 ":" [] []
-        5: MD_TEXTUAL@157..158
-          0: MD_TEXTUAL_LITERAL@157..158 " " [] []
-        6: MD_TEXTUAL@158..170
-          0: MD_TEXTUAL_LITERAL@158..170 "&notanentity" [] []
-        7: MD_TEXTUAL@170..171
+        5: MD_TEXTUAL@157..170
+          0: MD_TEXTUAL_LITERAL@157..170 " &notanentity" [] []
+        6: MD_TEXTUAL@170..171
           0: MD_TEXTUAL_LITERAL@170..171 "_" [] []
-        8: MD_TEXTUAL@171..175
+        7: MD_TEXTUAL@171..175
           0: MD_TEXTUAL_LITERAL@171..175 "with" [] []
-        9: MD_TEXTUAL@175..176
+        8: MD_TEXTUAL@175..176
           0: MD_TEXTUAL_LITERAL@175..176 "_" [] []
-        10: MD_TEXTUAL@176..188
-          0: MD_TEXTUAL_LITERAL@176..188 "underscore; " [] []
-        11: MD_TEXTUAL@188..189
-          0: MD_TEXTUAL_LITERAL@188..189 "&" [] []
-        12: MD_TEXTUAL@189..190
-          0: MD_TEXTUAL_LITERAL@189..190 "#" [] []
-        13: MD_TEXTUAL@190..200
-          0: MD_TEXTUAL_LITERAL@190..200 "12345678; " [] []
-        14: MD_TEXTUAL@200..201
-          0: MD_TEXTUAL_LITERAL@200..201 "&" [] []
-        15: MD_TEXTUAL@201..202
-          0: MD_TEXTUAL_LITERAL@201..202 "#" [] []
-        16: MD_TEXTUAL@202..209
-          0: MD_TEXTUAL_LITERAL@202..209 "xGGGG; " [] []
-        17: MD_TEXTUAL@209..212
-          0: MD_TEXTUAL_LITERAL@209..212 "&; " [] []
-        18: MD_TEXTUAL@212..213
-          0: MD_TEXTUAL_LITERAL@212..213 "&" [] []
-        19: MD_TEXTUAL@213..214
-          0: MD_TEXTUAL_LITERAL@213..214 "#" [] []
-        20: MD_TEXTUAL@214..215
-          0: MD_TEXTUAL_LITERAL@214..215 " " [] []
-        21: MD_TEXTUAL@215..221
-          0: MD_TEXTUAL_LITERAL@215..221 "& foo;" [] []
-        22: MD_TEXTUAL@221..222
+        9: MD_TEXTUAL@176..221
+          0: MD_TEXTUAL_LITERAL@176..221 "underscore; &#12345678; &#xGGGG; &; &# & foo;" [] []
+        10: MD_TEXTUAL@221..222
           0: MD_TEXTUAL_LITERAL@221..222 "\n" [] []
     9: MD_NEWLINE@222..223
       0: NEWLINE@222..223 "\n" [] []
     10: MD_PARAGRAPH@223..302
       0: MD_INLINE_ITEM_LIST@223..302
-        0: MD_TEXTUAL@223..235
-          0: MD_TEXTUAL_LITERAL@223..235 "Edge cases: " [] []
-        1: MD_TEXTUAL@235..239
-          0: MD_TEXTUAL_LITERAL@235..239 "&a; " [] []
-        2: MD_TEXTUAL@239..240
+        0: MD_TEXTUAL@223..239
+          0: MD_TEXTUAL_LITERAL@223..239 "Edge cases: &a; " [] []
+        1: MD_TEXTUAL@239..240
           0: MD_TEXTUAL_LITERAL@239..240 "(" [] []
-        3: MD_TEXTUAL@240..249
+        2: MD_TEXTUAL@240..249
           0: MD_TEXTUAL_LITERAL@240..249 "too short" [] []
-        4: MD_TEXTUAL@249..250
+        3: MD_TEXTUAL@249..250
           0: MD_TEXTUAL_LITERAL@249..250 ")" [] []
-        5: MD_TEXTUAL@250..251
-          0: MD_TEXTUAL_LITERAL@250..251 " " [] []
-        6: MD_TEXTUAL@251..291
-          0: MD_TEXTUAL_LITERAL@251..291 "&abcdefghijklmnopqrstuvwxyz01234567890; " [] []
-        7: MD_TEXTUAL@291..292
+        4: MD_TEXTUAL@250..291
+          0: MD_TEXTUAL_LITERAL@250..291 " &abcdefghijklmnopqrstuvwxyz01234567890; " [] []
+        5: MD_TEXTUAL@291..292
           0: MD_TEXTUAL_LITERAL@291..292 "(" [] []
-        8: MD_TEXTUAL@292..300
+        6: MD_TEXTUAL@292..300
           0: MD_TEXTUAL_LITERAL@292..300 "too long" [] []
-        9: MD_TEXTUAL@300..301
+        7: MD_TEXTUAL@300..301
           0: MD_TEXTUAL_LITERAL@300..301 ")" [] []
-        10: MD_TEXTUAL@301..302
+        8: MD_TEXTUAL@301..302
           0: MD_TEXTUAL_LITERAL@301..302 "\n" [] []
   2: EOF@302..302 "" [] []
 

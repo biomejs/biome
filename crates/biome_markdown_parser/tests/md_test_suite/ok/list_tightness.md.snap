@@ -460,19 +460,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@320..327 " Mixed " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@327..328 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@328..345 " Tight with Multi" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@345..346 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@346..358 "line Content" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@320..358 " Mixed - Tight with Multi-line Content" [] [],
                     },
                 ],
             },
@@ -590,13 +578,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@477..491 " Nested Lists " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@491..492 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@477..508 " Nested Lists - Mixed Tightness" [] [],
                     },
                 ],
             },
@@ -1111,16 +1093,8 @@ MdDocument {
           0: HASH@319..320 "#" [] []
       2: MD_PARAGRAPH@320..358
         0: MD_INLINE_ITEM_LIST@320..358
-          0: MD_TEXTUAL@320..327
-            0: MD_TEXTUAL_LITERAL@320..327 " Mixed " [] []
-          1: MD_TEXTUAL@327..328
-            0: MD_TEXTUAL_LITERAL@327..328 "-" [] []
-          2: MD_TEXTUAL@328..345
-            0: MD_TEXTUAL_LITERAL@328..345 " Tight with Multi" [] []
-          3: MD_TEXTUAL@345..346
-            0: MD_TEXTUAL_LITERAL@345..346 "-" [] []
-          4: MD_TEXTUAL@346..358
-            0: MD_TEXTUAL_LITERAL@346..358 "line Content" [] []
+          0: MD_TEXTUAL@320..358
+            0: MD_TEXTUAL_LITERAL@320..358 " Mixed - Tight with Multi-line Content" [] []
       3: MD_HASH_LIST@358..358
     23: MD_NEWLINE@358..359
       0: NEWLINE@358..359 "\n" [] []
@@ -1195,12 +1169,8 @@ MdDocument {
           0: HASH@476..477 "#" [] []
       2: MD_PARAGRAPH@477..508
         0: MD_INLINE_ITEM_LIST@477..508
-          0: MD_TEXTUAL@477..491
-            0: MD_TEXTUAL_LITERAL@477..491 " Nested Lists " [] []
-          1: MD_TEXTUAL@491..492
-            0: MD_TEXTUAL_LITERAL@491..492 "-" [] []
-          2: MD_TEXTUAL@492..508
-            0: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] []
+          0: MD_TEXTUAL@477..508
+            0: MD_TEXTUAL_LITERAL@477..508 " Nested Lists - Mixed Tightness" [] []
       3: MD_HASH_LIST@508..508
     30: MD_NEWLINE@508..509
       0: NEWLINE@508..509 "\n" [] []

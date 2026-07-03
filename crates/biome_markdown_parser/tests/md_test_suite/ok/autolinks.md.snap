@@ -121,13 +121,7 @@ MdDocument {
                     l_angle_token: L_ANGLE@135..136 "<" [] [],
                     value: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@147..148 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@136..156 "http://rust-lang.org" [] [],
                         },
                     ],
                     r_angle_token: R_ANGLE@156..157 ">" [] [],
@@ -167,13 +161,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@210..211 "<" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@211..213 "a@" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@213..214 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@214..215 "b" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@211..215 "a@-b" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@215..216 ">" [] [],
@@ -210,10 +198,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@260..261 "<" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@261..264 "a@b" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@264..265 "-" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@261..265 "a@b-" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@265..266 ">" [] [],
@@ -367,12 +352,8 @@ MdDocument {
         1: MD_AUTOLINK@135..157
           0: L_ANGLE@135..136 "<" [] []
           1: MD_INLINE_ITEM_LIST@136..156
-            0: MD_TEXTUAL@136..147
-              0: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] []
-            1: MD_TEXTUAL@147..148
-              0: MD_TEXTUAL_LITERAL@147..148 "-" [] []
-            2: MD_TEXTUAL@148..156
-              0: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] []
+            0: MD_TEXTUAL@136..156
+              0: MD_TEXTUAL_LITERAL@136..156 "http://rust-lang.org" [] []
           2: R_ANGLE@156..157 ">" [] []
         2: MD_TEXTUAL@157..167
           0: MD_TEXTUAL_LITERAL@157..167 " for more." [] []
@@ -396,15 +377,11 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@209..210 " " [] []
         6: MD_TEXTUAL@210..211
           0: MD_TEXTUAL_LITERAL@210..211 "<" [] []
-        7: MD_TEXTUAL@211..213
-          0: MD_TEXTUAL_LITERAL@211..213 "a@" [] []
-        8: MD_TEXTUAL@213..214
-          0: MD_TEXTUAL_LITERAL@213..214 "-" [] []
-        9: MD_TEXTUAL@214..215
-          0: MD_TEXTUAL_LITERAL@214..215 "b" [] []
-        10: MD_TEXTUAL@215..216
+        7: MD_TEXTUAL@211..215
+          0: MD_TEXTUAL_LITERAL@211..215 "a@-b" [] []
+        8: MD_TEXTUAL@215..216
           0: MD_TEXTUAL_LITERAL@215..216 ">" [] []
-        11: MD_TEXTUAL@216..217
+        9: MD_TEXTUAL@216..217
           0: MD_TEXTUAL_LITERAL@216..217 "\n" [] []
     9: MD_NEWLINE@217..218
       0: NEWLINE@217..218 "\n" [] []
@@ -424,13 +401,11 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@259..260 " " [] []
         6: MD_TEXTUAL@260..261
           0: MD_TEXTUAL_LITERAL@260..261 "<" [] []
-        7: MD_TEXTUAL@261..264
-          0: MD_TEXTUAL_LITERAL@261..264 "a@b" [] []
-        8: MD_TEXTUAL@264..265
-          0: MD_TEXTUAL_LITERAL@264..265 "-" [] []
-        9: MD_TEXTUAL@265..266
+        7: MD_TEXTUAL@261..265
+          0: MD_TEXTUAL_LITERAL@261..265 "a@b-" [] []
+        8: MD_TEXTUAL@265..266
           0: MD_TEXTUAL_LITERAL@265..266 ">" [] []
-        10: MD_TEXTUAL@266..267
+        9: MD_TEXTUAL@266..267
           0: MD_TEXTUAL_LITERAL@266..267 "\n" [] []
     11: MD_NEWLINE@267..268
       0: NEWLINE@267..268 "\n" [] []

@@ -216,13 +216,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@380..381 "<" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@381..389 "div data" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@389..390 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@390..392 "x=" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@381..392 "div data-x=" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@392..393 ">" [] [],
@@ -240,13 +234,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@431..432 "<" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@432..440 "div data" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@440..441 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@441..443 "x=" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@432..443 "div data-x=" [] [],
                 },
                 MdInlineCode {
                     l_tick_token: BACKTICK@443..444 "`" [] [],
@@ -319,13 +307,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@541..542 "<" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@542..543 "!" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@543..544 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@544..545 "-" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@542..545 "!--" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@545..546 ">" [] [],
@@ -347,31 +329,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@575..576 "<" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@576..577 "!" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@577..578 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@578..579 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@579..584 " foo " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@584..585 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@585..586 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@586..591 " bar " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@591..592 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@592..593 "-" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@576..593 "!-- foo -- bar --" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@593..594 ">" [] [],
@@ -393,16 +351,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@635..636 "<" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@636..637 "!" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@637..638 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@638..639 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@639..640 "-" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@636..640 "!---" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@640..641 ">" [] [],
@@ -544,51 +493,43 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@366..380 "Missing value " [] []
         19: MD_TEXTUAL@380..381
           0: MD_TEXTUAL_LITERAL@380..381 "<" [] []
-        20: MD_TEXTUAL@381..389
-          0: MD_TEXTUAL_LITERAL@381..389 "div data" [] []
-        21: MD_TEXTUAL@389..390
-          0: MD_TEXTUAL_LITERAL@389..390 "-" [] []
-        22: MD_TEXTUAL@390..392
-          0: MD_TEXTUAL_LITERAL@390..392 "x=" [] []
-        23: MD_TEXTUAL@392..393
+        20: MD_TEXTUAL@381..392
+          0: MD_TEXTUAL_LITERAL@381..392 "div data-x=" [] []
+        21: MD_TEXTUAL@392..393
           0: MD_TEXTUAL_LITERAL@392..393 ">" [] []
-        24: MD_TEXTUAL@393..409
+        22: MD_TEXTUAL@393..409
           0: MD_TEXTUAL_LITERAL@393..409 " should be text." [] []
-        25: MD_TEXTUAL@409..410
+        23: MD_TEXTUAL@409..410
           0: MD_TEXTUAL_LITERAL@409..410 "\n" [] []
-        26: MD_TEXTUAL@410..431
+        24: MD_TEXTUAL@410..431
           0: MD_TEXTUAL_LITERAL@410..431 "Backtick in unquoted " [] []
-        27: MD_TEXTUAL@431..432
+        25: MD_TEXTUAL@431..432
           0: MD_TEXTUAL_LITERAL@431..432 "<" [] []
-        28: MD_TEXTUAL@432..440
-          0: MD_TEXTUAL_LITERAL@432..440 "div data" [] []
-        29: MD_TEXTUAL@440..441
-          0: MD_TEXTUAL_LITERAL@440..441 "-" [] []
-        30: MD_TEXTUAL@441..443
-          0: MD_TEXTUAL_LITERAL@441..443 "x=" [] []
-        31: MD_INLINE_CODE@443..446
+        26: MD_TEXTUAL@432..443
+          0: MD_TEXTUAL_LITERAL@432..443 "div data-x=" [] []
+        27: MD_INLINE_CODE@443..446
           0: BACKTICK@443..444 "`" [] []
           1: MD_INLINE_ITEM_LIST@444..445
             0: MD_TEXTUAL@444..445
               0: MD_TEXTUAL_LITERAL@444..445 "a" [] []
           2: BACKTICK@445..446 "`" [] []
-        32: MD_TEXTUAL@446..447
+        28: MD_TEXTUAL@446..447
           0: MD_TEXTUAL_LITERAL@446..447 ">" [] []
-        33: MD_TEXTUAL@447..463
+        29: MD_TEXTUAL@447..463
           0: MD_TEXTUAL_LITERAL@447..463 " should be text." [] []
-        34: MD_TEXTUAL@463..464
+        30: MD_TEXTUAL@463..464
           0: MD_TEXTUAL_LITERAL@463..464 "\n" [] []
-        35: MD_TEXTUAL@464..477
+        31: MD_TEXTUAL@464..477
           0: MD_TEXTUAL_LITERAL@464..477 "Invalid name " [] []
-        36: MD_TEXTUAL@477..478
+        32: MD_TEXTUAL@477..478
           0: MD_TEXTUAL_LITERAL@477..478 "<" [] []
-        37: MD_TEXTUAL@478..488
+        33: MD_TEXTUAL@478..488
           0: MD_TEXTUAL_LITERAL@478..488 "div 1a=foo" [] []
-        38: MD_TEXTUAL@488..489
+        34: MD_TEXTUAL@488..489
           0: MD_TEXTUAL_LITERAL@488..489 ">" [] []
-        39: MD_TEXTUAL@489..505
+        35: MD_TEXTUAL@489..505
           0: MD_TEXTUAL_LITERAL@489..505 " should be text." [] []
-        40: MD_TEXTUAL@505..506
+        36: MD_TEXTUAL@505..506
           0: MD_TEXTUAL_LITERAL@505..506 "\n" [] []
     12: MD_NEWLINE@506..507
       0: NEWLINE@506..507 "\n" [] []
@@ -612,13 +553,9 @@ MdDocument {
           0: MD_INLINE_ITEM_LIST@541..546
             0: MD_TEXTUAL@541..542
               0: MD_TEXTUAL_LITERAL@541..542 "<" [] []
-            1: MD_TEXTUAL@542..543
-              0: MD_TEXTUAL_LITERAL@542..543 "!" [] []
-            2: MD_TEXTUAL@543..544
-              0: MD_TEXTUAL_LITERAL@543..544 "-" [] []
-            3: MD_TEXTUAL@544..545
-              0: MD_TEXTUAL_LITERAL@544..545 "-" [] []
-            4: MD_TEXTUAL@545..546
+            1: MD_TEXTUAL@542..545
+              0: MD_TEXTUAL_LITERAL@542..545 "!--" [] []
+            2: MD_TEXTUAL@545..546
               0: MD_TEXTUAL_LITERAL@545..546 ">" [] []
         2: MD_TEXTUAL@546..562
           0: MD_TEXTUAL_LITERAL@546..562 " should be text." [] []
@@ -630,25 +567,9 @@ MdDocument {
           0: MD_INLINE_ITEM_LIST@575..594
             0: MD_TEXTUAL@575..576
               0: MD_TEXTUAL_LITERAL@575..576 "<" [] []
-            1: MD_TEXTUAL@576..577
-              0: MD_TEXTUAL_LITERAL@576..577 "!" [] []
-            2: MD_TEXTUAL@577..578
-              0: MD_TEXTUAL_LITERAL@577..578 "-" [] []
-            3: MD_TEXTUAL@578..579
-              0: MD_TEXTUAL_LITERAL@578..579 "-" [] []
-            4: MD_TEXTUAL@579..584
-              0: MD_TEXTUAL_LITERAL@579..584 " foo " [] []
-            5: MD_TEXTUAL@584..585
-              0: MD_TEXTUAL_LITERAL@584..585 "-" [] []
-            6: MD_TEXTUAL@585..586
-              0: MD_TEXTUAL_LITERAL@585..586 "-" [] []
-            7: MD_TEXTUAL@586..591
-              0: MD_TEXTUAL_LITERAL@586..591 " bar " [] []
-            8: MD_TEXTUAL@591..592
-              0: MD_TEXTUAL_LITERAL@591..592 "-" [] []
-            9: MD_TEXTUAL@592..593
-              0: MD_TEXTUAL_LITERAL@592..593 "-" [] []
-            10: MD_TEXTUAL@593..594
+            1: MD_TEXTUAL@576..593
+              0: MD_TEXTUAL_LITERAL@576..593 "!-- foo -- bar --" [] []
+            2: MD_TEXTUAL@593..594
               0: MD_TEXTUAL_LITERAL@593..594 ">" [] []
         6: MD_TEXTUAL@594..616
           0: MD_TEXTUAL_LITERAL@594..616 " should be text maybe." [] []
@@ -660,15 +581,9 @@ MdDocument {
           0: MD_INLINE_ITEM_LIST@635..641
             0: MD_TEXTUAL@635..636
               0: MD_TEXTUAL_LITERAL@635..636 "<" [] []
-            1: MD_TEXTUAL@636..637
-              0: MD_TEXTUAL_LITERAL@636..637 "!" [] []
-            2: MD_TEXTUAL@637..638
-              0: MD_TEXTUAL_LITERAL@637..638 "-" [] []
-            3: MD_TEXTUAL@638..639
-              0: MD_TEXTUAL_LITERAL@638..639 "-" [] []
-            4: MD_TEXTUAL@639..640
-              0: MD_TEXTUAL_LITERAL@639..640 "-" [] []
-            5: MD_TEXTUAL@640..641
+            1: MD_TEXTUAL@636..640
+              0: MD_TEXTUAL_LITERAL@636..640 "!---" [] []
+            2: MD_TEXTUAL@640..641
               0: MD_TEXTUAL_LITERAL@640..641 ">" [] []
         10: MD_TEXTUAL@641..657
           0: MD_TEXTUAL_LITERAL@641..657 " should be text." [] []

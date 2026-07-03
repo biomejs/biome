@@ -530,13 +530,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@608..612 "Case" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@612..613 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@608..626 "Case-insensitive: " [] [],
                 },
                 MdReferenceLink {
                     l_brack_token: L_BRACK@626..627 "[" [] [],
@@ -968,20 +962,16 @@ MdDocument {
       0: NEWLINE@607..608 "\n" [] []
     34: MD_PARAGRAPH@608..639
       0: MD_INLINE_ITEM_LIST@608..639
-        0: MD_TEXTUAL@608..612
-          0: MD_TEXTUAL_LITERAL@608..612 "Case" [] []
-        1: MD_TEXTUAL@612..613
-          0: MD_TEXTUAL_LITERAL@612..613 "-" [] []
-        2: MD_TEXTUAL@613..626
-          0: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] []
-        3: MD_REFERENCE_LINK@626..638
+        0: MD_TEXTUAL@608..626
+          0: MD_TEXTUAL_LITERAL@608..626 "Case-insensitive: " [] []
+        1: MD_REFERENCE_LINK@626..638
           0: L_BRACK@626..627 "[" [] []
           1: MD_INLINE_ITEM_LIST@627..637
             0: MD_TEXTUAL@627..637
               0: MD_TEXTUAL_LITERAL@627..637 "case label" [] []
           2: R_BRACK@637..638 "]" [] []
           3: (empty)
-        4: MD_TEXTUAL@638..639
+        2: MD_TEXTUAL@638..639
           0: MD_TEXTUAL_LITERAL@638..639 "\n" [] []
     35: MD_NEWLINE@639..640
       0: NEWLINE@639..640 "\n" [] []
