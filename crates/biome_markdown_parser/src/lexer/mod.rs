@@ -68,6 +68,11 @@ pub enum MarkdownReLexContext {
     /// After an ordered list marker. Splits leading whitespace from content
     /// so the parser can capture it as `MD_LIST_POST_MARKER_SPACE`.
     ListPostMarker,
+    /// Re-lex a construct token that turned out to be plain text (failed
+    /// emphasis marker, unmatched bracket, ...). The token is consumed as
+    /// text together with the plain characters that follow it, producing
+    /// one wider text token instead of a one-character token.
+    TextualFallback,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -1544,15 +1549,27 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
         let old_position = self.position;
         self.position = u32::from(self.current_start) as usize;
 
-        let lex_context = match context {
-            MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
-            MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
-            MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
-            MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
-        };
-
         let re_lexed_kind = match self.current_byte() {
-            Some(current) => self.consume_token(current, lex_context),
+            // Consume the current character and everything after it as plain
+            // text, regardless of which token kind it lexed as before.
+            // `consume_textual` always consumes the first character, then
+            // stops at the next character that could be syntax.
+            Some(_) if context == MarkdownReLexContext::TextualFallback => {
+                self.consume_textual(MarkdownLexContext::Regular)
+            }
+            Some(current) => {
+                let lex_context = match context {
+                    MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
+                    MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
+                    MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
+                    MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
+                    // Handled by the arm above; the context has no
+                    // corresponding lex context.
+                    MarkdownReLexContext::TextualFallback => MarkdownLexContext::Regular,
+                };
+
+                self.consume_token(current, lex_context)
+            }
             None => EOF,
         };
 

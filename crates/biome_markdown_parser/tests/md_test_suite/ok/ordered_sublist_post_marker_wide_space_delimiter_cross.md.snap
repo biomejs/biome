@@ -89,10 +89,7 @@ MdDocument {
                                         MdParagraph {
                                             list: MdInlineItemList [
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@30..31 "*" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@31..36 "third" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@30..36 "*third" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@36..37 "\n" [] [],
@@ -203,11 +200,9 @@ MdDocument {
                   1: MD_BLOCK_LIST@30..37
                     0: MD_PARAGRAPH@30..37
                       0: MD_INLINE_ITEM_LIST@30..37
-                        0: MD_TEXTUAL@30..31
-                          0: MD_TEXTUAL_LITERAL@30..31 "*" [] []
-                        1: MD_TEXTUAL@31..36
-                          0: MD_TEXTUAL_LITERAL@31..36 "third" [] []
-                        2: MD_TEXTUAL@36..37
+                        0: MD_TEXTUAL@30..36
+                          0: MD_TEXTUAL_LITERAL@30..36 "*third" [] []
+                        1: MD_TEXTUAL@36..37
                           0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
                 1: MD_BULLET@37..54
                   0: MD_LIST_MARKER_PREFIX@37..46

@@ -512,19 +512,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@440..441 "[" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@440..457 "[invalid-trailing" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@441..457 "invalid-trailing" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@457..458 "]" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@458..459 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@459..472 " /url invalid" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@457..472 "]: /url invalid" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@472..473 "\n" [] [],
@@ -537,19 +528,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@474..475 "[" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@474..489 "[angle-trailing" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@475..489 "angle-trailing" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@489..490 "]" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@490..491 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@491..492 " " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@489..492 "]: " [] [],
                 },
                 MdInlineHtml {
                     value: MdInlineItemList [
@@ -885,33 +867,21 @@ MdDocument {
       0: NEWLINE@439..440 "\n" [] []
     37: MD_PARAGRAPH@440..473
       0: MD_INLINE_ITEM_LIST@440..473
-        0: MD_TEXTUAL@440..441
-          0: MD_TEXTUAL_LITERAL@440..441 "[" [] []
-        1: MD_TEXTUAL@441..457
-          0: MD_TEXTUAL_LITERAL@441..457 "invalid-trailing" [] []
-        2: MD_TEXTUAL@457..458
-          0: MD_TEXTUAL_LITERAL@457..458 "]" [] []
-        3: MD_TEXTUAL@458..459
-          0: MD_TEXTUAL_LITERAL@458..459 ":" [] []
-        4: MD_TEXTUAL@459..472
-          0: MD_TEXTUAL_LITERAL@459..472 " /url invalid" [] []
-        5: MD_TEXTUAL@472..473
+        0: MD_TEXTUAL@440..457
+          0: MD_TEXTUAL_LITERAL@440..457 "[invalid-trailing" [] []
+        1: MD_TEXTUAL@457..472
+          0: MD_TEXTUAL_LITERAL@457..472 "]: /url invalid" [] []
+        2: MD_TEXTUAL@472..473
           0: MD_TEXTUAL_LITERAL@472..473 "\n" [] []
     38: MD_NEWLINE@473..474
       0: NEWLINE@473..474 "\n" [] []
     39: MD_PARAGRAPH@474..507
       0: MD_INLINE_ITEM_LIST@474..507
-        0: MD_TEXTUAL@474..475
-          0: MD_TEXTUAL_LITERAL@474..475 "[" [] []
-        1: MD_TEXTUAL@475..489
-          0: MD_TEXTUAL_LITERAL@475..489 "angle-trailing" [] []
-        2: MD_TEXTUAL@489..490
-          0: MD_TEXTUAL_LITERAL@489..490 "]" [] []
-        3: MD_TEXTUAL@490..491
-          0: MD_TEXTUAL_LITERAL@490..491 ":" [] []
-        4: MD_TEXTUAL@491..492
-          0: MD_TEXTUAL_LITERAL@491..492 " " [] []
-        5: MD_INLINE_HTML@492..498
+        0: MD_TEXTUAL@474..489
+          0: MD_TEXTUAL_LITERAL@474..489 "[angle-trailing" [] []
+        1: MD_TEXTUAL@489..492
+          0: MD_TEXTUAL_LITERAL@489..492 "]: " [] []
+        2: MD_INLINE_HTML@492..498
           0: MD_INLINE_ITEM_LIST@492..498
             0: MD_TEXTUAL@492..493
               0: MD_TEXTUAL_LITERAL@492..493 "<" [] []
@@ -919,9 +889,9 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@493..497 "/url" [] []
             2: MD_TEXTUAL@497..498
               0: MD_TEXTUAL_LITERAL@497..498 ">" [] []
-        6: MD_TEXTUAL@498..506
+        3: MD_TEXTUAL@498..506
           0: MD_TEXTUAL_LITERAL@498..506 " invalid" [] []
-        7: MD_TEXTUAL@506..507
+        4: MD_TEXTUAL@506..507
           0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
   2: EOF@507..507 "" [] []
 

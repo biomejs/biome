@@ -1242,16 +1242,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@1320..1337 "Not inline HTML (" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@1337..1338 ">" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@1337..1376 "> at line start is blockquote marker): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@1338..1376 " at line start is blockquote marker): " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@1376..1377 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@1377..1390 "div class=\"a\"" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@1376..1390 "<div class=\"a\"" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@1390..1391 "\n" [] [],
@@ -2285,15 +2279,11 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@1319..1320 "\n" [] []
         6: MD_TEXTUAL@1320..1337
           0: MD_TEXTUAL_LITERAL@1320..1337 "Not inline HTML (" [] []
-        7: MD_TEXTUAL@1337..1338
-          0: MD_TEXTUAL_LITERAL@1337..1338 ">" [] []
-        8: MD_TEXTUAL@1338..1376
-          0: MD_TEXTUAL_LITERAL@1338..1376 " at line start is blockquote marker): " [] []
-        9: MD_TEXTUAL@1376..1377
-          0: MD_TEXTUAL_LITERAL@1376..1377 "<" [] []
-        10: MD_TEXTUAL@1377..1390
-          0: MD_TEXTUAL_LITERAL@1377..1390 "div class=\"a\"" [] []
-        11: MD_TEXTUAL@1390..1391
+        7: MD_TEXTUAL@1337..1376
+          0: MD_TEXTUAL_LITERAL@1337..1376 "> at line start is blockquote marker): " [] []
+        8: MD_TEXTUAL@1376..1390
+          0: MD_TEXTUAL_LITERAL@1376..1390 "<div class=\"a\"" [] []
+        9: MD_TEXTUAL@1390..1391
           0: MD_TEXTUAL_LITERAL@1390..1391 "\n" [] []
     42: MD_QUOTE@1391..1406
       0: MD_QUOTE_PREFIX@1391..1392

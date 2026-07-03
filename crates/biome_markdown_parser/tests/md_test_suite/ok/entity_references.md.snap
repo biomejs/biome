@@ -130,16 +130,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@132..170 "Invalid (remain as text): &notanentity" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@170..171 "_" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@170..175 "_with" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@171..175 "with" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@175..176 "_" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@176..221 "underscore; &#12345678; &#xGGGG; &; &# & foo;" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@175..221 "_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@221..222 "\n" [] [],
@@ -236,15 +230,11 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@132..222
         0: MD_TEXTUAL@132..170
           0: MD_TEXTUAL_LITERAL@132..170 "Invalid (remain as text): &notanentity" [] []
-        1: MD_TEXTUAL@170..171
-          0: MD_TEXTUAL_LITERAL@170..171 "_" [] []
-        2: MD_TEXTUAL@171..175
-          0: MD_TEXTUAL_LITERAL@171..175 "with" [] []
-        3: MD_TEXTUAL@175..176
-          0: MD_TEXTUAL_LITERAL@175..176 "_" [] []
-        4: MD_TEXTUAL@176..221
-          0: MD_TEXTUAL_LITERAL@176..221 "underscore; &#12345678; &#xGGGG; &; &# & foo;" [] []
-        5: MD_TEXTUAL@221..222
+        1: MD_TEXTUAL@170..175
+          0: MD_TEXTUAL_LITERAL@170..175 "_with" [] []
+        2: MD_TEXTUAL@175..221
+          0: MD_TEXTUAL_LITERAL@175..221 "_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] []
+        3: MD_TEXTUAL@221..222
           0: MD_TEXTUAL_LITERAL@221..222 "\n" [] []
     9: MD_NEWLINE@222..223
       0: NEWLINE@222..223 "\n" [] []

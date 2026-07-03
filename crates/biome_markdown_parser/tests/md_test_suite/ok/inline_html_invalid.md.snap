@@ -97,16 +97,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@108..116 "The URL " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@116..117 "<" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@116..128 "<example.com" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@117..128 "example.com" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@128..129 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@129..149 " should remain text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@128..149 "> should remain text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@149..150 "\n" [] [],
@@ -115,16 +109,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@150..157 "Domain " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@157..158 "<" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@157..174 "<test.example.com" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@158..174 "test.example.com" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@174..175 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@175..195 " should remain text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@174..195 "> should remain text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@195..196 "\n" [] [],
@@ -159,10 +147,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@214..227 "Open bracket " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@227..228 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@228..246 " followed by text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@227..246 "< followed by text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@246..247 "\n" [] [],
@@ -171,10 +156,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@247..259 "Partial tag " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@259..260 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@260..279 "div should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@259..279 "<div should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@279..280 "\n" [] [],
@@ -183,10 +165,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@280..292 "Missing end " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@292..293 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@293..325 "div class=\"test\" should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@292..325 "<div class=\"test\" should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@325..326 "\n" [] [],
@@ -195,16 +174,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@326..339 "Missing name " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@339..340 "<" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@339..348 "<div =foo" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@340..348 "div =foo" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@348..349 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@349..365 " should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@348..365 "> should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@365..366 "\n" [] [],
@@ -213,16 +186,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@366..380 "Missing value " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@380..381 "<" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@380..392 "<div data-x=" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@381..392 "div data-x=" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@392..393 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@393..409 " should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@392..409 "> should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@409..410 "\n" [] [],
@@ -231,10 +198,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@410..431 "Backtick in unquoted " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@431..432 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@432..443 "div data-x=" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@431..443 "<div data-x=" [] [],
                 },
                 MdInlineCode {
                     l_tick_token: BACKTICK@443..444 "`" [] [],
@@ -246,10 +210,7 @@ MdDocument {
                     r_tick_token: BACKTICK@445..446 "`" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@446..447 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@447..463 " should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@446..463 "> should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@463..464 "\n" [] [],
@@ -258,16 +219,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@464..477 "Invalid name " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@477..478 "<" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@477..488 "<div 1a=foo" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@478..488 "div 1a=foo" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@488..489 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@489..505 " should be text." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@488..505 "> should be text." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@505..506 "\n" [] [],
@@ -415,27 +370,19 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@108..196
         0: MD_TEXTUAL@108..116
           0: MD_TEXTUAL_LITERAL@108..116 "The URL " [] []
-        1: MD_TEXTUAL@116..117
-          0: MD_TEXTUAL_LITERAL@116..117 "<" [] []
-        2: MD_TEXTUAL@117..128
-          0: MD_TEXTUAL_LITERAL@117..128 "example.com" [] []
-        3: MD_TEXTUAL@128..129
-          0: MD_TEXTUAL_LITERAL@128..129 ">" [] []
-        4: MD_TEXTUAL@129..149
-          0: MD_TEXTUAL_LITERAL@129..149 " should remain text." [] []
-        5: MD_TEXTUAL@149..150
+        1: MD_TEXTUAL@116..128
+          0: MD_TEXTUAL_LITERAL@116..128 "<example.com" [] []
+        2: MD_TEXTUAL@128..149
+          0: MD_TEXTUAL_LITERAL@128..149 "> should remain text." [] []
+        3: MD_TEXTUAL@149..150
           0: MD_TEXTUAL_LITERAL@149..150 "\n" [] []
-        6: MD_TEXTUAL@150..157
+        4: MD_TEXTUAL@150..157
           0: MD_TEXTUAL_LITERAL@150..157 "Domain " [] []
-        7: MD_TEXTUAL@157..158
-          0: MD_TEXTUAL_LITERAL@157..158 "<" [] []
-        8: MD_TEXTUAL@158..174
-          0: MD_TEXTUAL_LITERAL@158..174 "test.example.com" [] []
-        9: MD_TEXTUAL@174..175
-          0: MD_TEXTUAL_LITERAL@174..175 ">" [] []
-        10: MD_TEXTUAL@175..195
-          0: MD_TEXTUAL_LITERAL@175..195 " should remain text." [] []
-        11: MD_TEXTUAL@195..196
+        5: MD_TEXTUAL@157..174
+          0: MD_TEXTUAL_LITERAL@157..174 "<test.example.com" [] []
+        6: MD_TEXTUAL@174..195
+          0: MD_TEXTUAL_LITERAL@174..195 "> should remain text." [] []
+        7: MD_TEXTUAL@195..196
           0: MD_TEXTUAL_LITERAL@195..196 "\n" [] []
     8: MD_NEWLINE@196..197
       0: NEWLINE@196..197 "\n" [] []
@@ -455,81 +402,59 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@214..506
         0: MD_TEXTUAL@214..227
           0: MD_TEXTUAL_LITERAL@214..227 "Open bracket " [] []
-        1: MD_TEXTUAL@227..228
-          0: MD_TEXTUAL_LITERAL@227..228 "<" [] []
-        2: MD_TEXTUAL@228..246
-          0: MD_TEXTUAL_LITERAL@228..246 " followed by text." [] []
-        3: MD_TEXTUAL@246..247
+        1: MD_TEXTUAL@227..246
+          0: MD_TEXTUAL_LITERAL@227..246 "< followed by text." [] []
+        2: MD_TEXTUAL@246..247
           0: MD_TEXTUAL_LITERAL@246..247 "\n" [] []
-        4: MD_TEXTUAL@247..259
+        3: MD_TEXTUAL@247..259
           0: MD_TEXTUAL_LITERAL@247..259 "Partial tag " [] []
-        5: MD_TEXTUAL@259..260
-          0: MD_TEXTUAL_LITERAL@259..260 "<" [] []
-        6: MD_TEXTUAL@260..279
-          0: MD_TEXTUAL_LITERAL@260..279 "div should be text." [] []
-        7: MD_TEXTUAL@279..280
+        4: MD_TEXTUAL@259..279
+          0: MD_TEXTUAL_LITERAL@259..279 "<div should be text." [] []
+        5: MD_TEXTUAL@279..280
           0: MD_TEXTUAL_LITERAL@279..280 "\n" [] []
-        8: MD_TEXTUAL@280..292
+        6: MD_TEXTUAL@280..292
           0: MD_TEXTUAL_LITERAL@280..292 "Missing end " [] []
-        9: MD_TEXTUAL@292..293
-          0: MD_TEXTUAL_LITERAL@292..293 "<" [] []
-        10: MD_TEXTUAL@293..325
-          0: MD_TEXTUAL_LITERAL@293..325 "div class=\"test\" should be text." [] []
-        11: MD_TEXTUAL@325..326
+        7: MD_TEXTUAL@292..325
+          0: MD_TEXTUAL_LITERAL@292..325 "<div class=\"test\" should be text." [] []
+        8: MD_TEXTUAL@325..326
           0: MD_TEXTUAL_LITERAL@325..326 "\n" [] []
-        12: MD_TEXTUAL@326..339
+        9: MD_TEXTUAL@326..339
           0: MD_TEXTUAL_LITERAL@326..339 "Missing name " [] []
-        13: MD_TEXTUAL@339..340
-          0: MD_TEXTUAL_LITERAL@339..340 "<" [] []
-        14: MD_TEXTUAL@340..348
-          0: MD_TEXTUAL_LITERAL@340..348 "div =foo" [] []
-        15: MD_TEXTUAL@348..349
-          0: MD_TEXTUAL_LITERAL@348..349 ">" [] []
-        16: MD_TEXTUAL@349..365
-          0: MD_TEXTUAL_LITERAL@349..365 " should be text." [] []
-        17: MD_TEXTUAL@365..366
+        10: MD_TEXTUAL@339..348
+          0: MD_TEXTUAL_LITERAL@339..348 "<div =foo" [] []
+        11: MD_TEXTUAL@348..365
+          0: MD_TEXTUAL_LITERAL@348..365 "> should be text." [] []
+        12: MD_TEXTUAL@365..366
           0: MD_TEXTUAL_LITERAL@365..366 "\n" [] []
-        18: MD_TEXTUAL@366..380
+        13: MD_TEXTUAL@366..380
           0: MD_TEXTUAL_LITERAL@366..380 "Missing value " [] []
-        19: MD_TEXTUAL@380..381
-          0: MD_TEXTUAL_LITERAL@380..381 "<" [] []
-        20: MD_TEXTUAL@381..392
-          0: MD_TEXTUAL_LITERAL@381..392 "div data-x=" [] []
-        21: MD_TEXTUAL@392..393
-          0: MD_TEXTUAL_LITERAL@392..393 ">" [] []
-        22: MD_TEXTUAL@393..409
-          0: MD_TEXTUAL_LITERAL@393..409 " should be text." [] []
-        23: MD_TEXTUAL@409..410
+        14: MD_TEXTUAL@380..392
+          0: MD_TEXTUAL_LITERAL@380..392 "<div data-x=" [] []
+        15: MD_TEXTUAL@392..409
+          0: MD_TEXTUAL_LITERAL@392..409 "> should be text." [] []
+        16: MD_TEXTUAL@409..410
           0: MD_TEXTUAL_LITERAL@409..410 "\n" [] []
-        24: MD_TEXTUAL@410..431
+        17: MD_TEXTUAL@410..431
           0: MD_TEXTUAL_LITERAL@410..431 "Backtick in unquoted " [] []
-        25: MD_TEXTUAL@431..432
-          0: MD_TEXTUAL_LITERAL@431..432 "<" [] []
-        26: MD_TEXTUAL@432..443
-          0: MD_TEXTUAL_LITERAL@432..443 "div data-x=" [] []
-        27: MD_INLINE_CODE@443..446
+        18: MD_TEXTUAL@431..443
+          0: MD_TEXTUAL_LITERAL@431..443 "<div data-x=" [] []
+        19: MD_INLINE_CODE@443..446
           0: BACKTICK@443..444 "`" [] []
           1: MD_INLINE_ITEM_LIST@444..445
             0: MD_TEXTUAL@444..445
               0: MD_TEXTUAL_LITERAL@444..445 "a" [] []
           2: BACKTICK@445..446 "`" [] []
-        28: MD_TEXTUAL@446..447
-          0: MD_TEXTUAL_LITERAL@446..447 ">" [] []
-        29: MD_TEXTUAL@447..463
-          0: MD_TEXTUAL_LITERAL@447..463 " should be text." [] []
-        30: MD_TEXTUAL@463..464
+        20: MD_TEXTUAL@446..463
+          0: MD_TEXTUAL_LITERAL@446..463 "> should be text." [] []
+        21: MD_TEXTUAL@463..464
           0: MD_TEXTUAL_LITERAL@463..464 "\n" [] []
-        31: MD_TEXTUAL@464..477
+        22: MD_TEXTUAL@464..477
           0: MD_TEXTUAL_LITERAL@464..477 "Invalid name " [] []
-        32: MD_TEXTUAL@477..478
-          0: MD_TEXTUAL_LITERAL@477..478 "<" [] []
-        33: MD_TEXTUAL@478..488
-          0: MD_TEXTUAL_LITERAL@478..488 "div 1a=foo" [] []
-        34: MD_TEXTUAL@488..489
-          0: MD_TEXTUAL_LITERAL@488..489 ">" [] []
-        35: MD_TEXTUAL@489..505
-          0: MD_TEXTUAL_LITERAL@489..505 " should be text." [] []
-        36: MD_TEXTUAL@505..506
+        23: MD_TEXTUAL@477..488
+          0: MD_TEXTUAL_LITERAL@477..488 "<div 1a=foo" [] []
+        24: MD_TEXTUAL@488..505
+          0: MD_TEXTUAL_LITERAL@488..505 "> should be text." [] []
+        25: MD_TEXTUAL@505..506
           0: MD_TEXTUAL_LITERAL@505..506 "\n" [] []
     12: MD_NEWLINE@506..507
       0: NEWLINE@506..507 "\n" [] []

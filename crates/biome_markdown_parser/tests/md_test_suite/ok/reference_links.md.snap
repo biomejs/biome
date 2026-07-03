@@ -381,10 +381,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@410..411 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@411..420 "undefined" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@410..420 "[undefined" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@420..421 "]" [] [],
@@ -849,13 +846,11 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@379..422
         0: MD_TEXTUAL@379..410
           0: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] []
-        1: MD_TEXTUAL@410..411
-          0: MD_TEXTUAL_LITERAL@410..411 "[" [] []
-        2: MD_TEXTUAL@411..420
-          0: MD_TEXTUAL_LITERAL@411..420 "undefined" [] []
-        3: MD_TEXTUAL@420..421
+        1: MD_TEXTUAL@410..420
+          0: MD_TEXTUAL_LITERAL@410..420 "[undefined" [] []
+        2: MD_TEXTUAL@420..421
           0: MD_TEXTUAL_LITERAL@420..421 "]" [] []
-        4: MD_TEXTUAL@421..422
+        3: MD_TEXTUAL@421..422
           0: MD_TEXTUAL_LITERAL@421..422 "\n" [] []
     26: MD_NEWLINE@422..423
       0: NEWLINE@422..423 "\n" [] []
