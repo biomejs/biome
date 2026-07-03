@@ -34,13 +34,7 @@ MdDocument {
                             label: MdLinkLabel {
                                 content: MdInlineItemList [
                                     MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@3..8 "valid" [] [],
-                                    },
-                                    MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@8..9 "-" [] [],
-                                    },
-                                    MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@9..14 "title" [] [],
+                                        value_token: MD_TEXTUAL_LITERAL@3..14 "valid-title" [] [],
                                     },
                                 ],
                             },
@@ -125,12 +119,8 @@ MdDocument {
               1: L_BRACK@2..3 "[" [] []
               2: MD_LINK_LABEL@3..14
                 0: MD_INLINE_ITEM_LIST@3..14
-                  0: MD_TEXTUAL@3..8
-                    0: MD_TEXTUAL_LITERAL@3..8 "valid" [] []
-                  1: MD_TEXTUAL@8..9
-                    0: MD_TEXTUAL_LITERAL@8..9 "-" [] []
-                  2: MD_TEXTUAL@9..14
-                    0: MD_TEXTUAL_LITERAL@9..14 "title" [] []
+                  0: MD_TEXTUAL@3..14
+                    0: MD_TEXTUAL_LITERAL@3..14 "valid-title" [] []
               3: R_BRACK@14..15 "]" [] []
               4: COLON@15..16 ":" [] []
               5: MD_LINK_DESTINATION@16..22

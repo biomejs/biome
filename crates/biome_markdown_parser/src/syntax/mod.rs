@@ -38,8 +38,9 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    CompletedMarker, Parser,
+    CompletedMarker, Parser, TokenSet,
     prelude::ParsedSyntax::{self, *},
+    token_set,
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
@@ -87,7 +88,9 @@ pub(crate) fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
         Some('"')
     } else if text.starts_with('\'') {
         Some('\'')
-    } else if p.at(L_PAREN) {
+    } else if text.starts_with('(') {
+        // Text-based check: covers both an L_PAREN token (LinkDefinition
+        // context) and a plain-text token starting with `(` (Regular context).
         Some(')')
     } else {
         None
@@ -2326,6 +2329,13 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(T![EOF]) {
         return Absent;
     }
+    // A construct token that turned out to be plain text (failed emphasis
+    // marker, unmatched bracket, ...) would become a one-character node and
+    // split the surrounding prose. Re-lex it as plain text so it merges with
+    // the characters that follow it.
+    if p.at_ts(MERGES_WITH_FOLLOWING_TEXT) {
+        p.re_lex_textual_fallback();
+    }
     let m = p.start();
     // Remap any token to MD_TEXTUAL_LITERAL so the syntax factory accepts it.
     // This is necessary because tokens like L_PAREN, R_PAREN, etc. are lexed
@@ -2333,6 +2343,29 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     p.bump_remap(MD_TEXTUAL_LITERAL);
     Present(m.complete(p, MD_TEXTUAL))
 }
+
+/// Construct tokens that, once they fail to open a construct, read as plain
+/// text and can merge with the characters after them via
+/// [MarkdownParser::re_lex_textual_fallback].
+///
+/// Backtick and tilde tokens are deliberately absent: they carry a full
+/// delimiter sequence (like ```` `` ````) whose length drives code span
+/// matching, so re-splitting them would change how later code spans pair up.
+const MERGES_WITH_FOLLOWING_TEXT: TokenSet<MarkdownSyntaxKind> = token_set![
+    T![*],
+    UNDERSCORE,
+    BANG,
+    L_BRACK,
+    R_BRACK,
+    L_ANGLE,
+    R_ANGLE,
+    T!['('],
+    T![')'],
+    COLON,
+    T![-],
+    T![+],
+    T![#],
+];
 
 /// Attempt to parse some input with the given parsing function. If parsing
 /// succeeds, `Ok` is returned with the result of the parse and the state is

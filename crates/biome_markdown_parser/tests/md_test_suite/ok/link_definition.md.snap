@@ -95,13 +95,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@47..50 "one" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@50..51 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@51..56 "space" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@47..56 "one-space" [] [],
                     },
                 ],
             },
@@ -138,13 +132,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@68..71 "two" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@71..72 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@72..78 "spaces" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@68..78 "two-spaces" [] [],
                     },
                 ],
             },
@@ -184,13 +172,7 @@ MdDocument {
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@91..96 "three" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@96..97 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@97..103 "spaces" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@91..103 "three-spaces" [] [],
                     },
                 ],
             },
@@ -269,12 +251,8 @@ MdDocument {
       1: L_BRACK@46..47 "[" [] []
       2: MD_LINK_LABEL@47..56
         0: MD_INLINE_ITEM_LIST@47..56
-          0: MD_TEXTUAL@47..50
-            0: MD_TEXTUAL_LITERAL@47..50 "one" [] []
-          1: MD_TEXTUAL@50..51
-            0: MD_TEXTUAL_LITERAL@50..51 "-" [] []
-          2: MD_TEXTUAL@51..56
-            0: MD_TEXTUAL_LITERAL@51..56 "space" [] []
+          0: MD_TEXTUAL@47..56
+            0: MD_TEXTUAL_LITERAL@47..56 "one-space" [] []
       3: R_BRACK@56..57 "]" [] []
       4: COLON@57..58 ":" [] []
       5: MD_LINK_DESTINATION@58..63
@@ -297,12 +275,8 @@ MdDocument {
       1: L_BRACK@67..68 "[" [] []
       2: MD_LINK_LABEL@68..78
         0: MD_INLINE_ITEM_LIST@68..78
-          0: MD_TEXTUAL@68..71
-            0: MD_TEXTUAL_LITERAL@68..71 "two" [] []
-          1: MD_TEXTUAL@71..72
-            0: MD_TEXTUAL_LITERAL@71..72 "-" [] []
-          2: MD_TEXTUAL@72..78
-            0: MD_TEXTUAL_LITERAL@72..78 "spaces" [] []
+          0: MD_TEXTUAL@68..78
+            0: MD_TEXTUAL_LITERAL@68..78 "two-spaces" [] []
       3: R_BRACK@78..79 "]" [] []
       4: COLON@79..80 ":" [] []
       5: MD_LINK_DESTINATION@80..85
@@ -327,12 +301,8 @@ MdDocument {
       1: L_BRACK@90..91 "[" [] []
       2: MD_LINK_LABEL@91..103
         0: MD_INLINE_ITEM_LIST@91..103
-          0: MD_TEXTUAL@91..96
-            0: MD_TEXTUAL_LITERAL@91..96 "three" [] []
-          1: MD_TEXTUAL@96..97
-            0: MD_TEXTUAL_LITERAL@96..97 "-" [] []
-          2: MD_TEXTUAL@97..103
-            0: MD_TEXTUAL_LITERAL@97..103 "spaces" [] []
+          0: MD_TEXTUAL@91..103
+            0: MD_TEXTUAL_LITERAL@91..103 "three-spaces" [] []
       3: R_BRACK@103..104 "]" [] []
       4: COLON@104..105 ":" [] []
       5: MD_LINK_DESTINATION@105..110

@@ -26,10 +26,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@9..10 "!" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..11 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@10..25 "[unclosed image" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
@@ -53,11 +50,9 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
         1: MD_TEXTUAL@9..10
           0: MD_TEXTUAL_LITERAL@9..10 "!" [] []
-        2: MD_TEXTUAL@10..11
-          0: MD_TEXTUAL_LITERAL@10..11 "[" [] []
-        3: MD_TEXTUAL@11..25
-          0: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] []
-        4: MD_TEXTUAL@25..26
+        2: MD_TEXTUAL@10..25
+          0: MD_TEXTUAL_LITERAL@10..25 "[unclosed image" [] []
+        3: MD_TEXTUAL@25..26
           0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
   2: EOF@26..26 "" [] []
 

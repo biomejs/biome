@@ -227,25 +227,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@140..147 " Mixed " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@147..148 "#" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@148..157 " content " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@157..159 "##" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@159..165 " with " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@165..168 "###" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@168..177 " trailing" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@140..177 " Mixed # content ## with ### trailing" [] [],
                     },
                 ],
             },
@@ -392,20 +374,8 @@ MdDocument {
           0: HASH@137..140 "###" [] []
       2: MD_PARAGRAPH@140..177
         0: MD_INLINE_ITEM_LIST@140..177
-          0: MD_TEXTUAL@140..147
-            0: MD_TEXTUAL_LITERAL@140..147 " Mixed " [] []
-          1: MD_TEXTUAL@147..148
-            0: MD_TEXTUAL_LITERAL@147..148 "#" [] []
-          2: MD_TEXTUAL@148..157
-            0: MD_TEXTUAL_LITERAL@148..157 " content " [] []
-          3: MD_TEXTUAL@157..159
-            0: MD_TEXTUAL_LITERAL@157..159 "##" [] []
-          4: MD_TEXTUAL@159..165
-            0: MD_TEXTUAL_LITERAL@159..165 " with " [] []
-          5: MD_TEXTUAL@165..168
-            0: MD_TEXTUAL_LITERAL@165..168 "###" [] []
-          6: MD_TEXTUAL@168..177
-            0: MD_TEXTUAL_LITERAL@168..177 " trailing" [] []
+          0: MD_TEXTUAL@140..177
+            0: MD_TEXTUAL_LITERAL@140..177 " Mixed # content ## with ### trailing" [] []
       3: MD_HASH_LIST@177..182
         0: MD_HASH@177..182
           0: HASH@177..182 "####" [Whitespace(" ")] []

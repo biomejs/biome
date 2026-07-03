@@ -241,6 +241,14 @@ impl<'source> MarkdownParser<'source> {
         self.source.re_lex(MarkdownReLexContext::LinkDefinition);
     }
 
+    /// Re-lex the current token as plain text, merging it with the plain
+    /// characters that follow. Used when a construct token (failed emphasis
+    /// marker, unmatched bracket, ...) falls back to being ordinary text,
+    /// so it becomes one text node instead of a one-character node.
+    pub(crate) fn re_lex_textual_fallback(&mut self) {
+        self.source.re_lex(MarkdownReLexContext::TextualFallback);
+    }
+
     /// Force re-lex the current token in Regular context.
     ///
     /// Use this when switching from LinkDefinition context back to Regular context,
