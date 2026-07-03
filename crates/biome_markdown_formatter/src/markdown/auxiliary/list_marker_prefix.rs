@@ -1,13 +1,14 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
+use biome_markdown_syntax::list_ext::{ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::{MdListMarkerPrefix, MdListMarkerPrefixFields};
 use biome_rowan::TextSize;
 use std::ops::Add;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdListMarkerPrefix {
-    /// Target marker to replace with (e.g. `"-"`). `None` keeps the original.
-    target_marker: Option<&'static str>,
+    /// Target marker to replace with. `None` keeps the original marker.
+    target_marker: Option<TargetMarker>,
     keep_pre_marker: bool,
     min_post_marker_len: usize,
 }
@@ -32,8 +33,14 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
         // Note that for `-   `, the parser treats the indent as part of the marker, not the content
         // This is a parser bug that causes a regression
         // in crates/biome_markdown_formatter/tests/specs/prettier/markdown/spec/example-242.md.snap
-        match self.target_marker {
-            Some(target) => write!(f, [format_replaced(&marker, &token(target))])?,
+        match &self.target_marker {
+            Some(target) => {
+                let target = LocatedTargetMarker {
+                    target: *target,
+                    source_position: marker.text_trimmed_range().start(),
+                };
+                write!(f, [format_replaced(&marker, &target)])?
+            }
             None => {
                 if list_marker.is_ordered_with_paren()
                     && let Some(trimmed_text) = marker.text_trimmed().strip_suffix(")")
@@ -78,9 +85,101 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
     }
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub(crate) enum TargetMarker {
+    Unordered(ListMarker),
+    Ordered(OrderedMarker),
+}
+
+impl TargetMarker {
+    pub(crate) fn width(self) -> usize {
+        match self {
+            Self::Unordered(marker) => marker.unordered_marker_text().map_or(0, str::len),
+            Self::Ordered(marker) => marker.width(),
+        }
+    }
+}
+
+impl Format<MarkdownFormatContext> for TargetMarker {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        match self {
+            Self::Unordered(marker) => {
+                if let Some(marker) = marker.unordered_marker_text() {
+                    write!(f, [token(marker)])?;
+                }
+            }
+            Self::Ordered(marker) => marker.fmt(f)?,
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub(crate) struct OrderedMarker {
+    number: usize,
+    delimiter: OrderedListDelimiter,
+}
+
+impl OrderedMarker {
+    pub(crate) const fn new(number: usize, delimiter: OrderedListDelimiter) -> Self {
+        Self { number, delimiter }
+    }
+
+    fn width(self) -> usize {
+        let mut number = self.number;
+        let mut width = 1;
+
+        while number >= 10 {
+            number /= 10;
+            width += 1;
+        }
+
+        width + self.delimiter.marker_text().len()
+    }
+}
+
+impl Format<MarkdownFormatContext> for OrderedMarker {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        const DIGITS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        const MAX_DECIMAL_DIGITS: usize = (usize::BITS as usize * 1233 / 4096) + 1;
+
+        let mut digits = [0usize; MAX_DECIMAL_DIGITS];
+        let mut number = self.number;
+        let mut len = 0;
+
+        loop {
+            digits[len] = number % 10;
+            len += 1;
+            number /= 10;
+
+            if number == 0 {
+                break;
+            }
+        }
+
+        for digit in digits[..len].iter().rev() {
+            write!(f, [token(DIGITS[*digit])])?;
+        }
+
+        write!(f, [token(self.delimiter.marker_text())])
+    }
+}
+
+struct LocatedTargetMarker {
+    target: TargetMarker,
+    source_position: TextSize,
+}
+
+impl Format<MarkdownFormatContext> for LocatedTargetMarker {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        write!(f, [source_position(self.source_position), self.target])
+    }
+}
+
 pub(crate) struct FormatMdListMarkerPrefixOptions {
-    /// Target marker to replace with (e.g. `Some("-")`). `None` keeps the original.
-    pub(crate) target_marker: Option<&'static str>,
+    /// Target marker to replace with. `None` keeps the original marker.
+    pub(crate) target_marker: Option<TargetMarker>,
     /// When true, emit pre-marker indent tokens verbatim instead of removing them.
     pub(crate) keep_pre_marker: bool,
     /// Minimum number of spaces to emit after the list marker.

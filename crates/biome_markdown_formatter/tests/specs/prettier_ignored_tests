@@ -97,3 +97,6 @@ markdown/spec/example-513.md
 
 # This is frontmatter, which we don't support yet
 markdown/spec/example-66.md
+
+# It shouldn't change spacing
+markdown/spec/example-235.md

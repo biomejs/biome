@@ -413,7 +413,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
             } else {
                 let was_leading = still_leading;
                 let node_is_thematic_break = node.is_thematic_break();
-                if (prev_was_thematic_break || node_is_thematic_break)
+                let node_is_list = node.is_list();
+                if prev_was_list && node_is_list && !was_leading && !prev_was_newline {
+                    joiner.entry(&empty_line());
+                } else if (prev_was_thematic_break || node_is_thematic_break)
                     && !was_leading
                     && !prev_was_newline
                 {
@@ -422,7 +425,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
                 still_leading = false;
                 prev_was_header = node.is_any_header();
-                prev_was_list = node.is_list();
+                prev_was_list = node_is_list;
                 prev_was_link_reference_definition = node.is_link_reference_definition();
                 prev_was_thematic_break = node_is_thematic_break;
                 prev_was_newline = false;

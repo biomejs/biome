@@ -36,7 +36,7 @@ info: markdown/code/additional-space.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,26 +1,22 @@
+@@ -1,13 +1,11 @@
  1. Fork the repo and create your branch from `master`.
  
     Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
@@ -50,11 +50,7 @@ info: markdown/code/additional-space.md
     Note:
     Replace `<your_username>` with your GitHub username
  
--2. Run `yarn install`.
-+3. Run `yarn install`.
-    On Windows:
-    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
- 
+@@ -18,9 +16,7 @@
     ```sh
     yarn install
     ```
@@ -80,7 +76,7 @@ info: markdown/code/additional-space.md
    Note:
    Replace `<your_username>` with your GitHub username
 
-3. Run `yarn install`.
+2. Run `yarn install`.
    On Windows:
    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
 
