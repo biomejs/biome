@@ -429,6 +429,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         if at_line_terminator {
                             at_line_terminator = false;
                         } else {
+                            if pending_breaks > 0 {
+                                last_content_has_trailing_newline = true;
+                            }
                             pending_breaks += 1;
                         }
                         write!(
@@ -437,10 +440,6 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                                 print_mode: TextPrintMode::Remove,
                             })]
                         )?;
-                        if pending_breaks > 0 {
-                            last_content_has_trailing_newline = true;
-                        }
-                        pending_breaks += 1;
                     } else {
                         Self::emit_pending_breaks(pending_breaks, &content, f)?;
                         Self::fmt_list_content(&content, f)?;

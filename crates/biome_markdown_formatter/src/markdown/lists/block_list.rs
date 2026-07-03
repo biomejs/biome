@@ -142,26 +142,6 @@ impl FormatRuleWithOptions<MdBlockList> for FormatMdBlockList {
     }
 }
 
-fn format_removed_quote_boundary(node: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
-    match node {
-        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) => {
-            write!(
-                f,
-                [newline.format().with_options(FormatMdNewlineOptions {
-                    print_mode: TextPrintMode::Remove,
-                })]
-            )
-        }
-        AnyMdBlock::MdQuotePrefix(prefix) => write!(
-            f,
-            [prefix.format().with_options(FormatMdQuotePrefixOptions {
-                should_remove: true,
-            })]
-        ),
-        _ => write!(f, [node.format()]),
-    }
-}
-
 pub(crate) fn quote_boundary_trim_range(
     node: &MdBlockList,
     quote_boundary_trim: QuoteBoundaryTrim,
@@ -297,7 +277,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     )
                 {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: true,
+                        print_mode: TextPrintMode::Remove,
                     }));
                     while iter
                         .peek()
@@ -309,7 +289,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         )) = iter.next()
                         {
                             joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
-                                should_remove: true,
+                                print_mode: TextPrintMode::Remove,
                             }));
                         }
                     }
@@ -319,7 +299,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     && !is_trailing
                 {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        should_remove: true,
+                        print_mode: TextPrintMode::Remove,
                     }));
                     while iter
                         .peek()
@@ -331,7 +311,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         )) = iter.next()
                         {
                             joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
-                                should_remove: true,
+                                print_mode: TextPrintMode::Remove,
                             }));
                         }
                     }
