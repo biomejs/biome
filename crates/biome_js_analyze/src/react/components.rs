@@ -559,8 +559,8 @@ fn has_valid_react_component_params(
     parameters: impl Iterator<Item = SyntaxResult<AnyJsParameter>>,
 ) -> Option<bool> {
     let mut parameters = parameters;
-    let first = parameters.next().transpose()?;
-    let second = parameters.next().transpose()?;
+    let first = parameters.next().transpose().ok()?;
+    let second = parameters.next().transpose().ok()?;
 
     if parameters.next().is_some() {
         return Some(false);
