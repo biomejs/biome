@@ -252,6 +252,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut prev_was_list = false;
         let mut prev_was_html_block = false;
         let mut prev_was_indent_code_block = false;
+        let mut prev_was_fenced_code_block = false;
         let mut prev_was_link_reference_definition = false;
         let mut prev_was_thematic_break = false;
         let mut prev_was_newline = false;
@@ -384,6 +385,36 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                             joiner.entry(&blank_line.format());
                         }
                     }
+                } else if prev_was_fenced_code_block
+                    && !is_leading
+                    && !is_trailing
+                    && next_content_block_is_list(&self.node, index + 1, content_count)
+                {
+                    // A fenced code block doesn't print its own line
+                    // terminator, so the first newline of this run is the
+                    // terminator and the rest are blank lines. Removing the
+                    // whole run and printing one empty line keeps the output
+                    // stable across passes: replacing only the last newline
+                    // with a hard line break shrinks the run by one newline
+                    // on every pass.
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        print_mode: TextPrintMode::Remove,
+                    }));
+                    while iter
+                        .peek()
+                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
+                    {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                    }
+                    joiner.entry(&empty_line());
                 } else if next_is_bull_item {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         print_mode: TextPrintMode::Remove,
@@ -439,6 +470,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                         AnyMdCodeBlock::MdIndentCodeBlock(_)
                     ))
                 );
+                prev_was_fenced_code_block = node.is_fenced_block();
                 prev_ends_with_line_break = node
                     .as_any_list_item()
                     .is_some_and(|item| list_ends_with_line_break(&item));
@@ -458,6 +490,20 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
         joiner.finish()
     }
+}
+
+fn next_content_block_is_list(
+    block_list: &MdBlockList,
+    start: usize,
+    content_count: usize,
+) -> bool {
+    block_list
+        .iter()
+        .enumerate()
+        .skip(start)
+        .take_while(|(index, _)| *index < content_count)
+        .find(|(_, block)| !block.is_newline())
+        .is_some_and(|(_, block)| block.is_list())
 }
 
 fn next_content_block_is_thematic_break(

@@ -8,10 +8,11 @@ use crate::markdown::auxiliary::list_marker_prefix::{
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter};
 use biome_formatter::prelude::*;
-use biome_formatter::{Format, FormatResult, write};
+use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
@@ -149,11 +150,35 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let mut joiner = f.join();
 
-        for item in self.bullets.iter() {
+        for (index, item) in self.bullets.iter().enumerate() {
+            if index > 0 && content_ends_with_quote_prefix(&self.bullets[index - 1].node) {
+                let line_prefix = quote_line_prefix(item.node.syntax())?;
+                if !line_prefix.is_empty() {
+                    joiner.entry(&format_with(|f| {
+                        write!(
+                            f,
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                line_prefix.format(true)
+                            ])]
+                        )
+                    }));
+                }
+            }
             joiner.entry(item);
         }
         joiner.finish()
     }
+}
+
+/// A trailing [MdQuotePrefix] in a bullet's content is the `> ` of the line
+/// that starts the next bullet: the parser attaches continuation-line
+/// prefixes to the previous sibling's content.
+fn content_ends_with_quote_prefix(bullet: &MdBullet) -> bool {
+    matches!(
+        bullet.content().iter().last(),
+        Some(AnyMdBlock::MdQuotePrefix(_))
+    )
 }
 
 pub(crate) struct ListBullet {
