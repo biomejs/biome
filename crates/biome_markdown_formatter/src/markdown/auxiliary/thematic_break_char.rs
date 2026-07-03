@@ -1,9 +1,10 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::MdThematicBreakChar;
+use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdThematicBreakChar {
-    replacement: Option<&'static str>,
+    replacement: Option<MdThematicBreakMarker>,
     should_remove: bool,
 }
 impl FormatNodeRule<MdThematicBreakChar> for FormatMdThematicBreakChar {
@@ -23,7 +24,7 @@ impl FormatNodeRule<MdThematicBreakChar> for FormatMdThematicBreakChar {
                 f,
                 [format_replaced(
                     &token,
-                    &text(replacement, Some(token.text_range().start()))
+                    &text(replacement.as_str(), Some(token.text_range().start()))
                 )]
             );
         }
@@ -33,7 +34,7 @@ impl FormatNodeRule<MdThematicBreakChar> for FormatMdThematicBreakChar {
 }
 
 pub(crate) struct FormatMdThematicBreakCharOptions {
-    pub(crate) replacement: Option<&'static str>,
+    pub(crate) replacement: Option<MdThematicBreakMarker>,
     pub(crate) should_remove: bool,
 }
 

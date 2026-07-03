@@ -21,7 +21,7 @@ Heading
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,7 @@
+@@ -1,7 +1,6 @@
  # Heading
  
      foo
@@ -29,9 +29,6 @@ Heading
  ## Heading
  
      foo
--
-----
-+----
 ```
 
 # Output
@@ -43,5 +40,6 @@ Heading
 ## Heading
 
     foo
-----
+
+---
 ```

@@ -8,6 +8,7 @@ pub mod inline_ext;
 pub mod list_ext;
 mod syntax_node;
 pub mod text_ext;
+pub mod thematic_break_ext;
 
 pub use syntax_node::*;
 

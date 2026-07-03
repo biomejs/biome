@@ -57,6 +57,13 @@ impl AnyMdBlock {
         )
     }
 
+    pub const fn is_thematic_break(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdThematicBreakBlock(_))
+        )
+    }
+
     pub const fn is_newline(&self) -> bool {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)))
     }
