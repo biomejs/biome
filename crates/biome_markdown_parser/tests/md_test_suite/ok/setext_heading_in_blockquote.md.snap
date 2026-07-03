@@ -393,19 +393,7 @@ MdDocument {
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@178..220 "Mixed break chars are NOT thematic breaks " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@220..221 "(" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@221..237 "CommonMark §4.1" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@237..238 ")" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@238..239 "," [] [],
+                            value_token: MD_TEXTUAL_LITERAL@178..239 "Mixed break chars are NOT thematic breaks (CommonMark §4.1)," [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@239..240 "\n" [] [],
@@ -686,37 +674,29 @@ MdDocument {
       1: MD_BLOCK_LIST@178..305
         0: MD_PARAGRAPH@178..305
           0: MD_INLINE_ITEM_LIST@178..305
-            0: MD_TEXTUAL@178..220
-              0: MD_TEXTUAL_LITERAL@178..220 "Mixed break chars are NOT thematic breaks " [] []
-            1: MD_TEXTUAL@220..221
-              0: MD_TEXTUAL_LITERAL@220..221 "(" [] []
-            2: MD_TEXTUAL@221..237
-              0: MD_TEXTUAL_LITERAL@221..237 "CommonMark §4.1" [] []
-            3: MD_TEXTUAL@237..238
-              0: MD_TEXTUAL_LITERAL@237..238 ")" [] []
-            4: MD_TEXTUAL@238..239
-              0: MD_TEXTUAL_LITERAL@238..239 "," [] []
-            5: MD_TEXTUAL@239..240
+            0: MD_TEXTUAL@178..239
+              0: MD_TEXTUAL_LITERAL@178..239 "Mixed break chars are NOT thematic breaks (CommonMark §4.1)," [] []
+            1: MD_TEXTUAL@239..240
               0: MD_TEXTUAL_LITERAL@239..240 "\n" [] []
-            6: MD_QUOTE_PREFIX@240..242
+            2: MD_QUOTE_PREFIX@240..242
               0: MD_QUOTE_INDENT_LIST@240..240
               1: R_ANGLE@240..241 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@241..242 " " [] []
-            7: MD_TEXTUAL@242..298
+            3: MD_TEXTUAL@242..298
               0: MD_TEXTUAL_LITERAL@242..298 "so this line is a continuation paragraph, not a heading." [] []
-            8: MD_TEXTUAL@298..299
+            4: MD_TEXTUAL@298..299
               0: MD_TEXTUAL_LITERAL@298..299 "\n" [] []
-            9: MD_QUOTE_PREFIX@299..301
+            5: MD_QUOTE_PREFIX@299..301
               0: MD_QUOTE_INDENT_LIST@299..299
               1: R_ANGLE@299..300 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@300..301 " " [] []
-            10: MD_TEXTUAL@301..302
+            6: MD_TEXTUAL@301..302
               0: MD_TEXTUAL_LITERAL@301..302 "-" [] []
-            11: MD_TEXTUAL@302..303
+            7: MD_TEXTUAL@302..303
               0: MD_TEXTUAL_LITERAL@302..303 "*" [] []
-            12: MD_TEXTUAL@303..304
+            8: MD_TEXTUAL@303..304
               0: MD_TEXTUAL_LITERAL@303..304 "_" [] []
-            13: MD_TEXTUAL@304..305
+            9: MD_TEXTUAL@304..305
               0: MD_TEXTUAL_LITERAL@304..305 "\n" [] []
   2: EOF@305..305 "" [] []
 

@@ -321,22 +321,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@330..331 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@340..341 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@341..342 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@342..343 " " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@318..343 "Empty label (collapsed): " [] [],
                 },
                 MdReferenceLink {
                     l_brack_token: L_BRACK@343..344 "[" [] [],
@@ -824,19 +809,9 @@ MdDocument {
       0: NEWLINE@317..318 "\n" [] []
     20: MD_PARAGRAPH@318..352
       0: MD_INLINE_ITEM_LIST@318..352
-        0: MD_TEXTUAL@318..330
-          0: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] []
-        1: MD_TEXTUAL@330..331
-          0: MD_TEXTUAL_LITERAL@330..331 "(" [] []
-        2: MD_TEXTUAL@331..340
-          0: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] []
-        3: MD_TEXTUAL@340..341
-          0: MD_TEXTUAL_LITERAL@340..341 ")" [] []
-        4: MD_TEXTUAL@341..342
-          0: MD_TEXTUAL_LITERAL@341..342 ":" [] []
-        5: MD_TEXTUAL@342..343
-          0: MD_TEXTUAL_LITERAL@342..343 " " [] []
-        6: MD_REFERENCE_LINK@343..351
+        0: MD_TEXTUAL@318..343
+          0: MD_TEXTUAL_LITERAL@318..343 "Empty label (collapsed): " [] []
+        1: MD_REFERENCE_LINK@343..351
           0: L_BRACK@343..344 "[" [] []
           1: MD_INLINE_ITEM_LIST@344..348
             0: MD_TEXTUAL@344..348
@@ -846,7 +821,7 @@ MdDocument {
             0: L_BRACK@349..350 "[" [] []
             1: MD_INLINE_ITEM_LIST@350..350
             2: R_BRACK@350..351 "]" [] []
-        7: MD_TEXTUAL@351..352
+        2: MD_TEXTUAL@351..352
           0: MD_TEXTUAL_LITERAL@351..352 "\n" [] []
     21: MD_NEWLINE@352..353
       0: NEWLINE@352..353 "\n" [] []

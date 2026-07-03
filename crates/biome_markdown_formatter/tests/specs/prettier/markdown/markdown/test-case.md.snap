@@ -240,7 +240,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -56,30 +56,22 @@
+@@ -50,30 +50,22 @@
  ",
    source_position(154),
    "
@@ -283,7 +283,7 @@ IR differences:
    source_position(193),
    " ",
    source_position(194),
-@@ -89,13 +81,12 @@
+@@ -83,13 +75,12 @@
    source_position(196),
    " ",
    source_position(197),
@@ -299,7 +299,7 @@ IR differences:
    source_position(207),
    " ",
    source_position(208),
-@@ -103,9 +94,10 @@
+@@ -97,9 +88,10 @@
    source_position(209),
    " ",
    source_position(210),
@@ -313,7 +313,7 @@ IR differences:
    source_position(219),
    "
  ",
-@@ -118,1574 +110,1591 @@
+@@ -112,1546 +104,1563 @@
    source_position(223),
    " ",
    source_position(224),
@@ -337,16 +337,16 @@ IR differences:
  ",
 -  source_position(234),
 +  source_position(246),
-+  "
-+",
-+  source_position(247),
    "
  ",
 -  source_position(235),
-+  source_position(248),
++  source_position(247),
    "
  ",
 -  source_position(236),
++  source_position(248),
++  "
++",
 +  source_position(249),
    "# ",
 -  source_position(237),
@@ -883,13 +883,13 @@ IR differences:
    ]),
 -  source_position(1089),
 +  source_position(1119),
-+  ">",
+   ">",
+-  source_position(1090),
 +  source_position(1120),
 +  "
 +",
 +  source_position(1121),
-   ">",
--  source_position(1090),
++  ">",
 +  source_position(1122),
    " ",
 -  source_position(1091),
@@ -914,16 +914,7 @@ IR differences:
    " ",
 -  source_position(1121),
 +  source_position(1153),
-   "    Markdown.generate",
--  source_position(1142),
-+  source_position(1174),
-   "(",
--  source_position(1143),
-+  source_position(1175),
-   ")",
--  source_position(1144),
-+  source_position(1176),
-   ";",
+   "    Markdown.generate();",
 -  source_position(1145),
 +  source_position(1177),
    "
@@ -1081,16 +1072,7 @@ IR differences:
    ">",
 -  source_position(1300),
 +  source_position(1332),
-   "     Markdown.generate",
--  source_position(1322),
-+  source_position(1354),
-   "(",
--  source_position(1323),
-+  source_position(1355),
-   ")",
--  source_position(1324),
-+  source_position(1356),
-   ";",
+   "     Markdown.generate();",
 -  source_position(1325),
 +  source_position(1357),
    "
@@ -1294,15 +1276,15 @@ IR differences:
    "```",
 -  source_position(1477),
 +  source_position(1511),
-   "
- ",
--  source_position(1478),
++  "
++",
 +  source_position(1512),
    "
  ",
+-  source_position(1478),
 +  source_position(1513),
-+  "
-+",
+   "
+ ",
    hard_line_break,
 -  source_position(1480),
 +  source_position(1515),
@@ -2070,16 +2052,7 @@ IR differences:
    "]",
 -  source_position(2123),
 +  source_position(2158),
-   "(",
--  source_position(2124),
-+  source_position(2159),
-   "http://example.com \"Example\"",
--  source_position(2152),
-+  source_position(2187),
-   ")",
--  source_position(2153),
-+  source_position(2188),
-   " link.",
+   "(http://example.com \"Example\") link.",
 -  source_position(2159),
 +  source_position(2194),
    "
@@ -2111,16 +2084,7 @@ IR differences:
    "]",
 -  source_position(2176),
 +  source_position(2211),
-   "(",
--  source_position(2177),
-+  source_position(2212),
-   "http://example.com",
--  source_position(2195),
-+  source_position(2230),
-   ")",
--  source_position(2196),
-+  source_position(2231),
-   " has no title attr.",
+   "(http://example.com) has no title attr.",
 -  source_position(2215),
 +  source_position(2250),
    "
@@ -2585,13 +2549,7 @@ IR differences:
    "]",
 -  source_position(2734),
 +  source_position(2769),
-   "(",
--  source_position(2735),
-+  source_position(2770),
-   "http://placehold.it/200x50 \"Image Title\"",
--  source_position(2775),
-+  source_position(2810),
-   ")",
+   "(http://placehold.it/200x50 \"Image Title\")",
 -  source_position(2776),
 +  source_position(2811),
    "

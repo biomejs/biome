@@ -333,16 +333,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@401..402 "(" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@382..416 " this IS a heading (only 3 spaces)" [] [],
                     },
                 ],
             },
@@ -599,14 +590,8 @@ MdDocument {
           0: HASH@381..382 "#" [] []
       2: MD_PARAGRAPH@382..416
         0: MD_INLINE_ITEM_LIST@382..416
-          0: MD_TEXTUAL@382..401
-            0: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] []
-          1: MD_TEXTUAL@401..402
-            0: MD_TEXTUAL_LITERAL@401..402 "(" [] []
-          2: MD_TEXTUAL@402..415
-            0: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] []
-          3: MD_TEXTUAL@415..416
-            0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
+          0: MD_TEXTUAL@382..416
+            0: MD_TEXTUAL_LITERAL@382..416 " this IS a heading (only 3 spaces)" [] []
       3: MD_HASH_LIST@416..416
     20: MD_NEWLINE@416..417
       0: NEWLINE@416..417 "\n" [] []

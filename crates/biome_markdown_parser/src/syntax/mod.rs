@@ -87,7 +87,9 @@ pub(crate) fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
         Some('"')
     } else if text.starts_with('\'') {
         Some('\'')
-    } else if p.at(L_PAREN) {
+    } else if text.starts_with('(') {
+        // Text-based check: covers both an L_PAREN token (LinkDefinition
+        // context) and a plain-text token starting with `(` (Regular context).
         Some(')')
     } else {
         None

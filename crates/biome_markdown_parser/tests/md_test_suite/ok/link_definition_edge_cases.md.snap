@@ -332,13 +332,7 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@264..266 "  " [] [],
                     },
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@266..267 "(" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@267..280 "parenthesized" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@280..281 ")" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@266..281 "(parenthesized)" [] [],
                     },
                 ],
             },
@@ -773,12 +767,8 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@263..264 "\n" [] []
           1: MD_TEXTUAL@264..266
             0: MD_TEXTUAL_LITERAL@264..266 "  " [] []
-          2: MD_TEXTUAL@266..267
-            0: MD_TEXTUAL_LITERAL@266..267 "(" [] []
-          3: MD_TEXTUAL@267..280
-            0: MD_TEXTUAL_LITERAL@267..280 "parenthesized" [] []
-          4: MD_TEXTUAL@280..281
-            0: MD_TEXTUAL_LITERAL@280..281 ")" [] []
+          2: MD_TEXTUAL@266..281
+            0: MD_TEXTUAL_LITERAL@266..281 "(parenthesized)" [] []
     23: MD_NEWLINE@281..282
       0: NEWLINE@281..282 "\n" [] []
     24: MD_NEWLINE@282..283

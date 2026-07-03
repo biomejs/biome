@@ -79,19 +79,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@0..26 "Bullet with proper indent " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@26..27 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@27..48 "2 spaces = marker + 1" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@48..49 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@49..50 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@0..50 "Bullet with proper indent (2 spaces = marker + 1):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
@@ -143,19 +131,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@72..104 "Bullet with insufficient indent " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@104..105 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@105..131 "1 space - NOT part of item" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@131..132 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@132..133 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@72..133 "Bullet with insufficient indent (1 space - NOT part of item):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@133..134 "\n" [] [],
@@ -204,19 +180,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@158..190 "Ordered list multi-digit marker " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@190..191 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@191..219 "10. = 3 chars, need 4 indent" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@219..220 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@220..221 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@158..221 "Ordered list multi-digit marker (10. = 3 chars, need 4 indent):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@221..222 "\n" [] [],
@@ -274,19 +238,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@247..280 "Ordered list insufficient indent " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@280..281 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@281..308 "3 spaces - NOT part of item" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@308..309 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@309..310 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@247..310 "Ordered list insufficient indent (3 spaces - NOT part of item):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@310..311 "\n" [] [],
@@ -341,19 +293,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@339..361 "Simple ordered marker " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@361..362 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@362..389 "1. = 2 chars, need 3 indent" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@389..390 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@390..391 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@339..391 "Simple ordered marker (1. = 2 chars, need 3 indent):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@391..392 "\n" [] [],
@@ -408,19 +348,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@415..443 "Simple ordered insufficient " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@443..444 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@444..471 "2 spaces - NOT part of item" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@471..472 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@472..473 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@415..473 "Simple ordered insufficient (2 spaces - NOT part of item):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@473..474 "\n" [] [],
@@ -472,19 +400,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@500..529 "Multiple spaces after marker " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@529..530 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@530..554 "align to first non-space" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@554..555 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@555..556 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@500..556 "Multiple spaces after marker (align to first non-space):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@556..557 "\n" [] [],
@@ -832,17 +748,9 @@ MdDocument {
   1: MD_BLOCK_LIST@0..859
     0: MD_PARAGRAPH@0..51
       0: MD_INLINE_ITEM_LIST@0..51
-        0: MD_TEXTUAL@0..26
-          0: MD_TEXTUAL_LITERAL@0..26 "Bullet with proper indent " [] []
-        1: MD_TEXTUAL@26..27
-          0: MD_TEXTUAL_LITERAL@26..27 "(" [] []
-        2: MD_TEXTUAL@27..48
-          0: MD_TEXTUAL_LITERAL@27..48 "2 spaces = marker + 1" [] []
-        3: MD_TEXTUAL@48..49
-          0: MD_TEXTUAL_LITERAL@48..49 ")" [] []
-        4: MD_TEXTUAL@49..50
-          0: MD_TEXTUAL_LITERAL@49..50 ":" [] []
-        5: MD_TEXTUAL@50..51
+        0: MD_TEXTUAL@0..50
+          0: MD_TEXTUAL_LITERAL@0..50 "Bullet with proper indent (2 spaces = marker + 1):" [] []
+        1: MD_TEXTUAL@50..51
           0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
     1: MD_NEWLINE@51..52
       0: NEWLINE@51..52 "\n" [] []
@@ -873,17 +781,9 @@ MdDocument {
       0: NEWLINE@71..72 "\n" [] []
     4: MD_PARAGRAPH@72..134
       0: MD_INLINE_ITEM_LIST@72..134
-        0: MD_TEXTUAL@72..104
-          0: MD_TEXTUAL_LITERAL@72..104 "Bullet with insufficient indent " [] []
-        1: MD_TEXTUAL@104..105
-          0: MD_TEXTUAL_LITERAL@104..105 "(" [] []
-        2: MD_TEXTUAL@105..131
-          0: MD_TEXTUAL_LITERAL@105..131 "1 space - NOT part of item" [] []
-        3: MD_TEXTUAL@131..132
-          0: MD_TEXTUAL_LITERAL@131..132 ")" [] []
-        4: MD_TEXTUAL@132..133
-          0: MD_TEXTUAL_LITERAL@132..133 ":" [] []
-        5: MD_TEXTUAL@133..134
+        0: MD_TEXTUAL@72..133
+          0: MD_TEXTUAL_LITERAL@72..133 "Bullet with insufficient indent (1 space - NOT part of item):" [] []
+        1: MD_TEXTUAL@133..134
           0: MD_TEXTUAL_LITERAL@133..134 "\n" [] []
     5: MD_NEWLINE@134..135
       0: NEWLINE@134..135 "\n" [] []
@@ -912,17 +812,9 @@ MdDocument {
       0: NEWLINE@157..158 "\n" [] []
     8: MD_PARAGRAPH@158..222
       0: MD_INLINE_ITEM_LIST@158..222
-        0: MD_TEXTUAL@158..190
-          0: MD_TEXTUAL_LITERAL@158..190 "Ordered list multi-digit marker " [] []
-        1: MD_TEXTUAL@190..191
-          0: MD_TEXTUAL_LITERAL@190..191 "(" [] []
-        2: MD_TEXTUAL@191..219
-          0: MD_TEXTUAL_LITERAL@191..219 "10. = 3 chars, need 4 indent" [] []
-        3: MD_TEXTUAL@219..220
-          0: MD_TEXTUAL_LITERAL@219..220 ")" [] []
-        4: MD_TEXTUAL@220..221
-          0: MD_TEXTUAL_LITERAL@220..221 ":" [] []
-        5: MD_TEXTUAL@221..222
+        0: MD_TEXTUAL@158..221
+          0: MD_TEXTUAL_LITERAL@158..221 "Ordered list multi-digit marker (10. = 3 chars, need 4 indent):" [] []
+        1: MD_TEXTUAL@221..222
           0: MD_TEXTUAL_LITERAL@221..222 "\n" [] []
     9: MD_NEWLINE@222..223
       0: NEWLINE@222..223 "\n" [] []
@@ -957,17 +849,9 @@ MdDocument {
       0: NEWLINE@246..247 "\n" [] []
     12: MD_PARAGRAPH@247..311
       0: MD_INLINE_ITEM_LIST@247..311
-        0: MD_TEXTUAL@247..280
-          0: MD_TEXTUAL_LITERAL@247..280 "Ordered list insufficient indent " [] []
-        1: MD_TEXTUAL@280..281
-          0: MD_TEXTUAL_LITERAL@280..281 "(" [] []
-        2: MD_TEXTUAL@281..308
-          0: MD_TEXTUAL_LITERAL@281..308 "3 spaces - NOT part of item" [] []
-        3: MD_TEXTUAL@308..309
-          0: MD_TEXTUAL_LITERAL@308..309 ")" [] []
-        4: MD_TEXTUAL@309..310
-          0: MD_TEXTUAL_LITERAL@309..310 ":" [] []
-        5: MD_TEXTUAL@310..311
+        0: MD_TEXTUAL@247..310
+          0: MD_TEXTUAL_LITERAL@247..310 "Ordered list insufficient indent (3 spaces - NOT part of item):" [] []
+        1: MD_TEXTUAL@310..311
           0: MD_TEXTUAL_LITERAL@310..311 "\n" [] []
     13: MD_NEWLINE@311..312
       0: NEWLINE@311..312 "\n" [] []
@@ -1000,17 +884,9 @@ MdDocument {
       0: NEWLINE@338..339 "\n" [] []
     16: MD_PARAGRAPH@339..392
       0: MD_INLINE_ITEM_LIST@339..392
-        0: MD_TEXTUAL@339..361
-          0: MD_TEXTUAL_LITERAL@339..361 "Simple ordered marker " [] []
-        1: MD_TEXTUAL@361..362
-          0: MD_TEXTUAL_LITERAL@361..362 "(" [] []
-        2: MD_TEXTUAL@362..389
-          0: MD_TEXTUAL_LITERAL@362..389 "1. = 2 chars, need 3 indent" [] []
-        3: MD_TEXTUAL@389..390
-          0: MD_TEXTUAL_LITERAL@389..390 ")" [] []
-        4: MD_TEXTUAL@390..391
-          0: MD_TEXTUAL_LITERAL@390..391 ":" [] []
-        5: MD_TEXTUAL@391..392
+        0: MD_TEXTUAL@339..391
+          0: MD_TEXTUAL_LITERAL@339..391 "Simple ordered marker (1. = 2 chars, need 3 indent):" [] []
+        1: MD_TEXTUAL@391..392
           0: MD_TEXTUAL_LITERAL@391..392 "\n" [] []
     17: MD_NEWLINE@392..393
       0: NEWLINE@392..393 "\n" [] []
@@ -1043,17 +919,9 @@ MdDocument {
       0: NEWLINE@414..415 "\n" [] []
     20: MD_PARAGRAPH@415..474
       0: MD_INLINE_ITEM_LIST@415..474
-        0: MD_TEXTUAL@415..443
-          0: MD_TEXTUAL_LITERAL@415..443 "Simple ordered insufficient " [] []
-        1: MD_TEXTUAL@443..444
-          0: MD_TEXTUAL_LITERAL@443..444 "(" [] []
-        2: MD_TEXTUAL@444..471
-          0: MD_TEXTUAL_LITERAL@444..471 "2 spaces - NOT part of item" [] []
-        3: MD_TEXTUAL@471..472
-          0: MD_TEXTUAL_LITERAL@471..472 ")" [] []
-        4: MD_TEXTUAL@472..473
-          0: MD_TEXTUAL_LITERAL@472..473 ":" [] []
-        5: MD_TEXTUAL@473..474
+        0: MD_TEXTUAL@415..473
+          0: MD_TEXTUAL_LITERAL@415..473 "Simple ordered insufficient (2 spaces - NOT part of item):" [] []
+        1: MD_TEXTUAL@473..474
           0: MD_TEXTUAL_LITERAL@473..474 "\n" [] []
     21: MD_NEWLINE@474..475
       0: NEWLINE@474..475 "\n" [] []
@@ -1084,17 +952,9 @@ MdDocument {
       0: NEWLINE@499..500 "\n" [] []
     24: MD_PARAGRAPH@500..557
       0: MD_INLINE_ITEM_LIST@500..557
-        0: MD_TEXTUAL@500..529
-          0: MD_TEXTUAL_LITERAL@500..529 "Multiple spaces after marker " [] []
-        1: MD_TEXTUAL@529..530
-          0: MD_TEXTUAL_LITERAL@529..530 "(" [] []
-        2: MD_TEXTUAL@530..554
-          0: MD_TEXTUAL_LITERAL@530..554 "align to first non-space" [] []
-        3: MD_TEXTUAL@554..555
-          0: MD_TEXTUAL_LITERAL@554..555 ")" [] []
-        4: MD_TEXTUAL@555..556
-          0: MD_TEXTUAL_LITERAL@555..556 ":" [] []
-        5: MD_TEXTUAL@556..557
+        0: MD_TEXTUAL@500..556
+          0: MD_TEXTUAL_LITERAL@500..556 "Multiple spaces after marker (align to first non-space):" [] []
+        1: MD_TEXTUAL@556..557
           0: MD_TEXTUAL_LITERAL@556..557 "\n" [] []
     25: MD_NEWLINE@557..558
       0: NEWLINE@557..558 "\n" [] []

@@ -318,8 +318,23 @@ impl<'src> MarkdownLexer<'src> {
             }
             BTO => self.consume_byte(L_BRACK),
             BTC => self.consume_byte(R_BRACK),
-            PNO => self.consume_byte(L_PAREN),
-            PNC => self.consume_byte(R_PAREN),
+            // `(` and `)` are only syntax inside link destinations and titles,
+            // which the parser lexes with the LinkDefinition context.
+            // Anywhere else they are plain text.
+            PNO => {
+                if matches!(context, MarkdownLexContext::LinkDefinition) {
+                    self.consume_byte(L_PAREN)
+                } else {
+                    self.consume_textual(context)
+                }
+            }
+            PNC => {
+                if matches!(context, MarkdownLexContext::LinkDefinition) {
+                    self.consume_byte(R_PAREN)
+                } else {
+                    self.consume_textual(context)
+                }
+            }
             COL => self.consume_byte(COLON),
             AMP => self.consume_entity_or_textual(context),
             BSL => {
@@ -1282,10 +1297,17 @@ impl<'src> MarkdownLexer<'src> {
                 | MOR  // >
                 | BTO  // [
                 | BTC  // ]
-                | PNO  // (
-                | PNC  // )
                 | BSL  // \
                 => break,
+                // Parens are only syntax in link destinations and titles
+                // (LinkDefinition context); elsewhere they are plain text.
+                PNO | PNC => {
+                    if matches!(context, MarkdownLexContext::LinkDefinition) {
+                        break;
+                    }
+                    only_whitespace = false;
+                    self.advance(1);
+                }
                 // `-` and `+` only mean something at the start of a line
                 // (lists, thematic breaks, setext underlines). In the middle
                 // of text they are plain characters; after leading whitespace

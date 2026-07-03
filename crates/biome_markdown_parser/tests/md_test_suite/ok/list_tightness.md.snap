@@ -475,19 +475,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@360..403 "Tight list where items have multiple lines " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@403..404 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@404..415 "still tight" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@416..417 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@360..417 "Tight list where items have multiple lines (still tight):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@417..418 "\n" [] [],
@@ -1102,17 +1090,9 @@ MdDocument {
       0: NEWLINE@359..360 "\n" [] []
     25: MD_PARAGRAPH@360..418
       0: MD_INLINE_ITEM_LIST@360..418
-        0: MD_TEXTUAL@360..403
-          0: MD_TEXTUAL_LITERAL@360..403 "Tight list where items have multiple lines " [] []
-        1: MD_TEXTUAL@403..404
-          0: MD_TEXTUAL_LITERAL@403..404 "(" [] []
-        2: MD_TEXTUAL@404..415
-          0: MD_TEXTUAL_LITERAL@404..415 "still tight" [] []
-        3: MD_TEXTUAL@415..416
-          0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
-        4: MD_TEXTUAL@416..417
-          0: MD_TEXTUAL_LITERAL@416..417 ":" [] []
-        5: MD_TEXTUAL@417..418
+        0: MD_TEXTUAL@360..417
+          0: MD_TEXTUAL_LITERAL@360..417 "Tight list where items have multiple lines (still tight):" [] []
+        1: MD_TEXTUAL@417..418
           0: MD_TEXTUAL_LITERAL@417..418 "\n" [] []
     26: MD_NEWLINE@418..419
       0: NEWLINE@418..419 "\n" [] []

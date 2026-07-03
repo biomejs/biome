@@ -56,7 +56,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -93,105 +93,101 @@
+@@ -89,105 +89,101 @@
      hard_line_break,
      source_position(234),
      "```",
@@ -206,7 +206,7 @@ IR differences:
      ">",
      hard_line_break,
      empty_line,
-@@ -200,55 +196,52 @@
+@@ -196,55 +192,52 @@
      source_position(490),
      "sh",
      hard_line_break,
