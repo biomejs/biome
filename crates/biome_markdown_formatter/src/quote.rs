@@ -155,7 +155,7 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
                         }
 
                         let entry = format_with(move |f| {
-                            format_removed_quote_boundary(&block, f)?;
+                            format_removed_quote_boundary(block, f)?;
                             for block in &removed_blocks {
                                 format_removed_quote_boundary(block, f)?;
                             }
@@ -269,7 +269,7 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
                         after_removed_continuation_prefix = false;
                     } else if textual.is_newline()?
                         && should_format_quote_continuation_after_newline(
-                            &self.paragraph,
+                            self.paragraph,
                             index + 1,
                         )?
                     {
@@ -403,7 +403,7 @@ fn should_format_quote_paragraph(paragraph: &MdParagraph) -> FormatResult<bool> 
     for (index, item) in paragraph.list().iter().enumerate() {
         if let AnyMdInline::MdTextual(text) = item
             && text.is_newline()?
-            && should_format_quote_continuation_after_newline(&paragraph, index + 1)?
+            && should_format_quote_continuation_after_newline(paragraph, index + 1)?
         {
             return Ok(true);
         }
