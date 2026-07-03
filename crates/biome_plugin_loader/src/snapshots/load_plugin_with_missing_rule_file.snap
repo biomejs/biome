@@ -1,0 +1,10 @@
+---
+source: crates/biome_plugin_loader/src/lib.rs
+expression: content
+---
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Cannot read plugin file /my-plugin/rules/missing.grit
+
+    Caused by:
+      Cannot read file.
