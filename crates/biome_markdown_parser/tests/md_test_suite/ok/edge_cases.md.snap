@@ -49,10 +49,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@0..1 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@1..15 "NoSpaceHeading" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@0..15 "#NoSpaceHeading" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
@@ -65,10 +62,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@17..19 "##" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@17..30 "##AlsoNoSpace" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
@@ -81,19 +75,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@32..36 "foo " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@36..37 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@37..38 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@38..39 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@39..67 " bar is not a thematic break" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@32..67 "foo --- bar is not a thematic break" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@67..68 "\n" [] [],
@@ -254,16 +236,7 @@ MdDocument {
                     md_indent_char_token: MD_INDENT_CHAR@244..245 " " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@245..246 "#" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@267..268 "+" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@268..275 " spaces" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@245..275 "# not heading due to 4+ spaces" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@275..276 "\n" [] [],
@@ -281,16 +254,7 @@ MdDocument {
                     md_indent_char_token: MD_INDENT_CHAR@279..280 " " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@280..281 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@299..300 "+" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@300..307 " spaces" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@280..307 "- not list due to 4+ spaces" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@307..308 "\n" [] [],
@@ -308,16 +272,7 @@ MdDocument {
                     md_indent_char_token: MD_INDENT_CHAR@311..312 " " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@312..313 ">" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@332..333 "+" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@333..340 " spaces" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@312..340 "> not quote due to 4+ spaces" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@340..341 "\n" [] [],
@@ -363,16 +318,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@401..402 "(" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@382..416 " this IS a heading (only 3 spaces)" [] [],
                     },
                 ],
             },
@@ -446,37 +392,25 @@ MdDocument {
   1: MD_BLOCK_LIST@0..505
     0: MD_PARAGRAPH@0..16
       0: MD_INLINE_ITEM_LIST@0..16
-        0: MD_TEXTUAL@0..1
-          0: MD_TEXTUAL_LITERAL@0..1 "#" [] []
-        1: MD_TEXTUAL@1..15
-          0: MD_TEXTUAL_LITERAL@1..15 "NoSpaceHeading" [] []
-        2: MD_TEXTUAL@15..16
+        0: MD_TEXTUAL@0..15
+          0: MD_TEXTUAL_LITERAL@0..15 "#NoSpaceHeading" [] []
+        1: MD_TEXTUAL@15..16
           0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
     1: MD_NEWLINE@16..17
       0: NEWLINE@16..17 "\n" [] []
     2: MD_PARAGRAPH@17..31
       0: MD_INLINE_ITEM_LIST@17..31
-        0: MD_TEXTUAL@17..19
-          0: MD_TEXTUAL_LITERAL@17..19 "##" [] []
-        1: MD_TEXTUAL@19..30
-          0: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] []
-        2: MD_TEXTUAL@30..31
+        0: MD_TEXTUAL@17..30
+          0: MD_TEXTUAL_LITERAL@17..30 "##AlsoNoSpace" [] []
+        1: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
     3: MD_NEWLINE@31..32
       0: NEWLINE@31..32 "\n" [] []
     4: MD_PARAGRAPH@32..68
       0: MD_INLINE_ITEM_LIST@32..68
-        0: MD_TEXTUAL@32..36
-          0: MD_TEXTUAL_LITERAL@32..36 "foo " [] []
-        1: MD_TEXTUAL@36..37
-          0: MD_TEXTUAL_LITERAL@36..37 "-" [] []
-        2: MD_TEXTUAL@37..38
-          0: MD_TEXTUAL_LITERAL@37..38 "-" [] []
-        3: MD_TEXTUAL@38..39
-          0: MD_TEXTUAL_LITERAL@38..39 "-" [] []
-        4: MD_TEXTUAL@39..67
-          0: MD_TEXTUAL_LITERAL@39..67 " bar is not a thematic break" [] []
-        5: MD_TEXTUAL@67..68
+        0: MD_TEXTUAL@32..67
+          0: MD_TEXTUAL_LITERAL@32..67 "foo --- bar is not a thematic break" [] []
+        1: MD_TEXTUAL@67..68
           0: MD_TEXTUAL_LITERAL@67..68 "\n" [] []
     5: MD_NEWLINE@68..69
       0: NEWLINE@68..69 "\n" [] []
@@ -578,55 +512,37 @@ MdDocument {
           0: MD_INDENT_CHAR@243..244 " " [] []
         5: MD_INDENT_TOKEN@244..245
           0: MD_INDENT_CHAR@244..245 " " [] []
-        6: MD_TEXTUAL@245..246
-          0: MD_TEXTUAL_LITERAL@245..246 "#" [] []
-        7: MD_TEXTUAL@246..267
-          0: MD_TEXTUAL_LITERAL@246..267 " not heading due to 4" [] []
-        8: MD_TEXTUAL@267..268
-          0: MD_TEXTUAL_LITERAL@267..268 "+" [] []
-        9: MD_TEXTUAL@268..275
-          0: MD_TEXTUAL_LITERAL@268..275 " spaces" [] []
-        10: MD_TEXTUAL@275..276
+        6: MD_TEXTUAL@245..275
+          0: MD_TEXTUAL_LITERAL@245..275 "# not heading due to 4+ spaces" [] []
+        7: MD_TEXTUAL@275..276
           0: MD_TEXTUAL_LITERAL@275..276 "\n" [] []
-        11: MD_INDENT_TOKEN@276..277
+        8: MD_INDENT_TOKEN@276..277
           0: MD_INDENT_CHAR@276..277 " " [] []
-        12: MD_INDENT_TOKEN@277..278
+        9: MD_INDENT_TOKEN@277..278
           0: MD_INDENT_CHAR@277..278 " " [] []
-        13: MD_INDENT_TOKEN@278..279
+        10: MD_INDENT_TOKEN@278..279
           0: MD_INDENT_CHAR@278..279 " " [] []
-        14: MD_INDENT_TOKEN@279..280
+        11: MD_INDENT_TOKEN@279..280
           0: MD_INDENT_CHAR@279..280 " " [] []
-        15: MD_TEXTUAL@280..281
-          0: MD_TEXTUAL_LITERAL@280..281 "-" [] []
-        16: MD_TEXTUAL@281..299
-          0: MD_TEXTUAL_LITERAL@281..299 " not list due to 4" [] []
-        17: MD_TEXTUAL@299..300
-          0: MD_TEXTUAL_LITERAL@299..300 "+" [] []
-        18: MD_TEXTUAL@300..307
-          0: MD_TEXTUAL_LITERAL@300..307 " spaces" [] []
-        19: MD_TEXTUAL@307..308
+        12: MD_TEXTUAL@280..307
+          0: MD_TEXTUAL_LITERAL@280..307 "- not list due to 4+ spaces" [] []
+        13: MD_TEXTUAL@307..308
           0: MD_TEXTUAL_LITERAL@307..308 "\n" [] []
-        20: MD_INDENT_TOKEN@308..309
+        14: MD_INDENT_TOKEN@308..309
           0: MD_INDENT_CHAR@308..309 " " [] []
-        21: MD_INDENT_TOKEN@309..310
+        15: MD_INDENT_TOKEN@309..310
           0: MD_INDENT_CHAR@309..310 " " [] []
-        22: MD_INDENT_TOKEN@310..311
+        16: MD_INDENT_TOKEN@310..311
           0: MD_INDENT_CHAR@310..311 " " [] []
-        23: MD_INDENT_TOKEN@311..312
+        17: MD_INDENT_TOKEN@311..312
           0: MD_INDENT_CHAR@311..312 " " [] []
-        24: MD_TEXTUAL@312..313
-          0: MD_TEXTUAL_LITERAL@312..313 ">" [] []
-        25: MD_TEXTUAL@313..332
-          0: MD_TEXTUAL_LITERAL@313..332 " not quote due to 4" [] []
-        26: MD_TEXTUAL@332..333
-          0: MD_TEXTUAL_LITERAL@332..333 "+" [] []
-        27: MD_TEXTUAL@333..340
-          0: MD_TEXTUAL_LITERAL@333..340 " spaces" [] []
-        28: MD_TEXTUAL@340..341
+        18: MD_TEXTUAL@312..340
+          0: MD_TEXTUAL_LITERAL@312..340 "> not quote due to 4+ spaces" [] []
+        19: MD_TEXTUAL@340..341
           0: MD_TEXTUAL_LITERAL@340..341 "\n" [] []
-        29: MD_TEXTUAL@341..363
+        20: MD_TEXTUAL@341..363
           0: MD_TEXTUAL_LITERAL@341..363 "continues as paragraph" [] []
-        30: MD_TEXTUAL@363..364
+        21: MD_TEXTUAL@363..364
           0: MD_TEXTUAL_LITERAL@363..364 "\n" [] []
     17: MD_NEWLINE@364..365
       0: NEWLINE@364..365 "\n" [] []
@@ -649,14 +565,8 @@ MdDocument {
           0: HASH@381..382 "#" [] []
       2: MD_PARAGRAPH@382..416
         0: MD_INLINE_ITEM_LIST@382..416
-          0: MD_TEXTUAL@382..401
-            0: MD_TEXTUAL_LITERAL@382..401 " this IS a heading " [] []
-          1: MD_TEXTUAL@401..402
-            0: MD_TEXTUAL_LITERAL@401..402 "(" [] []
-          2: MD_TEXTUAL@402..415
-            0: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] []
-          3: MD_TEXTUAL@415..416
-            0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
+          0: MD_TEXTUAL@382..416
+            0: MD_TEXTUAL_LITERAL@382..416 " this IS a heading (only 3 spaces)" [] []
       3: MD_HASH_LIST@416..416
     20: MD_NEWLINE@416..417
       0: NEWLINE@416..417 "\n" [] []

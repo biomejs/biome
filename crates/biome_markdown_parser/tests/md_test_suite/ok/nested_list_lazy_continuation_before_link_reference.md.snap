@@ -81,19 +81,10 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                                                 },
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@31..32 "[" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@31..37 "[valid" [] [],
                                                 },
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@32..37 "valid" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@37..38 "]" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@38..39 ":" [] [],
-                                                },
-                                                MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@39..44 " /url" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@37..44 "]: /url" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@44..45 "\n" [] [],
@@ -163,17 +154,11 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@21..30 "lazy line" [] []
                         5: MD_TEXTUAL@30..31
                           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-                        6: MD_TEXTUAL@31..32
-                          0: MD_TEXTUAL_LITERAL@31..32 "[" [] []
-                        7: MD_TEXTUAL@32..37
-                          0: MD_TEXTUAL_LITERAL@32..37 "valid" [] []
-                        8: MD_TEXTUAL@37..38
-                          0: MD_TEXTUAL_LITERAL@37..38 "]" [] []
-                        9: MD_TEXTUAL@38..39
-                          0: MD_TEXTUAL_LITERAL@38..39 ":" [] []
-                        10: MD_TEXTUAL@39..44
-                          0: MD_TEXTUAL_LITERAL@39..44 " /url" [] []
-                        11: MD_TEXTUAL@44..45
+                        6: MD_TEXTUAL@31..37
+                          0: MD_TEXTUAL_LITERAL@31..37 "[valid" [] []
+                        7: MD_TEXTUAL@37..44
+                          0: MD_TEXTUAL_LITERAL@37..44 "]: /url" [] []
+                        8: MD_TEXTUAL@44..45
                           0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
   2: EOF@45..45 "" [] []
 

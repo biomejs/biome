@@ -124,13 +124,7 @@ MdDocument {
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@111..116 "Multi" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@116..117 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@117..127 "line quote" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@111..127 "Multi-line quote" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@127..128 "\n" [] [],
@@ -466,21 +460,17 @@ MdDocument {
       1: MD_BLOCK_LIST@111..173
         0: MD_PARAGRAPH@111..173
           0: MD_INLINE_ITEM_LIST@111..173
-            0: MD_TEXTUAL@111..116
-              0: MD_TEXTUAL_LITERAL@111..116 "Multi" [] []
-            1: MD_TEXTUAL@116..117
-              0: MD_TEXTUAL_LITERAL@116..117 "-" [] []
-            2: MD_TEXTUAL@117..127
-              0: MD_TEXTUAL_LITERAL@117..127 "line quote" [] []
-            3: MD_TEXTUAL@127..128
+            0: MD_TEXTUAL@111..127
+              0: MD_TEXTUAL_LITERAL@111..127 "Multi-line quote" [] []
+            1: MD_TEXTUAL@127..128
               0: MD_TEXTUAL_LITERAL@127..128 "\n" [] []
-            4: MD_TEXTUAL@128..150
+            2: MD_TEXTUAL@128..150
               0: MD_TEXTUAL_LITERAL@128..150 "with more lazy content" [] []
-            5: MD_TEXTUAL@150..151
+            3: MD_TEXTUAL@150..151
               0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
-            6: MD_TEXTUAL@151..172
+            4: MD_TEXTUAL@151..172
               0: MD_TEXTUAL_LITERAL@151..172 "and even more content" [] []
-            7: MD_TEXTUAL@172..173
+            5: MD_TEXTUAL@172..173
               0: MD_TEXTUAL_LITERAL@172..173 "\n" [] []
     5: MD_NEWLINE@173..174
       0: NEWLINE@173..174 "\n" [] []

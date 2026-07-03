@@ -120,13 +120,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@84..88 "Self" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@88..89 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@89..98 "closing: " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@84..98 "Self-closing: " [] [],
                 },
                 MdInlineHtml {
                     value: MdInlineItemList [
@@ -176,22 +170,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@133..134 "<" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@134..135 "!" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@135..136 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@136..137 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@137..146 " comment " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@146..147 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@147..148 "-" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@134..148 "!-- comment --" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@148..149 ">" [] [],
@@ -351,13 +330,9 @@ MdDocument {
       0: NEWLINE@83..84 "\n" [] []
     4: MD_PARAGRAPH@84..123
       0: MD_INLINE_ITEM_LIST@84..123
-        0: MD_TEXTUAL@84..88
-          0: MD_TEXTUAL_LITERAL@84..88 "Self" [] []
-        1: MD_TEXTUAL@88..89
-          0: MD_TEXTUAL_LITERAL@88..89 "-" [] []
-        2: MD_TEXTUAL@89..98
-          0: MD_TEXTUAL_LITERAL@89..98 "closing: " [] []
-        3: MD_INLINE_HTML@98..103
+        0: MD_TEXTUAL@84..98
+          0: MD_TEXTUAL_LITERAL@84..98 "Self-closing: " [] []
+        1: MD_INLINE_HTML@98..103
           0: MD_INLINE_ITEM_LIST@98..103
             0: MD_TEXTUAL@98..99
               0: MD_TEXTUAL_LITERAL@98..99 "<" [] []
@@ -365,9 +340,9 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@99..102 "br/" [] []
             2: MD_TEXTUAL@102..103
               0: MD_TEXTUAL_LITERAL@102..103 ">" [] []
-        4: MD_TEXTUAL@103..108
+        2: MD_TEXTUAL@103..108
           0: MD_TEXTUAL_LITERAL@103..108 " and " [] []
-        5: MD_INLINE_HTML@108..122
+        3: MD_INLINE_HTML@108..122
           0: MD_INLINE_ITEM_LIST@108..122
             0: MD_TEXTUAL@108..109
               0: MD_TEXTUAL_LITERAL@108..109 "<" [] []
@@ -375,7 +350,7 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@109..121 "img src=\"x\"/" [] []
             2: MD_TEXTUAL@121..122
               0: MD_TEXTUAL_LITERAL@121..122 ">" [] []
-        6: MD_TEXTUAL@122..123
+        4: MD_TEXTUAL@122..123
           0: MD_TEXTUAL_LITERAL@122..123 "\n" [] []
     5: MD_NEWLINE@123..124
       0: NEWLINE@123..124 "\n" [] []
@@ -387,19 +362,9 @@ MdDocument {
           0: MD_INLINE_ITEM_LIST@133..149
             0: MD_TEXTUAL@133..134
               0: MD_TEXTUAL_LITERAL@133..134 "<" [] []
-            1: MD_TEXTUAL@134..135
-              0: MD_TEXTUAL_LITERAL@134..135 "!" [] []
-            2: MD_TEXTUAL@135..136
-              0: MD_TEXTUAL_LITERAL@135..136 "-" [] []
-            3: MD_TEXTUAL@136..137
-              0: MD_TEXTUAL_LITERAL@136..137 "-" [] []
-            4: MD_TEXTUAL@137..146
-              0: MD_TEXTUAL_LITERAL@137..146 " comment " [] []
-            5: MD_TEXTUAL@146..147
-              0: MD_TEXTUAL_LITERAL@146..147 "-" [] []
-            6: MD_TEXTUAL@147..148
-              0: MD_TEXTUAL_LITERAL@147..148 "-" [] []
-            7: MD_TEXTUAL@148..149
+            1: MD_TEXTUAL@134..148
+              0: MD_TEXTUAL_LITERAL@134..148 "!-- comment --" [] []
+            2: MD_TEXTUAL@148..149
               0: MD_TEXTUAL_LITERAL@148..149 ">" [] []
         2: MD_TEXTUAL@149..157
           0: MD_TEXTUAL_LITERAL@149..157 " inline." [] []

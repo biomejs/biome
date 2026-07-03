@@ -40,13 +40,7 @@ MdDocument {
                             l_paren_token: L_PAREN@66..67 "(" [] [],
                             destination: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@67..101 "https://prettier.io/docs/en/option" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@101..102 "-" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@102..112 "philosophy" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@67..112 "https://prettier.io/docs/en/option-philosophy" [] [],
                                 },
                             ],
                             title: missing (optional),
@@ -91,12 +85,8 @@ MdDocument {
               2: R_BRACK@65..66 "]" [] []
               3: L_PAREN@66..67 "(" [] []
               4: MD_INLINE_ITEM_LIST@67..112
-                0: MD_TEXTUAL@67..101
-                  0: MD_TEXTUAL_LITERAL@67..101 "https://prettier.io/docs/en/option" [] []
-                1: MD_TEXTUAL@101..102
-                  0: MD_TEXTUAL_LITERAL@101..102 "-" [] []
-                2: MD_TEXTUAL@102..112
-                  0: MD_TEXTUAL_LITERAL@102..112 "philosophy" [] []
+                0: MD_TEXTUAL@67..112
+                  0: MD_TEXTUAL_LITERAL@67..112 "https://prettier.io/docs/en/option-philosophy" [] []
               5: (empty)
               6: R_PAREN@112..113 ")" [] []
             2: MD_TEXTUAL@113..167
