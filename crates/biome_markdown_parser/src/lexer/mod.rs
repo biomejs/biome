@@ -1354,23 +1354,18 @@ impl<'src> MarkdownLexer<'src> {
                     only_whitespace = false;
                     self.advance(1);
                 }
-                // IDT includes A-Z, a-z, and _ - only _ is special for markdown
-                IDT => {
-                    if byte == b'_' {
-                        // A `_` between two word characters (like the middle
-                        // of `snake_case`) can never open or close emphasis
-                        // (§6.2), so it stays inside the text token.
-                        if !self.is_intraword_underscore_sequence() {
-                            break;
-                        }
-                        while let Some(b'_') = self.current_byte() {
-                            self.advance(1);
-                        }
-                        only_whitespace = false;
-                    } else {
-                        only_whitespace = false;
-                        self.advance_char_unchecked();
+                // IDT includes A-Z, a-z, and _ - only _ is special for markdown.
+                // A `_` between two word characters (like the middle of
+                // `snake_case`) can never open or close emphasis (§6.2), so
+                // it stays inside the text token.
+                IDT if byte == b'_' => {
+                    if !self.is_intraword_underscore_sequence() {
+                        break;
                     }
+                    while let Some(b'_') = self.current_byte() {
+                        self.advance(1);
+                    }
+                    only_whitespace = false;
                 }
                 // All other characters are regular text
                 _ => {
