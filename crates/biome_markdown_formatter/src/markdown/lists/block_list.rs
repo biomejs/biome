@@ -252,6 +252,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
         let mut prev_was_list = false;
         let mut prev_was_html_block = false;
         let mut prev_was_indent_code_block = false;
+        let mut prev_was_link_reference_definition = false;
         let mut prev_ends_with_line_break = false;
         let mut prev_paragraph_has_hard_line = false;
         let content_count = self.node.len() - trailing_count;
@@ -262,7 +263,34 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 let is_trailing = index >= content_count;
                 let next_is_bull_item = iter.peek().is_some_and(|(_, next)| next.is_list());
 
-                if prev_was_header && !is_leading && !is_trailing {
+                if prev_was_link_reference_definition
+                    && !is_leading
+                    && !is_trailing
+                    && next_content_block_is_link_reference_definition(
+                        &self.node,
+                        index + 1,
+                        content_count,
+                    )
+                {
+                    joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                        should_remove: true,
+                    }));
+                    while iter
+                        .peek()
+                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
+                    {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
+                        )) = iter.next()
+                        {
+                            joiner.entry(&extra.format().with_options(FormatMdNewlineOptions {
+                                should_remove: true,
+                            }));
+                        }
+                    }
+                    joiner.entry(&hard_line_break());
+                } else if prev_was_header && !is_leading && !is_trailing {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         should_remove: true,
                     }));
@@ -354,6 +382,7 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 still_leading = false;
                 prev_was_header = node.is_any_header();
                 prev_was_list = node.is_list();
+                prev_was_link_reference_definition = node.is_link_reference_definition();
                 prev_was_html_block = matches!(
                     node,
                     AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_))
@@ -383,6 +412,20 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
         joiner.finish()
     }
+}
+
+fn next_content_block_is_link_reference_definition(
+    block_list: &MdBlockList,
+    start: usize,
+    content_count: usize,
+) -> bool {
+    block_list
+        .iter()
+        .enumerate()
+        .skip(start)
+        .take_while(|(index, _)| *index < content_count)
+        .find(|(_, block)| !block.is_newline())
+        .is_some_and(|(_, block)| block.is_link_reference_definition())
 }
 
 fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {

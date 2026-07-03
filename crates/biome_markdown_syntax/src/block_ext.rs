@@ -50,6 +50,13 @@ impl AnyMdBlock {
         )
     }
 
+    pub const fn is_link_reference_definition(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdLinkReferenceDefinition(_))
+        )
+    }
+
     pub const fn is_newline(&self) -> bool {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)))
     }

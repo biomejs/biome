@@ -85,6 +85,8 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
             return self.fmt_fenced_code_block(node, f);
         } else if self.print_mode.is_fill() {
             return self.fmt_fill(node, f, self.text_context);
+        } else if self.print_mode.is_remove() {
+            return self.fmt_remove(node, f);
         } else if self.text_context.is_list() {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
@@ -190,6 +192,23 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
 }
 
 impl FormatMdInlineItemList {
+    fn fmt_remove(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        for item in node.iter() {
+            match item {
+                AnyMdInline::MdTextual(textual) => write!(
+                    f,
+                    [textual.format().with_options(FormatMdTextualOptions {
+                        print_mode: TextPrintMode::Remove,
+                        ..FormatMdTextualOptions::default()
+                    })]
+                )?,
+                item => write!(f, [item.format()])?,
+            }
+        }
+
+        Ok(())
+    }
+
     /// Formats inline content inside a list item, normalizing the indentation
     /// of continuation lines.
     ///
