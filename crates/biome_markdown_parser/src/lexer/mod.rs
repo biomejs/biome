@@ -11,7 +11,7 @@ use biome_parser::lexer::{
 };
 use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
-use biome_unicode_table::lookup_byte;
+use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
 
 use crate::syntax::{
     MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
@@ -1357,10 +1357,20 @@ impl<'src> MarkdownLexer<'src> {
                 // IDT includes A-Z, a-z, and _ - only _ is special for markdown
                 IDT => {
                     if byte == b'_' {
-                        break;
+                        // A `_` between two word characters (like the middle
+                        // of `snake_case`) can never open or close emphasis
+                        // (§6.2), so it stays inside the text token.
+                        if !self.is_intraword_underscore_sequence() {
+                            break;
+                        }
+                        while let Some(b'_') = self.current_byte() {
+                            self.advance(1);
+                        }
+                        only_whitespace = false;
+                    } else {
+                        only_whitespace = false;
+                        self.advance_char_unchecked();
                     }
-                    only_whitespace = false;
-                    self.advance_char_unchecked();
                 }
                 // All other characters are regular text
                 _ => {
@@ -1475,6 +1485,30 @@ impl<'src> MarkdownLexer<'src> {
     /// A `!` not followed by `[` is plain text.
     fn is_at_image_start(&self) -> bool {
         self.current_byte() == Some(b'!') && self.byte_at(1) == Some(b'[')
+    }
+
+    /// Returns true if the `_` sequence at the current position sits between
+    /// two characters that are neither whitespace nor punctuation, like the
+    /// middle of `snake_case`. Per §6.2 such a sequence can never open or
+    /// close emphasis, so it can stay inside a plain-text token.
+    ///
+    /// Uses the same character classes as the emphasis flanking rules in
+    /// `syntax/inline/emphasis.rs`, so a folded `_` is exactly one the
+    /// emphasis parser would reject anyway.
+    fn is_intraword_underscore_sequence(&self) -> bool {
+        let is_word_char = |c: Option<char>| matches!(c, Some(c) if !c.is_whitespace() && !is_unicode_punctuation(c));
+
+        let before = self.source[..self.position].chars().next_back();
+        if !is_word_char(before) {
+            return false;
+        }
+
+        let mut offset = 0;
+        while let Some(b'_') = self.byte_at(offset) {
+            offset += 1;
+        }
+        let after = self.source[self.position + offset..].chars().next();
+        is_word_char(after)
     }
 
     /// Returns true when the rest of the line is only `#` characters and

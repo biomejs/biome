@@ -117,13 +117,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@162..166 "_bar" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@166..185 "_baz (not emphasis)" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@137..185 "Underscore intraword: foo_bar_baz (not emphasis)" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@185..186 "\n" [] [],
@@ -246,13 +240,9 @@ MdDocument {
       0: NEWLINE@136..137 "\n" [] []
     6: MD_PARAGRAPH@137..186
       0: MD_INLINE_ITEM_LIST@137..186
-        0: MD_TEXTUAL@137..162
-          0: MD_TEXTUAL_LITERAL@137..162 "Underscore intraword: foo" [] []
-        1: MD_TEXTUAL@162..166
-          0: MD_TEXTUAL_LITERAL@162..166 "_bar" [] []
-        2: MD_TEXTUAL@166..185
-          0: MD_TEXTUAL_LITERAL@166..185 "_baz (not emphasis)" [] []
-        3: MD_TEXTUAL@185..186
+        0: MD_TEXTUAL@137..185
+          0: MD_TEXTUAL_LITERAL@137..185 "Underscore intraword: foo_bar_baz (not emphasis)" [] []
+        1: MD_TEXTUAL@185..186
           0: MD_TEXTUAL_LITERAL@185..186 "\n" [] []
     7: MD_NEWLINE@186..187
       0: NEWLINE@186..187 "\n" [] []

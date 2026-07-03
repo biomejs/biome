@@ -127,13 +127,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@132..170 "Invalid (remain as text): &notanentity" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@170..175 "_with" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@175..221 "_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@132..221 "Invalid (remain as text): &notanentity_with_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@221..222 "\n" [] [],
@@ -228,13 +222,9 @@ MdDocument {
       0: NEWLINE@131..132 "\n" [] []
     8: MD_PARAGRAPH@132..222
       0: MD_INLINE_ITEM_LIST@132..222
-        0: MD_TEXTUAL@132..170
-          0: MD_TEXTUAL_LITERAL@132..170 "Invalid (remain as text): &notanentity" [] []
-        1: MD_TEXTUAL@170..175
-          0: MD_TEXTUAL_LITERAL@170..175 "_with" [] []
-        2: MD_TEXTUAL@175..221
-          0: MD_TEXTUAL_LITERAL@175..221 "_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] []
-        3: MD_TEXTUAL@221..222
+        0: MD_TEXTUAL@132..221
+          0: MD_TEXTUAL_LITERAL@132..221 "Invalid (remain as text): &notanentity_with_underscore; &#12345678; &#xGGGG; &; &# & foo;" [] []
+        1: MD_TEXTUAL@221..222
           0: MD_TEXTUAL_LITERAL@221..222 "\n" [] []
     9: MD_NEWLINE@222..223
       0: NEWLINE@222..223 "\n" [] []

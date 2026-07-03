@@ -56,7 +56,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -89,105 +89,101 @@
+@@ -81,101 +81,97 @@
      hard_line_break,
      source_position(234),
      "```",
@@ -80,13 +80,7 @@ IR differences:
      source_position(260),
 -    "<",
 -    source_position(261),
-     "your",
-+    source_position(264),
-+    "_",
-     source_position(265),
--    "_",
--    source_position(266),
-     "username",
+     "your_username",
 -    source_position(274),
 +    source_position(273),
      ">",
@@ -154,10 +148,10 @@ IR differences:
 +    "]",
      source_position(361),
 -    "]",
--    source_position(362),
-     "(",
++    "(",
+     source_position(362),
+-    "(",
 -    source_position(363),
-+    source_position(362),
      "https://yarnpkg.com/en/docs/install#windows-tab",
 -    source_position(410),
 +    source_position(409),
@@ -206,7 +200,7 @@ IR differences:
      ">",
      hard_line_break,
      empty_line,
-@@ -196,55 +192,52 @@
+@@ -184,55 +180,52 @@
      source_position(490),
      "sh",
      hard_line_break,
