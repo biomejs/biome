@@ -132,10 +132,11 @@ MdCodeNameList = MdTextual*
 
 // <div>
 // ^^^^^
-// html block - content is stored as raw text (multiple textual tokens)
 MdHtmlBlock =
 	indent: MdIndentTokenList
-	content: MdInlineItemList
+	content: MdHtmlContent
+
+MdHtmlContent = value: 'md_html_literal'
 
 // [foo]: /url "title"
 // ^^^^^^^^^^^^^^^^^^^

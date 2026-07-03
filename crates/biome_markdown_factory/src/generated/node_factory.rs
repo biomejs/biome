@@ -166,13 +166,19 @@ impl MdHeaderBuilder {
         ))
     }
 }
-pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> MdHtmlBlock {
+pub fn md_html_block(indent: MdIndentTokenList, content: MdHtmlContent) -> MdHtmlBlock {
     MdHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HTML_BLOCK,
         [
             Some(SyntaxElement::Node(indent.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
+    ))
+}
+pub fn md_html_content(value_token: SyntaxToken) -> MdHtmlContent {
+    MdHtmlContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_HTML_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {

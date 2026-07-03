@@ -68,6 +68,10 @@ impl AnyMdBlock {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)))
     }
 
+    pub const fn is_html_block(&self) -> bool {
+        matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_)))
+    }
+
     pub fn as_any_list_item(&self) -> Option<AnyListItem> {
         match self {
             Self::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {

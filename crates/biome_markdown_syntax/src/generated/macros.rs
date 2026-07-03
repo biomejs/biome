@@ -60,6 +60,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHtmlBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_HTML_CONTENT => {
+                    let $pattern = unsafe { $crate::MdHtmlContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK => {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body

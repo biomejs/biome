@@ -73,6 +73,12 @@ pub enum MarkdownReLexContext {
     /// text together with the plain characters that follow it, producing
     /// one wider text token instead of a one-character token.
     TextualFallback,
+    /// Re-lex the whole content of an HTML block as a single literal
+    /// token, whitespace and newlines included. The parser measures where the
+    /// block ends (terminator line, blank line, or container boundary) and
+    /// passes the end position via [MarkdownLexer::set_html_content_end]
+    /// before re-lexing.
+    HtmlContent,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -101,6 +107,10 @@ pub(crate) struct MarkdownLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
     force_ordered_list_marker: bool,
+
+    /// End position for the next [MarkdownReLexContext::HtmlContent] re-lex,
+    /// set by the parser after measuring where the HTML block ends.
+    html_content_end: Option<usize>,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -227,11 +237,18 @@ impl<'src> MarkdownLexer<'src> {
             position: 0,
             diagnostics: vec![],
             force_ordered_list_marker: false,
+            html_content_end: None,
         }
     }
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.force_ordered_list_marker = value;
+    }
+
+    /// Sets the end position for the next
+    /// [MarkdownReLexContext::HtmlContent] re-lex.
+    pub fn set_html_content_end(&mut self, end: usize) {
+        self.html_content_end = Some(end);
     }
 
     pub(crate) fn consume_token(
@@ -1586,15 +1603,28 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             Some(_) if context == MarkdownReLexContext::TextualFallback => {
                 self.consume_textual(MarkdownLexContext::Regular)
             }
+            // Consume everything up to the end position the parser measured
+            // as one literal token, whitespace and newlines included.
+            Some(_) if context == MarkdownReLexContext::HtmlContent => {
+                let end = self
+                    .html_content_end
+                    .take()
+                    .expect("set_html_content_end must be called before an HtmlContent re-lex");
+                debug_assert!(end > self.position && end <= self.source.len());
+                self.position = end;
+                MD_HTML_LITERAL
+            }
             Some(current) => {
                 let lex_context = match context {
                     MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
                     MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
                     MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
                     MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
-                    // Handled by the arm above; the context has no
+                    // Handled by the arms above; these contexts have no
                     // corresponding lex context.
-                    MarkdownReLexContext::TextualFallback => MarkdownLexContext::Regular,
+                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::HtmlContent => {
+                        MarkdownLexContext::Regular
+                    }
                 };
 
                 self.consume_token(current, lex_context)
