@@ -292,13 +292,16 @@ fn first_block_is_dash_thematic_break(content: &MdBlockList) -> bool {
 ///
 /// There is one safety rule: do not use `-` when one of the items starts with a
 /// thematic break made from dashes. Printing `- ---` is parsed as a thematic
-/// break, not as a list item that contains a thematic break. In that case, print
-/// `*` instead.
+/// break, not as a list item that contains a thematic break. In that case, use
+/// `+` for even sibling lists and `*` for odd sibling lists, so the chosen marker
+/// still differs from adjacent unordered lists.
 fn unordered_marker_for_list(
     list_sibling_index: usize,
     has_dash_thematic_break: bool,
 ) -> ListMarker {
-    if has_dash_thematic_break || !list_sibling_index.is_multiple_of(2) {
+    if has_dash_thematic_break && list_sibling_index.is_multiple_of(2) {
+        ListMarker::Plus
+    } else if !list_sibling_index.is_multiple_of(2) {
         ListMarker::Star
     } else {
         ListMarker::Minus

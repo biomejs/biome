@@ -18,6 +18,10 @@ info: markdown/bullet_list.md
 
 __bold__
 
+* - - -
+
++ item after dash thematic break
+
 ```
 
 
@@ -28,12 +32,15 @@ __bold__
 
 * item with **bold** and _italic_
 
-* item with `code`
++ item with `code`
 
-* ---
++ ---
 
-* ---
++ ---
 
 **bold**
++ ---
+
+* item after dash thematic break
 
 ```
