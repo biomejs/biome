@@ -313,7 +313,7 @@ IR differences:
    source_position(219),
    "
  ",
-@@ -112,1425 +104,1442 @@
+@@ -112,1421 +104,1438 @@
    source_position(223),
    " ",
    source_position(224),
@@ -1432,13 +1432,7 @@ IR differences:
  ",
 -  source_position(1636),
 +  source_position(1671),
-   "<",
--  source_position(1637),
-+  source_position(1672),
-   "!-- --",
--  source_position(1643),
-+  source_position(1678),
-   ">",
+   "<!-- -->",
 -  source_position(1644),
 +  source_position(1679),
    "

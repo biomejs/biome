@@ -249,6 +249,14 @@ impl<'source> MarkdownParser<'source> {
         self.source.re_lex(MarkdownReLexContext::TextualFallback);
     }
 
+    /// Re-lex from the current token start up to `end` as a single
+    /// literal token, whitespace and newlines included. Used for
+    /// HTML block content after the parser has measured where the block
+    /// ends. Must NOT be called inside lookahead.
+    pub(crate) fn re_lex_html_content(&mut self, end: TextSize) {
+        self.source.re_lex_html_content(end);
+    }
+
     /// Force re-lex the current token in Regular context.
     ///
     /// Use this when switching from LinkDefinition context back to Regular context,

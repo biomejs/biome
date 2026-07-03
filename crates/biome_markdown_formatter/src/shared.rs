@@ -118,7 +118,7 @@ pub(crate) fn format_removed_quote_boundary(
             write!(
                 f,
                 [newline.format().with_options(FormatMdNewlineOptions {
-                    should_remove: true,
+                    print_mode: TextPrintMode::Remove,
                 })]
             )
         }

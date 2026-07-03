@@ -29,6 +29,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
     keywords: &["null"],
     literals: &[
         "MD_HARD_LINE_LITERAL",
+        "MD_HTML_LITERAL",
         "MD_TEXTUAL_LITERAL",
         "MD_THEMATIC_BREAK_LITERAL",
         "MD_SETEXT_UNDERLINE_LITERAL",
@@ -56,6 +57,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_FENCED_CODE_BLOCK",
         "MD_CODE_NAME_LIST",
         "MD_HTML_BLOCK",
+        "MD_HTML_CONTENT",
         "MD_LINK_REFERENCE_DEFINITION",
         "MD_LINK_LABEL",
         "MD_LINK_DESTINATION",

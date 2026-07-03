@@ -423,6 +423,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdHtmlBlock {
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdHtmlContent>
+    for crate::markdown::auxiliary::html_content::FormatMdHtmlContent
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdHtmlContent,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdHtmlContent>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdHtmlContent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdHtmlContent,
+        crate::markdown::auxiliary::html_content::FormatMdHtmlContent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::html_content::FormatMdHtmlContent::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdHtmlContent {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdHtmlContent,
+        crate::markdown::auxiliary::html_content::FormatMdHtmlContent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::html_content::FormatMdHtmlContent::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdIndentCodeBlock>
     for crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlock
 {

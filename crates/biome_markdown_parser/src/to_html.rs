@@ -883,7 +883,7 @@ impl<'a> HtmlRenderer<'a> {
                 .and_then(biome_markdown_syntax::MdInlineItemList::cast)
                 .is_some();
             if is_inline {
-                let content = collect_raw_inline_text(&html.content());
+                let content = collect_html_content_text(&html.content());
                 self.push_str(&content);
             } else {
                 let block_indent = self.block_indent(html.syntax().text_trimmed_range());
@@ -1490,7 +1490,7 @@ fn render_html_block(
 ) {
     // Prepend the block prefix indent (now in explicit slot, not trivia)
     let mut content = indent_list_text(&html.indent());
-    content.push_str(&collect_raw_inline_text(&html.content()));
+    content.push_str(&collect_html_content_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }
@@ -1670,6 +1670,18 @@ fn collect_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String
 }
 
 /// Collect raw inline text without processing escapes.
+/// The raw text of HTML block content: a single literal token holding the
+/// whole content verbatim, container prefixes included.
+fn collect_html_content_text(
+    content: &biome_rowan::SyntaxResult<biome_markdown_syntax::MdHtmlContent>,
+) -> String {
+    content
+        .as_ref()
+        .ok()
+        .and_then(|content| content.value_token().ok())
+        .map_or_else(String::new, |token| token.text().to_string())
+}
+
 fn collect_raw_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String {
     let mut text = String::new();
     for item in list.iter() {
