@@ -298,7 +298,7 @@ fn unordered_marker_for_list(
     list_sibling_index: usize,
     has_dash_thematic_break: bool,
 ) -> ListMarker {
-    if has_dash_thematic_break || list_sibling_index % 2 == 1 {
+    if has_dash_thematic_break || !list_sibling_index.is_multiple_of(2) {
         ListMarker::Star
     } else {
         ListMarker::Minus
@@ -311,7 +311,7 @@ fn unordered_marker_for_list(
 /// ordered list nodes are adjacent, using a different delimiter for the next one
 /// keeps them separate when the formatted text is parsed again.
 fn ordered_delimiter_for_list(list_sibling_index: usize) -> OrderedListDelimiter {
-    if list_sibling_index % 2 == 0 {
+    if list_sibling_index.is_multiple_of(2) {
         OrderedListDelimiter::Dot
     } else {
         OrderedListDelimiter::Paren

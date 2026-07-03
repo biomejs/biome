@@ -414,9 +414,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                 let was_leading = still_leading;
                 let node_is_thematic_break = node.is_thematic_break();
                 let node_is_list = node.is_list();
-                if prev_was_list && node_is_list && !was_leading && !prev_was_newline {
-                    joiner.entry(&empty_line());
-                } else if (prev_was_thematic_break || node_is_thematic_break)
+                if ((prev_was_list && node_is_list)
+                    || prev_was_thematic_break
+                    || node_is_thematic_break)
                     && !was_leading
                     && !prev_was_newline
                 {
