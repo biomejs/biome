@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 190
 expression: snapshot
 ---
 
@@ -41,10 +40,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@6..8 "  " [] [],
                                 },
                             ],
                             underline_token: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] [],
@@ -74,10 +70,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@18..19 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@19..20 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@19..21 "  " [] [],
                                 },
                             ],
                             underline_token: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] [],
@@ -115,10 +108,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "foo" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-                2: MD_INDENT_TOKEN@6..7
-                  0: MD_INDENT_CHAR@6..7 " " [] []
-                3: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
+                2: MD_INDENT_TOKEN@6..8
+                  0: MD_INDENT_CHAR@6..8 "  " [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] []
             1: MD_NEWLINE@11..12
               0: NEWLINE@11..12 "\n" [] []
@@ -137,10 +128,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@15..18 "bar" [] []
                 1: MD_TEXTUAL@18..19
                   0: MD_TEXTUAL_LITERAL@18..19 "\n" [] []
-                2: MD_INDENT_TOKEN@19..20
-                  0: MD_INDENT_CHAR@19..20 " " [] []
-                3: MD_INDENT_TOKEN@20..21
-                  0: MD_INDENT_CHAR@20..21 " " [] []
+                2: MD_INDENT_TOKEN@19..21
+                  0: MD_INDENT_CHAR@19..21 "  " [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] []
     1: MD_NEWLINE@24..25
       0: NEWLINE@24..25 "\n" [] []

@@ -376,16 +376,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@509..510 "\n" [] [],
                         },
                         MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@510..511 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@511..512 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@512..513 " " [] [],
-                        },
-                        MdIndentToken {
-                            md_indent_char_token: MD_INDENT_CHAR@513..514 " " [] [],
+                            md_indent_char_token: MD_INDENT_CHAR@510..514 "    " [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] [],
@@ -622,17 +613,11 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@475..509 "Quote interrupted by indented code" [] []
             1: MD_TEXTUAL@509..510
               0: MD_TEXTUAL_LITERAL@509..510 "\n" [] []
-            2: MD_INDENT_TOKEN@510..511
-              0: MD_INDENT_CHAR@510..511 " " [] []
-            3: MD_INDENT_TOKEN@511..512
-              0: MD_INDENT_CHAR@511..512 " " [] []
-            4: MD_INDENT_TOKEN@512..513
-              0: MD_INDENT_CHAR@512..513 " " [] []
-            5: MD_INDENT_TOKEN@513..514
-              0: MD_INDENT_CHAR@513..514 " " [] []
-            6: MD_TEXTUAL@514..544
+            2: MD_INDENT_TOKEN@510..514
+              0: MD_INDENT_CHAR@510..514 "    " [] []
+            3: MD_TEXTUAL@514..544
               0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
-            7: MD_TEXTUAL@544..545
+            4: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
   2: EOF@545..545 "" [] []
 

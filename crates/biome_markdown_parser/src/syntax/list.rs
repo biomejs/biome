@@ -241,20 +241,30 @@ fn skip_list_marker_indent(p: &mut MarkdownParser) {
 fn emit_indent_char_list(p: &mut MarkdownParser, max_columns: usize) -> usize {
     let list_m = p.start();
     let mut consumed = 0usize;
-    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        let text = p.cur_text();
-        let width: usize = text
-            .chars()
-            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-            .sum();
-        if max_columns > 0 && consumed + width > max_columns {
-            break;
+
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken.
+    if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        let mut len = 0usize;
+        for byte in p.source_after_current().bytes() {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if max_columns > 0 && consumed + width > max_columns {
+                break;
+            }
+            consumed += width;
+            len += 1;
         }
-        consumed += width;
-        let char_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        char_m.complete(p, MD_INDENT_TOKEN);
+
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
+
     list_m.complete(p, MD_INDENT_TOKEN_LIST);
     consumed
 }
@@ -2459,30 +2469,27 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
     dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
-fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, mut byte_count: usize) {
+fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, byte_count: usize) {
     let list_m = p.start();
-    while byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if !text.is_empty()
-            && text.starts_with([' ', '\t'])
-            && !text.chars().all(|c| c == ' ' || c == '\t')
-        {
-            let old_range = p.cur_range();
-            p.re_lex(MarkdownReLexContext::ListPostMarker);
-            if p.cur_range() == old_range {
-                break;
-            }
-            continue;
-        }
-        if !text.chars().all(|c| c == ' ' || c == '\t') {
-            break;
-        }
 
-        byte_count = byte_count.saturating_sub(text.len());
-        let token_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        token_m.complete(p, MD_INDENT_TOKEN);
+    // Indentation may arrive as per-character tokens or bundled together
+    // with marker text in one token (for example "  1. child"). Measure the
+    // whitespace prefix on the source and consume up to `byte_count` bytes
+    // of it as a single MdIndentToken, regardless of how it was tokenized.
+    if byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with([' ', '\t']) {
+        let len = p
+            .source_after_current()
+            .bytes()
+            .take(byte_count)
+            .take_while(|byte| matches!(byte, b' ' | b'\t'))
+            .count();
+
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
+
     list_m.complete(p, MD_INDENT_TOKEN_LIST);
 }
 

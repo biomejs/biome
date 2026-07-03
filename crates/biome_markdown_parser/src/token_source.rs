@@ -175,11 +175,11 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
     }
 
-    /// Re-lex from the current token start up to `end` as a single
-    /// MD_HTML_LITERAL token, whitespace and newlines included.
-    pub fn re_lex_html_content(&mut self, end: TextSize) -> MarkdownSyntaxKind {
-        self.lexer.lexer_mut().set_html_content_end(end.into());
-        self.lexer.re_lex(MarkdownReLexContext::HtmlContent)
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind.
+    pub fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.lexer.lexer_mut().set_relex_span(end.into(), kind);
+        self.lexer.re_lex(MarkdownReLexContext::Span)
     }
 
     /// Bump the current token using the LinkDefinition context.

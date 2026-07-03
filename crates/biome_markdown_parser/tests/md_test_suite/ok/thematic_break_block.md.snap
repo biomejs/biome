@@ -26,13 +26,7 @@ MdDocument {
         MdThematicBreakBlock {
             parts: MdThematicBreakPartList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@0..1 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@1..2 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@2..3 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@0..3 "   " [] [],
                 },
                 MdThematicBreakChar {
                     value: STAR@3..4 "*" [] [],
@@ -171,17 +165,13 @@ MdDocument {
   1: MD_BLOCK_LIST@0..37
     0: MD_THEMATIC_BREAK_BLOCK@0..6
       0: MD_THEMATIC_BREAK_PART_LIST@0..6
-        0: MD_INDENT_TOKEN@0..1
-          0: MD_INDENT_CHAR@0..1 " " [] []
-        1: MD_INDENT_TOKEN@1..2
-          0: MD_INDENT_CHAR@1..2 " " [] []
-        2: MD_INDENT_TOKEN@2..3
-          0: MD_INDENT_CHAR@2..3 " " [] []
-        3: MD_THEMATIC_BREAK_CHAR@3..4
+        0: MD_INDENT_TOKEN@0..3
+          0: MD_INDENT_CHAR@0..3 "   " [] []
+        1: MD_THEMATIC_BREAK_CHAR@3..4
           0: STAR@3..4 "*" [] []
-        4: MD_THEMATIC_BREAK_CHAR@4..5
+        2: MD_THEMATIC_BREAK_CHAR@4..5
           0: STAR@4..5 "*" [] []
-        5: MD_THEMATIC_BREAK_CHAR@5..6
+        3: MD_THEMATIC_BREAK_CHAR@5..6
           0: STAR@5..6 "*" [] []
     1: MD_NEWLINE@6..7
       0: NEWLINE@6..7 "\n" [] []
