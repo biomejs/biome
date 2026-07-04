@@ -447,15 +447,20 @@ struct ListBlockList {
 impl ListBlockList {
     fn emit_pending_breaks(
         pending_breaks: u8,
+        previous_content_was_fenced_code_block: bool,
+        previous_content_needs_blank_before_fenced_code_block: bool,
         content: &AnyMdBlock,
         f: &mut Formatter<MarkdownFormatContext>,
     ) -> FormatResult<()> {
-        let breaks = if content.is_thematic_break() && pending_breaks > 0 {
+        let breaks = if pending_breaks > 0
+            && (previous_content_was_fenced_code_block
+                || content.is_thematic_break()
+                || (content.is_fenced_block()
+                    && previous_content_needs_blank_before_fenced_code_block))
+        {
             2
         } else if content.is_list() {
             pending_breaks.min(1)
-        } else if should_separate_fenced_code_block(content) && pending_breaks > 0 {
-            2
         } else {
             pending_breaks
         };
@@ -523,6 +528,8 @@ impl Format<MarkdownFormatContext> for ListBlockList {
         let iter = BlockListIterator::new(self.content.iter());
         let mut pending_breaks: u8 = 0;
         let mut last_content_was_thematic_break = false;
+        let mut last_content_was_fenced_code_block = false;
+        let mut last_content_needs_blank_before_fenced_code_block = false;
         let mut last_content_has_trailing_newline = false;
         let mut at_line_terminator = false;
         for item in iter {
@@ -544,6 +551,46 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         )?;
                     }
 
+                    if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
+                        && let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(middle_newline)) =
+                            &middle_block
+                    {
+                        if at_line_terminator {
+                            at_line_terminator = false;
+                        } else {
+                            if pending_breaks > 0 {
+                                last_content_has_trailing_newline = true;
+                            }
+                            pending_breaks += 1;
+                        }
+
+                        if pending_breaks > 0 {
+                            last_content_has_trailing_newline = true;
+                        }
+                        pending_breaks += 1;
+
+                        write!(
+                            f,
+                            [
+                                newline.format().with_options(FormatMdNewlineOptions {
+                                    print_mode: TextPrintMode::Remove,
+                                }),
+                                middle_newline
+                                    .format()
+                                    .with_options(FormatMdNewlineOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                    }),
+                                continuation.format().with_options(
+                                    FormatMdContinuationIndentOptions {
+                                        should_remove: true
+                                    }
+                                )
+                            ]
+                        )?;
+
+                        continue;
+                    }
+
                     // A newline right after a block that doesn't carry its
                     // own trailing newline (like an HTML block or a fenced
                     // code block) is that block's line terminator, not a
@@ -562,7 +609,13 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             )?;
                         }
                     } else {
-                        Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                        Self::emit_pending_breaks(
+                            pending_breaks,
+                            last_content_was_fenced_code_block,
+                            last_content_needs_blank_before_fenced_code_block,
+                            &content,
+                            f,
+                        )?;
                         Self::fmt_list_content(&content, f)?;
                     }
 
@@ -597,6 +650,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     };
                     at_line_terminator = false;
                     last_content_was_thematic_break = content.is_thematic_break();
+                    last_content_was_fenced_code_block = content.is_fenced_block();
+                    last_content_needs_blank_before_fenced_code_block =
+                        content_needs_blank_before_fenced_code_block(&content);
                     last_content_has_trailing_newline = middle_block.is_newline();
                 }
 
@@ -616,7 +672,41 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         )?;
                     }
 
-                    Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                    if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
+                    {
+                        if at_line_terminator {
+                            at_line_terminator = false;
+                        } else {
+                            if pending_breaks > 0 {
+                                last_content_has_trailing_newline = true;
+                            }
+                            pending_breaks += 1;
+                        }
+
+                        write!(
+                            f,
+                            [newline.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            })]
+                        )?;
+                        write!(
+                            f,
+                            [continuation.format().with_options(
+                                FormatMdContinuationIndentOptions {
+                                    should_remove: true
+                                }
+                            )]
+                        )?;
+                        continue;
+                    }
+
+                    Self::emit_pending_breaks(
+                        pending_breaks,
+                        last_content_was_fenced_code_block,
+                        last_content_needs_blank_before_fenced_code_block,
+                        &content,
+                        f,
+                    )?;
                     Self::fmt_list_content(&content, f)?;
                     write!(
                         f,
@@ -628,6 +718,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     )?;
                     pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
                     last_content_was_thematic_break = content.is_thematic_break();
+                    last_content_was_fenced_code_block = content.is_fenced_block();
+                    last_content_needs_blank_before_fenced_code_block =
+                        content_needs_blank_before_fenced_code_block(&content);
                     last_content_has_trailing_newline = false;
                     at_line_terminator = content.is_html_block() || content.is_fenced_block();
                 }
@@ -663,10 +756,19 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             })]
                         )?;
                     } else {
-                        Self::emit_pending_breaks(pending_breaks, &content, f)?;
+                        Self::emit_pending_breaks(
+                            pending_breaks,
+                            last_content_was_fenced_code_block,
+                            last_content_needs_blank_before_fenced_code_block,
+                            &content,
+                            f,
+                        )?;
                         Self::fmt_list_content(&content, f)?;
                         pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
                         last_content_was_thematic_break = content.is_thematic_break();
+                        last_content_was_fenced_code_block = content.is_fenced_block();
+                        last_content_needs_blank_before_fenced_code_block =
+                            content_needs_blank_before_fenced_code_block(&content);
                         last_content_has_trailing_newline = false;
                         at_line_terminator = content.is_html_block() || content.is_fenced_block();
                     }
@@ -688,26 +790,11 @@ impl Format<MarkdownFormatContext> for ListBlockList {
     }
 }
 
-/// Returns `true` for fenced code blocks nested deeply enough in lists that a
-/// blank line keeps the fence separated from the preceding list paragraph.
-///
-/// This is intentionally narrower than "any fenced code block after list
-/// content": shallow list code fences can be followed by regular paragraphs,
-/// and forcing a blank line there changes existing idempotency-sensitive cases.
-fn should_separate_fenced_code_block(content: &AnyMdBlock) -> bool {
-    if !content.is_fenced_block() {
-        return false;
-    }
-
-    content
-        .syntax()
-        .ancestors()
-        .filter(|ancestor| {
-            MdBulletListItem::can_cast(ancestor.kind())
-                || MdOrderedListItem::can_cast(ancestor.kind())
-        })
-        .count()
-        >= 3
+fn content_needs_blank_before_fenced_code_block(content: &AnyMdBlock) -> bool {
+    matches!(
+        content,
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(_))
+    ) || content.is_list()
 }
 
 /// Iterator in charge or formatting a [MdBlockList] that is inside a bullet list

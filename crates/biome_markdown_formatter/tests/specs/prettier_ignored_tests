@@ -2,6 +2,9 @@
 # One path prefix per line, relative to the prettier/ directory.
 # Ignored files produce no snapshot and are excluded from compatibility reports.
 
+# Can't move inline code
+markdown/spec/example-2.md
+
 # Tables (GFM extension, not supported by Biome's parser)
 markdown/table/
 markdown/long-table/
@@ -100,3 +103,6 @@ markdown/spec/example-66.md
 
 # It shouldn't change spacing
 markdown/spec/example-235.md
+
+# Prettier changes spacing of inline code, breaking semantics
+markdown/spec/example-268.md
