@@ -499,9 +499,6 @@ impl EmbeddedBindingsBuilder {
             return None;
         };
         let left = assign.left().ok()?;
-        // Register every identifier on the left-hand side. This covers a simple
-        // identifier (`a = 1`) as well as object (`{ x, y } = o`) and array
-        // (`[a, b] = arr`) destructuring, including nested and rest patterns.
         self.visit_svelte_assignment_pattern(left);
         Some(())
     }

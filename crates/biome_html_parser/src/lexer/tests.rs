@@ -420,9 +420,6 @@ fn svelte_let_const_keywords() {
         CONST_KW: 5,
     );
 
-    // Word boundary: identifiers that merely start with `let`/`const` must not
-    // be lexed as keywords, otherwise `{ letter }` would be mistaken for a
-    // declaration block.
     assert_lex!(
         HtmlLexContext::Svelte,
         "letter constant",
