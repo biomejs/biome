@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-declaration-comment.svelte
+---
+# Input
+```svelte
+<script>
+  const foo = () => 1;
+  const bar = 2;
+</script>
+
+{const result = /*something*/    (foo(),    bar)}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-declaration-comment.svelte:6:40 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ {const result = /*something*/    (foo(),    bar)}
+      │                                        ^
+    7 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
