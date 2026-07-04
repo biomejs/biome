@@ -195,6 +195,10 @@ fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind>
             is_const_block: true,
             ..
         } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Const)),
+        JsEmbeddingKind::Svelte {
+            declaration_block: Some(_),
+            ..
+        } => Some(EmbeddedBlockKind::Svelte(SvelteBlockKind::Declaration)),
         _ => None,
     }
 }
