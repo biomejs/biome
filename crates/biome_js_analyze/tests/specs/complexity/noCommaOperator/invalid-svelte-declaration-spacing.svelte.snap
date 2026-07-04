@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-declaration-spacing.svelte
+---
+# Input
+```svelte
+<script>
+  const foo = () => 1;
+  const bar = 2;
+</script>
+
+{const    result   =   (foo(),    bar)}
+{let	tabbed	=	(foo(),	bar)}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-declaration-spacing.svelte:6:30 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ {const    result   =   (foo(),    bar)}
+      │                              ^
+    7 │ {let	tabbed	=	(foo(),	bar)}
+    8 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+```
+invalid-svelte-declaration-spacing.svelte:7:21 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    6 │ {const    result   =   (foo(),    bar)}
+  > 7 │ {let	tabbed	=	(foo(),	bar)}
+      │     	      	 	      ^
+    8 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
