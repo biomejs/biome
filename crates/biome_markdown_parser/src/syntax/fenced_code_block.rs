@@ -26,7 +26,7 @@ use crate::lexer::MarkdownReLexContext;
 use crate::parser::MarkdownParser;
 use crate::syntax::parse_error::unterminated_fenced_code;
 use crate::syntax::quote::try_bump_quote_marker;
-use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
 use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
@@ -36,7 +36,7 @@ use biome_parser::{
         TokenSource,
     },
 };
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -282,6 +282,13 @@ fn parse_code_content(
             CodeContentTokenAction::Break => break,
             CodeContentTokenAction::Skip => {}
             CodeContentTokenAction::Consume => {
+                // Code content is literal text: consume the whole rest of
+                // the line as one token instead of one token per character
+                // group. The closing fence always starts on its own line,
+                // so it can never be swallowed.
+                if !p.at(NEWLINE) {
+                    p.re_lex(MarkdownReLexContext::CodeInfoString);
+                }
                 bump_code_textual(p);
                 at_line_start = false;
             }
@@ -613,27 +620,30 @@ fn at_closing_fence(p: &mut MarkdownParser, is_tilde_fence: bool, fence_len: usi
 }
 
 fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
+    if !p.at(MD_TEXTUAL_LITERAL) || !is_whitespace_only(p.cur_text()) {
+        return;
+    }
+
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken.
     let mut consumed = 0usize;
-
-    while consumed < indent && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
-            break;
-        }
-
-        let width = text
-            .chars()
-            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-            .sum::<usize>();
-
+    let mut len = 0usize;
+    for byte in p.source_after_current().bytes() {
+        let width = match byte {
+            b' ' => 1,
+            b'\t' => TAB_STOP_SPACES,
+            _ => break,
+        };
         if consumed + width > indent {
             break;
         }
-
         consumed += width;
-        let char_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        char_m.complete(p, MD_INDENT_TOKEN);
+        len += 1;
+    }
+
+    if len > 0 {
+        let end = p.cur_range().start() + TextSize::from(len as u32);
+        p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
     }
 }
 

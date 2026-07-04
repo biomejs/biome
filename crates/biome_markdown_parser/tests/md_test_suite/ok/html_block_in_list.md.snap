@@ -132,10 +132,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@120..121 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@121..122 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@122..123 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@121..123 "  " [] [],
                                 },
                                 MdInlineCode {
                                     l_tick_token: BACKTICK@123..124 "`" [] [],
@@ -171,10 +168,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@230..231 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@231..232 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@232..233 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@231..233 "  " [] [],
                                 },
                                 MdInlineCode {
                                     l_tick_token: BACKTICK@233..234 "`" [] [],
@@ -205,10 +199,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@356..357 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@357..358 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@356..358 "  " [] [],
                                 },
                             ],
                         },
@@ -228,10 +219,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@469..470 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@470..471 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@469..471 "  " [] [],
                                 },
                             ],
                         },
@@ -298,11 +286,9 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@114..120 ". With" [] []
                 5: MD_TEXTUAL@120..121
                   0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
-                6: MD_INDENT_TOKEN@121..122
-                  0: MD_INDENT_CHAR@121..122 " " [] []
-                7: MD_INDENT_TOKEN@122..123
-                  0: MD_INDENT_CHAR@122..123 " " [] []
-                8: MD_INLINE_CODE@123..140
+                6: MD_INDENT_TOKEN@121..123
+                  0: MD_INDENT_CHAR@121..123 "  " [] []
+                7: MD_INLINE_CODE@123..140
                   0: BACKTICK@123..124 "`" [] []
                   1: MD_INLINE_ITEM_LIST@124..139
                     0: MD_TEXTUAL@124..125
@@ -312,23 +298,21 @@ MdDocument {
                     2: MD_TEXTUAL@126..139
                       0: MD_TEXTUAL_LITERAL@126..139 "reporter=json" [] []
                   2: BACKTICK@139..140 "`" [] []
-                9: MD_TEXTUAL@140..197
+                8: MD_TEXTUAL@140..197
                   0: MD_TEXTUAL_LITERAL@140..197 ", the diagnostics and the summary will be printed in the " [] []
-                10: MD_INLINE_EMPHASIS@197..209
+                9: MD_INLINE_EMPHASIS@197..209
                   0: DOUBLE_STAR@197..199 "**" [] []
                   1: MD_INLINE_ITEM_LIST@199..207
                     0: MD_TEXTUAL@199..207
                       0: MD_TEXTUAL_LITERAL@199..207 "terminal" [] []
                   2: DOUBLE_STAR@207..209 "**" [] []
-                11: MD_TEXTUAL@209..230
+                10: MD_TEXTUAL@209..230
                   0: MD_TEXTUAL_LITERAL@209..230 " in JSON format. With" [] []
-                12: MD_TEXTUAL@230..231
+                11: MD_TEXTUAL@230..231
                   0: MD_TEXTUAL_LITERAL@230..231 "\n" [] []
-                13: MD_INDENT_TOKEN@231..232
-                  0: MD_INDENT_CHAR@231..232 " " [] []
-                14: MD_INDENT_TOKEN@232..233
-                  0: MD_INDENT_CHAR@232..233 " " [] []
-                15: MD_INLINE_CODE@233..257
+                12: MD_INDENT_TOKEN@231..233
+                  0: MD_INDENT_CHAR@231..233 "  " [] []
+                13: MD_INLINE_CODE@233..257
                   0: BACKTICK@233..234 "`" [] []
                   1: MD_INLINE_ITEM_LIST@234..256
                     0: MD_TEXTUAL@234..235
@@ -338,18 +322,16 @@ MdDocument {
                     2: MD_TEXTUAL@236..256
                       0: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] []
                   2: BACKTICK@256..257 "`" [] []
-                16: MD_TEXTUAL@257..354
+                14: MD_TEXTUAL@257..354
                   0: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] []
-                17: MD_TEXTUAL@354..355
+                15: MD_TEXTUAL@354..355
                   0: MD_TEXTUAL_LITERAL@354..355 "\n" [] []
             1: MD_NEWLINE@355..356
               0: NEWLINE@355..356 "\n" [] []
             2: MD_CONTINUATION_INDENT@356..358
               0: MD_INDENT_TOKEN_LIST@356..358
-                0: MD_INDENT_TOKEN@356..357
-                  0: MD_INDENT_CHAR@356..357 " " [] []
-                1: MD_INDENT_TOKEN@357..358
-                  0: MD_INDENT_CHAR@357..358 " " [] []
+                0: MD_INDENT_TOKEN@356..358
+                  0: MD_INDENT_CHAR@356..358 "  " [] []
             3: MD_PARAGRAPH@358..468
               0: MD_INLINE_ITEM_LIST@358..468
                 0: MD_TEXTUAL@358..467
@@ -360,10 +342,8 @@ MdDocument {
               0: NEWLINE@468..469 "\n" [] []
             5: MD_CONTINUATION_INDENT@469..471
               0: MD_INDENT_TOKEN_LIST@469..471
-                0: MD_INDENT_TOKEN@469..470
-                  0: MD_INDENT_CHAR@469..470 " " [] []
-                1: MD_INDENT_TOKEN@470..471
-                  0: MD_INDENT_CHAR@470..471 " " [] []
+                0: MD_INDENT_TOKEN@469..471
+                  0: MD_INDENT_CHAR@469..471 "  " [] []
             6: MD_HTML_BLOCK@471..2000
               0: MD_INDENT_TOKEN_LIST@471..471
               1: MD_HTML_CONTENT@471..2000

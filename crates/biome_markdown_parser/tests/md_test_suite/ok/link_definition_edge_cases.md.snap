@@ -65,10 +65,7 @@ MdDocument {
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@32..33 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@33..34 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@32..34 "  " [] [],
                 },
             ],
             l_brack_token: L_BRACK@34..35 "[" [] [],
@@ -115,10 +112,7 @@ MdDocument {
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [
                 MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@77..78 " " [] [],
-                },
-                MdIndentToken {
-                    md_indent_char_token: MD_INDENT_CHAR@78..79 " " [] [],
+                    md_indent_char_token: MD_INDENT_CHAR@77..79 "  " [] [],
                 },
             ],
             l_brack_token: L_BRACK@79..80 "[" [] [],
@@ -602,10 +596,8 @@ MdDocument {
       0: NEWLINE@31..32 "\n" [] []
     2: MD_LINK_REFERENCE_DEFINITION@32..56
       0: MD_INDENT_TOKEN_LIST@32..34
-        0: MD_INDENT_TOKEN@32..33
-          0: MD_INDENT_CHAR@32..33 " " [] []
-        1: MD_INDENT_TOKEN@33..34
-          0: MD_INDENT_CHAR@33..34 " " [] []
+        0: MD_INDENT_TOKEN@32..34
+          0: MD_INDENT_CHAR@32..34 "  " [] []
       1: L_BRACK@34..35 "[" [] []
       2: MD_LINK_LABEL@35..49
         0: MD_INLINE_ITEM_LIST@35..49
@@ -634,10 +626,8 @@ MdDocument {
       0: NEWLINE@76..77 "\n" [] []
     7: MD_LINK_REFERENCE_DEFINITION@77..100
       0: MD_INDENT_TOKEN_LIST@77..79
-        0: MD_INDENT_TOKEN@77..78
-          0: MD_INDENT_CHAR@77..78 " " [] []
-        1: MD_INDENT_TOKEN@78..79
-          0: MD_INDENT_CHAR@78..79 " " [] []
+        0: MD_INDENT_TOKEN@77..79
+          0: MD_INDENT_CHAR@77..79 "  " [] []
       1: L_BRACK@79..80 "[" [] []
       2: MD_LINK_LABEL@80..93
         0: MD_INLINE_ITEM_LIST@80..93

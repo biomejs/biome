@@ -334,7 +334,7 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
 }
 
 #[derive(Clone)]
-struct QuoteLinePrefix {
+pub(crate) struct QuoteLinePrefix {
     parts: Vec<QuoteLinePrefixPart>,
 }
 
@@ -345,7 +345,11 @@ enum QuoteLinePrefixPart {
 }
 
 impl QuoteLinePrefix {
-    fn format(&self, trailing_space: bool) -> impl Format<MarkdownFormatContext> + '_ {
+    pub(crate) fn is_empty(&self) -> bool {
+        self.parts.is_empty()
+    }
+
+    pub(crate) fn format(&self, trailing_space: bool) -> impl Format<MarkdownFormatContext> + '_ {
         format_with(move |f| {
             let last_quote_index = self
                 .parts
@@ -373,7 +377,7 @@ impl QuoteLinePrefix {
     }
 }
 
-fn quote_line_prefix(syntax: &MarkdownSyntaxNode) -> FormatResult<QuoteLinePrefix> {
+pub(crate) fn quote_line_prefix(syntax: &MarkdownSyntaxNode) -> FormatResult<QuoteLinePrefix> {
     let mut parts = Vec::new();
     let mut ancestors: Vec<_> = syntax.ancestors().skip(1).collect();
     ancestors.reverse();

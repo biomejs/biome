@@ -37,10 +37,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@8..10 "  " [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@10..11 " " [] [],
@@ -86,17 +83,15 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..7 "outer" [] []
                 1: MD_TEXTUAL@7..8
                   0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
-                2: MD_INDENT_TOKEN@8..9
-                  0: MD_INDENT_CHAR@8..9 " " [] []
-                3: MD_INDENT_TOKEN@9..10
-                  0: MD_INDENT_CHAR@9..10 " " [] []
-                4: MD_TEXTUAL@10..11
+                2: MD_INDENT_TOKEN@8..10
+                  0: MD_INDENT_CHAR@8..10 "  " [] []
+                3: MD_TEXTUAL@10..11
                   0: MD_TEXTUAL_LITERAL@10..11 " " [] []
-                5: MD_TEXTUAL@11..13
+                4: MD_TEXTUAL@11..13
                   0: MD_TEXTUAL_LITERAL@11..13 "2)" [] []
-                6: MD_TEXTUAL@13..20
+                5: MD_TEXTUAL@13..20
                   0: MD_TEXTUAL_LITERAL@13..20 " nested" [] []
-                7: MD_TEXTUAL@20..21
+                6: MD_TEXTUAL@20..21
                   0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
   2: EOF@21..21 "" [] []
 
