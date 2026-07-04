@@ -39,7 +39,11 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_event_handler(p, m);
     }
 
-    if let Some(kind) = p.source_type().as_embedding_kind().as_svelte_declaration_block() {
+    if let Some(kind) = p
+        .source_type()
+        .as_embedding_kind()
+        .as_svelte_declaration_block()
+    {
         return parse_svelte_declaration_root(p, m, kind);
     }
 
@@ -213,7 +217,8 @@ fn parse_svelte_declaration_root(
     kind: SvelteVariableKind,
 ) -> CompletedMarker {
     let is_const = matches!(kind, SvelteVariableKind::Const);
-    parse_svelte_declarator_list(p, is_const).or_add_diagnostic(p, js_parse_error::expected_binding);
+    parse_svelte_declarator_list(p, is_const)
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
 
     if !p.at(EOF) {
         p.error(js_parse_error::template_expression_trailing_code(
