@@ -219,7 +219,7 @@ pub struct UnsupportedRuleFormat {
 pub struct CantReadFile {
     #[message]
     #[description]
-    pub message: MessageAndDescription,
+    message: MessageAndDescription,
 
     #[serde(skip)]
     #[source]
