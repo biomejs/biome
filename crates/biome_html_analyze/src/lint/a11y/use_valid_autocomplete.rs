@@ -84,12 +84,8 @@ impl Rule for UseValidAutocomplete {
             return None;
         }
 
-        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
-        let autocomplete_val = autocomplete_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let autocomplete_attribute = node.find_attribute_or_vue_binding("autocomplete")?;
+        let autocomplete_val = autocomplete_attribute.as_static_value()?;
         let autocompletes = autocomplete_val
             .as_string_constant()?
             .split_ascii_whitespace()

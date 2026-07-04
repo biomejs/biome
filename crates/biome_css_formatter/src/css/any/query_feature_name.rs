@@ -10,6 +10,7 @@ impl FormatRule<AnyCssQueryFeatureName> for FormatAnyCssQueryFeatureName {
         match node {
             AnyCssQueryFeatureName::CssIdentifier(node) => node.format().fmt(f),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
+            AnyCssQueryFeatureName::ScssVariable(node) => node.format().fmt(f),
         }
     }
 }

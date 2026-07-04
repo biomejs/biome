@@ -22,43 +22,6 @@ info: yaml/spec/spec-example-7-10-plain-characters.yml
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -3,6 +3,10 @@
- - ": - ()"
- - Up, up, and away!
- - -123
--- http://example.com/foo#bar
-+- http://example.com/foo #bar
- # Inside flow collection:
--- [::vector, ": - ()", "Up, up and away!", -123, http://example.com/foo#bar]
-+- [ ::vector,
-+  ": - ()",
-+  "Up, up and away!",
-+  -123,
-+  http://example.com/foo #bar ]
-```
-
-# Output
-
-```yml
-# Outside flow collection:
-- ::vector
-- ": - ()"
-- Up, up, and away!
-- -123
-- http://example.com/foo #bar
-# Inside flow collection:
-- [ ::vector,
-  ": - ()",
-  "Up, up and away!",
-  -123,
-  http://example.com/foo #bar ]
-```
-
 # Errors
 ```
 spec-example-7-10-plain-characters.yml:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -71,4 +34,9 @@ spec-example-7-10-plain-characters.yml:13:1 parse ━━━━━━━━━━
        │ 
   
 
+```
+
+# Error
+```text
+format: Can't format code because it contains syntax errors
 ```

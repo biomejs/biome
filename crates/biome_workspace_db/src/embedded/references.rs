@@ -78,6 +78,51 @@ pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) 
     })
 }
 
+/// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
+///
+/// See also: https://svelte.dev/docs/svelte/stores
+#[salsa::tracked]
+pub fn is_svelte_store_reference_used(
+    db: &dyn LanguageDb,
+    reference: InternedReference<'_>,
+) -> bool {
+    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
+        return false;
+    };
+
+    embedded_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter().any(|value_reference| {
+                svelte_store_reference_name(value_reference.text.text()).is_some_and(
+                    |reference_store_name| reference_store_name == reference.name(db).text(),
+                )
+            })
+        })
+}
+
+fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {
+    // These are special Svelte runes that are not valid store names, so we should ignore them.
+    const SVELTE_RUNES: [&str; 7] = [
+        "$bindable",
+        "$derived",
+        "$effect",
+        "$host",
+        "$inspect",
+        "$props",
+        "$state",
+    ];
+
+    if SVELTE_RUNES.contains(&reference_name) {
+        return None;
+    }
+    let store_name = reference_name.strip_prefix('$')?;
+    if store_name.is_empty() || store_name.starts_with('$') {
+        return None;
+    }
+    Some(store_name)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

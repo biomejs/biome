@@ -8,13 +8,14 @@
 //! **Note:** Not 100% CommonMark §4.6 compliant. All HTML blocks terminate at
 //! blank lines, whereas CommonMark types 1-5 have specific terminators (`-->`, `?>`, etc.).
 
+use crate::MarkdownParser;
+use crate::lexer::MarkdownReLexContext;
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
+use crate::syntax::quote::{consume_quote_prefix_without_virtual, has_quote_prefix};
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
-
-use crate::MarkdownParser;
-use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
-use crate::syntax::quote::{consume_quote_prefix_without_virtual, has_quote_prefix};
+use biome_rowan::TextSize;
 
 /// Check if we're at an HTML block (line start, up to 3 spaces indent, then `<`).
 pub(crate) fn at_html_block(p: &mut MarkdownParser) -> bool {
@@ -285,43 +286,60 @@ pub(crate) fn parse_html_block(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     };
 
-    let content_m = p.start();
+    let terminator = match kind {
+        HtmlBlockKind::Type1(Type1Tag::Script) => Some(("</script>", true)),
+        HtmlBlockKind::Type1(Type1Tag::Pre) => Some(("</pre>", true)),
+        HtmlBlockKind::Type1(Type1Tag::Style) => Some(("</style>", true)),
+        HtmlBlockKind::Type1(Type1Tag::Textarea) => Some(("</textarea>", true)),
+        HtmlBlockKind::Type2 => Some(("-->", false)),
+        HtmlBlockKind::Type3 => Some(("?>", false)),
+        HtmlBlockKind::Type4 => Some((">", false)),
+        HtmlBlockKind::Type5 => Some(("]]>", false)),
+        HtmlBlockKind::Type6 | HtmlBlockKind::Type7 => None,
+    };
 
-    match kind {
-        HtmlBlockKind::Type1(tag) => {
-            let terminator = match tag {
-                Type1Tag::Script => "</script>",
-                Type1Tag::Pre => "</pre>",
-                Type1Tag::Style => "</style>",
-                Type1Tag::Textarea => "</textarea>",
-            };
-            parse_until_terminator(p, terminator, true);
-        }
-        HtmlBlockKind::Type2 => parse_until_terminator(p, "-->", false),
-        HtmlBlockKind::Type3 => parse_until_terminator(p, "?>", false),
-        HtmlBlockKind::Type4 => parse_until_terminator(p, ">", false),
-        HtmlBlockKind::Type5 => parse_until_terminator(p, "]]>", false),
-        HtmlBlockKind::Type6 | HtmlBlockKind::Type7 => parse_until_blank_line(p),
+    // Measure where the content ends, then store the whole content in a
+    // single MD_HTML_LITERAL token — whitespace, inner newlines, and
+    // container prefixes included. The newline that terminates the block's last line stays
+    // outside the literal.
+    let end = p.lookahead(|p| match terminator {
+        Some((needle, case_insensitive)) => advance_until_terminator(p, needle, case_insensitive),
+        None => advance_until_blank_line(p),
+    });
+
+    let content_m = p.start();
+    p.re_lex_span(end, MD_HTML_LITERAL);
+    p.bump(MD_HTML_LITERAL);
+    content_m.complete(p, MD_HTML_CONTENT);
+
+    let block = m.complete(p, MD_HTML_BLOCK);
+
+    // The newline that terminates the block's last line follows the block as
+    // its own newline node. Blank lines after it are further newline blocks.
+    if p.at(NEWLINE) {
+        let newline_m = p.start();
+        p.bump(NEWLINE);
+        newline_m.complete(p, MD_NEWLINE);
     }
 
-    content_m.complete(p, MD_INLINE_ITEM_LIST);
-    Present(m.complete(p, MD_HTML_BLOCK))
+    Present(block)
 }
 
-fn parse_until_blank_line(p: &mut MarkdownParser) {
+/// Advance past HTML block content that ends before a blank line, without
+/// producing nodes. Runs inside a lookahead to measure the content end.
+///
+/// Returns the end offset of the content: the position after the last
+/// content line, excluding the newline that terminates it.
+fn advance_until_blank_line(p: &mut MarkdownParser) -> TextSize {
+    let mut end = p.cur_range().start();
+
     while !p.at(EOF) {
         if p.at(NEWLINE) {
             if p.at_blank_line() {
-                let text_m = p.start();
-                p.bump_remap(MD_TEXTUAL_LITERAL);
-                text_m.complete(p, MD_TEXTUAL);
                 break;
             }
             // Consume the newline first, then check if the next line exits the container
-            let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
-            text_m.complete(p, MD_TEXTUAL);
-
+            p.bump_any();
             if at_container_boundary(p) {
                 break;
             }
@@ -334,36 +352,52 @@ fn parse_until_blank_line(p: &mut MarkdownParser) {
             break;
         }
 
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
+        // Content is literal text: consume the whole rest of the line at once.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
+        p.bump_any();
+        end = p.cur_range().start();
     }
+
+    end
 }
 
-fn parse_until_terminator(p: &mut MarkdownParser, terminator: &str, case_insensitive: bool) {
+/// Advance past HTML block content that ends on the line containing
+/// `terminator`, without producing nodes. Runs inside a lookahead to
+/// measure the content end.
+///
+/// Returns the end offset of the content: the position after the line
+/// containing the terminator, excluding the newline that terminates it.
+fn advance_until_terminator(
+    p: &mut MarkdownParser,
+    terminator: &str,
+    case_insensitive: bool,
+) -> TextSize {
     let mut line = String::new();
+    let mut end = p.cur_range().start();
 
     while !p.at(EOF) {
-        let text = p.cur_text();
-        let is_newline = p.at(NEWLINE);
-        line.push_str(text);
-
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
-
-        if is_newline {
+        if p.at(NEWLINE) {
             if line_contains(&line, terminator, case_insensitive) {
                 break;
             }
             line.clear();
+            p.bump_any();
             // Check container boundary after consuming newline
             if at_container_boundary(p) {
                 break;
             }
             skip_container_prefixes(p);
+            continue;
         }
+
+        // Content is literal text: consume the whole rest of the line at once.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
+        line.push_str(p.cur_text());
+        p.bump_any();
+        end = p.cur_range().start();
     }
+
+    end
 }
 
 fn line_contains(line: &str, needle: &str, case_insensitive: bool) -> bool {

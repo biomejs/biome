@@ -165,16 +165,10 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@124..138 "Not emphasis: " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@138..139 "*" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@138..144 "* not " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@139..144 " not " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@144..145 "*" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@145..155 " emphasis " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@144..155 "* emphasis " [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@155..156 "*" [] [],
@@ -215,19 +209,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@182..207 "Intraword underscore: foo" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@207..208 "_" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@208..211 "bar" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@211..212 "_" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@212..215 "baz" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@182..215 "Intraword underscore: foo_bar_baz" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@215..216 "\n" [] [],
@@ -333,17 +315,13 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@124..157
         0: MD_TEXTUAL@124..138
           0: MD_TEXTUAL_LITERAL@124..138 "Not emphasis: " [] []
-        1: MD_TEXTUAL@138..139
-          0: MD_TEXTUAL_LITERAL@138..139 "*" [] []
-        2: MD_TEXTUAL@139..144
-          0: MD_TEXTUAL_LITERAL@139..144 " not " [] []
-        3: MD_TEXTUAL@144..145
-          0: MD_TEXTUAL_LITERAL@144..145 "*" [] []
-        4: MD_TEXTUAL@145..155
-          0: MD_TEXTUAL_LITERAL@145..155 " emphasis " [] []
-        5: MD_TEXTUAL@155..156
+        1: MD_TEXTUAL@138..144
+          0: MD_TEXTUAL_LITERAL@138..144 "* not " [] []
+        2: MD_TEXTUAL@144..155
+          0: MD_TEXTUAL_LITERAL@144..155 "* emphasis " [] []
+        3: MD_TEXTUAL@155..156
           0: MD_TEXTUAL_LITERAL@155..156 "*" [] []
-        6: MD_TEXTUAL@156..157
+        4: MD_TEXTUAL@156..157
           0: MD_TEXTUAL_LITERAL@156..157 "\n" [] []
     9: MD_NEWLINE@157..158
       0: NEWLINE@157..158 "\n" [] []
@@ -365,17 +343,9 @@ MdDocument {
       0: NEWLINE@181..182 "\n" [] []
     12: MD_PARAGRAPH@182..216
       0: MD_INLINE_ITEM_LIST@182..216
-        0: MD_TEXTUAL@182..207
-          0: MD_TEXTUAL_LITERAL@182..207 "Intraword underscore: foo" [] []
-        1: MD_TEXTUAL@207..208
-          0: MD_TEXTUAL_LITERAL@207..208 "_" [] []
-        2: MD_TEXTUAL@208..211
-          0: MD_TEXTUAL_LITERAL@208..211 "bar" [] []
-        3: MD_TEXTUAL@211..212
-          0: MD_TEXTUAL_LITERAL@211..212 "_" [] []
-        4: MD_TEXTUAL@212..215
-          0: MD_TEXTUAL_LITERAL@212..215 "baz" [] []
-        5: MD_TEXTUAL@215..216
+        0: MD_TEXTUAL@182..215
+          0: MD_TEXTUAL_LITERAL@182..215 "Intraword underscore: foo_bar_baz" [] []
+        1: MD_TEXTUAL@215..216
           0: MD_TEXTUAL_LITERAL@215..216 "\n" [] []
   2: EOF@216..216 "" [] []
 

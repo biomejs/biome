@@ -3,10 +3,12 @@ use crate::syntax::parse_regular_identifier;
 use crate::syntax::scss::expression::parse_scss_regular_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
     is_at_identifier_continuation, is_at_scss_interpolated_identifier,
+    is_nth_at_identifier_hyphen_part, parse_identifier_hyphen_part,
     parse_scss_interpolated_identifier_parts,
 };
-use crate::syntax::scss::is_at_scss_interpolation;
+use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
@@ -63,6 +65,35 @@ pub(crate) fn parse_scss_interpolated_identifier(p: &mut CssParser) -> ParsedSyn
     if first_fragment.kind(p) != SCSS_INTERPOLATION && !is_at_identifier_continuation(p) {
         return Present(first_fragment);
     }
+
+    let parts =
+        parse_scss_interpolated_identifier_parts(p, first_fragment, parse_regular_identifier_part);
+
+    Present(parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
+}
+
+/// Returns whether an interpolated identifier starts with a single hyphen.
+///
+/// Example: `-#{$prefix}-radius` in `-#{$prefix}-radius: 4px;`.
+#[inline]
+pub(crate) fn is_nth_at_scss_hyphen_interpolated_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_identifier_hyphen_part(p, n)
+        && !p.has_nth_preceding_whitespace(n + 1)
+        && is_nth_at_scss_interpolation(p, n + 1)
+}
+
+/// Parses an interpolated identifier that starts with a single hyphen.
+///
+/// Example: `-#{$prefix}-radius` in `-#{$prefix}-radius: 4px;`.
+#[inline]
+pub(crate) fn parse_scss_hyphen_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_nth_at_scss_hyphen_interpolated_identifier(p, 0) {
+        return Absent;
+    }
+
+    let Present(first_fragment) = parse_identifier_hyphen_part(p) else {
+        return Absent;
+    };
 
     let parts =
         parse_scss_interpolated_identifier_parts(p, first_fragment, parse_regular_identifier_part);

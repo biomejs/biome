@@ -188,7 +188,7 @@ fn format(
         0
     };
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree, false)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {

@@ -38,8 +38,9 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    CompletedMarker, Parser,
+    CompletedMarker, Parser, TokenSet,
     prelude::ParsedSyntax::{self, *},
+    token_set,
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
@@ -62,6 +63,7 @@ use quote::{
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
+use crate::lexer::MarkdownReLexContext;
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -87,7 +89,9 @@ pub(crate) fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
         Some('"')
     } else if text.starts_with('\'') {
         Some('\'')
-    } else if p.at(L_PAREN) {
+    } else if text.starts_with('(') {
+        // Text-based check: covers both an L_PAREN token (LinkDefinition
+        // context) and a plain-text token starting with `(` (Regular context).
         Some(')')
     } else {
         None
@@ -549,7 +553,10 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
             }
         }
 
-        // Consume token as code content
+        // Consume token as code content. The content is literal text:
+        // consume the whole rest of the line as one token instead of one
+        // token per character group.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
         let text_m = p.start();
         p.bump_remap(MD_TEXTUAL_LITERAL);
         text_m.complete(p, MD_TEXTUAL);
@@ -600,20 +607,28 @@ fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
         return;
     }
 
-    let mut consumed = 0usize;
-    while consumed < indent && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " {
-            consumed += 1;
-        } else if text == "\t" {
-            consumed += TAB_STOP_SPACES;
-        } else {
-            break;
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken. A tab that
+    // starts below the budget is included even when its width overshoots it.
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let mut consumed = 0usize;
+        let mut len = 0usize;
+        for byte in p.source_after_current().bytes() {
+            if consumed >= indent {
+                break;
+            }
+            match byte {
+                b' ' => consumed += 1,
+                b'\t' => consumed += TAB_STOP_SPACES,
+                _ => break,
+            }
+            len += 1;
         }
 
-        let token_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        token_m.complete(p, MD_INDENT_TOKEN);
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
 }
 
@@ -2326,6 +2341,13 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     if p.at(T![EOF]) {
         return Absent;
     }
+    // A construct token that turned out to be plain text (failed emphasis
+    // marker, unmatched bracket, ...) would become a one-character node and
+    // split the surrounding prose. Re-lex it as plain text so it merges with
+    // the characters that follow it.
+    if p.at_ts(MERGES_WITH_FOLLOWING_TEXT) {
+        p.re_lex_textual_fallback();
+    }
     let m = p.start();
     // Remap any token to MD_TEXTUAL_LITERAL so the syntax factory accepts it.
     // This is necessary because tokens like L_PAREN, R_PAREN, etc. are lexed
@@ -2333,6 +2355,29 @@ pub(crate) fn parse_textual(p: &mut MarkdownParser) -> ParsedSyntax {
     p.bump_remap(MD_TEXTUAL_LITERAL);
     Present(m.complete(p, MD_TEXTUAL))
 }
+
+/// Construct tokens that, once they fail to open a construct, read as plain
+/// text and can merge with the characters after them via
+/// [MarkdownParser::re_lex_textual_fallback].
+///
+/// Backtick and tilde tokens are deliberately absent: they carry a full
+/// delimiter sequence (like ```` `` ````) whose length drives code span
+/// matching, so re-splitting them would change how later code spans pair up.
+const MERGES_WITH_FOLLOWING_TEXT: TokenSet<MarkdownSyntaxKind> = token_set![
+    T![*],
+    UNDERSCORE,
+    BANG,
+    L_BRACK,
+    R_BRACK,
+    L_ANGLE,
+    R_ANGLE,
+    T!['('],
+    T![')'],
+    COLON,
+    T![-],
+    T![+],
+    T![#],
+];
 
 /// Attempt to parse some input with the given parsing function. If parsing
 /// succeeds, `Ok` is returned with the result of the parse and the state is

@@ -41,10 +41,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@6..8 "  " [] [],
                                 },
                             ],
                         },
@@ -104,10 +101,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
             1: MD_CONTINUATION_INDENT@6..8
               0: MD_INDENT_TOKEN_LIST@6..8
-                0: MD_INDENT_TOKEN@6..7
-                  0: MD_INDENT_CHAR@6..7 " " [] []
-                1: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
+                0: MD_INDENT_TOKEN@6..8
+                  0: MD_INDENT_CHAR@6..8 "  " [] []
             2: MD_BULLET_LIST_ITEM@8..14
               0: MD_BULLET_LIST@8..14
                 0: MD_BULLET@8..14

@@ -71,7 +71,7 @@ use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-pub use server::WorkspaceServer;
+pub use server::{LocalWorkspace, WorkspaceServer};
 use smallvec::SmallVec;
 use std::{
     borrow::Cow,
@@ -1820,7 +1820,7 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
         }
         _ => NoopQueryProvider {}
     };
-    Box::new(WorkspaceServer::new(
+    Box::new(LocalWorkspace::new(
         fs,
         watcher_tx,
         service_tx,

@@ -32,7 +32,7 @@ pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 #[cfg(feature = "lang_js")]
 pub use file_handlers::JsFormatterSettings;
 pub use scanner::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
-pub use workspace::{Workspace, WorkspaceServer};
+pub use workspace::{LocalWorkspace, Workspace, WorkspaceServer};
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {

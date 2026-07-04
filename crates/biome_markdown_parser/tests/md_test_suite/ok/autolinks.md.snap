@@ -78,28 +78,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@73..89 "Not an autolink " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@73..102 "Not an autolink (no scheme): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@89..90 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@90..99 "no scheme" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@99..100 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@100..101 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@101..102 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@102..103 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@103..114 "example.com" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@102..114 "<example.com" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@114..115 ">" [] [],
@@ -121,13 +103,7 @@ MdDocument {
                     l_angle_token: L_ANGLE@135..136 "<" [] [],
                     value: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@147..148 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@136..156 "http://rust-lang.org" [] [],
                         },
                     ],
                     r_angle_token: R_ANGLE@156..157 ">" [] [],
@@ -146,34 +122,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@169..192 "Invalid email autolink " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@169..210 "Invalid email autolink (leading hyphen): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@192..193 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@193..207 "leading hyphen" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@207..208 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@208..209 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@209..210 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@210..211 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@211..213 "a@" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@213..214 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@214..215 "b" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@210..215 "<a@-b" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@215..216 ">" [] [],
@@ -189,31 +141,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@218..241 "Invalid email autolink " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@218..260 "Invalid email autolink (trailing hyphen): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@241..242 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@242..257 "trailing hyphen" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@257..258 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@258..259 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@259..260 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@260..261 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@261..264 "a@b" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@264..265 "-" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@260..265 "<a@b-" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@265..266 ">" [] [],
@@ -229,28 +160,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@268..291 "Invalid email autolink " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@268..306 "Invalid email autolink (empty label): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@291..292 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@292..303 "empty label" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@303..304 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@304..305 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@305..306 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@306..307 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@307..313 "a@a..b" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@306..313 "<a@a..b" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@313..314 ">" [] [],
@@ -266,28 +179,10 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@316..339 "Invalid email autolink " [] [],
+                    value_token: MD_TEXTUAL_LITERAL@316..357 "Invalid email autolink (label too long): " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@339..340 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@340..354 "label too long" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@354..355 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@355..356 ":" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@356..357 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@357..358 "<" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@358..424 "a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@357..424 "<a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@424..425 ">" [] [],
@@ -338,25 +233,13 @@ MdDocument {
       0: NEWLINE@72..73 "\n" [] []
     4: MD_PARAGRAPH@73..116
       0: MD_INLINE_ITEM_LIST@73..116
-        0: MD_TEXTUAL@73..89
-          0: MD_TEXTUAL_LITERAL@73..89 "Not an autolink " [] []
-        1: MD_TEXTUAL@89..90
-          0: MD_TEXTUAL_LITERAL@89..90 "(" [] []
-        2: MD_TEXTUAL@90..99
-          0: MD_TEXTUAL_LITERAL@90..99 "no scheme" [] []
-        3: MD_TEXTUAL@99..100
-          0: MD_TEXTUAL_LITERAL@99..100 ")" [] []
-        4: MD_TEXTUAL@100..101
-          0: MD_TEXTUAL_LITERAL@100..101 ":" [] []
-        5: MD_TEXTUAL@101..102
-          0: MD_TEXTUAL_LITERAL@101..102 " " [] []
-        6: MD_TEXTUAL@102..103
-          0: MD_TEXTUAL_LITERAL@102..103 "<" [] []
-        7: MD_TEXTUAL@103..114
-          0: MD_TEXTUAL_LITERAL@103..114 "example.com" [] []
-        8: MD_TEXTUAL@114..115
+        0: MD_TEXTUAL@73..102
+          0: MD_TEXTUAL_LITERAL@73..102 "Not an autolink (no scheme): " [] []
+        1: MD_TEXTUAL@102..114
+          0: MD_TEXTUAL_LITERAL@102..114 "<example.com" [] []
+        2: MD_TEXTUAL@114..115
           0: MD_TEXTUAL_LITERAL@114..115 ">" [] []
-        9: MD_TEXTUAL@115..116
+        3: MD_TEXTUAL@115..116
           0: MD_TEXTUAL_LITERAL@115..116 "\n" [] []
     5: MD_NEWLINE@116..117
       0: NEWLINE@116..117 "\n" [] []
@@ -367,12 +250,8 @@ MdDocument {
         1: MD_AUTOLINK@135..157
           0: L_ANGLE@135..136 "<" [] []
           1: MD_INLINE_ITEM_LIST@136..156
-            0: MD_TEXTUAL@136..147
-              0: MD_TEXTUAL_LITERAL@136..147 "http://rust" [] []
-            1: MD_TEXTUAL@147..148
-              0: MD_TEXTUAL_LITERAL@147..148 "-" [] []
-            2: MD_TEXTUAL@148..156
-              0: MD_TEXTUAL_LITERAL@148..156 "lang.org" [] []
+            0: MD_TEXTUAL@136..156
+              0: MD_TEXTUAL_LITERAL@136..156 "http://rust-lang.org" [] []
           2: R_ANGLE@156..157 ">" [] []
         2: MD_TEXTUAL@157..167
           0: MD_TEXTUAL_LITERAL@157..167 " for more." [] []
@@ -382,103 +261,49 @@ MdDocument {
       0: NEWLINE@168..169 "\n" [] []
     8: MD_PARAGRAPH@169..217
       0: MD_INLINE_ITEM_LIST@169..217
-        0: MD_TEXTUAL@169..192
-          0: MD_TEXTUAL_LITERAL@169..192 "Invalid email autolink " [] []
-        1: MD_TEXTUAL@192..193
-          0: MD_TEXTUAL_LITERAL@192..193 "(" [] []
-        2: MD_TEXTUAL@193..207
-          0: MD_TEXTUAL_LITERAL@193..207 "leading hyphen" [] []
-        3: MD_TEXTUAL@207..208
-          0: MD_TEXTUAL_LITERAL@207..208 ")" [] []
-        4: MD_TEXTUAL@208..209
-          0: MD_TEXTUAL_LITERAL@208..209 ":" [] []
-        5: MD_TEXTUAL@209..210
-          0: MD_TEXTUAL_LITERAL@209..210 " " [] []
-        6: MD_TEXTUAL@210..211
-          0: MD_TEXTUAL_LITERAL@210..211 "<" [] []
-        7: MD_TEXTUAL@211..213
-          0: MD_TEXTUAL_LITERAL@211..213 "a@" [] []
-        8: MD_TEXTUAL@213..214
-          0: MD_TEXTUAL_LITERAL@213..214 "-" [] []
-        9: MD_TEXTUAL@214..215
-          0: MD_TEXTUAL_LITERAL@214..215 "b" [] []
-        10: MD_TEXTUAL@215..216
+        0: MD_TEXTUAL@169..210
+          0: MD_TEXTUAL_LITERAL@169..210 "Invalid email autolink (leading hyphen): " [] []
+        1: MD_TEXTUAL@210..215
+          0: MD_TEXTUAL_LITERAL@210..215 "<a@-b" [] []
+        2: MD_TEXTUAL@215..216
           0: MD_TEXTUAL_LITERAL@215..216 ">" [] []
-        11: MD_TEXTUAL@216..217
+        3: MD_TEXTUAL@216..217
           0: MD_TEXTUAL_LITERAL@216..217 "\n" [] []
     9: MD_NEWLINE@217..218
       0: NEWLINE@217..218 "\n" [] []
     10: MD_PARAGRAPH@218..267
       0: MD_INLINE_ITEM_LIST@218..267
-        0: MD_TEXTUAL@218..241
-          0: MD_TEXTUAL_LITERAL@218..241 "Invalid email autolink " [] []
-        1: MD_TEXTUAL@241..242
-          0: MD_TEXTUAL_LITERAL@241..242 "(" [] []
-        2: MD_TEXTUAL@242..257
-          0: MD_TEXTUAL_LITERAL@242..257 "trailing hyphen" [] []
-        3: MD_TEXTUAL@257..258
-          0: MD_TEXTUAL_LITERAL@257..258 ")" [] []
-        4: MD_TEXTUAL@258..259
-          0: MD_TEXTUAL_LITERAL@258..259 ":" [] []
-        5: MD_TEXTUAL@259..260
-          0: MD_TEXTUAL_LITERAL@259..260 " " [] []
-        6: MD_TEXTUAL@260..261
-          0: MD_TEXTUAL_LITERAL@260..261 "<" [] []
-        7: MD_TEXTUAL@261..264
-          0: MD_TEXTUAL_LITERAL@261..264 "a@b" [] []
-        8: MD_TEXTUAL@264..265
-          0: MD_TEXTUAL_LITERAL@264..265 "-" [] []
-        9: MD_TEXTUAL@265..266
+        0: MD_TEXTUAL@218..260
+          0: MD_TEXTUAL_LITERAL@218..260 "Invalid email autolink (trailing hyphen): " [] []
+        1: MD_TEXTUAL@260..265
+          0: MD_TEXTUAL_LITERAL@260..265 "<a@b-" [] []
+        2: MD_TEXTUAL@265..266
           0: MD_TEXTUAL_LITERAL@265..266 ">" [] []
-        10: MD_TEXTUAL@266..267
+        3: MD_TEXTUAL@266..267
           0: MD_TEXTUAL_LITERAL@266..267 "\n" [] []
     11: MD_NEWLINE@267..268
       0: NEWLINE@267..268 "\n" [] []
     12: MD_PARAGRAPH@268..315
       0: MD_INLINE_ITEM_LIST@268..315
-        0: MD_TEXTUAL@268..291
-          0: MD_TEXTUAL_LITERAL@268..291 "Invalid email autolink " [] []
-        1: MD_TEXTUAL@291..292
-          0: MD_TEXTUAL_LITERAL@291..292 "(" [] []
-        2: MD_TEXTUAL@292..303
-          0: MD_TEXTUAL_LITERAL@292..303 "empty label" [] []
-        3: MD_TEXTUAL@303..304
-          0: MD_TEXTUAL_LITERAL@303..304 ")" [] []
-        4: MD_TEXTUAL@304..305
-          0: MD_TEXTUAL_LITERAL@304..305 ":" [] []
-        5: MD_TEXTUAL@305..306
-          0: MD_TEXTUAL_LITERAL@305..306 " " [] []
-        6: MD_TEXTUAL@306..307
-          0: MD_TEXTUAL_LITERAL@306..307 "<" [] []
-        7: MD_TEXTUAL@307..313
-          0: MD_TEXTUAL_LITERAL@307..313 "a@a..b" [] []
-        8: MD_TEXTUAL@313..314
+        0: MD_TEXTUAL@268..306
+          0: MD_TEXTUAL_LITERAL@268..306 "Invalid email autolink (empty label): " [] []
+        1: MD_TEXTUAL@306..313
+          0: MD_TEXTUAL_LITERAL@306..313 "<a@a..b" [] []
+        2: MD_TEXTUAL@313..314
           0: MD_TEXTUAL_LITERAL@313..314 ">" [] []
-        9: MD_TEXTUAL@314..315
+        3: MD_TEXTUAL@314..315
           0: MD_TEXTUAL_LITERAL@314..315 "\n" [] []
     13: MD_NEWLINE@315..316
       0: NEWLINE@315..316 "\n" [] []
     14: MD_PARAGRAPH@316..426
       0: MD_INLINE_ITEM_LIST@316..426
-        0: MD_TEXTUAL@316..339
-          0: MD_TEXTUAL_LITERAL@316..339 "Invalid email autolink " [] []
-        1: MD_TEXTUAL@339..340
-          0: MD_TEXTUAL_LITERAL@339..340 "(" [] []
-        2: MD_TEXTUAL@340..354
-          0: MD_TEXTUAL_LITERAL@340..354 "label too long" [] []
-        3: MD_TEXTUAL@354..355
-          0: MD_TEXTUAL_LITERAL@354..355 ")" [] []
-        4: MD_TEXTUAL@355..356
-          0: MD_TEXTUAL_LITERAL@355..356 ":" [] []
-        5: MD_TEXTUAL@356..357
-          0: MD_TEXTUAL_LITERAL@356..357 " " [] []
-        6: MD_TEXTUAL@357..358
-          0: MD_TEXTUAL_LITERAL@357..358 "<" [] []
-        7: MD_TEXTUAL@358..424
-          0: MD_TEXTUAL_LITERAL@358..424 "a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [] []
-        8: MD_TEXTUAL@424..425
+        0: MD_TEXTUAL@316..357
+          0: MD_TEXTUAL_LITERAL@316..357 "Invalid email autolink (label too long): " [] []
+        1: MD_TEXTUAL@357..424
+          0: MD_TEXTUAL_LITERAL@357..424 "<a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [] []
+        2: MD_TEXTUAL@424..425
           0: MD_TEXTUAL_LITERAL@424..425 ">" [] []
-        9: MD_TEXTUAL@425..426
+        3: MD_TEXTUAL@425..426
           0: MD_TEXTUAL_LITERAL@425..426 "\n" [] []
   2: EOF@426..426 "" [] []
 

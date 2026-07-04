@@ -5,3 +5,4 @@
 <Link href={somewhere}>ok</Link>
 <Link href="https://example.com">ok</Link>
 <Link href="#">ok</Link>
+<a {href}>test</a>

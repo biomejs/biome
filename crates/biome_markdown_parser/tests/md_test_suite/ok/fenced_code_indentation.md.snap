@@ -28,13 +28,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@4..5 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@5..6 " " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@6..14 "indented" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@4..14 "  indented" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@14..15 "\n" [] [],
@@ -64,13 +58,9 @@ MdDocument {
       3: MD_INLINE_ITEM_LIST@3..15
         0: MD_TEXTUAL@3..4
           0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
-        1: MD_TEXTUAL@4..5
-          0: MD_TEXTUAL_LITERAL@4..5 " " [] []
-        2: MD_TEXTUAL@5..6
-          0: MD_TEXTUAL_LITERAL@5..6 " " [] []
-        3: MD_TEXTUAL@6..14
-          0: MD_TEXTUAL_LITERAL@6..14 "indented" [] []
-        4: MD_TEXTUAL@14..15
+        1: MD_TEXTUAL@4..14
+          0: MD_TEXTUAL_LITERAL@4..14 "  indented" [] []
+        2: MD_TEXTUAL@14..15
           0: MD_TEXTUAL_LITERAL@14..15 "\n" [] []
       4: MD_INDENT_TOKEN_LIST@15..15
       5: TRIPLE_BACKTICK@15..18 "```" [] []

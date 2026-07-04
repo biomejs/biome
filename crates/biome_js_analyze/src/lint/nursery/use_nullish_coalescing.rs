@@ -190,6 +190,39 @@ declare_lint_rule! {
     /// const r = Boolean(a || b);
     /// ```
     ///
+    /// ### ignorePrimitives
+    ///
+    /// Ignore `||`, `||=`, and ternary expressions when every non-nullish variant
+    /// of the operand is a primitive the option opts out of. Use `true` to ignore
+    /// all primitives, or an object selecting `string`, `number`, `boolean`, or
+    /// `bigint`. Default: none.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignorePrimitives": { "string": true }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// Primitive kinds that are not opted out of are still reported.
+    ///
+    /// ```ts,expect_diagnostic,use_options,file=invalid-primitives.ts
+    /// declare const count: number | null;
+    /// const value = count || 0;
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// A `string` operand is not reported when `string` is ignored.
+    ///
+    /// ```ts,use_options,file=valid-primitives.ts
+    /// declare const name: string | null;
+    /// const value = name || 'default';
+    /// ```
+    ///
     pub UseNullishCoalescing {
         version: "2.4.5",
         name: "useNullishCoalescing",
@@ -445,6 +478,10 @@ fn run_logical_or(
         return None;
     }
 
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
+        return None;
+    }
+
     let can_fix =
         is_safe_type_for_replacement(&left_ty) && is_safe_syntax_context_for_replacement(logical);
 
@@ -491,6 +528,10 @@ fn run_logical_or_assignment(
         return None;
     }
 
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
+        return None;
+    }
+
     let can_fix = is_safe_type_for_replacement(&left_ty);
 
     Some(UseNullishCoalescingState::LogicalOrAssignment {
@@ -522,6 +563,44 @@ fn is_possibly_nullish(ty: &biome_js_type_info::Type) -> bool {
     } else {
         ty.conditional_semantics().is_nullish()
     }
+}
+
+/// Returns `true` when every non-nullish variant of `ty` is a primitive that the
+/// configured `ignorePrimitives` option suppresses. A non-union type is never
+/// ignored here, since the diagnostic only fires once the operand is a nullish
+/// union in the first place.
+fn should_ignore_for_primitives(
+    options: &UseNullishCoalescingOptions,
+    ty: &biome_js_type_info::Type,
+) -> bool {
+    if !ty.is_union() {
+        return false;
+    }
+    ty.flattened_union_variants()
+        .filter(|variant| !variant.conditional_semantics().is_nullish())
+        .all(|variant| is_ignored_primitive(options, &variant))
+}
+
+/// Maps a resolved primitive (or primitive literal) type to its matching
+/// `ignorePrimitives` selector. Non-primitive types are never ignored.
+fn is_ignored_primitive(
+    options: &UseNullishCoalescingOptions,
+    ty: &biome_js_type_info::Type,
+) -> bool {
+    ty.resolved_data().is_some_and(|data| match data.as_raw_data() {
+        TypeData::String => options.should_ignore_primitive_string(),
+        TypeData::Number => options.should_ignore_primitive_number(),
+        TypeData::Boolean => options.should_ignore_primitive_boolean(),
+        TypeData::BigInt => options.should_ignore_primitive_bigint(),
+        TypeData::Literal(literal) => match literal.as_ref() {
+            biome_js_type_info::Literal::String(_) => options.should_ignore_primitive_string(),
+            biome_js_type_info::Literal::Number(_) => options.should_ignore_primitive_number(),
+            biome_js_type_info::Literal::Boolean(_) => options.should_ignore_primitive_boolean(),
+            biome_js_type_info::Literal::BigInt(_) => options.should_ignore_primitive_bigint(),
+            _ => false,
+        },
+        _ => false,
+    })
 }
 
 fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool {
@@ -722,6 +801,14 @@ fn run_ternary(
 
     let (checked_expr, fallback_expr, is_positive, check_kind) =
         check_ternary_nullish_pattern(&test, &consequent, &alternate)?;
+
+    let options = ctx.options();
+    if options.has_any_ignore_primitives() {
+        let checked_ty = ctx.type_of_expression(&checked_expr);
+        if should_ignore_for_primitives(options, &checked_ty) {
+            return None;
+        }
+    }
 
     // The fix is unsafe when the checked expression contains calls or `new`, because
     // the ternary evaluates it twice (test + branch) while `??` evaluates it once.

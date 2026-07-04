@@ -39,10 +39,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@6..8 "  " [] [],
                                 },
                             ],
                             underline_token: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] [],
@@ -107,10 +104,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "Foo" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-                2: MD_INDENT_TOKEN@6..7
-                  0: MD_INDENT_CHAR@6..7 " " [] []
-                3: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
+                2: MD_INDENT_TOKEN@6..8
+                  0: MD_INDENT_CHAR@6..8 "  " [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] []
     1: MD_NEWLINE@11..12
       0: NEWLINE@11..12 "\n" [] []

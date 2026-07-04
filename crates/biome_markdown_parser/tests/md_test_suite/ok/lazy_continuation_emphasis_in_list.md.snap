@@ -327,10 +327,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@129..130 " " [] [],
                                 },
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@130..131 "-" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@131..136 " bar " [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@130..136 "- bar " [] [],
                                 },
                                 MdInlineEmphasis {
                                     l_fence: DOUBLE_STAR@136..138 "**" [] [],
@@ -575,27 +572,25 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@128..129 " " [] []
                 5: MD_TEXTUAL@129..130
                   0: MD_TEXTUAL_LITERAL@129..130 " " [] []
-                6: MD_TEXTUAL@130..131
-                  0: MD_TEXTUAL_LITERAL@130..131 "-" [] []
-                7: MD_TEXTUAL@131..136
-                  0: MD_TEXTUAL_LITERAL@131..136 " bar " [] []
-                8: MD_INLINE_EMPHASIS@136..146
+                6: MD_TEXTUAL@130..136
+                  0: MD_TEXTUAL_LITERAL@130..136 "- bar " [] []
+                7: MD_INLINE_EMPHASIS@136..146
                   0: DOUBLE_STAR@136..138 "**" [] []
                   1: MD_INLINE_ITEM_LIST@138..144
                     0: MD_TEXTUAL@138..144
                       0: MD_TEXTUAL_LITERAL@138..144 "strong" [] []
                   2: DOUBLE_STAR@144..146 "**" [] []
-                9: MD_TEXTUAL@146..147
+                8: MD_TEXTUAL@146..147
                   0: MD_TEXTUAL_LITERAL@146..147 "\n" [] []
-                10: MD_TEXTUAL@147..151
+                9: MD_TEXTUAL@147..151
                   0: MD_TEXTUAL_LITERAL@147..151 "baz " [] []
-                11: MD_INLINE_EMPHASIS@151..157
+                10: MD_INLINE_EMPHASIS@151..157
                   0: DOUBLE_STAR@151..153 "**" [] []
                   1: MD_INLINE_ITEM_LIST@153..155
                     0: MD_TEXTUAL@153..155
                       0: MD_TEXTUAL_LITERAL@153..155 "em" [] []
                   2: DOUBLE_STAR@155..157 "**" [] []
-                12: MD_TEXTUAL@157..158
+                11: MD_TEXTUAL@157..158
                   0: MD_TEXTUAL_LITERAL@157..158 "\n" [] []
   2: EOF@158..158 "" [] []
 

@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -54,7 +54,7 @@ declare_lint_rule! {
 
 impl Rule for NoHeaderScope {
     type Query = Ast<AnyHtmlTagElement>;
-    type State = HtmlAttribute;
+    type State = AnyHtmlAttribute;
     type Signals = Option<Self::State>;
     type Options = NoHeaderScopeOptions;
 
@@ -68,7 +68,11 @@ impl Rule for NoHeaderScope {
         }
 
         // Check if element has a scope attribute
-        element.find_attribute_by_name("scope")
+        if let Some(attribute) = element.find_attribute_or_vue_binding("scope") {
+            return Some(attribute);
+        }
+
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

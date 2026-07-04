@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: thenableInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// A non-callable `then` member does not make a thenable, so `await` is still reported.
+interface NotThenable { then: number; }
+declare const value: unknown;
+async function awaitNonCallableThen(): Promise<void> {
+    await (value as NotThenable);
+}
+
+```
+
+# Diagnostics
+```
+thenableInvalid.ts:7:5 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    5 │ declare const value: unknown;
+    6 │ async function awaitNonCallableThen(): Promise<void> {
+  > 7 │     await (value as NotThenable);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

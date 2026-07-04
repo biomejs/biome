@@ -42,7 +42,7 @@ pub(crate) struct CliSnapshot {
     /// the configuration, if set
     /// First string is the content
     /// Second string is the name
-    pub configuration_list: Vec<(String, String)>,
+    pub configuration_list: BTreeMap<String, String>,
     /// file name -> content
     pub files: BTreeMap<String, String>,
     /// messages written in console
@@ -55,7 +55,7 @@ impl CliSnapshot {
     pub fn from_result(result: Result<(), CliDiagnostic>) -> Self {
         Self {
             in_messages: InMessages::default(),
-            configuration_list: vec![],
+            configuration_list: BTreeMap::default(),
             files: BTreeMap::default(),
             messages: Vec::new(),
             termination: result.err().map(Error::from),
@@ -67,7 +67,7 @@ impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
 
-        for (configuration, file_name) in &self.configuration_list {
+        for (file_name, configuration) in &self.configuration_list {
             let file_name = redact_snapshot(file_name).unwrap_or(file_name.into());
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
             let parsed = parse_json(
@@ -459,7 +459,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             {
                 cli_snapshot
                     .configuration_list
-                    .push((content.to_string(), file.to_string()));
+                    .insert(file.to_string(), content.to_string());
             } else {
                 cli_snapshot
                     .files

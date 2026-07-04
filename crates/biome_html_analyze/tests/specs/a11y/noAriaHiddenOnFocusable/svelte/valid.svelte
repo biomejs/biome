@@ -12,6 +12,8 @@
 <button aria-hidden="true" tabindex="-1"></button>
 <div tabindex="-1" aria-hidden="true"></div>
 
+<button aria-hidden={ariaHiddenValue}></button>
+
 <!-- input type="hidden" is not focusable -->
 <input type="hidden" aria-hidden="true" />
 

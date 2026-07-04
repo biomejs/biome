@@ -35,9 +35,10 @@ futures              = "0.3.32"
 papaya               = { workspace = true }
 parking_lot          = { workspace = true }
 rustc-hash           = { workspace = true }
+salsa                = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
-tokio                = { workspace = true, features = ["io-std", "rt"] }
+tokio                = { workspace = true, features = ["io-std", "rt", "time"] }
 tower-lsp-server     = { workspace = true }
 tracing              = { workspace = true, features = ["attributes"] }
 url                  = { workspace = true }

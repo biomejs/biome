@@ -236,7 +236,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         let is_stylesheet = element
             .find_attribute_by_name("rel")
-            .and_then(|rel_attr| rel_attr.value())
+            .and_then(|rel_attr| rel_attr.as_static_value())
             .is_some_and(|rel_val| rel_val.text().eq_ignore_ascii_case("stylesheet"));
         if !is_stylesheet {
             return;
@@ -244,7 +244,7 @@ impl<'a> HtmlModuleVisitor<'a> {
 
         if let Some(href_value) = element
             .find_attribute_by_name("href")
-            .and_then(|href_attr| href_attr.value())
+            .and_then(|href_attr| href_attr.as_static_value())
         {
             let resolved = self.resolved_path_from_specifier(href_value.text());
             imported_stylesheets.push(resolved);

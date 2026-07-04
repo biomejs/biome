@@ -1,5 +1,5 @@
 use crate::FormatYamlSyntaxToken;
-use crate::prelude::YamlFormatContext;
+use crate::prelude::{YamlFormatContext, YamlFormatter};
 use biome_formatter::formatter::Formatter;
 use biome_formatter::trivia::FormatToken;
 use biome_formatter::{Argument, Format, FormatResult};
@@ -38,4 +38,12 @@ impl<'a> Format<YamlFormatContext> for FormatReplaced<'a> {
     fn fmt(&self, f: &mut Formatter<YamlFormatContext>) -> FormatResult<()> {
         FormatYamlSyntaxToken.format_replaced(self.token, &self.content, f)
     }
+}
+
+pub(crate) fn on_skipped(token: &YamlSyntaxToken, f: &mut YamlFormatter) -> FormatResult<()> {
+    FormatYamlSyntaxToken.format_skipped_token_trivia(token, f)
+}
+
+pub(crate) fn on_removed(token: &YamlSyntaxToken, f: &mut YamlFormatter) -> FormatResult<()> {
+    FormatYamlSyntaxToken.format_removed(token, f)
 }

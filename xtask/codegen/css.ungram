@@ -1536,6 +1536,7 @@ AnyCssQueryFeature =
 AnyCssQueryFeatureName =
 	CssIdentifier
 	| ScssInterpolatedIdentifier
+	| ScssVariable
 
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^
@@ -1585,8 +1586,10 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolation
+	| ScssExpression
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }

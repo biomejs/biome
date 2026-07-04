@@ -6,5 +6,6 @@ expression: valid.astro
 ```astro
 <!-- should not generate diagnostics -->
 <html lang="en"></html>
+<html lang={langValue}></html>
 
 ```

@@ -16,6 +16,7 @@ declare_lint_rule! {
     /// - It ignores the following properties:
     ///   - `animation`
     ///   - `animation-name`
+    ///   - `container-name`
     ///   - `counter-increment`
     ///   - `counter-reset`
     ///   - `counter-set`

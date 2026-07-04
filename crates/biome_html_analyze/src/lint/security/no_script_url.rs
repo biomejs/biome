@@ -3,10 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlOpeningElement, element_ext::AnyHtmlTagElement,
-    inner_string_text,
-};
+use biome_html_syntax::{HtmlOpeningElement, element_ext::AnyHtmlTagElement};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_script_url::NoScriptUrlOptions;
@@ -74,22 +71,16 @@ impl Rule for NoScriptUrl {
         }
 
         let attrs = element.attributes();
-        let attr = attrs.find_by_name("href")?;
-        let initializer = attr.initializer()?;
-        let value = initializer.value().ok()?;
+        let href_attribute = attrs.find_attribute_or_vue_binding("href")?;
+        let value = href_attribute.as_static_value()?;
 
-        let string_text = match &value {
-            AnyHtmlAttributeInitializer::HtmlString(html_string) => html_string
-                .value_token()
-                .ok()
-                .map(|token| inner_string_text(&token).into()),
-            AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(_) => value.string_value(),
-            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)
-            | AnyHtmlAttributeInitializer::VueVForValue(_) => None,
-        };
-
-        if string_text.is_some_and(|text| text.trim().to_lowercase_cow().starts_with("javascript:")) {
-            return Some(initializer.range());
+        if value
+            .text()
+            .trim()
+            .to_lowercase_cow()
+            .starts_with("javascript:")
+        {
+            return Some(href_attribute.range());
         }
 
         None

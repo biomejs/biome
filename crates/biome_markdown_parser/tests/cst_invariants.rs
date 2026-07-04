@@ -5,7 +5,12 @@ use biome_markdown_syntax::{
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 
 fn indent_len(indent: impl AstNodeList) -> usize {
-    indent.len()
+    // Indent runs are folded into single nodes, so measure text length
+    // instead of counting nodes.
+    indent
+        .iter()
+        .map(|node| usize::from(node.syntax().text_trimmed_range().len()))
+        .sum()
 }
 
 fn continuation_indents(input: &str) -> Vec<usize> {

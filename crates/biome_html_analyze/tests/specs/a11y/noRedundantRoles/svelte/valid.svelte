@@ -13,5 +13,7 @@
 
 <!-- Native elements with non-redundant roles -->
 <article role="presentation"></article>
+<article role={roleValue}></article>
+<article {role}></article>
 <span></span>
 <div></div>

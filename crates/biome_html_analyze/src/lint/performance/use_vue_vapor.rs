@@ -75,9 +75,9 @@ impl Rule for UseVueVapor {
         }
 
         let attributes = opening.attributes();
-        attributes.find_by_name("setup")?;
+        attributes.find_attribute_by_name("setup")?;
 
-        if attributes.find_by_name("vapor").is_some() {
+        if attributes.find_attribute_by_name("vapor").is_some() {
             return None;
         }
 
@@ -104,8 +104,8 @@ impl Rule for UseVueVapor {
         let old_attributes = opening.attributes();
 
         // Only apply the fix for <script setup> that doesn't already have vapor.
-        if old_attributes.find_by_name("setup").is_none()
-            || old_attributes.find_by_name("vapor").is_some()
+        if old_attributes.find_attribute_by_name("setup").is_none()
+            || old_attributes.find_attribute_by_name("vapor").is_some()
         {
             return None;
         }
