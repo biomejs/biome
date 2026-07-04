@@ -10339,6 +10339,7 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	  }
 	| {
 			Svelte: {
+				declaration_block?: SvelteVariableKind;
 				/**
 				 * Whether this is a `{@const name = value}` block.
 				 */
@@ -10404,6 +10405,7 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
+export type SvelteVariableKind = "Let" | "Const";
 export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
 	| "None"
