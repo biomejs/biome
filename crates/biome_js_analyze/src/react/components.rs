@@ -1,12 +1,12 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsParameter,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
-    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsInitializerClause, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember,
-    JsSyntaxToken, JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsParameter, JsArrowFunctionExpression,
+    JsAssignmentExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause,
+    JsExtendsClause, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
+    JsFunctionExpression, JsInitializerClause, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxToken,
+    JsVariableDeclarator,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxResult, TextRange, declare_node_union,
@@ -577,16 +577,13 @@ fn is_ref_parameter(parameter: &AnyJsParameter) -> bool {
     let name = match parameter {
         AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
             parameter,
-        )) => parameter
-            .binding()
-            .ok()
-            .and_then(|binding| {
-                binding
-                    .as_any_js_binding()?
-                    .as_js_identifier_binding()?
-                    .name_token()
-                    .ok()
-            }),
+        )) => parameter.binding().ok().and_then(|binding| {
+            binding
+                .as_any_js_binding()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()
+        }),
         AnyJsParameter::AnyJsFormalParameter(
             AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_),
         )
