@@ -4,6 +4,7 @@ use react_compiler_ast::scope::{
     BindingData, BindingId, BindingKind, ImportBindingData, ImportBindingKind, ScopeData, ScopeId,
     ScopeInfo, ScopeKind,
 };
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::collections::HashMap;
 
 pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
@@ -60,13 +61,13 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
         }
     }
 
-    let mut node_to_scope = HashMap::new();
-    let mut node_to_scope_end = HashMap::new();
-    let mut node_id_to_scope = HashMap::new();
+    let mut node_to_scope = FxHashMap::default();
+    let mut node_to_scope_end = FxHashMap::default();
+    let mut node_id_to_scope = FxHashMap::default();
     let mut scope_parent: Vec<Option<ScopeId>> = vec![None; next_react_id as usize];
     let mut scope_kinds: Vec<ScopeKind> = vec![ScopeKind::Block; next_react_id as usize];
-    let mut scope_bindings: Vec<HashMap<String, BindingId>> =
-        vec![HashMap::new(); next_react_id as usize];
+    let mut scope_bindings: Vec<FxHashMap<String, BindingId>> =
+        vec![FxHashMap::default(); next_react_id as usize];
 
     for scope in &all_scopes {
         let idx = scope.id().index();
@@ -117,8 +118,8 @@ pub(crate) fn convert_scope_info(model: &SemanticModel) -> ScopeInfo {
         });
     }
 
-    let mut reference_to_binding = IndexMap::new();
-    let mut ref_node_id_to_binding = IndexMap::new();
+    let mut reference_to_binding = IndexMap::<u32, BindingId, FxBuildHasher>::default();
+    let mut ref_node_id_to_binding = IndexMap::<u32, BindingId, FxBuildHasher>::default();
     for binding in model.all_bindings() {
         let declaration = binding.syntax();
         let declaration_start: u32 = declaration.text_trimmed_range().start().into();

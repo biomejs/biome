@@ -544,7 +544,7 @@ pub(super) fn convert_module_source(
                 .map_err(|_| missing("JsModuleSource", "value_token"))?;
             Ok(StringLiteral {
                 base: ctx.base(source.syntax().text_trimmed_range()),
-                value: inner_string_text(&token).to_string(),
+                value: inner_string_text(&token).to_string().into(),
             })
         }
         AnyJsModuleSource::JsMetavariable(source) => Err(unsupported(source.syntax())),

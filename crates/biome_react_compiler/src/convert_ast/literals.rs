@@ -12,7 +12,7 @@ pub(super) fn convert_literal(
             let value = inner_string_text(&token).to_string();
             Ok(Expression::StringLiteral(StringLiteral {
                 base: ctx.base(literal.syntax().text_trimmed_range()),
-                value,
+                value: value.into(),
             }))
         }
         AnyJsLiteralExpression::JsNumberLiteralExpression(literal) => {

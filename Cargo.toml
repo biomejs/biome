@@ -2,10 +2,6 @@
 resolver        = "2"
 members         = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
 default-members = ["crates/*"]
-# Excluded so it can carry its own Cargo.lock for the OXC oracle's modern
-# dependency tree without forcing version bumps onto Biome's main lockfile.
-# See crates/biome_react_compiler_conformance/Cargo.toml for details.
-exclude         = ["crates/biome_react_compiler_conformance"]
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
