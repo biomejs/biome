@@ -5,6 +5,9 @@ expression: content
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Cannot read plugin file /missing.grit
-
+    
     Caused by:
       Cannot read file.
+    
+    Caused by:
+      path "/missing.grit" does not exists in memory filesystem
