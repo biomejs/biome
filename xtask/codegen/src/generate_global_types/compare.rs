@@ -4,21 +4,35 @@ use anyhow::{Result, bail};
 
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
-    LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
+    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
 };
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
-/// Number of generated globals expected for `Error`.
-const ERROR_GLOBAL_COUNT: usize = 3;
+/// Expected number of lowered generated globals.
+const GENERATED_GLOBAL_COUNT: usize = 7;
+
+/// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
+/// [`assert_disposable_shape`] against the generated model.
+struct DisposableShape<'a> {
+    interface_name: &'a str,
+    interface_id_constant: &'a str,
+    member_name: &'a str,
+    symbol_id: &'static str,
+    helper_type_id: &'static str,
+    helper_name: &'a str,
+    helper_id_constant: &'a str,
+    helper_is_async: bool,
+    return_type_id: &'static str,
+}
 
 /// Validates lowered generated globals before they are emitted.
 pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
-    if lowered.globals().len() != ERROR_GLOBAL_COUNT {
+    if lowered.globals().len() != GENERATED_GLOBAL_COUNT {
         bail!(
-            "generated Error global has {} globals, expected {}",
+            "generated globals contain {} entries, expected {}",
             lowered.globals().len(),
-            ERROR_GLOBAL_COUNT
+            GENERATED_GLOBAL_COUNT
         );
     }
 
@@ -60,8 +74,37 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     let constructor = generated_constructor(lowered)?;
     assert_error_constructor_shape(constructor)?;
 
-    let call = generated_call(lowered)?;
+    let call = generated_function(lowered, "Error.call", "ERROR_CALL_ID_GLOBAL_TYPE_ID")?;
     assert_error_call_shape(call)?;
+
+    assert_disposable_shape(
+        lowered,
+        DisposableShape {
+            interface_name: "Disposable",
+            interface_id_constant: "DISPOSABLE_ID_GLOBAL_TYPE_ID",
+            member_name: "[Symbol.dispose]",
+            symbol_id: "GLOBAL_SYMBOL_DISPOSE_ID",
+            helper_type_id: "GLOBAL_DISPOSABLE_DISPOSE_ID",
+            helper_name: "Disposable[Symbol.dispose]",
+            helper_id_constant: "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
+            helper_is_async: false,
+            return_type_id: "GLOBAL_VOID_ID",
+        },
+    )?;
+    assert_disposable_shape(
+        lowered,
+        DisposableShape {
+            interface_name: "AsyncDisposable",
+            interface_id_constant: "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
+            member_name: "[Symbol.asyncDispose]",
+            symbol_id: "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
+            helper_type_id: "GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID",
+            helper_name: "AsyncDisposable[Symbol.asyncDispose]",
+            helper_id_constant: "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+            helper_is_async: true,
+            return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
+        },
+    )?;
 
     Ok(())
 }
@@ -94,21 +137,114 @@ fn generated_constructor(lowered: &LoweredGlobalTypes) -> Result<&LoweredConstru
     Ok(constructor)
 }
 
-/// Returns the generated call helper for `Error(...)`.
-fn generated_call(lowered: &LoweredGlobalTypes) -> Result<&LoweredFunction> {
-    let Some(call) = lowered.global("Error.call") else {
-        bail!("generated globals are missing the Error call helper");
+/// Returns the lowered interface named `name`, checking it targets `id_constant`.
+fn generated_interface<'a>(
+    lowered: &'a LoweredGlobalTypes,
+    name: &str,
+    id_constant: &str,
+) -> Result<&'a LoweredInterface> {
+    let Some(global) = lowered.global(name) else {
+        bail!("generated globals are missing {name}");
     };
-    if call.id_constant() != "ERROR_CALL_ID_GLOBAL_TYPE_ID" {
+    if global.id_constant() != id_constant {
         bail!(
-            "generated Error call targets {}, expected ERROR_CALL_ID_GLOBAL_TYPE_ID",
-            call.id_constant()
+            "generated {name} targets {}, expected {id_constant}",
+            global.id_constant()
         );
     }
-    let LoweredTypeData::Function(call) = call.data() else {
-        bail!("generated Error call helper is not function data");
+    let LoweredTypeData::Interface(interface) = global.data() else {
+        bail!("generated {name} global is not an interface");
     };
-    Ok(call)
+    if interface.name() != name {
+        bail!(
+            "generated {name} interface has unexpected name {}",
+            interface.name()
+        );
+    }
+    Ok(interface)
+}
+
+/// Returns the lowered function named `name`, checking it targets `id_constant`.
+fn generated_function<'a>(
+    lowered: &'a LoweredGlobalTypes,
+    name: &str,
+    id_constant: &str,
+) -> Result<&'a LoweredFunction> {
+    let Some(global) = lowered.global(name) else {
+        bail!("generated globals are missing {name}");
+    };
+    if global.id_constant() != id_constant {
+        bail!(
+            "generated {name} targets {}, expected {id_constant}",
+            global.id_constant()
+        );
+    }
+    let LoweredTypeData::Function(function) = global.data() else {
+        bail!("generated {name} helper is not function data");
+    };
+    Ok(function)
+}
+
+/// Validates that the generated interface and dispose helper match the expected [`DisposableShape`]:
+/// the single computed member keyed by the well-known symbol, and the helper's async flag and return.
+fn assert_disposable_shape(lowered: &LoweredGlobalTypes, shape: DisposableShape) -> Result<()> {
+    let interface =
+        generated_interface(lowered, shape.interface_name, shape.interface_id_constant)?;
+    let [member] = interface.members() else {
+        bail!(
+            "generated {} has {} members, expected one",
+            shape.interface_name,
+            interface.members().len()
+        );
+    };
+    if member.name() != shape.member_name {
+        bail!(
+            "generated {} member has unexpected name {}",
+            shape.interface_name,
+            member.name()
+        );
+    }
+    if member.kind()
+        != &(LoweredMemberKind::ComputedValue {
+            key_reference: LoweredTypeReference::Predefined(shape.symbol_id),
+        })
+    {
+        bail!(
+            "generated {} member has unexpected kind",
+            shape.interface_name
+        );
+    }
+    if member.type_reference() != &LoweredTypeReference::Predefined(shape.helper_type_id) {
+        bail!(
+            "generated {} member has unexpected type",
+            shape.interface_name
+        );
+    }
+
+    let helper = generated_function(lowered, shape.helper_name, shape.helper_id_constant)?;
+    if helper.is_async() != shape.helper_is_async {
+        bail!(
+            "generated {} helper has unexpected async flag",
+            shape.helper_name
+        );
+    }
+    if helper.name().is_some() {
+        bail!("generated {} helper should be anonymous", shape.helper_name);
+    }
+    if !helper.parameters().is_empty() {
+        bail!(
+            "generated {} helper should not have parameters",
+            shape.helper_name
+        );
+    }
+    if helper.return_type() != &LoweredTypeReference::Predefined(shape.return_type_id) {
+        bail!(
+            "generated {} helper has unexpected return type",
+            shape.helper_name
+        );
+    }
+
+    Ok(())
 }
 
 /// Validates a required `Error` string field such as `name` or `message`.
@@ -210,6 +346,9 @@ fn assert_error_constructor_shape(constructor: &LoweredConstructor) -> Result<()
 
 /// Validates the generated call helper shape.
 fn assert_error_call_shape(call: &LoweredFunction) -> Result<()> {
+    if call.is_async() {
+        bail!("generated Error call helper should not be async");
+    }
     if call.name() != Some("Error") {
         bail!("generated Error call helper has unexpected function name");
     }

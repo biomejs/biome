@@ -461,11 +461,15 @@ mod tests {
     }
 
     #[test]
-    fn error_global_is_migrated() {
+    fn error_and_disposable_globals_are_migrated() {
         let migrated = crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
         assert_eq!(
             migrated,
             &[
+                DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
+                ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
                 ERROR_ID_GLOBAL_TYPE_ID,
                 ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
                 ERROR_CALL_ID_GLOBAL_TYPE_ID,

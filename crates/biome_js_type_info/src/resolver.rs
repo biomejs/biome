@@ -489,6 +489,15 @@ impl<'a> ResolvedTypeMember<'a> {
         })
     }
 
+    /// Returns whether this member is keyed by a type reference that, with the
+    /// module context applied, matches `predicate`. The key may be spelled as
+    /// an index signature or as a computed value.
+    pub fn is_keyed_member_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        self.member.is_keyed_member_with_ty(|reference| {
+            predicate(&self.apply_module_id_to_reference(reference))
+        })
+    }
+
     #[inline]
     pub fn is_static(&self) -> bool {
         self.member.is_static()
@@ -522,6 +531,37 @@ impl<'a> ResolvedTypeMember<'a> {
     pub fn ty(&self) -> Cow<'_, TypeReference> {
         self.apply_module_id_to_reference(&self.member.ty)
     }
+}
+
+/// Applies the module ID of `resolved` to the key reference of index signature
+/// and computed value member kinds. Returns `None` for other kinds.
+fn keyed_member_kind_with_resolved_reference(
+    resolved: ResolvedTypeData,
+    member_kind: &TypeMemberKind,
+) -> Option<TypeMemberKind> {
+    let (key_reference, constructor): (&TypeReference, fn(TypeReference) -> TypeMemberKind) =
+        match member_kind {
+            TypeMemberKind::IndexSignature(key_reference)
+            | TypeMemberKind::ConstAssertedIndexSignature(key_reference) => {
+                (key_reference, TypeMemberKind::IndexSignature)
+            }
+            TypeMemberKind::ComputedValue(key_reference)
+            | TypeMemberKind::ConstAssertedComputedValue(key_reference) => {
+                (key_reference, TypeMemberKind::ComputedValue)
+            }
+            _ => return None,
+        };
+
+    let kind = constructor(
+        resolved
+            .apply_module_id_to_reference(key_reference)
+            .into_owned(),
+    );
+    Some(if member_kind.is_const_asserted() {
+        kind.with_const_asserted()
+    } else {
+        kind
+    })
 }
 
 /// Trait for implementing type resolution.
@@ -874,34 +914,17 @@ impl Resolvable for TypeReference {
                                         .own_members()
                                         .map(|member| {
                                             let was_optional = member.is_optional();
-                                            let kind = match &member.kind {
-                                                TypeMemberKind::IndexSignature(key_reference)
-                                                | TypeMemberKind::ConstAssertedIndexSignature(
-                                                    key_reference,
-                                                ) => {
-                                                    let resolved_index_signature_kind =
-                                                        TypeMemberKind::IndexSignature(
-                                                            resolved
-                                                                .apply_module_id_to_reference(
-                                                                    key_reference,
-                                                                )
-                                                                .into_owned(),
-                                                        );
-                                                    if member.kind.is_const_asserted() {
-                                                        resolved_index_signature_kind
-                                                            .with_const_asserted()
-                                                    } else {
-                                                        resolved_index_signature_kind
-                                                    }
+                                            let kind = keyed_member_kind_with_resolved_reference(
+                                                resolved,
+                                                &member.kind,
+                                            )
+                                            .unwrap_or_else(|| {
+                                                if is_partial {
+                                                    member.kind.clone().with_optional()
+                                                } else {
+                                                    member.kind.clone().without_optional()
                                                 }
-                                                other => {
-                                                    if is_partial {
-                                                        other.clone().with_optional()
-                                                    } else {
-                                                        other.clone().without_optional()
-                                                    }
-                                                }
-                                            };
+                                            });
                                             (
                                                 TypeMember {
                                                     kind,
@@ -953,28 +976,11 @@ impl Resolvable for TypeReference {
                                         .as_raw_data()
                                         .own_members()
                                         .map(|member| {
-                                            let kind = match &member.kind {
-                                                TypeMemberKind::IndexSignature(key_reference)
-                                                | TypeMemberKind::ConstAssertedIndexSignature(
-                                                    key_reference,
-                                                ) => {
-                                                    let resolved_index_signature_kind =
-                                                        TypeMemberKind::IndexSignature(
-                                                            resolved
-                                                                .apply_module_id_to_reference(
-                                                                    key_reference,
-                                                                )
-                                                                .into_owned(),
-                                                        );
-                                                    if member.kind.is_const_asserted() {
-                                                        resolved_index_signature_kind
-                                                            .with_const_asserted()
-                                                    } else {
-                                                        resolved_index_signature_kind
-                                                    }
-                                                }
-                                                other => other.clone(),
-                                            };
+                                            let kind = keyed_member_kind_with_resolved_reference(
+                                                resolved,
+                                                &member.kind,
+                                            )
+                                            .unwrap_or_else(|| member.kind.clone());
                                             TypeMember {
                                                 kind,
                                                 ty: resolved

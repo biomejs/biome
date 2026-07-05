@@ -7,11 +7,10 @@ use biome_js_syntax::AnyJsExpression;
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, FunctionParameter, GenericTypeParameter, Interface, Literal,
-    PatternFunctionParameter, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType,
-    ScopeId, TypeData, TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore, Union,
-    flattening::MAX_FLATTEN_DEPTH,
+    Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
+    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
@@ -408,55 +407,9 @@ impl Default for GlobalsResolver {
         });
         builder.set_manual_type_data(SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
         builder.set_manual_type_data(SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, || TypeData::Symbol);
-        builder.set_manual_type_data(DISPOSABLE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Interface(Box::new(Interface {
-                name: Text::new_static(DISPOSABLE_ID_NAME),
-                type_parameters: Box::default(),
-                extends: Box::default(),
-                members: Box::new([TypeMember {
-                    kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
-                        GLOBAL_SYMBOL_DISPOSE_ID,
-                    )),
-                    ty: ResolvedTypeId::new(TypeResolverLevel::Global, DISPOSABLE_DISPOSE_ID)
-                        .into(),
-                }]),
-            }))
-        });
-        builder.set_manual_type_data(DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Function(Box::new(Function {
-                is_async: false,
-                type_parameters: Default::default(),
-                name: None,
-                parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-            }))
-        });
-        builder.set_manual_type_data(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Interface(Box::new(Interface {
-                name: Text::new_static(ASYNC_DISPOSABLE_ID_NAME),
-                type_parameters: Box::default(),
-                extends: Box::default(),
-                members: Box::new([TypeMember {
-                    kind: TypeMemberKind::IndexSignature(TypeReference::Resolved(
-                        GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
-                    )),
-                    ty: ResolvedTypeId::new(
-                        TypeResolverLevel::Global,
-                        ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
-                    )
-                    .into(),
-                }]),
-            }))
-        });
-        builder.set_manual_type_data(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, || {
-            TypeData::Function(Box::new(Function {
-                is_async: true,
-                type_parameters: Default::default(),
-                name: None,
-                parameters: Default::default(),
-                return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-            }))
-        });
+        // `Disposable`, `AsyncDisposable`, and their `[Symbol.(async)Dispose]` helpers are
+        // supplied by the generated global types (see `MIGRATED_PREDEFINED_IDS`), which encode
+        // the members as computed keys instead of the index-signature hack this used to carry.
 
         builder.build()
     }
