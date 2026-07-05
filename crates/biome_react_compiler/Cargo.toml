@@ -16,9 +16,10 @@ biome_js_semantic = { workspace = true }
 biome_js_syntax   = { workspace = true }
 biome_rowan       = { workspace = true }
 indexmap          = { workspace = true }
-react_compiler = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
-react_compiler_ast = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
-react_compiler_hir = { git = "https://github.com/facebook/react", rev = "b49e04151e1c2cd34f4612e43c5e38edf5da56e2" }
+react_compiler = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
+react_compiler_ast = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
+react_compiler_hir = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
+rustc-hash = { workspace = true }
 serde_json = { workspace = true }
 
 [dev-dependencies]

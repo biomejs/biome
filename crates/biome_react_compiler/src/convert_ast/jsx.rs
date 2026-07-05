@@ -265,7 +265,7 @@ pub(super) fn convert_jsx_string_literal(
         .map_err(|_| missing("JsxString", "value_token"))?;
     Ok(StringLiteral {
         base: ctx.base(string.syntax().text_trimmed_range()),
-        value: inner_string_text(&token).to_string(),
+        value: inner_string_text(&token).to_string().into(),
     })
 }
 
