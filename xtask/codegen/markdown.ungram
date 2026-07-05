@@ -130,6 +130,8 @@ MdFencedCodeBlock =
 
 MdCodeNameList = MdTextual*
 
+MdCodeContent = value: 'md_code_literal'
+
 // <div>
 // ^^^^^
 MdHtmlBlock =
@@ -259,6 +261,7 @@ AnyMdInline =
 	| MdInlineHtml
 	| MdEntityReference
 	| MdHtmlBlock
+	| MdCodeContent
 	| MdHardLine
 	| MdTextual
 	| MdQuotePrefix

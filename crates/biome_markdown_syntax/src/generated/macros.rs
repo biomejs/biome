@@ -28,6 +28,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBulletListItem::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_CODE_CONTENT => {
+                    let $pattern = unsafe { $crate::MdCodeContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_CONTINUATION_INDENT => {
                     let $pattern = unsafe { $crate::MdContinuationIndent::new_unchecked(node) };
                     $body

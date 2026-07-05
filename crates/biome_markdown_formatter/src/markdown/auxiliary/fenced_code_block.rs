@@ -2,7 +2,7 @@ use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOption
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
+use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdFencedCodeBlockFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdFencedCodeBlock {
@@ -123,17 +123,24 @@ fn longest_fence_char_sequence(node: &MdFencedCodeBlock, fence_char: char) -> us
     let mut max_len = 0usize;
 
     for item in content.iter() {
-        if let Some(textual) = item.as_md_textual()
-            && let Ok(token) = textual.value_token()
-        {
-            let mut consecutive_count = 0usize;
-            for ch in token.text().chars() {
-                if ch == fence_char {
-                    consecutive_count += 1;
-                    max_len = max_len.max(consecutive_count);
-                } else {
-                    consecutive_count = 0;
-                }
+        // Document-level blocks store the whole content in one MdCodeContent
+        // literal; nested blocks keep per-line MdTextual nodes.
+        let token = match &item {
+            AnyMdInline::MdTextual(textual) => textual.value_token(),
+            AnyMdInline::MdCodeContent(code) => code.value_token(),
+            _ => continue,
+        };
+        let Ok(token) = token else {
+            continue;
+        };
+
+        let mut consecutive_count = 0usize;
+        for ch in token.text().chars() {
+            if ch == fence_char {
+                consecutive_count += 1;
+                max_len = max_len.max(consecutive_count);
+            } else {
+                consecutive_count = 0;
             }
         }
     }

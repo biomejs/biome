@@ -1701,6 +1701,11 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
         }
+        AnyMdInline::MdCodeContent(code) => {
+            if let Ok(token) = code.value_token() {
+                out.push_str(token.text());
+            }
+        }
         _ => {
             // For other inline elements, collect their tokens
             for token in item
@@ -1968,6 +1973,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdIndentToken(_) => {
             // Indent tokens don't contribute text to alt attributes
+        }
+        AnyMdInline::MdCodeContent(_) => {
+            // Fenced code content never appears inside link or image text
         }
     }
 }

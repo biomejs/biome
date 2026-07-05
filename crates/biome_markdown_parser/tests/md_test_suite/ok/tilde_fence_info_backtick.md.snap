@@ -28,14 +28,8 @@ MdDocument {
                 },
             ],
             content: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@25..37 "fn main() {}" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                MdCodeContent {
+                    value_token: MD_CODE_LITERAL@24..38 "\nfn main() {}\n" [] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
@@ -62,12 +56,8 @@ MdDocument {
         0: MD_TEXTUAL@3..24
           0: MD_TEXTUAL_LITERAL@3..24 " lang`with-backticks`" [] []
       3: MD_INLINE_ITEM_LIST@24..38
-        0: MD_TEXTUAL@24..25
-          0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
-        1: MD_TEXTUAL@25..37
-          0: MD_TEXTUAL_LITERAL@25..37 "fn main() {}" [] []
-        2: MD_TEXTUAL@37..38
-          0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+        0: MD_CODE_CONTENT@24..38
+          0: MD_CODE_LITERAL@24..38 "\nfn main() {}\n" [] []
       4: MD_INDENT_TOKEN_LIST@38..38
       5: TRIPLE_TILDE@38..41 "~~~" [] []
     1: MD_NEWLINE@41..42

@@ -7,7 +7,6 @@ expression: snapshot
 
 ```
 ```
-  indented
 ```
 
 ```
@@ -25,37 +24,37 @@ MdDocument {
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
                 MdCodeContent {
-                    value_token: MD_CODE_LITERAL@3..15 "\n  indented\n" [] [],
+                    value_token: MD_CODE_LITERAL@3..4 "\n" [] [],
                 },
             ],
             r_fence_indent: MdIndentTokenList [],
-            r_fence: TRIPLE_BACKTICK@15..18 "```" [] [],
+            r_fence: TRIPLE_BACKTICK@4..7 "```" [] [],
         },
         MdNewline {
-            value_token: NEWLINE@18..19 "\n" [] [],
+            value_token: NEWLINE@7..8 "\n" [] [],
         },
     ],
-    eof_token: EOF@19..19 "" [] [],
+    eof_token: EOF@8..8 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_DOCUMENT@0..19
+0: MD_DOCUMENT@0..8
   0: (empty)
-  1: MD_BLOCK_LIST@0..19
-    0: MD_FENCED_CODE_BLOCK@0..18
+  1: MD_BLOCK_LIST@0..8
+    0: MD_FENCED_CODE_BLOCK@0..7
       0: MD_INDENT_TOKEN_LIST@0..0
       1: TRIPLE_BACKTICK@0..3 "```" [] []
       2: MD_CODE_NAME_LIST@3..3
-      3: MD_INLINE_ITEM_LIST@3..15
-        0: MD_CODE_CONTENT@3..15
-          0: MD_CODE_LITERAL@3..15 "\n  indented\n" [] []
-      4: MD_INDENT_TOKEN_LIST@15..15
-      5: TRIPLE_BACKTICK@15..18 "```" [] []
-    1: MD_NEWLINE@18..19
-      0: NEWLINE@18..19 "\n" [] []
-  2: EOF@19..19 "" [] []
+      3: MD_INLINE_ITEM_LIST@3..4
+        0: MD_CODE_CONTENT@3..4
+          0: MD_CODE_LITERAL@3..4 "\n" [] []
+      4: MD_INDENT_TOKEN_LIST@4..4
+      5: TRIPLE_BACKTICK@4..7 "```" [] []
+    1: MD_NEWLINE@7..8
+      0: NEWLINE@7..8 "\n" [] []
+  2: EOF@8..8 "" [] []
 
 ```

@@ -79,7 +79,8 @@ pub enum MarkdownReLexContext {
     /// whitespace and newlines included: the parser measures where the block
     /// ends (terminator line, blank line, or container boundary) and passes
     /// the end position via [MarkdownLexer::set_relex_span] before re-lexing.
-    /// Runs of indentation characters use the same mechanism.
+    /// Document-level fenced code content and runs of indentation characters
+    /// use the same mechanism.
     Span,
 }
 
