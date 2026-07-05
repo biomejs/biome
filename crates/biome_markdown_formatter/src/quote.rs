@@ -86,7 +86,7 @@ impl Format<MarkdownFormatContext> for Quote {
             quote_boundary_trim,
         };
 
-        write!(f, [align(2, &content)])
+        write!(f, [align("  ", &content)])
     }
 }
 

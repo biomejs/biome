@@ -569,7 +569,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                                 f,
                                 [
                                     token("align("),
-                                    text(&count.to_string(), None),
+                                    text(&std::format!("{:?}", count.as_str()), None),
                                     token(","),
                                     space(),
                                 ]

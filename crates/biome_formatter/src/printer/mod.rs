@@ -12,6 +12,8 @@ use crate::{
     PrintResult, Printed, SourceMarker, TextRange,
 };
 
+use self::call_stack::PrintIndentStack;
+use crate::builders::AlignedStr;
 use crate::format_element::document::Document;
 use crate::format_element::tag::Condition;
 use crate::prelude::Tag::EndFill;
@@ -26,10 +28,7 @@ use crate::printer::queue::{
 };
 use biome_rowan::{TextLen, TextSize};
 use drop_bomb::DebugDropBomb;
-use std::num::NonZeroU8;
 use unicode_width::UnicodeWidthChar;
-
-use self::call_stack::PrintIndentStack;
 
 /// Prints the format elements into a string
 #[derive(Debug, Default)]
@@ -209,7 +208,10 @@ impl<'a> Printer<'a> {
 
                             // Measure to see if the group fits up on a single line. If that's the case,
                             // print the group in "flat" mode, otherwise continue in expanded mode
-                            stack.push(TagKind::Group, args.with_print_mode(PrintMode::Flat));
+                            stack.push(
+                                TagKind::Group,
+                                args.clone().with_print_mode(PrintMode::Flat),
+                            );
                             let fits = self.fits(queue, stack, indent_stack)?;
                             stack.pop(TagKind::Group)?;
 
@@ -222,7 +224,7 @@ impl<'a> Printer<'a> {
                     }
                 };
 
-                stack.push(TagKind::Group, args.with_print_mode(group_mode));
+                stack.push(TagKind::Group, args.clone().with_print_mode(group_mode));
 
                 if let Some(id) = group.id() {
                     self.state.group_modes.insert_print_mode(id, group_mode);
@@ -247,7 +249,7 @@ impl<'a> Printer<'a> {
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                indent_stack.align(align.count());
+                indent_stack.align(align.0.clone());
                 stack.push(TagKind::Align, args);
             }
 
@@ -359,24 +361,27 @@ impl<'a> Printer<'a> {
 
     fn print_text(&mut self, text: Text) {
         if !self.state.pending_indent.is_empty() {
-            let (indent_char, repeat_count) = match self.options.indent_style() {
-                IndentStyle::Tab => ('\t', 1),
-                IndentStyle::Space => (' ', self.options.indent_width().value()),
+            let indent = std::mem::take(&mut self.state.pending_indent);
+
+            let (indent_string, repeat_count) = match self.options.indent_style() {
+                IndentStyle::Tab => ("\t", 1),
+                IndentStyle::Space => (" ", self.options.indent_width().value()),
             };
 
-            let indent = std::mem::take(&mut self.state.pending_indent);
             let total_indent_char_count = indent.level() as usize * repeat_count as usize;
 
             self.state
                 .buffer
-                .reserve(total_indent_char_count + indent.align() as usize);
+                .reserve(total_indent_char_count + indent.align_len());
 
             for _ in 0..total_indent_char_count {
-                self.print_char(indent_char);
+                for ch in indent_string.chars() {
+                    self.print_char(ch);
+                }
             }
 
-            for _ in 0..indent.align() {
-                self.print_char(' ');
+            for ch in indent.align().chars() {
+                self.print_char(ch);
             }
         }
 
@@ -520,7 +525,7 @@ impl<'a> Printer<'a> {
                     return invalid_start_tag(TagKind::BestFittingEntry, current.first());
                 }
 
-                let entry_args = args.with_print_mode(PrintMode::Flat);
+                let entry_args = args.clone().with_print_mode(PrintMode::Flat);
 
                 // Skip the first element because we want to override the args for the entry and the
                 // args must be popped from the stack as soon as it sees the matching end entry.
@@ -541,7 +546,7 @@ impl<'a> Printer<'a> {
                         queue,
                         stack,
                         indent_stack,
-                        args.with_print_mode(PrintMode::Flat),
+                        args.clone().with_print_mode(PrintMode::Flat),
                         TagKind::BestFittingEntry,
                     );
                 }
@@ -556,7 +561,7 @@ impl<'a> Printer<'a> {
                 queue,
                 stack,
                 indent_stack,
-                args.with_print_mode(PrintMode::Expanded),
+                args.clone().with_print_mode(PrintMode::Expanded),
                 TagKind::BestFittingEntry,
             )
         }
@@ -595,7 +600,7 @@ impl<'a> Printer<'a> {
             return Ok(());
         }
 
-        stack.push(TagKind::Fill, args);
+        stack.push(TagKind::Fill, args.clone());
 
         while matches!(queue.top(), Some(FormatElement::Tag(Tag::StartEntry))) {
             let mut measurer = FitsMeasurer::new_flat(queue, stack, indent_stack, self);
@@ -659,13 +664,13 @@ impl<'a> Printer<'a> {
                     queue,
                     stack,
                     indent_stack,
-                    args.with_print_mode(PrintMode::Flat),
+                    args.clone().with_print_mode(PrintMode::Flat),
                 )?;
                 self.print_fill_separator(
                     queue,
                     stack,
                     indent_stack,
-                    args.with_print_mode(PrintMode::Flat),
+                    args.clone().with_print_mode(PrintMode::Flat),
                 )?;
             }
 
@@ -688,7 +693,12 @@ impl<'a> Printer<'a> {
                 }
             };
 
-            self.print_fill_item(queue, stack, indent_stack, args.with_print_mode(item_mode))?;
+            self.print_fill_item(
+                queue,
+                stack,
+                indent_stack,
+                args.clone().with_print_mode(item_mode),
+            )?;
 
             if matches!(queue.top(), Some(FormatElement::Tag(Tag::StartEntry))) {
                 let separator_mode = match last_pair_layout {
@@ -700,12 +710,12 @@ impl<'a> Printer<'a> {
 
                 // Push a new stack frame with print mode `Flat` for the case where the separator gets printed in expanded mode
                 // but does contain a group to ensure that the group will measure "fits" with the "flat" versions of the next item/separator.
-                stack.push(TagKind::Fill, args.with_print_mode(PrintMode::Flat));
+                stack.push(TagKind::Fill, args.clone().with_print_mode(PrintMode::Flat));
                 self.print_fill_separator(
                     queue,
                     stack,
                     indent_stack,
-                    args.with_print_mode(separator_mode),
+                    args.clone().with_print_mode(separator_mode),
                 )?;
                 stack.pop(TagKind::Fill)?;
             }
@@ -771,7 +781,7 @@ impl<'a> Printer<'a> {
                     // Handle the start of the first element by pushing the args on the stack.
                     if depth == 0 {
                         depth = 1;
-                        stack.push(kind, args);
+                        stack.push(kind, args.clone());
                         continue;
                     }
 
@@ -906,7 +916,7 @@ impl GroupModes {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 enum Indention {
     /// Indent the content by `count` levels by using the indention sequence specified by the printer options.
     Level(u16),
@@ -914,8 +924,9 @@ enum Indention {
     /// Indent the content by n-`level`s using the indention sequence specified by the printer options and `align` spaces.
     Align {
         level: u16,
-        align: NonZeroU8,
+        align: usize,
         align_count: u16,
+        content: AlignedStr,
     },
 }
 
@@ -937,11 +948,35 @@ impl Indention {
         }
     }
 
-    /// Returns the number of trailing align spaces or 0 if none
-    fn align(&self) -> u8 {
+    /// Returns the aligned placeholder printed after the configured indentation.
+    fn align(&self) -> &str {
+        match self {
+            Self::Level(_) => "",
+            Self::Align { content, .. } => content.as_str(),
+        }
+    }
+
+    fn align_width(&self, tab_width: u8) -> usize {
+        self.align()
+            .chars()
+            .map(|char| {
+                if char == '\t' {
+                    tab_width as usize
+                } else {
+                    char.width().unwrap_or(0)
+                }
+            })
+            .sum()
+    }
+
+    fn print_width(&self, tab_width: u8) -> usize {
+        self.level() as usize * tab_width as usize + self.align_width(tab_width)
+    }
+
+    fn align_len(&self) -> usize {
         match self {
             Self::Level(_) => 0,
-            Self::Align { align, .. } => (*align).into(),
+            Self::Align { align, .. } => *align,
         }
     }
 
@@ -963,10 +998,12 @@ impl Indention {
                 level: indent,
                 align,
                 align_count,
+                content,
             } => Self::Align {
                 level: indent + 1,
                 align,
                 align_count,
+                content,
             },
         }
     }
@@ -974,12 +1011,14 @@ impl Indention {
     /// Adds an `align` of `count` spaces to the current indention.
     ///
     /// It increments the `level` value if the current value is [Indent::IndentAlign].
-    fn set_align(self, count: NonZeroU8) -> Self {
+    fn set_align(self, placeholder: AlignedStr) -> Self {
+        let count = placeholder.len();
         match self {
             Self::Level(indent_count) => Self::Align {
                 level: indent_count,
                 align: count,
                 align_count: 1,
+                content: placeholder,
             },
 
             // Convert the existing align to an indent
@@ -987,10 +1026,15 @@ impl Indention {
                 level: indent,
                 align,
                 align_count,
+                mut content,
             } => Self::Align {
                 level: indent,
-                align: align.saturating_add(count.get()),
+                align: align.saturating_add(count),
                 align_count: align_count + 1,
+                content: {
+                    content.push_str(placeholder.as_str());
+                    content
+                },
             },
         }
     }
@@ -1052,7 +1096,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
         );
 
         let fits_state = FitsState {
-            pending_indent: printer.state.pending_indent,
+            pending_indent: printer.state.pending_indent.clone(),
             pending_space: printer.state.pending_space,
             line_width: printer.state.line_width,
             has_line_suffix: printer.state.line_suffixes.has_pending(),
@@ -1286,7 +1330,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                self.indent_stack.align(align.count());
+                self.indent_stack.align(align.0.clone());
                 self.stack.push(TagKind::Align, args);
             }
 
@@ -1383,9 +1427,16 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 }
                 self.stack.pop(tag.kind())?;
             }
-            FormatElement::Tag(tag @ (EndIndent | EndAlign)) => {
+            FormatElement::Tag(tag @ EndIndent) => {
                 self.stack.pop(tag.kind())?;
                 self.indent_stack.pop();
+            }
+            FormatElement::Tag(EndAlign) => {
+                self.stack.pop(TagKind::Align)?;
+                self.indent_stack.pop();
+                if !self.state.pending_indent.is_empty() {
+                    self.state.pending_indent = self.indent_stack.indention();
+                }
             }
             FormatElement::Tag(tag @ EndDedent(mode)) => {
                 if let DedentMode::Level = mode {
@@ -1400,9 +1451,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     fn fits_text(&mut self, text: Text) -> Fits {
         let indent = std::mem::take(&mut self.state.pending_indent);
-        self.state.line_width += indent.level() as usize
-            * self.options().indent_width().value() as usize
-            + indent.align() as usize;
+        self.state.line_width += indent.print_width(self.options().indent_width().value());
 
         if self.state.pending_space {
             self.state.line_width += 1;
@@ -2201,6 +2250,44 @@ Group 1 breaks"#
     }
 
     #[test]
+    fn align_prints_placeholder_content() {
+        let result = format(&format_args![
+            token("> "),
+            align(
+                "> ",
+                &format_args![token("a"), hard_line_break(), token("b")]
+            )
+        ]);
+
+        assert_eq!("> a\n> b", result.as_code());
+    }
+
+    #[test]
+    fn align_uses_configured_indent_for_base_levels() {
+        let options = PrinterOptions {
+            indent_style: IndentStyle::Tab,
+            indent_width: 2.try_into().unwrap(),
+            line_ending: LineEnding::Lf,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &indent(&format_args![align(
+                "> ",
+                &format_args![
+                    hard_line_break(),
+                    token("content"),
+                    hard_line_break(),
+                    token("next")
+                ]
+            )]),
+            options,
+        );
+
+        assert_eq!("\t> content\n\t> next", result.as_code());
+    }
+
+    #[test]
     fn align_does_not_leak_pending_indent() {
         // A hard_line_break as the last element inside align() used to
         // capture the align's indentation into pending_indent. Because
@@ -2209,11 +2296,11 @@ Group 1 breaks"#
         // would be printed with the stale, wider indentation.
         let result = format(&format_args![
             token("- "),
-            align(2, &format_args![token("content"), hard_line_break()]),
+            align("  ", &format_args![token("content"), hard_line_break()]),
             token("next")
         ]);
 
-        // "next" must start at column 0 — the align(2) block has ended.
+        // "next" must start at column 0 because the align block has ended.
         assert_eq!("- content\nnext", result.as_code());
     }
 
@@ -2222,12 +2309,12 @@ Group 1 breaks"#
         let result = format(&format_args![
             token("- "),
             align(
-                2,
+                "  ",
                 &format_args![
                     token("a"),
                     hard_line_break(),
                     token("- "),
-                    align(2, &format_args![token("b"), hard_line_break()]),
+                    align("  ", &format_args![token("b"), hard_line_break()]),
                     token("after_inner")
                 ]
             ),
@@ -2235,9 +2322,9 @@ Group 1 breaks"#
             token("after_outer")
         ]);
 
-        // After inner align(2) ends, "after_inner" should get 2 spaces
+        // After the inner align ends, "after_inner" should get 2 spaces
         // (from the outer align), not 4.
-        // After outer align(2) ends, "after_outer" should get 0 spaces.
+        // After the outer align ends, "after_outer" should get 0 spaces.
         assert_eq!("- a\n  - b\n  after_inner\nafter_outer", result.as_code());
     }
 
@@ -2247,7 +2334,7 @@ Group 1 breaks"#
         // pending_indent is empty and no leak can occur.
         let result = format(&format_args![
             token("- "),
-            align(2, &token("content")),
+            align("  ", &token("content")),
             hard_line_break(),
             token("next")
         ]);

@@ -287,7 +287,7 @@ impl Format<MarkdownFormatContext> for ListBullet {
         let content = ListBlockList {
             content: content.clone(),
         };
-        write!(f, [align(alignment, &content),])
+        write!(f, [align(" ".repeat(alignment as usize), &content),])
     }
 }
 

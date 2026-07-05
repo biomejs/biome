@@ -10,7 +10,6 @@ use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
-use std::num::NonZeroU8;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.
@@ -863,7 +862,7 @@ impl<Context> Format<Context> for HardSpace {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![indent(&format_args![
 ///                 hard_line_break(),
 ///                 token("should be 3 tabs"),
@@ -923,7 +922,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
 ///     token("root"),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         hard_line_break(),
 ///         token("aligned"),
 ///         dedent(&format_args![
@@ -967,7 +966,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 hard_line_break(),
 ///                 token("Indented"),
 ///                 align(
-///                     2,
+///                     "  ",
 ///                     &format_args![
 ///                         hard_line_break(),
 ///                         token("Indented and aligned"),
@@ -979,7 +978,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///                 ),
 ///             ]),
 ///             align(
-///                 2,
+///                 "  ",
 ///                 &format_args![
 ///                     hard_line_break(),
 ///                     token("Aligned"),
@@ -1014,9 +1013,9 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///     [
 ///         token("root"),
 ///         indent(&format_args![align(
-///             2,
+///             "  ",
 ///             &format_args![align(
-///                 2,
+///                 "  ",
 ///                 &format_args![indent(&format_args![
 ///                     hard_line_break(),
 ///                     token("should be 4 tabs"),
@@ -1084,7 +1083,7 @@ impl<Context> std::fmt::Debug for Dedent<'_, Context> {
 ///         indent(&format_args![
 ///             hard_line_break(),
 ///             token("indent level 2"),
-///             align(2, &format_args![
+///             align("  ", &format_args![
 ///                 hard_line_break(),
 ///                 token("two space align"),
 ///                 dedent_to_root(&format_args![
@@ -1133,7 +1132,6 @@ where
 /// ## Tab indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args};
 /// use biome_formatter::prelude::*;
 ///
@@ -1143,7 +1141,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1151,7 +1149,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1178,7 +1176,6 @@ where
 /// ## Spaces indention
 ///
 /// ```
-/// use std::num::NonZeroU8;
 /// use biome_formatter::{format, format_args, IndentStyle, SimpleFormatOptions};
 /// use biome_formatter::prelude::*;
 ///
@@ -1194,7 +1191,7 @@ where
 ///     hard_line_break(),
 ///     token("?"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         hard_line_break(),
 ///         token("}"),
@@ -1202,7 +1199,7 @@ where
 ///     hard_line_break(),
 ///     token(":"),
 ///     space(),
-///     align(2, &format_args![
+///     align("  ", &format_args![
 ///         token("function () {"),
 ///         block_indent(&token("console.log('test');")),
 ///         token("}"),
@@ -1223,25 +1220,82 @@ where
 ///
 /// * tab indention: Printer indents the expression with two tabs because the `align` increases the indention level.
 /// * space indention: Printer indents the expression by 4 spaces (one indention level) **and** 2 spaces for the align.
-pub fn align<Content, Context>(count: u8, content: &Content) -> Align<'_, Context>
+pub fn align<'a, Content, Context>(
+    placeholder: impl Into<AlignedStr>,
+    content: &'a Content,
+) -> Align<'a, Context>
 where
     Content: Format<Context>,
 {
     Align {
-        count: NonZeroU8::new(count).expect("Alignment count must be a non-zero number."),
+        placeholder: placeholder.into(),
         content: Argument::new(content),
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Align<'a, Context> {
-    count: NonZeroU8,
+    placeholder: AlignedStr,
     content: Argument<'a, Context>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AlignedStr {
+    Borrowed(&'static str),
+    Owned(String),
+}
+
+impl AlignedStr {
+    pub fn len(&self) -> usize {
+        match self {
+            Self::Borrowed(s) => s.len(),
+            Self::Owned(s) => s.len(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Self::Borrowed(s) => s.is_empty(),
+            Self::Owned(s) => s.is_empty(),
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Borrowed(s) => s,
+            Self::Owned(s) => s.as_str(),
+        }
+    }
+
+    pub fn push_str(&mut self, text: &str) {
+        match self {
+            Self::Borrowed(s) => {
+                let mut owned = String::from(*s);
+                owned.push_str(text);
+                *self = Self::Owned(owned);
+            }
+            Self::Owned(s) => s.push_str(text),
+        }
+    }
+}
+
+impl From<&'static str> for AlignedStr {
+    fn from(s: &'static str) -> Self {
+        Self::Borrowed(s)
+    }
+}
+
+impl From<String> for AlignedStr {
+    fn from(s: String) -> Self {
+        Self::Owned(s)
+    }
 }
 
 impl<Context> Format<Context> for Align<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Tag(StartAlign(tag::Align(self.count))))?;
+        f.write_element(FormatElement::Tag(StartAlign(tag::Align(
+            self.placeholder.clone(),
+        ))))?;
         Arguments::from(&self.content).fmt(f)?;
         f.write_element(FormatElement::Tag(EndAlign))
     }
@@ -1250,7 +1304,8 @@ impl<Context> Format<Context> for Align<'_, Context> {
 impl<Context> std::fmt::Debug for Align<'_, Context> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Align")
-            .field("count", &self.count)
+            .field("placeholder", &self.placeholder.as_str())
+            .field("count", &self.placeholder.len())
             .field("content", &"{{content}}")
             .finish()
     }

@@ -4,13 +4,9 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"```markdown
-* Red
-```
-
-
-
-1. Buy flour and salt
+    let source = r#"1. 123
+2. 123
+   1.   123
 "#;
     let parse = parse_markdown(source);
 

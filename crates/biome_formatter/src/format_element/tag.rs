@@ -1,8 +1,8 @@
 use crate::format_element::PrintMode;
+use crate::prelude::AlignedStr;
 use crate::{GroupId, TextSize};
 use biome_rowan::TextRange;
 use std::cell::Cell;
-use std::num::NonZeroU8;
 
 /// A Tag marking the start and end of some content to which some special formatting should be applied.
 ///
@@ -244,11 +244,15 @@ impl Condition {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Align(pub(crate) NonZeroU8);
+pub struct Align(pub(crate) AlignedStr);
 
 impl Align {
-    pub fn count(&self) -> NonZeroU8 {
-        self.0
+    pub fn count(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn placeholder(&self) -> &str {
+        self.0.as_str()
     }
 }
 

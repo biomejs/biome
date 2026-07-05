@@ -51,7 +51,7 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
             write!(
                 f,
                 [align(
-                    1,
+                    " ",
                     &format_once(|f| {
                         for line in lines {
                             write!(
