@@ -243,8 +243,11 @@ impl Condition {
     }
 }
 
+/// The placeholder is boxed to keep the payload one pointer wide: `Tag` and
+/// `FormatElement` sizes are asserted in `format_element.rs`, and alignment
+/// tags are rare enough that the extra indirection is free in practice.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Align(pub(crate) AlignedStr);
+pub struct Align(pub(crate) Box<AlignedStr>);
 
 impl Align {
     pub fn count(&self) -> usize {

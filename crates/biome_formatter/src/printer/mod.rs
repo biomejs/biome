@@ -249,7 +249,7 @@ impl<'a> Printer<'a> {
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                indent_stack.align(align.0.clone());
+                indent_stack.align((*align.0).clone());
                 stack.push(TagKind::Align, args);
             }
 
@@ -1330,7 +1330,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                self.indent_stack.align(align.0.clone());
+                self.indent_stack.align((*align.0).clone());
                 self.stack.push(TagKind::Align, args);
             }
 

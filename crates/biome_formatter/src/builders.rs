@@ -1239,43 +1239,38 @@ pub struct Align<'a, Context> {
     content: Argument<'a, Context>,
 }
 
+/// Placeholder text printed as alignment on continuation lines.
+///
+/// The printer clones this value on every line break inside an aligned
+/// region (see `pending_indent`), so the owned variant is reference-counted
+/// to keep those clones allocation-free.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AlignedStr {
     Borrowed(&'static str),
-    Owned(String),
+    Owned(std::rc::Rc<str>),
 }
 
 impl AlignedStr {
     pub fn len(&self) -> usize {
-        match self {
-            Self::Borrowed(s) => s.len(),
-            Self::Owned(s) => s.len(),
-        }
+        self.as_str().len()
     }
 
     pub fn is_empty(&self) -> bool {
-        match self {
-            Self::Borrowed(s) => s.is_empty(),
-            Self::Owned(s) => s.is_empty(),
-        }
+        self.as_str().is_empty()
     }
 
     pub fn as_str(&self) -> &str {
         match self {
             Self::Borrowed(s) => s,
-            Self::Owned(s) => s.as_str(),
+            Self::Owned(s) => s,
         }
     }
 
     pub fn push_str(&mut self, text: &str) {
-        match self {
-            Self::Borrowed(s) => {
-                let mut owned = String::from(*s);
-                owned.push_str(text);
-                *self = Self::Owned(owned);
-            }
-            Self::Owned(s) => s.push_str(text),
-        }
+        let mut owned = String::with_capacity(self.len() + text.len());
+        owned.push_str(self.as_str());
+        owned.push_str(text);
+        *self = Self::Owned(owned.into());
     }
 }
 
@@ -1287,15 +1282,17 @@ impl From<&'static str> for AlignedStr {
 
 impl From<String> for AlignedStr {
     fn from(s: String) -> Self {
-        Self::Owned(s)
+        Self::Owned(s.into())
     }
 }
 
 impl<Context> Format<Context> for Align<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Tag(StartAlign(tag::Align(
+        // The placeholder is boxed so the `Align` tag payload stays one
+        // pointer wide and `FormatElement` keeps its asserted size.
+        f.write_element(FormatElement::Tag(StartAlign(tag::Align(Box::new(
             self.placeholder.clone(),
-        ))))?;
+        )))))?;
         Arguments::from(&self.content).fmt(f)?;
         f.write_element(FormatElement::Tag(EndAlign))
     }
