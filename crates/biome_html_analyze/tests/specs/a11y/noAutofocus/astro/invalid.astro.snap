@@ -8,6 +8,7 @@ expression: invalid.astro
 <input autofocus />
 <input autofocus="true" />
 <input autofocus={autofocusValue} />
+<input {autofocus} />
 <textarea autofocus>content</textarea>
 <button autofocus>Submit</button>
 <select autofocus><option>a</option></select>
@@ -49,7 +50,7 @@ invalid.astro:3:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
   > 3 │ <input autofocus="true" />
       │        ^^^^^^^^^^^^^^^^
     4 │ <input autofocus={autofocusValue} />
-    5 │ <textarea autofocus>content</textarea>
+    5 │ <input {autofocus} />
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
@@ -69,8 +70,8 @@ invalid.astro:4:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
     3 │ <input autofocus="true" />
   > 4 │ <input autofocus={autofocusValue} />
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <textarea autofocus>content</textarea>
-    6 │ <button autofocus>Submit</button>
+    5 │ <input {autofocus} />
+    6 │ <textarea autofocus>content</textarea>
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
@@ -82,44 +83,44 @@ invalid.astro:4:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.astro:5:11 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:5:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
     3 │ <input autofocus="true" />
     4 │ <input autofocus={autofocusValue} />
-  > 5 │ <textarea autofocus>content</textarea>
-      │           ^^^^^^^^^
-    6 │ <button autofocus>Submit</button>
-    7 │ <select autofocus><option>a</option></select>
+  > 5 │ <input {autofocus} />
+      │        ^^^^^^^^^^^
+    6 │ <textarea autofocus>content</textarea>
+    7 │ <button autofocus>Submit</button>
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    5 │ <textarea·autofocus>content</textarea>
-      │           ---------                   
+    5 │ <input·{autofocus}·/>
+      │        ------------  
 
 ```
 
 ```
-invalid.astro:6:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:11 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
     4 │ <input autofocus={autofocusValue} />
-    5 │ <textarea autofocus>content</textarea>
-  > 6 │ <button autofocus>Submit</button>
-      │         ^^^^^^^^^
-    7 │ <select autofocus><option>a</option></select>
-    8 │ 
+    5 │ <input {autofocus} />
+  > 6 │ <textarea autofocus>content</textarea>
+      │           ^^^^^^^^^
+    7 │ <button autofocus>Submit</button>
+    8 │ <select autofocus><option>a</option></select>
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    6 │ <button·autofocus>Submit</button>
-      │         ---------                
+    6 │ <textarea·autofocus>content</textarea>
+      │           ---------                   
 
 ```
 
@@ -128,58 +129,79 @@ invalid.astro:7:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    5 │ <textarea autofocus>content</textarea>
-    6 │ <button autofocus>Submit</button>
-  > 7 │ <select autofocus><option>a</option></select>
+    5 │ <input {autofocus} />
+    6 │ <textarea autofocus>content</textarea>
+  > 7 │ <button autofocus>Submit</button>
       │         ^^^^^^^^^
-    8 │ 
-    9 │ <!-- autofocus on dialog/popover container itself is invalid -->
+    8 │ <select autofocus><option>a</option></select>
+    9 │ 
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    7 │ <select·autofocus><option>a</option></select>
+    7 │ <button·autofocus>Submit</button>
+      │         ---------                
+
+```
+
+```
+invalid.astro:8:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This element uses the autofocus attribute outside an allowed modal context.
+  
+     6 │ <textarea autofocus>content</textarea>
+     7 │ <button autofocus>Submit</button>
+   > 8 │ <select autofocus><option>a</option></select>
+       │         ^^^^^^^^^
+     9 │ 
+    10 │ <!-- autofocus on dialog/popover container itself is invalid -->
+  
+  i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    8 │ <select·autofocus><option>a</option></select>
       │         ---------                            
 
 ```
 
 ```
-invalid.astro:10:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:11:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-     9 │ <!-- autofocus on dialog/popover container itself is invalid -->
-  > 10 │ <dialog autofocus>content</dialog>
+    10 │ <!-- autofocus on dialog/popover container itself is invalid -->
+  > 11 │ <dialog autofocus>content</dialog>
        │         ^^^^^^^^^
-    11 │ <div popover autofocus>content</div>
-    12 │ 
+    12 │ <div popover autofocus>content</div>
+    13 │ 
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    10 │ <dialog·autofocus>content</dialog>
+    11 │ <dialog·autofocus>content</dialog>
        │         ---------                 
 
 ```
 
 ```
-invalid.astro:11:14 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:12:14 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-     9 │ <!-- autofocus on dialog/popover container itself is invalid -->
-    10 │ <dialog autofocus>content</dialog>
-  > 11 │ <div popover autofocus>content</div>
+    10 │ <!-- autofocus on dialog/popover container itself is invalid -->
+    11 │ <dialog autofocus>content</dialog>
+  > 12 │ <div popover autofocus>content</div>
        │              ^^^^^^^^^
-    12 │ 
+    13 │ 
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    11 │ <div·popover·autofocus>content</div>
+    12 │ <div·popover·autofocus>content</div>
        │              ---------              
 
 ```
