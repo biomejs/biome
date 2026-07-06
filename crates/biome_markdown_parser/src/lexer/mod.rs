@@ -856,6 +856,16 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         let trailing = &prefix[idx..];
+
+        // Padding in marker-only (`-   \n`, `1.   \n`) belongs to the list prefix,
+        // not an inline hard break. Keep it split so the parser can classify the
+        // first space as the list separator and the rest as content indent.
+        if trailing.iter().copied().all(is_space_or_tab_byte)
+            && self.current_whitespace_run_ends_line()
+        {
+            return true;
+        }
+
         if trailing.is_empty() {
             let mut saw_tab = current == b'\t';
             let mut next = self.position + 1;
@@ -949,15 +959,12 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
                 dash_count += 1;
             }
-            // Allow trailing spaces/tabs
-            while matches!(self.current_byte(), Some(b' ' | b'\t')) {
-                self.advance(1);
-            }
             // 1-2 dashes followed by newline/EOF is a setext underline
             // 3+ dashes goes to thematic break logic below
-            if (1..=2).contains(&dash_count)
-                && matches!(self.current_byte(), Some(b'\n' | b'\r') | None)
-            {
+            if (1..=2).contains(&dash_count) && self.current_whitespace_run_ends_line() {
+                // The trailing whitespace is only peeked to validate the setext
+                // underline. Leave it for the parser instead of including it in
+                // MD_SETEXT_UNDERLINE_LITERAL's span.
                 return MD_SETEXT_UNDERLINE_LITERAL;
             }
             // Not a setext underline - restore and try thematic break
@@ -1573,6 +1580,15 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         false
+    }
+
+    fn current_whitespace_run_ends_line(&self) -> bool {
+        let mut offset = 0;
+        while matches!(self.byte_at(offset), Some(b' ' | b'\t')) {
+            offset += 1;
+        }
+
+        matches!(self.byte_at(offset), Some(b'\n' | b'\r') | None)
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
