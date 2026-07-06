@@ -12,15 +12,15 @@ categories.workspace = true
 publish              = false
 
 [dependencies]
-biome_js_semantic = { workspace = true }
-biome_js_syntax   = { workspace = true }
-biome_rowan       = { workspace = true }
-indexmap          = { workspace = true }
-react_compiler = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
+biome_js_semantic  = { workspace = true }
+biome_js_syntax    = { workspace = true }
+biome_rowan        = { workspace = true }
+indexmap           = { workspace = true }
+react_compiler     = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
 react_compiler_ast = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
 react_compiler_hir = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
-rustc-hash = { workspace = true }
-serde_json = { workspace = true }
+rustc-hash         = { workspace = true }
+serde_json         = { workspace = true }
 
 [dev-dependencies]
 biome_js_parser = { path = "../biome_js_parser" }

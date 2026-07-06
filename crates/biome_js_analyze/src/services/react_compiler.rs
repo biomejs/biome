@@ -8,9 +8,11 @@ use biome_react_compiler::{
     CompileInput, CompileOutput, ReactCompilerError, compile_program, default_lint_options,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::use_react_compiler::UseReactCompilerOptions;
 use std::sync::Arc;
 
 use super::semantic::SemanticModelBuilderVisitor;
+use crate::lint::nursery::use_react_compiler::UseReactCompiler;
 
 pub type ReactCompilerResult = Arc<Result<CompileOutput, ReactCompilerError>>;
 
@@ -86,18 +88,33 @@ impl QueryMatch for ReactCompilerEvent {
 
 struct ReactCompilerVisitor {
     root: AnyJsRoot,
+    /// Options of the `useReactCompiler` rule, captured from the analyzer
+    /// options on the first walk event: compilation happens in [`Self::finish`],
+    /// which has no access to [`biome_analyze::AnalyzerOptions`].
+    options: Option<UseReactCompilerOptions>,
 }
 
 impl ReactCompilerVisitor {
     fn new(root: AnyJsRoot) -> Self {
-        Self { root }
+        Self {
+            root,
+            options: None,
+        }
     }
 }
 
 impl Visitor for ReactCompilerVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
+    fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
+        if self.options.is_none() {
+            self.options = Some(
+                ctx.options
+                    .rule_options::<UseReactCompiler>()
+                    .unwrap_or_default(),
+            );
+        }
+    }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         if ctx.services.get_service::<ReactCompilerResult>().is_none() {
@@ -110,12 +127,20 @@ impl Visitor for ReactCompilerVisitor {
                         .unwrap_or_default();
                     let source = self.root.syntax().text_with_trivia().to_string();
 
+                    let mut options = default_lint_options(&source);
+                    options.compilation_mode = self
+                        .options
+                        .unwrap_or_default()
+                        .compilation_mode()
+                        .as_compiler_mode()
+                        .to_string();
+
                     compile_program(CompileInput {
                         root: &self.root,
                         model,
                         source: &source,
                         source_type,
-                        options: default_lint_options(&source),
+                        options,
                     })
                 }
                 None => Err(ReactCompilerError::CompilerOutput(

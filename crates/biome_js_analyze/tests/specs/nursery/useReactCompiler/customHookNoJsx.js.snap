@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: customHookNoJsx.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Custom hooks are analyzed even in plain modules without JSX.
+
+import { useState } from "react";
+
+export function useFoo(enabled) {
+    if (enabled) {
+        useState(0);
+    }
+    return null;
+}
+
+```
+
+# Diagnostics
+```
+customHookNoJsx.js:9:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+     7 │ export function useFoo(enabled) {
+     8 │     if (enabled) {
+   > 9 │         useState(0);
+       │         ^^^^^^^^
+    10 │     }
+    11 │     return null;
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

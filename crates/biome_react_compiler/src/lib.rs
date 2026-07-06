@@ -2,6 +2,7 @@ mod comments;
 mod convert_ast;
 mod convert_scope;
 mod error;
+mod prefilter;
 
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, TextRange, TextSize};
@@ -59,6 +60,20 @@ pub fn convert_scope_info(input: ScopeInput<'_>) -> Result<ScopeInfo> {
 }
 
 pub fn compile_program(input: CompileInput<'_>) -> Result<CompileOutput> {
+    // In `infer` mode the compiler only analyzes functions that follow React
+    // naming conventions, so a file without any react-like function can be
+    // skipped before paying for AST/scope conversion and the compiler thread.
+    // `annotation` mode is deliberately not prefiltered (unlike upstream):
+    // a `"use memo"` directive can opt in any function, regardless of name.
+    if input.options.compilation_mode == "infer" && !prefilter::has_react_like_functions(input.root)
+    {
+        return Ok(CompileOutput {
+            file: None,
+            diagnostics: Vec::new(),
+            events: Vec::new(),
+        });
+    }
+
     let root =
         input.root.syntax().as_send().ok_or_else(|| {
             ReactCompilerError::CompilerOutput("expected root syntax node".into())
@@ -159,7 +174,7 @@ pub fn default_lint_options(source: &str) -> PluginOptions {
         enable_reanimated: false,
         is_dev: true,
         filename: None,
-        compilation_mode: "all".to_string(),
+        compilation_mode: "infer".to_string(),
         panic_threshold: "none".to_string(),
         target: CompilerTarget::Version("19".to_string()),
         gating: None,
