@@ -80,6 +80,12 @@
   }
 }
 
+@function --nested-property() {
+  font: {
+    size: 12px;
+  }
+}
+
 @keyframes loader {
   #{$i}% {
     opacity: 1;

@@ -5,9 +5,9 @@ use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
     is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
-    is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
-    parse_scss_nesting_declaration, parse_scss_variable_declaration,
-    try_parse_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_exclusive_scss_nested_property_declaration,
+    parse_scss_interpolated_property_declaration, parse_scss_nesting_declaration,
+    parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_metavariable,
@@ -221,6 +221,12 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If parsing as a declaration was successful, return the parsed declaration.
             if let Ok(declaration) = declaration {
                 return declaration;
+            }
+
+            if let ParsedSyntax::Present(declaration) =
+                parse_exclusive_scss_nested_property_declaration(p)
+            {
+                return ParsedSyntax::Present(declaration);
             }
 
             // If the speculative parse failed and we encountered an if() function,

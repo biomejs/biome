@@ -4,8 +4,8 @@ use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
     is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
-    is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
-    parse_scss_variable_declaration,
+    is_at_scss_variable_declaration, parse_exclusive_scss_nested_property_declaration,
+    parse_scss_interpolated_property_declaration, parse_scss_variable_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, parse_any_declaration_with_semicolon,
@@ -74,8 +74,28 @@ impl ParseNodeList for DeclarationOrAtRuleList {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
             )
-        } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
-            parse_scss_interpolated_property_declaration(p)
+        } else if is_at_scss_nesting_declaration(p) {
+            if CssSyntaxFeatures::Scss.is_supported(p) {
+                parse_scss_interpolated_property_declaration(p)
+            } else if let ParsedSyntax::Present(declaration) =
+                parse_exclusive_scss_nested_property_declaration(p)
+            {
+                ParsedSyntax::Present(declaration)
+            } else if is_at_scss_interpolated_property_name(p) {
+                CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                    p,
+                    parse_scss_interpolated_property_declaration,
+                    |p, marker| {
+                        scss_only_syntax_error(
+                            p,
+                            "SCSS interpolated property declarations",
+                            marker.range(p),
+                        )
+                    },
+                )
+            } else {
+                parse_any_declaration_with_semicolon(p)
+            }
         } else if is_at_scss_interpolated_property_name(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,

@@ -37,6 +37,12 @@
   --theme-#{$slot}: red;
 }
 
+.nested-properties {
+  font: {
+    family: sans-serif;
+  }
+}
+
 .malformed-css {
   color: calc(# {value});
 }

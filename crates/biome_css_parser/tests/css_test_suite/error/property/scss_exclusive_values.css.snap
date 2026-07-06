@@ -45,6 +45,12 @@ expression: snapshot
   --theme-#{$slot}: red;
 }
 
+.nested-properties {
+  font: {
+    family: sans-serif;
+  }
+}
+
 .malformed-css {
   color: calc(# {value});
 }
@@ -1569,71 +1575,127 @@ CssRoot {
                         CssClassSelector {
                             dot_token: DOT@1205..1208 "." [Newline("\n"), Newline("\n")] [],
                             name: CssCustomIdentifier {
-                                value_token: IDENT@1208..1222 "malformed-css" [] [Whitespace(" ")],
+                                value_token: IDENT@1208..1226 "nested-properties" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@1222..1223 "{" [] [],
+                l_curly_token: L_CURLY@1226..1227 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssBogus {
+                        items: [
+                            CssIdentifier {
+                                value_token: IDENT@1227..1234 "font" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            COLON@1234..1236 ":" [] [Whitespace(" ")],
+                            ScssExpression {
+                                items: ScssExpressionItemList [],
+                            },
+                            CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@1236..1237 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1237..1248 "family" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@1248..1250 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1250..1260 "sans-serif" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1260..1261 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1261..1265 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        ],
+                    },
+                ],
+                r_curly_token: R_CURLY@1265..1267 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@1267..1270 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1270..1284 "malformed-css" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@1284..1285 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@1223..1231 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1285..1293 "color" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@1231..1233 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@1293..1295 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssFunction {
                                         name: CssIdentifier {
-                                            value_token: IDENT@1233..1237 "calc" [] [],
+                                            value_token: IDENT@1295..1299 "calc" [] [],
                                         },
-                                        l_paren_token: L_PAREN@1237..1238 "(" [] [],
+                                        l_paren_token: L_PAREN@1299..1300 "(" [] [],
                                         items: CssParameterList [
                                             CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssColor {
-                                                        hash_token: HASH@1238..1240 "#" [] [Whitespace(" ")],
+                                                        hash_token: HASH@1300..1302 "#" [] [Whitespace(" ")],
                                                         value_token: missing (required),
                                                     },
                                                 ],
                                             },
                                             missing separator,
                                             CssCommaSeparatedValue {
-                                                l_curly_token: L_CURLY@1240..1241 "{" [] [],
+                                                l_curly_token: L_CURLY@1302..1303 "{" [] [],
                                                 items: CssGenericComponentValueList [
                                                     CssIdentifier {
-                                                        value_token: IDENT@1241..1246 "value" [] [],
+                                                        value_token: IDENT@1303..1308 "value" [] [],
                                                     },
                                                 ],
-                                                r_curly_token: R_CURLY@1246..1247 "}" [] [],
+                                                r_curly_token: R_CURLY@1308..1309 "}" [] [],
                                             },
                                         ],
-                                        r_paren_token: R_PAREN@1247..1248 ")" [] [],
+                                        r_paren_token: R_PAREN@1309..1310 ")" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@1248..1249 ";" [] [],
+                        semicolon_token: SEMICOLON@1310..1311 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@1249..1251 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@1311..1313 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@1251..1252 "" [Newline("\n")] [],
+    eof_token: EOF@1313..1314 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..1252
+0: CSS_ROOT@0..1314
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..1251
+  1: CSS_ROOT_ITEM_LIST@0..1313
     0: CSS_QUALIFIED_RULE@0..521
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
@@ -2433,48 +2495,83 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@1202..1203 ";" [] []
         2: R_CURLY@1203..1205 "}" [Newline("\n")] []
-    3: CSS_QUALIFIED_RULE@1205..1251
-      0: CSS_SELECTOR_LIST@1205..1222
-        0: CSS_COMPOUND_SELECTOR@1205..1222
+    3: CSS_QUALIFIED_RULE@1205..1267
+      0: CSS_SELECTOR_LIST@1205..1226
+        0: CSS_COMPOUND_SELECTOR@1205..1226
           0: CSS_NESTED_SELECTOR_LIST@1205..1205
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@1205..1222
-            0: CSS_CLASS_SELECTOR@1205..1222
+          2: CSS_SUB_SELECTOR_LIST@1205..1226
+            0: CSS_CLASS_SELECTOR@1205..1226
               0: DOT@1205..1208 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@1208..1222
-                0: IDENT@1208..1222 "malformed-css" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@1222..1251
-        0: L_CURLY@1222..1223 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@1223..1249
-          0: CSS_DECLARATION_WITH_SEMICOLON@1223..1249
-            0: CSS_DECLARATION@1223..1248
-              0: CSS_GENERIC_PROPERTY@1223..1248
-                0: CSS_IDENTIFIER@1223..1231
-                  0: IDENT@1223..1231 "color" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@1231..1233 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1233..1248
-                  0: CSS_FUNCTION@1233..1248
-                    0: CSS_IDENTIFIER@1233..1237
-                      0: IDENT@1233..1237 "calc" [] []
-                    1: L_PAREN@1237..1238 "(" [] []
-                    2: CSS_PARAMETER_LIST@1238..1247
-                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1238..1240
-                        0: CSS_COMPONENT_VALUE_LIST@1238..1240
-                          0: CSS_COLOR@1238..1240
-                            0: HASH@1238..1240 "#" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@1208..1226
+                0: IDENT@1208..1226 "nested-properties" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@1226..1267
+        0: L_CURLY@1226..1227 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@1227..1265
+          0: CSS_BOGUS@1227..1265
+            0: CSS_IDENTIFIER@1227..1234
+              0: IDENT@1227..1234 "font" [Newline("\n"), Whitespace("  ")] []
+            1: COLON@1234..1236 ":" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@1236..1236
+              0: SCSS_EXPRESSION_ITEM_LIST@1236..1236
+            3: CSS_DECLARATION_OR_RULE_BLOCK@1236..1265
+              0: L_CURLY@1236..1237 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@1237..1261
+                0: CSS_DECLARATION_WITH_SEMICOLON@1237..1261
+                  0: CSS_DECLARATION@1237..1260
+                    0: CSS_GENERIC_PROPERTY@1237..1260
+                      0: CSS_IDENTIFIER@1237..1248
+                        0: IDENT@1237..1248 "family" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@1248..1250 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1250..1260
+                        0: CSS_IDENTIFIER@1250..1260
+                          0: IDENT@1250..1260 "sans-serif" [] []
+                    1: (empty)
+                  1: SEMICOLON@1260..1261 ";" [] []
+              2: R_CURLY@1261..1265 "}" [Newline("\n"), Whitespace("  ")] []
+        2: R_CURLY@1265..1267 "}" [Newline("\n")] []
+    4: CSS_QUALIFIED_RULE@1267..1313
+      0: CSS_SELECTOR_LIST@1267..1284
+        0: CSS_COMPOUND_SELECTOR@1267..1284
+          0: CSS_NESTED_SELECTOR_LIST@1267..1267
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@1267..1284
+            0: CSS_CLASS_SELECTOR@1267..1284
+              0: DOT@1267..1270 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@1270..1284
+                0: IDENT@1270..1284 "malformed-css" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@1284..1313
+        0: L_CURLY@1284..1285 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@1285..1311
+          0: CSS_DECLARATION_WITH_SEMICOLON@1285..1311
+            0: CSS_DECLARATION@1285..1310
+              0: CSS_GENERIC_PROPERTY@1285..1310
+                0: CSS_IDENTIFIER@1285..1293
+                  0: IDENT@1285..1293 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1293..1295 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1295..1310
+                  0: CSS_FUNCTION@1295..1310
+                    0: CSS_IDENTIFIER@1295..1299
+                      0: IDENT@1295..1299 "calc" [] []
+                    1: L_PAREN@1299..1300 "(" [] []
+                    2: CSS_PARAMETER_LIST@1300..1309
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1300..1302
+                        0: CSS_COMPONENT_VALUE_LIST@1300..1302
+                          0: CSS_COLOR@1300..1302
+                            0: HASH@1300..1302 "#" [] [Whitespace(" ")]
                             1: (empty)
                       1: (empty)
-                      2: CSS_COMMA_SEPARATED_VALUE@1240..1247
-                        0: L_CURLY@1240..1241 "{" [] []
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@1241..1246
-                          0: CSS_IDENTIFIER@1241..1246
-                            0: IDENT@1241..1246 "value" [] []
-                        2: R_CURLY@1246..1247 "}" [] []
-                    3: R_PAREN@1247..1248 ")" [] []
+                      2: CSS_COMMA_SEPARATED_VALUE@1302..1309
+                        0: L_CURLY@1302..1303 "{" [] []
+                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@1303..1308
+                          0: CSS_IDENTIFIER@1303..1308
+                            0: IDENT@1303..1308 "value" [] []
+                        2: R_CURLY@1308..1309 "}" [] []
+                    3: R_PAREN@1309..1310 ")" [] []
               1: (empty)
-            1: SEMICOLON@1248..1249 ";" [] []
-        2: R_CURLY@1249..1251 "}" [Newline("\n")] []
-  2: EOF@1251..1252 "" [Newline("\n")] []
+            1: SEMICOLON@1310..1311 ";" [] []
+        2: R_CURLY@1311..1313 "}" [Newline("\n")] []
+  2: EOF@1313..1314 "" [Newline("\n")] []
 
 ```
 
@@ -2786,35 +2883,48 @@ scss_exclusive_values.css:37:3 parse ━━━━━━━━━━━━━━�
     38 │ }
     39 │ 
   
-scss_exclusive_values.css:41:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss_exclusive_values.css:41:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS nested property declarations are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    40 │ .nested-properties {
+  > 41 │   font: {
+       │   ^^^^^^^
+  > 42 │     family: sans-serif;
+  > 43 │   }
+       │   ^
+    44 │ }
+    45 │ 
+  
+scss_exclusive_values.css:47:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a color but instead found '#'.
   
-    40 │ .malformed-css {
-  > 41 │   color: calc(# {value});
+    46 │ .malformed-css {
+  > 47 │   color: calc(# {value});
        │               ^
-    42 │ }
-    43 │ 
+    48 │ }
+    49 │ 
   
   i Expected a color here.
   
-    40 │ .malformed-css {
-  > 41 │   color: calc(# {value});
+    46 │ .malformed-css {
+  > 47 │   color: calc(# {value});
        │               ^
-    42 │ }
-    43 │ 
+    48 │ }
+    49 │ 
   
   i Ensure the color is specified in a valid hexadecimal format. Examples: #000, #000f, #ffffff, #ffffffff
   
-scss_exclusive_values.css:41:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss_exclusive_values.css:47:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
-    40 │ .malformed-css {
-  > 41 │   color: calc(# {value});
+    46 │ .malformed-css {
+  > 47 │   color: calc(# {value});
        │                 ^
-    42 │ }
-    43 │ 
+    48 │ }
+    49 │ 
   
   i Expected one of:
   
