@@ -15,17 +15,33 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
+/// Returns whether the current token can start an SCSS-interpolated selector
+/// identifier.
+///
+/// Examples: `#{$tag}` and `button-#{$variant}`.
 #[inline]
 pub(crate) fn is_at_scss_interpolated_selector_identifier(p: &mut CssParser) -> bool {
     is_nth_at_scss_interpolated_selector_identifier(p, 0)
 }
 
+/// Returns whether the token at `n` can start an SCSS-interpolated selector
+/// identifier.
+///
+/// This is intentionally selector-specific: selector names may be built from an
+/// interpolation alone (`#{$tag}`) or from a plain identifier followed by an
+/// adjacent interpolation suffix (`button#{$state}` or `button-#{$state}`).
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolated_selector_identifier(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_scss_interpolation(p, n)
         || is_nth_at_identifier(p, n) && is_nth_at_scss_selector_identifier_suffix(p, n + 1)
 }
 
+/// Returns whether the token at `n` continues a selector identifier with SCSS
+/// interpolation and no separating whitespace.
+///
+/// The suffix can be a direct interpolation (`#{$state}`) or a hyphen followed
+/// by interpolation (`-#{$state}`), matching selector names such as
+/// `button#{$state}` and `button-#{$state}`.
 #[inline]
 fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> bool {
     !p.has_nth_preceding_whitespace(n)
