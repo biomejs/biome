@@ -197,6 +197,7 @@ impl ServiceLanguage for CssLanguage {
                 .unwrap_or_default(),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
+            report_scss_exclusive_syntax: cfg!(feature = "report_scss_exclusive_syntax"),
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -1004,6 +1005,21 @@ mod test {
                 .with_indent_width(IndentWidth::default())
                 .with_line_ending(LineEnding::default())
                 .with_line_width(LineWidth::default())
+        );
+    }
+
+    #[test]
+    fn resolve_parse_options_maps_scss_reporting_feature() {
+        let parse_options = CssLanguage::resolve_parse_options(
+            &OverrideSettings::default(),
+            &CssParserSettings::default(),
+            &BiomePath::new("test.css"),
+            &DocumentFileSource::Css(CssFileSource::css()),
+        );
+
+        assert_eq!(
+            parse_options.report_scss_exclusive_syntax,
+            cfg!(feature = "report_scss_exclusive_syntax")
         );
     }
 }
