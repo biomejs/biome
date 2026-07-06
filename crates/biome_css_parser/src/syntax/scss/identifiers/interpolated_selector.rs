@@ -1,16 +1,39 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::expression::parse_scss_selector_interpolation;
 use crate::syntax::scss::identifiers::interpolated_identifier::{
     is_at_identifier_continuation, is_at_scss_interpolated_identifier,
     parse_scss_interpolated_identifier_parts,
 };
-use crate::syntax::scss::is_at_scss_interpolation;
+use crate::syntax::scss::{is_at_scss_interpolation, is_nth_at_scss_interpolation};
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
 };
 use biome_css_syntax::CssSyntaxKind::{SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATION};
+use biome_css_syntax::T;
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+
+#[inline]
+pub(crate) fn is_at_scss_interpolated_selector_identifier(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolated_selector_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_scss_interpolated_selector_identifier(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_scss_interpolation(p, n)
+        || is_nth_at_identifier(p, n) && is_nth_at_scss_selector_identifier_suffix(p, n + 1)
+}
+
+#[inline]
+fn is_nth_at_scss_selector_identifier_suffix(p: &mut CssParser, n: usize) -> bool {
+    !p.has_nth_preceding_whitespace(n)
+        && (is_nth_at_scss_interpolation(p, n)
+            || p.nth_at(n, T![-])
+                && !p.has_nth_preceding_whitespace(n + 1)
+                && is_nth_at_scss_interpolation(p, n + 1))
+}
 
 /// Parses SCSS-interpolated selector name slots.
 ///

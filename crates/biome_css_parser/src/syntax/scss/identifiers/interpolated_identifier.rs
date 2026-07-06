@@ -1,13 +1,13 @@
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::scss::is_nth_at_scss_interpolation;
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
 use biome_css_syntax::CssSyntaxKind::{
     EOF, SCSS_INTERPOLATED_IDENTIFIER_HYPHEN, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
 };
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, ParserProgress, SyntaxFeature};
+use biome_parser::{CompletedMarker, Parser, ParserProgress};
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_identifier(p: &mut CssParser) -> bool {
@@ -16,8 +16,7 @@ pub(crate) fn is_at_scss_interpolated_identifier(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolated_identifier(p: &mut CssParser, n: usize) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n))
+    is_nth_at_identifier(p, n) || is_nth_at_scss_interpolation(p, n)
 }
 
 /// Returns `true` when the current token continues an interpolated identifier
@@ -58,7 +57,7 @@ pub(super) fn parse_scss_interpolated_identifier_parts(
 
 #[inline]
 fn is_at_adjacent_identifier(p: &mut CssParser) -> bool {
-    !p.has_preceding_whitespace() && is_at_scss_interpolated_identifier(p)
+    !p.has_preceding_whitespace() && is_nth_at_scss_interpolated_identifier(p, 0)
 }
 
 /// Returns `true` when `-` belongs to the current interpolated identifier,

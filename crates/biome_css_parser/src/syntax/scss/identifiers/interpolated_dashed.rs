@@ -7,12 +7,11 @@ use crate::syntax::scss::identifiers::interpolated_identifier::{
 use crate::syntax::scss::{
     is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation,
 };
-use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, parse_regular_identifier};
+use crate::syntax::{is_at_dashed_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATED_DASHED_IDENTIFIER;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::prelude::SyntaxFeature;
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_dashed_identifier(p: &mut CssParser) -> bool {
@@ -22,8 +21,7 @@ pub(crate) fn is_at_scss_interpolated_dashed_identifier(p: &mut CssParser) -> bo
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolated_dashed_identifier(p: &mut CssParser, n: usize) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && is_nth_at_identifier_hyphen_part(p, n)
+    is_nth_at_identifier_hyphen_part(p, n)
         && is_nth_at_identifier_hyphen_part(p, n + 1)
         && !p.has_nth_preceding_whitespace(n + 1)
         && is_nth_at_scss_interpolated_identifier(p, n + 2)
@@ -69,8 +67,7 @@ pub(crate) fn parse_scss_interpolated_dashed_identifier(p: &mut CssParser) -> Pa
 
 #[inline]
 fn is_at_dashed_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && is_at_dashed_identifier(p)
+    is_at_dashed_identifier(p)
         && is_nth_at_scss_interpolation(p, 1)
         && !p.has_nth_preceding_whitespace(1)
 }
