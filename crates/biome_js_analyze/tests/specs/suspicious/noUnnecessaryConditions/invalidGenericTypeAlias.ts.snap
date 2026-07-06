@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Id<string>` substitutes to the non-nullish `string`, so the optional chain is unnecessary.
+type Id<T> = T;
+function readLength(text: Id<string>) {
+	return text?.length;
+}
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    2 │ type Id<T> = T;
+    3 │ function readLength(text: Id<string>) {
+  > 4 │ 	return text?.length;
+      │ 	       ^^^^
+    5 │ }
+    6 │ 
+  
+  i Replace ?. with ..
+  
+    2 │ type Id<T> = T;
+    3 │ function readLength(text: Id<string>) {
+  > 4 │ 	return text?.length;
+      │ 	           ^^
+    5 │ }
+    6 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

@@ -14,13 +14,17 @@ use biome_js_syntax::{
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
     JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
     JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsInitializerClause, JsLogicalExpression, JsLogicalOperator, JsMethodClassMember,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameters, JsPropertyClassMember, JsPropertyObjectMember, JsReferenceIdentifier,
+    JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsCallSignatureTypeMember, TsConditionalType,
+    TsConstructSignatureTypeMember, TsConstructorType, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsExternalModuleDeclaration, TsFunctionType,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsMethodSignatureClassMember,
+    TsMethodSignatureTypeMember, TsModuleDeclaration,
     TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
@@ -697,13 +701,35 @@ impl TypeData {
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
             AnyTsType::TsConditionalType(ty) => {
-                // We don't attempt to evaluate the condition, so we simply
-                // infer a union of both the possibilities.
+                if let Some(selected_type) = selected_conditional_branch(ty) {
+                    return selected_type.map_or_else(
+                        |_| Self::unknown(),
+                        |ty| {
+                            Self::reference(TypeReference::from_any_ts_type(
+                                resolver, scope_id, &ty,
+                            ))
+                        },
+                    );
+                }
+
+                let true_type = ty.true_type();
+                let false_type = ty.false_type();
+
+                // A conditional in a generic alias that is not trivially true cannot be evaluated
+                // until the alias is monomorphized. Biome does not evaluate `extends`, so unioning
+                // both branches would invent a variant the instantiation never produces; lower it
+                // to `unknown`. Identical branches are exempt: the union dedups either way.
+                if !conditional_branches_are_identical(&true_type, &false_type)
+                    && conditional_in_generic_alias(ty)
+                {
+                    return Self::unknown();
+                }
+
                 let types = Box::new([
-                    ty.true_type()
+                    true_type
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
-                    ty.false_type()
+                    false_type
                         .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                         .unwrap_or_default(),
                 ]);
@@ -2922,6 +2948,121 @@ fn type_from_function_body(
             TypeData::union_of(resolver, return_types)
         }
     }
+}
+
+/// `true` when both result branches are syntactically identical, so the conditional
+/// resolves to that branch regardless of whether its condition can be evaluated.
+fn conditional_branches_are_identical(
+    true_type: &SyntaxResult<AnyTsType>,
+    false_type: &SyntaxResult<AnyTsType>,
+) -> bool {
+    match (true_type, false_type) {
+        (Ok(true_type), Ok(false_type)) => {
+            true_type.syntax().text_trimmed() == false_type.syntax().text_trimmed()
+        }
+        _ => false,
+    }
+}
+
+/// Returns the true branch of a conditional whose condition is trivially true: `check` and `extends`
+/// are the same type (`string extends string`). Checks that mention an enclosing generic type
+/// parameter are excluded because alias expansion may expose a distributive bare parameter
+/// (`Id<T> extends Id<T>` behaves like `T extends T`).
+fn selected_conditional_branch(conditional: &TsConditionalType) -> Option<SyntaxResult<AnyTsType>> {
+    let check_type = conditional.check_type().ok()?;
+    let extends_type = conditional.extends_type().ok()?;
+
+    if check_type.syntax().text_trimmed() != extends_type.syntax().text_trimmed() {
+        return None;
+    }
+    if check_mentions_enclosing_type_parameter(conditional, &check_type) {
+        return None;
+    }
+    Some(conditional.true_type())
+}
+
+/// `true` when `check_type` references an enclosing generic type parameter (`T`). Syntax equality
+/// is not enough to reduce such conditionals because aliases can hide a distributive bare
+/// parameter.
+fn check_mentions_enclosing_type_parameter(
+    conditional: &TsConditionalType,
+    check_type: &AnyTsType,
+) -> bool {
+    let parameter_names = enclosing_type_parameter_names(conditional);
+    if parameter_names.is_empty() {
+        return false;
+    }
+
+    std::iter::once(check_type.syntax().clone())
+        .chain(check_type.syntax().descendants())
+        .filter_map(TsReferenceType::cast)
+        .any(|reference| {
+            reference
+                .name()
+                .ok()
+                .and_then(|name| text_from_token(name.as_js_reference_identifier()?.value_token()))
+                .is_some_and(|name| parameter_names.contains(&name))
+        })
+}
+
+fn enclosing_type_parameter_names(conditional: &TsConditionalType) -> Vec<Text> {
+    conditional
+        .syntax()
+        .ancestors()
+        .filter_map(|node| type_parameters_from_enclosing_node(&node))
+        .flat_map(|type_parameters| {
+            type_parameters
+                .items()
+                .into_iter()
+                .filter_map(|parameter| text_from_token(parameter.ok()?.name().ok()?.ident_token()))
+        })
+        .collect()
+}
+
+fn type_parameters_from_enclosing_node(node: &JsSyntaxNode) -> Option<TsTypeParameters> {
+    macro_rules! try_type_parameters {
+        ($($ty:ty),+ $(,)?) => {
+            $(
+                if let Some(node) = <$ty>::cast(node.clone()) {
+                    return node.type_parameters();
+                }
+            )+
+        };
+    }
+
+    try_type_parameters!(
+        JsArrowFunctionExpression,
+        JsClassDeclaration,
+        JsClassExportDefaultDeclaration,
+        JsClassExpression,
+        JsFunctionDeclaration,
+        JsFunctionExportDefaultDeclaration,
+        JsFunctionExpression,
+        JsMethodClassMember,
+        JsMethodObjectMember,
+        TsCallSignatureTypeMember,
+        TsConstructSignatureTypeMember,
+        TsConstructorType,
+        TsDeclareFunctionDeclaration,
+        TsDeclareFunctionExportDefaultDeclaration,
+        TsFunctionType,
+        TsInterfaceDeclaration,
+        TsMethodSignatureClassMember,
+        TsMethodSignatureTypeMember,
+        TsTypeAliasDeclaration,
+    );
+
+    None
+}
+
+/// `true` when the conditional is inside a generic type alias, whose unbound type parameter leaves
+/// the condition unevaluable until the alias is monomorphized.
+fn conditional_in_generic_alias(conditional: &TsConditionalType) -> bool {
+    conditional
+        .syntax()
+        .ancestors()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .is_some_and(|alias| alias.type_parameters().is_some())
 }
 
 /// Checks for TypeScript's special `const` assertion target.

@@ -1,0 +1,9 @@
+// should not generate diagnostics
+
+// `Id<1>` substitutes to the numeric literal `1`, so both members are numeric and consistent.
+type Id<T> = T;
+const one: Id<1> = 1;
+enum NumericOnly {
+	A = one,
+	B = 2,
+}

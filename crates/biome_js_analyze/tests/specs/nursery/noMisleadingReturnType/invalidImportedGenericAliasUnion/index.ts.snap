@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+import type { Maybe } from "./types";
+
+function getName(): Maybe<string> {
+	return "biome";
+}
+
+```
+
+# Diagnostics
+```
+index.ts:5:19 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    3 │ import type { Maybe } from "./types";
+    4 │ 
+  > 5 │ function getName(): Maybe<string> {
+      │                   ^^^^^^^^^^^^^^^
+    6 │ 	return "biome";
+    7 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

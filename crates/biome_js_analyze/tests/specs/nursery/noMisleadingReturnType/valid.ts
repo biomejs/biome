@@ -240,6 +240,10 @@ function outerWithInnerCast(): number {
     return inner() as unknown as number;
 }
 
+function unknownMemberNotMisleading(): { a: string; b: unknown } { return { a: "x", b: 1 }; }
+function unknownMemberConstAssertedNotMisleading(): { a: string; b: unknown } { return { a: "x", b: 1 as const }; }
+function optionalOnlyEmptyReturn(): { a?: string } { return {}; }
+
 async function awaitObjectCast(): Promise<object> { return await ({} as object); }
 function nonNullObjectCast(): object { return ({} as object)!; }
 declare const maybeObj: object | undefined;
@@ -315,3 +319,84 @@ function widenSatisfiesAssertion(b: boolean): string { if (b) return ("a" as str
 type WidenedAlias = string;
 function widenAliasAssertion(b: boolean): WidenedAlias { if (b) return "a" as WidenedAlias; return "b" as WidenedAlias; }
 function assertedBooleanLiteralsCollapse(b: boolean): boolean { if (b) return true as true; return false as false; }
+type GenericMaybe<T> = T | null;
+declare const someText: string;
+function genericAliasFullyCovered(flag: boolean): GenericMaybe<string> {
+    if (flag) return someText;
+    return null;
+}
+
+type GenericMaybeAny<T> = T | null;
+function genericAliasAnyCollapsesToEscapeHatch(): GenericMaybeAny<any> { return "hello"; }
+
+type ConditionalAlias<T> = T extends string ? T : null;
+function genericConditionalAliasNoFalsePositive(): ConditionalAlias<number> { return null; }
+
+type FirstParam<T> = T | null;
+type SecondParam<T> = T | undefined;
+function distinctSameNamedParamsNoLeak(flag: boolean): FirstParam<string> {
+    if (flag) return someText;
+    return null;
+}
+
+type DefaultRefParam<A, B = A> = A | B;
+function defaultRefParamFullyCovered(x: number): DefaultRefParam<number> {
+    return x;
+}
+
+type NestedInner<T> = T | undefined;
+type NestedOuter<T> = NestedInner<T> | T;
+function nestedGenericAliasFullyCovered(flag: boolean, x: number): NestedOuter<number> {
+    return flag ? x : undefined;
+}
+
+type NestedConditional<T> =
+    | { value: T extends string ? string : null }
+    | { value: null };
+function nestedConditionalNoFalsePositive(): NestedConditional<number> {
+    return { value: null };
+}
+
+function unknownIndexSignatureNotMisleading(): { a: string; [key: string]: unknown } {
+    return { a: "x", b: 1 };
+}
+
+function numberIndexSignatureWidening(): { a: number; [key: string]: number } {
+    return { a: 1, b: 1 };
+}
+
+type ConstTrueCondition<T> = string extends string ? T : null;
+function genericConstConditionNoFalsePositive(): ConstTrueCondition<string> {
+    return "x";
+}
+
+type ConstCondLiteralUnion<T> = string extends string ? "a" | "b" : null;
+function constCondLiteralUnionNoFalsePositive(flag: boolean): ConstCondLiteralUnion<number> {
+    if (flag) return "a";
+    return "b";
+}
+
+type GenericObjectVariantUnion<T> = { a: T } | { a: number };
+function genericObjectVariantUnionPropertyWidening(flag: boolean): GenericObjectVariantUnion<string> {
+    if (flag) return { a: "x" };
+    return { a: 1 };
+}
+
+type ObjectVariantUnion = { a: string } | { a: number };
+function objectVariantUnionPropertyWidening(flag: boolean): ObjectVariantUnion {
+    if (flag) return { a: "x" };
+    return { a: 1 };
+}
+
+type ExactOrWidening = { value: "a" } | { value: string };
+function variantExactMatchAndPropertyWidening(flag: boolean): ExactOrWidening {
+    if (flag) return { value: "a" } as const;
+    return { value: "b" };
+}
+
+// The assertion pins the return to the annotation's own alias, so both sides monomorphize
+// to the same `string | null` union.
+type MaybeAsserted<T> = T | null;
+function assertedGenericAliasMatches(): MaybeAsserted<string> {
+    return "hello" as MaybeAsserted<string>;
+}

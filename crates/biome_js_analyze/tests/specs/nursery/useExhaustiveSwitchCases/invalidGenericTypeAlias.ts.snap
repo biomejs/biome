@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGenericTypeAlias.ts
+---
+# Input
+```ts
+// `Id<"a" | "b">` substitutes to the literal union, so the missing `"b"` case is detectable.
+type Id<T> = T;
+declare const s: Id<"a" | "b">;
+switch (s) {
+	case "a":
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalidGenericTypeAlias.ts:4:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    2 │ type Id<T> = T;
+    3 │ declare const s: Id<"a" | "b">;
+  > 4 │ switch (s) {
+      │ ^^^^^^^^^^^^
+  > 5 │ 	case "a":
+  > 6 │ 		break;
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "b"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    4 4 │   switch (s) {
+    5 5 │     case "a":
+    6   │ - → → break;
+      6 │ + → → break;
+      7 │ + → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
+    7 8 │   }
+    8 9 │   
+  
+
+```

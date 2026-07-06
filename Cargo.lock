@@ -1542,6 +1542,7 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_workspace_db",
+ "boxcar",
  "camino",
  "cfg-if",
  "codspeed-divan-compat",

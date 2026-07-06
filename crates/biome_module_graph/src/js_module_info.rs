@@ -28,6 +28,8 @@ use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
 pub use collector::TypeInferenceMode;
 pub use diagnostics::JsModuleInfoDiagnostic;
+#[doc(hidden)]
+pub use module_resolver::MAX_ALIAS_CHAIN_DEPTH;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 

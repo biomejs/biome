@@ -3,13 +3,13 @@ use biome_js_type_info::{
     GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, MAX_FLATTEN_DEPTH, ModuleId, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ResolverId, ScopeId, Type, TypeData, TypeId,
     TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
-    TypeStore,
+    TypeStore, instantiated_generic_alias,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::rc::Rc;
-use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
+use std::{borrow::Cow, cell::RefCell, collections::hash_map::Entry, ops::Deref, sync::Arc};
 
 use crate::{
     JsExport, JsImportPath, JsOwnExport, ModuleDb,
@@ -20,11 +20,120 @@ use super::{JsModuleInfo, JsModuleInfoDiagnostic};
 
 const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
+/// Depth cap for materializing a chain of generic-alias applications (`type W1<T> = W0<T>; ...`).
+/// Each level recurses through `instantiated_generic_alias`, so an unbounded chain would overflow
+/// the stack. Past the cap the alias is left opaque, which consumers treat as indeterminate.
+pub const MAX_ALIAS_CHAIN_DEPTH: usize = 32;
+
 // Any references that resolve to "module 0" will be rewritten to reference the
 // module resolver. The reason we do this is that any references to other
 // modules can be resolved within the module resolver, whereas references that
 // still point to the module's own types would remain unresolved.
 const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
+
+/// Holds module-relative, pre-dedup ids, so a key is valid only within its producing
+/// collection/resolution; never persist or share it across modules.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+struct InstantiationKey {
+    /// The generic declaration being instantiated.
+    target_id: ResolvedTypeId,
+    /// The type arguments applied to it, in declaration order.
+    arguments: Box<[TypeReference]>,
+}
+
+impl InstantiationKey {
+    /// Builds a key for instantiating `target_id` with `arguments`.
+    fn new(target_id: ResolvedTypeId, arguments: Box<[TypeReference]>) -> Self {
+        Self {
+            target_id,
+            arguments,
+        }
+    }
+}
+
+/// Append-only store for alias instantiations minted after the primary store is frozen. Lazy ids
+/// are `primary_type_count() + local_index`, valid only while that base stays fixed.
+///
+/// `boxcar::Vec` is used for `types` because the [`TypeResolver`] API hands out `&TypeData`
+/// borrowed from `&self` while later instantiations keep appending; boxcar keeps those
+/// references stable across pushes. The resolver is single-threaded (`ModuleResolver` holds an
+/// `Rc`), so the map state only needs `RefCell`, not a lock.
+#[derive(Default)]
+struct LazyInstantiationStore {
+    types: boxcar::Vec<Arc<TypeData>>,
+    state: RefCell<LazyInstantiationState>,
+}
+
+#[derive(Default)]
+struct LazyInstantiationState {
+    /// Memoizes each `(alias, arguments)` instantiation to its lazy id.
+    cache: FxHashMap<InstantiationKey, ResolvedTypeId>,
+    /// Reverse map from stored data to its lazy `TypeId`, for content dedup.
+    type_ids_by_data: FxHashMap<Arc<TypeData>, TypeId>,
+    /// Primary-store length at the first lazy insertion. Lazy ids offset by it; it must not change.
+    recorded_base: Option<usize>,
+}
+
+impl LazyInstantiationStore {
+    fn cached(&self, key: &InstantiationKey) -> Option<ResolvedTypeId> {
+        self.state.borrow().cache.get(key).copied()
+    }
+
+    /// Returns `true` while the primary base used to offset lazy ids has not
+    /// shifted since the first lazy insertion. Used only for debug assertions.
+    fn base_is_stable(&self, current_base: usize) -> bool {
+        self.state
+            .borrow()
+            .recorded_base
+            .is_none_or(|recorded| recorded == current_base)
+    }
+
+    /// Finds content-identical data already interned here, rebased to its global `base_len + local` id.
+    fn find_type(&self, base_len: usize, type_data: &TypeData) -> Option<TypeId> {
+        self.state
+            .borrow()
+            .type_ids_by_data
+            .get(type_data)
+            .map(|id| TypeId::new(base_len + id.index()))
+    }
+
+    /// Reads data for a global id, or `None` if the id sits below the lazy range (`base_len`).
+    fn get(&self, base_len: usize, id: TypeId) -> Option<&TypeData> {
+        let local_index = id.index().checked_sub(base_len)?;
+        self.types.get(local_index).map(Arc::as_ref)
+    }
+
+    /// Interns `type_data`, returning the lazy `TypeId` `base_len + local_index`. `base_len` must be
+    /// identical on every call; the `debug_assert` pins it on first insertion.
+    fn insert_type(&self, base_len: usize, type_data: Cow<TypeData>) -> TypeId {
+        let mut state = self.state.borrow_mut();
+        match state.recorded_base {
+            None => state.recorded_base = Some(base_len),
+            Some(recorded) => debug_assert_eq!(
+                recorded, base_len,
+                "lazy instantiation base shifted ({recorded} -> {base_len}); the primary type store must stay frozen once lazy types are minted",
+            ),
+        }
+        if let Some(id) = state.type_ids_by_data.get(type_data.as_ref()) {
+            return TypeId::new(base_len + id.index());
+        }
+
+        let type_data = Arc::new(type_data.into_owned());
+        let id = TypeId::new(self.types.push(type_data.clone()));
+        state.type_ids_by_data.insert(type_data, id);
+        TypeId::new(base_len + id.index())
+    }
+
+    fn insert_cache(&self, key: InstantiationKey, resolved_id: ResolvedTypeId) {
+        self.state.borrow_mut().cache.insert(key, resolved_id);
+    }
+
+    /// All lazy types in insertion order, for the debug/snapshot dump. boxcar slots never move,
+    /// so the returned references stay valid.
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.iter().map(|(_, ty)| Arc::as_ref(ty)).collect()
+    }
+}
 
 /// Type resolver that is able to resolve types _across_ modules.
 ///
@@ -70,6 +179,13 @@ pub struct ModuleResolver {
 
     /// Diagnostics emitted during the resolution of types
     diagnostics: Vec<JsModuleInfoDiagnostic>,
+
+    /// Alias instantiations materialized after construction, when the primary store is immutable.
+    lazy_instantiations: LazyInstantiationStore,
+
+    /// Primary-store length, frozen when inference ends (`None` until then). The fixed offset base
+    /// for lazy instantiation ids, so they never collide with a still-growing primary store.
+    frozen_primary_count: Option<usize>,
 }
 
 impl ModuleResolver {
@@ -89,11 +205,15 @@ impl ModuleResolver {
             types,
             type_id_map: Default::default(),
             diagnostics: Default::default(),
+            lazy_instantiations: Default::default(),
+            frozen_primary_count: None,
         };
 
         if infer_types {
             resolver.run_inference();
         }
+        // Freeze the primary store: its length is now the fixed base for lazy ids.
+        resolver.frozen_primary_count = Some(resolver.types.len());
         resolver
     }
 
@@ -352,24 +472,43 @@ impl ModuleResolver {
 
         None
     }
-}
 
-impl TypeResolver for ModuleResolver {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Full
+    /// Size of the primary store: the frozen count once set, else the live length. The offset
+    /// base that separates primary ids from lazy instantiation ids.
+    fn primary_type_count(&self) -> usize {
+        self.frozen_primary_count
+            .unwrap_or_else(|| self.types.len())
     }
 
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types.find(type_data)
+    /// Routes a `TypeId` below [`Self::primary_type_count`] to the primary store, otherwise to the
+    /// lazy instantiation store.
+    fn get_by_id_raw(&self, id: TypeId) -> Option<&TypeData> {
+        // The base is frozen at finalization, so the lazy store's recorded base must still match it.
+        debug_assert!(
+            self.lazy_instantiations
+                .base_is_stable(self.primary_type_count()),
+            "lazy instantiation base disagrees with the frozen primary length; id routing is corrupted",
+        );
+        // `register_type` routes to the lazy store once frozen, so the primary store must not grow.
+        debug_assert!(
+            self.frozen_primary_count
+                .is_none_or(|frozen| frozen == self.types.len()),
+            "the primary type store grew after being frozen; id routing is corrupted",
+        );
+        if id.index() < self.primary_type_count() {
+            Some(self.types.get_by_id(id))
+        } else {
+            self.lazy_instantiations.get(self.primary_type_count(), id)
+        }
     }
 
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        self.types.get_by_id(id)
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
+    /// Resolves an id to its stored data without materializing deferred alias
+    /// applications; `Full` ids route through [`Self::get_by_id_raw`].
+    fn get_by_resolved_id_raw(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
-            TypeResolverLevel::Full => Some(ResolvedTypeData::from((id, self.get_by_id(id.id())))),
+            TypeResolverLevel::Full => self
+                .get_by_id_raw(id.id())
+                .map(|data| ResolvedTypeData::from((id, data))),
             TypeResolverLevel::Thin => {
                 let module_id = id.module_id();
                 let module = &self.modules[module_id.index()];
@@ -387,8 +526,338 @@ impl TypeResolver for ModuleResolver {
         }
     }
 
+    /// Resolves `id`, materializing a deferred generic-alias application. `stack` guards
+    /// alias-application cycles. Returns the raw resolution until the store is frozen (no lazy minting).
+    fn get_by_resolved_id_with_stack(
+        &self,
+        id: ResolvedTypeId,
+        stack: &mut Vec<InstantiationKey>,
+    ) -> Option<ResolvedTypeData<'_>> {
+        let resolved = self.get_by_resolved_id_raw(id)?;
+        if self.frozen_primary_count.is_none() {
+            return Some(resolved);
+        }
+        // A non-expandable application yields `None`; fall back to the opaque `resolved`, which
+        // consumers treat as indeterminate.
+        self.instantiated_alias_application(resolved, stack)
+            .or(Some(resolved))
+    }
+
+    /// For an `InstanceOf` of a generic alias (e.g. `Maybe<string>`), substitutes the body with its
+    /// arguments and interns it. `None` for nominal instances (`Promise<T>`) and `stack` cycles.
+    fn instantiated_alias_application(
+        &self,
+        resolved: ResolvedTypeData<'_>,
+        stack: &mut Vec<InstantiationKey>,
+    ) -> Option<ResolvedTypeData<'_>> {
+        // Derive only the key first: the cache hit is the steady state after the first
+        // materialization, and it never needs the declared parameters or the body.
+        let key = self.alias_application_key(&resolved)?;
+        if let Some(cached) = self.lazy_instantiations.cached(&key) {
+            return self.get_by_resolved_id_raw(cached);
+        }
+        if stack.contains(&key) {
+            return None;
+        }
+        // A parameterized chain (`type W1<T> = W0<T>; ...`) re-enters here per level via
+        // `instantiated_generic_alias`, so cap the re-entry depth and leave deeper aliases opaque
+        // (indeterminate to consumers) rather than overflowing the stack.
+        if stack.len() >= MAX_ALIAS_CHAIN_DEPTH {
+            return None;
+        }
+        let (declared, body_ref) = self.alias_declaration_parts(&key)?;
+
+        // Walk the chain of identity-alias handoffs (`type A = Id<B>`) iteratively, interning one
+        // level per hop. The walk stops and leaves the alias opaque when a hop fails to materialize
+        // or closes a cycle (`type Loop = Id<Loop>`, mutual aliases). It terminates because every
+        // hop pushes a fresh key and a repeated key ends it.
+        let base = stack.len();
+        let mut chain: Vec<(InstantiationKey, TypeData)> = Vec::new();
+        let mut current = Some((key, declared, body_ref));
+        let mut leave_opaque = false;
+        while let Some((hop_key, hop_declared, hop_body)) = current.take() {
+            // The handoff walk is iterative and never re-enters the depth check above, so a long
+            // acyclic chain (`type A1 = Id<A0>; ...`) would otherwise walk every level. Enforce the
+            // same cap per hop and leave deeper aliases opaque.
+            if stack.len() >= MAX_ALIAS_CHAIN_DEPTH {
+                leave_opaque = true;
+                break;
+            }
+            stack.push(hop_key.clone());
+            let Some(materialized) =
+                self.materialize_alias_level(&hop_key, &hop_declared, &hop_body, stack)
+            else {
+                // The hop cannot materialize: a cycle, or a malformed/unresolvable alias.
+                leave_opaque = true;
+                break;
+            };
+
+            // Does the materialized body hand off to another alias application?
+            let next_key = if let TypeData::Reference(reference) = &materialized
+                && let Some(ref_id) = self.resolve_reference(reference)
+                && let Some(ref_resolved) = self.get_by_resolved_id_raw(ref_id)
+            {
+                self.alias_application_key(&ref_resolved)
+            } else {
+                None
+            };
+            chain.push((hop_key, materialized));
+
+            let Some(next_key) = next_key else {
+                break; // chain ends in a concrete body
+            };
+            if self.lazy_instantiations.cached(&next_key).is_some() {
+                break; // handoff target already interned
+            }
+            if stack.contains(&next_key) {
+                // Handoff target is still on the stack: a cycle.
+                leave_opaque = true;
+                break;
+            }
+            let Some((next_declared, next_body)) = self.alias_declaration_parts(&next_key) else {
+                leave_opaque = true;
+                break;
+            };
+            current = Some((next_key, next_declared, next_body));
+        }
+        stack.truncate(base);
+        if leave_opaque {
+            return None;
+        }
+
+        // Intern deepest-first so type IDs match the order a depth-first walk produces.
+        let mut entry_id = None;
+        for (hop_key, data) in chain.into_iter().rev() {
+            let instantiated_id = self.register_lazy_type(Cow::Owned(data));
+            let resolved_id = ResolvedTypeId::new(TypeResolverLevel::Full, instantiated_id);
+            self.lazy_instantiations.insert_cache(hop_key, resolved_id);
+            entry_id = Some(resolved_id);
+        }
+        self.get_by_resolved_id_raw(entry_id?)
+    }
+
+    /// Substitutes a single alias level via [`instantiated_generic_alias`], keeping the cycle
+    /// `stack` visible to the nested resolution so the walk above can intern each level on its own.
+    fn materialize_alias_level(
+        &self,
+        key: &InstantiationKey,
+        declared: &[TypeReference],
+        body_ref: &TypeReference,
+        stack: &mut Vec<InstantiationKey>,
+    ) -> Option<TypeData> {
+        let mut lazy_resolver = LazyInstantiationResolver {
+            resolver: self,
+            stack: RefCell::new(std::mem::take(stack)),
+        };
+        let instantiated =
+            instantiated_generic_alias(&key.arguments, declared, body_ref, &mut lazy_resolver);
+        *stack = lazy_resolver.stack.into_inner();
+        instantiated
+    }
+
+    /// Derives the [`InstantiationKey`] of a generic-alias application. `None` for
+    /// non-applications such as nominal instances (`Promise<T>`, `Array<T>`).
+    fn alias_application_key(&self, resolved: &ResolvedTypeData) -> Option<InstantiationKey> {
+        let TypeData::InstanceOf(instance) = resolved.as_raw_data() else {
+            return None;
+        };
+        if instance.type_parameters.is_empty() {
+            return None;
+        }
+
+        let target_ref = resolved.apply_module_id_to_reference(&instance.ty);
+        let target_id = self.resolve_reference(target_ref.as_ref())?;
+        let target = self.get_by_resolved_id_raw(target_id)?;
+        let TypeData::InstanceOf(alias) = target.as_raw_data() else {
+            return None;
+        };
+        if alias.type_parameters.is_empty() {
+            return None;
+        }
+
+        let arguments = instance
+            .type_parameters
+            .iter()
+            .map(|param| resolved.apply_module_id_to_reference(param).into_owned())
+            .collect::<Box<[_]>>();
+        Some(InstantiationKey::new(target_id, arguments))
+    }
+
+    /// Extracts the declared parameters and body reference of the alias behind `key`. Kept
+    /// separate from [`Self::alias_application_key`] so the key-only exits (cache hit, cycle,
+    /// depth cap) skip these allocations.
+    fn alias_declaration_parts(
+        &self,
+        key: &InstantiationKey,
+    ) -> Option<(Vec<TypeReference>, TypeReference)> {
+        let target = self.get_by_resolved_id_raw(key.target_id)?;
+        let TypeData::InstanceOf(alias) = target.as_raw_data() else {
+            return None;
+        };
+        let declared = alias
+            .type_parameters
+            .iter()
+            .map(|param| target.apply_module_id_to_reference(param).into_owned())
+            .collect::<Vec<_>>();
+        let body_ref = target.apply_module_id_to_reference(&alias.ty).into_owned();
+        Some((declared, body_ref))
+    }
+
+    /// Interns a materialized type, reusing the primary-store id when the data already lives there
+    /// so lazy ids are minted only for types the primary store lacks.
+    fn register_lazy_type(&self, type_data: Cow<TypeData>) -> TypeId {
+        if let Some(type_id) = self.types.find(type_data.as_ref()) {
+            return type_id;
+        }
+        self.lazy_instantiations
+            .insert_type(self.primary_type_count(), type_data)
+    }
+}
+
+/// [`TypeResolver`] view for alias materialization: reads through the parent [`ModuleResolver`],
+/// registers new types into its lazy store, and threads `stack` to break instantiation cycles.
+struct LazyInstantiationResolver<'a> {
+    resolver: &'a ModuleResolver,
+    stack: RefCell<Vec<InstantiationKey>>,
+}
+
+impl TypeResolver for LazyInstantiationResolver<'_> {
+    fn level(&self) -> TypeResolverLevel {
+        self.resolver.level()
+    }
+
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.resolver.find_type(type_data)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.resolver.get_by_id(id)
+    }
+
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
+        let mut id = id;
+        let mut hops = 0;
+        loop {
+            let resolved = {
+                let mut stack = self.stack.borrow_mut();
+                self.resolver
+                    .get_by_resolved_id_with_stack(id, &mut stack)?
+            };
+            match resolved.as_raw_data() {
+                // Follow `Reference -> Reference` chains, bounded against cycles of distinct ids;
+                // on exhaustion the reference is returned un-followed.
+                TypeData::Reference(TypeReference::Resolved(next))
+                    if id != *next && hops < MAX_FLATTEN_DEPTH =>
+                {
+                    id = resolved.apply_module_id(*next);
+                    hops += 1;
+                }
+                _ => return Some(resolved),
+            }
+        }
+    }
+
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        self.resolver.register_lazy_type(type_data)
+    }
+
+    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
+        self.resolver.resolve_reference(ty)
+    }
+
+    fn resolve_import(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+        self.resolver.resolve_import(qualifier)
+    }
+
+    fn resolve_import_namespace_member(
+        &self,
+        module_id: ModuleId,
+        name: &str,
+    ) -> Option<ResolvedTypeId> {
+        self.resolver
+            .resolve_import_namespace_member(module_id, name)
+    }
+
+    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
+        self.resolver.resolve_qualifier(qualifier)
+    }
+
+    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
+        self.resolver.resolve_type_of(identifier, scope_id)
+    }
+
+    fn resolve_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
+        let id = self.resolver.resolved_id_for_expression(expr);
+        let mut stack = self.stack.borrow_mut();
+        match self.resolver.get_by_resolved_id_with_stack(id, &mut stack) {
+            Some(resolved) => Cow::Owned(resolved.to_data()),
+            None => Cow::Owned(TypeData::unknown()),
+        }
+    }
+
+    fn reference_to_resolved_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expression: &AnyJsExpression,
+    ) -> TypeReference {
+        self.resolver.resolved_id_for_expression(expression).into()
+    }
+
+    fn mapped_resolved_id(&self, resolved_id: ResolvedTypeId) -> ResolvedTypeId {
+        self.resolver.mapped_resolved_id(resolved_id)
+    }
+
+    fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
+        self.resolver.fallback_resolver()
+    }
+
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.resolver.registered_types()
+    }
+}
+
+impl TypeResolver for ModuleResolver {
+    /// The module resolver is the full-resolution stage.
+    fn level(&self) -> TypeResolverLevel {
+        TypeResolverLevel::Full
+    }
+
+    /// Searches the primary store for content-identical data, then the lazy instantiation store.
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types.find(type_data).or_else(|| {
+            self.lazy_instantiations
+                .find_type(self.primary_type_count(), type_data)
+        })
+    }
+
+    /// Resolves a local id, falling back to the global `unknown` type when it is out of range.
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        self.get_by_id_raw(id)
+            .unwrap_or_else(|| GLOBAL_RESOLVER.get_by_id(GLOBAL_UNKNOWN_ID.id()))
+    }
+
+    /// Entry point for id resolution; seeds the empty cycle stack threaded through materialization.
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
+        let mut stack = Vec::new();
+        self.get_by_resolved_id_with_stack(id, &mut stack)
+    }
+
+    // Before freeze, grow the primary store. After freeze its length is the fixed lazy-id base, so
+    // late registrations go to the lazy store; growing the primary store then would corrupt id routing.
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        if self.frozen_primary_count.is_some() {
+            return self.register_lazy_type(type_data);
+        }
         self.types.insert_cow(type_data)
+    }
+
+    /// Expansion happens through the lazy instantiation path instead, memoized per application.
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        false
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
@@ -509,7 +978,9 @@ impl TypeResolver for ModuleResolver {
     }
 
     fn registered_types(&self) -> Vec<&TypeData> {
-        self.types.as_references()
+        let mut types = self.types.as_references();
+        types.extend(self.lazy_instantiations.registered_types());
+        types
     }
 }
 

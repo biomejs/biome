@@ -215,6 +215,115 @@ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a";
 function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
 function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
 function singleAssertedBooleanLiteral(): boolean { return false as false; }
+type Maybe<T> = T | null;
+function genericAliasUnion(): Maybe<string> { return "hello"; }
+
+type Either<L, R> = L | R;
+function genericAliasMultiParam(): Either<string, number> { return "hello"; }
+
+type Wrap<T> = Maybe<T>;
+function nestedGenericAliasUnion(): Wrap<string> { return "hello"; }
+
+type Boxed<T> = { value: T } | null;
+function genericAliasObjectVariant(): Boxed<string> { return { value: "x" }; }
+
+type MaybeLiteral<T> = T | null;
+function genericAliasLiteralUnionAsConst(): MaybeLiteral<"hello"> { return "hello" as const; }
+
+type EitherLiteral<L, R> = L | R;
+function genericAliasLiteralMultiParamAsConst(): EitherLiteral<"hello", number> { return "hello" as const; }
+
+type WrapLiteral<T> = MaybeLiteral<T>;
+function nestedGenericAliasLiteralUnionAsConst(): WrapLiteral<"hello"> { return "hello" as const; }
+
+type BoxedLiteral<T> = { value: T } | null;
+function genericAliasObjectLiteralVariantAsConst(): BoxedLiteral<"x"> { return { value: "x" as const }; }
+
+function genericAliasLiteralUnionNoConst(): MaybeLiteral<"hello"> { return "hello"; }
+
+function genericAliasLiteralMultiParamNoConst(): EitherLiteral<"hello", number> { return "hello"; }
+
+function nestedGenericAliasLiteralUnionNoConst(): WrapLiteral<"hello"> { return "hello"; }
+
+function genericAliasObjectLiteralVariantNoConst(): BoxedLiteral<"x"> { return { value: "x" }; }
+
+type IdAlias<T> = T;
+function genericIdentityAlias(): IdAlias<string> { return "hello" as const; }
+
+function mixedIndexAndNamedWiden(): { id: number; [key: string]: number } {
+    return { id: 1 as const, count: 2 as const };
+}
+
+function namedOnlyWithExtraInferredMember(): { id: number } {
+    const result = { id: 1 as const, extra: "ignored" as const };
+    return result;
+}
+
+type Pair<A, B = string> = A | B;
+function genericAliasDefaultParam(b: boolean): Pair<number> {
+    if (b) return 1;
+    return 2;
+}
+
+function recordIndexSignatureWiden(): Record<string, string> {
+    return { a: "x" as const };
+}
+
+type TaggedMaybe<T> =
+    | { kind: "extra"; value: T extends string ? string : number }
+    | { kind: "ok"; value: null };
+function unknownDoesNotMaskDiscriminant(): TaggedMaybe<number> {
+    return { kind: "ok", value: null };
+}
+function unknownDoesNotMaskDiscriminantReversed(): TaggedMaybe<number> {
+    return { value: null, kind: "ok" };
+}
+
+// The trivially-true condition (identical sides) resolves to its true branch, so
+// `NonGenericConditional` is `"a" | "b"`, and returning only "a" is misleading.
+type NonGenericConditional = string extends string ? "a" | "b" : never;
+function nonGenericConditionalReturnsSubset(): NonGenericConditional { return "a"; }
+
+type ChoicePlainOptional = { optional?: string } | { required: number };
+function choicePlainOptional(): ChoicePlainOptional {
+    return { required: 1 as const };
+}
+
+type ChoiceGenericOptional<T> = { optional?: T } | { required: number };
+function choiceGenericOptional(): ChoiceGenericOptional<string> {
+    return { required: 1 as const };
+}
+
+async function asyncGenericAliasUnion(): Promise<Maybe<string>> {
+    return "x";
+}
+
+type EntryOrNull = { id: string; meta: unknown } | null;
+function readEntry(): EntryOrNull {
+    return { id: "x", meta: 1 };
+}
+
+type OptionsOrNull = { retries?: number } | null;
+function getOptions(): OptionsOrNull {
+    return {};
+}
+
+type StringMapOrNull = Record<string, string> | null;
+function getStringMap(): StringMapOrNull {
+    return {};
+}
+
+function unknownConstMemberKeepsSiblingMisleading(): { a: object; b: unknown } {
+    return { a: { x: 1 }, b: 2 as const };
+}
+
+// The assertion pins the return to `JustAsserted<string>` = `string`, so the annotation's
+// `null` variant is never produced.
+type MaybeNarrowedByAssertion<T> = T | null;
+type JustAsserted<T> = T;
+function assertedGenericAliasNarrower(): MaybeNarrowedByAssertion<string> {
+    return "hello" as JustAsserted<string>;
+}
 
 ```
 
@@ -2467,7 +2576,7 @@ invalid.ts:210:39 lint/nursery/noMisleadingReturnType ━━━━━━━━�
   > 210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
         │                                       ^^^^^^^^
     211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
-    212 │ 
+    212 │ type Maybe<T> = T | null;
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -2489,11 +2598,642 @@ invalid.ts:211:40 lint/nursery/noMisleadingReturnType ━━━━━━━━�
     210 │ function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
   > 211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
         │                                        ^^^^^^^^^
-    212 │ 
+    212 │ type Maybe<T> = T | null;
+    213 │ function genericAliasUnion(): Maybe<string> { return "hello"; }
   
   i A wider return type hides the precise types that callers could rely on.
   
   i Consider using false as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:213:29 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    211 │ function singleAssertedBooleanLiteral(): boolean { return false as false; }
+    212 │ type Maybe<T> = T | null;
+  > 213 │ function genericAliasUnion(): Maybe<string> { return "hello"; }
+        │                             ^^^^^^^^^^^^^^^
+    214 │ 
+    215 │ type Either<L, R> = L | R;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:216:34 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    215 │ type Either<L, R> = L | R;
+  > 216 │ function genericAliasMultiParam(): Either<string, number> { return "hello"; }
+        │                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+    217 │ 
+    218 │ type Wrap<T> = Maybe<T>;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:219:35 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    218 │ type Wrap<T> = Maybe<T>;
+  > 219 │ function nestedGenericAliasUnion(): Wrap<string> { return "hello"; }
+        │                                   ^^^^^^^^^^^^^^
+    220 │ 
+    221 │ type Boxed<T> = { value: T } | null;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:222:37 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    221 │ type Boxed<T> = { value: T } | null;
+  > 222 │ function genericAliasObjectVariant(): Boxed<string> { return { value: "x" }; }
+        │                                     ^^^^^^^^^^^^^^^
+    223 │ 
+    224 │ type MaybeLiteral<T> = T | null;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:225:43 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    224 │ type MaybeLiteral<T> = T | null;
+  > 225 │ function genericAliasLiteralUnionAsConst(): MaybeLiteral<"hello"> { return "hello" as const; }
+        │                                           ^^^^^^^^^^^^^^^^^^^^^^^
+    226 │ 
+    227 │ type EitherLiteral<L, R> = L | R;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:228:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    227 │ type EitherLiteral<L, R> = L | R;
+  > 228 │ function genericAliasLiteralMultiParamAsConst(): EitherLiteral<"hello", number> { return "hello" as const; }
+        │                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    229 │ 
+    230 │ type WrapLiteral<T> = MaybeLiteral<T>;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:231:49 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    230 │ type WrapLiteral<T> = MaybeLiteral<T>;
+  > 231 │ function nestedGenericAliasLiteralUnionAsConst(): WrapLiteral<"hello"> { return "hello" as const; }
+        │                                                 ^^^^^^^^^^^^^^^^^^^^^^
+    232 │ 
+    233 │ type BoxedLiteral<T> = { value: T } | null;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:234:51 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    233 │ type BoxedLiteral<T> = { value: T } | null;
+  > 234 │ function genericAliasObjectLiteralVariantAsConst(): BoxedLiteral<"x"> { return { value: "x" as const }; }
+        │                                                   ^^^^^^^^^^^^^^^^^^^
+    235 │ 
+    236 │ function genericAliasLiteralUnionNoConst(): MaybeLiteral<"hello"> { return "hello"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:236:43 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    234 │ function genericAliasObjectLiteralVariantAsConst(): BoxedLiteral<"x"> { return { value: "x" as const }; }
+    235 │ 
+  > 236 │ function genericAliasLiteralUnionNoConst(): MaybeLiteral<"hello"> { return "hello"; }
+        │                                           ^^^^^^^^^^^^^^^^^^^^^^^
+    237 │ 
+    238 │ function genericAliasLiteralMultiParamNoConst(): EitherLiteral<"hello", number> { return "hello"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:238:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    236 │ function genericAliasLiteralUnionNoConst(): MaybeLiteral<"hello"> { return "hello"; }
+    237 │ 
+  > 238 │ function genericAliasLiteralMultiParamNoConst(): EitherLiteral<"hello", number> { return "hello"; }
+        │                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    239 │ 
+    240 │ function nestedGenericAliasLiteralUnionNoConst(): WrapLiteral<"hello"> { return "hello"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:240:49 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    238 │ function genericAliasLiteralMultiParamNoConst(): EitherLiteral<"hello", number> { return "hello"; }
+    239 │ 
+  > 240 │ function nestedGenericAliasLiteralUnionNoConst(): WrapLiteral<"hello"> { return "hello"; }
+        │                                                 ^^^^^^^^^^^^^^^^^^^^^^
+    241 │ 
+    242 │ function genericAliasObjectLiteralVariantNoConst(): BoxedLiteral<"x"> { return { value: "x" }; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:242:51 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    240 │ function nestedGenericAliasLiteralUnionNoConst(): WrapLiteral<"hello"> { return "hello"; }
+    241 │ 
+  > 242 │ function genericAliasObjectLiteralVariantNoConst(): BoxedLiteral<"x"> { return { value: "x" }; }
+        │                                                   ^^^^^^^^^^^^^^^^^^^
+    243 │ 
+    244 │ type IdAlias<T> = T;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:245:32 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    244 │ type IdAlias<T> = T;
+  > 245 │ function genericIdentityAlias(): IdAlias<string> { return "hello" as const; }
+        │                                ^^^^^^^^^^^^^^^^^
+    246 │ 
+    247 │ function mixedIndexAndNamedWiden(): { id: number; [key: string]: number } {
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:247:35 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    245 │ function genericIdentityAlias(): IdAlias<string> { return "hello" as const; }
+    246 │ 
+  > 247 │ function mixedIndexAndNamedWiden(): { id: number; [key: string]: number } {
+        │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    248 │     return { id: 1 as const, count: 2 as const };
+    249 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:251:44 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    249 │ }
+    250 │ 
+  > 251 │ function namedOnlyWithExtraInferredMember(): { id: number } {
+        │                                            ^^^^^^^^^^^^^^^^
+    252 │     const result = { id: 1 as const, extra: "ignored" as const };
+    253 │     return result;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:257:46 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    256 │ type Pair<A, B = string> = A | B;
+  > 257 │ function genericAliasDefaultParam(b: boolean): Pair<number> {
+        │                                              ^^^^^^^^^^^^^^
+    258 │     if (b) return 1;
+    259 │     return 2;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 1 | 2 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:262:37 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    260 │ }
+    261 │ 
+  > 262 │ function recordIndexSignatureWiden(): Record<string, string> {
+        │                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    263 │     return { a: "x" as const };
+    264 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:269:42 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    267 │     | { kind: "extra"; value: T extends string ? string : number }
+    268 │     | { kind: "ok"; value: null };
+  > 269 │ function unknownDoesNotMaskDiscriminant(): TaggedMaybe<number> {
+        │                                          ^^^^^^^^^^^^^^^^^^^^^
+    270 │     return { kind: "ok", value: null };
+    271 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:272:50 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    270 │     return { kind: "ok", value: null };
+    271 │ }
+  > 272 │ function unknownDoesNotMaskDiscriminantReversed(): TaggedMaybe<number> {
+        │                                                  ^^^^^^^^^^^^^^^^^^^^^
+    273 │     return { value: null, kind: "ok" };
+    274 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:279:46 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    277 │ // `NonGenericConditional` is `"a" | "b"`, and returning only "a" is misleading.
+    278 │ type NonGenericConditional = string extends string ? "a" | "b" : never;
+  > 279 │ function nonGenericConditionalReturnsSubset(): NonGenericConditional { return "a"; }
+        │                                              ^^^^^^^^^^^^^^^^^^^^^^^
+    280 │ 
+    281 │ type ChoicePlainOptional = { optional?: string } | { required: number };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:282:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    281 │ type ChoicePlainOptional = { optional?: string } | { required: number };
+  > 282 │ function choicePlainOptional(): ChoicePlainOptional {
+        │                               ^^^^^^^^^^^^^^^^^^^^^
+    283 │     return { required: 1 as const };
+    284 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:287:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    286 │ type ChoiceGenericOptional<T> = { optional?: T } | { required: number };
+  > 287 │ function choiceGenericOptional(): ChoiceGenericOptional<string> {
+        │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    288 │     return { required: 1 as const };
+    289 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:291:40 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    289 │ }
+    290 │ 
+  > 291 │ async function asyncGenericAliasUnion(): Promise<Maybe<string>> {
+        │                                        ^^^^^^^^^^^^^^^^^^^^^^^^
+    292 │     return "x";
+    293 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:296:21 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    295 │ type EntryOrNull = { id: string; meta: unknown } | null;
+  > 296 │ function readEntry(): EntryOrNull {
+        │                     ^^^^^^^^^^^^^
+    297 │     return { id: "x", meta: 1 };
+    298 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:301:22 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    300 │ type OptionsOrNull = { retries?: number } | null;
+  > 301 │ function getOptions(): OptionsOrNull {
+        │                      ^^^^^^^^^^^^^^^
+    302 │     return {};
+    303 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:306:24 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    305 │ type StringMapOrNull = Record<string, string> | null;
+  > 306 │ function getStringMap(): StringMapOrNull {
+        │                        ^^^^^^^^^^^^^^^^^
+    307 │     return {};
+    308 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:310:52 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    308 │ }
+    309 │ 
+  > 310 │ function unknownConstMemberKeepsSiblingMisleading(): { a: object; b: unknown } {
+        │                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    311 │     return { a: { x: 1 }, b: 2 as const };
+    312 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:318:40 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    316 │ type MaybeNarrowedByAssertion<T> = T | null;
+    317 │ type JustAsserted<T> = T;
+  > 318 │ function assertedGenericAliasNarrower(): MaybeNarrowedByAssertion<string> {
+        │                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    319 │     return "hello" as JustAsserted<string>;
+    320 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using string as the return type.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
   
