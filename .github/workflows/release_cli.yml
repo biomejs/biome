@@ -55,10 +55,10 @@ jobs:
           - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
-          - os: depot-macos-14
+          - os: depot-macos-latest
             target: x86_64-apple-darwin
             code-target: darwin-x64
-          - os: depot-macos-14
+          - os: depot-macos-latest
             target: aarch64-apple-darwin
             code-target: darwin-arm64
 
