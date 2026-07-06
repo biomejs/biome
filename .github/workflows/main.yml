@@ -35,7 +35,7 @@ jobs:
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
-      - uses: tombi-toml/setup-tombi@90dc1ab19ff45cc28017aab8cd0093516d908532 # v1.1.5
+      - uses: tombi-toml/setup-tombi@e23e1d4c5044e8c51c41ec19a5c607ab5a83cabd # v1.1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Format TOML files
@@ -83,7 +83,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Install cargo-deny
-        uses: taiki-e/install-action@682e7d9e49c5e653d371fc6adbda67653461378a # v2.82.4
+        uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419 # v2.82.7
         with:
           tool: cargo-deny
       - run: cargo deny check bans
