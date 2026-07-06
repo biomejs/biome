@@ -72,18 +72,16 @@ info: markdown/link/title.md
 +[a](https://example.com '\)')
 +[a](https://example.com (\)))
  
--[a](https://example.com '"')
--[a](https://example.com "'")
--[a](https://example.com ")")
+-[a](https://example.com '\\"')
+-[a](https://example.com "\\'")
+-[a](https://example.com "\\)")
 +[a](https://example.com "\\\"")
 +[a](https://example.com '\\\'')
 +[a](https://example.com (\\\)))
  
--[a](https://example.com "'")
--[a](https://example.com '"')
--[a](https://example.com '"')
-+[a](https://example.com "\\'")
-+[a](https://example.com '\\"')
+ [a](https://example.com "\\'")
+ [a](https://example.com '\\"')
+-[a](https://example.com '\\"')
 +[a](https://example.com (\\"))
  
  <!-- magical incantations -->

@@ -1,4 +1,5 @@
 - A list item.
+
 <details><summary>Summary</summary>
 <p>
 
@@ -8,6 +9,7 @@
 </details>
 
 - A list item.
+
 <blockquote>
 
 <p>quoted sentence1<br>
