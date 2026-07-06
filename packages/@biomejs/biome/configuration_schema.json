@@ -15104,6 +15104,13 @@
 		},
 		"UseDomQuerySelectorOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of receiver identifiers to ignore.\n\nIn the expression `document.querySelector('div')`, the receiver is `document`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseEnumInitializersConfiguration": {
