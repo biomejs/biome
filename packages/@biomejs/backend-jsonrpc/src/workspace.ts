@@ -8423,7 +8423,14 @@ Default: `"it"`
 }
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
-export type UseDomQuerySelectorOptions = {};
+export interface UseDomQuerySelectorOptions {
+	/**
+	* A list of receiver identifiers to ignore.
+
+In the expression `document.querySelector('div')`, the receiver is `document`. 
+	 */
+	ignore?: string[];
+}
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
 /**
