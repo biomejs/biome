@@ -77,10 +77,7 @@ MdDocument {
                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
                         content_indent: MdIndentTokenList [
                             MdIndentToken {
-                                md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
-                            },
-                            MdIndentToken {
-                                md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
+                                md_indent_char_token: MD_INDENT_CHAR@14..16 "  " [] [],
                             },
                         ],
                     },
@@ -124,10 +121,7 @@ MdDocument {
                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@24..25 " " [] [],
                         content_indent: MdIndentTokenList [
                             MdIndentToken {
-                                md_indent_char_token: MD_INDENT_CHAR@25..26 " " [] [],
-                            },
-                            MdIndentToken {
-                                md_indent_char_token: MD_INDENT_CHAR@26..27 " " [] [],
+                                md_indent_char_token: MD_INDENT_CHAR@25..27 "  " [] [],
                             },
                         ],
                     },
@@ -240,10 +234,8 @@ MdDocument {
             1: MD_ORDERED_LIST_MARKER@11..13 "1." [] []
             2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
             3: MD_INDENT_TOKEN_LIST@14..16
-              0: MD_INDENT_TOKEN@14..15
-                0: MD_INDENT_CHAR@14..15 " " [] []
-              1: MD_INDENT_TOKEN@15..16
-                0: MD_INDENT_CHAR@15..16 " " [] []
+              0: MD_INDENT_TOKEN@14..16
+                0: MD_INDENT_CHAR@14..16 "  " [] []
           1: MD_BLOCK_LIST@16..17
             0: MD_NEWLINE@16..17
               0: NEWLINE@16..17 "\n" [] []
@@ -270,10 +262,8 @@ MdDocument {
             1: MINUS@23..24 "-" [] []
             2: MD_LIST_POST_MARKER_SPACE@24..25 " " [] []
             3: MD_INDENT_TOKEN_LIST@25..27
-              0: MD_INDENT_TOKEN@25..26
-                0: MD_INDENT_CHAR@25..26 " " [] []
-              1: MD_INDENT_TOKEN@26..27
-                0: MD_INDENT_CHAR@26..27 " " [] []
+              0: MD_INDENT_TOKEN@25..27
+                0: MD_INDENT_CHAR@25..27 "  " [] []
           1: MD_BLOCK_LIST@27..28
             0: MD_NEWLINE@27..28
               0: NEWLINE@27..28 "\n" [] []
