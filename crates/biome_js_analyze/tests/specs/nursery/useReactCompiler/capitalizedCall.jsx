@@ -1,6 +1,9 @@
 // should generate diagnostics
 
-function Component() {
+function Component(props) {
+    if (props.compact) {
+        return <span />;
+    }
     return OtherComponent();
 }
 

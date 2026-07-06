@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: utilityModule.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// With `compilationMode: "all"`, every function is analyzed, including
+// utility functions that don't follow React naming conventions.
+
+let counter = 0;
+
+export function increment() {
+    counter = counter + 1;
+    return counter;
+}
+
+```
+
+# Diagnostics
+```
+utilityModule.js:9:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component reassigns a variable declared outside it.
+  
+     8 │ export function increment() {
+   > 9 │     counter = counter + 1;
+       │     ^^^^^^^
+    10 │     return counter;
+    11 │ }
+  
+  i Changing external variables during render makes component output depend on mutable shared state.
+  
+  i Keep render logic local and immutable, or move shared updates into state, refs, or event handlers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

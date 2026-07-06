@@ -6,7 +6,10 @@ expression: capitalizedCall.jsx
 ```jsx
 // should generate diagnostics
 
-function Component() {
+function Component(props) {
+    if (props.compact) {
+        return <span />;
+    }
     return OtherComponent();
 }
 
@@ -18,15 +21,16 @@ function OtherComponent() {
 
 # Diagnostics
 ```
-capitalizedCall.jsx:4:12 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+capitalizedCall.jsx:7:12 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This capitalized function is called directly.
   
-    3 │ function Component() {
-  > 4 │     return OtherComponent();
+    5 │         return <span />;
+    6 │     }
+  > 7 │     return OtherComponent();
       │            ^^^^^^^^^^^^^^^^
-    5 │ }
-    6 │ 
+    8 │ }
+    9 │ 
   
   i React treats capitalized functions as components, and components should be rendered with JSX so their hooks and lifecycle are handled correctly.
   

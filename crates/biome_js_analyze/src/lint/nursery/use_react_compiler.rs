@@ -8,8 +8,9 @@ use biome_rule_options::use_react_compiler::UseReactCompilerOptions;
 declare_lint_rule! {
     /// Validate files with React Compiler.
     ///
-    /// This rule runs React Compiler in lint mode and reports any compiler diagnostics.
-    /// React Compiler validates whether components and hooks can be safely compiled.
+    /// This rule runs React Compiler in lint mode and reports the actionable
+    /// diagnostics it emits. React Compiler validates whether components and
+    /// hooks can be safely compiled.
     ///
     /// ## Examples
     ///
@@ -32,6 +33,42 @@ declare_lint_rule! {
     /// ```jsx
     /// function Component(props) {
     ///     return <div>{props.value}</div>;
+    /// }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `compilationMode`
+    ///
+    /// Controls which functions React Compiler analyzes. Accepted values are:
+    ///
+    /// - `"infer"` (default): analyzes functions that follow React conventions —
+    ///   components (capitalized functions that create JSX or call hooks) and
+    ///   hooks (functions whose name starts with `use`). Files that don't define
+    ///   any such function are skipped entirely.
+    /// - `"annotation"`: analyzes only functions annotated with a `"use memo"`
+    ///   directive.
+    /// - `"all"`: analyzes every function. This can report React-specific
+    ///   diagnostics in non-React code, such as utility functions that update
+    ///   module-level state.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "compilationMode": "all"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With `"compilationMode": "all"`, violations are reported even in
+    /// functions that don't follow React naming conventions:
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// let counter = 0;
+    ///
+    /// export function increment() {
+    ///     counter = counter + 1;
+    ///     return counter;
     /// }
     /// ```
     pub UseReactCompiler {
