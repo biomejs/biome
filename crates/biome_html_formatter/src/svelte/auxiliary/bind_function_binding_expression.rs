@@ -27,11 +27,15 @@ impl FormatNodeRule<SvelteBindFunctionBindingExpression>
             f,
             [group(&biome_formatter::format_args![
                 l_curly_token.format(),
-                get.format(),
-                comma_token.format(),
-                space(),
-                set.format(),
-                r_curly_token.format()
+                soft_block_indent(&biome_formatter::format_args![
+                    soft_line_break_or_space(),
+                    get.format(),
+                    comma_token.format(),
+                    soft_line_break_or_space(),
+                    set.format(),
+                ]),
+                soft_line_break_or_space(),
+                r_curly_token.format(),
             ])]
         )
     }
