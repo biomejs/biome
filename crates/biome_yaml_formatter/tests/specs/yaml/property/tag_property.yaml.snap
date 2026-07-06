@@ -17,10 +17,3 @@ info: yaml/property/tag_property.yaml
 [&x "val", !tag [1, 2]]
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"&x \"val\"" => 1..9
-" !tag [1, 2" => 10..21

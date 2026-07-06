@@ -20,12 +20,10 @@ a: !!set &anchor
 +++ Biome
 @@ -1,3 +1,4 @@
 -a: !!set &anchor
--  - 123
--  - 456
 +a:
 +  !!set &anchor
-+- 123
-+- 456
+   - 123
+   - 456
 ```
 
 # Output
@@ -33,6 +31,6 @@ a: !!set &anchor
 ```yml
 a:
   !!set &anchor
-- 123
-- 456
+  - 123
+  - 456
 ```
