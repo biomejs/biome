@@ -113,13 +113,8 @@ impl PluginDiagnostic {
 
     pub fn cant_read_file(path: Utf8PathBuf, source: FileSystemDiagnostic) -> Self {
         Self::CantReadFile(CantReadFile {
-            message: MessageAndDescription::from(
-                markup! {
-                    "Cannot read plugin file "
-                    <Emphasis>{path.to_string()}</Emphasis>
-                }
-                .to_owned(),
-            ),
+            message: MessageAndDescription::from(markup! {"Cannot read plugin file"}.to_owned()),
+            path: path.to_string(),
             source: Some(Error::from(source)),
         })
     }
@@ -220,6 +215,9 @@ pub struct CantReadFile {
     #[message]
     #[description]
     message: MessageAndDescription,
+
+    #[location(resource)]
+    path: String,
 
     #[serde(skip)]
     #[source]
