@@ -71,8 +71,12 @@ impl LSPServer {
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
         let url = params.text_document.uri;
-        match requests::syntax_tree::syntax_tree(&self.session, &url) {
-            Ok(result) => Ok(result.unwrap_or_default()),
+        let result =
+            catch_lsp_operation(move || requests::syntax_tree::syntax_tree(&self.session, &url));
+        match result {
+            Ok(Ok(Ok(result))) => Ok(result.unwrap_or_default()),
+            Ok(Ok(Err(err))) => Err(into_lsp_error(err)),
+            Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
             Err(err) => Err(into_lsp_error(err)),
         }
     }
@@ -630,7 +634,7 @@ macro_rules! workspace_method {
                 let session = server.session.clone();
                 let result = spawn_blocking(move || {
                     let _guard = span.entered();
-                    catch_lsp_operation(|| session.workspace().$method(params))
+                    catch_lsp_operation(|| session.workspace_for_request().$method(params))
                 });
 
                 result.map(move |result| {

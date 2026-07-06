@@ -40,12 +40,31 @@ pub struct WorkspaceDb {
     storage: Storage<Self>,
 }
 
-impl WorkspaceDb {
+/// Handles to the collections that a [WorkspaceDb] shares with all its
+/// clones.
+///
+/// The database and its clones all point to the same underlying collections,
+/// so an update made through this type is immediately visible to all of them,
+/// and no lock is needed.
+///
+/// This matters when the database is updated through salsa setters: a setter
+/// can only run once every clone of the database has been dropped. A thread
+/// that still holds a clone must be able to finish its work on its own,
+/// without waiting for the lock that protects the database while the setter
+/// runs. This type is what makes that possible.
+#[derive(Clone)]
+pub struct WorkspaceDbData {
+    #[cfg(feature = "module_graph")]
+    modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
+}
+
+impl WorkspaceDbData {
     /// Inserts a file source so that it can be retrieved by index later.
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    pub fn insert_source(&mut self, document_file_source: DocumentFileSource) -> usize {
+    pub fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
             .find(|(_, file_source)| **file_source == document_file_source)
@@ -53,6 +72,55 @@ impl WorkspaceDb {
                 || self.file_sources.push(document_file_source),
                 |(index, _)| index,
             )
+    }
+
+    #[cfg(feature = "module_graph")]
+    pub fn insert_module(&self, path: Utf8PathBuf, module: ModuleInfo) {
+        self.modules.pin().insert(path, module);
+    }
+
+    #[cfg(feature = "module_graph")]
+    pub fn remove_module(&self, path: &Utf8Path) {
+        self.modules.pin().remove(path);
+    }
+
+    /// Removes all modules that start with the given path. That's usually used
+    /// when removing a library or a folder from the project.
+    pub fn unload_path(&self, path: &Utf8Path) {
+        #[cfg(feature = "module_graph")]
+        {
+            let modules = self.modules.pin();
+            let to_remove: Vec<Utf8PathBuf> = modules
+                .keys()
+                .filter(|p| p.starts_with(path))
+                .cloned()
+                .collect();
+            for p in to_remove {
+                modules.remove(&p);
+            }
+        }
+        #[cfg(not(feature = "module_graph"))]
+        let _ = path;
+    }
+}
+
+impl WorkspaceDb {
+    /// Returns handles to the collections that this database shares with all
+    /// its clones.
+    pub fn data(&self) -> WorkspaceDbData {
+        WorkspaceDbData {
+            #[cfg(feature = "module_graph")]
+            modules: self.modules.clone(),
+            file_sources: self.file_sources.clone(),
+        }
+    }
+
+    /// Inserts a file source so that it can be retrieved by index later.
+    ///
+    /// Returns the index at which the file source can be retrieved using
+    /// `get_source()`.
+    pub fn insert_source(&mut self, document_file_source: DocumentFileSource) -> usize {
+        self.data().insert_source(document_file_source)
     }
 
     pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
@@ -174,7 +242,7 @@ impl WorkspaceDb {
 
     #[cfg(feature = "module_graph")]
     pub fn insert_module(&self, path: Utf8PathBuf, module: ModuleInfo) {
-        self.modules.pin().insert(path, module);
+        self.data().insert_module(path, module);
     }
 
     /// It updates the CST of an existing parsed source
@@ -210,24 +278,11 @@ impl WorkspaceDb {
 
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&self, path: &Utf8Path) {
-        self.modules.pin().remove(path);
+        self.data().remove_module(path);
     }
 
     pub fn unload_path(&self, path: &Utf8Path) {
-        #[cfg(feature = "module_graph")]
-        {
-            let modules = self.modules.pin();
-            let to_remove: Vec<Utf8PathBuf> = modules
-                .keys()
-                .filter(|p| p.starts_with(path))
-                .cloned()
-                .collect();
-            for p in to_remove {
-                modules.remove(&p);
-            }
-        }
-        #[cfg(not(feature = "module_graph"))]
-        let _ = path;
+        self.data().unload_path(path);
     }
 }
 
