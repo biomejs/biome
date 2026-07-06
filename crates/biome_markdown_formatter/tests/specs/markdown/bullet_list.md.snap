@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: markdown/bullet_list.md
 ---
 
@@ -22,6 +23,10 @@ __bold__
 
 + item after dash thematic break
 
+-   
+
+1.   
+
 ```
 
 
@@ -42,5 +47,9 @@ __bold__
 + ---
 
 * item after dash thematic break
+
+-
+
+1.
 
 ```

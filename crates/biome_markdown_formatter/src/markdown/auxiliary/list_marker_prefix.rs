@@ -63,7 +63,8 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             }
         }
 
-        let post_marker_len = if is_marker_only_bullet(node) {
+        let is_marker_only_bullet = is_marker_only_bullet(node);
+        let post_marker_len = if is_marker_only_bullet {
             // marker-only bullets have no post-marker space to preserve
             0
         } else {
@@ -89,7 +90,16 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
                 write!(f, [token(" ")])?;
             }
         }
-        write!(f, [content_indent.format()])
+        if is_marker_only_bullet {
+            for indent_token in content_indent.iter() {
+                f.context().comments().is_suppressed(indent_token.syntax());
+                write!(f, [format_removed(&indent_token.md_indent_char_token()?)])?;
+            }
+        } else {
+            write!(f, [content_indent.format()])?;
+        }
+
+        Ok(())
     }
 }
 
