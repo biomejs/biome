@@ -113,7 +113,7 @@ fn to_location(
     let target_range = if definition_path == original_path {
         to_proto::range(&doc.line_index, *definition_range, position_encoding)?
     } else {
-        let content = session.workspace().get_file_content(
+        let content = session.workspace_for_request().get_file_content(
             biome_service::workspace::GetFileContentParams {
                 project_key: doc.project_key,
                 path: definition_path.clone(),

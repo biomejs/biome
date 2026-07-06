@@ -63,33 +63,41 @@ pub(crate) fn code_actions(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
-    if !session.workspace().file_exists(path.clone().into())? {
+    if !session
+        .workspace_for_request()
+        .file_exists(path.clone().into())?
+    {
         return Ok(None);
     }
 
-    if session.workspace().is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
+    if session
+        .workspace_for_request()
+        .is_path_ignored(PathIsIgnoredParams {
+            path: path.clone(),
+            is_dir: false,
+            project_key: doc.project_key,
+            features,
+            ignore_kind: IgnoreKind::Ancestors,
+        })?
+    {
         return Ok(Some(Vec::new()));
     }
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = &session.workspace().file_features(SupportsFeatureParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        features,
-        inline_config: session.inline_config(),
-        skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new()
-            .with_search()
-            .with_formatter()
-            .build(),
-    })?;
+    } = &session
+        .workspace_for_request()
+        .file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            features,
+            inline_config: session.inline_config(),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new()
+                .with_search()
+                .with_formatter()
+                .build(),
+        })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
         info!("Linter and assist are disabled.");
@@ -103,10 +111,13 @@ pub(crate) fn code_actions(
         categories = categories.with_assist();
     }
 
-    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let size_limit_result =
+        session
+            .workspace_for_request()
+            .check_file_size(CheckFileSizeParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
@@ -130,10 +141,12 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
-    let content = session.workspace().get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
     let offset = match path.extension() {
         Some("vue") => VueFileHandler::start(content.as_str()),
         Some("astro") => AstroFileHandler::start(content.as_str()),
@@ -164,23 +177,25 @@ pub(crate) fn code_actions(
     };
     debug!("Cursor range {:?}", &cursor_range);
     let supports_resolve = session.supports_code_action_resolve();
-    let result = match session.workspace().pull_actions(PullActionsParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        range: Some(cursor_range),
-        // TODO: compute skip and only based on configuration
-        skip: vec![],
-        only: vec![],
-        suppression_reason: None,
-        enabled_rules: filters
-            .iter()
-            .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
-            .map(AnalyzerSelector::from)
-            .collect(),
-        categories: categories.build(),
-        inline_config: session.inline_config(),
-        compute_actions: !supports_resolve,
-    }) {
+    let result = match session
+        .workspace_for_request()
+        .pull_actions(PullActionsParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            range: Some(cursor_range),
+            // TODO: compute skip and only based on configuration
+            skip: vec![],
+            only: vec![],
+            suppression_reason: None,
+            enabled_rules: filters
+                .iter()
+                .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+                .map(AnalyzerSelector::from)
+                .collect(),
+            categories: categories.build(),
+            inline_config: session.inline_config(),
+            compute_actions: !supports_resolve,
+        }) {
         Ok(result) => result,
         Err(err) => {
             return if matches!(
@@ -427,21 +442,23 @@ pub(crate) fn code_action_resolve(
     let rule_selector =
         AnalyzerSelector::Rule(resolve_data.rule.context("The rule doesn't exist")?);
 
-    let result = session.workspace().pull_actions(PullActionsParams {
-        project_key: resolve_data.project_key,
-        path: path.clone(),
-        range: Some(resolve_data.range),
-        suppression_reason: None,
-        only: vec![rule_selector],
-        skip: vec![],
-        enabled_rules: vec![],
-        categories: RuleCategoriesBuilder::default()
-            .with_lint()
-            .with_assist()
-            .build(),
-        inline_config: session.inline_config(),
-        compute_actions: true,
-    })?;
+    let result = session
+        .workspace_for_request()
+        .pull_actions(PullActionsParams {
+            project_key: resolve_data.project_key,
+            path: path.clone(),
+            range: Some(resolve_data.range),
+            suppression_reason: None,
+            only: vec![rule_selector],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: RuleCategoriesBuilder::default()
+                .with_lint()
+                .with_assist()
+                .build(),
+            inline_config: session.inline_config(),
+            compute_actions: true,
+        })?;
 
     // Find the action matching the requested kind
     let target_action = result.actions.into_iter().find(|action| {
@@ -526,50 +543,64 @@ fn fix_all(
     };
     let analyzer_features = FeaturesBuilder::new().with_linter().with_assist().build();
 
-    if !session.workspace().file_exists(path.clone().into())? {
+    if !session
+        .workspace_for_request()
+        .file_exists(path.clone().into())?
+    {
         return Ok(None);
     }
 
-    if session.workspace().is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features: analyzer_features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
+    if session
+        .workspace_for_request()
+        .is_path_ignored(PathIsIgnoredParams {
+            path: path.clone(),
+            is_dir: false,
+            project_key: doc.project_key,
+            features: analyzer_features,
+            ignore_kind: IgnoreKind::Ancestors,
+        })?
+    {
         return Ok(None);
     }
 
     let FileFeaturesResult {
         features_supported: file_features,
-    } = session.workspace().file_features(SupportsFeatureParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-        features: FeaturesBuilder::new()
-            .with_formatter()
-            .with_linter()
-            .with_assist()
-            .build(),
-        inline_config: session.inline_config(),
-        skip_ignore_check: false,
-        not_requested_features: FeaturesBuilder::new().with_search().build(),
-    })?;
+    } = session
+        .workspace_for_request()
+        .file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            features: FeaturesBuilder::new()
+                .with_formatter()
+                .with_linter()
+                .with_assist()
+                .build(),
+            inline_config: session.inline_config(),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().with_search().build(),
+        })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace().is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features: analyzer_features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
+    if session
+        .workspace_for_request()
+        .is_path_ignored(PathIsIgnoredParams {
+            path: path.clone(),
+            is_dir: false,
+            project_key: doc.project_key,
+            features: analyzer_features,
+            ignore_kind: IgnoreKind::Ancestors,
+        })?
+    {
         return Ok(None);
     }
 
-    let size_limit_result = session.workspace().check_file_size(CheckFileSizeParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
+    let size_limit_result =
+        session
+            .workspace_for_request()
+            .check_file_size(CheckFileSizeParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+            })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
@@ -590,7 +621,7 @@ fn fix_all(
         )));
     }
 
-    let fixed = session.workspace().fix_file(FixFileParams {
+    let fixed = session.workspace_for_request().fix_file(FixFileParams {
         project_key: doc.project_key,
         path: path.clone(),
         fix_file_mode: FixFileMode::SafeFixes,
@@ -607,10 +638,13 @@ fn fix_all(
     } else {
         match path.as_path().extension() {
             Some(extension) => {
-                let input = session.workspace().get_file_content(GetFileContentParams {
-                    project_key: doc.project_key,
-                    path: path.clone(),
-                })?;
+                let input =
+                    session
+                        .workspace_for_request()
+                        .get_file_content(GetFileContentParams {
+                            project_key: doc.project_key,
+                            path: path.clone(),
+                        })?;
                 match extension {
                     "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
                     "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),

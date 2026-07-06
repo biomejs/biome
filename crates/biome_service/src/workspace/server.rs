@@ -3312,19 +3312,26 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: impl Into<BiomePath>,
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
-        self.open_file_internal(
-            OpenFileReason::Index(trigger),
-            OpenFileParams {
-                project_key,
-                path: path.into(),
-                content: FileContent::FromServer,
-                document_file_source: None,
-                persist_node_cache: false,
-                // TODO: review here, it feels wrong that we can't pass the inline config
-                inline_config: None,
-                editor_features: None,
-            },
-        )
+        let path = path.into();
+        // Indexing this file can be interrupted when another thread updates
+        // the workspace database at the same time (this only happens in the
+        // LSP, see `DbState`). Retry until the file is fully indexed, so its
+        // data is not missing from the module graph.
+        retry_on_pending_write(|| {
+            self.open_file_internal(
+                OpenFileReason::Index(trigger),
+                OpenFileParams {
+                    project_key,
+                    path: path.clone(),
+                    content: FileContent::FromServer,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                    // TODO: review here, it feels wrong that we can't pass the inline config
+                    inline_config: None,
+                    editor_features: None,
+                },
+            )
+        })
         .map(|result| (result.dependencies, result.diagnostics))
     }
 
