@@ -5,7 +5,8 @@ mod error;
 mod prefilter;
 
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{AnyJsRoot, TextRange, TextSize};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use react_compiler::entrypoint::compile_result::{CompileResult, LoggerEvent};
 use react_compiler::entrypoint::plugin_options::{CompilerTarget, PluginOptions};

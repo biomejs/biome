@@ -9,13 +9,14 @@ use biome_js_syntax::{
     AnyJsStatement, AnyJsTemplateElement, AnyJsxAttribute, AnyJsxAttributeName,
     AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxObjectName, AnyJsxTag,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsDirective, JsExport,
-    JsFileSource, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsIdentifierBinding,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsIdentifierBinding,
     JsIdentifierExpression, JsImport, JsNamedImportSpecifiers, JsObjectBindingPattern,
     JsPostUpdateExpression, JsPreUpdateExpression, JsReturnStatement, JsScript, JsSpread,
     JsSyntaxNode, JsTemplateExpression, JsVariableStatement, JsxAttribute, JsxElement,
     JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxMemberName, JsxName,
     JsxSelfClosingElement, JsxSpreadAttribute, JsxString, JsxText, inner_string_text,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use react_compiler_ast::declarations::{
     Declaration, ExportAllDeclaration, ExportDefaultDecl, ExportDefaultDeclaration, ExportKind,

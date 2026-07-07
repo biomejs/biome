@@ -1,5 +1,5 @@
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_react_compiler::{ConvertInput, convert_file};
 use react_compiler_ast::statements::Statement;
 
