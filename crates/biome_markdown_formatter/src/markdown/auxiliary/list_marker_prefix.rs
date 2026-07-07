@@ -198,9 +198,7 @@ impl Format<MarkdownFormatContext> for LocatedTargetMarker {
 }
 
 // A marker-only bullet (`-\n`, or `-   \n` before formatting) has no block
-// content besides the newline. Prettier removes the separator and indent
-// padding for those items, so the prefix formatter needs to detect them before
-// deciding how many spaces to print after the marker.
+// content besides the newline.
 fn is_marker_only_bullet(node: &MdListMarkerPrefix) -> bool {
     let Some(bullet) = node.syntax().parent().and_then(MdBullet::cast) else {
         return false;
