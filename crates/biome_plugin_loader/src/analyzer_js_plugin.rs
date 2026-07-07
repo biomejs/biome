@@ -84,6 +84,11 @@ impl AnalyzerJsPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
+    fn name(&self) -> &str {
+        // JS plugins don't declare a name; fall back to the plugin file stem.
+        self.path.file_stem().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         PluginTargetLanguage::JavaScript
     }
