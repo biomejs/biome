@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/parser-regression/issue-19152.md
+---
+
+# Input
+
+```md
+-    foo
+-		foo
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-- foo
+--     foo
++-    foo
++-    foo
+```
+
+# Output
+
+```md
+-    foo
+-    foo
+```

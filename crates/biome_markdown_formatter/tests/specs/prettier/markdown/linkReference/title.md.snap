@@ -53,45 +53,45 @@ info: markdown/linkReference/title.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,29 +1,29 @@
+@@ -1,36 +1,29 @@
 -[ref]: https://example.com "bar"
 +[ref]: https://example.com (bar)
  [other-ref]: https://example.com (Shakespeare's "Romeo and Juliet" is a famous play)
--[a]: https://example.com '"'
--[a]: https://example.com '"'
--[a]: https://example.com '"'
+-
+ [a]: https://example.com "\""
+ [a]: https://example.com '\"'
+ [a]: https://example.com (\")
+-
 -[a]: https://example.com "'"
--[a]: https://example.com "'"
--[a]: https://example.com "'"
--[a]: https://example.com "'"
--[a]: https://example.com ")"
--[a]: https://example.com ")"
--[a]: https://example.com '\\"'
-+[a]: https://example.com "\""
-+[a]: https://example.com '\"'
-+[a]: https://example.com (\")
+-
 +[a]: https://example.com "\'"
-+[a]: https://example.com '\''
-+[a]: https://example.com (\')
+ [a]: https://example.com '\''
+ [a]: https://example.com (\')
+-
+-[a]: https://example.com "'"
+-[a]: https://example.com ")"
+-
 +[a]: https://example.com "\'"
 +[a]: https://example.com '\)'
-+[a]: https://example.com (\))
-+[a]: https://example.com "\\\""
-+[a]: https://example.com '\\\''
-+[a]: https://example.com (\\\))
- [a]: https://example.com "\\'"
--[a]: https://example.com "\\)"
--[a]: https://example.com "\\'"
- [a]: https://example.com '\\"'
--[a]: https://example.com '\\"'
+ [a]: https://example.com (\))
+-
+ [a]: https://example.com "\\\""
+ [a]: https://example.com '\\\''
+ [a]: https://example.com (\\\))
+-
+-[a]: https://example.com "'"
+-[a]: https://example.com '"'
+-[a]: https://example.com '"'
+-[a]: https://example.com "\\a\\a"
+-[a]: https://example.com "\\a\\a"
+-[a]: https://example.com "\\a\\a"
++[a]: https://example.com "\\'"
++[a]: https://example.com '\\"'
 +[a]: https://example.com (\\")
 +[a]: https://example.com "\a\a"
 +[a]: https://example.com '\a\a'
 +[a]: https://example.com (\a\a)
  [a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
 -[a]: https://example.com "\\a\\a"
 -[a]: https://example.com "\\a\\a"
 +[a]: https://example.com '\\a\\a'

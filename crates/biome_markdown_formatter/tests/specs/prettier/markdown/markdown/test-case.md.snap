@@ -220,23 +220,16 @@ This paragraph has some `code` in it.
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,18 +4,20 @@
+@@ -4,6 +4,8 @@
  
      This is a paragraph.
  
--Header 1
--========
- 
--Header 2
----------
- 
-+# Header 1
 +
-+## Header 2
 +
-     Header 1
-     ========
+ # Header 1
  
+ ## Header 2
+@@ -14,6 +16,8 @@
      Header 2
      --------
  
@@ -245,7 +238,7 @@ This paragraph has some `code` in it.
  # Header 1
  
  ## Header 2
-@@ -35,6 +37,8 @@
+@@ -33,6 +37,8 @@
      ##### Header 5
      ###### Header 6
  
@@ -254,7 +247,7 @@ This paragraph has some `code` in it.
  # Header 1
  
  ## Header 2
-@@ -54,12 +58,15 @@
+@@ -52,12 +58,15 @@
      ##### Header 5 #####
      ###### Header 6 ######
  
@@ -271,7 +264,7 @@ This paragraph has some `code` in it.
  > 1. This is the first list item.
  > 2. This is the second list item.
  >
-@@ -75,6 +82,9 @@
+@@ -73,6 +82,9 @@
      >
      >     Markdown.generate();
  
@@ -281,7 +274,7 @@ This paragraph has some `code` in it.
  - Red
  - Green
  - Blue
-@@ -87,6 +97,7 @@
+@@ -85,6 +97,7 @@
  - Green
  - Blue
  
@@ -289,7 +282,7 @@ This paragraph has some `code` in it.
  ```markdown
  - Red
  - Green
-@@ -111,6 +122,8 @@
+@@ -109,6 +122,8 @@
  1. Bake
  ```
  
@@ -298,7 +291,7 @@ This paragraph has some `code` in it.
  Paragraph:
  
      Code
-@@ -141,6 +154,8 @@
+@@ -139,6 +154,8 @@
  
      ---------------------------------------
  
@@ -307,7 +300,7 @@ This paragraph has some `code` in it.
  This is [an example](http://example.com "Example") link.
  
  [This link](http://example.com) has no title attr.
-@@ -161,6 +176,8 @@
+@@ -159,6 +176,8 @@
  
      [id]: http://example.com "Optional Title"
  
@@ -316,7 +309,7 @@ This paragraph has some `code` in it.
  _single asterisks_
  
  _single underscores_
-@@ -177,10 +194,14 @@
+@@ -175,10 +194,14 @@
  
      __double underscores__
  

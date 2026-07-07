@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote/interrupt-others.md
+---
+
+# Input
+
+```md
+This paragraph
+> is interrupted by block quote.
+
+[This link
+> is interrupted by block quote.](http://example.com)
+
+[[This wiki link
+> is interrupted by block quote.]]
+
+> This is a block quote and this paragraph
+>     > is interrupted neither by block quote nor indented code block.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,11 @@
+ This paragraph
+-
+ > is interrupted by block quote.
+ 
+ [This link
+-
+ > is interrupted by block quote.](http://example.com)
+ 
+ [[This wiki link
+-
+ > is interrupted by block quote.]]
+ 
+-> This is a block quote and this paragraph > is interrupted neither by block quote nor indented code block.
++> This is a block quote and this paragraph
++>     > is interrupted neither by block quote nor indented code block.
+```
+
+# Output
+
+```md
+This paragraph
+> is interrupted by block quote.
+
+[This link
+> is interrupted by block quote.](http://example.com)
+
+[[This wiki link
+> is interrupted by block quote.]]
+
+> This is a block quote and this paragraph
+>     > is interrupted neither by block quote nor indented code block.
+```

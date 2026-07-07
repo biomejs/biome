@@ -1,0 +1,208 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/heading/setext/not-header.md
+---
+
+# Input
+
+```md
+\===
+    ===
+\===
+    ---
+\---
+    -
+\-
+    =
+\=
+\\---
+\\===
+    \-
+    \=
+    \\-
+    \\=
+-foo ---**bar**===あ===
+
+\-
+    -
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,11 +1,11 @@
+-# \===
+-
+-## \===
+-
+-## \---
+-
+-# \-
+-
++\===
++===
++\===
++---
++\---
++-
++\-
++=
+ \=
+ \\---
+ \\===
+@@ -15,4 +15,5 @@
+ \\=
+ -foo ---**bar**===あ===
+ 
+-## \-
++\-
++-
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,90 +1,101 @@
+ [
+-  "# ",
+   source_position(0),
+   "\=",
+   source_position(2),
+   "==",
+   soft_line_break,
+   hard_line_break,
+-  empty_line,
+-  "## ",
+   source_position(9),
++  "===",
++  soft_line_break,
++  hard_line_break,
++  source_position(13),
+   "\=",
+-  source_position(11),
++  source_position(15),
+   "==",
+   soft_line_break,
+   hard_line_break,
+-  empty_line,
+-  "## ",
+-  source_position(18),
++  source_position(22),
++  "---",
++  soft_line_break,
++  hard_line_break,
++  source_position(26),
+   "\-",
+-  source_position(20),
++  source_position(28),
+   "--",
+   soft_line_break,
+   hard_line_break,
+-  empty_line,
+-  "# ",
+-  source_position(25),
++  source_position(35),
++  "-",
++  soft_line_break,
++  hard_line_break,
++  source_position(37),
+   "\-",
+   soft_line_break,
+   hard_line_break,
+-  empty_line,
+-  source_position(30),
++  source_position(44),
++  "=",
++  soft_line_break,
++  hard_line_break,
++  source_position(46),
+   "\=",
+   soft_line_break,
+   hard_line_break,
+-  source_position(33),
++  source_position(49),
+   "\\",
+-  source_position(35),
++  source_position(51),
+   "---",
+   soft_line_break,
+   hard_line_break,
+-  source_position(39),
++  source_position(55),
+   "\\",
+-  source_position(41),
++  source_position(57),
+   "===",
+   soft_line_break,
+   hard_line_break,
+-  source_position(45),
++  source_position(65),
+   "\-",
+   soft_line_break,
+   hard_line_break,
+-  source_position(48),
++  source_position(72),
+   "\=",
+   soft_line_break,
+   hard_line_break,
+-  source_position(51),
++  source_position(79),
+   "\\",
+-  source_position(53),
++  source_position(81),
+   "-",
+   soft_line_break,
+   hard_line_break,
+-  source_position(55),
++  source_position(87),
+   "\\",
+-  source_position(57),
++  source_position(89),
+   "=",
+   soft_line_break,
+   hard_line_break,
+-  source_position(59),
++  source_position(91),
+   "-foo ",
+-  source_position(64),
++  source_position(96),
+   "---",
+-  source_position(67),
+-  "**",
+-  source_position(69),
+-  "bar",
+-  source_position(72),
+-  "**",
+-  source_position(74),
+-  "===あ===",
++  source_position(99),
++  "*",
++  source_position(100),
++  "*bar",
++  source_position(104),
++  "*",
++  source_position(105),
++  "*===あ===",
+   soft_line_break,
+   hard_line_break,
+-  source_position(84),
++  source_position(116),
+   "
+-## ",
+-  source_position(85),
++",
++  source_position(117),
+   "\-",
+   soft_line_break,
+   hard_line_break,
++  source_position(124),
++  "-",
++  soft_line_break,
+   hard_line_break
+ ]
+\ No newline at end of file
+
+```

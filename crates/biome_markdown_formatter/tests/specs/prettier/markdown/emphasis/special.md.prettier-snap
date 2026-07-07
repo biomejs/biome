@@ -16,20 +16,20 @@
 
 0_1_2
 
-!_1_2
+!\_1_2
 
-0_1_! <!-- remark-misparsing, should be formatted as `0_1\_!` -->
+0*1*!
 
 !_1_!
 
 0_1_2
 
-！_1_2
+！\_1_2
 
-0_1_！ <!-- remark-misparsing, should be formatted as `0_1\_！` -->
+0*1*！
 
 ！_1_！
 
 1***2***3
 
-1 _**2**_ 3
+1 **_2_** 3
