@@ -860,7 +860,7 @@ impl<'src> MarkdownLexer<'src> {
         // Padding in marker-only (`-   \n`, `1.   \n`) belongs to the list prefix,
         // not an inline hard break. Keep it split so the parser can classify the
         // first space as the list separator and the rest as content indent.
-        if trailing.iter().copied().all(is_space_or_tab_byte)
+        if trailing.iter().all(|byte| is_space_or_tab_byte(*byte))
             && self.current_whitespace_run_ends_line()
         {
             return true;
