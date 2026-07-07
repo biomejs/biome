@@ -96,8 +96,8 @@ IR differences:
 -    source_position(91),
 +    source_position(117),
      "- ",
--    align(2, [source_position(93), "123"])
-+    align(2, [source_position(119), "123"])
+-    align("  ", [source_position(93), "123"])
++    align("  ", [source_position(119), "123"])
    ]),
    hard_line_break,
 -  source_position(97),
@@ -115,7 +115,7 @@ IR differences:
 -    source_position(114),
 +    source_position(142),
      "- ",
-     align(2, [
+     align("  ", [
 -      source_position(116),
 +      source_position(144),
        "123",
@@ -136,8 +136,8 @@ IR differences:
 -    source_position(141),
 +    source_position(173),
      "- ",
--    align(2, [source_position(143), "a"]),
-+    align(2, [source_position(175), "a"]),
+-    align("  ", [source_position(143), "a"]),
++    align("  ", [source_position(175), "a"]),
      hard_line_break,
 -    source_position(147),
 +    source_position(179),
@@ -146,7 +146,7 @@ IR differences:
 -    source_position(169),
 +    source_position(201),
      "- ",
-     align(2, [
+     align("  ", [
 -      source_position(171),
 +      source_position(203),
        "b",
@@ -158,7 +158,7 @@ IR differences:
 -    source_position(191),
 +    source_position(227),
      "- ",
-     align(2, [
+     align("  ", [
 -      source_position(193),
 +      source_position(229),
        "c",

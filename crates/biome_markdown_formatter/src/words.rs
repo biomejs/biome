@@ -225,6 +225,16 @@ fn build_word_stream(
                 current_word_group.push(ProseAtom::InlineElement(item));
                 flush_word_group(&mut stream, &mut current_word_group);
             }
+
+            // Document-level fenced code content never appears in prose;
+            // handled defensively as an atomic element printed verbatim by
+            // its own formatter.
+            AnyMdInline::MdCodeContent(code) => {
+                f.context().comments().is_suppressed(code.syntax());
+                flush_word_group(&mut stream, &mut current_word_group);
+                current_word_group.push(ProseAtom::InlineElement(item));
+                flush_word_group(&mut stream, &mut current_word_group);
+            }
             AnyMdInline::MdQuotePrefix(prefix) => {
                 prefix
                     .format()

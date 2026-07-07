@@ -1,18 +1,18 @@
 use crate::format_element::PrintMode;
 use crate::format_element::tag::TagKind;
+use crate::prelude::AlignedStr;
 use crate::printer::Indention;
 use crate::printer::stack::{Stack, StackedStack};
 use crate::{IndentStyle, InvalidDocumentError, PrintError, PrintResult};
 use std::fmt::Debug;
-use std::num::NonZeroU8;
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub(super) enum StackFrameKind {
     Root,
     Tag(TagKind),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub(super) struct StackFrame {
     kind: StackFrameKind,
     args: PrintElementArgs,
@@ -24,7 +24,7 @@ pub(super) struct StackFrame {
 ///
 /// The state is passed by value, which is why it's important that it isn't storing any heavy
 /// data structures. Such structures should be stored on the [PrinterState] instead.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(super) struct PrintElementArgs {
     mode: PrintMode,
 }
@@ -124,6 +124,7 @@ pub(super) trait CallStack {
             .top()
             .expect("Expected `stack` to never be empty.")
             .args
+            .clone()
     }
 
     /// Returns the [TagKind] of the current stack frame or [None] if this is the root stack frame.
@@ -244,7 +245,7 @@ pub(super) trait IndentStack {
         self.current_stack_mut().pop();
     }
     fn indention(&self) -> Indention {
-        self.current_stack().top().copied().unwrap_or_default()
+        self.current_stack().top().cloned().unwrap_or_default()
     }
     fn reset_indent(&mut self) {
         self.current_stack_mut().push(Indention::default());
@@ -253,8 +254,8 @@ pub(super) trait IndentStack {
         let next_indent = self.indention().increment_level(indent_style);
         self.current_stack_mut().push(next_indent);
     }
-    fn align(&mut self, count: NonZeroU8) {
-        let next_indent = self.indention().set_align(count);
+    fn align(&mut self, placeholder: AlignedStr) {
+        let next_indent = self.indention().set_align(placeholder);
         self.current_stack_mut().push(next_indent);
     }
 }
