@@ -1,6 +1,9 @@
 use biome_js_parser::{JsParserOptions, parse};
 use biome_languages::JsFileSource;
 use biome_react_compiler::{ConvertInput, convert_file};
+use react_compiler_ast::expressions::Expression;
+use react_compiler_ast::jsx::JSXAttributeValue;
+use react_compiler_ast::patterns::{ObjectPatternProperty, PatternLike};
 use react_compiler_ast::statements::Statement;
 
 #[test]
@@ -324,4 +327,110 @@ fn converts_control_flow_literals_and_ts_wrappers() {
         Statement::SwitchStatement(_)
     ));
     assert!(matches!(function.body.body[5], Statement::TryStatement(_)));
+}
+
+#[test]
+fn converts_react_compiler_edge_cases() {
+    let source = r#"// 😀
+function Component({ title = "fallback" }) {
+    const hex = 0x10;
+    const label = `a\n${title}\u{21}`;
+    return <Wrapper icon=<Icon /> fragment=<></> />;
+}
+"#;
+    let source_type = JsFileSource::jsx();
+    let parsed = parse(source, source_type, JsParserOptions::default());
+
+    let file = convert_file(ConvertInput {
+        root: &parsed.tree(),
+        source,
+        source_type,
+    })
+    .expect("expected conversion to succeed");
+
+    let Statement::FunctionDeclaration(function) = &file.program.body[0] else {
+        panic!("expected function declaration");
+    };
+    assert_eq!(function.base.start, Some(8));
+    assert_eq!(function.base.loc.as_ref().unwrap().start.index, Some(6));
+
+    let PatternLike::ObjectPattern(params) = &function.params[0] else {
+        panic!("expected object pattern parameter");
+    };
+    let ObjectPatternProperty::ObjectProperty(property) = &params.properties[0] else {
+        panic!("expected object pattern property");
+    };
+    let PatternLike::AssignmentPattern(default) = property.value.as_ref() else {
+        panic!("expected assignment pattern");
+    };
+    assert_eq!(default.base.start, property.key.base().start);
+
+    let Statement::VariableDeclaration(hex) = &function.body.body[0] else {
+        panic!("expected hex variable declaration");
+    };
+    let Expression::NumericLiteral(number) = hex.declarations[0].init.as_deref().unwrap() else {
+        panic!("expected numeric literal");
+    };
+    assert_eq!(number.value, 16.0);
+
+    let Statement::VariableDeclaration(label) = &function.body.body[1] else {
+        panic!("expected label variable declaration");
+    };
+    let Expression::TemplateLiteral(template) = label.declarations[0].init.as_deref().unwrap()
+    else {
+        panic!("expected template literal");
+    };
+    assert_eq!(template.quasis[0].value.raw, r#"a\n"#);
+    assert_eq!(template.quasis[0].value.cooked.as_deref(), Some("a\n"));
+    assert_eq!(template.quasis[1].value.raw, r#"\u{21}"#);
+    assert_eq!(template.quasis[1].value.cooked.as_deref(), Some("!"));
+
+    let Statement::ReturnStatement(return_statement) = &function.body.body[2] else {
+        panic!("expected return statement");
+    };
+    let Expression::JSXElement(element) = return_statement.argument.as_deref().unwrap() else {
+        panic!("expected jsx element");
+    };
+    let JSXAttributeValue::JSXElement(_) = element.opening_element.attributes[0]
+        .as_attribute()
+        .value
+        .as_ref()
+        .unwrap()
+    else {
+        panic!("expected jsx element attribute value");
+    };
+    let JSXAttributeValue::JSXFragment(_) = element.opening_element.attributes[1]
+        .as_attribute()
+        .value
+        .as_ref()
+        .unwrap()
+    else {
+        panic!("expected jsx fragment attribute value");
+    };
+}
+
+trait TestObjectPatternPropExt {
+    fn base(&self) -> &react_compiler_ast::common::BaseNode;
+}
+
+impl TestObjectPatternPropExt for Expression {
+    fn base(&self) -> &react_compiler_ast::common::BaseNode {
+        match self {
+            Expression::Identifier(identifier) => &identifier.base,
+            _ => panic!("expected identifier key"),
+        }
+    }
+}
+
+trait TestJsxAttributeExt {
+    fn as_attribute(&self) -> &react_compiler_ast::jsx::JSXAttribute;
+}
+
+impl TestJsxAttributeExt for react_compiler_ast::jsx::JSXAttributeItem {
+    fn as_attribute(&self) -> &react_compiler_ast::jsx::JSXAttribute {
+        match self {
+            react_compiler_ast::jsx::JSXAttributeItem::JSXAttribute(attribute) => attribute,
+            _ => panic!("expected jsx attribute"),
+        }
+    }
 }
