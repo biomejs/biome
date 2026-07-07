@@ -1,9 +1,7 @@
-use crate::prelude::*;
+use crate::{markdown::lists::indent_token_list::FormatMdIndentTokenListOptions, prelude::*};
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::list_ext::{ListMarker, OrderedListDelimiter};
-use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdLeafBlock, MdBullet, MdListMarkerPrefix, MdListMarkerPrefixFields,
-};
+use biome_markdown_syntax::{MdBullet, MdListMarkerPrefix, MdListMarkerPrefixFields};
 use biome_rowan::TextSize;
 use std::ops::Add;
 
@@ -91,10 +89,14 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
             }
         }
         if is_marker_only_bullet {
-            for indent_token in content_indent.iter() {
-                f.context().comments().is_suppressed(indent_token.syntax());
-                write!(f, [format_removed(&indent_token.md_indent_char_token()?)])?;
-            }
+            write!(
+                f,
+                [content_indent
+                    .format()
+                    .with_options(FormatMdIndentTokenListOptions {
+                        should_remove: true,
+                    })]
+            )?;
         } else {
             write!(f, [content_indent.format()])?;
         }
