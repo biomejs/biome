@@ -59,6 +59,10 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
+    fn name(&self) -> &str {
+        self.grit_query.name.as_deref().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
@@ -88,7 +92,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
     }
 
     fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
-        let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
+        let name = self.name();
 
         let (root, source_range, original_text) = match self.language() {
             PluginTargetLanguage::JavaScript => node
@@ -296,6 +300,12 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/test.grit".into(), r#"`hello`"#);
         AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
+    }
+
+    #[test]
+    fn name_is_derived_from_the_pattern_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "test");
     }
 
     #[test]
