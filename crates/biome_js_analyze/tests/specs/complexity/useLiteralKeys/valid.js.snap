@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
 expression: valid.js
 ---
 # Input
@@ -21,6 +22,10 @@ a["a-b"]
 a[`a-b`]
 a[`time range`];
 a[`time${range}`];
+a["__proto__"];
+a[`__proto__`];
+a["__proto__"] = value;
+a?.["__proto__"];
 class C { a = 0 }
 class C { a(){} }
 class C { get a(){} }

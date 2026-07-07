@@ -15,6 +15,10 @@ a["a-b"]
 a[`a-b`]
 a[`time range`];
 a[`time${range}`];
+a["__proto__"];
+a[`__proto__`];
+a["__proto__"] = value;
+a?.["__proto__"];
 class C { a = 0 }
 class C { a(){} }
 class C { get a(){} }

@@ -85,12 +85,10 @@ impl Rule for UseLiteralKeys {
                 }
             StaticValue::String(token) => {
                 let value = inner_string_text(&token);
-                // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
-                // have different semantic.
-                // The first is a regular property.
-                // The second is a special property that changes the object prototype.
+                // Keep computed `["__proto__"]` unchanged because literal or dot
+                // rewrites interact with the legacy prototype accessor.
                 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
-                if is_computed_member_name && value == "__proto__" {
+                if value == "__proto__" {
                     return None;
                 }
                 // A computed property `["something"]` can always be simplified to a string literal "something",
