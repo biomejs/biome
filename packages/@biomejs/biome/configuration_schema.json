@@ -462,6 +462,26 @@
 				}
 			]
 		},
+		"CompilationMode": {
+			"description": "Controls which functions React Compiler analyzes.",
+			"oneOf": [
+				{
+					"description": "Analyze functions that follow React conventions: components\n(capitalized functions that create JSX or call hooks) and hooks\n(`use`-prefixed functions).",
+					"type": "string",
+					"const": "infer"
+				},
+				{
+					"description": "Analyze only functions annotated with a `\"use memo\"` directive.",
+					"type": "string",
+					"const": "annotation"
+				},
+				{
+					"description": "Analyze every function. This can report React-specific diagnostics in\nnon-React code, such as utility functions that update module-level\nstate.",
+					"type": "string",
+					"const": "all"
+				}
+			]
+		},
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -7039,6 +7059,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactCompiler": {
+					"description": "Validate files with React Compiler.\nSee https://biomejs.dev/linter/rules/use-react-compiler",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactCompilerConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReactFunctionComponentDefinition": {
 					"description": "Enforce a specific function type for React function components.\nSee https://biomejs.dev/linter/rules/use-react-function-component-definition",
 					"anyOf": [
@@ -11963,6 +11990,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactCompilerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReactFunctionComponentDefinitionOptions": {
 			"type": "object",
 			"properties": {
@@ -16003,6 +16039,22 @@
 		},
 		"UseReactAsyncServerFunctionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactCompilerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactCompilerOptions" }
+			]
+		},
+		"UseReactCompilerOptions": {
+			"type": "object",
+			"properties": {
+				"compilationMode": {
+					"description": "Which functions React Compiler analyzes. Defaults to `infer`.",
+					"anyOf": [{ "$ref": "#/$defs/CompilationMode" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseReactFunctionComponentDefinitionConfiguration": {
