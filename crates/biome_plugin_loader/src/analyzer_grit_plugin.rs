@@ -303,6 +303,12 @@ mod tests {
     }
 
     #[test]
+    fn name_is_derived_from_the_pattern_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "test");
+    }
+
+    #[test]
     fn applies_to_all_files_without_includes() {
         let plugin = load_test_plugin(None);
         assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));

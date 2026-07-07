@@ -196,6 +196,12 @@ mod tests {
     }
 
     #[test]
+    fn name_is_derived_from_the_plugin_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "plugin");
+    }
+
+    #[test]
     fn applies_to_all_files_without_includes() {
         let plugin = load_test_plugin(None);
         assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
