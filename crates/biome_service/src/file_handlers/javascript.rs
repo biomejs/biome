@@ -5,7 +5,8 @@ use super::{
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult,
     ParseEmbeddedParams, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
-    ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
+    ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes, format_on_type_noop,
+    matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
 #[cfg(feature = "js_embeds")]
@@ -94,6 +95,7 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;
+use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
@@ -1455,12 +1457,27 @@ pub(crate) fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_js_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: JsSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let printed = biome_js_formatter::format_range(options, &tree, root_node.text_trimmed_range())?;
     Ok(printed)
 }
 

@@ -872,3 +872,7 @@ mod tests;
 #[cfg(test)]
 #[path = "server_goto.tests.rs"]
 mod server_goto;
+
+#[cfg(test)]
+#[path = "server_type_on_format.tests.rs"]
+mod server_type_on_format;

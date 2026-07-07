@@ -1,7 +1,8 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
     EditorCapabilities, EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults,
-    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, format_on_type_noop,
+    matches_on_type_char,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -32,8 +33,10 @@ use biome_graphql_analyze::analyze;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
-use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
+use biome_graphql_syntax::{
+    GraphqlLanguage, GraphqlRoot, GraphqlSyntaxKind, GraphqlSyntaxNode, TextRange, TextSize,
+};
+use biome_rowan::{AstNode, NodeCache, SyntaxKind, TokenAtOffset};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use either::Either;
@@ -438,12 +441,39 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_graphql_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: GraphqlSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let formatting_root = root_node
+        .ancestors()
+        .find(|node: &GraphqlSyntaxNode| {
+            node.parent()
+                .is_some_and(|parent| parent.kind() == GraphqlSyntaxKind::GRAPHQL_ROOT)
+        })
+        .unwrap_or(root_node);
+
+    let printed = biome_graphql_formatter::format_range(
+        options,
+        &tree,
+        formatting_root.text_trimmed_range(),
+    )?;
     Ok(printed)
 }
 

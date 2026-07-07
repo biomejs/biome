@@ -91,6 +91,58 @@ const c = [
     );
 }
 
+#[ignore]
+#[test]
+// temporary repro for biome-zed#164 — mimics workspace format_on_type
+fn on_type_repro() {
+    use biome_js_formatter::format_sub_tree;
+    use biome_rowan::TokenAtOffset;
+
+    // Valid code: the user just typed the `}` closing the inner function body.
+    let src = "class A {\n  foo() {\n    return 1;\n  }\n}\n";
+    // offset right after the inner `}` (line 3 `  }`)
+    let offset =
+        biome_rowan::TextSize::from(u32::try_from(src.find("  }").unwrap() + "  }".len()).unwrap());
+
+    let source_type = JsFileSource::ts();
+    let parsed = parse(src, source_type, JsParserOptions::default());
+    let tree = parsed.syntax();
+    eprintln!("has errors: {}", parsed.has_errors());
+
+    let token = match tree.token_at_offset(offset) {
+        TokenAtOffset::None => panic!("empty file"),
+        TokenAtOffset::Single(token) => token,
+        TokenAtOffset::Between(token, _) => token,
+    };
+    eprintln!("token at offset: {:?} {:?}", token.kind(), token.text());
+    let root_node = token.parent().unwrap();
+    eprintln!(
+        "formatting subtree: {:?} range {:?}",
+        root_node.kind(),
+        root_node.text_range_with_trivia()
+    );
+
+    let printed = format_sub_tree(JsFormatOptions::new(source_type), &root_node).unwrap();
+    eprintln!("printed range: {:?}", printed.range());
+    eprintln!("--- input slice ---");
+    eprintln!("{}", &src[printed.range().unwrap()]);
+    eprintln!("--- formatted ---");
+    eprintln!("{}", printed.as_code());
+
+    // Alternative: what format_range would produce for the same spot
+    let ranged = biome_js_formatter::format_range(
+        JsFormatOptions::new(source_type),
+        &tree,
+        root_node.text_trimmed_range(),
+    )
+    .unwrap();
+    eprintln!("format_range printed range: {:?}", ranged.range());
+    eprintln!("--- format_range input slice ---");
+    eprintln!("{}", &src[ranged.range().unwrap()]);
+    eprintln!("--- format_range formatted ---");
+    eprintln!("{}", ranged.as_code());
+}
+
 #[test]
 fn test_trailing_newline_enabled() {
     let src = r#"const a = 1;"#;
