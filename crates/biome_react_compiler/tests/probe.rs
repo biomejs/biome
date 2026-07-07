@@ -1,6 +1,6 @@
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_react_compiler::{CompileInput, compile_program, default_lint_options};
 
 #[test]

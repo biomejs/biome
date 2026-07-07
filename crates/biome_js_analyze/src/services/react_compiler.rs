@@ -122,7 +122,7 @@ impl Visitor for ReactCompilerVisitor {
                 Some(model) => {
                     let source_type = ctx
                         .services
-                        .get_service::<biome_js_syntax::JsFileSource>()
+                        .get_service::<biome_languages::JsFileSource>()
                         .copied()
                         .unwrap_or_default();
                     let source = self.root.syntax().text_with_trivia().to_string();

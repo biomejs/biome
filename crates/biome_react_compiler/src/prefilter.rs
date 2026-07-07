@@ -125,7 +125,7 @@ pub fn has_react_like_functions(root: &AnyJsRoot) -> bool {
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn check(source: &str) -> bool {
         let parsed = parse(source, JsFileSource::jsx(), JsParserOptions::default());

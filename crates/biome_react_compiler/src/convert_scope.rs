@@ -255,7 +255,7 @@ fn binding_kind_of(
 
 fn binding_kind(kind: JsDeclarationKind) -> BindingKind {
     match kind {
-        JsDeclarationKind::HoistedValue => BindingKind::Hoisted,
+        JsDeclarationKind::Function | JsDeclarationKind::HoistedValue => BindingKind::Hoisted,
         JsDeclarationKind::Import | JsDeclarationKind::ImportType => BindingKind::Module,
         JsDeclarationKind::Value => BindingKind::Let,
         JsDeclarationKind::Using => BindingKind::Const,
