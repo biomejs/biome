@@ -3,6 +3,7 @@ use react_compiler_ast::common::{BaseNode, Position, SourceLocation};
 
 pub(crate) struct ConvertCtx<'a> {
     pub(crate) root: &'a AnyJsRoot,
+    source: &'a str,
     line_offsets: Vec<u32>,
 }
 
@@ -15,7 +16,11 @@ impl<'a> ConvertCtx<'a> {
             }
         }
 
-        Self { root, line_offsets }
+        Self {
+            root,
+            source,
+            line_offsets,
+        }
     }
 
     pub(crate) fn base(&self, range: TextRange) -> BaseNode {
@@ -48,10 +53,14 @@ impl<'a> ConvertCtx<'a> {
             Err(index) => index.saturating_sub(1),
         };
         let line_start = self.line_offsets[line_index];
+        let index = self.source[..offset as usize].encode_utf16().count() as u32;
+        let column = self.source[line_start as usize..offset as usize]
+            .encode_utf16()
+            .count() as u32;
         Position {
             line: (line_index + 1) as u32,
-            column: offset - line_start,
-            index: Some(offset),
+            column,
+            index: Some(index),
         }
     }
 }

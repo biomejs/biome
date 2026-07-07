@@ -72,15 +72,10 @@ function Component() {
             source_type,
             options: default_lint_options(source),
         });
-        println!("CASE {name}");
-        match result {
-            Ok(output) => {
-                println!("diagnostics: {}", output.diagnostics.len());
-                for diagnostic in output.diagnostics {
-                    println!("{diagnostic}");
-                }
-            }
-            Err(error) => println!("ERR {error}"),
-        }
+        let output = result.unwrap_or_else(|error| panic!("{name}: unexpected error: {error}"));
+        assert!(
+            !output.diagnostics.is_empty(),
+            "{name}: expected at least one diagnostic"
+        );
     }
 }

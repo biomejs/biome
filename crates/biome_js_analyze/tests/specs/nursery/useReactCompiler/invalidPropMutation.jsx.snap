@@ -6,10 +6,10 @@ expression: invalidPropMutation.jsx
 ```jsx
 // should generate diagnostics
 
-function Component(props) {
-    props.value = true;
+function Component({ config }) {
+    config.enabled = true;
 
-    return <div>{props.value}</div>;
+    return <div>{config.enabled}</div>;
 }
 
 function IndirectMutation(props) {
@@ -30,11 +30,11 @@ invalidPropMutation.jsx:4:5 lint/nursery/useReactCompiler ━━━━━━━�
 
   i This component mutates a value that React treats as immutable.
   
-    3 │ function Component(props) {
-  > 4 │     props.value = true;
-      │     ^^^^^
+    3 │ function Component({ config }) {
+  > 4 │     config.enabled = true;
+      │     ^^^^^^
     5 │ 
-    6 │     return <div>{props.value}</div>;
+    6 │     return <div>{config.enabled}</div>;
   
   i Props, state, and values derived from hooks should be treated as immutable during render. Mutating them can make renders inconsistent.
   

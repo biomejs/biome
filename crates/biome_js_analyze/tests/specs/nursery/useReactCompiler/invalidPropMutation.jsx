@@ -1,9 +1,9 @@
 // should generate diagnostics
 
-function Component(props) {
-    props.value = true;
+function Component({ config }) {
+    config.enabled = true;
 
-    return <div>{props.value}</div>;
+    return <div>{config.enabled}</div>;
 }
 
 function IndirectMutation(props) {

@@ -234,10 +234,17 @@ pub(super) fn convert_jsx_attribute_value(
                 convert_jsx_expression_attribute_value(ctx, &expression)?,
             ))
         }
-        AnyJsxAttributeValue::AnyJsxTag(AnyJsxTag::JsxElement(element)) => Ok(
-            JSXAttributeValue::JSXElement(Box::new(convert_jsx_element(ctx, &element)?)),
-        ),
-        value => Err(unsupported(value.syntax())),
+        AnyJsxAttributeValue::AnyJsxTag(tag) => match tag {
+            AnyJsxTag::JsxElement(element) => Ok(JSXAttributeValue::JSXElement(Box::new(
+                convert_jsx_element(ctx, &element)?,
+            ))),
+            AnyJsxTag::JsxSelfClosingElement(element) => Ok(JSXAttributeValue::JSXElement(
+                Box::new(convert_jsx_self_closing_element(ctx, &element)?),
+            )),
+            AnyJsxTag::JsxFragment(fragment) => Ok(JSXAttributeValue::JSXFragment(
+                convert_jsx_fragment(ctx, &fragment)?,
+            )),
+        },
     }
 }
 

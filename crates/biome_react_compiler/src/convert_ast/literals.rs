@@ -1,4 +1,5 @@
 use super::*;
+use biome_js_syntax::numbers::parse_js_number;
 
 pub(super) fn convert_literal(
     ctx: &ConvertCtx<'_>,
@@ -20,12 +21,10 @@ pub(super) fn convert_literal(
                 .value_token()
                 .map_err(|_| missing("JsNumberLiteralExpression", "value_token"))?;
             let raw = token.text_trimmed();
-            let value = raw
-                .parse()
-                .map_err(|_| ReactCompilerError::InvalidLiteral {
-                    range: token.text_trimmed_range(),
-                    reason: "number literal is not supported yet",
-                })?;
+            let value = parse_js_number(raw).ok_or(ReactCompilerError::InvalidLiteral {
+                range: token.text_trimmed_range(),
+                reason: "number literal is not supported yet",
+            })?;
             Ok(Expression::NumericLiteral(NumericLiteral {
                 base: ctx.base(literal.syntax().text_trimmed_range()),
                 value,

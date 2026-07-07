@@ -14,7 +14,8 @@ use biome_js_syntax::{
     JsPostUpdateExpression, JsPreUpdateExpression, JsReturnStatement, JsScript, JsSpread,
     JsSyntaxNode, JsTemplateExpression, JsVariableStatement, JsxAttribute, JsxElement,
     JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxMemberName, JsxName,
-    JsxSelfClosingElement, JsxSpreadAttribute, JsxString, JsxText, inner_string_text,
+    JsxSelfClosingElement, JsxSpreadAttribute, JsxString, JsxText, TextRange, TextSize,
+    inner_string_text, unescape_js_string,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;

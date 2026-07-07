@@ -143,18 +143,44 @@ pub(super) fn convert_optional_default_pattern(
     init: Option<biome_js_syntax::JsInitializerClause>,
 ) -> Result<PatternLike> {
     match init {
-        Some(init) => Ok(PatternLike::AssignmentPattern(AssignmentPattern {
-            base: ctx.base(init.syntax().text_trimmed_range()),
-            left: Box::new(left),
-            right: Box::new(convert_expression(
-                ctx,
-                init.expression()
-                    .map_err(|_| missing("JsInitializerClause", "expression"))?,
-            )?),
-            type_annotation: None,
-            decorators: None,
-        })),
+        Some(init) => {
+            let range = optional_default_pattern_range(&left, init.syntax().text_trimmed_range());
+            Ok(PatternLike::AssignmentPattern(AssignmentPattern {
+                base: ctx.base(range),
+                left: Box::new(left),
+                right: Box::new(convert_expression(
+                    ctx,
+                    init.expression()
+                        .map_err(|_| missing("JsInitializerClause", "expression"))?,
+                )?),
+                type_annotation: None,
+                decorators: None,
+            }))
+        }
         None => Ok(left),
+    }
+}
+
+fn optional_default_pattern_range(left: &PatternLike, init_range: TextRange) -> TextRange {
+    let base = match left {
+        PatternLike::Identifier(pattern) => &pattern.base,
+        PatternLike::ObjectPattern(pattern) => &pattern.base,
+        PatternLike::ArrayPattern(pattern) => &pattern.base,
+        PatternLike::AssignmentPattern(pattern) => &pattern.base,
+        PatternLike::RestElement(pattern) => &pattern.base,
+        PatternLike::MemberExpression(pattern) => &pattern.base,
+        PatternLike::TSAsExpression(pattern) => &pattern.base,
+        PatternLike::TSSatisfiesExpression(pattern) => &pattern.base,
+        PatternLike::TSNonNullExpression(pattern) => &pattern.base,
+        PatternLike::TSTypeAssertion(pattern) => &pattern.base,
+        PatternLike::TypeCastExpression(pattern) => &pattern.base,
+    };
+    match (base.start, base.end) {
+        (Some(start), Some(end)) => TextRange::new(
+            TextSize::from(start.min(u32::from(init_range.start()))),
+            TextSize::from(end.max(u32::from(init_range.end()))),
+        ),
+        _ => init_range,
     }
 }
 

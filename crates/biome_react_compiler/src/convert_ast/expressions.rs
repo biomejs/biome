@@ -613,6 +613,7 @@ pub(super) fn convert_template_literal_parts(
     let mut quasis = Vec::new();
     let mut expressions = Vec::new();
     let mut pending_raw = String::new();
+    let mut pending_cooked = String::new();
     let mut pending_base = ctx.base(template.syntax().text_trimmed_range());
 
     for element in template.elements() {
@@ -625,17 +626,19 @@ pub(super) fn convert_template_literal_parts(
                     pending_base = ctx.base(chunk.syntax().text_trimmed_range());
                 }
                 pending_raw.push_str(token.text_trimmed());
+                pending_cooked.push_str(unescape_js_string(token.token_text_trimmed()).text());
             }
             AnyJsTemplateElement::JsTemplateElement(element) => {
                 quasis.push(TemplateElement {
                     base: pending_base.clone(),
                     value: TemplateElementValue {
                         raw: pending_raw.clone(),
-                        cooked: Some(pending_raw.clone()),
+                        cooked: Some(pending_cooked.clone()),
                     },
                     tail: false,
                 });
                 pending_raw.clear();
+                pending_cooked.clear();
                 pending_base = ctx.base(element.syntax().text_trimmed_range());
                 expressions.push(convert_expression(
                     ctx,
@@ -651,7 +654,7 @@ pub(super) fn convert_template_literal_parts(
         base: pending_base,
         value: TemplateElementValue {
             raw: pending_raw.clone(),
-            cooked: Some(pending_raw),
+            cooked: Some(pending_cooked),
         },
         tail: true,
     });
