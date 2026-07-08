@@ -1804,11 +1804,18 @@ fn compare_nonunion_coverage(annotated: &Type, inferred: &Type) -> NonUnionCover
 
             (TypeData::InstanceOf(ann_inst), TypeData::InstanceOf(inf_inst)) => {
                 let same_base = match (ann.resolve(&ann_inst.ty), inf.resolve(&inf_inst.ty)) {
-                    (Some(a), Some(b)) => types_match(&a, &b),
-                    _ => false,
+                    (Some(a), Some(b)) => types_match_checked(&a, &b),
+                    _ => Some(false),
                 };
-                if !same_base {
-                    return NonUnionCoverage::Mismatch;
+                match same_base {
+                    // The base walk hit its iteration cap: inconclusive, not a definite
+                    // mismatch, so stay uncertain instead of inventing an uncovered variant.
+                    None => {
+                        saw_unknown = true;
+                        continue;
+                    }
+                    Some(false) => return NonUnionCoverage::Mismatch,
+                    Some(true) => {}
                 }
                 let ann_params = &ann_inst.type_parameters;
                 let inf_params = &inf_inst.type_parameters;
@@ -2079,8 +2086,17 @@ fn is_union_wider(annotated: &Type, inferred: &Type) -> bool {
         })
 }
 
-/// Checks structural equality between two types.
+/// Checks structural equality between two types. An inconclusive walk (the iteration cap is
+/// hit) counts as "not equal"; callers that must tell a definite mismatch apart from an
+/// undecided comparison should use [`types_match_checked`] instead.
 fn types_match(a: &Type, b: &Type) -> bool {
+    types_match_checked(a, b).unwrap_or(false)
+}
+
+/// Structural type equality with a bounded walk. `Some(true)`/`Some(false)` is a decided
+/// match/mismatch; `None` means the walk hit `MAX_TYPE_TRAVERSAL_ITERATIONS` without deciding,
+/// so an inconclusive comparison is not mistaken for a definite mismatch.
+fn types_match_checked(a: &Type, b: &Type) -> Option<bool> {
     let mut a = a.clone();
     let mut b = b.clone();
     // Resolving `InstanceOf` bases loops forever on a circular alias (`type R = R`),
@@ -2095,12 +2111,12 @@ fn types_match(a: &Type, b: &Type) -> bool {
             | (TypeData::Undefined, TypeData::Undefined)
             | (TypeData::VoidKeyword, TypeData::VoidKeyword)
             | (TypeData::NeverKeyword, TypeData::NeverKeyword)
-            | (TypeData::ObjectKeyword, TypeData::ObjectKeyword) => return true,
+            | (TypeData::ObjectKeyword, TypeData::ObjectKeyword) => return Some(true),
 
-            (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => return a_lit == b_lit,
+            (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => return Some(a_lit == b_lit),
 
             (TypeData::Generic(a_gen), TypeData::Generic(b_gen)) => {
-                return a_gen.name == b_gen.name
+                return Some(a_gen.name == b_gen.name)
             }
 
             (TypeData::InstanceOf(a_inst), TypeData::InstanceOf(b_inst))
@@ -2111,7 +2127,7 @@ fn types_match(a: &Type, b: &Type) -> bool {
                         a = a_base;
                         b = b_base;
                     }
-                    _ => return false,
+                    _ => return Some(false),
                 }
             }
 
@@ -2121,9 +2137,9 @@ fn types_match(a: &Type, b: &Type) -> bool {
                 if let Some(base) = b.resolve(&b_inst.ty)
                     && let TypeData::Generic(b_gen) = &*base
                 {
-                    return a_gen.name == b_gen.name;
+                    return Some(a_gen.name == b_gen.name);
                 }
-                return false;
+                return Some(false);
             }
             (TypeData::InstanceOf(a_inst), TypeData::Generic(b_gen))
                 if a_inst.type_parameters.is_empty() =>
@@ -2131,13 +2147,13 @@ fn types_match(a: &Type, b: &Type) -> bool {
                 if let Some(base) = a.resolve(&a_inst.ty)
                     && let TypeData::Generic(a_gen) = &*base
                 {
-                    return a_gen.name == b_gen.name;
+                    return Some(a_gen.name == b_gen.name);
                 }
-                return false;
+                return Some(false);
             }
 
-            _ => return false,
+            _ => return Some(false),
         }
     }
-    false
+    None
 }
