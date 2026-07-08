@@ -23,7 +23,8 @@ use biome_js_type_info::{
     TypeData, TypeResolver,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        Literal as InferredLiteral, ReturnType as InferredReturnType, TypeData as InferredTypeData,
+        InternedUnion as InferredUnion, Literal as InferredLiteral,
+        ReturnType as InferredReturnType, TypeData as InferredTypeData,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
@@ -35,9 +36,10 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, InferredModuleTypes, JsExport, JsImport, JsImportPath,
     JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
     ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, infer_module_types, is_class_referenced_by_importers,
-    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    find_js_exported_symbol, infer_call_expression_type, infer_module_types,
+    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
+    transitive_importers_of, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -133,6 +135,17 @@ fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> 
     ty == InferredTypeData::Number
         || is_inferred_instance_of(db, ty, InferredTypeData::Number)
         || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Number(_)))
+}
+
+fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
+    let InferredTypeData::Function(function) = ty else {
+        panic!("type must be inferred as a function");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        panic!("function return type must be inferred as a type");
+    };
+
+    assert!(is_inferred_string(db, *return_ty));
 }
 
 fn local_type_id_of_instance<'db>(
@@ -1423,6 +1436,44 @@ fn test_infer_module_types_resolves_anonymous_default_class_export() {
 }
 
 #[test]
+fn test_infer_module_types_resolves_anonymous_default_function_export() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export default function(): string {
+                return "value";
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let ModuleInfoKind::Js(js_info) = index_module.kind(&db) else {
+        panic!("module must be JavaScript");
+    };
+    let default_ty = match js_info
+        .exports
+        .get("default")
+        .and_then(JsExport::as_own_export)
+    {
+        Some(JsOwnExport::Type(resolved_id)) => inferred
+            .types
+            .get(resolved_id.index())
+            .copied()
+            .expect("default export type must be inferred"),
+        _ => panic!("default export must have a type"),
+    };
+
+    assert!(!js_info.raw_types.is_empty());
+    assert!(inferred.named_type_ids.is_empty());
+    assert_inferred_function_returns_string(&db, inferred.resolve_type(&db, default_ty));
+}
+
+#[test]
 fn test_infer_module_types_resolves_imported_anonymous_default_class_members() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -1454,6 +1505,153 @@ fn test_infer_module_types_resolves_imported_anonymous_default_class_members() {
         .find_member_type(&db, value_ty, "name")
         .expect("imported anonymous default class member must be inferred");
     assert!(is_inferred_string(&db, name_ty));
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_anonymous_default_function() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"
+            export default function(): string {
+                return "value";
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import readValue from "./base.ts";
+
+            export { readValue };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
+        .expect("readValue binding type must be inferred");
+
+    assert_inferred_function_returns_string(&db, inferred.resolve_type(&db, read_value_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_resolves_imported_default_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"
+            export default function(): string {
+                return "value";
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import readValue from "./base.ts";
+
+            export const value = readValue();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
+        .expect("readValue binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, read_value_ty),
+        Vec::new(),
+    );
+
+    assert!(is_inferred_string(&db, call_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const readValue: () => string = () => "value";
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
+        .expect("readValue binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, read_value_ty),
+        Vec::new(),
+    );
+
+    assert!(is_inferred_string(&db, call_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_resolves_union_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readString(): string {
+                return "value";
+            }
+
+            export function readNumber(): number {
+                return 1;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let read_string_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readString")
+        .expect("readString binding type must be inferred");
+    let read_number_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readNumber")
+        .expect("readNumber binding type must be inferred");
+    let callee_ty = InferredTypeData::Union(InferredUnion::new(
+        &db,
+        Vec::from([
+            inferred.resolve_type(&db, read_string_ty),
+            inferred.resolve_type(&db, read_number_ty),
+        ])
+        .into_boxed_slice(),
+    ));
+    let call_ty = infer_call_expression_type(&db, index_module, callee_ty, Vec::new());
+    let InferredTypeData::Union(union) = call_ty else {
+        panic!("union function call must return a union, got {call_ty:?} from {callee_ty:?}");
+    };
+
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty))
+    );
 }
 
 #[test]

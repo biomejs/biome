@@ -10,14 +10,17 @@
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::db::type_inference::{
-    infer_module_types_cycle_result, normalize_type_cycle_result, resolve_raw_types,
+    collected_type_result, infer_module_types_cycle_result, normalize_type_cycle_result,
+    resolve_raw_types,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
-    interned_types::{ReturnType, TypeData as InferredTypeData},
+    interned_types::{
+        InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
+    },
 };
 use biome_jsdoc_comment::JsdocComment;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -60,11 +63,40 @@ pub fn infer_call_expression_type<'db>(
     _args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
     match callee {
-        InferredTypeData::Function(function) => match function.return_type(db) {
-            ReturnType::Type(ty) => *ty,
-            ReturnType::Predicate(_) | ReturnType::Asserts(_) => InferredTypeData::Boolean,
+        InferredTypeData::Union(union) => collected_type_result(
+            db,
+            union
+                .types(db)
+                .iter()
+                .filter_map(|callee| infer_function_call_type(db, *callee))
+                .collect(),
+        )
+        .unwrap_or(InferredTypeData::Unknown),
+        callee => infer_function_call_type(db, callee).unwrap_or(InferredTypeData::Unknown),
+    }
+}
+
+fn infer_function_call_type<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    match callee {
+        InferredTypeData::Function(function) => infer_function_return_type(db, function),
+        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+            InferredTypeData::Function(function) => infer_function_return_type(db, function),
+            _ => None,
         },
-        _ => InferredTypeData::Unknown,
+        _ => None,
+    }
+}
+
+fn infer_function_return_type<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+) -> Option<InferredTypeData<'db>> {
+    match function.return_type(db) {
+        ReturnType::Type(ty) => Some(*ty),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
     }
 }
 

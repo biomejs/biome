@@ -188,7 +188,7 @@ impl<'db> InferredModuleTypes<'db> {
             }
         }
 
-        member_result_type(db, found)
+        collected_type_result(db, found)
     }
 
     fn find_own_member_type(
@@ -277,7 +277,7 @@ fn find_member_type<'db>(
     })?
 }
 
-fn member_result_type<'db>(
+pub(super) fn collected_type_result<'db>(
     db: &'db dyn ModuleDb,
     mut types: Vec<InferredTypeData<'db>>,
 ) -> Option<InferredTypeData<'db>> {
