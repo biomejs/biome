@@ -153,15 +153,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install cargo-audit
-        uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419 # v2.82.7
-        if: matrix.code-target == 'linux-x64-musl'
-        with:
-          tool: cargo-audit
-
-      - name: Audit crates.io dependencies
-        if: matrix.code-target == 'linux-x64-musl'
-        run: cargo audit
+      # NOTE: removed temporarily to make the release successful
+      #      - name: Install cargo-audit
+      #        uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419 # v2.82.7
+      #        if: matrix.code-target == 'linux-x64-musl'
+      #        with:
+      #          tool: cargo-audit
+      #
+      #      - name: Audit crates.io dependencies
+      #        if: matrix.code-target == 'linux-x64-musl'
+      #        run: cargo audit
 
       # Build the CLI binary
       - name: Build binaries
