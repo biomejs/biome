@@ -244,6 +244,17 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    pub fn callable_function(self, db: &'db dyn TypeDb) -> Option<InternedFunction<'db>> {
+        match self {
+            Self::Function(function) => Some(function),
+            Self::InstanceOf(instance) => match instance.ty(db) {
+                Self::Function(function) => Some(function),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
     /// Compares this type pattern with an actual argument type and returns the
     /// generic replacements needed to make the pattern match the actual type.
     ///
@@ -990,6 +1001,15 @@ pub struct InternedFunction<'db> {
     pub is_async: bool,
     #[returns(ref)]
     pub name: Option<Text>,
+}
+
+impl<'db> InternedFunction<'db> {
+    pub fn returns_promise(self, db: &'db dyn TypeDb) -> bool {
+        match self.return_type(db) {
+            ReturnType::Type(ty) => ty.is_promise_instance(db),
+            ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
+        }
+    }
 }
 
 #[salsa::interned]

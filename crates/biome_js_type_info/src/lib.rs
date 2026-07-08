@@ -6,6 +6,7 @@
 
 mod conditionals;
 mod flattening;
+mod format_inferred_type_info;
 mod format_type_info;
 pub(crate) mod generated;
 mod globals;
@@ -30,4 +31,7 @@ pub use type_data::TypeData as RawTypeData;
 pub use type_data::*;
 pub use type_store::*;
 
+pub use format_inferred_type_info::{
+    FormatInferredTypeContext, InferredTypeDisplay, format_inferred_type,
+};
 pub use format_type_info::{FormatTypeContext, FormatTypeOptions};

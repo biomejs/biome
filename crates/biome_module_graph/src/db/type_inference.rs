@@ -6,12 +6,22 @@ use biome_js_type_info::{
     GLOBAL_RESOLVER, ImportSymbol, ResolvedTypeId, TypeId, TypeImportQualifier, TypeReference,
     TypeResolver, TypeResolverLevel,
     interned_types::{
-        InternedUnion as InferredUnion, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId,
-        ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::{AsId, FromId};
+
+/// Unlike the other limits, this one guards actual stack recursion: each level
+/// of `ResolutionCtx::resolve` clones a raw type and runs the conversion walk,
+/// so the frames are heavy. Named declarations already short-circuit to
+/// `TypeData::Local` handles, which leaves only structural nesting within a
+/// single declaration on the stack — real-world code stays well below this.
+const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
+const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
+const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
+const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
 pub struct BindingTypeData<'db> {
@@ -49,7 +59,7 @@ impl<'db> InferredModuleTypes<'db> {
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
-        self.resolve_type_recursive(db, ty)
+        self.resolve_type_iterative(db, ty)
     }
 
     pub fn find_member_type(
@@ -58,19 +68,25 @@ impl<'db> InferredModuleTypes<'db> {
         ty: InferredTypeData<'db>,
         name: &str,
     ) -> Option<InferredTypeData<'db>> {
-        self.find_member_type_recursive(db, ty, name)
+        self.find_member_type_iterative(db, ty, name)
     }
 
-    fn resolve_type_recursive(
+    fn resolve_type_iterative(
         &self,
         db: &'db dyn ModuleDb,
         mut ty: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
         let mut seen = FxHashSet::default();
+        let mut remaining_steps = MAX_LOCAL_TYPE_RESOLUTION_STEPS;
         loop {
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };
+
+            if remaining_steps == 0 {
+                return ty;
+            }
+            remaining_steps -= 1;
 
             let module_key = local.module(db);
             let type_id = local.type_id(db);
@@ -100,7 +116,7 @@ impl<'db> InferredModuleTypes<'db> {
             .and_then(|types| types.types.get(type_id.index()).copied())
     }
 
-    fn find_member_type_recursive(
+    fn find_member_type_iterative(
         &self,
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
@@ -109,12 +125,13 @@ impl<'db> InferredModuleTypes<'db> {
         let mut seen = FxHashSet::default();
         let mut pending = vec![(ty, MemberLookup::Any, false)];
         let mut found = Vec::new();
+        let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
 
         while let Some((ty, lookup, collect)) = pending.pop() {
-            let ty = self.resolve_type_recursive(db, ty);
+            let ty = self.resolve_type_iterative(db, ty);
             let (ty, lookup) = match ty {
                 InferredTypeData::InstanceOf(instance) => (
-                    self.resolve_type_recursive(db, instance.ty(db)),
+                    self.resolve_type_iterative(db, instance.ty(db)),
                     MemberLookup::Instance,
                 ),
                 ty => (ty, lookup),
@@ -123,6 +140,13 @@ impl<'db> InferredModuleTypes<'db> {
             if !seen.insert((ty, lookup)) {
                 continue;
             }
+
+            // Deduplicated entries above don't count against the budget, so
+            // the limit measures distinct types visited, not queue churn.
+            if remaining_steps == 0 {
+                break;
+            }
+            remaining_steps -= 1;
 
             if let Some(member_ty) = self.find_own_member_type(db, ty, name, lookup) {
                 if collect {
@@ -279,18 +303,12 @@ fn find_member_type<'db>(
 
 pub(super) fn collected_type_result<'db>(
     db: &'db dyn ModuleDb,
-    mut types: Vec<InferredTypeData<'db>>,
+    types: Vec<InferredTypeData<'db>>,
 ) -> Option<InferredTypeData<'db>> {
-    let mut seen = FxHashSet::default();
-    types.retain(|ty| seen.insert(*ty));
-
-    match types.len() {
-        0 => None,
-        1 => types.pop(),
-        _ => Some(InferredTypeData::Union(InferredUnion::new(
-            db,
-            types.into_boxed_slice(),
-        ))),
+    if types.is_empty() {
+        None
+    } else {
+        Some(InferredTypeData::union_from_types(db, types))
     }
 }
 
@@ -319,6 +337,7 @@ struct ResolutionCtx<'db, 'a> {
     named_type_ids: FxHashSet<TypeId>,
     resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     in_progress: FxHashSet<TypeId>,
+    resolution_depth: usize,
 }
 
 pub(super) fn resolve_raw_types<'db>(
@@ -337,6 +356,7 @@ pub(super) fn resolve_raw_types<'db>(
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
+        resolution_depth: 0,
     };
 
     let mut named_type_ids = ctx
@@ -409,11 +429,18 @@ fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
 
 impl<'db> ResolutionCtx<'db, '_> {
     fn resolve(&mut self, reference: &TypeReference) -> InferredTypeData<'db> {
-        match reference {
+        if self.resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {
+            return InferredTypeData::Unknown;
+        }
+
+        self.resolution_depth += 1;
+        let resolved = match reference {
             TypeReference::Resolved(resolved_id) => self.resolve_resolved_id(*resolved_id),
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Import(import) => self.resolve_import(import),
-        }
+        };
+        self.resolution_depth -= 1;
+        resolved
     }
 
     fn resolve_resolved_id(&mut self, resolved_id: ResolvedTypeId) -> InferredTypeData<'db> {
@@ -479,7 +506,13 @@ impl<'db> ResolutionCtx<'db, '_> {
             .js_info
             .semantic_model
             .scope_from_id(qualifier.scope_id);
+        let mut remaining_steps = MAX_SCOPE_RESOLUTION_STEPS;
         loop {
+            if remaining_steps == 0 {
+                return InferredTypeData::Unknown;
+            }
+            remaining_steps -= 1;
+
             if let Some(binding) = scope.get_binding(identifier.text()) {
                 if binding.is_imported()
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())

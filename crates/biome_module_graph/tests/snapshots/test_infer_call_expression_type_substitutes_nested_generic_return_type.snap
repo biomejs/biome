@@ -1,0 +1,54 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function wrap<T>(value: T): Promise<T> {
+	return Promise.resolve(value);
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}
+
+Module TypeId(2) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve
+
+Module TypeId(3) => instanceof T
+
+Module TypeId(4) => Call class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve(instanceof T)
+
+Module TypeId(5) => T
+
+Module TypeId(6) => instanceof Promise<instanceof T>
+
+Module TypeId(7) => sync Function "wrap" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof Promise<instanceof T>
+}
+```

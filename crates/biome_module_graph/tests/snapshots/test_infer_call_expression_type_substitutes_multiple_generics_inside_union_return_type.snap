@@ -1,0 +1,67 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function pair<T, U>(left: T, right: U): Promise<T | U> {
+	return Promise.resolve(left as T | U);
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => instanceof U
+
+Module TypeId(2) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}
+
+Module TypeId(3) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve
+
+Module TypeId(4) => instanceof T
+
+Module TypeId(5) => instanceof T
+
+Module TypeId(6) => instanceof U
+
+Module TypeId(7) => instanceof T | instanceof U
+
+Module TypeId(8) => Call class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve(instanceof T | instanceof U)
+
+Module TypeId(9) => T
+
+Module TypeId(10) => U
+
+Module TypeId(11) => instanceof T | instanceof U
+
+Module TypeId(12) => instanceof Promise<instanceof T | instanceof U>
+
+Module TypeId(13) => sync Function "pair" {
+  accepts: {
+    params: [
+      required left: instanceof T
+      required right: instanceof U
+    ]
+    type_args: [T, U]
+  }
+  returns: instanceof Promise<instanceof T | instanceof U>
+}
+```

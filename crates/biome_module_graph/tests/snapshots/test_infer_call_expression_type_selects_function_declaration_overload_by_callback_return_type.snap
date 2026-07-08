@@ -1,0 +1,300 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function bestEffort<T>(cb: () => Promise<T>): Promise<T | undefined>;
+export function bestEffort<T>(cb: () => T): T | undefined;
+export function bestEffort<T>(cb: (() => T) | (() => Promise<T>)) {
+	return cb();
+}
+
+export function readPromise(): Promise<string> {
+	return Promise.resolve("value");
+}
+
+export function readString(): string {
+	return "value";
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => instanceof Promise<instanceof T>
+
+Module TypeId(2) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Module TypeId(3) => instanceof T
+
+Module TypeId(4) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Module TypeId(5) => instanceof T
+
+Module TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Module TypeId(7) => instanceof Promise<instanceof T>
+
+Module TypeId(8) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Module TypeId(9) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+} | sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Module TypeId(10) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+} | sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Module TypeId(11) => Call sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+} | sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}(No parameters)
+
+Module TypeId(12) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}
+
+Module TypeId(13) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve
+
+Module TypeId(14) => string: value
+
+Module TypeId(15) => Call class "Promise" {
+  extends: none
+  implements: []
+  type_args: [unknown]
+}.resolve(string: value)
+
+Module TypeId(16) => T
+
+Module TypeId(17) => undefined
+
+Module TypeId(18) => instanceof T | undefined
+
+Module TypeId(19) => instanceof Promise<instanceof T | undefined>
+
+Module TypeId(20) => sync Function "bestEffort" {
+  accepts: {
+    params: [
+      required cb: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<instanceof T>
+      }
+    ]
+    type_args: [T]
+  }
+  returns: instanceof Promise<instanceof T | undefined>
+}
+
+Module TypeId(21) => instanceof T | undefined
+
+Module TypeId(22) => sync Function "bestEffort" {
+  accepts: {
+    params: [
+      required cb: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof T
+      }
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T | undefined
+}
+
+Module TypeId(23) => sync Function "bestEffort" {
+  accepts: {
+    params: [
+      required cb: sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof T
+      } | sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<instanceof T>
+      }
+    ]
+    type_args: [T]
+  }
+  returns: Call sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof T
+  } | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<instanceof T>
+  }(No parameters)
+}
+
+Module TypeId(24) => instanceof Promise<string>
+
+Module TypeId(25) => sync Function "readPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Module TypeId(26) => sync Function "readString" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(27) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "bestEffort" {
+        accepts: {
+          params: [
+            required cb: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: instanceof Promise<instanceof T>
+            }
+          ]
+          type_args: [T]
+        }
+        returns: instanceof Promise<instanceof T | undefined>
+      }
+    ,
+    ():
+      sync Function "bestEffort" {
+        accepts: {
+          params: [
+            required cb: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: instanceof T
+            }
+          ]
+          type_args: [T]
+        }
+        returns: instanceof T | undefined
+      }
+    ,
+    ():
+      sync Function "bestEffort" {
+        accepts: {
+          params: [
+            required cb: sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: instanceof T
+            } | sync Function {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: instanceof Promise<instanceof T>
+            }
+          ]
+          type_args: [T]
+        }
+        returns: Call sync Function {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: instanceof T
+        } | sync Function {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: instanceof Promise<instanceof T>
+        }(No parameters)
+      }
+  ]
+}
+```

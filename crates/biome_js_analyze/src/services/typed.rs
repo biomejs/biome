@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::Type;
 use biome_module_graph::{
-    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types,
+    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types_bottom_up,
 };
 use biome_rowan::{AstNode, TextRange};
 use std::rc::Rc;
@@ -44,7 +44,7 @@ impl TypedService {
     )]
     fn resolver(&self) -> Option<Arc<ModuleResolver>> {
         let typed_module = self.module.as_ref()?;
-        let _ = infer_module_types(typed_module.db.as_ref(), typed_module.module);
+        let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
         let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
         else {
             return None;

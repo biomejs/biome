@@ -1,0 +1,36 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function maybeString<T>(value: T): T | string {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => instanceof T
+
+Module TypeId(2) => T
+
+Module TypeId(3) => instanceof T | string
+
+Module TypeId(4) => sync Function "maybeString" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T | string
+}
+```

@@ -56,6 +56,51 @@ pub fn infer_module_types<'db>(
     Some(resolve_raw_types(db, module, &js_info, &import_types))
 }
 
+/// Infers the types of a module, preparing the modules it imports first.
+///
+/// This is the entry point to use when answering an outside request, such as
+/// a lint rule asking for type information after a file was opened or
+/// changed. At that moment the imported modules may not have been inferred
+/// yet, and this function works through them one at a time, innermost imports
+/// first, so that even very long import chains are handled safely.
+///
+/// From within other database queries, call [`infer_module_types`] directly
+/// instead: there, the imported modules are already taken care of.
+pub fn infer_module_types_bottom_up<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+) -> Option<InferredModuleTypes<'db>> {
+    let mut visited = FxHashSet::default();
+    let mut stack = vec![(module, false)];
+
+    while let Some((current, imports_visited)) = stack.pop() {
+        if imports_visited {
+            infer_module_types(db, current);
+            continue;
+        }
+        if !visited.insert(current) {
+            continue;
+        }
+
+        // Revisit this module to infer it once its imports below are done.
+        stack.push((current, true));
+
+        let ModuleInfoKind::Js(js_info) = current.kind(db) else {
+            continue;
+        };
+        for import_path in js_info.static_import_paths.values() {
+            if let Some(path) = import_path.as_path()
+                && let Some(target) = db.module_for_path(path)
+                && !visited.contains(&target)
+            {
+                stack.push((target, false));
+            }
+        }
+    }
+
+    infer_module_types(db, module)
+}
+
 #[salsa::tracked]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
@@ -109,7 +154,7 @@ fn infer_call_signature_type<'db>(
     let signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| infer_callable_function(db, member.ty))
+        .filter_map(|member| member.ty.callable_function(db))
         .collect::<Vec<_>>();
 
     if signatures.len() < 2 {
@@ -122,20 +167,6 @@ fn infer_call_signature_type<'db>(
         .into_iter()
         .find(|function| signature_accepts_arguments(db, *function, args))
         .and_then(|function| infer_function_return_type(db, function, args))
-}
-
-fn infer_callable_function<'db>(
-    db: &'db dyn ModuleDb,
-    ty: InferredTypeData<'db>,
-) -> Option<InferredFunction<'db>> {
-    match ty {
-        InferredTypeData::Function(function) => Some(function),
-        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
-            InferredTypeData::Function(function) => Some(function),
-            _ => None,
-        },
-        _ => None,
-    }
 }
 
 fn signature_accepts_arguments<'db>(
@@ -158,23 +189,15 @@ fn signature_accepts_arguments<'db>(
 
     parameters.iter().zip(args).all(|(parameter, arg)| {
         match (
-            infer_callable_function(db, parameter.ty()),
-            infer_callable_function(db, *arg),
+            parameter.ty().callable_function(db),
+            arg.callable_function(db),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
-                function_returns_promise(db, parameter_function)
-                    == function_returns_promise(db, argument_function)
+                parameter_function.returns_promise(db) == argument_function.returns_promise(db)
             }
             _ => true,
         }
     })
-}
-
-fn function_returns_promise<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> bool {
-    match function.return_type(db) {
-        ReturnType::Type(ty) => ty.is_promise_instance(db),
-        ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
-    }
 }
 
 fn infer_function_return_type<'db>(
@@ -207,13 +230,13 @@ fn infer_generic_return_type<'db>(
             continue;
         }
 
-        let Some(parameter_function) = infer_callable_function(db, parameter_ty) else {
+        let Some(parameter_function) = parameter_ty.callable_function(db) else {
             continue;
         };
         let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
             continue;
         };
-        let Some(argument_function) = infer_callable_function(db, *arg) else {
+        let Some(argument_function) = arg.callable_function(db) else {
             continue;
         };
         let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {

@@ -11,7 +11,7 @@ use biome_db::ParsedSource;
 use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_resolver::ResolveError;
 
-use crate::snap::ModuleGraphSnapshot;
+use crate::snap::{ModuleGraphSnapshot, source_files_from_memory_fs, write_source_file};
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -20,7 +20,7 @@ use biome_html_parser::HtmlParserOptions;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::{
-    TypeData, TypeResolver,
+    TypeData, TypeResolver, format_inferred_type,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
         InternedUnion as InferredUnion, Literal as InferredLiteral,
@@ -274,6 +274,42 @@ fn inferred_overload_ty_by_name<'db>(
                         >= 2
             )
         })
+}
+
+fn assert_inferred_type_snapshot(test_name: &str, db: &dyn ModuleDb, fs: &MemoryFileSystem) {
+    let mut content = String::new();
+    let files = source_files_from_memory_fs(fs);
+    for (file_name, source_code) in &files {
+        let file_name = Utf8PathBuf::from(file_name.as_str());
+        write_source_file(&mut content, &file_name, source_code, None);
+
+        let Some(module) = db.module_for_path(file_name.as_path()) else {
+            continue;
+        };
+        let Some(inferred) = infer_module_types(db, module) else {
+            continue;
+        };
+        if inferred.types.is_empty() {
+            continue;
+        }
+
+        content.push_str("\n\n## Inferred types\n\n```");
+        for (index, ty) in inferred.types.iter().enumerate() {
+            content.push_str("\nModule TypeId(");
+            content.push_str(&index.to_string());
+            content.push_str(") => ");
+            content.push_str(&format_inferred_type(db, *ty));
+            content.push('\n');
+        }
+        content.push_str("```\n");
+    }
+
+    insta::with_settings!({
+        snapshot_path => "snapshots",
+        prepend_module_to_snapshot => false,
+    }, {
+        insta::assert_snapshot!(test_name, content);
+    });
 }
 
 fn build_js_db(
@@ -1753,6 +1789,11 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_by_arity(
     let one_arg_ty =
         infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
     assert!(is_inferred_number(&db, one_arg_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_callable_interface_overload_by_arity",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -1799,6 +1840,11 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_with_opti
     let one_arg_ty =
         infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
     assert!(is_inferred_number(&db, one_arg_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_callable_interface_overload_with_optional_parameter_by_arity",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -1848,6 +1894,11 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_with_rest
         Vec::from([InferredTypeData::Number, InferredTypeData::Number]),
     );
     assert!(is_inferred_number(&db, many_arg_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_callable_interface_overload_with_rest_parameter_by_arity",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -1929,6 +1980,11 @@ fn test_infer_call_expression_type_selects_callable_object_overload_by_arity() {
     let one_arg_ty =
         infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
     assert!(is_inferred_number(&db, one_arg_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_callable_object_overload_by_arity",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -1994,6 +2050,11 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
     assert!(
         !sync_result_ty.is_promise_instance(&db),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
+    );
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_function_declaration_overload_by_callback_return_type",
+        &db,
+        &fs,
     );
 }
 
@@ -2069,6 +2130,11 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
         !sync_result_ty.is_promise_instance(&db),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
     );
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_selects_imported_function_declaration_overload_by_callback_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2125,6 +2191,11 @@ fn test_infer_call_expression_type_deduplicates_substituted_union_return_type() 
     );
 
     assert!(is_inferred_string(&db, call_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_deduplicates_substituted_union_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2196,6 +2267,11 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
             .iter()
             .any(|ty| is_inferred_number(&db, *ty))
     );
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_nested_generic_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2228,6 +2304,11 @@ fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_retu
         call_ty,
         |ty| { contains_inferred_string(&db, ty) && contains_inferred_number(&db, ty) }
     ));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_generic_inside_promise_union_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2260,6 +2341,11 @@ fn test_infer_call_expression_type_substitutes_multiple_generics_inside_union_re
         call_ty,
         |ty| { contains_inferred_string(&db, ty) && contains_inferred_number(&db, ty) }
     ));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_multiple_generics_inside_union_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2300,6 +2386,11 @@ fn test_infer_call_expression_type_substitutes_generic_inside_union_with_promise
     assert!(union.types(&db).iter().any(|ty| {
         is_inferred_promise_with_type_parameter(&db, *ty, |ty| contains_inferred_string(&db, ty))
     }));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_generic_inside_union_with_promise_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2334,6 +2425,11 @@ fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_ret
     );
 
     assert!(is_inferred_number(&db, call_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_generic_from_callback_promise_return_type",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -2385,6 +2481,11 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
             .types(&db)
             .iter()
             .any(|ty| is_inferred_number(&db, *ty))
+    );
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_resolves_union_function_return_type",
+        &db,
+        &fs,
     );
 }
 
