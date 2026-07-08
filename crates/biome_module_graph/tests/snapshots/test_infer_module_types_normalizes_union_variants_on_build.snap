@@ -1,0 +1,57 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 328
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readValue(
+	value: string | (number | string),
+): string | (number | string) {
+	return value;
+}
+
+export function readBoolean(value: true | false): true | false {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => number | string
+
+Module TypeId(1) => string | number
+
+Module TypeId(2) => string | number
+
+Module TypeId(3) => bool: true
+
+Module TypeId(4) => bool: false
+
+Module TypeId(5) => boolean
+
+Module TypeId(6) => sync Function "readValue" {
+  accepts: {
+    params: [
+      required value: string | number
+    ]
+    type_args: []
+  }
+  returns: string | number
+}
+
+Module TypeId(7) => sync Function "readBoolean" {
+  accepts: {
+    params: [
+      required value: boolean
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+```

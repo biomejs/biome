@@ -238,6 +238,23 @@ fn inferred_binding_ty_by_name<'db>(
         .map(|data| data.ty)
 }
 
+fn inferred_function_return_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let binding_ty = inferred_binding_ty_by_name(db, module, inferred, name)?;
+    let function = inferred
+        .resolve_type(db, binding_ty)
+        .callable_function(db)?;
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        return None;
+    };
+
+    Some(inferred.resolve_type(db, *return_ty))
+}
+
 fn inferred_overload_ty_by_name<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -2484,6 +2501,64 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
     );
     assert_inferred_type_snapshot(
         "test_infer_call_expression_type_resolves_union_function_return_type",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_normalizes_union_variants_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readValue(value: string | (number | string)): string | (number | string) {
+                return value;
+            }
+
+            export function readBoolean(value: true | false): true | false {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let value_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readValue")
+        .expect("readValue return type must be inferred");
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!("readValue must return a union, got {value_ty:?}");
+    };
+    assert_eq!(union.types(&db).len(), 2);
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .all(|ty| !matches!(ty, InferredTypeData::Union(_)))
+    );
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty))
+    );
+
+    let boolean_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readBoolean")
+            .expect("readBoolean return type must be inferred");
+    assert_eq!(boolean_ty, InferredTypeData::Boolean);
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_normalizes_union_variants_on_build",
         &db,
         &fs,
     );

@@ -4,6 +4,7 @@
     reason = "salsa interned handle lifetimes are used by generated code"
 )]
 
+mod builders;
 mod conditionals;
 mod flattening;
 mod format_inferred_type_info;

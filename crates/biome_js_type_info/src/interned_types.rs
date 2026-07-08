@@ -9,6 +9,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     ScopeId,
+    builders::UnionBuilder,
     globals_ids::{
         GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_NUMBER_ID,
         GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
@@ -222,6 +223,14 @@ impl<'db> TypeData<'db> {
         )
     }
 
+    pub(crate) fn is_boolean_literal(self, db: &'db dyn TypeDb, value: bool) -> bool {
+        matches!(
+            self,
+            Self::Literal(literal)
+                if matches!(literal.literal(db), Literal::Boolean(boolean) if boolean.as_bool() == value)
+        )
+    }
+
     pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> bool {
         let Self::InstanceOf(instance) = self else {
             return false;
@@ -343,18 +352,11 @@ impl<'db> TypeData<'db> {
 
     /// Builds the smallest type that represents a list of union variants.
     ///
-    /// Duplicate variants are removed. An empty list becomes `unknown`, and a
+    /// Duplicate variants are removed. An empty list becomes `never`, and a
     /// single remaining variant is returned directly instead of wrapping it in
     /// a union.
-    pub fn union_from_types(db: &'db dyn TypeDb, mut types: Vec<Self>) -> Self {
-        let mut seen = FxHashSet::default();
-        types.retain(|ty| seen.insert(*ty));
-
-        match types.len() {
-            0 => Self::Unknown,
-            1 => types.pop().unwrap_or(Self::Unknown),
-            _ => Self::Union(InternedUnion::new(db, types.into_boxed_slice())),
-        }
+    pub fn union_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
+        UnionBuilder::new(db).add_all(types).build()
     }
 
     pub fn promise_class(db: &'db dyn TypeDb) -> Self {
@@ -483,10 +485,10 @@ impl<'db> TypeData<'db> {
                     convert_references(db, intersection.types(), resolve_reference),
                 ))
             }
-            raw::TypeData::Union(union) => Self::Union(InternedUnion::new(
+            raw::TypeData::Union(union) => Self::union_from_types(
                 db,
-                convert_references(db, union.types(), resolve_reference),
-            )),
+                convert_references(db, union.types(), resolve_reference).into_vec(),
+            ),
             raw::TypeData::TypeOperator(type_operator) => {
                 Self::TypeOperator(InternedTypeOperatorType::new(
                     db,
