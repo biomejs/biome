@@ -5,10 +5,13 @@ use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, ImportSymbol, ResolvedTypeId, TypeId, TypeImportQualifier, TypeReference,
     TypeResolver, TypeResolverLevel,
-    interned_types::{LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData},
+    interned_types::{
+        InternedUnion as InferredUnion, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId,
+        ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+    },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
-use salsa::plumbing::AsId;
+use salsa::plumbing::{AsId, FromId};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
 pub struct BindingTypeData<'db> {
@@ -37,6 +40,226 @@ unsafe impl salsa::Update for InferredModuleTypes<'_> {
             *old_value = new_value;
             true
         }
+    }
+}
+
+impl<'db> InferredModuleTypes<'db> {
+    pub fn resolve_type(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        self.resolve_type_recursive(db, ty)
+    }
+
+    pub fn find_member_type(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+    ) -> Option<InferredTypeData<'db>> {
+        self.find_member_type_recursive(db, ty, name)
+    }
+
+    fn resolve_type_recursive(
+        &self,
+        db: &'db dyn ModuleDb,
+        mut ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let mut seen = FxHashSet::default();
+        loop {
+            let InferredTypeData::Local(local) = ty else {
+                return ty;
+            };
+
+            let module_key = local.module(db);
+            let type_id = local.type_id(db);
+            if !seen.insert((module_key, type_id)) {
+                return ty;
+            }
+
+            ty = self
+                .type_for_local_handle(db, local)
+                .unwrap_or(InferredTypeData::Unknown);
+        }
+    }
+
+    fn type_for_local_handle(
+        &self,
+        db: &'db dyn ModuleDb,
+        local: LocalTypeHandle<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let module_key = local.module(db);
+        let type_id = local.type_id(db);
+        if module_key == self.module_key {
+            return self.types.get(type_id.index()).copied();
+        }
+
+        let module = module_for_key(db, module_key)?;
+        super::queries::infer_module_types(db, module)
+            .and_then(|types| types.types.get(type_id.index()).copied())
+    }
+
+    fn find_member_type_recursive(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut seen = FxHashSet::default();
+        let mut pending = vec![(ty, MemberLookup::Any, false)];
+        let mut found = Vec::new();
+
+        while let Some((ty, lookup, collect)) = pending.pop() {
+            let ty = self.resolve_type_recursive(db, ty);
+            let (ty, lookup) = match ty {
+                InferredTypeData::InstanceOf(instance) => {
+                    (self.resolve_type_recursive(db, instance.ty(db)), MemberLookup::Instance)
+                }
+                ty => (ty, lookup),
+            };
+
+            if !seen.insert((ty, lookup)) {
+                continue;
+            }
+
+            if let Some(member_ty) = self.find_own_member_type(db, ty, name, lookup) {
+                if collect {
+                    found.push(member_ty);
+                    continue;
+                }
+                return Some(member_ty);
+            }
+
+            match ty {
+                InferredTypeData::Class(class) => {
+                    if let Some(mut extends) = class.extends(db) {
+                        if matches!(lookup, MemberLookup::Any) {
+                            extends = class_side_type(db, extends);
+                        }
+                        pending.push((extends, lookup, collect));
+                    }
+                }
+                InferredTypeData::Interface(interface) => {
+                    pending.extend(
+                        interface
+                            .extends(db)
+                            .iter()
+                            .rev()
+                            .copied()
+                            .map(|ty| (ty, lookup, collect)),
+                    );
+                }
+                InferredTypeData::Generic(generic) => {
+                    if let Some(constraint) = generic.constraint(db) {
+                        pending.push((constraint, lookup, collect));
+                    }
+                }
+                InferredTypeData::Intersection(intersection) => {
+                    pending.extend(
+                        intersection
+                            .types(db)
+                            .iter()
+                            .rev()
+                            .copied()
+                            .map(|ty| (ty, lookup, true)),
+                    );
+                }
+                InferredTypeData::Object(object) => {
+                    if let Some(prototype) = object.prototype(db) {
+                        pending.push((prototype, lookup, collect));
+                    }
+                }
+                InferredTypeData::Union(union) => {
+                    pending.extend(
+                        union
+                            .types(db)
+                            .iter()
+                            .rev()
+                            .copied()
+                            .map(|ty| (ty, lookup, true)),
+                    );
+                }
+                _ => {}
+            }
+        }
+
+        member_result_type(db, found)
+    }
+
+    fn find_own_member_type(
+        &self,
+        db: &'db dyn ModuleDb,
+        ty: InferredTypeData<'db>,
+        name: &str,
+        lookup: MemberLookup,
+    ) -> Option<InferredTypeData<'db>> {
+        match ty {
+            InferredTypeData::Class(class) => find_member_type(class.members(db), name, lookup),
+            InferredTypeData::Interface(interface) => {
+                find_member_type(interface.members(db), name, lookup)
+            }
+            InferredTypeData::Literal(literal) => match literal.literal(db) {
+                InferredLiteral::Object(members) => find_member_type(members, name, lookup),
+                _ => None,
+            },
+            InferredTypeData::Module(module) => find_member_type(module.members(db), name, lookup),
+            InferredTypeData::Namespace(namespace) => {
+                find_member_type(namespace.members(db), name, lookup)
+            }
+            InferredTypeData::Object(object) => find_member_type(object.members(db), name, lookup),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+enum MemberLookup {
+    Any,
+    Instance,
+}
+
+fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+    match ty {
+        InferredTypeData::InstanceOf(instance) => instance.ty(db),
+        ty => ty,
+    }
+}
+
+fn module_for_key(db: &dyn ModuleDb, module_key: ModuleKey) -> Option<ModuleInfo> {
+    let module = ModuleInfo::from_id(module_key.as_id());
+    let current = db.module_for_path(module.path(db))?;
+    (ModuleKey::new(current.as_id()) == module_key).then_some(current)
+}
+
+fn find_member_type<'db>(
+    members: &[InferredTypeMember<'db>],
+    name: &str,
+    lookup: MemberLookup,
+) -> Option<InferredTypeData<'db>> {
+    members
+        .iter()
+        .find(|member| {
+            !(matches!(lookup, MemberLookup::Instance) && member.kind.is_static())
+                && member.kind.has_name(name)
+        })
+        .map(|member| member.ty)
+}
+
+fn member_result_type<'db>(
+    db: &'db dyn ModuleDb,
+    mut types: Vec<InferredTypeData<'db>>,
+) -> Option<InferredTypeData<'db>> {
+    let mut seen = FxHashSet::default();
+    types.retain(|ty| seen.insert(*ty));
+
+    match types.len() {
+        0 => None,
+        1 => types.pop(),
+        _ => Some(InferredTypeData::Union(InferredUnion::new(
+            db,
+            types.into_boxed_slice(),
+        ))),
     }
 }
 

@@ -22,12 +22,16 @@ pub type ReferenceResolver<'db, 'resolver> =
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
 pub struct ModuleKey {
-    pub id: salsa::Id,
+    id: salsa::Id,
 }
 
 impl ModuleKey {
     pub fn new(id: salsa::Id) -> Self {
         Self { id }
+    }
+
+    pub fn as_id(self) -> salsa::Id {
+        self.id
     }
 }
 
@@ -530,6 +534,38 @@ pub enum TypeMemberKind<'db> {
     Named(Text),
     NamedOptional(Text),
     NamedStatic(Text),
+}
+
+impl TypeMemberKind<'_> {
+    pub fn has_name(&self, name: &str) -> bool {
+        match self {
+            Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
+            Self::Getter(own_name)
+            | Self::ConstAssertedGetter(own_name)
+            | Self::Named(own_name)
+            | Self::ConstAssertedNamed(own_name)
+            | Self::NamedOptional(own_name)
+            | Self::ConstAssertedNamedOptional(own_name)
+            | Self::NamedStatic(own_name)
+            | Self::ConstAssertedNamedStatic(own_name) => own_name.text() == name,
+            Self::CallSignature
+            | Self::ComputedValue(_)
+            | Self::ConstAssertedCallSignature
+            | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedIndexSignature(_)
+            | Self::IndexSignature(_) => false,
+        }
+    }
+
+    pub fn is_static(&self) -> bool {
+        matches!(
+            self,
+            Self::Constructor
+                | Self::ConstAssertedConstructor
+                | Self::NamedStatic(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
