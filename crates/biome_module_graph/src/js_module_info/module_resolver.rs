@@ -51,15 +51,12 @@ impl InstantiationKey {
     }
 }
 
-/// Append-only store for alias instantiations minted after the primary store is frozen. Lazy ids
-/// are `primary_type_count() + local_index`, valid only while that base stays fixed.
-///
-/// `boxcar::Vec` is used for `types` because the [`TypeResolver`] API hands out `&TypeData`
-/// borrowed from `&self` while later instantiations keep appending; boxcar keeps those
-/// references stable across pushes. The resolver is single-threaded (`ModuleResolver` holds an
-/// `Rc`), so the map state only needs `RefCell`, not a lock.
+/// Append-only store for alias instantiations minted after the primary store is frozen.
+/// Lazy ids are `primary_type_count() + local_index`.
 #[derive(Default)]
 struct LazyInstantiationStore {
+    /// `boxcar` (not `Vec`) so `get_by_id(&self) -> &TypeData` stays valid while later
+    /// instantiations append through `&self`.
     types: boxcar::Vec<Arc<TypeData>>,
     state: RefCell<LazyInstantiationState>,
 }
