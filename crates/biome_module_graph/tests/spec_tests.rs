@@ -189,6 +189,17 @@ fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: Infer
     assert!(is_inferred_string(db, *return_ty));
 }
 
+fn assert_inferred_function_returns_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
+    let InferredTypeData::Function(function) = ty else {
+        panic!("type must be inferred as a function");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(db) else {
+        panic!("function return type must be inferred as a type");
+    };
+
+    assert!(is_inferred_number(db, *return_ty));
+}
+
 fn local_type_id_of_instance<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -3221,6 +3232,100 @@ fn test_infer_module_types_resolves_imported_local_handle_members() {
         .find_member_type(&db, *return_ty, "name")
         .expect("Foo.create().name must be found through the imported local handle");
     assert!(is_inferred_string(&db, name_ty));
+}
+
+#[test]
+fn test_infer_module_types_resolves_namespace_import_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            export function alpha(): number {
+                return 1;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import * as source from "./source.ts";
+
+            export { source };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let source_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "source")
+        .expect("source import type must be inferred");
+    let InferredTypeData::Namespace(_) = source_ty else {
+        panic!("namespace import must infer a namespace, got {source_ty:?}");
+    };
+
+    let alpha_ty = inferred
+        .find_member_type(&db, source_ty, "alpha")
+        .expect("namespace import must expose source.alpha");
+    assert_inferred_function_returns_number(&db, alpha_ty);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_namespace_import_members",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_namespace_reexport_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            export function alpha(): number {
+                return 1;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/barrel.ts".into(),
+        r#"export * as MyNs from "./source.ts";"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { MyNs } from "./barrel.ts";
+
+            export { MyNs };
+        "#,
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/barrel.ts", "/src/index.ts"],
+        true,
+    );
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let namespace_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "MyNs")
+        .expect("MyNs import type must be inferred");
+    let InferredTypeData::Namespace(_) = namespace_ty else {
+        panic!("namespace reexport import must infer a namespace, got {namespace_ty:?}");
+    };
+
+    let alpha_ty = inferred
+        .find_member_type(&db, namespace_ty, "alpha")
+        .expect("namespace reexport must expose source.alpha");
+    assert_inferred_function_returns_number(&db, alpha_ty);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_namespace_reexport_members",
+        &db,
+        &fs,
+    );
 }
 
 #[test]

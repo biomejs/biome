@@ -1,16 +1,18 @@
-use crate::db::queries::NormalizeTypeInput;
+use crate::db::queries::{NormalizeTypeInput, infer_module_types};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::TextRange;
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, ImportSymbol, ResolvedTypeId, TypeId, TypeImportQualifier, TypeReference,
-    TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, ImportSymbol, Path, ResolvedTypeId, TypeId, TypeImportQualifier,
+    TypeReference, TypeResolver, TypeResolverLevel,
     interned_types::{
-        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        InternedNamespace as InferredNamespace, Literal as InferredLiteral, LocalTypeHandle,
+        LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind,
     },
 };
+use biome_rowan::Text;
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::{AsId, FromId};
 
@@ -23,6 +25,7 @@ const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
 const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
+const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
 pub struct BindingTypeData<'db> {
@@ -340,6 +343,26 @@ struct ResolutionCtx<'db, 'a> {
     resolution_depth: usize,
 }
 
+struct NamespaceExportCollection<'db> {
+    members: Vec<InferredTypeMember<'db>>,
+    seen_names: FxHashSet<String>,
+    seen_modules: FxHashSet<ModuleKey>,
+    stack: Vec<(ModuleInfo, bool)>,
+    remaining_steps: usize,
+}
+
+impl NamespaceExportCollection<'_> {
+    fn new() -> Self {
+        Self {
+            members: Vec::new(),
+            seen_names: FxHashSet::default(),
+            seen_modules: FxHashSet::default(),
+            stack: Vec::new(),
+            remaining_steps: MAX_EXPORT_RESOLUTION_STEPS,
+        }
+    }
+}
+
 pub(super) fn resolve_raw_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -560,39 +583,258 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
+        self.resolve_import_qualifier(qualifier)
+    }
+
+    fn resolve_import_qualifier(&self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
+        let Some(module) = self.module_for_resolved_path(&qualifier.resolved_path) else {
+            return InferredTypeData::Unknown;
+        };
+
         let Some(imported_types) = self.import_types.get(&qualifier.resolved_path) else {
-            return InferredTypeData::Unknown;
+            return infer_module_types(self.db, module)
+                .map_or(InferredTypeData::Unknown, |types| {
+                    self.resolve_import_symbol(module, &types, &qualifier.symbol)
+                });
         };
 
-        let Some(path) = qualifier.resolved_path.as_path() else {
+        self.resolve_import_symbol(module, imported_types, &qualifier.symbol)
+    }
+
+    fn module_for_resolved_path(&self, resolved_path: &ResolvedPath) -> Option<ModuleInfo> {
+        let path = resolved_path.as_path()?;
+        self.db.module_for_path(path)
+    }
+
+    fn resolve_import_symbol(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+        symbol: &ImportSymbol,
+    ) -> InferredTypeData<'db> {
+        match symbol {
+            ImportSymbol::All => self.namespace_for_module(module, inferred_types),
+            ImportSymbol::Default => self.resolve_export_name(module, inferred_types, "default"),
+            ImportSymbol::Named(name) => {
+                self.resolve_export_name(module, inferred_types, name.text())
+            }
+        }
+    }
+
+    fn resolve_js_import(&self, import: &JsImport) -> InferredTypeData<'db> {
+        self.module_for_resolved_path(&import.resolved_path)
+            .and_then(|module| {
+                infer_module_types(self.db, module)
+                    .map(|types| self.resolve_import_symbol(module, &types, &import.symbol))
+            })
+            .unwrap_or(InferredTypeData::Unknown)
+    }
+
+    fn namespace_for_module(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+    ) -> InferredTypeData<'db> {
+        let mut collection = NamespaceExportCollection::new();
+
+        if !self.collect_namespace_members(module, inferred_types, true, &mut collection) {
             return InferredTypeData::Unknown;
-        };
-        let Some(module) = self.db.module_for_path(path) else {
-            return InferredTypeData::Unknown;
-        };
+        }
+
+        while let Some((module, include_default)) = collection.stack.pop() {
+            if collection.remaining_steps == 0 {
+                return InferredTypeData::Unknown;
+            }
+            collection.remaining_steps -= 1;
+
+            let Some(inferred_types) = infer_module_types(self.db, module) else {
+                continue;
+            };
+
+            if !self.collect_namespace_members(
+                module,
+                &inferred_types,
+                include_default,
+                &mut collection,
+            ) {
+                return InferredTypeData::Unknown;
+            }
+        }
+
+        InferredTypeData::Namespace(InferredNamespace::new(
+            self.db,
+            collection.members.into_boxed_slice(),
+            Path::from(Text::from(module.path(self.db).to_string())),
+        ))
+    }
+
+    fn collect_namespace_members(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+        include_default: bool,
+        collection: &mut NamespaceExportCollection<'db>,
+    ) -> bool {
+        let module_key = ModuleKey::new(module.as_id());
+        if !collection.seen_modules.insert(module_key) {
+            return true;
+        }
+
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return InferredTypeData::Unknown;
+            return true;
         };
 
-        let export_name = match &qualifier.symbol {
-            ImportSymbol::Default => "default",
-            ImportSymbol::Named(name) => name.text(),
-            ImportSymbol::All => return InferredTypeData::Unknown,
+        for (name, _) in js_info.exports.iter() {
+            if !include_default && name.text() == "default" {
+                continue;
+            }
+
+            if !collection.seen_names.insert(name.text().to_string()) {
+                continue;
+            }
+
+            if collection.remaining_steps == 0 {
+                return false;
+            }
+            collection.remaining_steps -= 1;
+
+            collection.members.push(InferredTypeMember {
+                kind: InferredTypeMemberKind::Named(name.clone()),
+                ty: self.resolve_export_name(module, inferred_types, name.text()),
+            });
+        }
+
+        for reexport in js_info.blanket_reexports.iter().rev() {
+            if let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) {
+                collection.stack.push((module, false));
+            }
+        }
+
+        true
+    }
+
+    fn resolve_export_name(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+        name: &str,
+    ) -> InferredTypeData<'db> {
+        let mut stack = Vec::new();
+        let mut seen = FxHashSet::default();
+        let mut remaining_steps = MAX_EXPORT_RESOLUTION_STEPS;
+
+        if let Some(ty) = self.resolve_export_name_in_module(
+            module,
+            inferred_types,
+            name,
+            &mut stack,
+            &mut seen,
+            &mut remaining_steps,
+        ) {
+            return ty;
+        }
+
+        while let Some((module, name)) = stack.pop() {
+            if remaining_steps == 0 {
+                return InferredTypeData::Unknown;
+            }
+            remaining_steps -= 1;
+
+            let Some(inferred_types) = infer_module_types(self.db, module) else {
+                continue;
+            };
+
+            if let Some(ty) = self.resolve_export_name_in_module(
+                module,
+                &inferred_types,
+                &name,
+                &mut stack,
+                &mut seen,
+                &mut remaining_steps,
+            ) {
+                return ty;
+            }
+        }
+
+        InferredTypeData::Unknown
+    }
+
+    fn resolve_export_name_in_module(
+        &self,
+        module: ModuleInfo,
+        inferred_types: &InferredModuleTypes<'db>,
+        name: &str,
+        stack: &mut Vec<(ModuleInfo, String)>,
+        seen: &mut FxHashSet<(ModuleKey, String)>,
+        remaining_steps: &mut usize,
+    ) -> Option<InferredTypeData<'db>> {
+        let module_key = ModuleKey::new(module.as_id());
+        if !seen.insert((module_key, name.to_string())) {
+            return None;
+        }
+
+        let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
+            return None;
         };
 
-        match js_info
-            .exports
-            .get(export_name)
-            .and_then(JsExport::as_own_export)
-        {
-            Some(JsOwnExport::Binding(range)) => imported_types
+        match js_info.exports.get(name) {
+            Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
+                Some(self.resolve_own_export(inferred_types, own_export))
+            }
+            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                self.push_reexport_target(reexport.import.clone(), name, stack);
+                None
+            }
+            None => {
+                for reexport in js_info.blanket_reexports.iter().rev() {
+                    if *remaining_steps == 0 {
+                        return Some(InferredTypeData::Unknown);
+                    }
+                    *remaining_steps -= 1;
+                    if let Some(module) =
+                        self.module_for_resolved_path(&reexport.import.resolved_path)
+                    {
+                        stack.push((module, name.to_string()));
+                    }
+                }
+                None
+            }
+        }
+    }
+
+    fn push_reexport_target(
+        &self,
+        import: JsImport,
+        fallback_name: &str,
+        stack: &mut Vec<(ModuleInfo, String)>,
+    ) {
+        let Some(module) = self.module_for_resolved_path(&import.resolved_path) else {
+            return;
+        };
+
+        match import.symbol {
+            ImportSymbol::All => {
+                stack.push((module, fallback_name.to_string()));
+            }
+            ImportSymbol::Default => stack.push((module, "default".to_string())),
+            ImportSymbol::Named(name) => stack.push((module, name.text().to_string())),
+        }
+    }
+
+    fn resolve_own_export(
+        &self,
+        inferred_types: &InferredModuleTypes<'db>,
+        own_export: &JsOwnExport,
+    ) -> InferredTypeData<'db> {
+        match own_export {
+            JsOwnExport::Binding(range) => inferred_types
                 .binding_type_data
                 .get(range)
                 .map_or(InferredTypeData::Unknown, |data| data.ty),
-            Some(JsOwnExport::Type(resolved_id)) => {
-                inferred_type_from_resolved_id(self.db, imported_types, *resolved_id)
+            JsOwnExport::Type(resolved_id) => {
+                inferred_type_from_resolved_id(self.db, inferred_types, *resolved_id)
             }
-            Some(JsOwnExport::Namespace(_)) | None => InferredTypeData::Unknown,
+            JsOwnExport::Namespace(reexport) => self.resolve_js_import(&reexport.import),
         }
     }
 }

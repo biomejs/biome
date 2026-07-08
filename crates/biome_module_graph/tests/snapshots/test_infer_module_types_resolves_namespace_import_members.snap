@@ -1,0 +1,38 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 360
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+import * as source from "./source.ts";
+
+export { source };
+```
+# `/src/source.ts`
+
+## Source
+
+```ts
+export function alpha(): number {
+	return 1;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => sync Function "alpha" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+```
