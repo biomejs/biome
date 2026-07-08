@@ -60,8 +60,9 @@ pub struct DivergentType {
     pub id: salsa::Id,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::Update)]
 pub enum TypeData<'db> {
+    #[default]
     Unknown,
     Divergent(DivergentType),
     Global,
@@ -100,20 +101,23 @@ pub enum TypeData<'db> {
     VoidKeyword,
 }
 
-impl<'db> Default for TypeData<'db> {
-    fn default() -> Self {
-        Self::Unknown
-    }
-}
-
 impl<'db> TypeData<'db> {
     pub fn divergent(id: salsa::Id) -> Self {
         Self::Divergent(DivergentType { id })
     }
 
+    pub fn is_string_key_type(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::String => true,
+            Self::InstanceOf(instance) => instance.ty(db) == Self::String,
+            _ => false,
+        }
+    }
+
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
-        let mut resolve_reference =
-            |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
+        let mut resolve_reference = |reference: &raw::TypeReference| {
+            Self::from_raw_reference_lossy(reference)
+        };
         Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
     }
 
@@ -137,7 +141,7 @@ impl<'db> TypeData<'db> {
             raw::TypeData::Class(class) => Self::Class(InternedClass::new(
                 db,
                 convert_references(db, &class.type_parameters, resolve_reference),
-                class.extends.as_ref().map(|ty| resolve_reference(ty)),
+                class.extends.as_ref().map(&mut *resolve_reference),
                 convert_references(db, &class.implements, resolve_reference),
                 convert_type_members(db, &class.members, resolve_reference),
                 class.name.clone(),
@@ -149,7 +153,7 @@ impl<'db> TypeData<'db> {
                 constructor
                     .return_type
                     .as_ref()
-                    .map(|ty| resolve_reference(ty)),
+                    .map(&mut *resolve_reference),
             )),
             raw::TypeData::Function(function) => Self::Function(InternedFunction::new(
                 db,
@@ -178,7 +182,7 @@ impl<'db> TypeData<'db> {
             )),
             raw::TypeData::Object(object) => Self::Object(InternedObject::new(
                 db,
-                object.prototype.as_ref().map(|ty| resolve_reference(ty)),
+                object.prototype.as_ref().map(&mut *resolve_reference),
                 convert_type_members(db, &object.members, resolve_reference),
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
@@ -236,12 +240,12 @@ impl<'db> TypeData<'db> {
             raw::TypeData::MergedReference(reference) => {
                 Self::MergedReference(InternedMergedReference::new(
                     db,
-                    reference.ty.as_ref().map(|ty| resolve_reference(ty)),
-                    reference.value_ty.as_ref().map(|ty| resolve_reference(ty)),
+                    reference.ty.as_ref().map(&mut *resolve_reference),
+                    reference.value_ty.as_ref().map(&mut *resolve_reference),
                     reference
                         .namespace_ty
                         .as_ref()
-                        .map(|ty| resolve_reference(ty)),
+                        .map(&mut *resolve_reference),
                 ))
             }
             raw::TypeData::TypeofExpression(expression) => {
@@ -268,7 +272,7 @@ impl<'db> TypeData<'db> {
         }
     }
 
-    pub fn from_raw_reference_lossy(db: &'db dyn TypeDb, reference: &raw::TypeReference) -> Self {
+    pub fn from_raw_reference_lossy(reference: &raw::TypeReference) -> Self {
         match reference {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_UNKNOWN_ID => Self::Unknown,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_UNDEFINED_ID => Self::Undefined,
@@ -283,9 +287,7 @@ impl<'db> TypeData<'db> {
                 .type_parameters
                 .iter()
                 .find(|param| param.is_known())
-                .map_or(Self::Unknown, |param| {
-                    Self::from_raw_reference_lossy(db, param)
-                }),
+                .map_or(Self::Unknown, Self::from_raw_reference_lossy),
             raw::TypeReference::Import(_) => Self::Unknown,
         }
     }
@@ -432,9 +434,9 @@ impl<'db> TypeData<'db> {
     fn raw_reference_from_option(
         self,
         _db: &'db dyn TypeDb,
-        ty: Option<TypeData<'db>>,
+        ty: Option<Self>,
     ) -> Option<raw::TypeReference> {
-        ty.map(TypeData::to_raw_reference_lossy)
+        ty.map(Self::to_raw_reference_lossy)
     }
 }
 
@@ -536,7 +538,7 @@ pub enum TypeMemberKind<'db> {
     NamedStatic(Text),
 }
 
-impl TypeMemberKind<'_> {
+impl<'db> TypeMemberKind<'db> {
     pub fn has_name(&self, name: &str) -> bool {
         match self {
             Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
@@ -554,6 +556,13 @@ impl TypeMemberKind<'_> {
             | Self::ConstAssertedComputedValue(_)
             | Self::ConstAssertedIndexSignature(_)
             | Self::IndexSignature(_) => false,
+        }
+    }
+
+    pub fn index_signature_type(&self) -> Option<TypeData<'db>> {
+        match self {
+            Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => Some(*ty),
+            _ => None,
         }
     }
 
@@ -860,7 +869,7 @@ fn convert_references<'db>(
     let _ = db;
     references
         .iter()
-        .map(|reference| resolve_reference(reference))
+        .map(resolve_reference)
         .collect()
 }
 

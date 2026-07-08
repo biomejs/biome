@@ -195,19 +195,29 @@ impl<'db> InferredModuleTypes<'db> {
         lookup: MemberLookup,
     ) -> Option<InferredTypeData<'db>> {
         match ty {
-            InferredTypeData::Class(class) => find_member_type(class.members(db), name, lookup),
+            InferredTypeData::Class(class) => find_member_type(
+                db,
+                class.members(db),
+                name,
+                lookup,
+                matches!(lookup, MemberLookup::Instance),
+            ),
             InferredTypeData::Interface(interface) => {
-                find_member_type(interface.members(db), name, lookup)
+                find_member_type(db, interface.members(db), name, lookup, true)
             }
             InferredTypeData::Literal(literal) => match literal.literal(db) {
-                InferredLiteral::Object(members) => find_member_type(members, name, lookup),
+                InferredLiteral::Object(members) => find_member_type(db, members, name, lookup, true),
                 _ => None,
             },
-            InferredTypeData::Module(module) => find_member_type(module.members(db), name, lookup),
-            InferredTypeData::Namespace(namespace) => {
-                find_member_type(namespace.members(db), name, lookup)
+            InferredTypeData::Module(module) => {
+                find_member_type(db, module.members(db), name, lookup, true)
             }
-            InferredTypeData::Object(object) => find_member_type(object.members(db), name, lookup),
+            InferredTypeData::Namespace(namespace) => {
+                find_member_type(db, namespace.members(db), name, lookup, true)
+            }
+            InferredTypeData::Object(object) => {
+                find_member_type(db, object.members(db), name, lookup, true)
+            }
             _ => None,
         }
     }
@@ -233,17 +243,32 @@ fn module_for_key(db: &dyn ModuleDb, module_key: ModuleKey) -> Option<ModuleInfo
 }
 
 fn find_member_type<'db>(
+    db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
     name: &str,
     lookup: MemberLookup,
+    allow_index_signature: bool,
 ) -> Option<InferredTypeData<'db>> {
-    members
+    let named_member = members
         .iter()
         .find(|member| {
             !(matches!(lookup, MemberLookup::Instance) && member.kind.is_static())
                 && member.kind.has_name(name)
         })
-        .map(|member| member.ty)
+        .map(|member| member.ty);
+    if named_member.is_some() {
+        return named_member;
+    }
+
+    allow_index_signature.then(|| {
+        members.iter().find_map(|member| {
+            member
+                .kind
+                .index_signature_type()
+                .is_some_and(|ty| ty.is_string_key_type(db))
+                .then_some(member.ty)
+        })
+    })?
 }
 
 fn member_result_type<'db>(

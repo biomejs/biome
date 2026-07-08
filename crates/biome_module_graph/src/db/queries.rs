@@ -57,7 +57,7 @@ pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     _module: ModuleInfo,
     callee: InferredTypeData<'db>,
-    _args: Box<[InferredTypeData<'db>]>,
+    _args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
     match callee {
         InferredTypeData::Function(function) => match function.return_type(db) {

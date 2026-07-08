@@ -36,6 +36,10 @@ pub struct TypedService {
 }
 
 impl TypedService {
+    #[expect(
+        clippy::arc_with_non_send_sync,
+        reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
+    )]
     fn resolver(&self) -> Option<Arc<ModuleResolver>> {
         let typed_module = self.module.as_ref()?;
         let _ = infer_module_types(typed_module.db.as_ref(), typed_module.module);

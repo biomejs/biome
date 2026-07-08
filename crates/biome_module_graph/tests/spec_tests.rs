@@ -1276,6 +1276,34 @@ fn test_infer_module_types_resolves_generic_constraint_members() {
 }
 
 #[test]
+fn test_infer_module_types_resolves_string_index_signature_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Dictionary = {
+                [key: string]: number;
+            };
+
+            export const dictionary: Dictionary = {};
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let dictionary_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "dictionary")
+        .expect("dictionary binding type must be inferred");
+
+    let value_ty = inferred
+        .find_member_type(&db, dictionary_ty, "anything")
+        .expect("string index signature must expose arbitrary string members");
+    assert!(is_inferred_number(&db, value_ty));
+}
+
+#[test]
 fn test_infer_module_types_documents_anonymous_default_class_handle_gap() {
     let fs = MemoryFileSystem::default();
     fs.insert(
