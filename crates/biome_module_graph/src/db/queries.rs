@@ -19,8 +19,8 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
-        InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember,
+        InternedFunction as InferredFunction, InternedTypeInstance as InferredTypeInstance,
+        ReturnType, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -83,9 +83,9 @@ fn infer_function_call_type<'db>(
     args: &[InferredTypeData<'db>],
 ) -> Option<InferredTypeData<'db>> {
     match callee {
-        InferredTypeData::Function(function) => infer_function_return_type(db, function),
+        InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
         InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
-            InferredTypeData::Function(function) => infer_function_return_type(db, function),
+            InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
             InferredTypeData::Interface(interface) => {
                 infer_call_signature_type(db, interface.members(db), args)
             }
@@ -116,13 +116,13 @@ fn infer_call_signature_type<'db>(
     if signatures.len() < 2 {
         return signatures
             .first()
-            .and_then(|function| infer_function_return_type(db, *function));
+            .and_then(|function| infer_function_return_type(db, *function, args));
     }
 
     signatures
         .into_iter()
         .find(|function| signature_accepts_arguments(db, *function, args))
-        .and_then(|function| infer_function_return_type(db, function))
+        .and_then(|function| infer_function_return_type(db, function, args))
 }
 
 fn infer_callable_function<'db>(
@@ -181,10 +181,92 @@ fn function_returns_promise<'db>(db: &'db dyn ModuleDb, function: InferredFuncti
 fn infer_function_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
+    args: &[InferredTypeData<'db>],
 ) -> Option<InferredTypeData<'db>> {
     match function.return_type(db) {
-        ReturnType::Type(ty) => Some(*ty),
+        ReturnType::Type(ty) => Some(infer_generic_return_type(db, function, *ty, args)),
         ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
+    }
+}
+
+fn infer_generic_return_type<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    mut return_ty: InferredTypeData<'db>,
+    args: &[InferredTypeData<'db>],
+) -> InferredTypeData<'db> {
+    for (parameter, arg) in function.parameters(db).iter().zip(args) {
+        let parameter_ty = parameter.ty();
+        if is_generic_reference(db, parameter_ty) {
+            return_ty = substitute_type(db, return_ty, parameter_ty, *arg);
+            continue;
+        }
+
+        let Some(parameter_function) = infer_callable_function(db, parameter_ty) else {
+            continue;
+        };
+        let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
+            continue;
+        };
+        if !is_generic_reference(db, *parameter_return_ty) {
+            continue;
+        }
+        let Some(argument_function) = infer_callable_function(db, *arg) else {
+            continue;
+        };
+        let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {
+            continue;
+        };
+
+        return_ty = substitute_type(db, return_ty, *parameter_return_ty, *argument_return_ty);
+    }
+
+    return_ty
+}
+
+fn is_generic_reference<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    match ty {
+        InferredTypeData::Generic(_) => true,
+        InferredTypeData::InstanceOf(instance) => {
+            matches!(instance.ty(db), InferredTypeData::Generic(_))
+        }
+        _ => false,
+    }
+}
+
+fn substitute_type<'db>(
+    db: &'db dyn ModuleDb,
+    target: InferredTypeData<'db>,
+    generic: InferredTypeData<'db>,
+    replacement: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    if target == generic {
+        return replacement;
+    }
+
+    match target {
+        InferredTypeData::InstanceOf(instance) => {
+            InferredTypeData::InstanceOf(InferredTypeInstance::new(
+                db,
+                substitute_type(db, instance.ty(db), generic, replacement),
+                instance
+                    .type_parameters(db)
+                    .iter()
+                    .map(|ty| substitute_type(db, *ty, generic, replacement))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            ))
+        }
+        InferredTypeData::Union(union) => collected_type_result(
+            db,
+            union
+                .types(db)
+                .iter()
+                .map(|ty| substitute_type(db, *ty, generic, replacement))
+                .collect(),
+        )
+        .unwrap_or(InferredTypeData::Unknown),
+        ty => ty,
     }
 }
 

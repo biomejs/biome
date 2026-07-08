@@ -1871,6 +1871,101 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
 }
 
 #[test]
+fn test_infer_call_expression_type_selects_imported_function_declaration_overload_by_callback_return_type()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/functions.ts".into(),
+        r#"
+            export function bestEffort<T>(cb: () => Promise<T>): Promise<T | undefined>;
+            export function bestEffort<T>(cb: () => T): T | undefined;
+            export function bestEffort<T>(cb: (() => T) | (() => Promise<T>)) {
+                return cb();
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { bestEffort } from "./functions.ts";
+
+            export function readPromise(): Promise<string> {
+                return Promise.resolve("value");
+            }
+
+            export function readString(): string {
+                return "value";
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/functions.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let best_effort_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "bestEffort")
+        .expect("bestEffort import type must be inferred");
+    let read_promise_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readPromise")
+        .expect("readPromise binding type must be inferred");
+    let read_string_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readString")
+        .expect("readString binding type must be inferred");
+    let best_effort_ty = inferred.resolve_type(&db, best_effort_ty);
+
+    let promise_result_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        best_effort_ty,
+        Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
+    );
+    assert!(
+        promise_result_ty.is_promise_instance(&db),
+        "promise callback overload must return a Promise, got {promise_result_ty:?}",
+    );
+
+    let sync_result_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        best_effort_ty,
+        Vec::from([inferred.resolve_type(&db, read_string_ty)]),
+    );
+    assert_ne!(sync_result_ty, InferredTypeData::Unknown);
+    assert!(
+        !sync_result_ty.is_promise_instance(&db),
+        "sync callback overload must not return a Promise, got {sync_result_ty:?}",
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_direct_generic_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function identity<T>(value: T): T {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let identity_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "identity")
+        .expect("identity binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, identity_ty),
+        Vec::from([InferredTypeData::Number]),
+    );
+
+    assert!(is_inferred_number(&db, call_ty));
+}
+
+#[test]
 fn test_infer_call_expression_type_resolves_union_function_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
