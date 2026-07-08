@@ -2717,6 +2717,106 @@ fn test_infer_module_types_normalizes_primitive_intersections_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_merges_inline_object_intersections_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readCombined(
+                value: { name: string } & { value: number },
+            ): { name: string } & { value: number } {
+                return value;
+            }
+
+            export function readValue(
+                value: { value: string } & { value: number },
+            ): { value: string } & { value: number } {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let combined_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readCombined")
+            .expect("readCombined return type must be inferred");
+    let InferredTypeData::Object(combined_object) = combined_ty else {
+        panic!("readCombined must return a merged object, got {combined_ty:?}");
+    };
+    assert_eq!(combined_object.members(&db).len(), 2);
+
+    let name_ty = inferred
+        .find_member_type(&db, combined_ty, "name")
+        .expect("merged object must expose name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    let value_ty = inferred
+        .find_member_type(&db, combined_ty, "value")
+        .expect("merged object must expose value");
+    assert!(is_inferred_number(&db, value_ty));
+
+    let duplicate_value_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readValue")
+            .expect("readValue return type must be inferred");
+    let duplicate_value_member_ty = inferred
+        .find_member_type(&db, duplicate_value_ty, "value")
+        .expect("merged duplicate member must expose value");
+    assert!(contains_inferred_string(&db, duplicate_value_member_ty));
+    assert!(contains_inferred_number(&db, duplicate_value_member_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_merges_inline_object_intersections_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_merges_function_intersections_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readFunction(
+                value: (() => string) & (() => number),
+            ): (() => string) & (() => number) {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let function_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readFunction")
+            .expect("readFunction return type must be inferred");
+    let InferredTypeData::Function(function) = function_ty else {
+        panic!("readFunction must return a merged function, got {function_ty:?}");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(&db) else {
+        panic!("merged function return type must be a type");
+    };
+
+    assert!(contains_inferred_string(&db, *return_ty));
+    assert!(contains_inferred_number(&db, *return_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_merges_function_intersections_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_resolves_imported_local_handle_members() {
     let fs = MemoryFileSystem::default();
     fs.insert(

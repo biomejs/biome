@@ -856,6 +856,12 @@ pub struct TypeMember<'db> {
     pub ty: TypeData<'db>,
 }
 
+impl TypeMember<'_> {
+    pub(crate) fn name(&self) -> Option<Text> {
+        self.kind.name()
+    }
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub enum TypeMemberKind<'db> {
     CallSignature,
@@ -916,6 +922,28 @@ impl<'db> TypeMemberKind<'db> {
 
     pub fn is_call_signature(&self) -> bool {
         matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
+    }
+
+    pub(crate) fn name(&self) -> Option<Text> {
+        match self {
+            Self::CallSignature
+            | Self::ComputedValue(_)
+            | Self::ConstAssertedCallSignature
+            | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedIndexSignature(_)
+            | Self::IndexSignature(_) => None,
+            Self::ConstAssertedConstructor | Self::Constructor => {
+                Some(Text::new_static("constructor"))
+            }
+            Self::ConstAssertedGetter(name)
+            | Self::ConstAssertedNamed(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ConstAssertedNamedStatic(name)
+            | Self::Getter(name)
+            | Self::Named(name)
+            | Self::NamedOptional(name)
+            | Self::NamedStatic(name) => Some(name.clone()),
+        }
     }
 }
 

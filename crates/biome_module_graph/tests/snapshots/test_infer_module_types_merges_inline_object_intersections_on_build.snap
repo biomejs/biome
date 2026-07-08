@@ -1,0 +1,94 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 328
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readCombined(
+	value: { name: string } & { value: number },
+): { name: string } & { value: number } {
+	return value;
+}
+
+export function readValue(
+	value: { value: string } & { value: number },
+): { value: string } & { value: number } {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => Object {
+  prototype: No prototype
+  members: ["name": string]
+}
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Module TypeId(4) => Object {
+  prototype: No prototype
+  members: ["value": string]
+}
+
+Module TypeId(5) => Object {
+  prototype: No prototype
+  members: ["value": string | number]
+}
+
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: ["value": string | number]
+}
+
+Module TypeId(7) => sync Function "readCombined" {
+  accepts: {
+    params: [
+      required value: Object {
+        prototype: No prototype
+        members: ["name": string, "value": number]
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["name": string, "value": number]
+  }
+}
+
+Module TypeId(8) => sync Function "readValue" {
+  accepts: {
+    params: [
+      required value: Object {
+        prototype: No prototype
+        members: ["value": string | number]
+      }
+    ]
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["value": string | number]
+  }
+}
+```

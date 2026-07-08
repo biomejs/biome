@@ -1,4 +1,7 @@
-use crate::interned_types::{InternedIntersection, InternedUnion, TypeData, TypeDb};
+use crate::interned_types::{
+    InternedFunction, InternedIntersection, InternedObject, InternedUnion, ReturnType, TypeData,
+    TypeDb, TypeMember,
+};
 
 pub(crate) struct IntersectionBuilder<'db> {
     db: &'db dyn TypeDb,
@@ -58,6 +61,14 @@ impl<'db> IntersectionBuilder<'db> {
     }
 
     pub(crate) fn build(mut self) -> TypeData<'db> {
+        if let Some(merged_function) = self.try_build_function() {
+            return merged_function;
+        }
+
+        if let Some(merged_object) = self.try_build_object() {
+            return merged_object;
+        }
+
         match self.types.len() {
             0 => TypeData::NeverKeyword,
             1 => self.types.pop().unwrap_or(TypeData::NeverKeyword),
@@ -65,6 +76,81 @@ impl<'db> IntersectionBuilder<'db> {
                 self.db,
                 self.types.into_boxed_slice(),
             )),
+        }
+    }
+
+    fn try_build_function(&self) -> Option<TypeData<'db>> {
+        if self.types.len() < 2 {
+            return None;
+        }
+
+        let mut return_types = Vec::new();
+        for ty in &self.types {
+            let TypeData::Function(function) = ty else {
+                return None;
+            };
+            let ReturnType::Type(return_ty) = function.return_type(self.db) else {
+                return Some(TypeData::Function(InternedFunction::new(
+                    self.db,
+                    Box::default(),
+                    Box::default(),
+                    ReturnType::Type(TypeData::Boolean),
+                    false,
+                    None,
+                )));
+            };
+            return_types.push(*return_ty);
+        }
+
+        Some(TypeData::Function(InternedFunction::new(
+            self.db,
+            Box::default(),
+            Box::default(),
+            ReturnType::Type(TypeData::union_from_types(self.db, return_types)),
+            false,
+            None,
+        )))
+    }
+
+    fn try_build_object(&self) -> Option<TypeData<'db>> {
+        if self.types.len() < 2 {
+            return None;
+        }
+
+        let mut members = Vec::new();
+        for ty in &self.types {
+            let TypeData::Object(object) = ty else {
+                return None;
+            };
+            merge_members(self.db, &mut members, object.members(self.db));
+        }
+
+        Some(TypeData::Object(InternedObject::new(
+            self.db,
+            None,
+            members.into_boxed_slice(),
+        )))
+    }
+}
+
+fn merge_members<'db>(
+    db: &'db dyn TypeDb,
+    merged: &mut Vec<TypeMember<'db>>,
+    members: &[TypeMember<'db>],
+) {
+    for member in members.iter().filter(|member| !member.kind.is_static()) {
+        let existing = member.name().and_then(|name| {
+            merged
+                .iter_mut()
+                .find(|merged_member| merged_member.kind.has_name(name.text()))
+        });
+
+        match existing {
+            Some(existing) if existing.ty != member.ty => {
+                existing.ty = TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+            }
+            Some(_) => {}
+            None => merged.push(member.clone()),
         }
     }
 }
