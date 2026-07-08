@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/issue-17746-indented-code-then-nested-list.md
+---
+
+# Input
+
+```md
+-     a
+
+  - b
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,2 +1,2 @@
+ -    a
+-- b
++   - b
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,19 +1,22 @@
+ [
+   source_position(0),
+   "-",
+-  source_position(1),
+-  " ",
+-  source_position(2),
+-  " ",
+-  source_position(3),
+-  " ",
+-  source_position(4),
+-  " ",
+-  align("     ", [source_position(5), "a", hard_line_break, hard_line_break]),
+-  source_position(10),
+-  "-",
+-  source_position(11),
+-  " ",
+-  align("  ", [source_position(12), "b", hard_line_break, hard_line_break]),
++  align("   ", [
++    align("    ", [
++      "    ",
++      source_position(1),
++      "a",
++      source_position(7),
++      "
++"
++    ]),
++    hard_line_break,
++    source_position(11),
++    "-",
++    source_position(12),
++    " ",
++    align("  ", [source_position(13), "b", hard_line_break, hard_line_break]),
++    hard_line_break
++  ]),
+   hard_line_break
+ ]
+\ No newline at end of file
+
+```
