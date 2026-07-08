@@ -20,7 +20,8 @@ use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
         InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
-        ReturnType, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
         TypeSubstitution as InferredTypeSubstitution,
     },
 };
@@ -259,6 +260,10 @@ fn infer_generic_return_type<'db>(
 #[derive(Clone, Copy, Debug)]
 enum TypeNormalizationItem<'db> {
     Type(InferredTypeData<'db>),
+    ExitLocal {
+        module: InferredModuleKey,
+        type_id: InferredLocalTypeId,
+    },
     RebuildInstance(usize),
     RebuildIntersection(usize),
     RebuildMergedReference {
@@ -282,6 +287,7 @@ pub fn normalize_type<'db>(
     let original = ty;
     let mut stack = Vec::from([TypeNormalizationItem::Type(ty)]);
     let mut results = Vec::new();
+    let mut active_locals = FxHashSet::default();
     let mut remaining_steps = MAX_TYPE_NORMALIZATION_STEPS;
 
     while let Some(item) = stack.pop() {
@@ -292,7 +298,26 @@ pub fn normalize_type<'db>(
                 }
                 remaining_steps -= 1;
 
-                match inferred.resolve_type(db, ty) {
+                let mut exit_local = None;
+                let ty = match ty {
+                    InferredTypeData::Local(local) => {
+                        let module = local.module(db);
+                        let type_id = local.type_id(db);
+                        if !active_locals.insert((module, type_id)) {
+                            results.push(InferredTypeData::Local(local));
+                            continue;
+                        }
+                        exit_local = Some((module, type_id));
+                        inferred.resolve_type(db, ty)
+                    }
+                    ty => inferred.resolve_type(db, ty),
+                };
+
+                if let Some((module, type_id)) = exit_local {
+                    stack.push(TypeNormalizationItem::ExitLocal { module, type_id });
+                }
+
+                match ty {
                     InferredTypeData::InstanceOf(instance) => {
                         stack.push(TypeNormalizationItem::RebuildInstance(
                             instance.type_parameters(db).len(),
@@ -329,6 +354,17 @@ pub fn normalize_type<'db>(
                             stack.push(TypeNormalizationItem::Type(ty));
                         }
                     }
+                    InferredTypeData::TypeofType(ty) => {
+                        stack.push(TypeNormalizationItem::Type(ty.ty(db)));
+                    }
+                    InferredTypeData::TypeofValue(value) => {
+                        let ty = value.ty(db);
+                        if ty == InferredTypeData::Unknown {
+                            results.push(InferredTypeData::TypeofValue(value));
+                        } else {
+                            stack.push(TypeNormalizationItem::Type(ty));
+                        }
+                    }
                     InferredTypeData::Union(union) => {
                         stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
                         for ty in union.types(db).iter().rev() {
@@ -337,6 +373,9 @@ pub fn normalize_type<'db>(
                     }
                     ty => results.push(ty),
                 }
+            }
+            TypeNormalizationItem::ExitLocal { module, type_id } => {
+                active_locals.remove(&(module, type_id));
             }
             TypeNormalizationItem::RebuildInstance(type_parameter_count) => {
                 let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
