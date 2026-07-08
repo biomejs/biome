@@ -1860,6 +1860,46 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_resolves_record_index_signature_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readRecord(value: Record<string, number>): Record<string, number> {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let record_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readRecord")
+        .expect("readRecord return type must be inferred");
+    let InferredTypeData::InstanceOf(record_instance) = record_ty else {
+        panic!("readRecord must return an object instance, got {record_ty:?}");
+    };
+    let InferredTypeData::Object(object) = record_instance.ty(&db) else {
+        panic!("readRecord must return an object instance, got {record_ty:?}");
+    };
+    assert_eq!(object.members(&db).len(), 1);
+
+    let item_ty = inferred
+        .find_member_type(&db, record_ty, "item")
+        .expect("Record<string, number> must expose a number string index signature");
+    assert!(is_inferred_number(&db, item_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_record_index_signature_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_resolves_anonymous_default_class_export() {
     let fs = MemoryFileSystem::default();
     fs.insert(

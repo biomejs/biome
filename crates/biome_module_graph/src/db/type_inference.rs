@@ -7,8 +7,9 @@ use biome_js_type_info::{
     GLOBAL_RESOLVER, ImportSymbol, Path, ResolvedTypeId, TypeId, TypeImportQualifier,
     TypeReference, TypeResolver, TypeResolverLevel,
     interned_types::{
-        InternedNamespace as InferredNamespace, Literal as InferredLiteral, LocalTypeHandle,
-        LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        InternedNamespace as InferredNamespace, InternedObject as InferredObject,
+        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
@@ -565,6 +566,19 @@ impl<'db> ResolutionCtx<'db, '_> {
 
         if let Some(resolved_id) = GLOBAL_RESOLVER.resolve_qualifier(qualifier) {
             return self.resolve_resolved_id(resolved_id);
+        }
+
+        if qualifier.is_record() && qualifier.type_parameters.len() == 2 {
+            let key_ty = self.resolve(&qualifier.type_parameters[0]);
+            let value_ty = self.resolve(&qualifier.type_parameters[1]);
+            return InferredTypeData::Object(InferredObject::new(
+                self.db,
+                None,
+                Box::from([InferredTypeMember {
+                    kind: InferredTypeMemberKind::IndexSignature(key_ty),
+                    ty: value_ty,
+                }]),
+            ));
         }
 
         if qualifier.is_array() {
