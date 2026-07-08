@@ -1,3 +1,4 @@
+use crate::db::queries::NormalizeTypeInput;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::TextRange;
@@ -323,8 +324,7 @@ pub(super) fn infer_module_types_cycle_result<'db>(
 pub(super) fn normalize_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
-    _module: ModuleInfo,
-    _ty: InferredTypeData<'db>,
+    _input: NormalizeTypeInput<'db>,
 ) -> InferredTypeData<'db> {
     InferredTypeData::Unknown
 }

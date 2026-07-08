@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    unused_lifetimes,
+    reason = "Salsa interned structs can use the database lifetime only in generated field storage."
+)]
 
 pub mod css_module_info;
 mod db;

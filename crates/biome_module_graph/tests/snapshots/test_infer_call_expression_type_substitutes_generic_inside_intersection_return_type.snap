@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests.rs
-assertion_line: 328
 expression: content
 ---
 
@@ -16,6 +15,10 @@ type WithName = {
 export function withName<T>(value: T): T & WithName {
 	return value as T & WithName;
 }
+
+export function readValue(): { value: number } {
+	return { value: 1 };
+}
 ```
 
 ## Inferred types
@@ -27,28 +30,51 @@ Module TypeId(1) => instanceof T
 
 Module TypeId(2) => instanceof T
 
-Module TypeId(3) => instanceof local type 5
+Module TypeId(3) => instanceof local type 7
 
-Module TypeId(4) => instanceof T & instanceof local type 5
+Module TypeId(4) => instanceof T & instanceof local type 7
 
-Module TypeId(5) => Object {
+Module TypeId(5) => number: 1
+
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: ["value": number: 1]
+}
+
+Module TypeId(7) => Object {
   prototype: No prototype
   members: ["name": string]
 }
 
-Module TypeId(6) => T
+Module TypeId(8) => T
 
-Module TypeId(7) => instanceof local type 5
+Module TypeId(9) => instanceof local type 7
 
-Module TypeId(8) => instanceof T & instanceof local type 5
+Module TypeId(10) => instanceof T & instanceof local type 7
 
-Module TypeId(9) => sync Function "withName" {
+Module TypeId(11) => sync Function "withName" {
   accepts: {
     params: [
       required value: instanceof T
     ]
     type_args: [T]
   }
-  returns: instanceof T & instanceof local type 5
+  returns: instanceof T & instanceof local type 7
+}
+
+Module TypeId(12) => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Module TypeId(13) => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 }
 ```

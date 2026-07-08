@@ -105,24 +105,37 @@ pub fn infer_module_types_bottom_up<'db>(
     infer_module_types(db, module)
 }
 
+#[salsa::interned]
+#[derive(Debug)]
+pub struct CallExpressionTypeInput<'db> {
+    pub module: ModuleInfo,
+    pub callee: InferredTypeData<'db>,
+    #[returns(ref)]
+    pub args: Box<[InferredTypeData<'db>]>,
+}
+
 #[salsa::tracked]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
-    callee: InferredTypeData<'db>,
-    args: Vec<InferredTypeData<'db>>,
+    input: CallExpressionTypeInput<'db>,
 ) -> InferredTypeData<'db> {
-    match callee {
+    let module = input.module(db);
+    let callee = input.callee(db);
+    let args = input.args(db);
+    let ty = match callee {
         InferredTypeData::Union(union) => collected_type_result(
             db,
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| infer_function_call_type(db, *callee, &args))
+                .filter_map(|callee| infer_function_call_type(db, *callee, args))
                 .collect(),
         )
         .unwrap_or(InferredTypeData::Unknown),
-        callee => infer_function_call_type(db, callee, &args).unwrap_or(InferredTypeData::Unknown),
-    }
+        callee => infer_function_call_type(db, callee, args).unwrap_or(InferredTypeData::Unknown),
+    };
+
+    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
 }
 
 fn infer_function_call_type<'db>(
@@ -274,12 +287,20 @@ enum TypeNormalizationItem<'db> {
     RebuildUnion(usize),
 }
 
+#[salsa::interned]
+#[derive(Debug)]
+pub struct NormalizeTypeInput<'db> {
+    pub module: ModuleInfo,
+    pub ty: InferredTypeData<'db>,
+}
+
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
-    module: ModuleInfo,
-    ty: InferredTypeData<'db>,
+    input: NormalizeTypeInput<'db>,
 ) -> InferredTypeData<'db> {
+    let module = input.module(db);
+    let ty = input.ty(db);
     let Some(inferred) = infer_module_types(db, module) else {
         return ty;
     };

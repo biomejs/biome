@@ -33,13 +33,14 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, InferredModuleTypes, JsExport, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
-    ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, infer_call_expression_type, infer_module_types,
-    is_class_referenced_by_importers, normalize_type, resolve_css_module, resolve_html_module,
-    resolve_js_module, transitive_importers_of, traverse_import_tree_for_classes,
-    traverse_import_tree_for_html_classes,
+    CallExpressionTypeInput, HtmlEmbeddedContent, ImportSymbol, InferredModuleTypes, JsExport,
+    JsImport, JsImportPath, JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport,
+    ModuleDb, ModuleDiagnostic, ModuleInfo, ModuleInfoKind, ModuleResolver, NormalizeTypeInput,
+    PathInfoCache, ResolvedPath, SymbolFromModuleInfo, find_js_exported_symbol,
+    infer_call_expression_type as infer_call_expression_type_query, infer_module_types,
+    is_class_referenced_by_importers, normalize_type as normalize_type_query, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -200,6 +201,26 @@ fn local_type_id_of_instance<'db>(
     };
 
     Some(local.type_id(db).index())
+}
+
+fn infer_call_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    callee: InferredTypeData<'db>,
+    args: Vec<InferredTypeData<'db>>,
+) -> InferredTypeData<'db> {
+    infer_call_expression_type_query(
+        db,
+        CallExpressionTypeInput::new(db, module, callee, args.into_boxed_slice()),
+    )
+}
+
+fn normalize_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    normalize_type_query(db, NormalizeTypeInput::new(db, module, ty))
 }
 
 fn interface_member_ty<'db>(
@@ -1866,8 +1887,12 @@ fn test_infer_call_expression_type_resolves_imported_default_function_return_typ
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
     let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
         .expect("readValue binding type must be inferred");
-    let call_ty =
-        infer_call_expression_type(&db, inferred.resolve_type(&db, read_value_ty), Vec::new());
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, read_value_ty),
+        Vec::new(),
+    );
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1889,8 +1914,12 @@ fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
     let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
         .expect("readValue binding type must be inferred");
-    let call_ty =
-        infer_call_expression_type(&db, inferred.resolve_type(&db, read_value_ty), Vec::new());
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, read_value_ty),
+        Vec::new(),
+    );
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1928,7 +1957,7 @@ fn test_infer_call_expression_type_resolves_callable_interface_return_type() {
             )
         })
         .expect("Reader interface type must be inferred");
-    let call_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1970,11 +1999,15 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_by_arity(
         })
         .expect("Reader interface type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
-    let one_arg_ty =
-        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
+    let one_arg_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        reader_ty,
+        Vec::from([InferredTypeData::Number]),
+    );
     assert!(is_inferred_number(&db, one_arg_ty));
     assert_inferred_type_snapshot(
         "test_infer_call_expression_type_selects_callable_interface_overload_by_arity",
@@ -2021,11 +2054,15 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_with_opti
         })
         .expect("Reader interface type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
-    let one_arg_ty =
-        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
+    let one_arg_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        reader_ty,
+        Vec::from([InferredTypeData::Number]),
+    );
     assert!(is_inferred_number(&db, one_arg_ty));
     assert_inferred_type_snapshot(
         "test_infer_call_expression_type_selects_callable_interface_overload_with_optional_parameter_by_arity",
@@ -2072,11 +2109,12 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_with_rest
         })
         .expect("Reader interface type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
     let many_arg_ty = infer_call_expression_type(
         &db,
+        index_module,
         reader_ty,
         Vec::from([InferredTypeData::Number, InferredTypeData::Number]),
     );
@@ -2120,7 +2158,7 @@ fn test_infer_call_expression_type_resolves_callable_object_return_type() {
             )
         })
         .expect("Reader object type must be inferred");
-    let call_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -2161,11 +2199,15 @@ fn test_infer_call_expression_type_selects_callable_object_overload_by_arity() {
         })
         .expect("Reader object type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
-    let one_arg_ty =
-        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
+    let one_arg_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        reader_ty,
+        Vec::from([InferredTypeData::Number]),
+    );
     assert!(is_inferred_number(&db, one_arg_ty));
     assert_inferred_type_snapshot(
         "test_infer_call_expression_type_selects_callable_object_overload_by_arity",
@@ -2210,6 +2252,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
 
     let promise_result_ty = infer_call_expression_type(
         &db,
+        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
@@ -2230,6 +2273,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
 
     let sync_result_ty = infer_call_expression_type(
         &db,
+        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_string_ty)]),
     );
@@ -2289,6 +2333,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
 
     let promise_result_ty = infer_call_expression_type(
         &db,
+        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
@@ -2309,6 +2354,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
 
     let sync_result_ty = infer_call_expression_type(
         &db,
+        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_string_ty)]),
     );
@@ -2345,6 +2391,7 @@ fn test_infer_call_expression_type_substitutes_direct_generic_return_type() {
         .expect("identity binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, identity_ty),
         Vec::from([InferredTypeData::Number]),
     );
@@ -2373,6 +2420,7 @@ fn test_infer_call_expression_type_deduplicates_substituted_union_return_type() 
         .expect("maybeString binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, maybe_string_ty),
         Vec::from([InferredTypeData::String]),
     );
@@ -2412,6 +2460,7 @@ fn test_infer_call_expression_type_substitutes_callback_generic_return_type() {
         .expect("readString binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, run_ty),
         Vec::from([inferred.resolve_type(&db, read_string_ty)]),
     );
@@ -2440,6 +2489,7 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
         .expect("wrap binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, wrap_ty),
         Vec::from([InferredTypeData::Number]),
     );
@@ -2482,6 +2532,7 @@ fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_retu
         .expect("boxed binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, boxed_ty),
         Vec::from([InferredTypeData::String]),
     );
@@ -2519,6 +2570,7 @@ fn test_infer_call_expression_type_substitutes_multiple_generics_inside_union_re
         .expect("pair binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, pair_ty),
         Vec::from([InferredTypeData::String, InferredTypeData::Number]),
     );
@@ -2557,6 +2609,7 @@ fn test_infer_call_expression_type_substitutes_generic_inside_union_with_promise
             .expect("maybePromise binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, maybe_promise_ty),
         Vec::from([InferredTypeData::String]),
     );
@@ -2593,6 +2646,10 @@ fn test_infer_call_expression_type_substitutes_generic_inside_intersection_retur
             export function withName<T>(value: T): T & WithName {
                 return value as T & WithName;
             }
+
+            export function readValue(): { value: number } {
+                return { value: 1 };
+            }
         "#,
     );
 
@@ -2603,32 +2660,29 @@ fn test_infer_call_expression_type_substitutes_generic_inside_intersection_retur
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
     let with_name_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "withName")
         .expect("withName binding type must be inferred");
+    let read_value_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readValue")
+            .expect("readValue return type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, with_name_ty),
-        Vec::from([InferredTypeData::String]),
+        Vec::from([read_value_ty]),
     );
-    let InferredTypeData::Intersection(intersection) = call_ty else {
-        panic!("withName must return an intersection, got {call_ty:?}");
+    let InferredTypeData::Object(object) = call_ty else {
+        panic!("withName call must return a normalized object, got {call_ty:?}");
     };
-
-    assert!(
-        intersection
-            .types(&db)
-            .iter()
-            .any(|ty| is_inferred_string(&db, *ty))
-    );
-    assert!(
-        intersection
-            .types(&db)
-            .iter()
-            .all(|ty| !matches!(ty, InferredTypeData::Generic(_)))
-    );
+    assert_eq!(object.members(&db).len(), 2);
 
     let name_ty = inferred
         .find_member_type(&db, call_ty, "name")
-        .expect("substituted intersection must expose WithName.name");
+        .expect("normalized call return must expose WithName.name");
     assert!(is_inferred_string(&db, name_ty));
+
+    let value_ty = inferred
+        .find_member_type(&db, call_ty, "value")
+        .expect("normalized call return must expose readValue.value");
+    assert!(is_inferred_number(&db, value_ty));
     assert_inferred_type_snapshot(
         "test_infer_call_expression_type_substitutes_generic_inside_intersection_return_type",
         &db,
@@ -2663,6 +2717,7 @@ fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_ret
         .expect("readNumber binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
+        index_module,
         inferred.resolve_type(&db, unwrap_ty),
         Vec::from([inferred.resolve_type(&db, read_number_ty)]),
     );
@@ -2708,7 +2763,7 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
         ])
         .into_boxed_slice(),
     ));
-    let call_ty = infer_call_expression_type(&db, callee_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, index_module, callee_ty, Vec::new());
     let InferredTypeData::Union(union) = call_ty else {
         panic!("union function call must return a union, got {call_ty:?} from {callee_ty:?}");
     };
