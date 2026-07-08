@@ -567,8 +567,44 @@ impl<'db> ResolutionCtx<'db, '_> {
             return self.resolve_resolved_id(resolved_id);
         }
 
+        if qualifier.is_array() {
+            return InferredTypeData::array_instance(
+                self.db,
+                qualifier
+                    .type_parameters
+                    .iter()
+                    .map(|parameter| self.resolve(parameter))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            );
+        }
+
+        if qualifier.is_map() {
+            return InferredTypeData::map_instance(
+                self.db,
+                qualifier
+                    .type_parameters
+                    .iter()
+                    .map(|parameter| self.resolve(parameter))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            );
+        }
+
         if qualifier.is_promise() {
             return InferredTypeData::promise_instance(
+                self.db,
+                qualifier
+                    .type_parameters
+                    .iter()
+                    .map(|parameter| self.resolve(parameter))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            );
+        }
+
+        if qualifier.is_set() {
+            return InferredTypeData::set_instance(
                 self.db,
                 qualifier
                     .type_parameters

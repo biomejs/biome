@@ -1,0 +1,41 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 360
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Tree = number | Tree[];
+
+export function readTree(value: Tree): Tree {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof local type 4
+
+Module TypeId(1) => instanceof local type 4
+
+Module TypeId(2) => instanceof local type 4
+
+Module TypeId(3) => instanceof Array<instanceof local type 4>
+
+Module TypeId(4) => number | instanceof Array<instanceof local type 4>
+
+Module TypeId(5) => sync Function "readTree" {
+  accepts: {
+    params: [
+      required value: instanceof local type 4
+    ]
+    type_args: []
+  }
+  returns: instanceof local type 4
+}
+```

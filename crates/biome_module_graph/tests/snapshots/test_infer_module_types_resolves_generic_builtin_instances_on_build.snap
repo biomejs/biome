@@ -1,0 +1,51 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 360
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readMap(value: Map<string, number>): Map<string, number> {
+	return value;
+}
+
+export function readSet(value: Set<string>): Set<string> {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof Map<string, number>
+
+Module TypeId(1) => instanceof Map<string, number>
+
+Module TypeId(2) => instanceof Set<string>
+
+Module TypeId(3) => instanceof Set<string>
+
+Module TypeId(4) => sync Function "readMap" {
+  accepts: {
+    params: [
+      required value: instanceof Map<string, number>
+    ]
+    type_args: []
+  }
+  returns: instanceof Map<string, number>
+}
+
+Module TypeId(5) => sync Function "readSet" {
+  accepts: {
+    params: [
+      required value: instanceof Set<string>
+    ]
+    type_args: []
+  }
+  returns: instanceof Set<string>
+}
+```

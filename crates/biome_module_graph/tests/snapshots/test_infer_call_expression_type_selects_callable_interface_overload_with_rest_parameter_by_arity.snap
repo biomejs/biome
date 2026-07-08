@@ -1,5 +1,6 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests.rs
+assertion_line: 360
 expression: content
 ---
 
@@ -17,7 +18,7 @@ export interface Reader {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof unknown
+Module TypeId(0) => instanceof Array<number>
 
 Module TypeId(1) => sync Function {
   accepts: {
@@ -27,12 +28,12 @@ Module TypeId(1) => sync Function {
   returns: string
 }
 
-Module TypeId(2) => instanceof unknown
+Module TypeId(2) => instanceof Array<number>
 
 Module TypeId(3) => sync Function {
   accepts: {
     params: [
-      required ...values: instanceof unknown
+      required ...values: instanceof Array<number>
     ]
     type_args: []
   }
@@ -56,7 +57,7 @@ Module TypeId(4) => interface "Reader" {
       sync Function {
         accepts: {
           params: [
-            required ...values: instanceof unknown
+            required ...values: instanceof Array<number>
           ]
           type_args: []
         }

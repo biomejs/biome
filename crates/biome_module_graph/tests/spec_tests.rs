@@ -1727,6 +1727,139 @@ fn test_normalize_type_preserves_recursive_local_edge() {
 }
 
 #[test]
+fn test_normalize_type_preserves_recursive_array_local_edge() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Tree = number | Tree[];
+
+            export function readTree(value: Tree): Tree {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let tree_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readTree")
+        .expect("readTree return type must be inferred");
+    let tree_index = local_type_id_of_instance(&db, tree_ty)
+        .expect("readTree must return an instance of the local Tree type");
+    let normalized_ty = normalize_type(&db, index_module, tree_ty);
+
+    let InferredTypeData::Union(union) = normalized_ty else {
+        panic!("recursive Tree type must normalize to a union, got {normalized_ty:?}");
+    };
+    let normalized_tree = format_inferred_type(&db, normalized_ty);
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty)),
+        "recursive Tree union must keep its number branch"
+    );
+    assert!(
+        union.types(&db).iter().any(|ty| {
+            matches!(
+                ty,
+                InferredTypeData::InstanceOf(instance)
+                    if matches!(
+                        instance.ty(&db),
+                        InferredTypeData::Class(class)
+                            if class
+                                .name(&db)
+                                .as_ref()
+                                .is_some_and(|name| name.text() == "Array")
+                    )
+                    && instance.type_parameters(&db).iter().any(|parameter| {
+                        matches!(
+                            parameter,
+                            InferredTypeData::Local(local)
+                                if local.type_id(&db).index() == tree_index
+                        )
+                        || local_type_id_of_instance(&db, *parameter) == Some(tree_index)
+                    })
+            )
+        }),
+        "recursive Tree union must keep the recursive Array local edge: {normalized_tree}"
+    );
+
+    assert_inferred_type_snapshot(
+        "test_normalize_type_preserves_recursive_array_local_edge",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readMap(value: Map<string, number>): Map<string, number> {
+                return value;
+            }
+
+            export function readSet(value: Set<string>): Set<string> {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let map_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readMap")
+        .expect("readMap return type must be inferred");
+    let InferredTypeData::InstanceOf(map_instance) = map_ty else {
+        panic!("readMap must return a Map instance, got {map_ty:?}");
+    };
+    let InferredTypeData::Class(map_class) = map_instance.ty(&db) else {
+        panic!("readMap must return a class instance");
+    };
+    assert_eq!(map_class.name(&db).as_ref().map(Text::text), Some("Map"));
+    assert_eq!(map_instance.type_parameters(&db).len(), 2);
+    assert!(is_inferred_string(
+        &db,
+        map_instance.type_parameters(&db)[0]
+    ));
+    assert!(is_inferred_number(
+        &db,
+        map_instance.type_parameters(&db)[1]
+    ));
+
+    let set_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readSet")
+        .expect("readSet return type must be inferred");
+    let InferredTypeData::InstanceOf(set_instance) = set_ty else {
+        panic!("readSet must return a Set instance, got {set_ty:?}");
+    };
+    let InferredTypeData::Class(set_class) = set_instance.ty(&db) else {
+        panic!("readSet must return a class instance");
+    };
+    assert_eq!(set_class.name(&db).as_ref().map(Text::text), Some("Set"));
+    assert_eq!(set_instance.type_parameters(&db).len(), 1);
+    assert!(is_inferred_string(
+        &db,
+        set_instance.type_parameters(&db)[0]
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_generic_builtin_instances_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_resolves_anonymous_default_class_export() {
     let fs = MemoryFileSystem::default();
     fs.insert(

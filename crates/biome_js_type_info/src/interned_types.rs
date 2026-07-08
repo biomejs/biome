@@ -11,9 +11,9 @@ use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
-        GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_NUMBER_ID,
-        GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
-        GLOBAL_VOID_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
+        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID,
+        GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -462,15 +462,31 @@ impl<'db> TypeData<'db> {
         IntersectionBuilder::new(db).add_all(types).build()
     }
 
-    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
+    fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
         Self::Class(InternedClass::new(
             db,
             Box::default(),
             None,
             Box::default(),
             Box::default(),
-            Some(Text::new_static("Promise")),
+            Some(Text::new_static(name)),
         ))
+    }
+
+    pub fn array_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Array")
+    }
+
+    pub fn map_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Map")
+    }
+
+    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Promise")
+    }
+
+    pub fn set_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Set")
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
@@ -483,8 +499,20 @@ impl<'db> TypeData<'db> {
         Self::InstanceOf(InternedTypeInstance::new(db, ty, type_parameters))
     }
 
+    pub fn array_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
+        Self::instance_of(db, Self::array_class(db), type_parameters)
+    }
+
+    pub fn map_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
+        Self::instance_of(db, Self::map_class(db), type_parameters)
+    }
+
     pub fn promise_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
         Self::instance_of(db, Self::promise_class(db), type_parameters)
+    }
+
+    pub fn set_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
+        Self::instance_of(db, Self::set_class(db), type_parameters)
     }
 
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
@@ -649,7 +677,10 @@ impl<'db> TypeData<'db> {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_STRING_ID => Self::String,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_GLOBAL_ID => Self::Global,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_BOOLEAN_ID => Self::Boolean,
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_ARRAY_ID => Self::array_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_MAP_ID => Self::map_class(db),
             raw::TypeReference::Resolved(id) if *id == GLOBAL_PROMISE_ID => Self::promise_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_SET_ID => Self::set_class(db),
             raw::TypeReference::Resolved(_) => Self::Unknown,
             raw::TypeReference::Qualifier(qualifier) => qualifier
                 .type_parameters
