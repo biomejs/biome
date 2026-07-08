@@ -130,7 +130,9 @@ fn is_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> 
 }
 
 fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
-    ty == InferredTypeData::Number || is_inferred_instance_of(db, ty, InferredTypeData::Number)
+    ty == InferredTypeData::Number
+        || is_inferred_instance_of(db, ty, InferredTypeData::Number)
+        || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Number(_)))
 }
 
 fn local_type_id_of_instance<'db>(
@@ -1331,6 +1333,51 @@ fn test_infer_module_types_resolves_computed_string_literal_members() {
     assert!(is_inferred_string(&db, name_ty));
 
     assert!(inferred.find_member_type(&db, object_ty, "other").is_none());
+}
+
+#[test]
+fn test_infer_module_types_resolves_merged_reference_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Foo {
+                typeName: string;
+            }
+
+            const Foo = {
+                valueName: 1,
+            };
+
+            export { Foo };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let ModuleInfoKind::Js(js_info) = index_module.kind(&db) else {
+        panic!("module must be JavaScript");
+    };
+    let foo_ty = match js_info.exports.get("Foo").and_then(JsExport::as_own_export) {
+        Some(JsOwnExport::Type(resolved_id)) => inferred
+            .types
+            .get(resolved_id.index())
+            .copied()
+            .expect("Foo export type must be inferred"),
+        _ => panic!("Foo export must have a type"),
+    };
+    let type_name_ty = inferred
+        .find_member_type(&db, foo_ty, "typeName")
+        .expect("merged type side must expose Foo.typeName");
+    assert!(is_inferred_string(&db, type_name_ty));
+
+    let value_name_ty = inferred
+        .find_member_type(&db, foo_ty, "valueName")
+        .expect("merged value side must expose Foo.valueName");
+    assert!(is_inferred_number(&db, value_name_ty));
 }
 
 #[test]

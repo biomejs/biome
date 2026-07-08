@@ -113,9 +113,10 @@ impl<'db> InferredModuleTypes<'db> {
         while let Some((ty, lookup, collect)) = pending.pop() {
             let ty = self.resolve_type_recursive(db, ty);
             let (ty, lookup) = match ty {
-                InferredTypeData::InstanceOf(instance) => {
-                    (self.resolve_type_recursive(db, instance.ty(db)), MemberLookup::Instance)
-                }
+                InferredTypeData::InstanceOf(instance) => (
+                    self.resolve_type_recursive(db, instance.ty(db)),
+                    MemberLookup::Instance,
+                ),
                 ty => (ty, lookup),
             };
 
@@ -209,7 +210,9 @@ impl<'db> InferredModuleTypes<'db> {
                 find_member_type(db, interface.members(db), name, lookup, true)
             }
             InferredTypeData::Literal(literal) => match literal.literal(db) {
-                InferredLiteral::Object(members) => find_member_type(db, members, name, lookup, true),
+                InferredLiteral::Object(members) => {
+                    find_member_type(db, members, name, lookup, true)
+                }
                 _ => None,
             },
             InferredTypeData::Module(module) => {

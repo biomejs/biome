@@ -79,6 +79,7 @@ pub(super) struct JsModuleInfoCollector {
 }
 
 /// Intermediary representation for an exported symbol.
+#[derive(Clone)]
 pub(super) enum JsCollectedExport {
     ExportNamedSymbol {
         /// Name under which the symbol will be exported.
@@ -368,15 +369,14 @@ impl JsModuleInfoCollector {
         );
     }
 
-    fn finalise(
-        &mut self,
-        semantic_model: &SemanticModel,
-    ) -> FinalisedModuleTypes {
+    fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
         if self.infer_types {
             self.infer_all_types(semantic_model);
         }
 
         self.populate_namespace_and_module_members();
+
+        self.register_export_types();
 
         let raw_types = self.raw_types();
         let raw_expressions = self.raw_expressions();
@@ -405,11 +405,7 @@ impl JsModuleInfoCollector {
     }
 
     fn raw_types(&self) -> Vec<RawTypeData> {
-        self.types
-            .as_references()
-            .into_iter()
-            .cloned()
-            .collect()
+        self.types.as_references().into_iter().cloned().collect()
     }
 
     fn raw_expressions(&self) -> FxHashMap<TextRange, TypeReference> {
@@ -814,10 +810,21 @@ impl JsModuleInfoCollector {
         }
     }
 
+    fn register_export_types(&mut self) {
+        let _ = self.collect_exports_from(self.exports.clone());
+    }
+
     fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+        let exports = std::mem::take(&mut self.exports);
+        self.collect_exports_from(exports)
+    }
+
+    fn collect_exports_from(
+        &mut self,
+        exports: Vec<JsCollectedExport>,
+    ) -> IndexMap<Text, JsExport> {
         let mut finalised_exports = IndexMap::new();
 
-        let exports = std::mem::take(&mut self.exports);
         for export in exports {
             match export {
                 JsCollectedExport::ExportNamedSymbol {

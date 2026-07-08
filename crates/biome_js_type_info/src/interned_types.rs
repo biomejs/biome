@@ -123,9 +123,8 @@ impl<'db> TypeData<'db> {
     }
 
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
-        let mut resolve_reference = |reference: &raw::TypeReference| {
-            Self::from_raw_reference_lossy(reference)
-        };
+        let mut resolve_reference =
+            |reference: &raw::TypeReference| Self::from_raw_reference_lossy(reference);
         Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
     }
 
@@ -250,10 +249,7 @@ impl<'db> TypeData<'db> {
                     db,
                     reference.ty.as_ref().map(&mut *resolve_reference),
                     reference.value_ty.as_ref().map(&mut *resolve_reference),
-                    reference
-                        .namespace_ty
-                        .as_ref()
-                        .map(&mut *resolve_reference),
+                    reference.namespace_ty.as_ref().map(&mut *resolve_reference),
                 ))
             }
             raw::TypeData::TypeofExpression(expression) => {
@@ -888,10 +884,7 @@ fn convert_references<'db>(
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[TypeData<'db>]> {
     let _ = db;
-    references
-        .iter()
-        .map(resolve_reference)
-        .collect()
+    references.iter().map(resolve_reference).collect()
 }
 
 fn convert_type_members<'db>(

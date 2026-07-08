@@ -8,7 +8,9 @@ use biome_js_syntax::{
     JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
-use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types};
+use biome_module_graph::{
+    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types,
+};
 use biome_rowan::{AstNode, TextRange};
 use std::rc::Rc;
 use std::sync::Arc;

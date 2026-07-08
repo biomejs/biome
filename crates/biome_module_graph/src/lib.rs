@@ -15,8 +15,8 @@ pub use css_module_info::{
     CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssTraversalStep,
     ImportTreeDisplay, ImportTreeNode,
 };
-pub use db::{ModuleDb, TypeDb};
 pub use db::queries::*;
+pub use db::{ModuleDb, TypeDb};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
 pub use js_module_info::{
