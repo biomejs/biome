@@ -19,8 +19,8 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
-        InternedFunction as InferredFunction, InternedTypeInstance as InferredTypeInstance,
-        ReturnType, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -59,7 +59,6 @@ pub fn infer_module_types<'db>(
 #[salsa::tracked]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
-    _module: ModuleInfo,
     callee: InferredTypeData<'db>,
     args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
@@ -197,8 +196,14 @@ fn infer_generic_return_type<'db>(
 ) -> InferredTypeData<'db> {
     for (parameter, arg) in function.parameters(db).iter().zip(args) {
         let parameter_ty = parameter.ty();
-        if is_generic_reference(db, parameter_ty) {
-            return_ty = substitute_type(db, return_ty, parameter_ty, *arg);
+        if parameter_ty.is_generic_reference(db) {
+            return_ty = return_ty.substitute_type(
+                db,
+                InferredTypeSubstitution {
+                    generic: parameter_ty,
+                    replacement: *arg,
+                },
+            );
             continue;
         }
 
@@ -208,9 +213,6 @@ fn infer_generic_return_type<'db>(
         let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
             continue;
         };
-        if !is_generic_reference(db, *parameter_return_ty) {
-            continue;
-        }
         let Some(argument_function) = infer_callable_function(db, *arg) else {
             continue;
         };
@@ -218,56 +220,14 @@ fn infer_generic_return_type<'db>(
             continue;
         };
 
-        return_ty = substitute_type(db, return_ty, *parameter_return_ty, *argument_return_ty);
+        for substitution in
+            parameter_return_ty.collect_generic_replacements(db, *argument_return_ty)
+        {
+            return_ty = return_ty.substitute_type(db, substitution);
+        }
     }
 
     return_ty
-}
-
-fn is_generic_reference<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
-    match ty {
-        InferredTypeData::Generic(_) => true,
-        InferredTypeData::InstanceOf(instance) => {
-            matches!(instance.ty(db), InferredTypeData::Generic(_))
-        }
-        _ => false,
-    }
-}
-
-fn substitute_type<'db>(
-    db: &'db dyn ModuleDb,
-    target: InferredTypeData<'db>,
-    generic: InferredTypeData<'db>,
-    replacement: InferredTypeData<'db>,
-) -> InferredTypeData<'db> {
-    if target == generic {
-        return replacement;
-    }
-
-    match target {
-        InferredTypeData::InstanceOf(instance) => {
-            InferredTypeData::InstanceOf(InferredTypeInstance::new(
-                db,
-                substitute_type(db, instance.ty(db), generic, replacement),
-                instance
-                    .type_parameters(db)
-                    .iter()
-                    .map(|ty| substitute_type(db, *ty, generic, replacement))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            ))
-        }
-        InferredTypeData::Union(union) => collected_type_result(
-            db,
-            union
-                .types(db)
-                .iter()
-                .map(|ty| substitute_type(db, *ty, generic, replacement))
-                .collect(),
-        )
-        .unwrap_or(InferredTypeData::Unknown),
-        ty => ty,
-    }
 }
 
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]

@@ -5,6 +5,7 @@
 //! later phases will wire into module inference.
 
 use biome_rowan::Text;
+use rustc_hash::FxHashSet;
 
 use crate::{
     ScopeId,
@@ -20,6 +21,104 @@ use crate::{
 pub type RawTypeData = raw::TypeData;
 pub type ReferenceResolver<'db, 'resolver> =
     dyn FnMut(&raw::TypeReference) -> TypeData<'db> + 'resolver;
+const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
+const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeSubstitution<'db> {
+    pub generic: TypeData<'db>,
+    pub replacement: TypeData<'db>,
+}
+
+/// Item produced while rebuilding a type after generic substitution.
+///
+/// The iterator emits plain type values first, then a rebuild item once the
+/// values needed by that wrapper have already been emitted.
+#[derive(Clone, Copy, Debug)]
+enum TypeSubstitutionItem<'db> {
+    /// A type that can be pushed directly into the rebuilt result.
+    Type(TypeData<'db>),
+
+    /// Rebuilds an instance type.
+    ///
+    /// The result stack contains the instance target type followed by this many
+    /// type parameters.
+    RebuildInstance(usize),
+
+    /// Rebuilds a union type from this many already-emitted variants.
+    RebuildUnion(usize),
+}
+
+/// Iterates over a type without recursion and applies one generic substitution.
+///
+/// This yields enough information for the caller to rebuild the type: plain
+/// types are yielded as-is, and wrapper types yield a rebuild item after their
+/// children have been yielded.
+struct TypeSubstitutionIter<'db> {
+    db: &'db dyn TypeDb,
+    stack: Vec<TypeSubstitutionItem<'db>>,
+    substitution: TypeSubstitution<'db>,
+    remaining_steps: usize,
+    exceeded_step_limit: bool,
+}
+
+impl<'db> TypeSubstitutionIter<'db> {
+    fn new(db: &'db dyn TypeDb, ty: TypeData<'db>, substitution: TypeSubstitution<'db>) -> Self {
+        Self {
+            db,
+            stack: Vec::from([TypeSubstitutionItem::Type(ty)]),
+            substitution,
+            remaining_steps: MAX_TYPE_SUBSTITUTION_STEPS,
+            exceeded_step_limit: false,
+        }
+    }
+}
+
+impl<'db> Iterator for TypeSubstitutionIter<'db> {
+    type Item = TypeSubstitutionItem<'db>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(item) = self.stack.pop() {
+            let TypeSubstitutionItem::Type(ty) = item else {
+                return Some(item);
+            };
+
+            if self.remaining_steps == 0 {
+                self.exceeded_step_limit = true;
+                return None;
+            }
+            self.remaining_steps -= 1;
+
+            if ty == self.substitution.generic {
+                return Some(TypeSubstitutionItem::Type(self.substitution.replacement));
+            }
+
+            match ty {
+                TypeData::InstanceOf(instance) => {
+                    self.stack.push(TypeSubstitutionItem::RebuildInstance(
+                        instance.type_parameters(self.db).len(),
+                    ));
+                    for parameter in instance.type_parameters(self.db).iter().rev() {
+                        self.stack.push(TypeSubstitutionItem::Type(*parameter));
+                    }
+                    self.stack
+                        .push(TypeSubstitutionItem::Type(instance.ty(self.db)));
+                }
+                TypeData::Union(union) => {
+                    self.stack.push(TypeSubstitutionItem::RebuildUnion(
+                        union.types(self.db).len(),
+                    ));
+                    for ty in union.types(self.db).iter().rev() {
+                        self.stack.push(TypeSubstitutionItem::Type(*ty));
+                    }
+                }
+                ty => return Some(TypeSubstitutionItem::Type(ty)),
+            }
+        }
+
+        None
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
 pub struct ModuleKey {
@@ -137,6 +236,116 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    pub fn is_generic_reference(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::Generic(_) => true,
+            Self::InstanceOf(instance) => matches!(instance.ty(db), Self::Generic(_)),
+            _ => false,
+        }
+    }
+
+    /// Compares this type pattern with an actual argument type and returns the
+    /// generic replacements needed to make the pattern match the actual type.
+    ///
+    /// For example, comparing the pattern `Promise<T>` with the actual type
+    /// `Promise<string>` returns a replacement where `generic` is `T` and
+    /// `replacement` is `string`.
+    ///
+    /// The walk is iterative and stops after a fixed number of steps so a bad
+    /// or cyclic type shape cannot loop forever.
+    pub fn collect_generic_replacements(
+        self,
+        db: &'db dyn TypeDb,
+        actual: Self,
+    ) -> Vec<TypeSubstitution<'db>> {
+        let mut replacements = Vec::new();
+        let mut stack = Vec::from([(self, actual)]);
+        let mut seen = FxHashSet::default();
+        let mut remaining_steps = MAX_GENERIC_REPLACEMENT_STEPS;
+
+        while let Some((pattern, actual)) = stack.pop() {
+            if !seen.insert((pattern, actual)) {
+                continue;
+            }
+            if remaining_steps == 0 {
+                break;
+            }
+            remaining_steps -= 1;
+
+            if pattern.is_generic_reference(db) {
+                replacements.push(TypeSubstitution {
+                    generic: pattern,
+                    replacement: actual,
+                });
+                continue;
+            }
+
+            let (Self::InstanceOf(pattern), Self::InstanceOf(actual)) = (pattern, actual) else {
+                continue;
+            };
+
+            for (pattern, actual) in pattern
+                .type_parameters(db)
+                .iter()
+                .zip(actual.type_parameters(db))
+                .rev()
+            {
+                stack.push((*pattern, *actual));
+            }
+            stack.push((pattern.ty(db), actual.ty(db)));
+        }
+
+        replacements
+    }
+
+    pub fn substitute_type(self, db: &'db dyn TypeDb, substitution: TypeSubstitution<'db>) -> Self {
+        let mut results = Vec::new();
+        let mut items = TypeSubstitutionIter::new(db, self, substitution);
+
+        while let Some(item) = items.next() {
+            match item {
+                TypeSubstitutionItem::Type(ty) => results.push(ty),
+                TypeSubstitutionItem::RebuildInstance(type_parameter_count) => {
+                    let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
+                        return self;
+                    };
+                    let mut parts = results.split_off(start);
+                    let ty = parts.remove(0);
+                    results.push(Self::instance_of(db, ty, parts.into_boxed_slice()));
+                }
+                TypeSubstitutionItem::RebuildUnion(type_count) => {
+                    let Some(start) = results.len().checked_sub(type_count) else {
+                        return self;
+                    };
+                    let types = results.split_off(start);
+                    results.push(Self::union_from_types(db, types));
+                }
+            }
+        }
+
+        if items.exceeded_step_limit {
+            return self;
+        }
+
+        results.pop().unwrap_or(self)
+    }
+
+    /// Builds the smallest type that represents a list of union variants.
+    ///
+    /// Duplicate variants are removed. An empty list becomes `unknown`, and a
+    /// single remaining variant is returned directly instead of wrapping it in
+    /// a union.
+    pub fn union_from_types(db: &'db dyn TypeDb, mut types: Vec<Self>) -> Self {
+        let mut seen = FxHashSet::default();
+        types.retain(|ty| seen.insert(*ty));
+
+        match types.len() {
+            0 => Self::Unknown,
+            1 => types.pop().unwrap_or(Self::Unknown),
+            _ => Self::Union(InternedUnion::new(db, types.into_boxed_slice())),
+        }
+    }
+
     pub fn promise_class(db: &'db dyn TypeDb) -> Self {
         Self::Class(InternedClass::new(
             db,
@@ -146,6 +355,20 @@ impl<'db> TypeData<'db> {
             Box::default(),
             Some(Text::new_static("Promise")),
         ))
+    }
+
+    pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
+        if type_parameters.is_empty()
+            && let Self::InstanceOf(instance) = ty
+        {
+            return Self::InstanceOf(instance);
+        }
+
+        Self::InstanceOf(InternedTypeInstance::new(db, ty, type_parameters))
+    }
+
+    pub fn promise_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
+        Self::instance_of(db, Self::promise_class(db), type_parameters)
     }
 
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
@@ -264,11 +487,11 @@ impl<'db> TypeData<'db> {
                 db,
                 convert_literal(db, literal.as_ref(), resolve_reference),
             )),
-            raw::TypeData::InstanceOf(instance) => Self::InstanceOf(InternedTypeInstance::new(
+            raw::TypeData::InstanceOf(instance) => Self::instance_of(
                 db,
                 resolve_reference(&instance.ty),
                 convert_references(db, &instance.type_parameters, resolve_reference),
-            )),
+            ),
             raw::TypeData::Reference(reference) => resolve_reference(reference),
             raw::TypeData::MergedReference(reference) => {
                 Self::MergedReference(InternedMergedReference::new(

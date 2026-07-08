@@ -137,6 +137,46 @@ fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> 
         || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Number(_)))
 }
 
+fn contains_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if is_inferred_string(db, ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_string(db, *ty)),
+        _ => false,
+    }
+}
+
+fn contains_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if is_inferred_number(db, ty) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_number(db, *ty)),
+        _ => false,
+    }
+}
+
+fn is_inferred_promise_with_type_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    predicate: impl Fn(InferredTypeData<'db>) -> bool,
+) -> bool {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return false;
+    };
+
+    ty.is_promise_instance(db) && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
+}
+
 fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
     let InferredTypeData::Function(function) = ty else {
         panic!("type must be inferred as a function");
@@ -1603,12 +1643,8 @@ fn test_infer_call_expression_type_resolves_imported_default_function_return_typ
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
     let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
         .expect("readValue binding type must be inferred");
-    let call_ty = infer_call_expression_type(
-        &db,
-        index_module,
-        inferred.resolve_type(&db, read_value_ty),
-        Vec::new(),
-    );
+    let call_ty =
+        infer_call_expression_type(&db, inferred.resolve_type(&db, read_value_ty), Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1630,12 +1666,8 @@ fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
     let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
     let read_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readValue")
         .expect("readValue binding type must be inferred");
-    let call_ty = infer_call_expression_type(
-        &db,
-        index_module,
-        inferred.resolve_type(&db, read_value_ty),
-        Vec::new(),
-    );
+    let call_ty =
+        infer_call_expression_type(&db, inferred.resolve_type(&db, read_value_ty), Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1673,7 +1705,7 @@ fn test_infer_call_expression_type_resolves_callable_interface_return_type() {
             )
         })
         .expect("Reader interface type must be inferred");
-    let call_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1715,16 +1747,107 @@ fn test_infer_call_expression_type_selects_callable_interface_overload_by_arity(
         })
         .expect("Reader interface type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
-    let one_arg_ty = infer_call_expression_type(
-        &db,
-        index_module,
-        reader_ty,
-        Vec::from([InferredTypeData::Number]),
-    );
+    let one_arg_ty =
+        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
     assert!(is_inferred_number(&db, one_arg_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_selects_callable_interface_overload_with_optional_parameter_by_arity()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export interface Reader {
+                (): string;
+                (value?: number): number;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let reader_ty = inferred
+        .types
+        .iter()
+        .copied()
+        .find(|ty| {
+            matches!(
+                ty,
+                InferredTypeData::Interface(interface)
+                    if interface.name(&db).text() == "Reader"
+                        && interface
+                            .members(&db)
+                            .iter()
+                            .filter(|member| member.kind.is_call_signature())
+                            .count()
+                            == 2
+            )
+        })
+        .expect("Reader interface type must be inferred");
+
+    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    assert!(is_inferred_string(&db, zero_arg_ty));
+
+    let one_arg_ty =
+        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
+    assert!(is_inferred_number(&db, one_arg_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_selects_callable_interface_overload_with_rest_parameter_by_arity()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export interface Reader {
+                (): string;
+                (...values: number[]): number;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let reader_ty = inferred
+        .types
+        .iter()
+        .copied()
+        .find(|ty| {
+            matches!(
+                ty,
+                InferredTypeData::Interface(interface)
+                    if interface.name(&db).text() == "Reader"
+                        && interface
+                            .members(&db)
+                            .iter()
+                            .filter(|member| member.kind.is_call_signature())
+                            .count()
+                            == 2
+            )
+        })
+        .expect("Reader interface type must be inferred");
+
+    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
+    assert!(is_inferred_string(&db, zero_arg_ty));
+
+    let many_arg_ty = infer_call_expression_type(
+        &db,
+        reader_ty,
+        Vec::from([InferredTypeData::Number, InferredTypeData::Number]),
+    );
+    assert!(is_inferred_number(&db, many_arg_ty));
 }
 
 #[test]
@@ -1759,7 +1882,7 @@ fn test_infer_call_expression_type_resolves_callable_object_return_type() {
             )
         })
         .expect("Reader object type must be inferred");
-    let call_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
 
     assert!(is_inferred_string(&db, call_ty));
 }
@@ -1800,15 +1923,11 @@ fn test_infer_call_expression_type_selects_callable_object_overload_by_arity() {
         })
         .expect("Reader object type must be inferred");
 
-    let zero_arg_ty = infer_call_expression_type(&db, index_module, reader_ty, Vec::new());
+    let zero_arg_ty = infer_call_expression_type(&db, reader_ty, Vec::new());
     assert!(is_inferred_string(&db, zero_arg_ty));
 
-    let one_arg_ty = infer_call_expression_type(
-        &db,
-        index_module,
-        reader_ty,
-        Vec::from([InferredTypeData::Number]),
-    );
+    let one_arg_ty =
+        infer_call_expression_type(&db, reader_ty, Vec::from([InferredTypeData::Number]));
     assert!(is_inferred_number(&db, one_arg_ty));
 }
 
@@ -1848,7 +1967,6 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
 
     let promise_result_ty = infer_call_expression_type(
         &db,
-        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
@@ -1856,10 +1974,19 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
         promise_result_ty.is_promise_instance(&db),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
+    let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
+        panic!("promise callback overload must return a Promise instance");
+    };
+    assert!(
+        instance
+            .type_parameters(&db)
+            .iter()
+            .any(|ty| contains_inferred_string(&db, *ty)),
+        "promise callback overload must substitute the callback return type"
+    );
 
     let sync_result_ty = infer_call_expression_type(
         &db,
-        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_string_ty)]),
     );
@@ -1914,7 +2041,6 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
 
     let promise_result_ty = infer_call_expression_type(
         &db,
-        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
@@ -1922,10 +2048,19 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
         promise_result_ty.is_promise_instance(&db),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
+    let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
+        panic!("promise callback overload must return a Promise instance");
+    };
+    assert!(
+        instance
+            .type_parameters(&db)
+            .iter()
+            .any(|ty| contains_inferred_string(&db, *ty)),
+        "promise callback overload must substitute the callback return type"
+    );
 
     let sync_result_ty = infer_call_expression_type(
         &db,
-        index_module,
         best_effort_ty,
         Vec::from([inferred.resolve_type(&db, read_string_ty)]),
     );
@@ -1957,9 +2092,245 @@ fn test_infer_call_expression_type_substitutes_direct_generic_return_type() {
         .expect("identity binding type must be inferred");
     let call_ty = infer_call_expression_type(
         &db,
-        index_module,
         inferred.resolve_type(&db, identity_ty),
         Vec::from([InferredTypeData::Number]),
+    );
+
+    assert!(is_inferred_number(&db, call_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_deduplicates_substituted_union_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function maybeString<T>(value: T): T | string {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let maybe_string_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "maybeString")
+        .expect("maybeString binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, maybe_string_ty),
+        Vec::from([InferredTypeData::String]),
+    );
+
+    assert!(is_inferred_string(&db, call_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_callback_generic_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function run<T>(cb: () => T): T {
+                return cb();
+            }
+
+            export function readString(): string {
+                return "value";
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let run_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "run")
+        .expect("run binding type must be inferred");
+    let read_string_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readString")
+        .expect("readString binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, run_ty),
+        Vec::from([inferred.resolve_type(&db, read_string_ty)]),
+    );
+
+    assert!(is_inferred_string(&db, call_ty));
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function wrap<T>(value: T): Promise<T> {
+                return Promise.resolve(value);
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let wrap_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "wrap")
+        .expect("wrap binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, wrap_ty),
+        Vec::from([InferredTypeData::Number]),
+    );
+    let InferredTypeData::InstanceOf(instance) = call_ty else {
+        panic!("wrap must return a Promise instance, got {call_ty:?}");
+    };
+
+    assert!(call_ty.is_promise_instance(&db));
+    assert!(
+        instance
+            .type_parameters(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty))
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function boxed<T>(value: T): Promise<T | number> {
+                return Promise.resolve(value as T | number);
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let boxed_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "boxed")
+        .expect("boxed binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, boxed_ty),
+        Vec::from([InferredTypeData::String]),
+    );
+
+    assert!(is_inferred_promise_with_type_parameter(
+        &db,
+        call_ty,
+        |ty| { contains_inferred_string(&db, ty) && contains_inferred_number(&db, ty) }
+    ));
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_multiple_generics_inside_union_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function pair<T, U>(left: T, right: U): Promise<T | U> {
+                return Promise.resolve(left as T | U);
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let pair_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "pair")
+        .expect("pair binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, pair_ty),
+        Vec::from([InferredTypeData::String, InferredTypeData::Number]),
+    );
+
+    assert!(is_inferred_promise_with_type_parameter(
+        &db,
+        call_ty,
+        |ty| { contains_inferred_string(&db, ty) && contains_inferred_number(&db, ty) }
+    ));
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_generic_inside_union_with_promise_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function maybePromise<T>(value: T): T | Promise<T> {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let maybe_promise_ty =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "maybePromise")
+            .expect("maybePromise binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, maybe_promise_ty),
+        Vec::from([InferredTypeData::String]),
+    );
+    let InferredTypeData::Union(union) = call_ty else {
+        panic!("maybePromise must return a union, got {call_ty:?}");
+    };
+
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| contains_inferred_string(&db, *ty))
+    );
+    assert!(union.types(&db).iter().any(|ty| {
+        is_inferred_promise_with_type_parameter(&db, *ty, |ty| contains_inferred_string(&db, ty))
+    }));
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function unwrap<T>(cb: () => Promise<T>): T {
+                return undefined as T;
+            }
+
+            export function readNumber(): Promise<number> {
+                return Promise.resolve(1);
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let unwrap_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "unwrap")
+        .expect("unwrap binding type must be inferred");
+    let read_number_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "readNumber")
+        .expect("readNumber binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, unwrap_ty),
+        Vec::from([inferred.resolve_type(&db, read_number_ty)]),
     );
 
     assert!(is_inferred_number(&db, call_ty));
@@ -1998,7 +2369,7 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
         ])
         .into_boxed_slice(),
     ));
-    let call_ty = infer_call_expression_type(&db, index_module, callee_ty, Vec::new());
+    let call_ty = infer_call_expression_type(&db, callee_ty, Vec::new());
     let InferredTypeData::Union(union) = call_ty else {
         panic!("union function call must return a union, got {call_ty:?} from {callee_ty:?}");
     };

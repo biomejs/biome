@@ -507,15 +507,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
 
-        GLOBAL_RESOLVER.resolve_qualifier(qualifier).map_or_else(
-            || {
+        if let Some(resolved_id) = GLOBAL_RESOLVER.resolve_qualifier(qualifier) {
+            return self.resolve_resolved_id(resolved_id);
+        }
+
+        if qualifier.is_promise() {
+            return InferredTypeData::promise_instance(
+                self.db,
                 qualifier
-                    .is_promise()
-                    .then(|| InferredTypeData::promise_class(self.db))
-                    .unwrap_or(InferredTypeData::Unknown)
-            },
-            |resolved_id| self.resolve_resolved_id(resolved_id),
-        )
+                    .type_parameters
+                    .iter()
+                    .map(|parameter| self.resolve(parameter))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            );
+        }
+
+        InferredTypeData::Unknown
     }
 
     fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
