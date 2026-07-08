@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
-    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
+    Module, Namespace, RawTypeData, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
@@ -371,15 +371,16 @@ impl JsModuleInfoCollector {
     fn finalise(
         &mut self,
         semantic_model: &SemanticModel,
-    ) -> (
-        IndexMap<Text, JsExport>,
-        FxHashMap<TextRange, super::BindingTypeData>,
-    ) {
+    ) -> FinalisedModuleTypes {
         if self.infer_types {
             self.infer_all_types(semantic_model);
         }
 
         self.populate_namespace_and_module_members();
+
+        let raw_types = self.raw_types();
+        let raw_expressions = self.raw_expressions();
+        let raw_binding_types = self.raw_binding_types();
 
         if self.infer_types {
             self.resolve_all_and_downgrade_project_references();
@@ -394,7 +395,35 @@ impl JsModuleInfoCollector {
         let exports = self.collect_exports();
         let binding_type_data = self.build_binding_type_data(semantic_model);
 
-        (exports, binding_type_data)
+        FinalisedModuleTypes {
+            exports,
+            binding_type_data,
+            raw_types,
+            raw_expressions,
+            raw_binding_types,
+        }
+    }
+
+    fn raw_types(&self) -> Vec<RawTypeData> {
+        self.types
+            .as_references()
+            .into_iter()
+            .cloned()
+            .collect()
+    }
+
+    fn raw_expressions(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.parsed_expressions
+            .iter()
+            .map(|(range, resolved_id)| (*range, TypeReference::Resolved(*resolved_id)))
+            .collect()
+    }
+
+    fn raw_binding_types(&self) -> FxHashMap<TextRange, TypeReference> {
+        self.bindings
+            .iter()
+            .map(|binding| (binding.range, binding.ty.clone()))
+            .collect()
     }
 
     fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
@@ -1099,16 +1128,19 @@ impl JsModuleInfo {
         infer_types: bool,
     ) -> Self {
         collector.infer_types = infer_types;
-        let (exports, binding_type_data) = collector.finalise(&semantic_model);
+        let finalised = collector.finalise(&semantic_model);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
-            exports: Exports(exports),
+            exports: Exports(finalised.exports),
             blanket_reexports: collector.blanket_reexports,
             semantic_model,
-            binding_type_data,
+            binding_type_data: finalised.binding_type_data,
+            raw_types: finalised.raw_types,
+            raw_expressions: finalised.raw_expressions,
+            raw_binding_types: finalised.raw_binding_types,
             expressions: collector.parsed_expressions,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
@@ -1116,4 +1148,12 @@ impl JsModuleInfo {
             referenced_classes: collector.referenced_classes,
         }))
     }
+}
+
+struct FinalisedModuleTypes {
+    exports: IndexMap<Text, JsExport>,
+    binding_type_data: FxHashMap<TextRange, BindingTypeData>,
+    raw_types: Vec<RawTypeData>,
+    raw_expressions: FxHashMap<TextRange, TypeReference>,
+    raw_binding_types: FxHashMap<TextRange, TypeReference>,
 }

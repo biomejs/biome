@@ -10,7 +10,7 @@ use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
+    FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeReference,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -225,6 +225,15 @@ pub struct JsModuleInfoInner {
     /// This enriches the semantic model's bindings with type inference results
     /// and documentation comments.
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData>,
+
+    /// Raw local type table collected before module-level resolution and flattening.
+    pub raw_types: Vec<RawTypeData>,
+
+    /// Raw expression references collected before module-level resolution and flattening.
+    pub raw_expressions: FxHashMap<TextRange, TypeReference>,
+
+    /// Raw binding references collected before module-level resolution and flattening.
+    pub raw_binding_types: FxHashMap<TextRange, TypeReference>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,

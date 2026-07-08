@@ -8,7 +8,7 @@ use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
-use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind};
+use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, TypeDb};
 use biome_parser::AnyParse;
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -320,6 +320,10 @@ impl biome_db::Db for WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 }
+
+#[cfg(feature = "module_graph")]
+#[salsa::db]
+impl TypeDb for WorkspaceDb {}
 
 #[cfg(feature = "module_graph")]
 #[salsa::db]

@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![allow(
+    unused_lifetimes,
+    reason = "salsa interned handle lifetimes are used by generated code"
+)]
 
 mod conditionals;
 mod flattening;
@@ -8,6 +12,7 @@ mod globals;
 mod globals_builder;
 pub(crate) mod globals_ids;
 mod helpers;
+pub mod interned_types;
 mod local_inference;
 mod resolver;
 mod r#type;
@@ -18,8 +23,10 @@ pub use conditionals::*;
 pub use flattening::MAX_FLATTEN_DEPTH;
 pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
+pub use interned_types::TypeDb;
 pub use resolver::*;
 pub use r#type::Type;
+pub use type_data::TypeData as RawTypeData;
 pub use type_data::*;
 pub use type_store::*;
 

@@ -1,12 +1,12 @@
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo, ModuleInfoKind};
-use biome_db::Db;
+pub use biome_js_type_info::TypeDb;
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub mod queries;
 
 /// Extends `Db` with module-graph-specific lookups.
 #[salsa::db]
-pub trait ModuleDb: Db {
+pub trait ModuleDb: TypeDb {
     /// Given a path, it retrieves its corresponding module info.
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo>;
 

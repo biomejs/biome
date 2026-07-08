@@ -8,9 +8,22 @@ use biome_js_syntax::{
     JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
-use biome_module_graph::ModuleResolver;
+use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types};
 use biome_rowan::{AstNode, TextRange};
+use std::rc::Rc;
 use std::sync::Arc;
+
+#[derive(Clone)]
+pub(crate) struct TypedModule {
+    db: Rc<dyn ModuleDb>,
+    module: ModuleInfo,
+}
+
+impl TypedModule {
+    pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
+        Self { db, module }
+    }
+}
 
 /// Service for use with type inference rules.
 ///
@@ -18,15 +31,28 @@ use std::sync::Arc;
 /// expressions or function definitions from the module graph.
 #[derive(Clone)]
 pub struct TypedService {
-    resolver: Option<Arc<ModuleResolver>>,
+    module: Option<TypedModule>,
     model: Option<SemanticModel>,
 }
 
 impl TypedService {
+    fn resolver(&self) -> Option<Arc<ModuleResolver>> {
+        let typed_module = self.module.as_ref()?;
+        let _ = infer_module_types(typed_module.db.as_ref(), typed_module.module);
+        let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
+        else {
+            return None;
+        };
+
+        Some(Arc::new(ModuleResolver::for_module(
+            module_info.clone(),
+            typed_module.db.clone(),
+        )))
+    }
+
     /// Returns the [`Type`] for the given `expression`.
     pub fn type_of_expression(&self, expression: &AnyJsExpression) -> Type {
-        self.resolver
-            .as_ref()
+        self.resolver()
             .map(|resolver| resolver.resolved_type_of_expression(expression))
             .unwrap_or_default()
     }
@@ -34,8 +60,7 @@ impl TypedService {
     /// Returns the [`Type`] of the value with the given `name`, as defined
     /// in the scope that contains `range`.
     pub fn type_of_named_value(&self, range: TextRange, name: &str) -> Type {
-        self.resolver
-            .as_ref()
+        self.resolver()
             .map(|resolver| resolver.resolved_type_of_named_value(range, name))
             .unwrap_or_default()
     }
@@ -53,14 +78,13 @@ impl TypedService {
                 .and_then(AnyJsBinding::as_js_identifier_binding)
                 .and_then(|identifier| identifier.name_token().ok())
                 .and_then(|name| {
-                    self.resolver.as_ref().map(|resolver| {
+                    self.resolver().map(|resolver| {
                         resolver.resolved_type_of_named_value(function.range(), name.text())
                     })
                 })
                 .unwrap_or_default(),
             AnyJsFunction::JsFunctionExportDefaultDeclaration(_decl) => self
-                .resolver
-                .as_ref()
+                .resolver()
                 .and_then(|resolver| resolver.resolved_type_of_default_export())
                 .unwrap_or_default(),
             AnyJsFunction::JsFunctionExpression(expr) => {
@@ -128,10 +152,12 @@ impl FromServices for TypedService {
             }
         }
 
-        let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
-        let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
+        let module = services
+            .get_service::<Option<TypedModule>>()
+            .cloned()
+            .flatten();
         let model = services.get_service::<SemanticModel>().cloned();
-        Ok(Self { resolver, model })
+        Ok(Self { module, model })
     }
 }
 
