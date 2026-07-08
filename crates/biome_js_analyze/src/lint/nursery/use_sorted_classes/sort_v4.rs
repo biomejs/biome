@@ -54,6 +54,7 @@ enum SortKey {
         property_idx: u16,
         property_count: u8,
         registration_idx: u16,
+        important: bool,
     },
 }
 
@@ -70,17 +71,16 @@ impl SortKey {
         if !node.variants().is_empty() {
             return Self::Unknown;
         }
-        // TODO: important suffix (`flex!`).
-        if node.excl_token().is_some() {
-            return Self::Unknown;
-        }
 
         let is_negative = node.negative_token().is_some();
+        // An important candidate (`flex!`) sorts exactly where its plain
+        // twin does; `compare` breaks exact-key ties plain-first.
+        let is_important = node.excl_token().is_some();
 
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
         };
-        match inner {
+        let base = match inner {
             AnyTwCandidate::TwArbitraryCandidate(a) => {
                 let Ok(property_token) = a.property_token() else {
                     return Self::Unknown;
@@ -93,6 +93,7 @@ impl SortKey {
                     property_idx,
                     property_count: 1,
                     registration_idx: 0,
+                    important: false,
                 }
             }
             AnyTwCandidate::TwBogusCandidate(_) => Self::Unknown,
@@ -116,6 +117,7 @@ impl SortKey {
                     property_idx: entry.property_idx,
                     property_count: entry.property_count,
                     registration_idx,
+                    important: false,
                 }
             }
 
@@ -154,19 +156,34 @@ impl SortKey {
                 };
 
                 if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                    return resolve_arbitrary_branch(arbitrary_branches, &arb.value(), registration_idx)
-                        .unwrap_or(Self::Unknown);
+                    resolve_arbitrary_branch(arbitrary_branches, &arb.value(), registration_idx)
+                        .unwrap_or(Self::Unknown)
+                } else {
+                    let modifier = f.modifier();
+                    resolve_named_branch(
+                        named_branches,
+                        &value,
+                        modifier.as_ref(),
+                        registration_idx,
+                    )
+                    .unwrap_or(Self::Unknown)
                 }
-
-                let modifier = f.modifier();
-                resolve_named_branch(
-                    named_branches,
-                    &value,
-                    modifier.as_ref(),
-                    registration_idx,
-                )
-                .unwrap_or(Self::Unknown)
             }
+        };
+
+        match base {
+            Self::Unknown => Self::Unknown,
+            Self::Known {
+                property_idx,
+                property_count,
+                registration_idx,
+                ..
+            } => Self::Known {
+                property_idx,
+                property_count,
+                registration_idx,
+                important: is_important,
+            },
         }
     }
 }
@@ -183,11 +200,13 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
                 property_idx: p1,
                 property_count: c1,
                 registration_idx: r1,
+                important: i1,
             },
             SortKey::Known {
                 property_idx: p2,
                 property_count: c2,
                 registration_idx: r2,
+                important: i2,
             },
         ) => p1
             .cmp(&p2)
@@ -195,7 +214,9 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
             // their property bucket so they sort before single-property
             // utilities in the same bucket.
             .then_with(|| c2.cmp(&c1))
-            .then_with(|| r1.cmp(&r2)),
+            .then_with(|| r1.cmp(&r2))
+            // A plain utility precedes its important twin (`flex flex!`).
+            .then_with(|| i1.cmp(&i2)),
     }
 }
 
@@ -265,7 +286,8 @@ fn named_value_type_matches(
 }
 
 /// Walk a basename's named branch list and return the first matching
-/// branch as a complete `SortKey::Known`. Branch order in the preset
+/// branch as a `SortKey::Known` (importance is stamped by
+/// `SortKey::from_candidate`). Branch order in the preset
 /// already reflects the resolution precedence we want
 /// (Keyword → Theme → Typed).
 fn resolve_named_branch(
@@ -319,13 +341,15 @@ fn resolve_named_branch(
             property_idx,
             property_count,
             registration_idx,
+            important: false,
         });
     }
     None
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
-/// branch as a complete `SortKey::Known`. Typed branches precede the
+/// branch as a `SortKey::Known` (importance is stamped by
+/// `SortKey::from_candidate`). Typed branches precede the
 /// type-blind fallback in generated preset order.
 fn resolve_arbitrary_branch(
     branches: &[ArbitraryBranch],
@@ -346,6 +370,7 @@ fn resolve_arbitrary_branch(
             property_idx,
             property_count,
             registration_idx,
+            important: false,
         });
     }
     None
@@ -361,7 +386,14 @@ mod tests {
             property_idx,
             property_count,
             registration_idx,
+            important: false,
         }
+    }
+
+    fn classify(input: &str) -> SortKey {
+        let parsed = parse_tailwind(input);
+        let full = parsed.tree().candidates().iter().next().unwrap();
+        SortKey::from_candidate(&full)
     }
 
     fn functional_parts(input: &str) -> (AnyTwValue, Option<AnyTwModifier>) {
@@ -417,6 +449,19 @@ mod tests {
     #[test]
     fn compare_returns_equal_for_identical_known_keys() {
         assert_eq!(compare(&known(5, 1, 0), &known(5, 1, 0)), Ordering::Equal);
+    }
+
+    #[test]
+    fn compare_breaks_exact_key_tie_plain_before_important() {
+        let plain = known(5, 1, 0);
+        let important = SortKey::Known {
+            property_idx: 5,
+            property_count: 1,
+            registration_idx: 0,
+            important: true,
+        };
+        assert_eq!(compare(&plain, &important), Ordering::Less);
+        assert_eq!(compare(&important, &plain), Ordering::Greater);
     }
 
     // endregion: compare
@@ -559,6 +604,52 @@ mod tests {
         let full = parsed.tree().candidates().iter().next().unwrap();
         let display_idx = *PROPERTY_INDEX.get("display").unwrap();
         assert_eq!(SortKey::from_candidate(&full), known(display_idx, 1, 0));
+    }
+
+    #[test]
+    fn important_suffix_is_position_neutral_in_the_key() {
+        let SortKey::Known {
+            property_idx,
+            property_count,
+            registration_idx,
+            important: false,
+        } = classify("flex")
+        else {
+            panic!("expected `flex` to classify as a plain known key");
+        };
+        assert_eq!(
+            classify("flex!"),
+            SortKey::Known {
+                property_idx,
+                property_count,
+                registration_idx,
+                important: true,
+            }
+        );
+    }
+
+    #[test]
+    fn important_suffix_classifies_functional_and_arbitrary_candidates() {
+        assert!(matches!(
+            classify("p-4!"),
+            SortKey::Known {
+                important: true,
+                ..
+            }
+        ));
+        assert!(matches!(
+            classify("[display:block]!"),
+            SortKey::Known {
+                important: true,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn important_with_variants_is_still_unknown() {
+        // Variant weight is the remaining TODO; `!` must not bypass it.
+        assert_eq!(classify("hover:flex!"), SortKey::Unknown);
     }
 
     // endregion: sort key classification
