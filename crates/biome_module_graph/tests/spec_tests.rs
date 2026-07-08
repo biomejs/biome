@@ -37,8 +37,8 @@ use biome_module_graph::{
     JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
     ModuleInfo, ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
     find_js_exported_symbol, infer_call_expression_type, infer_module_types,
-    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
-    transitive_importers_of, traverse_import_tree_for_classes,
+    is_class_referenced_by_importers, normalize_type, resolve_css_module, resolve_html_module,
+    resolve_js_module, transitive_importers_of, traverse_import_tree_for_classes,
     traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
@@ -2575,6 +2575,18 @@ fn test_infer_module_types_normalizes_union_variants_on_build() {
             export function readBoolean(value: true | false): true | false {
                 return value;
             }
+
+            export function readStringLiteral(value: string | "literal"): string | "literal" {
+                return value;
+            }
+
+            export function readNumberLiteral(value: number | 1): number | 1 {
+                return value;
+            }
+
+            export function readBigIntLiteral(value: bigint | 1n): bigint | 1n {
+                return value;
+            }
         "#,
     );
 
@@ -2613,6 +2625,22 @@ fn test_infer_module_types_normalizes_union_variants_on_build() {
         inferred_function_return_ty_by_name(&db, index_module, &inferred, "readBoolean")
             .expect("readBoolean return type must be inferred");
     assert_eq!(boolean_ty, InferredTypeData::Boolean);
+
+    let string_literal_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readStringLiteral")
+            .expect("readStringLiteral return type must be inferred");
+    assert_eq!(string_literal_ty, InferredTypeData::String);
+
+    let number_literal_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readNumberLiteral")
+            .expect("readNumberLiteral return type must be inferred");
+    assert_eq!(number_literal_ty, InferredTypeData::Number);
+
+    let bigint_literal_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readBigIntLiteral")
+            .expect("readBigIntLiteral return type must be inferred");
+    assert_eq!(bigint_literal_ty, InferredTypeData::BigInt);
+
     assert_inferred_type_snapshot(
         "test_infer_module_types_normalizes_union_variants_on_build",
         &db,
@@ -2671,6 +2699,22 @@ fn test_infer_module_types_normalizes_intersection_variants_on_build() {
         .find_member_type(&db, combined_ty, "value")
         .expect("normalized intersection must expose WithValue.value");
     assert!(is_inferred_number(&db, value_ty));
+
+    let normalized_ty = normalize_type(&db, index_module, combined_ty);
+    let InferredTypeData::Object(normalized_object) = normalized_ty else {
+        panic!("normalized Local intersection must become an object, got {normalized_ty:?}");
+    };
+    assert_eq!(normalized_object.members(&db).len(), 2);
+
+    let normalized_name_ty = inferred
+        .find_member_type(&db, normalized_ty, "name")
+        .expect("normalized object must expose WithName.name");
+    assert!(is_inferred_string(&db, normalized_name_ty));
+
+    let normalized_value_ty = inferred
+        .find_member_type(&db, normalized_ty, "value")
+        .expect("normalized object must expose WithValue.value");
+    assert!(is_inferred_number(&db, normalized_value_ty));
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_normalizes_intersection_variants_on_build",
@@ -2811,6 +2855,96 @@ fn test_infer_module_types_merges_function_intersections_on_build() {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_merges_function_intersections_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_merges_mixed_intersections_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readCallableObject(
+                value: (() => string) & { value: number },
+            ): (() => string) & { value: number } {
+                return value;
+            }
+
+            export function readPrimitive(
+                value: string & { value: number },
+            ): string & { value: number } {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let callable_object_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readCallableObject")
+            .expect("readCallableObject return type must be inferred");
+    let InferredTypeData::Object(callable_object) = callable_object_ty else {
+        panic!("readCallableObject must return a merged object, got {callable_object_ty:?}");
+    };
+    assert_eq!(callable_object.members(&db).len(), 1);
+    let value_ty = inferred
+        .find_member_type(&db, callable_object_ty, "value")
+        .expect("merged callable object must expose value");
+    assert!(is_inferred_number(&db, value_ty));
+
+    let primitive_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readPrimitive")
+            .expect("readPrimitive return type must be inferred");
+    assert_eq!(primitive_ty, InferredTypeData::String);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_merges_mixed_intersections_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_merges_class_instance_intersections_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readPromiseObject(
+                value: Promise<string> & { value: number },
+            ): Promise<string> & { value: number } {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let promise_object_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readPromiseObject")
+            .expect("readPromiseObject return type must be inferred");
+    let InferredTypeData::InstanceOf(instance) = promise_object_ty else {
+        panic!("readPromiseObject must return a merged class instance, got {promise_object_ty:?}");
+    };
+    assert!(matches!(instance.ty(&db), InferredTypeData::Class(_)));
+
+    let value_ty = inferred
+        .find_member_type(&db, promise_object_ty, "value")
+        .expect("merged class instance must expose value");
+    assert!(is_inferred_number(&db, value_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_merges_class_instance_intersections_on_build",
         &db,
         &fs,
     );

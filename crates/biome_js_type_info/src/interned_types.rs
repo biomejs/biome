@@ -242,6 +242,20 @@ impl<'db> TypeData<'db> {
         )
     }
 
+    pub(crate) fn literal_base_type(self, db: &'db dyn TypeDb) -> Option<Self> {
+        let Self::Literal(literal) = self else {
+            return None;
+        };
+
+        match literal.literal(db) {
+            Literal::BigInt(_) => Some(Self::BigInt),
+            Literal::Boolean(_) => Some(Self::Boolean),
+            Literal::Number(_) => Some(Self::Number),
+            Literal::String(_) | Literal::Template(_) => Some(Self::String),
+            Literal::Object(_) | Literal::RegExp(_) => None,
+        }
+    }
+
     pub(crate) fn is_primitive(self, db: &'db dyn TypeDb) -> bool {
         match self {
             Self::BigInt
@@ -260,6 +274,47 @@ impl<'db> TypeData<'db> {
                     | Literal::Template(_)
             ),
             _ => false,
+        }
+    }
+
+    pub fn should_flatten_instance(self, type_parameters: &[Self]) -> bool {
+        match self {
+            Self::AnyKeyword
+            | Self::BigInt
+            | Self::Boolean
+            | Self::Conditional
+            | Self::Global
+            | Self::Literal(_)
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::NeverKeyword
+            | Self::Null
+            | Self::Number
+            | Self::ObjectKeyword
+            | Self::String
+            | Self::Symbol
+            | Self::ThisKeyword
+            | Self::Undefined
+            | Self::Unknown
+            | Self::UnknownKeyword
+            | Self::VoidKeyword => true,
+            Self::Constructor(_)
+            | Self::Function(_)
+            | Self::InstanceOf(_)
+            | Self::Interface(_)
+            | Self::Intersection(_)
+            | Self::Object(_)
+            | Self::Tuple(_)
+            | Self::Union(_) => type_parameters.is_empty(),
+            Self::Class(_)
+            | Self::Divergent(_)
+            | Self::Generic(_)
+            | Self::Local(_)
+            | Self::MergedReference(_)
+            | Self::TypeOperator(_)
+            | Self::TypeofExpression(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_) => false,
         }
     }
 
@@ -1080,6 +1135,21 @@ pub struct InternedFunction<'db> {
 }
 
 impl<'db> InternedFunction<'db> {
+    pub(crate) fn intersection_with(
+        self,
+        db: &'db dyn TypeDb,
+        other: Self,
+    ) -> InternedFunction<'db> {
+        let return_type = match (self.return_type(db), other.return_type(db)) {
+            (ReturnType::Type(left), ReturnType::Type(right)) => {
+                ReturnType::Type(TypeData::union_from_types(db, Vec::from([*left, *right])))
+            }
+            _ => ReturnType::Type(TypeData::Boolean),
+        };
+
+        Self::new(db, Box::default(), Box::default(), return_type, false, None)
+    }
+
     pub fn returns_promise(self, db: &'db dyn TypeDb) -> bool {
         match self.return_type(db) {
             ReturnType::Type(ty) => ty.is_promise_instance(db),

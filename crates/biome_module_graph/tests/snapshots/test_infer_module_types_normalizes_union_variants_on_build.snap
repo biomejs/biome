@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests.rs
-assertion_line: 328
 expression: content
 ---
 
@@ -16,6 +15,20 @@ export function readValue(
 }
 
 export function readBoolean(value: true | false): true | false {
+	return value;
+}
+
+export function readStringLiteral(
+	value: string | "literal",
+): string | "literal" {
+	return value;
+}
+
+export function readNumberLiteral(value: number | 1): number | 1 {
+	return value;
+}
+
+export function readBigIntLiteral(value: bigint | 1n): bigint | 1n {
 	return value;
 }
 ```
@@ -35,7 +48,27 @@ Module TypeId(4) => bool: false
 
 Module TypeId(5) => boolean
 
-Module TypeId(6) => sync Function "readValue" {
+Module TypeId(6) => string: literal
+
+Module TypeId(7) => string
+
+Module TypeId(8) => string
+
+Module TypeId(9) => number: 1
+
+Module TypeId(10) => number
+
+Module TypeId(11) => number
+
+Module TypeId(12) => BigInt
+
+Module TypeId(13) => bigint: 1n
+
+Module TypeId(14) => BigInt
+
+Module TypeId(15) => BigInt
+
+Module TypeId(16) => sync Function "readValue" {
   accepts: {
     params: [
       required value: string | number
@@ -45,7 +78,7 @@ Module TypeId(6) => sync Function "readValue" {
   returns: string | number
 }
 
-Module TypeId(7) => sync Function "readBoolean" {
+Module TypeId(17) => sync Function "readBoolean" {
   accepts: {
     params: [
       required value: boolean
@@ -53,5 +86,35 @@ Module TypeId(7) => sync Function "readBoolean" {
     type_args: []
   }
   returns: boolean
+}
+
+Module TypeId(18) => sync Function "readStringLiteral" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(19) => sync Function "readNumberLiteral" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Module TypeId(20) => sync Function "readBigIntLiteral" {
+  accepts: {
+    params: [
+      required value: BigInt
+    ]
+    type_args: []
+  }
+  returns: BigInt
 }
 ```

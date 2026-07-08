@@ -31,6 +31,8 @@ use std::collections::VecDeque;
 
 pub use crate::db::type_inference::InferredModuleTypes;
 
+const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
+
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
 pub fn infer_module_types<'db>(
     db: &'db dyn ModuleDb,
@@ -253,13 +255,98 @@ fn infer_generic_return_type<'db>(
     return_ty
 }
 
+#[derive(Clone, Copy, Debug)]
+enum TypeNormalizationItem<'db> {
+    Type(InferredTypeData<'db>),
+    RebuildInstance(usize),
+    RebuildIntersection(usize),
+    RebuildUnion(usize),
+}
+
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
-    _db: &'db dyn ModuleDb,
-    _module: ModuleInfo,
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
     ty: InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
-    ty
+    let Some(inferred) = infer_module_types(db, module) else {
+        return ty;
+    };
+
+    let original = ty;
+    let mut stack = Vec::from([TypeNormalizationItem::Type(ty)]);
+    let mut results = Vec::new();
+    let mut remaining_steps = MAX_TYPE_NORMALIZATION_STEPS;
+
+    while let Some(item) = stack.pop() {
+        match item {
+            TypeNormalizationItem::Type(ty) => {
+                if remaining_steps == 0 {
+                    return original;
+                }
+                remaining_steps -= 1;
+
+                match inferred.resolve_type(db, ty) {
+                    InferredTypeData::InstanceOf(instance) => {
+                        stack.push(TypeNormalizationItem::RebuildInstance(
+                            instance.type_parameters(db).len(),
+                        ));
+                        for type_parameter in instance.type_parameters(db).iter().rev() {
+                            stack.push(TypeNormalizationItem::Type(*type_parameter));
+                        }
+                        stack.push(TypeNormalizationItem::Type(instance.ty(db)));
+                    }
+                    InferredTypeData::Intersection(intersection) => {
+                        stack.push(TypeNormalizationItem::RebuildIntersection(
+                            intersection.types(db).len(),
+                        ));
+                        for ty in intersection.types(db).iter().rev() {
+                            stack.push(TypeNormalizationItem::Type(*ty));
+                        }
+                    }
+                    InferredTypeData::Union(union) => {
+                        stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
+                        for ty in union.types(db).iter().rev() {
+                            stack.push(TypeNormalizationItem::Type(*ty));
+                        }
+                    }
+                    ty => results.push(ty),
+                }
+            }
+            TypeNormalizationItem::RebuildInstance(type_parameter_count) => {
+                let Some(start) = results.len().checked_sub(type_parameter_count + 1) else {
+                    return original;
+                };
+                let mut parts = results.split_off(start);
+                let ty = parts.remove(0);
+                if ty.should_flatten_instance(&parts) {
+                    results.push(ty);
+                } else {
+                    results.push(InferredTypeData::instance_of(
+                        db,
+                        ty,
+                        parts.into_boxed_slice(),
+                    ));
+                }
+            }
+            TypeNormalizationItem::RebuildIntersection(type_count) => {
+                let Some(start) = results.len().checked_sub(type_count) else {
+                    return original;
+                };
+                let types = results.split_off(start);
+                results.push(InferredTypeData::intersection_from_types(db, types));
+            }
+            TypeNormalizationItem::RebuildUnion(type_count) => {
+                let Some(start) = results.len().checked_sub(type_count) else {
+                    return original;
+                };
+                let types = results.split_off(start);
+                results.push(InferredTypeData::union_from_types(db, types));
+            }
+        }
+    }
+
+    results.pop().unwrap_or(original)
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.

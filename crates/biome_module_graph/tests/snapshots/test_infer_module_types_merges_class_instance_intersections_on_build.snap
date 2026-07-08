@@ -1,0 +1,57 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readPromiseObject(
+	value: Promise<string> & { value: number },
+): Promise<string> & { value: number } {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof Promise<string>
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Module TypeId(2) => instanceof class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(3) => instanceof class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(4) => sync Function "readPromiseObject" {
+  accepts: {
+    params: [
+      required value: instanceof class {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof class {
+    extends: none
+    implements: []
+    type_args: []
+  }
+}
+```

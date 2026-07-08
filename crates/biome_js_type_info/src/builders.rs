@@ -1,7 +1,9 @@
+use crate::Path;
 use crate::interned_types::{
-    InternedFunction, InternedIntersection, InternedObject, InternedUnion, ReturnType, TypeData,
-    TypeDb, TypeMember,
+    InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
+    InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
 };
+use biome_rowan::Text;
 
 pub(crate) struct IntersectionBuilder<'db> {
     db: &'db dyn TypeDb,
@@ -61,12 +63,8 @@ impl<'db> IntersectionBuilder<'db> {
     }
 
     pub(crate) fn build(mut self) -> TypeData<'db> {
-        if let Some(merged_function) = self.try_build_function() {
-            return merged_function;
-        }
-
-        if let Some(merged_object) = self.try_build_object() {
-            return merged_object;
+        if let Some(merged) = MergedType::from_types(self.db, &self.types) {
+            return merged.into_type(self.db);
         }
 
         match self.types.len() {
@@ -78,59 +76,226 @@ impl<'db> IntersectionBuilder<'db> {
             )),
         }
     }
+}
 
-    fn try_build_function(&self) -> Option<TypeData<'db>> {
-        if self.types.len() < 2 {
+enum MergedType<'db> {
+    Any,
+    ClassInstance(Vec<TypeMember<'db>>),
+    Function(InternedFunction<'db>),
+    Interface(Vec<TypeMember<'db>>),
+    Namespace(Vec<TypeMember<'db>>),
+    Never,
+    Object(Vec<TypeMember<'db>>),
+    Primitive(TypeData<'db>),
+    Unknown,
+}
+
+#[derive(Clone, Copy)]
+enum MergedTypeKind {
+    Any,
+    ClassInstance,
+    Function,
+    Interface,
+    Namespace,
+    Never,
+    Object,
+    Primitive,
+    Unknown,
+}
+
+impl MergedTypeKind {
+    fn intersection_with(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Any, _) | (_, Self::Any) => Self::Any,
+            (Self::ClassInstance, Self::ClassInstance) => Self::ClassInstance,
+            (
+                Self::ClassInstance,
+                Self::Function | Self::Interface | Self::Object | Self::Namespace,
+            )
+            | (
+                Self::Function | Self::Interface | Self::Object | Self::Namespace,
+                Self::ClassInstance,
+            ) => Self::ClassInstance,
+            (Self::Function, Self::Function) => Self::Function,
+            (Self::Interface, Self::Interface)
+            | (Self::Interface, Self::Function)
+            | (Self::Function, Self::Interface) => Self::Interface,
+            (Self::Namespace, Self::Namespace)
+            | (Self::Namespace, Self::Function | Self::Object | Self::Interface)
+            | (Self::Function | Self::Object | Self::Interface, Self::Namespace) => Self::Namespace,
+            (Self::Never, _) | (_, Self::Never) => Self::Never,
+            (Self::Object, Self::Object)
+            | (Self::Object, Self::Function | Self::Interface)
+            | (Self::Function | Self::Interface, Self::Object) => Self::Object,
+            (Self::Primitive, Self::Primitive) => Self::Never,
+            (Self::Primitive, _) | (_, Self::Primitive) => Self::Primitive,
+            (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
+        }
+    }
+}
+
+impl<'db> MergedType<'db> {
+    fn from_types(db: &'db dyn TypeDb, types: &[TypeData<'db>]) -> Option<Self> {
+        if types.len() < 2 {
             return None;
         }
 
-        let mut return_types = Vec::new();
-        for ty in &self.types {
-            let TypeData::Function(function) = ty else {
-                return None;
-            };
-            let ReturnType::Type(return_ty) = function.return_type(self.db) else {
-                return Some(TypeData::Function(InternedFunction::new(
-                    self.db,
+        let mut types = types.iter().copied();
+        let mut merged = Self::from_type(db, types.next()?)?;
+        for ty in types {
+            merged = merged.intersection_with(db, Self::from_type(db, ty)?);
+        }
+
+        Some(merged)
+    }
+
+    fn from_type(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<Self> {
+        match ty {
+            TypeData::AnyKeyword | TypeData::Conditional => Some(Self::Any),
+            TypeData::BigInt
+            | TypeData::Boolean
+            | TypeData::Null
+            | TypeData::Number
+            | TypeData::String
+            | TypeData::Symbol
+            | TypeData::Undefined => Some(Self::Primitive(ty)),
+            TypeData::Class(class) => Some(Self::Object(class_static_members(class.members(db)))),
+            TypeData::Function(function) => Some(Self::Function(function)),
+            TypeData::InstanceOf(instance) => match instance.ty(db) {
+                TypeData::Class(class) => Some(Self::ClassInstance(class_instance_members(
+                    class.members(db),
+                ))),
+                _ => None,
+            },
+            TypeData::Interface(interface) => Some(Self::Interface(interface.members(db).to_vec())),
+            TypeData::Literal(literal) => match literal.literal(db) {
+                Literal::BigInt(_)
+                | Literal::Boolean(_)
+                | Literal::Number(_)
+                | Literal::String(_)
+                | Literal::Template(_) => Some(Self::Primitive(ty)),
+                Literal::Object(members) => Some(Self::Object(members.to_vec())),
+                Literal::RegExp(_) => Some(Self::Unknown),
+            },
+            TypeData::Namespace(namespace) => Some(Self::Namespace(namespace.members(db).to_vec())),
+            TypeData::NeverKeyword => Some(Self::Never),
+            TypeData::Object(object) => Some(Self::Object(object.members(db).to_vec())),
+            TypeData::Unknown | TypeData::UnknownKeyword => Some(Self::Unknown),
+            _ => None,
+        }
+    }
+
+    fn intersection_with(self, db: &'db dyn TypeDb, other: Self) -> Self {
+        match (self, other) {
+            (Self::Any, _) | (_, Self::Any) => Self::Any,
+            (Self::Function(left), Self::Function(right)) => {
+                Self::Function(left.intersection_with(db, right))
+            }
+            (Self::Never, _) | (_, Self::Never) => Self::Never,
+            (Self::Primitive(_), Self::Primitive(_)) => Self::Never,
+            (Self::Primitive(primitive), _) | (_, Self::Primitive(primitive)) => {
+                Self::Primitive(primitive)
+            }
+            (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
+            (left, right) => {
+                let (left_kind, left_members) = left.into_kind_with_members();
+                let (right_kind, right_members) = right.into_kind_with_members();
+                let mut members = left_members;
+                merge_members(db, &mut members, &right_members);
+                Self::from_kind_and_members(left_kind.intersection_with(right_kind), members)
+            }
+        }
+    }
+
+    fn into_kind_with_members(self) -> (MergedTypeKind, Vec<TypeMember<'db>>) {
+        match self {
+            Self::Any => (MergedTypeKind::Any, Vec::new()),
+            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members),
+            Self::Function(_) => (MergedTypeKind::Function, Vec::new()),
+            Self::Interface(members) => (MergedTypeKind::Interface, members),
+            Self::Namespace(members) => (MergedTypeKind::Namespace, members),
+            Self::Never => (MergedTypeKind::Never, Vec::new()),
+            Self::Object(members) => (MergedTypeKind::Object, members),
+            Self::Primitive(_) => (MergedTypeKind::Primitive, Vec::new()),
+            Self::Unknown => (MergedTypeKind::Unknown, Vec::new()),
+        }
+    }
+
+    fn from_kind_and_members(kind: MergedTypeKind, members: Vec<TypeMember<'db>>) -> Self {
+        match kind {
+            MergedTypeKind::Any => Self::Any,
+            MergedTypeKind::ClassInstance => Self::ClassInstance(members),
+            MergedTypeKind::Interface => Self::Interface(members),
+            MergedTypeKind::Namespace => Self::Namespace(members),
+            MergedTypeKind::Never => Self::Never,
+            MergedTypeKind::Object => Self::Object(members),
+            MergedTypeKind::Function | MergedTypeKind::Primitive | MergedTypeKind::Unknown => {
+                Self::Unknown
+            }
+        }
+    }
+
+    fn into_type(self, db: &'db dyn TypeDb) -> TypeData<'db> {
+        match self {
+            Self::Any => TypeData::AnyKeyword,
+            Self::ClassInstance(members) => TypeData::instance_of(
+                db,
+                TypeData::Class(InternedClass::new(
+                    db,
                     Box::default(),
-                    Box::default(),
-                    ReturnType::Type(TypeData::Boolean),
-                    false,
                     None,
-                )));
-            };
-            return_types.push(*return_ty);
+                    Box::default(),
+                    members.into_boxed_slice(),
+                    None,
+                )),
+                Box::default(),
+            ),
+            Self::Function(function) => TypeData::Function(function),
+            Self::Interface(members) => TypeData::Interface(InternedInterface::new(
+                db,
+                Box::default(),
+                Box::default(),
+                members.into_boxed_slice(),
+                Text::new_static("(merged)"),
+            )),
+            Self::Namespace(members) => TypeData::Namespace(InternedNamespace::new(
+                db,
+                members.into_boxed_slice(),
+                Path::from(Text::new_static("")),
+            )),
+            Self::Never => TypeData::NeverKeyword,
+            Self::Object(members) => {
+                TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
+            }
+            Self::Primitive(primitive) => primitive,
+            Self::Unknown => TypeData::Unknown,
         }
-
-        Some(TypeData::Function(InternedFunction::new(
-            self.db,
-            Box::default(),
-            Box::default(),
-            ReturnType::Type(TypeData::union_from_types(self.db, return_types)),
-            false,
-            None,
-        )))
     }
+}
 
-    fn try_build_object(&self) -> Option<TypeData<'db>> {
-        if self.types.len() < 2 {
-            return None;
-        }
+fn class_instance_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
+    members
+        .iter()
+        .filter(|member| !member.kind.is_static())
+        .cloned()
+        .collect()
+}
 
-        let mut members = Vec::new();
-        for ty in &self.types {
-            let TypeData::Object(object) = ty else {
-                return None;
-            };
-            merge_members(self.db, &mut members, object.members(self.db));
-        }
-
-        Some(TypeData::Object(InternedObject::new(
-            self.db,
-            None,
-            members.into_boxed_slice(),
-        )))
-    }
+fn class_static_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
+    members
+        .iter()
+        .filter_map(|member| match &member.kind {
+            TypeMemberKind::NamedStatic(name) => Some(TypeMember {
+                kind: TypeMemberKind::Named(name.clone()),
+                ty: member.ty,
+            }),
+            TypeMemberKind::ConstAssertedNamedStatic(name) => Some(TypeMember {
+                kind: TypeMemberKind::ConstAssertedNamed(name.clone()),
+                ty: member.ty,
+            }),
+            _ => None,
+        })
+        .collect()
 }
 
 fn merge_members<'db>(
@@ -203,7 +368,7 @@ impl<'db> UnionBuilder<'db> {
     }
 
     pub(crate) fn build(mut self) -> TypeData<'db> {
-        self.normalize_boolean_variants();
+        self.normalize_literal_variants();
 
         match self.types.len() {
             0 => TypeData::NeverKeyword,
@@ -212,8 +377,11 @@ impl<'db> UnionBuilder<'db> {
         }
     }
 
-    fn normalize_boolean_variants(&mut self) {
+    fn normalize_literal_variants(&mut self) {
+        let has_bigint = self.types.iter().any(|ty| *ty == TypeData::BigInt);
         let has_boolean = self.types.iter().any(|ty| *ty == TypeData::Boolean);
+        let has_number = self.types.iter().any(|ty| *ty == TypeData::Number);
+        let has_string = self.types.iter().any(|ty| *ty == TypeData::String);
         let has_true = self
             .types
             .iter()
@@ -222,16 +390,22 @@ impl<'db> UnionBuilder<'db> {
             .types
             .iter()
             .any(|ty| ty.is_boolean_literal(self.db, false));
+        let should_add_boolean = !has_boolean && has_true && has_false;
+        let should_absorb_boolean_literals = has_boolean || should_add_boolean;
 
-        if !(has_boolean || has_true && has_false) {
+        if !(has_bigint || should_absorb_boolean_literals || has_number || has_string) {
             return;
         }
 
-        self.types.retain(|ty| {
-            !ty.is_boolean_literal(self.db, true) && !ty.is_boolean_literal(self.db, false)
+        self.types.retain(|ty| match ty.literal_base_type(self.db) {
+            Some(TypeData::BigInt) => !has_bigint,
+            Some(TypeData::Boolean) => !should_absorb_boolean_literals,
+            Some(TypeData::Number) => !has_number,
+            Some(TypeData::String) => !has_string,
+            _ => true,
         });
 
-        if !has_boolean {
+        if should_add_boolean {
             self.types.push(TypeData::Boolean);
         }
     }
