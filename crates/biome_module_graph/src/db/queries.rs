@@ -9,12 +9,14 @@
 //! when the inputs are the same.
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
+use crate::db::type_inference::{
+    infer_module_types_cycle_result, normalize_type_cycle_result, resolve_raw_types,
+};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{ImportTreeNode, JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath};
+use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, ImportSymbol, ResolvedTypeId, TypeId, TypeImportQualifier, TypeReference,
-    TypeResolver, TypeResolverLevel,
+    ImportSymbol,
     interned_types::{ReturnType, TypeData as InferredTypeData},
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -23,32 +25,7 @@ use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::VecDeque;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
-pub struct BindingTypeData<'db> {
-    pub ty: InferredTypeData<'db>,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InferredModuleTypes<'db> {
-    pub expressions: FxHashMap<TextRange, InferredTypeData<'db>>,
-    pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
-}
-
-// SAFETY: This struct does not borrow from the database. It owns the ranges, and
-// the types are small handles created by Salsa. Comparing the old maps with the
-// new maps is safe; if they differ, replacing the old maps exposes the same data
-// as updating each entry one by one.
-unsafe impl salsa::Update for InferredModuleTypes<'_> {
-    unsafe fn maybe_update(old_pointer: *mut Self, new_value: Self) -> bool {
-        let old_value = unsafe { &mut *old_pointer };
-        if *old_value == new_value {
-            false
-        } else {
-            *old_value = new_value;
-            true
-        }
-    }
-}
+pub use crate::db::type_inference::InferredModuleTypes;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
 pub fn infer_module_types<'db>(
@@ -72,15 +49,7 @@ pub fn infer_module_types<'db>(
         }
     }
 
-    Some(resolve_raw_types(db, &js_info, &import_types))
-}
-
-fn infer_module_types_cycle_result<'db>(
-    _db: &'db dyn ModuleDb,
-    _id: salsa::Id,
-    _module: ModuleInfo,
-) -> Option<InferredModuleTypes<'db>> {
-    None
+    Some(resolve_raw_types(db, module, &js_info, &import_types))
 }
 
 #[salsa::tracked]
@@ -106,200 +75,6 @@ pub fn normalize_type<'db>(
     ty: InferredTypeData<'db>,
 ) -> InferredTypeData<'db> {
     ty
-}
-
-fn normalize_type_cycle_result<'db>(
-    _db: &'db dyn ModuleDb,
-    _id: salsa::Id,
-    _module: ModuleInfo,
-    _ty: InferredTypeData<'db>,
-) -> InferredTypeData<'db> {
-    InferredTypeData::Unknown
-}
-
-struct ResolutionCtx<'db, 'a> {
-    db: &'db dyn ModuleDb,
-    js_info: &'a JsModuleInfo,
-    import_types: &'a FxHashMap<ResolvedPath, InferredModuleTypes<'db>>,
-    resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
-    in_progress: FxHashSet<TypeId>,
-}
-
-fn resolve_raw_types<'db>(
-    db: &'db dyn ModuleDb,
-    js_info: &JsModuleInfo,
-    import_types: &FxHashMap<ResolvedPath, InferredModuleTypes<'db>>,
-) -> InferredModuleTypes<'db> {
-    let mut ctx = ResolutionCtx {
-        db,
-        js_info,
-        import_types,
-        resolved: FxHashMap::default(),
-        in_progress: FxHashSet::default(),
-    };
-
-    let expressions = js_info
-        .raw_expressions
-        .iter()
-        .map(|(range, reference)| (*range, ctx.resolve(reference)))
-        .collect();
-
-    let binding_type_data = js_info
-        .raw_binding_types
-        .iter()
-        .map(|(range, reference)| {
-            (
-                *range,
-                BindingTypeData {
-                    ty: ctx.resolve(reference),
-                },
-            )
-        })
-        .collect();
-
-    InferredModuleTypes {
-        expressions,
-        binding_type_data,
-    }
-}
-
-impl<'db> ResolutionCtx<'db, '_> {
-    fn resolve(&mut self, reference: &TypeReference) -> InferredTypeData<'db> {
-        match reference {
-            TypeReference::Resolved(resolved_id) => self.resolve_resolved_id(*resolved_id),
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Import(import) => self.resolve_import(import),
-        }
-    }
-
-    fn resolve_resolved_id(&mut self, resolved_id: ResolvedTypeId) -> InferredTypeData<'db> {
-        match resolved_id.level() {
-            TypeResolverLevel::Thin => self.resolve_raw_type_id(resolved_id.id()),
-            TypeResolverLevel::Global => InferredTypeData::from_raw_lossy(
-                self.db,
-                GLOBAL_RESOLVER.get_by_id(resolved_id.id()),
-            ),
-            TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
-        }
-    }
-
-    fn resolve_raw_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        if let Some(ty) = self.resolved.get(&type_id) {
-            return *ty;
-        }
-
-        if !self.in_progress.insert(type_id) {
-            return InferredTypeData::Unknown;
-        }
-
-        let ty = self
-            .js_info
-            .raw_types
-            .get(type_id.index())
-            .map_or(InferredTypeData::Unknown, |raw| match raw {
-                biome_js_type_info::RawTypeData::Reference(reference) => self.resolve(reference),
-                raw => InferredTypeData::from_raw_lossy(self.db, raw),
-            });
-
-        self.in_progress.remove(&type_id);
-        self.resolved.insert(type_id, ty);
-        ty
-    }
-
-    fn resolve_qualifier(
-        &mut self,
-        qualifier: &biome_js_type_info::TypeReferenceQualifier,
-    ) -> InferredTypeData<'db> {
-        let Some(identifier) = qualifier.path.iter().next() else {
-            return InferredTypeData::Unknown;
-        };
-
-        let mut scope = self.js_info.semantic_model.scope_from_id(qualifier.scope_id);
-        loop {
-            if let Some(binding) = scope.get_binding(identifier.text()) {
-                if binding.is_imported()
-                    && let Some(import) = self.js_info.static_imports.get(identifier.text())
-                {
-                    return self.resolve_import(&TypeImportQualifier {
-                        symbol: import.symbol.clone(),
-                        resolved_path: import.resolved_path.clone(),
-                        type_only: qualifier.type_only,
-                    });
-                }
-
-                return self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())
-                    .cloned()
-                    .map_or(InferredTypeData::Unknown, |reference| self.resolve(&reference));
-            }
-
-            match scope.parent() {
-                Some(parent) => scope = parent,
-                None => break,
-            }
-        }
-
-        GLOBAL_RESOLVER
-            .resolve_qualifier(qualifier)
-            .map_or(InferredTypeData::Unknown, |resolved_id| {
-                self.resolve_resolved_id(resolved_id)
-            })
-    }
-
-    fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {
-        let Some(imported_types) = self.import_types.get(&qualifier.resolved_path) else {
-            return InferredTypeData::Unknown;
-        };
-
-        let Some(path) = qualifier.resolved_path.as_path() else {
-            return InferredTypeData::Unknown;
-        };
-        let Some(module) = self.db.module_for_path(path) else {
-            return InferredTypeData::Unknown;
-        };
-        let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return InferredTypeData::Unknown;
-        };
-
-        let export_name = match &qualifier.symbol {
-            ImportSymbol::Default => "default",
-            ImportSymbol::Named(name) => name.text(),
-            ImportSymbol::All => return InferredTypeData::Unknown,
-        };
-
-        match js_info.exports.get(export_name).and_then(JsExport::as_own_export) {
-            Some(JsOwnExport::Binding(range)) => imported_types
-                .binding_type_data
-                .get(range)
-                .map_or(InferredTypeData::Unknown, |data| data.ty),
-            Some(JsOwnExport::Type(resolved_id)) => {
-                inferred_type_from_resolved_id(self.db, &js_info, *resolved_id)
-            }
-            Some(JsOwnExport::Namespace(_)) | None => InferredTypeData::Unknown,
-        }
-    }
-}
-
-fn inferred_type_from_resolved_id<'db>(
-    db: &'db dyn ModuleDb,
-    js_info: &JsModuleInfo,
-    resolved_id: ResolvedTypeId,
-) -> InferredTypeData<'db> {
-    match resolved_id.level() {
-        TypeResolverLevel::Thin => js_info
-            .types
-            .get(resolved_id.index())
-            .map_or(InferredTypeData::Unknown, |ty| {
-                InferredTypeData::from_raw_lossy(db, ty.as_ref())
-            }),
-        TypeResolverLevel::Global => InferredTypeData::from_raw_lossy(
-            db,
-            GLOBAL_RESOLVER.get_by_id(resolved_id.id()),
-        ),
-        TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
-    }
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.

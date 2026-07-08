@@ -3,6 +3,7 @@ pub use biome_js_type_info::TypeDb;
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub mod queries;
+mod type_inference;
 
 /// Extends `Db` with module-graph-specific lookups.
 #[salsa::db]

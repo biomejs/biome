@@ -7,6 +7,8 @@ use std::fs::read_link;
 use std::ops::Deref;
 use std::sync::Arc;
 
+use biome_db::ParsedSource;
+use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_resolver::ResolveError;
 
 use crate::snap::ModuleGraphSnapshot;
@@ -17,7 +19,13 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_
 use biome_html_parser::HtmlParserOptions;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::{
+    TypeData, TypeResolver,
+    interned_types::{
+        InternedInterface as InferredInterface, ReturnType as InferredReturnType,
+        TypeData as InferredTypeData, TypeMemberKind as InferredTypeMemberKind,
+    },
+};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
@@ -26,8 +34,8 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
+    find_js_exported_symbol, infer_module_types, is_class_referenced_by_importers,
+    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
@@ -41,7 +49,106 @@ use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
+use salsa::Storage;
 use walkdir::WalkDir;
+
+#[salsa::db]
+struct TestModuleDb {
+    modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
+    events: Events,
+    storage: Storage<Self>,
+}
+
+impl TestModuleDb {
+    fn new() -> Self {
+        let events = Events::default();
+        Self {
+            modules: BTreeMap::new(),
+            storage: salsa::Storage::new(Some(Box::new({
+                let events = events.clone();
+                move |event| {
+                    events.0.lock().unwrap().push(event);
+                }
+            }))),
+            events,
+        }
+    }
+
+    fn take_salsa_events(&mut self) -> Vec<salsa::Event> {
+        std::mem::take(&mut *self.events.0.lock().unwrap())
+    }
+
+    fn clear_salsa_events(&mut self) {
+        self.take_salsa_events();
+    }
+}
+
+#[salsa::db]
+impl salsa::Database for TestModuleDb {}
+
+#[salsa::db]
+impl biome_db::Db for TestModuleDb {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        None
+    }
+}
+
+#[salsa::db]
+impl biome_module_graph::TypeDb for TestModuleDb {}
+
+#[salsa::db]
+impl ModuleDb for TestModuleDb {
+    fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.modules.get(path).copied()
+    }
+
+    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
+        for (path, module) in &self.modules {
+            f(path, &module.kind(self));
+        }
+    }
+}
+
+#[salsa::tracked]
+fn inferred_expression_count(db: &dyn ModuleDb, module: ModuleInfo) -> usize {
+    infer_module_types(db, module).map_or(0, |inferred| inferred.expressions.len())
+}
+
+fn is_inferred_instance_of<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    inner: InferredTypeData<'db>,
+) -> bool {
+    matches!(ty, InferredTypeData::InstanceOf(instance) if instance.ty(db) == inner)
+}
+
+fn local_type_id_of_instance<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<usize> {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return None;
+    };
+    let InferredTypeData::Local(local) = instance.ty(db) else {
+        return None;
+    };
+
+    Some(local.type_id(db).index())
+}
+
+fn interface_member_ty<'db>(
+    db: &'db dyn ModuleDb,
+    interface: InferredInterface<'db>,
+    member_name: &str,
+) -> Option<InferredTypeData<'db>> {
+    interface.members(db).iter().find_map(|member| {
+        matches!(
+            &member.kind,
+            InferredTypeMemberKind::Named(name) if name.text() == member_name,
+        )
+        .then_some(member.ty)
+    })
+}
 
 fn build_js_db(
     fs: &dyn biome_resolver::FsWithResolverProxy,
@@ -67,6 +174,44 @@ fn build_js_db(
             ModuleInfoKind::Js(module_info),
         );
         db.modules.pin().insert(path.as_path().to_path_buf(), md);
+    }
+    db
+}
+
+fn resolve_js_module_kind_for_test(
+    fs: &MemoryFileSystem,
+    path: &str,
+    infer_types: bool,
+) -> ModuleInfoKind {
+    let paths = [BiomePath::new(path)];
+    let mut added_paths = get_added_js_paths(fs, &paths);
+    let (path, root, semantic_model) = added_paths.pop().expect("module must parse");
+    let (module_info, _, _) = resolve_js_module(
+        root,
+        path,
+        fs,
+        &ProjectLayout::default(),
+        semantic_model,
+        &PathInfoCache::default(),
+        infer_types,
+    );
+
+    ModuleInfoKind::Js(module_info)
+}
+
+fn build_js_test_module_db(
+    fs: &MemoryFileSystem,
+    paths: &[&str],
+    infer_types: bool,
+) -> TestModuleDb {
+    let mut db = TestModuleDb::new();
+    for path in paths {
+        let module_info = ModuleInfo::new(
+            &db,
+            Utf8PathBuf::from(*path),
+            resolve_js_module_kind_for_test(fs, path, infer_types),
+        );
+        db.modules.insert(Utf8PathBuf::from(*path), module_info);
     }
     db
 }
@@ -591,6 +736,351 @@ fn test_export_const_type_declaration_with_namespace() {
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs);
     snapshot.assert_snapshot("test_export_const_type_declaration_with_namespace");
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_exported_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Foo } from "./types.ts";
+
+            export const value: Foo = "value";
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let types_module = db
+        .module_for_path(Utf8Path::new("/src/types.ts"))
+        .expect("module must exist");
+    let inferred_types = infer_module_types(&db, types_module).expect("types must be inferred");
+    let ModuleInfoKind::Js(types_info) = types_module.kind(&db) else {
+        panic!("module must be JavaScript");
+    };
+    assert_eq!(inferred_types.types.len(), types_info.raw_types.len());
+
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    assert!(
+        inferred
+            .binding_type_data
+            .values()
+            .any(|data| data.ty == InferredTypeData::String)
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_nested_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Foo } from "./types.ts";
+
+            export function value(): Foo {
+                return "value";
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    assert!(inferred.types.iter().any(|ty| {
+        matches!(
+            *ty,
+            InferredTypeData::Function(function)
+                if matches!(
+                    function.return_type(&db),
+                    InferredReturnType::Type(return_ty)
+                        if is_inferred_instance_of(&db, *return_ty, InferredTypeData::String),
+                )
+        )
+    }));
+}
+
+#[test]
+fn test_infer_module_types_resolves_nested_object_member_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Foo } from "./types.ts";
+
+            export type Boxed = {
+                value: Foo;
+            };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    assert!(inferred.types.iter().any(|ty| {
+        matches!(
+            *ty,
+            InferredTypeData::Object(object)
+                if object.members(&db).iter().any(|member| {
+                    matches!(
+                        &member.kind,
+                        InferredTypeMemberKind::Named(name) if name.text() == "value",
+                    ) && is_inferred_instance_of(&db, member.ty, InferredTypeData::String)
+                })
+        )
+    }));
+}
+
+#[test]
+fn test_infer_module_types_resolves_nested_union_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+            export type Bar = number;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Foo, Bar } from "./types.ts";
+
+            export type Value = Foo | Bar;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    assert!(inferred.types.iter().any(|ty| {
+        matches!(
+            *ty,
+            InferredTypeData::Union(union)
+                if union
+                    .types(&db)
+                    .iter()
+                    .any(|ty| is_inferred_instance_of(&db, *ty, InferredTypeData::String))
+                    && union
+                        .types(&db)
+                        .iter()
+                        .any(|ty| is_inferred_instance_of(&db, *ty, InferredTypeData::Number))
+        )
+    }));
+}
+
+#[test]
+fn test_infer_module_types_uses_local_handle_for_recursive_class_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Foo {
+                name: string;
+
+                static create(): Foo {
+                    return new Foo();
+                }
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let (class_index, class) = inferred
+        .types
+        .iter()
+        .enumerate()
+        .find_map(|(index, ty)| match ty {
+            InferredTypeData::Class(class)
+                if class
+                    .name(&db)
+                    .as_ref()
+                    .is_some_and(|name| name.text() == "Foo") =>
+            {
+                Some((index, class))
+            }
+            _ => None,
+        })
+        .expect("Foo class type must be inferred");
+
+    let return_ty = class
+        .members(&db)
+        .iter()
+        .find_map(|member| {
+            if !matches!(
+                &member.kind,
+                InferredTypeMemberKind::NamedStatic(name) if name.text() == "create",
+            ) {
+                return None;
+            }
+
+            let InferredTypeData::Function(function) = member.ty else {
+                return None;
+            };
+            match function.return_type(&db) {
+                InferredReturnType::Type(return_ty) => Some(*return_ty),
+                InferredReturnType::Predicate(_) | InferredReturnType::Asserts(_) => None,
+            }
+        })
+        .expect("Foo.create return type must be inferred");
+
+    let InferredTypeData::InstanceOf(instance) = return_ty else {
+        panic!("Foo.create must return an instance type");
+    };
+    let InferredTypeData::Local(local) = instance.ty(&db) else {
+        panic!("Foo.create must return a local handle to Foo");
+    };
+
+    assert_eq!(local.module(&db), inferred.module_key);
+    assert_eq!(local.type_id(&db).index(), class_index);
+}
+
+#[test]
+fn test_infer_module_types_uses_local_handles_for_recursive_interfaces() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export interface A {
+                b: B;
+            }
+
+            export interface B {
+                a: A;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let (a_index, a_interface) = inferred
+        .types
+        .iter()
+        .enumerate()
+        .find_map(|(index, ty)| match ty {
+            InferredTypeData::Interface(interface) if interface.name(&db).text() == "A" => {
+                Some((index, *interface))
+            }
+            _ => None,
+        })
+        .expect("A interface type must be inferred");
+    let (b_index, b_interface) = inferred
+        .types
+        .iter()
+        .enumerate()
+        .find_map(|(index, ty)| match ty {
+            InferredTypeData::Interface(interface) if interface.name(&db).text() == "B" => {
+                Some((index, *interface))
+            }
+            _ => None,
+        })
+        .expect("B interface type must be inferred");
+
+    let a_b_ty = interface_member_ty(&db, a_interface, "b").expect("A.b must be inferred");
+    let b_a_ty = interface_member_ty(&db, b_interface, "a").expect("B.a must be inferred");
+
+    assert_eq!(local_type_id_of_instance(&db, a_b_ty), Some(b_index));
+    assert_eq!(local_type_id_of_instance(&db, b_a_ty), Some(a_index));
+}
+
+#[test]
+fn test_infer_module_types_is_memoized() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const value: string = "value";
+        "#,
+    );
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    let _ = infer_module_types(&db, index_module);
+    db.clear_salsa_events();
+    let _ = infer_module_types(&db, index_module);
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_not_run(&db, infer_module_types, index_module, &events);
+}
+
+#[test]
+fn test_infer_module_types_backdates_equal_output() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const value: string = "value";
+        "#,
+    );
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let expression_count = inferred_expression_count(&db, index_module);
+    assert!(expression_count > 0);
+
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const value: string = "value";
+            // This changes the module input, but not the inferred types.
+        "#,
+    );
+    let module_kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+    salsa::Setter::to(index_module.set_kind(&mut db), module_kind);
+
+    db.clear_salsa_events();
+    assert_eq!(
+        inferred_expression_count(&db, index_module),
+        expression_count
+    );
+    let events = db.take_salsa_events();
+
+    assert_function_query_was_run(&db, infer_module_types, index_module, &events);
+    assert_function_query_was_not_run(&db, inferred_expression_count, index_module, &events);
 }
 
 #[test]
