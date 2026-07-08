@@ -20,6 +20,7 @@ use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
         InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -60,7 +61,7 @@ pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     _module: ModuleInfo,
     callee: InferredTypeData<'db>,
-    _args: Vec<InferredTypeData<'db>>,
+    args: Vec<InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
     match callee {
         InferredTypeData::Union(union) => collected_type_result(
@@ -68,25 +69,112 @@ pub fn infer_call_expression_type<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| infer_function_call_type(db, *callee))
+                .filter_map(|callee| infer_function_call_type(db, *callee, &args))
                 .collect(),
         )
         .unwrap_or(InferredTypeData::Unknown),
-        callee => infer_function_call_type(db, callee).unwrap_or(InferredTypeData::Unknown),
+        callee => infer_function_call_type(db, callee, &args).unwrap_or(InferredTypeData::Unknown),
     }
 }
 
 fn infer_function_call_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
+    args: &[InferredTypeData<'db>],
 ) -> Option<InferredTypeData<'db>> {
     match callee {
         InferredTypeData::Function(function) => infer_function_return_type(db, function),
         InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
             InferredTypeData::Function(function) => infer_function_return_type(db, function),
+            InferredTypeData::Interface(interface) => {
+                infer_call_signature_type(db, interface.members(db), args)
+            }
+            InferredTypeData::Object(object) => {
+                infer_call_signature_type(db, object.members(db), args)
+            }
+            _ => None,
+        },
+        InferredTypeData::Interface(interface) => {
+            infer_call_signature_type(db, interface.members(db), args)
+        }
+        InferredTypeData::Object(object) => infer_call_signature_type(db, object.members(db), args),
+        _ => None,
+    }
+}
+
+fn infer_call_signature_type<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    args: &[InferredTypeData<'db>],
+) -> Option<InferredTypeData<'db>> {
+    let signatures = members
+        .iter()
+        .filter(|member| member.kind.is_call_signature())
+        .filter_map(|member| infer_callable_function(db, member.ty))
+        .collect::<Vec<_>>();
+
+    if signatures.len() < 2 {
+        return signatures
+            .first()
+            .and_then(|function| infer_function_return_type(db, *function));
+    }
+
+    signatures
+        .into_iter()
+        .find(|function| signature_accepts_arguments(db, *function, args))
+        .and_then(|function| infer_function_return_type(db, function))
+}
+
+fn infer_callable_function<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredFunction<'db>> {
+    match ty {
+        InferredTypeData::Function(function) => Some(function),
+        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+            InferredTypeData::Function(function) => Some(function),
             _ => None,
         },
         _ => None,
+    }
+}
+
+fn signature_accepts_arguments<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[InferredTypeData<'db>],
+) -> bool {
+    let parameters = function.parameters(db);
+    let accepts_rest = parameters
+        .last()
+        .is_some_and(|parameter| parameter.is_rest());
+    let required = parameters
+        .iter()
+        .filter(|parameter| !parameter.is_optional() && !parameter.is_rest())
+        .count();
+
+    if args.len() < required || (!accepts_rest && args.len() > parameters.len()) {
+        return false;
+    }
+
+    parameters.iter().zip(args).all(|(parameter, arg)| {
+        match (
+            infer_callable_function(db, parameter.ty()),
+            infer_callable_function(db, *arg),
+        ) {
+            (Some(parameter_function), Some(argument_function)) => {
+                function_returns_promise(db, parameter_function)
+                    == function_returns_promise(db, argument_function)
+            }
+            _ => true,
+        }
+    })
+}
+
+fn function_returns_promise<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> bool {
+    match function.return_type(db) {
+        ReturnType::Type(ty) => ty.is_promise_instance(db),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
     }
 }
 

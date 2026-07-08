@@ -10,7 +10,8 @@ use crate::{
     ScopeId,
     globals_ids::{
         GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_NUMBER_ID,
-        GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
+        GLOBAL_VOID_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -122,9 +123,34 @@ impl<'db> TypeData<'db> {
         )
     }
 
+    pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> bool {
+        let Self::InstanceOf(instance) = self else {
+            return false;
+        };
+
+        match instance.ty(db) {
+            Self::Class(class) => class
+                .name(db)
+                .as_ref()
+                .is_some_and(|name| name.text() == "Promise"),
+            _ => false,
+        }
+    }
+
+    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
+        Self::Class(InternedClass::new(
+            db,
+            Box::default(),
+            None,
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static("Promise")),
+        ))
+    }
+
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference =
-            |reference: &raw::TypeReference| Self::from_raw_reference_lossy(reference);
+            |reference: &raw::TypeReference| Self::from_raw_reference_lossy(db, reference);
         Self::from_raw_with_resolver(db, raw, &mut resolve_reference)
     }
 
@@ -276,7 +302,7 @@ impl<'db> TypeData<'db> {
         }
     }
 
-    pub fn from_raw_reference_lossy(reference: &raw::TypeReference) -> Self {
+    pub fn from_raw_reference_lossy(db: &'db dyn TypeDb, reference: &raw::TypeReference) -> Self {
         match reference {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_UNKNOWN_ID => Self::Unknown,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_UNDEFINED_ID => Self::Undefined,
@@ -286,12 +312,15 @@ impl<'db> TypeData<'db> {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_STRING_ID => Self::String,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_GLOBAL_ID => Self::Global,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_BOOLEAN_ID => Self::Boolean,
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_PROMISE_ID => Self::promise_class(db),
             raw::TypeReference::Resolved(_) => Self::Unknown,
             raw::TypeReference::Qualifier(qualifier) => qualifier
                 .type_parameters
                 .iter()
                 .find(|param| param.is_known())
-                .map_or(Self::Unknown, Self::from_raw_reference_lossy),
+                .map_or(Self::Unknown, |param| {
+                    Self::from_raw_reference_lossy(db, param)
+                }),
             raw::TypeReference::Import(_) => Self::Unknown,
         }
     }
@@ -486,6 +515,29 @@ pub enum FunctionParameter<'db> {
     Pattern(PatternFunctionParameter<'db>),
 }
 
+impl<'db> FunctionParameter<'db> {
+    pub fn ty(&self) -> TypeData<'db> {
+        match self {
+            Self::Named(parameter) => parameter.ty,
+            Self::Pattern(parameter) => parameter.ty,
+        }
+    }
+
+    pub fn is_optional(&self) -> bool {
+        match self {
+            Self::Named(parameter) => parameter.is_optional,
+            Self::Pattern(parameter) => parameter.is_optional,
+        }
+    }
+
+    pub fn is_rest(&self) -> bool {
+        match self {
+            Self::Named(parameter) => parameter.is_rest,
+            Self::Pattern(parameter) => parameter.is_rest,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct NamedFunctionParameter<'db> {
     pub name: Text,
@@ -578,6 +630,10 @@ impl<'db> TypeMemberKind<'db> {
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
+    }
+
+    pub fn is_call_signature(&self) -> bool {
+        matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
     }
 }
 
