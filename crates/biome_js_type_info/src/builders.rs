@@ -1,4 +1,73 @@
-use crate::interned_types::{InternedUnion, TypeData, TypeDb};
+use crate::interned_types::{InternedIntersection, InternedUnion, TypeData, TypeDb};
+
+pub(crate) struct IntersectionBuilder<'db> {
+    db: &'db dyn TypeDb,
+    types: Vec<TypeData<'db>>,
+}
+
+impl<'db> IntersectionBuilder<'db> {
+    pub(crate) fn new(db: &'db dyn TypeDb) -> Self {
+        Self {
+            db,
+            types: Vec::new(),
+        }
+    }
+
+    pub(crate) fn add(mut self, ty: TypeData<'db>) -> Self {
+        if self.types.as_slice() == [TypeData::NeverKeyword] {
+            return self;
+        }
+
+        match ty {
+            TypeData::NeverKeyword => {
+                self.types.clear();
+                self.types.push(TypeData::NeverKeyword);
+            }
+            TypeData::Intersection(intersection) => {
+                for ty in intersection.types(self.db) {
+                    self = self.add(*ty);
+                }
+            }
+            ty => {
+                if ty.is_primitive(self.db)
+                    && self
+                        .types
+                        .iter()
+                        .any(|other| *other != ty && other.is_primitive(self.db))
+                {
+                    self.types.clear();
+                    self.types.push(TypeData::NeverKeyword);
+                    return self;
+                }
+
+                if !self.types.contains(&ty) {
+                    self.types.push(ty);
+                }
+            }
+        }
+
+        self
+    }
+
+    pub(crate) fn add_all(mut self, types: impl IntoIterator<Item = TypeData<'db>>) -> Self {
+        for ty in types {
+            self = self.add(ty);
+        }
+
+        self
+    }
+
+    pub(crate) fn build(mut self) -> TypeData<'db> {
+        match self.types.len() {
+            0 => TypeData::NeverKeyword,
+            1 => self.types.pop().unwrap_or(TypeData::NeverKeyword),
+            _ => TypeData::Intersection(InternedIntersection::new(
+                self.db,
+                self.types.into_boxed_slice(),
+            )),
+        }
+    }
+}
 
 pub(crate) struct UnionBuilder<'db> {
     db: &'db dyn TypeDb,

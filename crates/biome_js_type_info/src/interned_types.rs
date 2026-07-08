@@ -9,7 +9,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     ScopeId,
-    builders::UnionBuilder,
+    builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
         GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_NUMBER_ID,
         GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID,
@@ -48,6 +48,9 @@ enum TypeSubstitutionItem<'db> {
 
     /// Rebuilds a union type from this many already-emitted variants.
     RebuildUnion(usize),
+
+    /// Rebuilds an intersection type from this many already-emitted variants.
+    RebuildIntersection(usize),
 }
 
 /// Iterates over a type without recursion and applies one generic substitution.
@@ -110,6 +113,14 @@ impl<'db> Iterator for TypeSubstitutionIter<'db> {
                         union.types(self.db).len(),
                     ));
                     for ty in union.types(self.db).iter().rev() {
+                        self.stack.push(TypeSubstitutionItem::Type(*ty));
+                    }
+                }
+                TypeData::Intersection(intersection) => {
+                    self.stack.push(TypeSubstitutionItem::RebuildIntersection(
+                        intersection.types(self.db).len(),
+                    ));
+                    for ty in intersection.types(self.db).iter().rev() {
                         self.stack.push(TypeSubstitutionItem::Type(*ty));
                     }
                 }
@@ -231,6 +242,27 @@ impl<'db> TypeData<'db> {
         )
     }
 
+    pub(crate) fn is_primitive(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::BigInt
+            | Self::Boolean
+            | Self::Null
+            | Self::Number
+            | Self::String
+            | Self::Symbol
+            | Self::Undefined => true,
+            Self::Literal(literal) => matches!(
+                literal.literal(db),
+                Literal::BigInt(_)
+                    | Literal::Boolean(_)
+                    | Literal::Number(_)
+                    | Literal::String(_)
+                    | Literal::Template(_)
+            ),
+            _ => false,
+        }
+    }
+
     pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> bool {
         let Self::InstanceOf(instance) = self else {
             return false;
@@ -340,6 +372,13 @@ impl<'db> TypeData<'db> {
                     let types = results.split_off(start);
                     results.push(Self::union_from_types(db, types));
                 }
+                TypeSubstitutionItem::RebuildIntersection(type_count) => {
+                    let Some(start) = results.len().checked_sub(type_count) else {
+                        return self;
+                    };
+                    let types = results.split_off(start);
+                    results.push(Self::intersection_from_types(db, types));
+                }
             }
         }
 
@@ -357,6 +396,15 @@ impl<'db> TypeData<'db> {
     /// a union.
     pub fn union_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
         UnionBuilder::new(db).add_all(types).build()
+    }
+
+    /// Builds the smallest type that represents a list of intersection variants.
+    ///
+    /// Nested intersections are flattened, duplicate variants are removed, an
+    /// empty list becomes `never`, and a single remaining variant is returned
+    /// directly instead of wrapping it in an intersection.
+    pub fn intersection_from_types(db: &'db dyn TypeDb, types: Vec<Self>) -> Self {
+        IntersectionBuilder::new(db).add_all(types).build()
     }
 
     pub fn promise_class(db: &'db dyn TypeDb) -> Self {
@@ -479,12 +527,10 @@ impl<'db> TypeData<'db> {
                     .then(|| resolve_reference(&generic.default)),
                 generic.name.clone(),
             )),
-            raw::TypeData::Intersection(intersection) => {
-                Self::Intersection(InternedIntersection::new(
-                    db,
-                    convert_references(db, intersection.types(), resolve_reference),
-                ))
-            }
+            raw::TypeData::Intersection(intersection) => Self::intersection_from_types(
+                db,
+                convert_references(db, intersection.types(), resolve_reference).into_vec(),
+            ),
             raw::TypeData::Union(union) => Self::union_from_types(
                 db,
                 convert_references(db, union.types(), resolve_reference).into_vec(),

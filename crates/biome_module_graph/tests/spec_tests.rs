@@ -2411,6 +2411,62 @@ fn test_infer_call_expression_type_substitutes_generic_inside_union_with_promise
 }
 
 #[test]
+fn test_infer_call_expression_type_substitutes_generic_inside_intersection_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type WithName = {
+                name: string;
+            };
+
+            export function withName<T>(value: T): T & WithName {
+                return value as T & WithName;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let with_name_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "withName")
+        .expect("withName binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        inferred.resolve_type(&db, with_name_ty),
+        Vec::from([InferredTypeData::String]),
+    );
+    let InferredTypeData::Intersection(intersection) = call_ty else {
+        panic!("withName must return an intersection, got {call_ty:?}");
+    };
+
+    assert!(
+        intersection
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+    assert!(
+        intersection
+            .types(&db)
+            .iter()
+            .all(|ty| !matches!(ty, InferredTypeData::Generic(_)))
+    );
+
+    let name_ty = inferred
+        .find_member_type(&db, call_ty, "name")
+        .expect("substituted intersection must expose WithName.name");
+    assert!(is_inferred_string(&db, name_ty));
+    assert_inferred_type_snapshot(
+        "test_infer_call_expression_type_substitutes_generic_inside_intersection_return_type",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -2559,6 +2615,102 @@ fn test_infer_module_types_normalizes_union_variants_on_build() {
     assert_eq!(boolean_ty, InferredTypeData::Boolean);
     assert_inferred_type_snapshot(
         "test_infer_module_types_normalizes_union_variants_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_normalizes_intersection_variants_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type WithName = {
+                name: string;
+            };
+
+            type WithValue = {
+                value: number;
+            };
+
+            export function readCombined(
+                value: WithName & (WithValue & WithName),
+            ): WithName & (WithValue & WithName) {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let combined_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readCombined")
+            .expect("readCombined return type must be inferred");
+    let InferredTypeData::Intersection(intersection) = combined_ty else {
+        panic!("readCombined must return an intersection, got {combined_ty:?}");
+    };
+    assert_eq!(intersection.types(&db).len(), 2);
+    assert!(
+        intersection
+            .types(&db)
+            .iter()
+            .all(|ty| !matches!(ty, InferredTypeData::Intersection(_)))
+    );
+
+    let name_ty = inferred
+        .find_member_type(&db, combined_ty, "name")
+        .expect("normalized intersection must expose WithName.name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    let value_ty = inferred
+        .find_member_type(&db, combined_ty, "value")
+        .expect("normalized intersection must expose WithValue.value");
+    assert!(is_inferred_number(&db, value_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_normalizes_intersection_variants_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_normalizes_primitive_intersections_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readString(value: string & string): string & string {
+                return value;
+            }
+
+            export function readNever(value: string & number): string & number {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let string_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readString")
+        .expect("readString return type must be inferred");
+    assert_eq!(string_ty, InferredTypeData::String);
+
+    let never_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readNever")
+        .expect("readNever return type must be inferred");
+    assert_eq!(never_ty, InferredTypeData::NeverKeyword);
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_normalizes_primitive_intersections_on_build",
         &db,
         &fs,
     );
