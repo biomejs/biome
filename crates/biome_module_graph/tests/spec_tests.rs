@@ -1485,7 +1485,7 @@ fn test_resolve_deep_generic_alias_chain_does_not_overflow() {
     // A long chain of generic-alias applications (`type W1<T> = W0<T>; ...`) re-enters the
     // instantiation path once per level. `MAX_ALIAS_CHAIN_DEPTH` must bound that recursion so a
     // pathological chain resolves (deep levels stay opaque) instead of overflowing the stack.
-    const DEPTH: usize = MAX_ALIAS_CHAIN_DEPTH + 1;
+    const DEPTH: usize = MAX_ALIAS_CHAIN_DEPTH as usize + 1;
     let mut source = String::from("type W0<T> = T;\n");
     for i in 1..=DEPTH {
         source.push_str(&format!("type W{i}<T> = W{}<T>;\n", i - 1));

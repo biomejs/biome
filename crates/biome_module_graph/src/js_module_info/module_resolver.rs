@@ -23,7 +23,7 @@ const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 /// Depth cap for materializing a chain of generic-alias applications (`type W1<T> = W0<T>; ...`).
 /// Each level recurses through `instantiated_generic_alias`, so an unbounded chain would overflow
 /// the stack. Past the cap the alias is left opaque, which consumers treat as indeterminate.
-pub const MAX_ALIAS_CHAIN_DEPTH: usize = 32;
+pub const MAX_ALIAS_CHAIN_DEPTH: u8 = 32;
 
 // Any references that resolve to "module 0" will be rewritten to reference the
 // module resolver. The reason we do this is that any references to other
@@ -562,7 +562,7 @@ impl ModuleResolver {
         // A parameterized chain (`type W1<T> = W0<T>; ...`) re-enters here per level via
         // `instantiated_generic_alias`, so cap the re-entry depth and leave deeper aliases opaque
         // (indeterminate to consumers) rather than overflowing the stack.
-        if stack.len() >= MAX_ALIAS_CHAIN_DEPTH {
+        if stack.len() >= usize::from(MAX_ALIAS_CHAIN_DEPTH) {
             return None;
         }
         let (declared, body_ref) = self.alias_declaration_parts(&key)?;
@@ -579,7 +579,7 @@ impl ModuleResolver {
             // The handoff walk is iterative and never re-enters the depth check above, so a long
             // acyclic chain (`type A1 = Id<A0>; ...`) would otherwise walk every level. Enforce the
             // same cap per hop and leave deeper aliases opaque.
-            if stack.len() >= MAX_ALIAS_CHAIN_DEPTH {
+            if stack.len() >= usize::from(MAX_ALIAS_CHAIN_DEPTH) {
                 leave_opaque = true;
                 break;
             }
