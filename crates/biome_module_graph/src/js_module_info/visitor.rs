@@ -261,22 +261,34 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExportDefaultDeclaration,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let name = match &node {
+        let name = match node {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(node) => {
-                node.id().and_then(get_name)?
+                node.id().and_then(get_name)
             }
             AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(node) => {
-                node.id().ok().and_then(get_ts_name)?
+                node.id().ok().and_then(get_ts_name)
             }
         };
 
-        collector.register_export_with_name("default", name);
+        if let Some(name) = name {
+            collector.register_export_with_name("default", name);
+        } else if matches!(
+            node,
+            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(_)
+                | AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+        ) {
+            collector.register_default_export_declaration(node);
+        } else {
+            return None;
+        }
+
         Some(())
     }
 

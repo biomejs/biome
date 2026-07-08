@@ -335,6 +335,16 @@ impl JsModuleInfoCollector {
         })
     }
 
+    pub fn register_default_export_declaration(
+        &mut self,
+        declaration: &AnyJsExportDefaultDeclaration,
+    ) {
+        let type_data =
+            TypeData::from_any_js_export_default_declaration(self, ScopeId::GLOBAL, declaration);
+        let ty = TypeReference::from(self.register_and_resolve(type_data));
+        self.register_export(JsCollectedExport::ExportDefault { ty });
+    }
+
     pub fn register_blanket_reexport(&mut self, reexport: JsReexport) {
         self.blanket_reexports.push(reexport);
     }

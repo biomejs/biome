@@ -1381,7 +1381,7 @@ fn test_infer_module_types_resolves_merged_reference_members() {
 }
 
 #[test]
-fn test_infer_module_types_documents_anonymous_default_class_handle_gap() {
+fn test_infer_module_types_resolves_anonymous_default_class_export() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
@@ -1400,10 +1400,60 @@ fn test_infer_module_types_documents_anonymous_default_class_handle_gap() {
     let ModuleInfoKind::Js(js_info) = index_module.kind(&db) else {
         panic!("module must be JavaScript");
     };
+    let default_ty = match js_info
+        .exports
+        .get("default")
+        .and_then(JsExport::as_own_export)
+    {
+        Some(JsOwnExport::Type(resolved_id)) => inferred
+            .types
+            .get(resolved_id.index())
+            .copied()
+            .expect("default export type must be inferred"),
+        _ => panic!("default export must have a type"),
+    };
 
-    assert!(!js_info.exports.contains_key("default"));
-    assert!(js_info.raw_types.is_empty());
+    assert!(!js_info.raw_types.is_empty());
     assert!(inferred.named_type_ids.is_empty());
+
+    let name_ty = inferred
+        .find_member_type(&db, default_ty, "name")
+        .expect("anonymous default class member must be inferred");
+    assert!(is_inferred_string(&db, name_ty));
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_anonymous_default_class_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"
+            export default class {
+                name: string;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import Base from "./base.ts";
+
+            export const value: Base = new Base();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "value")
+        .expect("value binding type must be inferred");
+
+    let name_ty = inferred
+        .find_member_type(&db, value_ty, "name")
+        .expect("imported anonymous default class member must be inferred");
+    assert!(is_inferred_string(&db, name_ty));
 }
 
 #[test]
