@@ -55,6 +55,10 @@ pub trait SortableAttribute {
         sort_first: &[Box<str>],
         base: impl Fn(&Self, &Self) -> Ordering,
     ) -> Ordering {
+        if sort_first.is_empty() {
+            return base(self, other);
+        }
+
         self.sort_first_index(sort_first)
             .cmp(&other.sort_first_index(sort_first))
             .then_with(|| base(self, other))
