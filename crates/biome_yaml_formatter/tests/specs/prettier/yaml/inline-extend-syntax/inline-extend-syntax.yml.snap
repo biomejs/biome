@@ -25,18 +25,16 @@ bar:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,9 @@
+@@ -1,7 +1,8 @@
  # 8876
  
  foo:
 -  <<: &anchor
--    K1: "One"
 +  <<:
 +    &anchor
-+   K1: "One"
+     K1: "One"
    K2: "Two"
  
- bar:
 ```
 
 # Output
@@ -47,7 +45,7 @@ bar:
 foo:
   <<:
     &anchor
-   K1: "One"
+    K1: "One"
   K2: "Two"
 
 bar:

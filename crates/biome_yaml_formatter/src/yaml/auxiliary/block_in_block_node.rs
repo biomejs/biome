@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_rowan::AstNode;
-use biome_yaml_syntax::{YamlBlockInBlockNode, YamlBlockInBlockNodeFields};
+use biome_yaml_syntax::{
+    AnyYamlBlockInBlockContent, YamlBlockInBlockNode, YamlBlockInBlockNodeFields,
+};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockInBlockNode;
 impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
@@ -10,10 +11,20 @@ impl FormatNodeRule<YamlBlockInBlockNode> for FormatYamlBlockInBlockNode {
             properties,
             content,
         } = node.as_fields();
+        let content = content?;
 
-        if properties.len() > 0 {
-            // TODO: Implement formatting for block nodes with tag or anchor properties.
-            return format_verbatim_node(node.syntax()).fmt(f);
+        write!(f, [properties.format()])?;
+
+        if !properties.is_empty() {
+            if matches!(
+                &content,
+                AnyYamlBlockInBlockContent::YamlBlockMapping(_)
+                    | AnyYamlBlockInBlockContent::YamlBlockSequence(_)
+            ) {
+                write!(f, [hard_line_break()])?;
+            } else {
+                write!(f, [space()])?;
+            }
         }
 
         write!(f, [content.format()])
