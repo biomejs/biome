@@ -1,0 +1,41 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Foo = {
+	name: "foo";
+};
+
+const Foo = {
+	name: "foo",
+} as const;
+
+export { Foo };
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => string: foo
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Module TypeId(3) => (type: local type 1, value: Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}, namespace: none)
+```

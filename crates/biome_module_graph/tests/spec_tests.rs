@@ -23,8 +23,8 @@ use biome_js_type_info::{
     TypeData, TypeResolver, format_inferred_type,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        InternedUnion as InferredUnion, Literal as InferredLiteral,
-        ReturnType as InferredReturnType, TypeData as InferredTypeData,
+        InternedMergedReference as InferredMergedReference, InternedUnion as InferredUnion,
+        Literal as InferredLiteral, ReturnType as InferredReturnType, TypeData as InferredTypeData,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
@@ -1522,6 +1522,75 @@ fn test_infer_module_types_resolves_merged_reference_members() {
         .find_member_type(&db, foo_ty, "valueName")
         .expect("merged value side must expose Foo.valueName");
     assert!(is_inferred_number(&db, value_name_ty));
+}
+
+#[test]
+fn test_normalize_type_collapses_equal_merged_reference_targets() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Foo = {
+                name: "foo";
+            };
+
+            const Foo = {
+                name: "foo",
+            } as const;
+
+            export { Foo };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let ModuleInfoKind::Js(js_info) = index_module.kind(&db) else {
+        panic!("module must be JavaScript");
+    };
+    let foo_ty = match js_info.exports.get("Foo").and_then(JsExport::as_own_export) {
+        Some(JsOwnExport::Type(resolved_id)) => inferred
+            .types
+            .get(resolved_id.index())
+            .copied()
+            .expect("Foo export type must be inferred"),
+        _ => panic!("Foo export must have a type"),
+    };
+
+    assert!(
+        matches!(foo_ty, InferredTypeData::MergedReference(_)),
+        "Foo export must be a merged reference, got {foo_ty:?}"
+    );
+
+    let InferredTypeData::MergedReference(reference) = foo_ty else {
+        panic!("Foo export must be a merged reference, got {foo_ty:?}");
+    };
+    let target = reference
+        .targets(&db)
+        .next()
+        .expect("merged reference must have a target");
+    let expected_ty = normalize_type(&db, index_module, target);
+    let duplicated_target_ty = InferredTypeData::MergedReference(InferredMergedReference::new(
+        &db,
+        Some(target),
+        Some(target),
+        None,
+    ));
+    let normalized_ty = normalize_type(&db, index_module, duplicated_target_ty);
+    assert_eq!(normalized_ty, expected_ty);
+
+    let name_ty = inferred
+        .find_member_type(&db, normalized_ty, "name")
+        .expect("normalized merged reference must expose Foo.name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    assert_inferred_type_snapshot(
+        "test_normalize_type_collapses_equal_merged_reference_targets",
+        &db,
+        &fs,
+    );
 }
 
 #[test]

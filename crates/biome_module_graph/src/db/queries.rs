@@ -19,8 +19,9 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
-        InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
+        InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
+        ReturnType, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -260,6 +261,11 @@ enum TypeNormalizationItem<'db> {
     Type(InferredTypeData<'db>),
     RebuildInstance(usize),
     RebuildIntersection(usize),
+    RebuildMergedReference {
+        has_ty: bool,
+        has_value_ty: bool,
+        has_namespace_ty: bool,
+    },
     RebuildUnion(usize),
 }
 
@@ -304,6 +310,25 @@ pub fn normalize_type<'db>(
                             stack.push(TypeNormalizationItem::Type(*ty));
                         }
                     }
+                    InferredTypeData::MergedReference(reference) => {
+                        let ty = reference.ty(db);
+                        let value_ty = reference.value_ty(db);
+                        let namespace_ty = reference.namespace_ty(db);
+                        stack.push(TypeNormalizationItem::RebuildMergedReference {
+                            has_ty: ty.is_some(),
+                            has_value_ty: value_ty.is_some(),
+                            has_namespace_ty: namespace_ty.is_some(),
+                        });
+                        if let Some(namespace_ty) = namespace_ty {
+                            stack.push(TypeNormalizationItem::Type(namespace_ty));
+                        }
+                        if let Some(value_ty) = value_ty {
+                            stack.push(TypeNormalizationItem::Type(value_ty));
+                        }
+                        if let Some(ty) = ty {
+                            stack.push(TypeNormalizationItem::Type(ty));
+                        }
+                    }
                     InferredTypeData::Union(union) => {
                         stack.push(TypeNormalizationItem::RebuildUnion(union.types(db).len()));
                         for ty in union.types(db).iter().rev() {
@@ -335,6 +360,38 @@ pub fn normalize_type<'db>(
                 };
                 let types = results.split_off(start);
                 results.push(InferredTypeData::intersection_from_types(db, types));
+            }
+            TypeNormalizationItem::RebuildMergedReference {
+                has_ty,
+                has_value_ty,
+                has_namespace_ty,
+            } => {
+                let target_count = [has_ty, has_value_ty, has_namespace_ty]
+                    .into_iter()
+                    .filter(|has_target| *has_target)
+                    .count();
+                let Some(start) = results.len().checked_sub(target_count) else {
+                    return original;
+                };
+                let mut targets = results.split_off(start).into_iter();
+                let ty = has_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
+                let value_ty =
+                    has_value_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
+                let namespace_ty =
+                    has_namespace_ty.then(|| targets.next().unwrap_or(InferredTypeData::Unknown));
+                let target_values = [ty, value_ty, namespace_ty]
+                    .into_iter()
+                    .flatten()
+                    .collect::<Vec<_>>();
+                if let Some(first) = target_values.first().copied()
+                    && target_values.iter().all(|target| *target == first)
+                {
+                    results.push(first);
+                } else {
+                    results.push(InferredTypeData::MergedReference(
+                        InferredMergedReference::new(db, ty, value_ty, namespace_ty),
+                    ));
+                }
             }
             TypeNormalizationItem::RebuildUnion(type_count) => {
                 let Some(start) = results.len().checked_sub(type_count) else {
