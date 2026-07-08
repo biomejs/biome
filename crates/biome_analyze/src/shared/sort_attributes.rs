@@ -55,10 +55,6 @@ pub trait SortableAttribute {
         sort_first: &[Box<str>],
         base: impl Fn(&Self, &Self) -> Ordering,
     ) -> Ordering {
-        // Fast path: with no pinned attributes the comparison is fully
-        // delegated to `base`. This avoids the `name()` lookups performed by
-        // `sort_first_index`, which are hot when the rule runs with default
-        // options (the common case).
         if sort_first.is_empty() {
             return base(self, other);
         }
