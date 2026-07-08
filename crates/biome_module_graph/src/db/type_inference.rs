@@ -165,6 +165,9 @@ impl<'db> InferredModuleTypes<'db> {
                             .map(|ty| (ty, lookup, true)),
                     );
                 }
+                InferredTypeData::MergedReference(reference) => {
+                    pending.extend(reference.targets(db).map(|ty| (ty, lookup, true)));
+                }
                 InferredTypeData::Object(object) => {
                     if let Some(prototype) = object.prototype(db) {
                         pending.push((prototype, lookup, collect));
@@ -265,7 +268,7 @@ fn find_member_type<'db>(
             member
                 .kind
                 .index_signature_type()
-                .is_some_and(|ty| ty.is_string_key_type(db))
+                .is_some_and(|ty| ty.is_string_key_type(db) || ty.is_string_literal_key(db, name))
                 .then_some(member.ty)
         })
     })?

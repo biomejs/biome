@@ -114,6 +114,14 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    pub fn is_string_literal_key(self, db: &'db dyn TypeDb, name: &str) -> bool {
+        matches!(
+            self,
+            Self::Literal(literal)
+                if matches!(literal.literal(db), Literal::String(string) if string.as_str() == name)
+        )
+    }
+
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
         let mut resolve_reference = |reference: &raw::TypeReference| {
             Self::from_raw_reference_lossy(reference)
@@ -814,6 +822,19 @@ pub struct InternedMergedReference<'db> {
     pub ty: Option<TypeData<'db>>,
     pub value_ty: Option<TypeData<'db>>,
     pub namespace_ty: Option<TypeData<'db>>,
+}
+
+impl<'db> InternedMergedReference<'db> {
+    /// Returns the types stored in this merged reference.
+    ///
+    /// Missing parts are skipped. The order is type, value, then namespace.
+    pub fn targets(self, db: &'db dyn TypeDb) -> impl Iterator<Item = TypeData<'db>> {
+        // Preserve the raw merged-reference order: type, value, then namespace.
+        // If future lookups need a narrower target set, this is the single place to change it.
+        [self.ty(db), self.value_ty(db), self.namespace_ty(db)]
+            .into_iter()
+            .flatten()
+    }
 }
 
 #[salsa::interned]

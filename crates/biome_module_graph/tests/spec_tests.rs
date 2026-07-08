@@ -23,7 +23,7 @@ use biome_js_type_info::{
     TypeData, TypeResolver,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        ReturnType as InferredReturnType, TypeData as InferredTypeData,
+        Literal as InferredLiteral, ReturnType as InferredReturnType, TypeData as InferredTypeData,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
@@ -124,7 +124,9 @@ fn is_inferred_instance_of<'db>(
 }
 
 fn is_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
-    ty == InferredTypeData::String || is_inferred_instance_of(db, ty, InferredTypeData::String)
+    ty == InferredTypeData::String
+        || is_inferred_instance_of(db, ty, InferredTypeData::String)
+        || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::String(_)))
 }
 
 fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
@@ -1304,6 +1306,34 @@ fn test_infer_module_types_resolves_string_index_signature_members() {
 }
 
 #[test]
+fn test_infer_module_types_resolves_computed_string_literal_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const object = {
+                ["name"]: "object",
+            };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let object_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "object")
+        .expect("object binding type must be inferred");
+
+    let name_ty = inferred
+        .find_member_type(&db, object_ty, "name")
+        .expect("computed string literal member must match its literal name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    assert!(inferred.find_member_type(&db, object_ty, "other").is_none());
+}
+
+#[test]
 fn test_infer_module_types_documents_anonymous_default_class_handle_gap() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -1374,6 +1404,96 @@ fn test_infer_module_types_resolves_imported_local_handle_members() {
     let name_ty = inferred
         .find_member_type(&db, *return_ty, "name")
         .expect("Foo.create().name must be found through the imported local handle");
+    assert!(is_inferred_string(&db, name_ty));
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_inherited_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"
+            export class Base {
+                name: string;
+
+                static label(): string {
+                    return "base";
+                }
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { Base } from "./base.ts";
+
+            export class Derived extends Base {
+                value: number;
+            }
+
+            export const derived: Derived = new Derived();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let derived_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "derived")
+        .expect("derived binding type must be inferred");
+    let name_ty = inferred
+        .find_member_type(&db, derived_ty, "name")
+        .expect("Derived instance must inherit imported Base.name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    let derived_class_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "Derived")
+        .expect("Derived class type must be inferred");
+    let label_ty = inferred
+        .find_member_type(&db, derived_class_ty, "label")
+        .expect("Derived class must inherit imported Base.label");
+    assert!(matches!(label_ty, InferredTypeData::Function(_)));
+}
+
+#[test]
+fn test_infer_module_types_resolves_imported_interface_extends_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"
+            export interface Base {
+                name: string;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Base } from "./base.ts";
+
+            export interface Derived extends Base {
+                value: number;
+            }
+
+            export const derived: Derived = {
+                name: "derived",
+                value: 1,
+            };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/base.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let derived_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "derived")
+        .expect("derived binding type must be inferred");
+
+    let name_ty = inferred
+        .find_member_type(&db, derived_ty, "name")
+        .expect("Derived interface must inherit imported Base.name");
     assert!(is_inferred_string(&db, name_ty));
 }
 
