@@ -5,7 +5,7 @@ use biome_css_syntax::TextRange;
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, ImportSymbol, Path, ResolvedTypeId, TypeId, TypeImportQualifier,
-    TypeReference, TypeResolver, TypeResolverLevel,
+    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
     interned_types::{
         InternedNamespace as InferredNamespace, InternedObject as InferredObject,
         Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
@@ -306,6 +306,32 @@ fn find_member_type<'db>(
     })?
 }
 
+fn object_type<'db>(
+    db: &'db dyn ModuleDb,
+    members: Vec<InferredTypeMember<'db>>,
+) -> InferredTypeData<'db> {
+    InferredTypeData::Object(InferredObject::new(db, None, members.into_boxed_slice()))
+}
+
+fn strip_undefined<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+    let InferredTypeData::Union(union) = ty else {
+        return ty;
+    };
+
+    let types = union.types(db);
+    let filtered = types
+        .iter()
+        .copied()
+        .filter(|ty| *ty != InferredTypeData::Undefined)
+        .collect::<Vec<_>>();
+
+    if filtered.len() == types.len() {
+        ty
+    } else {
+        InferredTypeData::union_from_types(db, filtered)
+    }
+}
+
 pub(super) fn collected_type_result<'db>(
     db: &'db dyn ModuleDb,
     types: Vec<InferredTypeData<'db>>,
@@ -518,10 +544,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty
     }
 
-    fn resolve_qualifier(
-        &mut self,
-        qualifier: &biome_js_type_info::TypeReferenceQualifier,
-    ) -> InferredTypeData<'db> {
+    fn resolve_qualifier(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
         let Some(identifier) = qualifier.path.iter().next() else {
             return InferredTypeData::Unknown;
         };
@@ -581,6 +604,20 @@ impl<'db> ResolutionCtx<'db, '_> {
             ));
         }
 
+        if (qualifier.is_pick() || qualifier.is_omit()) && qualifier.type_parameters.len() == 2 {
+            return self.resolve_pick_or_omit(qualifier);
+        }
+
+        if (qualifier.is_partial() || qualifier.is_required())
+            && qualifier.type_parameters.len() == 1
+        {
+            return self.resolve_partial_or_required(qualifier);
+        }
+
+        if qualifier.is_readonly() && qualifier.type_parameters.len() == 1 {
+            return self.resolve_readonly(qualifier);
+        }
+
         if qualifier.is_array() {
             return InferredTypeData::array_instance(
                 self.db,
@@ -629,7 +666,178 @@ impl<'db> ResolutionCtx<'db, '_> {
             );
         }
 
+        if qualifier.is_weak_map() {
+            return InferredTypeData::weak_map_instance(
+                self.db,
+                qualifier
+                    .type_parameters
+                    .iter()
+                    .map(|parameter| self.resolve(parameter))
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice(),
+            );
+        }
+
         InferredTypeData::Unknown
+    }
+
+    fn resolve_pick_or_omit(
+        &mut self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> InferredTypeData<'db> {
+        let target_ty = self.resolve(&qualifier.type_parameters[0]);
+        let key_ty = self.resolve(&qualifier.type_parameters[1]);
+        let Some(key_names) = self.string_literal_keys(key_ty) else {
+            return InferredTypeData::Unknown;
+        };
+        let Some(members) = self.own_members(target_ty) else {
+            return InferredTypeData::Unknown;
+        };
+
+        let is_pick = qualifier.is_pick();
+        let members = members
+            .into_iter()
+            .filter(|member| {
+                member.kind.name().map_or(!is_pick, |name| {
+                    let matches_key = key_names.iter().any(|key| key.text() == name.text());
+                    if is_pick { matches_key } else { !matches_key }
+                })
+            })
+            .collect::<Vec<_>>();
+
+        object_type(self.db, members)
+    }
+
+    fn resolve_partial_or_required(
+        &mut self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> InferredTypeData<'db> {
+        let target_ty = self.resolve(&qualifier.type_parameters[0]);
+        let Some(members) = self.own_members(target_ty) else {
+            return InferredTypeData::Unknown;
+        };
+
+        let is_partial = qualifier.is_partial();
+        let members = members
+            .into_iter()
+            .map(|mut member| {
+                let was_optional = member.kind.is_optional();
+                if is_partial {
+                    member.kind = member.kind.with_optional();
+                    if !was_optional {
+                        member.ty = InferredTypeData::union_from_types(
+                            self.db,
+                            Vec::from([member.ty, InferredTypeData::Undefined]),
+                        );
+                    }
+                } else {
+                    member.kind = member.kind.without_optional();
+                    if was_optional {
+                        member.ty = strip_undefined(self.db, member.ty);
+                    }
+                }
+                member
+            })
+            .collect();
+
+        object_type(self.db, members)
+    }
+
+    fn resolve_readonly(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
+        let target_ty = self.resolve(&qualifier.type_parameters[0]);
+        self.own_members(target_ty)
+            .map_or(InferredTypeData::Unknown, |members| {
+                object_type(self.db, members)
+            })
+    }
+
+    fn own_members(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<InferredTypeMember<'db>>> {
+        let mut ty = ty;
+        let mut remaining_steps = MAX_LOCAL_TYPE_RESOLUTION_STEPS;
+
+        loop {
+            if remaining_steps == 0 {
+                return None;
+            }
+            remaining_steps -= 1;
+
+            match self.resolve_inferred_type(ty) {
+                InferredTypeData::Class(class) => return Some(class.members(self.db).to_vec()),
+                InferredTypeData::Interface(interface) => {
+                    return Some(interface.members(self.db).to_vec());
+                }
+                InferredTypeData::InstanceOf(instance) => ty = instance.ty(self.db),
+                InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                    InferredLiteral::Object(members) => return Some(members.to_vec()),
+                    _ => return None,
+                },
+                InferredTypeData::Module(module) => return Some(module.members(self.db).to_vec()),
+                InferredTypeData::Namespace(namespace) => {
+                    return Some(namespace.members(self.db).to_vec());
+                }
+                InferredTypeData::Object(object) => return Some(object.members(self.db).to_vec()),
+                _ => return None,
+            }
+        }
+    }
+
+    fn string_literal_keys(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<Text>> {
+        match self.resolve_inferred_type(ty) {
+            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                InferredLiteral::String(value) => Some(vec![value.as_ref().clone()]),
+                _ => None,
+            },
+            InferredTypeData::Union(union) => Some(
+                union
+                    .types(self.db)
+                    .to_vec()
+                    .into_iter()
+                    .filter_map(|ty| self.string_literal_key(ty))
+                    .collect(),
+            ),
+            _ => None,
+        }
+    }
+
+    fn string_literal_key(&mut self, ty: InferredTypeData<'db>) -> Option<Text> {
+        match self.resolve_inferred_type(ty) {
+            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                InferredLiteral::String(value) => Some(value.as_ref().clone()),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    fn resolve_inferred_type(&mut self, mut ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        let mut seen = FxHashSet::default();
+        let mut remaining_steps = MAX_LOCAL_TYPE_RESOLUTION_STEPS;
+
+        loop {
+            let InferredTypeData::Local(local) = ty else {
+                return ty;
+            };
+
+            if remaining_steps == 0 {
+                return ty;
+            }
+            remaining_steps -= 1;
+
+            let module_key = local.module(self.db);
+            let local_type_id = local.type_id(self.db);
+            if !seen.insert((module_key, local_type_id)) {
+                return ty;
+            }
+
+            ty = if module_key == self.module_key {
+                self.resolve_raw_type_id(TypeId::new(local_type_id.index()))
+            } else {
+                module_for_key(self.db, module_key)
+                    .and_then(|module| infer_module_types(self.db, module))
+                    .and_then(|types| types.types.get(local_type_id.index()).copied())
+                    .unwrap_or(InferredTypeData::Unknown)
+            };
+        }
     }
 
     fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> InferredTypeData<'db> {

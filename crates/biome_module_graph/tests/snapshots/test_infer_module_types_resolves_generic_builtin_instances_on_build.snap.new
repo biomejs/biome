@@ -1,6 +1,6 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests.rs
-assertion_line: 397
+assertion_line: 392
 expression: content
 ---
 

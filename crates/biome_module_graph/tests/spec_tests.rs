@@ -166,6 +166,20 @@ fn contains_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db
     }
 }
 
+fn contains_inferred_undefined<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    if ty == InferredTypeData::Undefined {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_undefined(db, *ty)),
+        _ => false,
+    }
+}
+
 fn is_inferred_promise_with_type_parameter<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -245,6 +259,29 @@ fn interface_member_ty<'db>(
             InferredTypeMemberKind::Named(name) if name.text() == member_name,
         )
         .then_some(member.ty)
+    })
+}
+
+fn object_member_ty_by_name<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    member_name: &str,
+) -> Option<(InferredTypeMemberKind<'db>, InferredTypeData<'db>)> {
+    let object = match ty {
+        InferredTypeData::Object(object) => object,
+        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+            InferredTypeData::Object(object) => object,
+            _ => return None,
+        },
+        _ => return None,
+    };
+
+    object.members(db).iter().find_map(|member| {
+        member
+            .kind
+            .name()
+            .is_some_and(|name| name.text() == member_name)
+            .then(|| (member.kind.clone(), member.ty))
     })
 }
 
@@ -1809,6 +1846,10 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
             export function readSet(value: Set<string>): Set<string> {
                 return value;
             }
+
+            export function readWeakMap(value: WeakMap<object, string>): WeakMap<object, string> {
+                return value;
+            }
         "#,
     );
 
@@ -1852,8 +1893,104 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
         set_instance.type_parameters(&db)[0]
     ));
 
+    let weak_map_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readWeakMap")
+            .expect("readWeakMap return type must be inferred");
+    let InferredTypeData::InstanceOf(weak_map_instance) = weak_map_ty else {
+        panic!("readWeakMap must return a WeakMap instance, got {weak_map_ty:?}");
+    };
+    let InferredTypeData::Class(weak_map_class) = weak_map_instance.ty(&db) else {
+        panic!("readWeakMap must return a class instance");
+    };
+    assert_eq!(
+        weak_map_class.name(&db).as_ref().map(Text::text),
+        Some("WeakMap")
+    );
+    assert_eq!(weak_map_instance.type_parameters(&db).len(), 2);
+    assert!(is_inferred_string(
+        &db,
+        weak_map_instance.type_parameters(&db)[1]
+    ));
+
     assert_inferred_type_snapshot(
         "test_infer_module_types_resolves_generic_builtin_instances_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_builtin_global_identities_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readRegExp(value: RegExp): RegExp {
+                return value;
+            }
+
+            export function readDate(value: Date): Date {
+                return value;
+            }
+
+            export function readError(value: Error): Error {
+                return value;
+            }
+
+            export function readSymbol(value: Symbol): Symbol {
+                return value;
+            }
+
+            export function readDisposable(value: Disposable): Disposable {
+                return value;
+            }
+
+            export function readAsyncDisposable(value: AsyncDisposable): AsyncDisposable {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for (function_name, class_name) in [
+        ("readRegExp", "RegExp"),
+        ("readDate", "Date"),
+        ("readError", "Error"),
+        ("readSymbol", "Symbol"),
+    ] {
+        let ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, function_name)
+            .unwrap_or_else(|| panic!("{function_name} return type must be inferred"));
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            panic!("{function_name} must return a {class_name} instance, got {ty:?}");
+        };
+        let InferredTypeData::Class(class) = instance.ty(&db) else {
+            panic!("{function_name} must return a {class_name} instance, got {ty:?}");
+        };
+        assert_eq!(class.name(&db).as_ref().map(Text::text), Some(class_name));
+    }
+
+    for (function_name, interface_name) in [
+        ("readDisposable", "Disposable"),
+        ("readAsyncDisposable", "AsyncDisposable"),
+    ] {
+        let ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, function_name)
+            .unwrap_or_else(|| panic!("{function_name} return type must be inferred"));
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            panic!("{function_name} must return an {interface_name} instance, got {ty:?}");
+        };
+        let InferredTypeData::Interface(interface) = instance.ty(&db) else {
+            panic!("{function_name} must return an {interface_name} instance, got {ty:?}");
+        };
+        assert_eq!(interface.name(&db).text(), interface_name);
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_builtin_global_identities_on_build",
         &db,
         &fs,
     );
@@ -1894,6 +2031,111 @@ fn test_infer_module_types_resolves_record_index_signature_on_build() {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_resolves_record_index_signature_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_utility_type_members_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Source = {
+                [key: string]: string | number | undefined;
+                name: string;
+                value: number;
+                optional?: string;
+            };
+
+            export function readPick(
+                value: Pick<Source, "name" | "value">,
+            ): Pick<Source, "name" | "value"> {
+                return value;
+            }
+
+            export function readOmit(
+                value: Omit<Source, "value">,
+            ): Omit<Source, "value"> {
+                return value;
+            }
+
+            export function readPartial(value: Partial<Source>): Partial<Source> {
+                return value;
+            }
+
+            export function readRequired(value: Required<Source>): Required<Source> {
+                return value;
+            }
+
+            export function readReadonly(value: Readonly<Source>): Readonly<Source> {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let pick_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readPick")
+        .expect("readPick return type must be inferred");
+    let (_, pick_name_ty) =
+        object_member_ty_by_name(&db, pick_ty, "name").expect("Pick<Source, ...> must keep name");
+    let (_, pick_value_ty) =
+        object_member_ty_by_name(&db, pick_ty, "value").expect("Pick<Source, ...> must keep value");
+    assert!(is_inferred_string(&db, pick_name_ty));
+    assert!(is_inferred_number(&db, pick_value_ty));
+    assert!(object_member_ty_by_name(&db, pick_ty, "optional").is_none());
+    assert!(
+        inferred
+            .find_member_type(&db, pick_ty, "anything")
+            .is_none()
+    );
+
+    let omit_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "readOmit")
+        .expect("readOmit return type must be inferred");
+    let (_, omit_name_ty) =
+        object_member_ty_by_name(&db, omit_ty, "name").expect("Omit<Source, ...> must keep name");
+    assert!(is_inferred_string(&db, omit_name_ty));
+    assert!(object_member_ty_by_name(&db, omit_ty, "value").is_none());
+    let omit_index_ty = inferred
+        .find_member_type(&db, omit_ty, "anything")
+        .expect("Omit<Source, ...> must preserve the string index signature");
+    assert!(contains_inferred_string(&db, omit_index_ty));
+    assert!(contains_inferred_number(&db, omit_index_ty));
+
+    let partial_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readPartial")
+            .expect("readPartial return type must be inferred");
+    let (partial_name_kind, partial_name_ty) =
+        object_member_ty_by_name(&db, partial_ty, "name").expect("Partial<Source> must keep name");
+    assert!(partial_name_kind.is_optional());
+    assert!(contains_inferred_string(&db, partial_name_ty));
+    assert!(contains_inferred_undefined(&db, partial_name_ty));
+
+    let required_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readRequired")
+            .expect("readRequired return type must be inferred");
+    let (required_optional_kind, required_optional_ty) =
+        object_member_ty_by_name(&db, required_ty, "optional")
+            .expect("Required<Source> must keep optional");
+    assert!(!required_optional_kind.is_optional());
+    assert!(is_inferred_string(&db, required_optional_ty));
+    assert!(!contains_inferred_undefined(&db, required_optional_ty));
+
+    let readonly_ty =
+        inferred_function_return_ty_by_name(&db, index_module, &inferred, "readReadonly")
+            .expect("readReadonly return type must be inferred");
+    let (_, readonly_name_ty) = object_member_ty_by_name(&db, readonly_ty, "name")
+        .expect("Readonly<Source> must keep name");
+    assert!(is_inferred_string(&db, readonly_name_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_utility_type_members_on_build",
         &db,
         &fs,
     );

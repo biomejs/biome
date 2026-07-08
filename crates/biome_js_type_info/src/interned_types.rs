@@ -11,9 +11,11 @@ use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
-        GLOBAL_ARRAY_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
-        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID, GLOBAL_UNDEFINED_ID,
-        GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID,
+        GLOBAL_DATE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
+        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
+        GLOBAL_SYMBOL_ID, GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID,
+        GLOBAL_WEAK_MAP_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -473,8 +475,34 @@ impl<'db> TypeData<'db> {
         ))
     }
 
+    fn builtin_interface(db: &'db dyn TypeDb, name: &'static str) -> Self {
+        Self::Interface(InternedInterface::new(
+            db,
+            Box::default(),
+            Box::default(),
+            Box::default(),
+            Text::new_static(name),
+        ))
+    }
+
     pub fn array_class(db: &'db dyn TypeDb) -> Self {
         Self::builtin_class(db, "Array")
+    }
+
+    pub fn async_disposable_interface(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_interface(db, "AsyncDisposable")
+    }
+
+    pub fn date_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Date")
+    }
+
+    pub fn disposable_interface(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_interface(db, "Disposable")
+    }
+
+    pub fn error_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Error")
     }
 
     pub fn map_class(db: &'db dyn TypeDb) -> Self {
@@ -485,8 +513,20 @@ impl<'db> TypeData<'db> {
         Self::builtin_class(db, "Promise")
     }
 
+    pub fn regexp_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "RegExp")
+    }
+
     pub fn set_class(db: &'db dyn TypeDb) -> Self {
         Self::builtin_class(db, "Set")
+    }
+
+    pub fn symbol_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "Symbol")
+    }
+
+    pub fn weak_map_class(db: &'db dyn TypeDb) -> Self {
+        Self::builtin_class(db, "WeakMap")
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
@@ -513,6 +553,10 @@ impl<'db> TypeData<'db> {
 
     pub fn set_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
         Self::instance_of(db, Self::set_class(db), type_parameters)
+    }
+
+    pub fn weak_map_instance(db: &'db dyn TypeDb, type_parameters: Box<[Self]>) -> Self {
+        Self::instance_of(db, Self::weak_map_class(db), type_parameters)
     }
 
     pub fn from_raw_lossy(db: &'db dyn TypeDb, raw: &RawTypeData) -> Self {
@@ -678,9 +722,22 @@ impl<'db> TypeData<'db> {
             raw::TypeReference::Resolved(id) if *id == GLOBAL_GLOBAL_ID => Self::Global,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_BOOLEAN_ID => Self::Boolean,
             raw::TypeReference::Resolved(id) if *id == GLOBAL_ARRAY_ID => Self::array_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_ASYNC_DISPOSABLE_ID => {
+                Self::async_disposable_interface(db)
+            }
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_DATE_ID => Self::date_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_DISPOSABLE_ID => {
+                Self::disposable_interface(db)
+            }
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_ERROR_ID => Self::error_class(db),
             raw::TypeReference::Resolved(id) if *id == GLOBAL_MAP_ID => Self::map_class(db),
             raw::TypeReference::Resolved(id) if *id == GLOBAL_PROMISE_ID => Self::promise_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_REGEXP_ID => Self::regexp_class(db),
             raw::TypeReference::Resolved(id) if *id == GLOBAL_SET_ID => Self::set_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_SYMBOL_ID => Self::symbol_class(db),
+            raw::TypeReference::Resolved(id) if *id == GLOBAL_WEAK_MAP_ID => {
+                Self::weak_map_class(db)
+            }
             raw::TypeReference::Resolved(_) => Self::Unknown,
             raw::TypeReference::Qualifier(qualifier) => qualifier
                 .type_parameters
@@ -1006,11 +1063,34 @@ impl<'db> TypeMemberKind<'db> {
         )
     }
 
+    pub fn is_optional(&self) -> bool {
+        matches!(
+            self,
+            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+        )
+    }
+
+    pub fn with_optional(self) -> Self {
+        match self {
+            Self::Named(name) => Self::NamedOptional(name),
+            Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            other => other,
+        }
+    }
+
+    pub fn without_optional(self) -> Self {
+        match self {
+            Self::NamedOptional(name) => Self::Named(name),
+            Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            other => other,
+        }
+    }
+
     pub fn is_call_signature(&self) -> bool {
         matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
     }
 
-    pub(crate) fn name(&self) -> Option<Text> {
+    pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature
             | Self::ComputedValue(_)
