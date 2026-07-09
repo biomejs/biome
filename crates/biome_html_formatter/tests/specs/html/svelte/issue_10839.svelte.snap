@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_10839.svelte
+---
+
+# Input
+
+```svelte
+<div>
+	{#each presets as [ preset, label ]}
+      <div>preset</div>
+    {/each}
+</div>
+
+<div
+	bind:clientWidth={null, (width) => {
+if (!vertical) {
+trackSize = width
+}
+}}
+	bind:clientHeight={null, (height) => {
+if (vertical) {
+trackSize = height
+}
+}}
+></div>
+
+```
+
+
+# Formatted
+
+```svelte
+<div>
+	{#each presets as [preset, label]}
+		<div>preset</div>
+	{/each}
+</div>
+
+<div
+	bind:clientWidth={
+		null,
+		(width) => {
+if (!vertical) {
+trackSize = width
+}
+}
+	}
+	bind:clientHeight={
+		null,
+		(height) => {
+if (vertical) {
+trackSize = height
+}
+}
+	}
+></div>
+
+```
