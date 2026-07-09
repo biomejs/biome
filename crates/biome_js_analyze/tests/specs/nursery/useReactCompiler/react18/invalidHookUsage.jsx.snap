@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidHookUsage.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+import { useState } from "react";
+
+function HookInNestedFunction() {
+    function nested() {
+        useState(0);
+    }
+
+    nested();
+
+    return <div />;
+}
+
+```
