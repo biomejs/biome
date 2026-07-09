@@ -78,6 +78,105 @@ impl<'db> IntersectionBuilder<'db> {
     }
 }
 
+pub(crate) fn object_from_members<'db>(
+    db: &'db dyn TypeDb,
+    members: Vec<TypeMember<'db>>,
+) -> TypeData<'db> {
+    TypeData::Object(InternedObject::new(db, None, members.into_boxed_slice()))
+}
+
+pub(crate) fn pick_members<'db>(
+    db: &'db dyn TypeDb,
+    members: Vec<TypeMember<'db>>,
+    key_names: &[Text],
+) -> TypeData<'db> {
+    object_from_members(db, filter_members_by_key_names(members, key_names, true))
+}
+
+pub(crate) fn omit_members<'db>(
+    db: &'db dyn TypeDb,
+    members: Vec<TypeMember<'db>>,
+    key_names: &[Text],
+) -> TypeData<'db> {
+    object_from_members(db, filter_members_by_key_names(members, key_names, false))
+}
+
+pub(crate) fn with_all_optional_members<'db>(
+    db: &'db dyn TypeDb,
+    members: Vec<TypeMember<'db>>,
+) -> TypeData<'db> {
+    object_from_members(
+        db,
+        members
+            .into_iter()
+            .map(|mut member| {
+                let was_optional = member.kind.is_optional();
+                member.kind = member.kind.with_optional();
+                if !was_optional {
+                    member.ty =
+                        TypeData::union_from_types(db, Vec::from([member.ty, TypeData::Undefined]));
+                }
+                member
+            })
+            .collect(),
+    )
+}
+
+pub(crate) fn with_all_required_members<'db>(
+    db: &'db dyn TypeDb,
+    members: Vec<TypeMember<'db>>,
+) -> TypeData<'db> {
+    object_from_members(
+        db,
+        members
+            .into_iter()
+            .map(|mut member| {
+                let was_optional = member.kind.is_optional();
+                member.kind = member.kind.without_optional();
+                if was_optional {
+                    member.ty = strip_undefined(db, member.ty);
+                }
+                member
+            })
+            .collect(),
+    )
+}
+
+fn filter_members_by_key_names<'db>(
+    members: Vec<TypeMember<'db>>,
+    key_names: &[Text],
+    is_pick: bool,
+) -> Vec<TypeMember<'db>> {
+    members
+        .into_iter()
+        .filter(|member| {
+            member.kind.name().map_or(!is_pick, |name| {
+                let matches_key = key_names.iter().any(|key| key.text() == name.text());
+                if is_pick { matches_key } else { !matches_key }
+            })
+        })
+        .collect()
+}
+
+fn strip_undefined<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+    let TypeData::Union(union) = ty else {
+        return ty;
+    };
+
+    let types = union.types(db);
+    let filtered = types
+        .iter()
+        .copied()
+        .filter(|ty| *ty != TypeData::Undefined)
+        .collect::<Vec<_>>();
+
+    if filtered.len() == types.len() {
+        ty
+    } else {
+        TypeData::union_from_types(db, filtered)
+    }
+}
+
 enum MergedType<'db> {
     Any,
     ClassInstance(Vec<TypeMember<'db>>),

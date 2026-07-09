@@ -464,6 +464,34 @@ impl<'db> TypeData<'db> {
         IntersectionBuilder::new(db).add_all(types).build()
     }
 
+    pub fn object_from_members(db: &'db dyn TypeDb, members: Vec<TypeMember<'db>>) -> Self {
+        crate::builders::object_from_members(db, members)
+    }
+
+    pub fn pick_members(
+        db: &'db dyn TypeDb,
+        members: Vec<TypeMember<'db>>,
+        key_names: &[Text],
+    ) -> Self {
+        crate::builders::pick_members(db, members, key_names)
+    }
+
+    pub fn omit_members(
+        db: &'db dyn TypeDb,
+        members: Vec<TypeMember<'db>>,
+        key_names: &[Text],
+    ) -> Self {
+        crate::builders::omit_members(db, members, key_names)
+    }
+
+    pub fn with_all_optional_members(db: &'db dyn TypeDb, members: Vec<TypeMember<'db>>) -> Self {
+        crate::builders::with_all_optional_members(db, members)
+    }
+
+    pub fn with_all_required_members(db: &'db dyn TypeDb, members: Vec<TypeMember<'db>>) -> Self {
+        crate::builders::with_all_required_members(db, members)
+    }
+
     fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
         Self::Class(InternedClass::new(
             db,

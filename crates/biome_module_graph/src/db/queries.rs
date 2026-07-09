@@ -14,7 +14,7 @@ use crate::db::type_inference::{
     resolve_raw_types,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb};
+use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
@@ -93,16 +93,50 @@ pub fn infer_module_types_bottom_up<'db>(
             continue;
         };
         for import_path in js_info.static_import_paths.values() {
-            if let Some(path) = import_path.as_path()
-                && let Some(target) = db.module_for_path(path)
-                && !visited.contains(&target)
-            {
-                stack.push((target, false));
+            push_inference_dependency(db, &visited, &mut stack, &import_path.resolved_path);
+        }
+        for reexport in js_info.blanket_reexports.iter() {
+            push_inference_dependency(db, &visited, &mut stack, &reexport.import.resolved_path);
+        }
+        for export in js_info.exports.values() {
+            match export {
+                JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
+                    push_inference_dependency(
+                        db,
+                        &visited,
+                        &mut stack,
+                        &reexport.import.resolved_path,
+                    );
+                }
+                JsExport::Own(JsOwnExport::Namespace(reexport))
+                | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
+                    push_inference_dependency(
+                        db,
+                        &visited,
+                        &mut stack,
+                        &reexport.import.resolved_path,
+                    );
+                }
+                _ => {}
             }
         }
     }
 
     infer_module_types(db, module)
+}
+
+fn push_inference_dependency(
+    db: &dyn ModuleDb,
+    visited: &FxHashSet<ModuleInfo>,
+    stack: &mut Vec<(ModuleInfo, bool)>,
+    resolved_path: &ResolvedPath,
+) {
+    if let Some(path) = resolved_path.as_path()
+        && let Some(target) = db.module_for_path(path)
+        && !visited.contains(&target)
+    {
+        stack.push((target, false));
+    }
 }
 
 #[salsa::interned]

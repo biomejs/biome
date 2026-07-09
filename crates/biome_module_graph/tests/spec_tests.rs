@@ -8,7 +8,10 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 use biome_db::ParsedSource;
-use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
+use biome_db::testing::{
+    Events, assert_function_query_was_not_run, assert_function_query_was_run,
+    function_query_will_execute_position,
+};
 use biome_resolver::ResolveError;
 
 use crate::snap::{ModuleGraphSnapshot, source_files_from_memory_fs, write_source_file};
@@ -38,9 +41,10 @@ use biome_module_graph::{
     ModuleDb, ModuleDiagnostic, ModuleInfo, ModuleInfoKind, ModuleResolver, NormalizeTypeInput,
     PathInfoCache, ResolvedPath, SymbolFromModuleInfo, find_js_exported_symbol,
     infer_call_expression_type as infer_call_expression_type_query, infer_module_types,
-    is_class_referenced_by_importers, normalize_type as normalize_type_query, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    infer_module_types_bottom_up, is_class_referenced_by_importers,
+    normalize_type as normalize_type_query, resolve_css_module, resolve_html_module,
+    resolve_js_module, transitive_importers_of, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -3892,6 +3896,71 @@ fn test_infer_module_types_backdates_equal_output() {
 
     assert_function_query_was_run(&db, infer_module_types, index_module, &events);
     assert_function_query_was_not_run(&db, inferred_expression_count, index_module, &events);
+}
+
+#[test]
+fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/leaf.ts".into(),
+        r#"
+            export type Source = {
+                name: string;
+            };
+        "#,
+    );
+    fs.insert(
+        "/src/mid.ts".into(),
+        r#"
+            export * from "./leaf.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Source } from "./mid.ts";
+
+            export function read(value: Source): Source {
+                return value;
+            }
+        "#,
+    );
+
+    let mut db =
+        build_js_test_module_db(&fs, &["/src/leaf.ts", "/src/mid.ts", "/src/index.ts"], true);
+    let leaf_module = db
+        .module_for_path(Utf8Path::new("/src/leaf.ts"))
+        .expect("leaf module must exist");
+    let mid_module = db
+        .module_for_path(Utf8Path::new("/src/mid.ts"))
+        .expect("mid module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+
+    db.clear_salsa_events();
+    let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
+    let return_ty = inferred_function_return_ty_by_name(&db, index_module, &inferred, "read")
+        .expect("read return type must be inferred");
+    let name_ty = inferred
+        .find_member_type(&db, return_ty, "name")
+        .expect("re-exported Source must expose name");
+    assert!(is_inferred_string(&db, name_ty));
+
+    let events = db.take_salsa_events();
+    let leaf_position =
+        function_query_will_execute_position(&db, infer_module_types, leaf_module, &events)
+            .expect("leaf inference must run");
+    let mid_position =
+        function_query_will_execute_position(&db, infer_module_types, mid_module, &events)
+            .expect("mid inference must run");
+    let index_position =
+        function_query_will_execute_position(&db, infer_module_types, index_module, &events)
+            .expect("index inference must run");
+    assert!(
+        leaf_position < mid_position && mid_position < index_position,
+        "bottom-up inference must warm blanket re-export dependencies before their importers"
+    );
 }
 
 #[test]

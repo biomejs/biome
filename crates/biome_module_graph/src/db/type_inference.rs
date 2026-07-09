@@ -7,9 +7,8 @@ use biome_js_type_info::{
     GLOBAL_RESOLVER, ImportSymbol, Path, ResolvedTypeId, TypeId, TypeImportQualifier,
     TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
     interned_types::{
-        InternedNamespace as InferredNamespace, InternedObject as InferredObject,
-        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, ModuleKey,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        InternedNamespace as InferredNamespace, Literal as InferredLiteral, LocalTypeHandle,
+        LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
         TypeMemberKind as InferredTypeMemberKind,
     },
 };
@@ -306,32 +305,6 @@ fn find_member_type<'db>(
     })?
 }
 
-fn object_type<'db>(
-    db: &'db dyn ModuleDb,
-    members: Vec<InferredTypeMember<'db>>,
-) -> InferredTypeData<'db> {
-    InferredTypeData::Object(InferredObject::new(db, None, members.into_boxed_slice()))
-}
-
-fn strip_undefined<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
-    let InferredTypeData::Union(union) = ty else {
-        return ty;
-    };
-
-    let types = union.types(db);
-    let filtered = types
-        .iter()
-        .copied()
-        .filter(|ty| *ty != InferredTypeData::Undefined)
-        .collect::<Vec<_>>();
-
-    if filtered.len() == types.len() {
-        ty
-    } else {
-        InferredTypeData::union_from_types(db, filtered)
-    }
-}
-
 pub(super) fn collected_type_result<'db>(
     db: &'db dyn ModuleDb,
     types: Vec<InferredTypeData<'db>>,
@@ -594,14 +567,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         if qualifier.is_record() && qualifier.type_parameters.len() == 2 {
             let key_ty = self.resolve(&qualifier.type_parameters[0]);
             let value_ty = self.resolve(&qualifier.type_parameters[1]);
-            return InferredTypeData::Object(InferredObject::new(
+            return InferredTypeData::object_from_members(
                 self.db,
-                None,
-                Box::from([InferredTypeMember {
+                Vec::from([InferredTypeMember {
                     kind: InferredTypeMemberKind::IndexSignature(key_ty),
                     ty: value_ty,
                 }]),
-            ));
+            );
         }
 
         if (qualifier.is_pick() || qualifier.is_omit()) && qualifier.type_parameters.len() == 2 {
@@ -694,18 +666,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             return InferredTypeData::Unknown;
         };
 
-        let is_pick = qualifier.is_pick();
-        let members = members
-            .into_iter()
-            .filter(|member| {
-                member.kind.name().map_or(!is_pick, |name| {
-                    let matches_key = key_names.iter().any(|key| key.text() == name.text());
-                    if is_pick { matches_key } else { !matches_key }
-                })
-            })
-            .collect::<Vec<_>>();
-
-        object_type(self.db, members)
+        if qualifier.is_pick() {
+            InferredTypeData::pick_members(self.db, members, &key_names)
+        } else {
+            InferredTypeData::omit_members(self.db, members, &key_names)
+        }
     }
 
     fn resolve_partial_or_required(
@@ -717,37 +682,18 @@ impl<'db> ResolutionCtx<'db, '_> {
             return InferredTypeData::Unknown;
         };
 
-        let is_partial = qualifier.is_partial();
-        let members = members
-            .into_iter()
-            .map(|mut member| {
-                let was_optional = member.kind.is_optional();
-                if is_partial {
-                    member.kind = member.kind.with_optional();
-                    if !was_optional {
-                        member.ty = InferredTypeData::union_from_types(
-                            self.db,
-                            Vec::from([member.ty, InferredTypeData::Undefined]),
-                        );
-                    }
-                } else {
-                    member.kind = member.kind.without_optional();
-                    if was_optional {
-                        member.ty = strip_undefined(self.db, member.ty);
-                    }
-                }
-                member
-            })
-            .collect();
-
-        object_type(self.db, members)
+        if qualifier.is_partial() {
+            InferredTypeData::with_all_optional_members(self.db, members)
+        } else {
+            InferredTypeData::with_all_required_members(self.db, members)
+        }
     }
 
     fn resolve_readonly(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
         let target_ty = self.resolve(&qualifier.type_parameters[0]);
         self.own_members(target_ty)
             .map_or(InferredTypeData::Unknown, |members| {
-                object_type(self.db, members)
+                InferredTypeData::object_from_members(self.db, members)
             })
     }
 
