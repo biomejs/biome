@@ -44,7 +44,8 @@ impl TypedService {
     )]
     fn resolver(&self) -> Option<Arc<ModuleResolver>> {
         let typed_module = self.module.as_ref()?;
-        let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
+        // NOTE: commented, no need to do useless computation. Comment this out once we're ready to migrate to the new engine.
+        // let _ = infer_module_types_bottom_up(typed_module.db.as_ref(), typed_module.module);
         let ModuleInfoKind::Js(module_info) = typed_module.module.kind(typed_module.db.as_ref())
         else {
             return None;
