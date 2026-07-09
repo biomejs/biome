@@ -1,0 +1,193 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box<T> {
+	value: T;
+
+	constructor(value: T) {
+		this.value = value;
+	}
+}
+
+export class ArrayBox<T> {
+	value: T;
+
+	constructor(values: Array<T>) {
+		this.value = values[0] as T;
+	}
+}
+
+export class CallbackBox<T> {
+	value: T;
+
+	constructor(read: () => T) {
+		this.value = read();
+	}
+}
+
+export const directValue = new Box("text").value;
+
+export const values: Array<number> = [1];
+export const arrayValue = new ArrayBox(values).value;
+
+export const callbackValue = new CallbackBox(() => true).value;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => instanceof local type 35
+
+Module TypeId(2) => instanceof T
+
+Module TypeId(3) => unknown
+
+Module TypeId(4) => instanceof T
+
+Module TypeId(5) => instanceof Array<instanceof T>
+
+Module TypeId(6) => instanceof local type 39
+
+Module TypeId(7) => instanceof Array<instanceof T>
+
+Module TypeId(8) => number: 0
+
+Module TypeId(9) => instanceof T | undefined
+
+Module TypeId(10) => instanceof T
+
+Module TypeId(11) => instanceof T
+
+Module TypeId(12) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Module TypeId(13) => instanceof local type 43
+
+Module TypeId(14) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Module TypeId(15) => instanceof T
+
+Module TypeId(16) => local type 35
+
+Module TypeId(17) => string: text
+
+Module TypeId(18) => instanceof Box<string: text>
+
+Module TypeId(19) => string: text
+
+Module TypeId(20) => number: 1
+
+Module TypeId(21) => [number: 1]
+
+Module TypeId(22) => instanceof Array<number>
+
+Module TypeId(23) => local type 39
+
+Module TypeId(24) => instanceof Array<number>
+
+Module TypeId(25) => instanceof ArrayBox<number>
+
+Module TypeId(26) => number
+
+Module TypeId(27) => local type 43
+
+Module TypeId(28) => bool: true
+
+Module TypeId(29) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: bool: true
+}
+
+Module TypeId(30) => instanceof CallbackBox<bool: true>
+
+Module TypeId(31) => bool: true
+
+Module TypeId(32) => T
+
+Module TypeId(33) => instanceof T
+
+Module TypeId(34) => constructor {
+  params: [
+    required value: instanceof T
+  ]
+  type_args: []
+  returns: none
+}
+
+Module TypeId(35) => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(36) => instanceof T
+
+Module TypeId(37) => instanceof Array<instanceof T>
+
+Module TypeId(38) => constructor {
+  params: [
+    required values: instanceof Array<instanceof T>
+  ]
+  type_args: []
+  returns: none
+}
+
+Module TypeId(39) => class "ArrayBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(40) => instanceof T
+
+Module TypeId(41) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof T
+}
+
+Module TypeId(42) => constructor {
+  params: [
+    required read: sync Function {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: instanceof T
+    }
+  ]
+  type_args: []
+  returns: none
+}
+
+Module TypeId(43) => class "CallbackBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+```

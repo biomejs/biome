@@ -1,0 +1,41 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export async function consume(value: Promise<string> | number) {
+	const awaited = await value;
+	return awaited;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof Promise<string>
+
+Module TypeId(1) => instanceof Promise<string> | number
+
+Module TypeId(2) => instanceof Promise<string> | number
+
+Module TypeId(3) => string | number
+
+Module TypeId(4) => string | number
+
+Module TypeId(5) => instanceof Promise<string | number>
+
+Module TypeId(6) => async Function "consume" {
+  accepts: {
+    params: [
+      required value: instanceof Promise<string> | number
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<string | number>
+}
+```

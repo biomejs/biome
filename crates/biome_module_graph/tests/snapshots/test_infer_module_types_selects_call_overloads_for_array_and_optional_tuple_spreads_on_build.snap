@@ -1,0 +1,298 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function readArray(value: string): string;
+export function readArray(left: number, right: number): boolean;
+export function readArray(..._args: [string] | [number, number]) {
+	return undefined as string | boolean;
+}
+
+export const numbers: number[] = [1, 2];
+export const arraySpread = readArray(...numbers);
+
+export function readTuple(value: string): string;
+export function readTuple(value: string, count: number): number;
+export function readTuple(..._args: [string, number?]) {
+	return undefined as string | number;
+}
+
+export const optionalTuple: [string, number?] = ["value"];
+export const optionalTupleSpread = readTuple(...optionalTuple);
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => [string]
+
+Module TypeId(1) => [number,
+number]
+
+Module TypeId(2) => [string] | [number,
+number]
+
+Module TypeId(3) => boolean
+
+Module TypeId(4) => string | boolean
+
+Module TypeId(5) => number: 1
+
+Module TypeId(6) => number: 2
+
+Module TypeId(7) => [number: 1,
+number: 2]
+
+Module TypeId(8) => instanceof Array<number>
+
+Module TypeId(9) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
+}
+
+Module TypeId(10) => instanceof Array<number>
+
+Module TypeId(11) => boolean
+
+Module TypeId(12) => [string,
+number?]
+
+Module TypeId(13) => string | number
+
+Module TypeId(14) => string: value
+
+Module TypeId(15) => [string: value]
+
+Module TypeId(16) => instanceof [string,
+number?]
+
+Module TypeId(17) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+            required count: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required ..._args: [string,
+            number?]
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Module TypeId(18) => instanceof [string,
+number?]
+
+Module TypeId(19) => string
+
+Module TypeId(20) => sync Function "readArray" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(21) => sync Function "readArray" {
+  accepts: {
+    params: [
+      required left: number
+      required right: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Module TypeId(22) => sync Function "readArray" {
+  accepts: {
+    params: [
+      required ..._args: [string] | [number,
+      number]
+    ]
+    type_args: []
+  }
+  returns: string | boolean
+}
+
+Module TypeId(23) => sync Function "readTuple" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(24) => sync Function "readTuple" {
+  accepts: {
+    params: [
+      required value: string
+      required count: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Module TypeId(25) => sync Function "readTuple" {
+  accepts: {
+    params: [
+      required ..._args: [string,
+      number?]
+    ]
+    type_args: []
+  }
+  returns: string | number
+}
+
+Module TypeId(26) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required value: string
+            required count: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "readTuple" {
+        accepts: {
+          params: [
+            required ..._args: [string,
+            number?]
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Module TypeId(27) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
+}
+```

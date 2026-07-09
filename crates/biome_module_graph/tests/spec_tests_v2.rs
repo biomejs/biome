@@ -2710,6 +2710,80 @@ fn test_infer_module_types_preserves_new_expression_generic_instances_on_build()
 }
 
 #[test]
+fn test_infer_module_types_infers_new_expression_nested_generic_instances_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Box<T> {
+                value: T;
+
+                constructor(value: T) {
+                    this.value = value;
+                }
+            }
+
+            export class ArrayBox<T> {
+                value: T;
+
+                constructor(values: Array<T>) {
+                    this.value = values[0] as T;
+                }
+            }
+
+            export class CallbackBox<T> {
+                value: T;
+
+                constructor(read: () => T) {
+                    this.value = read();
+                }
+            }
+
+            export const directValue = new Box("text").value;
+
+            export const values: Array<number> = [1];
+            export const arrayValue = new ArrayBox(values).value;
+
+            export const callbackValue = new CallbackBox(() => true).value;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let direct_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "directValue")
+        .expect("directValue binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, direct_value_ty)
+    ));
+
+    let array_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "arrayValue")
+        .expect("arrayValue binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, array_value_ty)
+    ));
+
+    let callback_value_ty =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "callbackValue")
+            .expect("callbackValue binding type must be inferred");
+    assert!(is_inferred_boolean(
+        &db,
+        inferred.resolve_type(&db, callback_value_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_infers_new_expression_nested_generic_instances_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_evaluates_await_promise_like_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -2759,6 +2833,38 @@ fn test_infer_module_types_evaluates_await_promise_like_expressions_on_build() {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_evaluates_await_promise_like_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export async function consume(value: Promise<string> | number) {
+                const awaited = await value;
+                return awaited;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let awaited_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "awaited")
+        .expect("awaited binding type must be inferred");
+    let awaited_ty = inferred.resolve_type(&db, awaited_ty);
+    assert!(contains_inferred_string(&db, awaited_ty));
+    assert!(contains_inferred_number(&db, awaited_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_await_union_expressions_on_build",
         &db,
         &fs,
     );
@@ -2819,6 +2925,141 @@ fn test_infer_module_types_selects_call_overloads_by_parameter_types_on_build() 
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_selects_call_overloads_by_parameter_types_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_by_nominal_class_parameters_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Foo {}
+            export class Bar {}
+
+            export function select(value: Foo): string;
+            export function select(value: Bar): number;
+            export function select(_value: Foo | Bar): string | number {
+                return undefined as string | number;
+            }
+
+            export const selected = select(new Bar());
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let selected_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "selected")
+        .expect("selected binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, selected_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_selects_call_overloads_by_nominal_class_parameters_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_for_subclass_arguments_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Base {}
+            export class Derived extends Base {}
+            export class Other {}
+
+            export function select(value: Other): number;
+            export function select(value: Base): string;
+            export function select(_value: Other | Base): string | number {
+                return undefined as string | number;
+            }
+
+            export const selected = select(new Derived());
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let selected_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "selected")
+        .expect("selected binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, selected_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_selects_call_overloads_for_subclass_arguments_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_for_array_and_optional_tuple_spreads_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readArray(value: string): string;
+            export function readArray(left: number, right: number): boolean;
+            export function readArray(..._args: [string] | [number, number]) {
+                return undefined as string | boolean;
+            }
+
+            export const numbers: number[] = [1, 2];
+            export const arraySpread = readArray(...numbers);
+
+            export function readTuple(value: string): string;
+            export function readTuple(value: string, count: number): number;
+            export function readTuple(..._args: [string, number?]) {
+                return undefined as string | number;
+            }
+
+            export const optionalTuple: [string, number?] = ["value"];
+            export const optionalTupleSpread = readTuple(...optionalTuple);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let array_spread_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "arraySpread")
+        .expect("arraySpread binding type must be inferred");
+    assert!(is_inferred_boolean(
+        &db,
+        inferred.resolve_type(&db, array_spread_ty)
+    ));
+
+    let optional_tuple_spread_ty =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "optionalTupleSpread")
+            .expect("optionalTupleSpread binding type must be inferred");
+    let optional_tuple_spread_ty = inferred.resolve_type(&db, optional_tuple_spread_ty);
+    assert!(
+        is_inferred_string(&db, optional_tuple_spread_ty),
+        "optionalTupleSpread must be string, got {}",
+        format_inferred_type(&db, optional_tuple_spread_ty)
+    );
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_selects_call_overloads_for_array_and_optional_tuple_spreads_on_build",
         &db,
         &fs,
     );

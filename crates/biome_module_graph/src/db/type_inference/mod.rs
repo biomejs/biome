@@ -1,3 +1,5 @@
+#![deny(clippy::wildcard_enum_match_arm)]
+
 use crate::ModuleDb;
 use biome_css_syntax::TextRange;
 use biome_js_type_info::interned_types::{LocalTypeId, ModuleKey, TypeData as InferredTypeData};

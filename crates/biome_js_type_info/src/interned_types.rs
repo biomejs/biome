@@ -558,7 +558,7 @@ impl<'db> TypeData<'db> {
         let mut results = Vec::new();
         let mut items = TypeSubstitutionIter::new(db, self, substitution);
 
-        while let Some(item) = items.next() {
+        for item in items.by_ref() {
             match item {
                 TypeSubstitutionItem::Type(ty) => results.push(ty),
                 TypeSubstitutionItem::RebuildInstance(type_parameter_count) => {
@@ -1425,11 +1425,7 @@ pub struct InternedFunction<'db> {
 }
 
 impl<'db> InternedFunction<'db> {
-    pub(crate) fn intersection_with(
-        self,
-        db: &'db dyn TypeDb,
-        other: Self,
-    ) -> InternedFunction<'db> {
+    pub(crate) fn intersection_with(self, db: &'db dyn TypeDb, other: Self) -> Self {
         let return_type = match (self.return_type(db), other.return_type(db)) {
             (ReturnType::Type(left), ReturnType::Type(right)) => {
                 ReturnType::Type(TypeData::union_from_types(db, Vec::from([*left, *right])))

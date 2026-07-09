@@ -238,7 +238,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                         );
                     }
                 }
-                _ => return ty,
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return ty,
             }
         }
 

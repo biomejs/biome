@@ -81,7 +81,41 @@ impl<'db> InferredModuleTypes<'db> {
                     );
                     (target, MemberLookup::Instance)
                 }
-                ty => (ty, lookup),
+                ty @ (InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword) => (ty, lookup),
             };
 
             if !seen.insert((ty, lookup, state.substitutions.clone())) {
@@ -176,7 +210,35 @@ impl<'db> InferredModuleTypes<'db> {
                         }
                     }));
                 }
-                _ => {}
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {}
             }
         }
 
@@ -205,7 +267,12 @@ impl<'db> InferredModuleTypes<'db> {
                 InferredLiteral::Object(members) => {
                     find_member_type(db, members, name, lookup, true)
                 }
-                _ => None,
+                InferredLiteral::BigInt(_)
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Number(_)
+                | InferredLiteral::RegExp(_)
+                | InferredLiteral::String(_)
+                | InferredLiteral::Template(_) => None,
             },
             InferredTypeData::Module(module) => {
                 find_member_type(db, module.members(db), name, lookup, true)
@@ -216,7 +283,36 @@ impl<'db> InferredModuleTypes<'db> {
             InferredTypeData::Object(object) => {
                 find_member_type(db, object.members(db), name, lookup, true)
             }
-            _ => None,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
         }
     }
 }
@@ -236,13 +332,13 @@ pub(in crate::db::type_inference) enum StaticMemberMode {
 impl StaticMemberMode {
     fn allows_named_member(self, kind: &InferredTypeMemberKind<'_>) -> bool {
         match self {
-            StaticMemberMode::Class => kind.is_static() && !kind.is_constructor(),
-            StaticMemberMode::Instance => !kind.is_static(),
+            Self::Class => kind.is_static() && !kind.is_constructor(),
+            Self::Instance => !kind.is_static(),
         }
     }
 
     fn allows_index_signature(self) -> bool {
-        matches!(self, StaticMemberMode::Instance)
+        matches!(self, Self::Instance)
     }
 }
 
@@ -307,7 +403,38 @@ fn declared_type_parameters<'db>(
         InferredTypeData::Function(function) => Some(function.type_parameters(db)),
         InferredTypeData::InstanceOf(instance) => Some(instance.type_parameters(db)),
         InferredTypeData::Interface(interface) => Some(interface.type_parameters(db)),
-        _ => None,
+        InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Constructor(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::Union(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::TypeofType(_)
+        | InferredTypeData::TypeofValue(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword => None,
     }
 }
 
@@ -325,7 +452,41 @@ pub(in crate::db::type_inference) fn apply_substitutions<'db>(
 fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
     match ty {
         InferredTypeData::InstanceOf(instance) => instance.ty(db),
-        ty => ty,
+        ty @ (InferredTypeData::Unknown
+        | InferredTypeData::Divergent(_)
+        | InferredTypeData::Global
+        | InferredTypeData::BigInt
+        | InferredTypeData::Boolean
+        | InferredTypeData::Null
+        | InferredTypeData::Number
+        | InferredTypeData::String
+        | InferredTypeData::Symbol
+        | InferredTypeData::Undefined
+        | InferredTypeData::Conditional
+        | InferredTypeData::Class(_)
+        | InferredTypeData::Constructor(_)
+        | InferredTypeData::Function(_)
+        | InferredTypeData::Interface(_)
+        | InferredTypeData::Module(_)
+        | InferredTypeData::Namespace(_)
+        | InferredTypeData::Object(_)
+        | InferredTypeData::Tuple(_)
+        | InferredTypeData::Generic(_)
+        | InferredTypeData::Local(_)
+        | InferredTypeData::Intersection(_)
+        | InferredTypeData::Union(_)
+        | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::Literal(_)
+        | InferredTypeData::MergedReference(_)
+        | InferredTypeData::TypeofExpression(_)
+        | InferredTypeData::TypeofType(_)
+        | InferredTypeData::TypeofValue(_)
+        | InferredTypeData::AnyKeyword
+        | InferredTypeData::NeverKeyword
+        | InferredTypeData::ObjectKeyword
+        | InferredTypeData::ThisKeyword
+        | InferredTypeData::UnknownKeyword
+        | InferredTypeData::VoidKeyword) => ty,
     }
 }
 

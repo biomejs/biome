@@ -1,0 +1,170 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Base {}
+export class Derived extends Base {}
+export class Other {}
+
+export function select(value: Other): number;
+export function select(value: Base): string;
+export function select(_value: Other | Base): string | number {
+	return undefined as string | number;
+}
+
+export const selected = select(new Derived());
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => local type 11
+
+Module TypeId(1) => instanceof local type 13
+
+Module TypeId(2) => instanceof local type 11
+
+Module TypeId(3) => instanceof local type 13
+
+Module TypeId(4) => instanceof local type 11
+
+Module TypeId(5) => instanceof local type 13 | instanceof local type 11
+
+Module TypeId(6) => string | number
+
+Module TypeId(7) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof local type 13
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof local type 11
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof local type 13 | instanceof local type 11
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Module TypeId(8) => local type 12
+
+Module TypeId(9) => instanceof Derived
+
+Module TypeId(10) => string
+
+Module TypeId(11) => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(12) => class "Derived" {
+  extends: local type 11
+  implements: []
+  type_args: []
+}
+
+Module TypeId(13) => class "Other" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(14) => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof local type 13
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Module TypeId(15) => sync Function "select" {
+  accepts: {
+    params: [
+      required value: instanceof local type 11
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(16) => sync Function "select" {
+  accepts: {
+    params: [
+      required _value: instanceof local type 13 | instanceof local type 11
+    ]
+    type_args: []
+  }
+  returns: string | number
+}
+
+Module TypeId(17) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof local type 13
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof local type 11
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof local type 13 | instanceof local type 11
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+```

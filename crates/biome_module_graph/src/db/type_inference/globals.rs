@@ -116,9 +116,9 @@ pub(in crate::db::type_inference) fn resolve_global_type_id<'db>(
     resolve_global_type_id_with_resolver(db, GLOBAL_RESOLVER.as_ref(), type_id, resolved_globals)
 }
 
-fn resolve_global_type_id_with_resolver<'db, 'a>(
+fn resolve_global_type_id_with_resolver<'db>(
     db: &'db dyn ModuleDb,
-    resolver: &'a dyn TypeResolver,
+    resolver: &dyn TypeResolver,
     type_id: TypeId,
     resolved_globals: &mut FxHashMap<TypeId, InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
@@ -1241,7 +1241,40 @@ mod tests {
                 );
             }
             InferredTypeData::Object(_) => {}
-            _ => panic!(
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => panic!(
                 "outer intersection must become a normalized intersection or object, got {intersection_ty:?}"
             ),
         }

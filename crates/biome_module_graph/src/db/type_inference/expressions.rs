@@ -6,7 +6,7 @@ use super::{
     },
     resolver::ResolutionCtx,
 };
-use crate::db::queries::infer_call_expression_return_type;
+use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     TypeofExpression as RawTypeofExpression,
@@ -14,9 +14,9 @@ use biome_js_type_info::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
         InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
-        Literal as InferredLiteral, TupleElementType as InferredTupleElementType,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeofExpression as InferredTypeofExpression,
+        Literal as InferredLiteral, ReturnType as InferredReturnType,
+        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
     literal::NumberLiteral,
 };
@@ -28,6 +28,7 @@ const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
 const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_STATIC_MEMBER_LOOKUP_STEPS: usize = 1024;
+const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn resolve_typeof_expression(
@@ -96,6 +97,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
                 let arguments = self.resolve_call_arguments(&expression.arguments);
+                let arguments = arguments
+                    .into_iter()
+                    .map(ResolvedCallArgument::ty)
+                    .collect::<Vec<_>>();
                 self.resolve_new_expression(callee, &arguments)
             }
             RawTypeofExpression::NullishCoalescing(expression) => {
@@ -184,6 +189,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             InferredTypeofExpression::New(expression) => {
                 let arguments = self.resolve_inferred_call_arguments(&expression.arguments);
+                let arguments = arguments
+                    .into_iter()
+                    .map(ResolvedCallArgument::ty)
+                    .collect::<Vec<_>>();
                 self.resolve_new_expression(expression.callee, &arguments)
             }
             InferredTypeofExpression::NullishCoalescing(expression) => {
@@ -296,7 +305,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_call_arguments(arguments);
-        infer_call_expression_return_type(self.db, callee, &args)
+        infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
     fn resolve_inferred_call_expression(
@@ -305,17 +314,19 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[InferredCallArgumentType<'db>],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_inferred_call_arguments(arguments);
-        infer_call_expression_return_type(self.db, callee, &args)
+        infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
     fn resolve_call_arguments(
         &mut self,
         arguments: &[RawCallArgumentType],
-    ) -> Vec<InferredTypeData<'db>> {
+    ) -> Vec<ResolvedCallArgument<'db>> {
         let mut args = Vec::new();
         for argument in arguments {
             match argument {
-                RawCallArgumentType::Argument(ty) => args.push(self.resolve(ty)),
+                RawCallArgumentType::Argument(ty) => {
+                    args.push(ResolvedCallArgument::Argument(self.resolve(ty)))
+                }
                 RawCallArgumentType::Spread(ty) => {
                     let ty = self.resolve(ty);
                     self.push_spread_argument(ty, &mut args);
@@ -328,13 +339,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn resolve_inferred_call_arguments(
         &mut self,
         arguments: &[InferredCallArgumentType<'db>],
-    ) -> Vec<InferredTypeData<'db>> {
+    ) -> Vec<ResolvedCallArgument<'db>> {
         let mut args = Vec::new();
         for argument in arguments {
             match argument {
-                InferredCallArgumentType::Argument(ty) => {
-                    args.push(self.resolve_inferred_type(*ty))
-                }
+                InferredCallArgumentType::Argument(ty) => args.push(
+                    ResolvedCallArgument::Argument(self.resolve_inferred_type(*ty)),
+                ),
                 InferredCallArgumentType::Spread(ty) => {
                     let ty = self.resolve_inferred_type(*ty);
                     self.push_spread_argument(ty, &mut args);
@@ -347,20 +358,69 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn push_spread_argument(
         &mut self,
         ty: InferredTypeData<'db>,
-        args: &mut Vec<InferredTypeData<'db>>,
+        args: &mut Vec<ResolvedCallArgument<'db>>,
     ) {
         match self.resolve_inferred_type(ty) {
-            InferredTypeData::Tuple(tuple) => {
-                for element in tuple.elements(self.db) {
-                    args.push(
-                        self.optional_element_type(
-                            element.ty,
-                            element.is_optional || element.is_rest,
-                        ),
-                    );
+            InferredTypeData::InstanceOf(instance) => {
+                let target = self.resolve_inferred_type(instance.ty(self.db));
+                if let InferredTypeData::Tuple(tuple) = target {
+                    self.push_tuple_spread_arguments(tuple, args);
+                } else {
+                    args.push(ResolvedCallArgument::Spread(InferredTypeData::InstanceOf(
+                        instance,
+                    )));
                 }
             }
-            ty => args.push(ty),
+            InferredTypeData::Tuple(tuple) => self.push_tuple_spread_arguments(tuple, args),
+            ty @ (InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword) => args.push(ResolvedCallArgument::Spread(ty)),
+        }
+    }
+
+    fn push_tuple_spread_arguments(
+        &mut self,
+        tuple: InferredTuple<'db>,
+        args: &mut Vec<ResolvedCallArgument<'db>>,
+    ) {
+        for element in tuple.elements(self.db) {
+            let ty = self.optional_element_type(element.ty, element.is_optional || element.is_rest);
+            if element.is_optional || element.is_rest {
+                args.push(ResolvedCallArgument::Optional(ty));
+            } else {
+                args.push(ResolvedCallArgument::Argument(ty));
+            }
         }
     }
 
@@ -386,7 +446,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                         .into_boxed_slice(),
                 )
             }
-            _ => return None,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => return None,
         };
 
         let constructor = class
@@ -399,7 +492,42 @@ impl<'db> ResolutionCtx<'db, '_> {
                 {
                     Some(constructor)
                 }
-                _ => None,
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => None,
             });
         let constructed_ty = constructor
             .and_then(|constructor| constructor.return_type(self.db))
@@ -449,6 +577,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                 }
             }
+
+            let Some(parameter_function) = parameter_ty.callable_function(self.db) else {
+                continue;
+            };
+            let InferredReturnType::Type(parameter_return_ty) =
+                parameter_function.return_type(self.db)
+            else {
+                continue;
+            };
+            let Some(argument_function) = arg.callable_function(self.db) else {
+                continue;
+            };
+            let InferredReturnType::Type(argument_return_ty) =
+                argument_function.return_type(self.db)
+            else {
+                continue;
+            };
+
+            for substitution in
+                parameter_return_ty.collect_generic_replacements(self.db, *argument_return_ty)
+            {
+                for (index, declared_parameter) in declared_parameters.iter().enumerate() {
+                    if substitution.generic == *declared_parameter
+                        || substitution.generic
+                            == InferredTypeData::instance_of(
+                                self.db,
+                                *declared_parameter,
+                                Box::default(),
+                            )
+                    {
+                        inferred_parameters[index] = substitution.replacement;
+                    }
+                }
+            }
         }
 
         inferred_parameters.into_boxed_slice()
@@ -458,19 +620,64 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         argument: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {
-        match self.resolve_inferred_type(argument) {
-            ty @ (InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::Object(_)
-            | InferredTypeData::String) => Some(ty),
-            ty @ InferredTypeData::InstanceOf(_) => self.resolve_promise_value_type(ty),
-            _ => None,
+        let mut types = Vec::new();
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([argument]);
+
+        for _ in 0..MAX_AWAIT_EXPRESSION_STEPS {
+            let Some(ty) = pending.pop() else {
+                return collected_type_result(self.db, types);
+            };
+            let ty = self.resolve_inferred_type(ty);
+            if !seen.insert(ty) {
+                continue;
+            }
+
+            match ty {
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().rev().copied());
+                }
+                ty @ InferredTypeData::InstanceOf(_) => {
+                    types.push(self.resolve_promise_value_type(ty).unwrap_or(ty))
+                }
+                ty @ (InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::Object(_)
+                | InferredTypeData::String) => types.push(ty),
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {}
+            }
         }
+
+        None
     }
 
     fn resolve_promise_value_type(
@@ -523,7 +730,40 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Interface(interface) => {
                 interface.name(self.db).text() == "PromiseLike"
             }
-            _ => false,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => false,
         }
     }
 
@@ -531,9 +771,44 @@ impl<'db> ResolutionCtx<'db, '_> {
         match self.resolve_inferred_type(parent) {
             InferredTypeData::Class(class) => class
                 .extends(self.db)
-                .map(|extends| InferredTypeData::instance_of(self.db, extends, Box::default()))
-                .unwrap_or(InferredTypeData::Unknown),
-            _ => InferredTypeData::Unknown,
+                .map_or(InferredTypeData::Unknown, |extends| {
+                    InferredTypeData::instance_of(self.db, extends, Box::default())
+                }),
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => InferredTypeData::Unknown,
         }
     }
 
@@ -570,7 +845,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                     match self.resolve_inferred_type(*ty) {
                         InferredTypeData::Undefined => {}
                         InferredTypeData::Unknown => types.push(InferredTypeData::Unknown),
-                        ty => {
+                        ty @ (InferredTypeData::Divergent(_)
+                        | InferredTypeData::Global
+                        | InferredTypeData::BigInt
+                        | InferredTypeData::Boolean
+                        | InferredTypeData::Null
+                        | InferredTypeData::Number
+                        | InferredTypeData::String
+                        | InferredTypeData::Symbol
+                        | InferredTypeData::Conditional
+                        | InferredTypeData::Class(_)
+                        | InferredTypeData::Constructor(_)
+                        | InferredTypeData::Function(_)
+                        | InferredTypeData::Interface(_)
+                        | InferredTypeData::Module(_)
+                        | InferredTypeData::Namespace(_)
+                        | InferredTypeData::Object(_)
+                        | InferredTypeData::Tuple(_)
+                        | InferredTypeData::Generic(_)
+                        | InferredTypeData::Local(_)
+                        | InferredTypeData::Intersection(_)
+                        | InferredTypeData::Union(_)
+                        | InferredTypeData::TypeOperator(_)
+                        | InferredTypeData::Literal(_)
+                        | InferredTypeData::InstanceOf(_)
+                        | InferredTypeData::MergedReference(_)
+                        | InferredTypeData::TypeofExpression(_)
+                        | InferredTypeData::TypeofType(_)
+                        | InferredTypeData::TypeofValue(_)
+                        | InferredTypeData::AnyKeyword
+                        | InferredTypeData::NeverKeyword
+                        | InferredTypeData::ObjectKeyword
+                        | InferredTypeData::ThisKeyword
+                        | InferredTypeData::UnknownKeyword
+                        | InferredTypeData::VoidKeyword) => {
                             if let Some((member_ty, is_optional)) =
                                 self.find_static_member_on_resolved_type(ty, member_name)
                             {
@@ -581,7 +889,39 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 collected_type_result(self.db, types).or(Some(InferredTypeData::Unknown))
             }
-            ty => self
+            ty @ (InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword) => self
                 .find_static_member_on_resolved_type(ty, member_name)
                 .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
         }
@@ -679,7 +1019,34 @@ impl<'db> ResolutionCtx<'db, '_> {
                         pending.push(prototype);
                     }
                 }
-                _ => {}
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {}
             }
         }
 
@@ -721,7 +1088,41 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .first()
                     .map(|ty| self.optional_element_type(*ty, true))
             }
-            _ => None,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
         }
     }
 
@@ -755,7 +1156,41 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .collect::<Box<[InferredTypeData<'db>]>>();
                 Some(InferredTypeData::array_instance(self.db, type_parameters))
             }
-            _ => None,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
         }
     }
 
@@ -781,7 +1216,40 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let target = self.resolve_inferred_type(instance.ty(self.db));
                 self.rest_object_from_type(target, excluded_names)
             }
-            subject => self.rest_object_from_type(subject, excluded_names),
+            subject @ (InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword) => self.rest_object_from_type(subject, excluded_names),
         }
     }
 
@@ -861,7 +1329,35 @@ impl<'db> ResolutionCtx<'db, '_> {
                         pending.push(prototype);
                     }
                 }
-                _ => {}
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {}
             }
         }
 
@@ -950,7 +1446,29 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::Template(_) => Some(InferredTypeData::String),
             },
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
-            _ => None,
+            InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::Symbol
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
         }
     }
 
@@ -960,7 +1478,41 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         match self.resolve_inferred_type(argument) {
             InferredTypeData::BigInt => InferredTypeData::BigInt,
-            _ => InferredTypeData::Number,
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => InferredTypeData::Number,
         }
     }
 
@@ -991,7 +1543,31 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::String => self.typeof_string_literal("string"),
             InferredTypeData::Symbol => self.typeof_string_literal("symbol"),
             InferredTypeData::Undefined => self.typeof_string_literal("undefined"),
-            _ => self.typeof_return_union(),
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => self.typeof_return_union(),
         }
     }
 
@@ -1066,7 +1642,35 @@ impl<'db> ResolutionCtx<'db, '_> {
                     ),
                     InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
                     InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
-                    _ => return ConditionalType::Unknown,
+                    InferredTypeData::Unknown
+                    | InferredTypeData::Divergent(_)
+                    | InferredTypeData::Global
+                    | InferredTypeData::BigInt
+                    | InferredTypeData::Boolean
+                    | InferredTypeData::Null
+                    | InferredTypeData::Number
+                    | InferredTypeData::String
+                    | InferredTypeData::Symbol
+                    | InferredTypeData::Undefined
+                    | InferredTypeData::Conditional
+                    | InferredTypeData::Class(_)
+                    | InferredTypeData::Constructor(_)
+                    | InferredTypeData::Function(_)
+                    | InferredTypeData::Interface(_)
+                    | InferredTypeData::Module(_)
+                    | InferredTypeData::Namespace(_)
+                    | InferredTypeData::Object(_)
+                    | InferredTypeData::Tuple(_)
+                    | InferredTypeData::Generic(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::TypeOperator(_)
+                    | InferredTypeData::Literal(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::NeverKeyword
+                    | InferredTypeData::ObjectKeyword
+                    | InferredTypeData::ThisKeyword
+                    | InferredTypeData::UnknownKeyword
+                    | InferredTypeData::VoidKeyword => return ConditionalType::Unknown,
                 }
             }
 
@@ -1114,7 +1718,37 @@ impl<'db> ResolutionCtx<'db, '_> {
                     ),
                     InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
                     InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
-                    _ => types.push(ty),
+                    InferredTypeData::Unknown
+                    | InferredTypeData::Divergent(_)
+                    | InferredTypeData::Global
+                    | InferredTypeData::BigInt
+                    | InferredTypeData::Boolean
+                    | InferredTypeData::Null
+                    | InferredTypeData::Number
+                    | InferredTypeData::String
+                    | InferredTypeData::Symbol
+                    | InferredTypeData::Undefined
+                    | InferredTypeData::Conditional
+                    | InferredTypeData::Class(_)
+                    | InferredTypeData::Constructor(_)
+                    | InferredTypeData::Function(_)
+                    | InferredTypeData::Interface(_)
+                    | InferredTypeData::Module(_)
+                    | InferredTypeData::Namespace(_)
+                    | InferredTypeData::Object(_)
+                    | InferredTypeData::Tuple(_)
+                    | InferredTypeData::Generic(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::Intersection(_)
+                    | InferredTypeData::TypeOperator(_)
+                    | InferredTypeData::Literal(_)
+                    | InferredTypeData::MergedReference(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::NeverKeyword
+                    | InferredTypeData::ObjectKeyword
+                    | InferredTypeData::ThisKeyword
+                    | InferredTypeData::UnknownKeyword
+                    | InferredTypeData::VoidKeyword => types.push(ty),
                 },
                 FilterAction::Stripped => {}
             }
@@ -1134,7 +1768,38 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(false)),
                 InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
-                _ => {
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::Null
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {
                     if ty
                         .conditional_type_shallow(self.db)
                         .is_none_or(|conditional| !conditional.is_truthy())
@@ -1147,7 +1812,41 @@ impl<'db> ResolutionCtx<'db, '_> {
             },
             ConditionalSubset::Truthy => match ty {
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(true)),
-                _ => {
+                InferredTypeData::Unknown
+                | InferredTypeData::Divergent(_)
+                | InferredTypeData::Global
+                | InferredTypeData::BigInt
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => {
                     if ty
                         .conditional_type_shallow(self.db)
                         .is_none_or(|conditional| !conditional.is_falsy())

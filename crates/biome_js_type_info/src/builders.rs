@@ -321,16 +321,16 @@ impl MergedTypeKind {
                 Self::ClassInstance,
             ) => Self::ClassInstance,
             (Self::Function, Self::Function) => Self::Function,
-            (Self::Interface, Self::Interface)
-            | (Self::Interface, Self::Function)
-            | (Self::Function, Self::Interface) => Self::Interface,
-            (Self::Namespace, Self::Namespace)
-            | (Self::Namespace, Self::Function | Self::Object | Self::Interface)
-            | (Self::Function | Self::Object | Self::Interface, Self::Namespace) => Self::Namespace,
+            (Self::Interface | Self::Function, Self::Interface)
+            | (Self::Interface, Self::Function) => Self::Interface,
+            (
+                Self::Namespace | Self::Function | Self::Object | Self::Interface,
+                Self::Namespace,
+            )
+            | (Self::Namespace, Self::Function | Self::Object | Self::Interface) => Self::Namespace,
             (Self::Never, _) | (_, Self::Never) => Self::Never,
-            (Self::Object, Self::Object)
-            | (Self::Object, Self::Function | Self::Interface)
-            | (Self::Function | Self::Interface, Self::Object) => Self::Object,
+            (Self::Object | Self::Function | Self::Interface, Self::Object)
+            | (Self::Object, Self::Function | Self::Interface) => Self::Object,
             (Self::Primitive, Self::Primitive) => Self::Never,
             (Self::Primitive, _) | (_, Self::Primitive) => Self::Primitive,
             (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
@@ -579,10 +579,10 @@ impl<'db> UnionBuilder<'db> {
     }
 
     fn normalize_literal_variants(&mut self) {
-        let has_bigint = self.types.iter().any(|ty| *ty == TypeData::BigInt);
-        let has_boolean = self.types.iter().any(|ty| *ty == TypeData::Boolean);
-        let has_number = self.types.iter().any(|ty| *ty == TypeData::Number);
-        let has_string = self.types.iter().any(|ty| *ty == TypeData::String);
+        let has_bigint = self.types.contains(&TypeData::BigInt);
+        let has_boolean = self.types.contains(&TypeData::Boolean);
+        let has_number = self.types.contains(&TypeData::Number);
+        let has_string = self.types.contains(&TypeData::String);
         let has_true = self
             .types
             .iter()
