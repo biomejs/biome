@@ -29,9 +29,11 @@ pub use html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlMo
 pub use js_module_info::{
     BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
+    TypeInferenceMode,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
     resolve_css_module, resolve_html_module, resolve_js_module,
+    resolve_js_module_with_inference_mode,
 };
 pub use path_info_cache::PathInfoCache;

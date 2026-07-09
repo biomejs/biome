@@ -70,8 +70,8 @@ pub(super) struct JsModuleInfoCollector {
     /// Diagnostics emitted during the collection of module graph information
     diagnostics: Vec<JsModuleInfoDiagnostic>,
 
-    /// Whether to enable type inference when finalizing the module info
-    infer_types: bool,
+    /// How much type inference work to perform when finalizing the module info
+    inference_mode: TypeInferenceMode,
 
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
@@ -144,7 +144,7 @@ impl JsModuleInfoCollector {
             types: TypeStore::default(),
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
-            infer_types: false,
+            inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
         }
     }
@@ -380,7 +380,7 @@ impl JsModuleInfoCollector {
     }
 
     fn finalise(&mut self, semantic_model: &SemanticModel) -> FinalisedModuleTypes {
-        if self.infer_types {
+        if self.inference_mode != TypeInferenceMode::Disabled {
             self.infer_all_types(semantic_model);
         }
 
@@ -392,7 +392,7 @@ impl JsModuleInfoCollector {
         let raw_expressions = self.raw_expressions();
         let raw_binding_types = self.raw_binding_types();
 
-        if self.infer_types {
+        if self.inference_mode == TypeInferenceMode::Complete {
             self.resolve_all_and_downgrade_project_references();
 
             // Purging before flattening will save us from duplicate work during
@@ -1138,13 +1138,27 @@ impl JsModuleInfoCollector {
     }
 }
 
+/// Selects how much type inference work the collector performs while
+/// finalizing a module.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TypeInferenceMode {
+    /// No type inference at all.
+    Disabled,
+    /// Collects the raw type table for the salsa-backed inference engine,
+    /// without running the legacy resolution and flattening passes.
+    RawTypesOnly,
+    /// Collects the raw type table and runs the legacy resolution and
+    /// flattening passes.
+    Complete,
+}
+
 impl JsModuleInfo {
     pub(super) fn new(
         mut collector: JsModuleInfoCollector,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-        infer_types: bool,
+        inference_mode: TypeInferenceMode,
     ) -> Self {
-        collector.infer_types = infer_types;
+        collector.inference_mode = inference_mode;
         let finalised = collector.finalise(&semantic_model);
 
         Self(Arc::new(JsModuleInfoInner {
@@ -1161,7 +1175,7 @@ impl JsModuleInfo {
             expressions: collector.parsed_expressions,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
-            infer_types: collector.infer_types,
+            infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
         }))
     }

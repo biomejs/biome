@@ -26,6 +26,7 @@ use scope::JsScope;
 
 use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
+pub use collector::TypeInferenceMode;
 pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
