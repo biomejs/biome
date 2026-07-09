@@ -11,7 +11,8 @@ use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     TypeofExpression as RawTypeofExpression,
     interned_types::{
-        CallArgumentType as InferredCallArgumentType, InternedLiteral as InferredInternedLiteral,
+        CallArgumentType as InferredCallArgumentType, InternedClass as InferredClass,
+        InternedConstructor as InferredConstructor, InternedLiteral as InferredInternedLiteral,
         InternedTuple as InferredTuple, Literal as InferredLiteral,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
@@ -23,6 +24,7 @@ use rustc_hash::FxHashSet;
 
 const MAX_CONDITIONAL_TYPE_STEPS: usize = 1024;
 const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
+const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 
 impl<'db> ResolutionCtx<'db, '_> {
@@ -91,7 +93,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
-                self.resolve_new_expression(callee, expression.arguments.len())
+                let arguments = self.resolve_call_arguments(&expression.arguments);
+                self.resolve_new_expression(callee, &arguments)
             }
             RawTypeofExpression::NullishCoalescing(expression) => {
                 let left = self.resolve(&expression.left);
@@ -177,7 +180,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_logical_or_expression(expression.left, expression.right)
             }
             InferredTypeofExpression::New(expression) => {
-                self.resolve_new_expression(expression.callee, expression.arguments.len())
+                let arguments = self.resolve_inferred_call_arguments(&expression.arguments);
+                self.resolve_new_expression(expression.callee, &arguments)
             }
             InferredTypeofExpression::NullishCoalescing(expression) => {
                 self.resolve_nullish_coalescing_expression(expression.left, expression.right)
@@ -285,15 +289,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
-        let args = arguments
-            .iter()
-            .map(|argument| match argument {
-                RawCallArgumentType::Argument(ty) | RawCallArgumentType::Spread(ty) => {
-                    self.resolve(ty)
-                }
-            })
-            .collect::<Vec<_>>();
-
+        let args = self.resolve_call_arguments(arguments);
         infer_call_expression_return_type(self.db, callee, &args)
     }
 
@@ -302,47 +298,154 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         arguments: &[InferredCallArgumentType<'db>],
     ) -> InferredTypeData<'db> {
-        let args = arguments
-            .iter()
-            .map(|argument| match argument {
-                InferredCallArgumentType::Argument(ty) | InferredCallArgumentType::Spread(ty) => {
-                    self.resolve_inferred_type(*ty)
-                }
-            })
-            .collect::<Vec<_>>();
-
+        let args = self.resolve_inferred_call_arguments(arguments);
         infer_call_expression_return_type(self.db, callee, &args)
+    }
+
+    fn resolve_call_arguments(
+        &mut self,
+        arguments: &[RawCallArgumentType],
+    ) -> Vec<InferredTypeData<'db>> {
+        let mut args = Vec::new();
+        for argument in arguments {
+            match argument {
+                RawCallArgumentType::Argument(ty) => args.push(self.resolve(ty)),
+                RawCallArgumentType::Spread(ty) => {
+                    let ty = self.resolve(ty);
+                    self.push_spread_argument(ty, &mut args);
+                }
+            }
+        }
+        args
+    }
+
+    fn resolve_inferred_call_arguments(
+        &mut self,
+        arguments: &[InferredCallArgumentType<'db>],
+    ) -> Vec<InferredTypeData<'db>> {
+        let mut args = Vec::new();
+        for argument in arguments {
+            match argument {
+                InferredCallArgumentType::Argument(ty) => {
+                    args.push(self.resolve_inferred_type(*ty))
+                }
+                InferredCallArgumentType::Spread(ty) => {
+                    let ty = self.resolve_inferred_type(*ty);
+                    self.push_spread_argument(ty, &mut args);
+                }
+            }
+        }
+        args
+    }
+
+    fn push_spread_argument(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        args: &mut Vec<InferredTypeData<'db>>,
+    ) {
+        match self.resolve_inferred_type(ty) {
+            InferredTypeData::Tuple(tuple) => {
+                for element in tuple.elements(self.db) {
+                    args.push(
+                        self.optional_element_type(
+                            element.ty,
+                            element.is_optional || element.is_rest,
+                        ),
+                    );
+                }
+            }
+            ty => args.push(ty),
+        }
     }
 
     fn resolve_new_expression(
         &mut self,
         callee: InferredTypeData<'db>,
-        argument_count: usize,
+        args: &[InferredTypeData<'db>],
     ) -> Option<InferredTypeData<'db>> {
         let callee = self.resolve_inferred_type(callee);
-        let InferredTypeData::Class(class) = callee else {
-            return None;
+        let (class_ty, class, explicit_type_parameters) = match callee {
+            InferredTypeData::Class(class) => (callee, class, Box::default()),
+            InferredTypeData::InstanceOf(instance) => {
+                let class_ty = self.resolve_inferred_type(instance.ty(self.db));
+                let InferredTypeData::Class(class) = class_ty else {
+                    return None;
+                };
+                (
+                    class_ty,
+                    class,
+                    instance
+                        .type_parameters(self.db)
+                        .to_vec()
+                        .into_boxed_slice(),
+                )
+            }
+            _ => return None,
         };
 
-        let constructed_ty = class
+        let constructor = class
             .members(self.db)
             .iter()
             .filter(|member| member.kind.is_constructor())
             .find_map(|member| match self.resolve_inferred_type(member.ty) {
                 InferredTypeData::Constructor(constructor)
-                    if constructor.accepts_argument_count(self.db, argument_count) =>
+                    if constructor.accepts_argument_count(self.db, args.len()) =>
                 {
-                    constructor.return_type(self.db)
+                    Some(constructor)
                 }
                 _ => None,
-            })
-            .unwrap_or(callee);
+            });
+        let constructed_ty = constructor
+            .and_then(|constructor| constructor.return_type(self.db))
+            .unwrap_or(class_ty);
+        let type_parameters = if !explicit_type_parameters.is_empty() {
+            explicit_type_parameters
+        } else if constructed_ty == class_ty {
+            constructor
+                .map(|constructor| self.infer_constructor_type_parameters(class, constructor, args))
+                .unwrap_or_default()
+        } else {
+            Box::default()
+        };
 
         Some(InferredTypeData::instance_of(
             self.db,
             constructed_ty,
-            Box::default(),
+            type_parameters,
         ))
+    }
+
+    fn infer_constructor_type_parameters(
+        &self,
+        class: InferredClass<'db>,
+        constructor: InferredConstructor<'db>,
+        args: &[InferredTypeData<'db>],
+    ) -> Box<[InferredTypeData<'db>]> {
+        let declared_parameters = class.type_parameters(self.db);
+        if declared_parameters.is_empty() {
+            return Box::default();
+        }
+
+        let mut inferred_parameters = declared_parameters.to_vec();
+        for (parameter, arg) in constructor.parameters(self.db).iter().zip(args) {
+            let parameter_ty = parameter.parameter.ty();
+            for substitution in parameter_ty.collect_generic_replacements(self.db, *arg) {
+                for (index, declared_parameter) in declared_parameters.iter().enumerate() {
+                    if substitution.generic == *declared_parameter
+                        || substitution.generic
+                            == InferredTypeData::instance_of(
+                                self.db,
+                                *declared_parameter,
+                                Box::default(),
+                            )
+                    {
+                        inferred_parameters[index] = substitution.replacement;
+                    }
+                }
+            }
+        }
+
+        inferred_parameters.into_boxed_slice()
     }
 
     fn resolve_await_expression(
@@ -359,17 +462,62 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Number
             | InferredTypeData::Object(_)
             | InferredTypeData::String) => Some(ty),
-            InferredTypeData::InstanceOf(instance)
-                if self
-                    .resolve_inferred_type(instance.ty(self.db))
-                    .is_promise_class(self.db) =>
-            {
-                instance
+            ty @ InferredTypeData::InstanceOf(_) => self.resolve_promise_value_type(ty),
+            _ => None,
+        }
+    }
+
+    fn resolve_promise_value_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([ty]);
+
+        for _ in 0..MAX_PROMISE_UNWRAP_STEPS {
+            let ty = self.resolve_inferred_type(pending.pop()?);
+            if !seen.insert(ty) {
+                continue;
+            }
+
+            let InferredTypeData::InstanceOf(instance) = ty else {
+                continue;
+            };
+            let target = self.resolve_inferred_type(instance.ty(self.db));
+            if self.is_promise_like_target(target) {
+                return instance
                     .type_parameters(self.db)
                     .first()
-                    .map(|ty| self.resolve_inferred_type(*ty))
+                    .map(|ty| self.resolve_inferred_type(*ty));
             }
-            _ => None,
+
+            if let InferredTypeData::Class(class) = target
+                && let Some(extends) = class.extends(self.db)
+            {
+                let substitutions = substitutions_for_instance(
+                    self.db,
+                    target,
+                    instance.type_parameters(self.db),
+                    &[],
+                );
+                pending.push(apply_substitutions(self.db, extends, &substitutions));
+            }
+        }
+
+        None
+    }
+
+    fn is_promise_like_target(&mut self, target: InferredTypeData<'db>) -> bool {
+        match self.resolve_inferred_type(target) {
+            target if target.is_promise_class(self.db) => true,
+            InferredTypeData::Class(class) => class
+                .name(self.db)
+                .as_ref()
+                .is_some_and(|name| name.text() == "PromiseLike"),
+            InferredTypeData::Interface(interface) => {
+                interface.name(self.db).text() == "PromiseLike"
+            }
+            _ => false,
         }
     }
 

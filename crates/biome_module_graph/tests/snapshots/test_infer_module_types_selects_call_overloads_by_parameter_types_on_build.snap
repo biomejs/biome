@@ -1,0 +1,202 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function reader(value: string): string;
+export function reader(value: number): number;
+export function reader(left: number, right: number): boolean;
+export function reader(..._args: [string] | [number] | [number, number]) {
+	return undefined as string | number | boolean;
+}
+
+export const textual = reader("value");
+export const numeric = reader(1);
+export const args = [1, 2];
+export const spread = reader(...args);
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => [string]
+
+Module TypeId(1) => [number]
+
+Module TypeId(2) => [number,
+number]
+
+Module TypeId(3) => [string] | [number] | [number,
+number]
+
+Module TypeId(4) => boolean
+
+Module TypeId(5) => string | number | boolean
+
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+
+Module TypeId(7) => string: value
+
+Module TypeId(8) => string
+
+Module TypeId(9) => number: 1
+
+Module TypeId(10) => number
+
+Module TypeId(11) => number: 2
+
+Module TypeId(12) => [number: 1,
+number: 2]
+
+Module TypeId(13) => [number: 1,
+number: 2]
+
+Module TypeId(14) => boolean
+
+Module TypeId(15) => sync Function "reader" {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(16) => sync Function "reader" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Module TypeId(17) => sync Function "reader" {
+  accepts: {
+    params: [
+      required left: number
+      required right: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Module TypeId(18) => sync Function "reader" {
+  accepts: {
+    params: [
+      required ..._args: [string] | [number] | [number,
+      number]
+    ]
+    type_args: []
+  }
+  returns: string | number | boolean
+}
+
+Module TypeId(19) => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "reader" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | number | boolean
+      }
+  ]
+}
+```

@@ -1,0 +1,72 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box<T> {
+	value: T;
+
+	constructor(value: T) {
+		this.value = value;
+	}
+}
+
+export const explicit = new Box<string>("value");
+export const explicitValue = explicit.value;
+
+export const inferred = new Box(1);
+export const inferredValue = inferred.value;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof T
+
+Module TypeId(1) => instanceof local type 16
+
+Module TypeId(2) => instanceof T
+
+Module TypeId(3) => unknown
+
+Module TypeId(4) => local type 16
+
+Module TypeId(5) => string: value
+
+Module TypeId(6) => instanceof Box<string: value>
+
+Module TypeId(7) => instanceof Box<string: value>
+
+Module TypeId(8) => string: value
+
+Module TypeId(9) => number: 1
+
+Module TypeId(10) => instanceof Box<number: 1>
+
+Module TypeId(11) => instanceof Box<number: 1>
+
+Module TypeId(12) => number: 1
+
+Module TypeId(13) => T
+
+Module TypeId(14) => instanceof T
+
+Module TypeId(15) => constructor {
+  params: [
+    required value: instanceof T
+  ]
+  type_args: []
+  returns: none
+}
+
+Module TypeId(16) => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+```

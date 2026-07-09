@@ -23,7 +23,8 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol,
     interned_types::{
-        InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
+        FunctionParameter as InferredFunctionParameter, InternedFunction as InferredFunction,
+        InternedMergedReference as InferredMergedReference, Literal as InferredLiteral,
         LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
         TypeData as InferredTypeData, TypeMember as InferredTypeMember,
         TypeSubstitution as InferredTypeSubstitution,
@@ -251,9 +252,17 @@ fn signature_accepts_arguments<'db>(
         return false;
     }
 
-    parameters.iter().zip(args).all(|(parameter, arg)| {
+    args.iter().enumerate().all(|(index, arg)| {
+        let Some(parameter) = parameter_for_argument(parameters, index) else {
+            return false;
+        };
+        let parameter_ty = parameter_argument_type(db, parameter);
+        if !argument_may_match_parameter(db, parameter_ty, *arg) {
+            return false;
+        }
+
         match (
-            parameter.ty().callable_function(db),
+            parameter_ty.callable_function(db),
             arg.callable_function(db),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
@@ -262,6 +271,123 @@ fn signature_accepts_arguments<'db>(
             _ => true,
         }
     })
+}
+
+fn parameter_for_argument<'db>(
+    parameters: &'db [InferredFunctionParameter<'db>],
+    index: usize,
+) -> Option<&'db InferredFunctionParameter<'db>> {
+    parameters
+        .get(index)
+        .or_else(|| parameters.last().filter(|parameter| parameter.is_rest()))
+}
+
+fn parameter_argument_type<'db>(
+    db: &'db dyn ModuleDb,
+    parameter: &InferredFunctionParameter<'db>,
+) -> InferredTypeData<'db> {
+    if !parameter.is_rest() {
+        return parameter.ty();
+    }
+
+    match parameter.ty() {
+        InferredTypeData::InstanceOf(instance)
+            if instance.ty(db).is_array_class(db) && !instance.type_parameters(db).is_empty() =>
+        {
+            instance.type_parameters(db)[0]
+        }
+        ty => ty,
+    }
+}
+
+fn argument_may_match_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    parameter_ty: InferredTypeData<'db>,
+    arg_ty: InferredTypeData<'db>,
+) -> bool {
+    let parameter_ty = literal_base_type(db, parameter_ty).unwrap_or(parameter_ty);
+    let arg_ty = literal_base_type(db, arg_ty).unwrap_or(arg_ty);
+
+    if parameter_ty == arg_ty {
+        return true;
+    }
+
+    match (parameter_ty, arg_ty) {
+        (
+            InferredTypeData::AnyKeyword
+            | InferredTypeData::Unknown
+            | InferredTypeData::UnknownKeyword,
+            _,
+        )
+        | (
+            _,
+            InferredTypeData::AnyKeyword
+            | InferredTypeData::Unknown
+            | InferredTypeData::UnknownKeyword,
+        )
+        | (InferredTypeData::Generic(_), _)
+        | (InferredTypeData::ThisKeyword, _) => true,
+        (InferredTypeData::Union(union), arg_ty) => union
+            .types(db)
+            .iter()
+            .any(|parameter_ty| argument_may_match_parameter(db, *parameter_ty, arg_ty)),
+        (parameter_ty, InferredTypeData::Union(union)) => union
+            .types(db)
+            .iter()
+            .any(|arg_ty| argument_may_match_parameter(db, parameter_ty, *arg_ty)),
+        (InferredTypeData::InstanceOf(parameter), InferredTypeData::InstanceOf(argument)) => {
+            argument_may_match_parameter(db, parameter.ty(db), argument.ty(db))
+                && parameter
+                    .type_parameters(db)
+                    .iter()
+                    .zip(argument.type_parameters(db))
+                    .all(|(parameter_ty, arg_ty)| {
+                        argument_may_match_parameter(db, *parameter_ty, *arg_ty)
+                    })
+        }
+        (InferredTypeData::InstanceOf(parameter), arg_ty) => {
+            argument_may_match_parameter(db, parameter.ty(db), arg_ty)
+        }
+        (parameter_ty, InferredTypeData::InstanceOf(argument)) => {
+            argument_may_match_parameter(db, parameter_ty, argument.ty(db))
+        }
+        (
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::VoidKeyword,
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::VoidKeyword,
+        ) => false,
+        _ => true,
+    }
+}
+
+fn literal_base_type<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let InferredTypeData::Literal(literal) = ty else {
+        return None;
+    };
+
+    match literal.literal(db) {
+        InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
+        InferredLiteral::Boolean(_) => Some(InferredTypeData::Boolean),
+        InferredLiteral::Number(_) => Some(InferredTypeData::Number),
+        InferredLiteral::String(_) | InferredLiteral::Template(_) => Some(InferredTypeData::String),
+        InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => None,
+    }
 }
 
 fn infer_function_return_type<'db>(

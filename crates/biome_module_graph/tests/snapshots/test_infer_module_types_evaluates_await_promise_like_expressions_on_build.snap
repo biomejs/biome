@@ -1,0 +1,143 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class StringPromise extends Promise<string> {}
+
+export interface PromiseLike<T> {
+	then(resolve: (value: T) => void): void;
+}
+
+export async function consume(
+	subclass: StringPromise,
+	like: PromiseLike<number>,
+) {
+	const awaitedSubclass = await subclass;
+	const awaitedLike = await like;
+	return awaitedSubclass;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(1) => instanceof T
+
+Module TypeId(2) => instanceof T
+
+Module TypeId(3) => void
+
+Module TypeId(4) => sync Function {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Module TypeId(5) => instanceof local type 13
+
+Module TypeId(6) => instanceof local type 18<number>
+
+Module TypeId(7) => instanceof local type 13
+
+Module TypeId(8) => string
+
+Module TypeId(9) => instanceof local type 18<number>
+
+Module TypeId(10) => number
+
+Module TypeId(11) => string
+
+Module TypeId(12) => instanceof Promise<string>
+
+Module TypeId(13) => class "StringPromise" {
+  extends: instanceof Promise<string>
+  implements: []
+  type_args: []
+}
+
+Module TypeId(14) => T
+
+Module TypeId(15) => instanceof T
+
+Module TypeId(16) => sync Function {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Module TypeId(17) => sync Function "then" {
+  accepts: {
+    params: [
+      required resolve: sync Function {
+        accepts: {
+          params: [
+            required value: instanceof T
+          ]
+          type_args: []
+        }
+        returns: void
+      }
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Module TypeId(18) => interface "PromiseLike" {
+  extends: []
+  type_args: [T]
+  members: [
+    "then":
+      sync Function "then" {
+        accepts: {
+          params: [
+            required resolve: sync Function {
+              accepts: {
+                params: [
+                  required value: instanceof T
+                ]
+                type_args: []
+              }
+              returns: void
+            }
+          ]
+          type_args: []
+        }
+        returns: void
+      }
+  ]
+}
+
+Module TypeId(19) => instanceof Promise<string>
+
+Module TypeId(20) => async Function "consume" {
+  accepts: {
+    params: [
+      required subclass: instanceof local type 13
+      required like: instanceof local type 18<number>
+    ]
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+```
