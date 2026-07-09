@@ -1,0 +1,92 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+import type { ImportedBox } from "./types.ts";
+
+interface LocalBox<T> {
+	value: T;
+}
+
+export function readLocalBox(value: LocalBox<number>): LocalBox<number> {
+	return value;
+}
+
+export function readImportedBox(
+	value: ImportedBox<string>,
+): ImportedBox<string> {
+	return value;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof local type 6<number>
+
+Module TypeId(1) => instanceof local type 6<number>
+
+Module TypeId(2) => instanceof local type 2<string>
+
+Module TypeId(3) => instanceof local type 2<string>
+
+Module TypeId(4) => T
+
+Module TypeId(5) => instanceof T
+
+Module TypeId(6) => interface "LocalBox" {
+  extends: []
+  type_args: [T]
+  members: ["value": instanceof T]
+}
+
+Module TypeId(7) => sync Function "readLocalBox" {
+  accepts: {
+    params: [
+      required value: instanceof local type 6<number>
+    ]
+    type_args: []
+  }
+  returns: instanceof local type 6<number>
+}
+
+Module TypeId(8) => sync Function "readImportedBox" {
+  accepts: {
+    params: [
+      required value: instanceof local type 2<string>
+    ]
+    type_args: []
+  }
+  returns: instanceof local type 2<string>
+}
+```
+
+# `/src/types.ts`
+
+## Source
+
+```ts
+export interface ImportedBox<T> {
+	value: T;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => T
+
+Module TypeId(1) => instanceof T
+
+Module TypeId(2) => interface "ImportedBox" {
+  extends: []
+  type_args: [T]
+  members: ["value": instanceof T]
+}
+```

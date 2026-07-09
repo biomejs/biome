@@ -9,7 +9,7 @@ use biome_js_type_info::{
     interned_types::{
         InternedNamespace as InferredNamespace, Literal as InferredLiteral, LocalTypeHandle,
         LocalTypeId, ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
+        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::Text;
@@ -127,21 +127,29 @@ impl<'db> InferredModuleTypes<'db> {
         name: &str,
     ) -> Option<InferredTypeData<'db>> {
         let mut seen = FxHashSet::default();
-        let mut pending = vec![(ty, MemberLookup::Any, false)];
+        let mut pending = vec![MemberLookupState::new(ty, MemberLookup::Any, false)];
         let mut found = Vec::new();
         let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
 
-        while let Some((ty, lookup, collect)) = pending.pop() {
-            let ty = self.resolve_type_iterative(db, ty);
+        while let Some(mut state) = pending.pop() {
+            let lookup = state.lookup;
+            let collect = state.collect;
+            let ty = self.resolve_type_iterative(db, state.ty);
             let (ty, lookup) = match ty {
-                InferredTypeData::InstanceOf(instance) => (
-                    self.resolve_type_iterative(db, instance.ty(db)),
-                    MemberLookup::Instance,
-                ),
+                InferredTypeData::InstanceOf(instance) => {
+                    let target = self.resolve_type_iterative(db, instance.ty(db));
+                    state.substitutions = substitutions_for_instance(
+                        db,
+                        target,
+                        instance.type_parameters(db),
+                        &state.substitutions,
+                    );
+                    (target, MemberLookup::Instance)
+                }
                 ty => (ty, lookup),
             };
 
-            if !seen.insert((ty, lookup)) {
+            if !seen.insert((ty, lookup, state.substitutions.clone())) {
                 continue;
             }
 
@@ -153,6 +161,7 @@ impl<'db> InferredModuleTypes<'db> {
             remaining_steps -= 1;
 
             if let Some(member_ty) = self.find_own_member_type(db, ty, name, lookup) {
+                let member_ty = apply_substitutions(db, member_ty, &state.substitutions);
                 if collect {
                     found.push(member_ty);
                     continue;
@@ -166,51 +175,71 @@ impl<'db> InferredModuleTypes<'db> {
                         if matches!(lookup, MemberLookup::Any) {
                             extends = class_side_type(db, extends);
                         }
-                        pending.push((extends, lookup, collect));
+                        pending.push(MemberLookupState {
+                            ty: apply_substitutions(db, extends, &state.substitutions),
+                            lookup,
+                            collect,
+                            substitutions: state.substitutions.clone(),
+                        });
                     }
                 }
                 InferredTypeData::Interface(interface) => {
-                    pending.extend(
-                        interface
-                            .extends(db)
-                            .iter()
-                            .rev()
-                            .copied()
-                            .map(|ty| (ty, lookup, collect)),
-                    );
+                    pending.extend(interface.extends(db).iter().rev().copied().map(|ty| {
+                        MemberLookupState {
+                            ty: apply_substitutions(db, ty, &state.substitutions),
+                            lookup,
+                            collect,
+                            substitutions: state.substitutions.clone(),
+                        }
+                    }));
                 }
                 InferredTypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(db) {
-                        pending.push((constraint, lookup, collect));
+                        pending.push(MemberLookupState {
+                            ty: apply_substitutions(db, constraint, &state.substitutions),
+                            lookup,
+                            collect,
+                            substitutions: state.substitutions.clone(),
+                        });
                     }
                 }
                 InferredTypeData::Intersection(intersection) => {
-                    pending.extend(
-                        intersection
-                            .types(db)
-                            .iter()
-                            .rev()
-                            .copied()
-                            .map(|ty| (ty, lookup, true)),
-                    );
+                    pending.extend(intersection.types(db).iter().rev().copied().map(|ty| {
+                        MemberLookupState {
+                            ty: apply_substitutions(db, ty, &state.substitutions),
+                            lookup,
+                            collect: true,
+                            substitutions: state.substitutions.clone(),
+                        }
+                    }));
                 }
                 InferredTypeData::MergedReference(reference) => {
-                    pending.extend(reference.targets(db).map(|ty| (ty, lookup, true)));
+                    pending.extend(reference.targets(db).map(|ty| MemberLookupState {
+                        ty: apply_substitutions(db, ty, &state.substitutions),
+                        lookup,
+                        collect: true,
+                        substitutions: state.substitutions.clone(),
+                    }));
                 }
                 InferredTypeData::Object(object) => {
                     if let Some(prototype) = object.prototype(db) {
-                        pending.push((prototype, lookup, collect));
+                        pending.push(MemberLookupState {
+                            ty: apply_substitutions(db, prototype, &state.substitutions),
+                            lookup,
+                            collect,
+                            substitutions: state.substitutions.clone(),
+                        });
                     }
                 }
                 InferredTypeData::Union(union) => {
-                    pending.extend(
-                        union
-                            .types(db)
-                            .iter()
-                            .rev()
-                            .copied()
-                            .map(|ty| (ty, lookup, true)),
-                    );
+                    pending.extend(union.types(db).iter().rev().copied().map(|ty| {
+                        MemberLookupState {
+                            ty: apply_substitutions(db, ty, &state.substitutions),
+                            lookup,
+                            collect: true,
+                            substitutions: state.substitutions.clone(),
+                        }
+                    }));
                 }
                 _ => {}
             }
@@ -261,6 +290,82 @@ impl<'db> InferredModuleTypes<'db> {
 enum MemberLookup {
     Any,
     Instance,
+}
+
+#[derive(Clone)]
+struct MemberLookupState<'db> {
+    ty: InferredTypeData<'db>,
+    lookup: MemberLookup,
+    collect: bool,
+    substitutions: Vec<InferredTypeSubstitution<'db>>,
+}
+
+impl<'db> MemberLookupState<'db> {
+    fn new(ty: InferredTypeData<'db>, lookup: MemberLookup, collect: bool) -> Self {
+        Self {
+            ty,
+            lookup,
+            collect,
+            substitutions: Vec::new(),
+        }
+    }
+}
+
+fn substitutions_for_instance<'db>(
+    db: &'db dyn ModuleDb,
+    target: InferredTypeData<'db>,
+    type_parameters: &[InferredTypeData<'db>],
+    inherited: &[InferredTypeSubstitution<'db>],
+) -> Vec<InferredTypeSubstitution<'db>> {
+    let Some(declared_parameters) = declared_type_parameters(db, target) else {
+        return inherited.to_vec();
+    };
+    if declared_parameters.is_empty() {
+        return inherited.to_vec();
+    }
+
+    let mut substitutions = inherited.to_vec();
+    for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
+        let declared = apply_substitutions(db, *declared, inherited);
+        let replacement = apply_substitutions(db, *replacement, inherited);
+        let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
+        if declared_instance != declared {
+            substitutions.push(InferredTypeSubstitution {
+                generic: declared_instance,
+                replacement,
+            });
+        }
+        substitutions.push(InferredTypeSubstitution {
+            generic: declared,
+            replacement,
+        });
+    }
+
+    substitutions
+}
+
+fn declared_type_parameters<'db>(
+    db: &'db dyn ModuleDb,
+    target: InferredTypeData<'db>,
+) -> Option<&'db [InferredTypeData<'db>]> {
+    match target {
+        InferredTypeData::Class(class) => Some(class.type_parameters(db)),
+        InferredTypeData::Function(function) => Some(function.type_parameters(db)),
+        InferredTypeData::InstanceOf(instance) => Some(instance.type_parameters(db)),
+        InferredTypeData::Interface(interface) => Some(interface.type_parameters(db)),
+        _ => None,
+    }
+}
+
+fn apply_substitutions<'db>(
+    db: &'db dyn ModuleDb,
+    mut ty: InferredTypeData<'db>,
+    substitutions: &[InferredTypeSubstitution<'db>],
+) -> InferredTypeData<'db> {
+    for substitution in substitutions {
+        ty = ty.substitute_type(db, *substitution);
+    }
+    ty
 }
 
 fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
@@ -502,15 +607,16 @@ impl<'db> ResolutionCtx<'db, '_> {
             return InferredTypeData::Unknown;
         }
 
-        let ty = self.js_info.raw_types.get(type_id.index()).cloned().map_or(
-            InferredTypeData::Unknown,
-            |raw| {
-                let db = self.db;
-                InferredTypeData::from_raw_with_resolver(db, &raw, &mut |reference| {
+        let db = self.db;
+        let js_info = self.js_info;
+        let ty = js_info
+            .raw_types
+            .get(type_id.index())
+            .map_or(InferredTypeData::Unknown, |raw| {
+                InferredTypeData::from_raw_with_resolver(db, raw, &mut |reference| {
                     self.resolve(reference)
                 })
-            },
-        );
+            });
 
         self.in_progress.remove(&type_id);
         self.resolved.insert(type_id, ty);
@@ -537,14 +643,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if binding.is_imported()
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    return self.resolve_import(&TypeImportQualifier {
+                    let target = self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         resolved_path: import.resolved_path.clone(),
                         type_only: qualifier.type_only,
                     });
+                    return self.apply_qualifier_type_parameters(target, qualifier);
                 }
 
-                return self
+                let target = self
                     .js_info
                     .raw_binding_types
                     .get(&binding.syntax().text_trimmed_range())
@@ -552,6 +659,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .map_or(InferredTypeData::Unknown, |reference| {
                         self.resolve(&reference)
                     });
+                return self.apply_qualifier_type_parameters(target, qualifier);
             }
 
             match scope.parent() {
@@ -651,6 +759,58 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         InferredTypeData::Unknown
+    }
+
+    fn apply_qualifier_type_parameters(
+        &mut self,
+        target: InferredTypeData<'db>,
+        qualifier: &TypeReferenceQualifier,
+    ) -> InferredTypeData<'db> {
+        if qualifier.type_parameters.is_empty() {
+            return target;
+        }
+
+        let Some(declared_parameters) = self.declared_type_parameters(target) else {
+            return target;
+        };
+
+        let incoming_parameters = qualifier
+            .type_parameters
+            .iter()
+            .map(|parameter| self.resolve(parameter))
+            .collect::<Vec<_>>();
+        let merged_parameters = declared_parameters
+            .iter()
+            .enumerate()
+            .map(|(index, parameter)| {
+                incoming_parameters
+                    .get(index)
+                    .copied()
+                    .unwrap_or(*parameter)
+            })
+            .collect::<Vec<_>>()
+            .into_boxed_slice();
+
+        InferredTypeData::instance_of(self.db, target, merged_parameters)
+    }
+
+    fn declared_type_parameters(
+        &mut self,
+        target: InferredTypeData<'db>,
+    ) -> Option<Box<[InferredTypeData<'db>]>> {
+        match self.resolve_inferred_type(target) {
+            InferredTypeData::Class(class) => Some(class.type_parameters(self.db).to_vec().into()),
+            InferredTypeData::Function(function) => {
+                Some(function.type_parameters(self.db).to_vec().into())
+            }
+            InferredTypeData::InstanceOf(instance) => {
+                Some(instance.type_parameters(self.db).to_vec().into())
+            }
+            InferredTypeData::Interface(interface) => {
+                Some(interface.type_parameters(self.db).to_vec().into())
+            }
+            _ => None,
+        }
     }
 
     fn resolve_pick_or_omit(

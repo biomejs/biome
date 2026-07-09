@@ -1,9 +1,116 @@
+use std::hash::Hash;
+
 use crate::Path;
 use crate::interned_types::{
     InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
     InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
 };
 use biome_rowan::Text;
+use rustc_hash::{FxHashMap, FxHashSet};
+
+struct CycleDetector<T, R> {
+    active: FxHashSet<T>,
+    cache: FxHashMap<T, R>,
+    fallback: R,
+}
+
+enum CycleEntry<R> {
+    Cached(R),
+    Reentered(R),
+    Entered,
+}
+
+impl<T, R> CycleDetector<T, R>
+where
+    T: Copy + Eq + Hash,
+    R: Clone,
+{
+    fn new(fallback: R) -> Self {
+        Self {
+            active: FxHashSet::default(),
+            cache: FxHashMap::default(),
+            fallback,
+        }
+    }
+
+    fn enter(&mut self, ty: T) -> CycleEntry<R> {
+        if let Some(cached) = self.cache.get(&ty) {
+            return CycleEntry::Cached(cached.clone());
+        }
+        if !self.active.insert(ty) {
+            return CycleEntry::Reentered(self.fallback.clone());
+        }
+
+        CycleEntry::Entered
+    }
+
+    fn finish(&mut self, ty: T, result: R) {
+        self.active.remove(&ty);
+        self.cache.insert(ty, result);
+    }
+}
+
+#[derive(Clone, Copy)]
+enum CompoundKind {
+    Intersection,
+    Union,
+}
+
+#[derive(Clone, Copy)]
+enum FlattenItem<'db> {
+    Type(TypeData<'db>),
+    Finish {
+        ty: TypeData<'db>,
+        result_start: usize,
+    },
+}
+
+fn flatten_compound_type<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+    kind: CompoundKind,
+) -> Vec<TypeData<'db>> {
+    let mut detector: CycleDetector<TypeData<'db>, Box<[TypeData<'db>]>> =
+        CycleDetector::new(Box::default());
+    let mut stack = vec![FlattenItem::Type(ty)];
+    let mut result = Vec::new();
+
+    while let Some(item) = stack.pop() {
+        match item {
+            FlattenItem::Type(ty) => {
+                let nested = match (kind, ty) {
+                    (CompoundKind::Intersection, TypeData::Intersection(intersection)) => {
+                        Some(intersection.types(db))
+                    }
+                    (CompoundKind::Union, TypeData::Union(union)) => Some(union.types(db)),
+                    _ => None,
+                };
+                let Some(nested) = nested else {
+                    result.push(ty);
+                    continue;
+                };
+
+                match detector.enter(ty) {
+                    CycleEntry::Cached(cached) | CycleEntry::Reentered(cached) => {
+                        result.extend(cached.iter().copied());
+                    }
+                    CycleEntry::Entered => {
+                        stack.push(FlattenItem::Finish {
+                            ty,
+                            result_start: result.len(),
+                        });
+                        stack.extend(nested.iter().rev().copied().map(FlattenItem::Type));
+                    }
+                }
+            }
+            FlattenItem::Finish { ty, result_start } => {
+                detector.finish(ty, result[result_start..].to_vec().into_boxed_slice());
+            }
+        }
+    }
+
+    result
+}
 
 pub(crate) struct IntersectionBuilder<'db> {
     db: &'db dyn TypeDb,
@@ -19,34 +126,32 @@ impl<'db> IntersectionBuilder<'db> {
     }
 
     pub(crate) fn add(mut self, ty: TypeData<'db>) -> Self {
-        if self.types.as_slice() == [TypeData::NeverKeyword] {
-            return self;
-        }
-
-        match ty {
-            TypeData::NeverKeyword => {
-                self.types.clear();
-                self.types.push(TypeData::NeverKeyword);
+        for ty in flatten_compound_type(self.db, ty, CompoundKind::Intersection) {
+            if self.types.as_slice() == [TypeData::NeverKeyword] {
+                return self;
             }
-            TypeData::Intersection(intersection) => {
-                for ty in intersection.types(self.db) {
-                    self = self.add(*ty);
-                }
-            }
-            ty => {
-                if ty.is_primitive(self.db)
-                    && self
-                        .types
-                        .iter()
-                        .any(|other| *other != ty && other.is_primitive(self.db))
-                {
-                    self.types.clear();
-                    self.types.push(TypeData::NeverKeyword);
-                    return self;
-                }
 
-                if !self.types.contains(&ty) {
-                    self.types.push(ty);
+            match ty {
+                TypeData::NeverKeyword => {
+                    if self.types.is_empty() {
+                        self.types.push(TypeData::NeverKeyword);
+                    }
+                }
+                ty => {
+                    if ty.is_primitive(self.db)
+                        && self
+                            .types
+                            .iter()
+                            .any(|other| *other != ty && other.is_primitive(self.db))
+                    {
+                        self.types.clear();
+                        self.types.push(TypeData::NeverKeyword);
+                        return self;
+                    }
+
+                    if !self.types.contains(&ty) {
+                        self.types.push(ty);
+                    }
                 }
             }
         }
@@ -433,24 +538,21 @@ impl<'db> UnionBuilder<'db> {
     }
 
     pub(crate) fn add(mut self, ty: TypeData<'db>) -> Self {
-        if self.types.as_slice() == [TypeData::AnyKeyword] {
-            return self;
-        }
+        for ty in flatten_compound_type(self.db, ty, CompoundKind::Union) {
+            if self.types.as_slice() == [TypeData::AnyKeyword] {
+                return self;
+            }
 
-        match ty {
-            TypeData::AnyKeyword => {
-                self.types.clear();
-                self.types.push(TypeData::AnyKeyword);
-            }
-            TypeData::NeverKeyword => {}
-            TypeData::Union(union) => {
-                for ty in union.types(self.db) {
-                    self = self.add(*ty);
+            match ty {
+                TypeData::AnyKeyword => {
+                    self.types.clear();
+                    self.types.push(TypeData::AnyKeyword);
                 }
-            }
-            ty => {
-                if !self.types.contains(&ty) {
-                    self.types.push(ty);
+                TypeData::NeverKeyword => {}
+                ty => {
+                    if !self.types.contains(&ty) {
+                        self.types.push(ty);
+                    }
                 }
             }
         }
@@ -507,5 +609,30 @@ impl<'db> UnionBuilder<'db> {
         if should_add_boolean {
             self.types.push(TypeData::Boolean);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CycleDetector, CycleEntry};
+
+    #[test]
+    fn cycle_detector_reports_reentry_before_finish() {
+        let mut detector = CycleDetector::new("fallback");
+
+        assert!(matches!(detector.enter(1), CycleEntry::Entered));
+        assert!(matches!(
+            detector.enter(1),
+            CycleEntry::Reentered("fallback")
+        ));
+    }
+
+    #[test]
+    fn cycle_detector_returns_cached_result_after_finish() {
+        let mut detector = CycleDetector::new("fallback");
+
+        assert!(matches!(detector.enter(1), CycleEntry::Entered));
+        detector.finish(1, "cached");
+        assert!(matches!(detector.enter(1), CycleEntry::Cached("cached")));
     }
 }
