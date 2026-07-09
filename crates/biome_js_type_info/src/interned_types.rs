@@ -215,6 +215,76 @@ pub enum TypeData<'db> {
     VoidKeyword,
 }
 
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub enum ConditionalType {
+    Anything,
+    Falsy,
+    FalsyButNotNullish,
+    NonNullish,
+    Nullish,
+    Truthy,
+    Unknown,
+}
+
+impl ConditionalType {
+    pub fn is_falsy(self) -> bool {
+        matches!(self, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish)
+    }
+
+    pub fn is_inferred(self) -> bool {
+        !matches!(self, Self::Unknown)
+    }
+
+    pub fn is_non_nullish(self) -> bool {
+        matches!(
+            self,
+            Self::FalsyButNotNullish | Self::NonNullish | Self::Truthy
+        )
+    }
+
+    pub fn is_nullish(self) -> bool {
+        matches!(self, Self::Nullish)
+    }
+
+    pub fn is_truthy(self) -> bool {
+        matches!(self, Self::Truthy)
+    }
+
+    pub fn is_mergeable(self) -> bool {
+        !matches!(self, Self::Anything | Self::Unknown)
+    }
+
+    pub fn merged_with(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Anything, _)
+            | (_, Self::Anything)
+            | (Self::Falsy | Self::Nullish, Self::NonNullish)
+            | (Self::Falsy | Self::FalsyButNotNullish | Self::Nullish, Self::Truthy)
+            | (Self::NonNullish, Self::Falsy | Self::Nullish)
+            | (Self::Truthy, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish) => {
+                Self::Anything
+            }
+            (Self::Falsy, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish)
+            | (Self::FalsyButNotNullish | Self::Nullish, Self::Falsy)
+            | (Self::FalsyButNotNullish, Self::Nullish)
+            | (Self::Nullish, Self::FalsyButNotNullish) => Self::Falsy,
+            (Self::FalsyButNotNullish, Self::FalsyButNotNullish) => Self::FalsyButNotNullish,
+            (Self::NonNullish, Self::FalsyButNotNullish | Self::NonNullish | Self::Truthy)
+            | (Self::FalsyButNotNullish | Self::Truthy, Self::NonNullish) => Self::NonNullish,
+            (Self::Nullish, Self::Nullish) => Self::Nullish,
+            (Self::Truthy, Self::Truthy) => Self::Truthy,
+            (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum ConditionalSubset {
+    Falsy,
+    Truthy,
+    NonNullish,
+}
+
 impl<'db> TypeData<'db> {
     pub fn divergent(id: salsa::Id) -> Self {
         Self::Divergent(DivergentType { id })
@@ -276,6 +346,71 @@ impl<'db> TypeData<'db> {
                     | Literal::Template(_)
             ),
             _ => false,
+        }
+    }
+
+    pub fn conditional_type_shallow(self, db: &'db dyn TypeDb) -> Option<ConditionalType> {
+        match self {
+            Self::AnyKeyword
+            | Self::Conditional
+            | Self::NeverKeyword
+            | Self::ThisKeyword
+            | Self::Unknown
+            | Self::UnknownKeyword => Some(ConditionalType::Anything),
+            Self::BigInt | Self::Boolean | Self::Interface(_) | Self::Number | Self::String => {
+                Some(ConditionalType::NonNullish)
+            }
+            Self::Class(_)
+            | Self::Constructor(_)
+            | Self::Function(_)
+            | Self::Global
+            | Self::Module(_)
+            | Self::Namespace(_)
+            | Self::Object(_)
+            | Self::ObjectKeyword
+            | Self::Symbol
+            | Self::Tuple(_) => Some(ConditionalType::Truthy),
+            Self::Literal(literal) => Some(match literal.literal(db) {
+                Literal::BigInt(text) => match text.text() {
+                    "0n" | "-0n" => ConditionalType::FalsyButNotNullish,
+                    _ => ConditionalType::Truthy,
+                },
+                Literal::Boolean(boolean) => {
+                    if boolean.as_bool() {
+                        ConditionalType::Truthy
+                    } else {
+                        ConditionalType::FalsyButNotNullish
+                    }
+                }
+                Literal::Number(number) => match number.to_f64() {
+                    Some(number) if number == 0. || number.is_nan() => {
+                        ConditionalType::FalsyButNotNullish
+                    }
+                    Some(_) => ConditionalType::Truthy,
+                    None => ConditionalType::Anything,
+                },
+                Literal::Object(_) | Literal::RegExp(_) => ConditionalType::Truthy,
+                Literal::String(string) => {
+                    if string.as_str().is_empty() {
+                        ConditionalType::FalsyButNotNullish
+                    } else {
+                        ConditionalType::Truthy
+                    }
+                }
+                Literal::Template(_) => ConditionalType::Anything,
+            }),
+            Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
+            Self::Divergent(_)
+            | Self::Generic(_)
+            | Self::Local(_)
+            | Self::TypeOperator(_)
+            | Self::TypeofType(_)
+            | Self::TypeofValue(_)
+            | Self::InstanceOf(_)
+            | Self::Intersection(_)
+            | Self::MergedReference(_)
+            | Self::TypeofExpression(_)
+            | Self::Union(_) => None,
         }
     }
 

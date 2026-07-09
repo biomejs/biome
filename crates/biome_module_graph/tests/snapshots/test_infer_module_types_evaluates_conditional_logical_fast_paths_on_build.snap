@@ -1,0 +1,44 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const truthyAnd = "yes" && 1;
+export const falsyAnd = 0 && missing;
+export const nullish = null ?? 1;
+export const nonNullish = "s" ?? missing;
+export const conditional = true ? "yes" : 1;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => string: yes
+
+Module TypeId(1) => number: 1
+
+Module TypeId(2) => number: 1
+
+Module TypeId(3) => number: 0
+
+Module TypeId(4) => unknown
+
+Module TypeId(5) => number: 0
+
+Module TypeId(6) => null
+
+Module TypeId(7) => number: 1
+
+Module TypeId(8) => string: s
+
+Module TypeId(9) => string: s
+
+Module TypeId(10) => bool: true
+
+Module TypeId(11) => string: yes
+```

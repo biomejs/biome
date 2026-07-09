@@ -11,11 +11,12 @@ use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     TypeofExpression as RawTypeofExpression,
     interned_types::{
-        CallArgumentType as InferredCallArgumentType, InternedClass as InferredClass,
-        InternedConstructor as InferredConstructor, InternedLiteral as InferredInternedLiteral,
-        InternedTuple as InferredTuple, Literal as InferredLiteral,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
+        CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
+        InternedClass as InferredClass, InternedConstructor as InferredConstructor,
+        InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
+        Literal as InferredLiteral, TupleElementType as InferredTupleElementType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeofExpression as InferredTypeofExpression,
     },
     literal::NumberLiteral,
 };
@@ -26,6 +27,7 @@ const MAX_CONDITIONAL_TYPE_STEPS: usize = 1024;
 const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
 const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
+const MAX_STATIC_MEMBER_LOOKUP_STEPS: usize = 1024;
 
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn resolve_typeof_expression(
@@ -111,6 +113,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::This(expression) => {
                 let parent = self.resolve(&expression.parent);
+                // FIXME: Generic class type parameters are not carried into `this` yet.
                 Some(InferredTypeData::instance_of(
                     self.db,
                     parent,
@@ -192,11 +195,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::Super(expression) => {
                 Some(self.resolve_super_expression(expression.parent))
             }
-            InferredTypeofExpression::This(expression) => Some(InferredTypeData::instance_of(
-                self.db,
-                expression.parent,
-                Box::default(),
-            )),
+            InferredTypeofExpression::This(expression) => {
+                // FIXME: Generic class type parameters are not carried into `this` yet.
+                Some(InferredTypeData::instance_of(
+                    self.db,
+                    expression.parent,
+                    Box::default(),
+                ))
+            }
             InferredTypeofExpression::Typeof(expression) => {
                 Some(self.resolve_typeof_operator(expression.argument))
             }
@@ -586,48 +592,98 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty: InferredTypeData<'db>,
         member_name: &str,
     ) -> Option<(InferredTypeData<'db>, bool)> {
-        match ty {
-            InferredTypeData::Class(class) => find_member_in_members_for_mode(
-                self.db,
-                class.members(self.db),
-                member_name,
-                StaticMemberMode::Instance,
-            ),
-            InferredTypeData::Interface(interface) => find_member_in_members_for_mode(
-                self.db,
-                interface.members(self.db),
-                member_name,
-                StaticMemberMode::Instance,
-            ),
-            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::Object(members) => find_member_in_members_for_mode(
-                    self.db,
-                    members,
-                    member_name,
-                    StaticMemberMode::Instance,
-                ),
-                _ => None,
-            },
-            InferredTypeData::Module(module) => find_member_in_members_for_mode(
-                self.db,
-                module.members(self.db),
-                member_name,
-                StaticMemberMode::Instance,
-            ),
-            InferredTypeData::Namespace(namespace) => find_member_in_members_for_mode(
-                self.db,
-                namespace.members(self.db),
-                member_name,
-                StaticMemberMode::Instance,
-            ),
-            InferredTypeData::Object(object) => find_member_in_members_for_mode(
-                self.db,
-                object.members(self.db),
-                member_name,
-                StaticMemberMode::Instance,
-            ),
-            _ => None,
+        let mut seen_types = FxHashSet::default();
+        let mut pending = Vec::from([ty]);
+        for _ in 0..MAX_STATIC_MEMBER_LOOKUP_STEPS {
+            let Some(ty) = pending.pop() else {
+                break;
+            };
+            let ty = self.resolve_inferred_type(ty);
+            if !seen_types.insert(ty) {
+                continue;
+            }
+
+            match ty {
+                InferredTypeData::Class(class) => {
+                    if let Some(member) = find_member_in_members_for_mode(
+                        self.db,
+                        class.members(self.db),
+                        member_name,
+                        StaticMemberMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                    if let Some(extends) = class.extends(self.db) {
+                        pending.push(extends);
+                    }
+                }
+                InferredTypeData::Generic(generic) => {
+                    if let Some(constraint) = generic.constraint(self.db) {
+                        pending.push(constraint);
+                    }
+                }
+                InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
+                InferredTypeData::Interface(interface) => {
+                    if let Some(member) = find_member_in_members_for_mode(
+                        self.db,
+                        interface.members(self.db),
+                        member_name,
+                        StaticMemberMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                    pending.extend(interface.extends(self.db).iter().rev().copied());
+                }
+                InferredTypeData::Literal(literal) => {
+                    if let InferredLiteral::Object(members) = literal.literal(self.db)
+                        && let Some(member) = find_member_in_members_for_mode(
+                            self.db,
+                            members,
+                            member_name,
+                            StaticMemberMode::Instance,
+                        )
+                    {
+                        return Some(member);
+                    }
+                }
+                InferredTypeData::Module(module) => {
+                    if let Some(member) = find_member_in_members_for_mode(
+                        self.db,
+                        module.members(self.db),
+                        member_name,
+                        StaticMemberMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                }
+                InferredTypeData::Namespace(namespace) => {
+                    if let Some(member) = find_member_in_members_for_mode(
+                        self.db,
+                        namespace.members(self.db),
+                        member_name,
+                        StaticMemberMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                }
+                InferredTypeData::Object(object) => {
+                    if let Some(member) = find_member_in_members_for_mode(
+                        self.db,
+                        object.members(self.db),
+                        member_name,
+                        StaticMemberMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                    if let Some(prototype) = object.prototype(self.db) {
+                        pending.push(prototype);
+                    }
+                }
+                _ => {}
+            }
         }
+
+        None
     }
 
     fn member_type(
@@ -980,7 +1036,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
 
-            if let Some(next) = self.conditional_type_shallow(ty) {
+            if let Some(next) = ty.conditional_type_shallow(self.db) {
                 conditional = if conditional == ConditionalType::Unknown {
                     next
                 } else {
@@ -1020,75 +1076,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         ConditionalType::Unknown
-    }
-
-    fn conditional_type_shallow(&self, ty: InferredTypeData<'db>) -> Option<ConditionalType> {
-        match ty {
-            InferredTypeData::AnyKeyword
-            | InferredTypeData::Conditional
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::Unknown
-            | InferredTypeData::UnknownKeyword => Some(ConditionalType::Anything),
-            InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Number
-            | InferredTypeData::String => Some(ConditionalType::NonNullish),
-            InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Global
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::Symbol
-            | InferredTypeData::Tuple(_) => Some(ConditionalType::Truthy),
-            InferredTypeData::Literal(literal) => Some(match literal.literal(self.db) {
-                InferredLiteral::BigInt(text) => match text.text() {
-                    "0n" | "-0n" => ConditionalType::FalsyButNotNullish,
-                    _ => ConditionalType::Truthy,
-                },
-                InferredLiteral::Boolean(boolean) => {
-                    if boolean.as_bool() {
-                        ConditionalType::Truthy
-                    } else {
-                        ConditionalType::FalsyButNotNullish
-                    }
-                }
-                InferredLiteral::Number(number) => match number.to_f64() {
-                    Some(number) if number == 0. || number.is_nan() => {
-                        ConditionalType::FalsyButNotNullish
-                    }
-                    Some(_) => ConditionalType::Truthy,
-                    None => ConditionalType::Anything,
-                },
-                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => ConditionalType::Truthy,
-                InferredLiteral::String(string) => {
-                    if string.as_str().is_empty() {
-                        ConditionalType::FalsyButNotNullish
-                    } else {
-                        ConditionalType::Truthy
-                    }
-                }
-                InferredLiteral::Template(_) => ConditionalType::Anything,
-            }),
-            InferredTypeData::Null
-            | InferredTypeData::Undefined
-            | InferredTypeData::VoidKeyword => Some(ConditionalType::Nullish),
-            InferredTypeData::Divergent(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_) => None,
-            InferredTypeData::InstanceOf(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::Union(_) => None,
-        }
     }
 
     fn filter_type_to_subset(
@@ -1148,8 +1135,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
                 _ => {
-                    if self
-                        .conditional_type_shallow(ty)
+                    if ty
+                        .conditional_type_shallow(self.db)
                         .is_none_or(|conditional| !conditional.is_truthy())
                     {
                         FilterAction::Retained
@@ -1161,8 +1148,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             ConditionalSubset::Truthy => match ty {
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(true)),
                 _ => {
-                    if self
-                        .conditional_type_shallow(ty)
+                    if ty
+                        .conditional_type_shallow(self.db)
                         .is_none_or(|conditional| !conditional.is_falsy())
                     {
                         FilterAction::Retained
@@ -1172,8 +1159,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             },
             ConditionalSubset::NonNullish => {
-                if self
-                    .conditional_type_shallow(ty)
+                if ty
+                    .conditional_type_shallow(self.db)
                     .is_none_or(|conditional| !conditional.is_nullish())
                 {
                     FilterAction::Retained
@@ -1256,76 +1243,6 @@ fn rest_member_mode_allows(member: &InferredTypeMember<'_>, mode: RestMemberMode
         RestMemberMode::Instance => !member.kind.is_static(),
         RestMemberMode::ClassStatic => member.kind.is_static() && !member.kind.is_constructor(),
     }
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-enum ConditionalType {
-    Anything,
-    Falsy,
-    FalsyButNotNullish,
-    NonNullish,
-    Nullish,
-    Truthy,
-    Unknown,
-}
-
-impl ConditionalType {
-    fn is_falsy(self) -> bool {
-        matches!(self, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish)
-    }
-
-    fn is_inferred(self) -> bool {
-        !matches!(self, Self::Unknown)
-    }
-
-    fn is_non_nullish(self) -> bool {
-        matches!(
-            self,
-            Self::FalsyButNotNullish | Self::NonNullish | Self::Truthy
-        )
-    }
-
-    fn is_nullish(self) -> bool {
-        matches!(self, Self::Nullish)
-    }
-
-    fn is_truthy(self) -> bool {
-        matches!(self, Self::Truthy)
-    }
-
-    fn is_mergeable(self) -> bool {
-        !matches!(self, Self::Anything | Self::Unknown)
-    }
-
-    fn merged_with(self, other: Self) -> Self {
-        match (self, other) {
-            (Self::Anything, _)
-            | (_, Self::Anything)
-            | (Self::Falsy | Self::Nullish, Self::NonNullish)
-            | (Self::Falsy | Self::FalsyButNotNullish | Self::Nullish, Self::Truthy)
-            | (Self::NonNullish, Self::Falsy | Self::Nullish)
-            | (Self::Truthy, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish) => {
-                Self::Anything
-            }
-            (Self::Falsy, Self::Falsy | Self::FalsyButNotNullish | Self::Nullish)
-            | (Self::FalsyButNotNullish | Self::Nullish, Self::Falsy)
-            | (Self::FalsyButNotNullish, Self::Nullish)
-            | (Self::Nullish, Self::FalsyButNotNullish) => Self::Falsy,
-            (Self::FalsyButNotNullish, Self::FalsyButNotNullish) => Self::FalsyButNotNullish,
-            (Self::NonNullish, Self::FalsyButNotNullish | Self::NonNullish | Self::Truthy)
-            | (Self::FalsyButNotNullish | Self::Truthy, Self::NonNullish) => Self::NonNullish,
-            (Self::Nullish, Self::Nullish) => Self::Nullish,
-            (Self::Truthy, Self::Truthy) => Self::Truthy,
-            (Self::Unknown, _) | (_, Self::Unknown) => Self::Unknown,
-        }
-    }
-}
-
-#[derive(Clone, Copy)]
-enum ConditionalSubset {
-    Falsy,
-    Truthy,
-    NonNullish,
 }
 
 enum FilterAction<'db> {

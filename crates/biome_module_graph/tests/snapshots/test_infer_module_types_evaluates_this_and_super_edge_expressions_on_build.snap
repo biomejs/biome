@@ -1,0 +1,111 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	value: number;
+
+	read() {
+		const arrow = () => {
+			const arrowValue = this.value;
+			return arrowValue;
+		};
+
+		function nested() {
+			const plainValue = this.value;
+			return plainValue;
+		}
+
+		return arrow();
+	}
+}
+
+export class Solo {
+	read() {
+		const noParent = super.value;
+		return noParent;
+	}
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => instanceof local type 13
+
+Module TypeId(1) => number
+
+Module TypeId(2) => number
+
+Module TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Module TypeId(4) => instanceof unknown
+
+Module TypeId(5) => unknown
+
+Module TypeId(6) => unknown
+
+Module TypeId(7) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Module TypeId(8) => unknown
+
+Module TypeId(9) => unknown
+
+Module TypeId(10) => unknown
+
+Module TypeId(11) => unknown
+
+Module TypeId(12) => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Module TypeId(13) => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(14) => sync Function "nested" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Module TypeId(15) => sync Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Module TypeId(16) => class "Solo" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

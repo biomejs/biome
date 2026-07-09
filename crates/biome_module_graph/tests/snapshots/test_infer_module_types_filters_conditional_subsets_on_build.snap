@@ -1,0 +1,46 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export let maybeText: string | null = "value";
+export let zeroOrText: string | 0 = "value";
+
+export const nullishResult = maybeText ?? "fallback";
+export const andResult = zeroOrText && true;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => string: value
+
+Module TypeId(1) => null
+
+Module TypeId(2) => string | null
+
+Module TypeId(3) => instanceof string | null
+
+Module TypeId(4) => number: 0
+
+Module TypeId(5) => string | number: 0
+
+Module TypeId(6) => instanceof string | number: 0
+
+Module TypeId(7) => instanceof string | null
+
+Module TypeId(8) => string: fallback
+
+Module TypeId(9) => string
+
+Module TypeId(10) => instanceof string | number: 0
+
+Module TypeId(11) => bool: true
+
+Module TypeId(12) => string:  | number: 0 | bool: true
+```

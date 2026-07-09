@@ -1,0 +1,92 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Base {
+	inherited: number;
+}
+
+export class Derived extends Base {
+	static a: number;
+	static keep: boolean;
+	own: string;
+}
+
+export const { a, ...staticRest } = Derived;
+
+export const derived: Derived = {} as Derived;
+export const { inherited, ...instanceRest } = derived;
+
+export const tuple = ["value", 1, true];
+export const [first, ...tupleRest] = tuple;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => local type 16
+
+Module TypeId(1) => local type 18
+
+Module TypeId(2) => number
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: [static "keep": boolean]
+}
+
+Module TypeId(4) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(5) => instanceof local type 18
+
+Module TypeId(6) => instanceof local type 18
+
+Module TypeId(7) => number
+
+Module TypeId(8) => Object {
+  prototype: No prototype
+  members: ["own": string]
+}
+
+Module TypeId(9) => string: value
+
+Module TypeId(10) => number: 1
+
+Module TypeId(11) => bool: true
+
+Module TypeId(12) => [string: value,
+number: 1,
+bool: true]
+
+Module TypeId(13) => [string: value,
+number: 1,
+bool: true]
+
+Module TypeId(14) => string: value
+
+Module TypeId(15) => [number: 1,
+bool: true]
+
+Module TypeId(16) => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(17) => boolean
+
+Module TypeId(18) => class "Derived" {
+  extends: local type 16
+  implements: []
+  type_args: []
+}
+```
