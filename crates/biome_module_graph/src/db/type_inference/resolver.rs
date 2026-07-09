@@ -18,6 +18,7 @@ use salsa::plumbing::AsId;
 /// `TypeData::Local` handles, which leaves only structural nesting within a
 /// single declaration on the stack -- real-world code stays well below this.
 const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
+const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
 pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
@@ -199,7 +200,49 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         let db = self.db;
-        InferredTypeData::from_raw_with_resolver(db, raw, &mut |reference| self.resolve(reference))
+        let ty = InferredTypeData::from_raw_with_resolver(db, raw, &mut |reference| {
+            self.resolve(reference)
+        });
+        self.resolve_inferred_expression_wrappers(ty)
+    }
+
+    fn resolve_inferred_expression_wrappers(
+        &mut self,
+        mut ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        for _ in 0..MAX_INFERRED_EXPRESSION_WRAPPER_STEPS {
+            match ty {
+                InferredTypeData::TypeofExpression(expression) => {
+                    ty = self
+                        .resolve_inferred_typeof_expression(expression.expression(self.db))
+                        .unwrap_or(InferredTypeData::Unknown);
+                }
+                InferredTypeData::InstanceOf(instance) => {
+                    let target = instance.ty(self.db);
+                    let InferredTypeData::TypeofExpression(expression) = target else {
+                        return ty;
+                    };
+                    let target = self
+                        .resolve_inferred_typeof_expression(expression.expression(self.db))
+                        .unwrap_or(InferredTypeData::Unknown);
+                    if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                        ty = target;
+                    } else {
+                        return InferredTypeData::instance_of(
+                            self.db,
+                            target,
+                            instance
+                                .type_parameters(self.db)
+                                .to_vec()
+                                .into_boxed_slice(),
+                        );
+                    }
+                }
+                _ => return ty,
+            }
+        }
+
+        ty
     }
 
     pub(in crate::db::type_inference) fn resolve_inferred_type(

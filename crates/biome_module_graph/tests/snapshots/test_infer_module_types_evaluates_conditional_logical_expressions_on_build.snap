@@ -1,0 +1,50 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export let flag: boolean = true;
+export let maybeText: string | undefined = "value";
+
+export const choice = flag ? "value" : 1;
+export const andValue = maybeText && 1;
+export const orValue = maybeText || 1;
+export const nullishValue = maybeText ?? 1;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => bool: true
+
+Module TypeId(1) => boolean
+
+Module TypeId(2) => instanceof boolean
+
+Module TypeId(3) => string: value
+
+Module TypeId(4) => undefined
+
+Module TypeId(5) => string | undefined
+
+Module TypeId(6) => instanceof string | undefined
+
+Module TypeId(7) => instanceof boolean
+
+Module TypeId(8) => number: 1
+
+Module TypeId(9) => string: value | number: 1
+
+Module TypeId(10) => instanceof string | undefined
+
+Module TypeId(11) => string:  | undefined | number: 1
+
+Module TypeId(12) => string | number: 1
+
+Module TypeId(13) => string | number: 1
+```
