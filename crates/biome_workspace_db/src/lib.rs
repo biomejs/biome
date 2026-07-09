@@ -249,6 +249,24 @@ impl WorkspaceDb {
         self.data().insert_module(path, module);
     }
 
+    #[cfg(feature = "module_graph")]
+    pub fn update_or_insert_module(
+        &mut self,
+        path: Utf8PathBuf,
+        kind: ModuleInfoKind,
+    ) -> ModuleInfo {
+        let existing_module = { self.modules.pin().get(&path).copied() };
+
+        if let Some(existing_module) = existing_module {
+            existing_module.set_kind(self).to(kind);
+            existing_module
+        } else {
+            let module = ModuleInfo::new(self, path.clone(), kind);
+            self.insert_module(path, module);
+            module
+        }
+    }
+
     /// It updates the CST of an existing parsed source
     pub fn update_parsed_root(&mut self, path: &Utf8Path, new_root: SendNode) {
         self.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters);
