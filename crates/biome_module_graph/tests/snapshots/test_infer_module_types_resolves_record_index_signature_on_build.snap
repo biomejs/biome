@@ -18,17 +18,7 @@ export function readRecord(
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof Object {
-  prototype: No prototype
-  members: [[string]: number]
-}
-
-Module TypeId(1) => instanceof Object {
-  prototype: No prototype
-  members: [[string]: number]
-}
-
-Module TypeId(2) => sync Function "readRecord" {
+Binding readRecord "readRecord" => sync Function "readRecord" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -42,5 +32,15 @@ Module TypeId(2) => sync Function "readRecord" {
     prototype: No prototype
     members: [[string]: number]
   }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [[string]: number]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [[string]: number]
 }
 ```

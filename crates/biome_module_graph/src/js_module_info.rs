@@ -7,10 +7,11 @@ mod utils;
 mod visitor;
 
 use crate::css_module_info::CssClassReference;
-use biome_js_semantic::ScopeId;
+use biome_js_semantic::{JsDeclarationKind, ScopeId};
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     FormatTypeContext, ImportSymbol, RawTypeData, ResolvedTypeId, TypeData, TypeReference,
+    TypeResolverLevel, interned_types::LocalTypeId,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -159,6 +160,40 @@ impl JsModuleInfo {
                     .and_then(|import| import.resolved_path.as_path())
             })
     }
+
+    pub fn local_type_name(&self, type_id: LocalTypeId) -> Option<Text> {
+        self.raw_binding_types
+            .iter()
+            .find_map(|(range, reference)| {
+                let TypeReference::Resolved(resolved_id) = reference else {
+                    return None;
+                };
+                if resolved_id.level() != TypeResolverLevel::Thin
+                    || resolved_id.index() != type_id.index()
+                {
+                    return None;
+                }
+
+                let binding = self.semantic_model.as_binding_by_range(*range)?;
+                if !is_named_type_declaration(binding.declaration_kind()) {
+                    return None;
+                }
+
+                Some(binding.syntax().text_trimmed().into_text())
+            })
+    }
+}
+
+fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
+    matches!(
+        declaration_kind,
+        JsDeclarationKind::Class
+            | JsDeclarationKind::Enum
+            | JsDeclarationKind::Interface
+            | JsDeclarationKind::Module
+            | JsDeclarationKind::Namespace
+            | JsDeclarationKind::Type
+    )
 }
 
 #[derive(Debug)]

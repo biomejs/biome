@@ -8,11 +8,15 @@ use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
-use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, TypeDb};
+use biome_module_graph::{LocalTypeId, ModuleDb, ModuleInfo, ModuleInfoKind, ModuleKey, TypeDb};
 use biome_parser::AnyParse;
 use biome_rowan::SendNode;
+#[cfg(feature = "module_graph")]
+use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
+#[cfg(feature = "module_graph")]
+use salsa::plumbing::{AsId, FromId};
 use salsa::{Setter, Storage};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -323,7 +327,20 @@ impl biome_db::Db for WorkspaceDb {
 
 #[cfg(feature = "module_graph")]
 #[salsa::db]
-impl TypeDb for WorkspaceDb {}
+impl TypeDb for WorkspaceDb {
+    fn local_type_name(&self, module_key: ModuleKey, type_id: LocalTypeId) -> Option<Text> {
+        let module = ModuleInfo::from_id(module_key.as_id());
+        let current = self.module_for_path(module.path(self))?;
+        if ModuleKey::new(current.as_id()) != module_key {
+            return None;
+        }
+
+        let ModuleInfoKind::Js(info) = current.kind(self) else {
+            return None;
+        };
+        info.local_type_name(type_id)
+    }
+}
 
 #[cfg(feature = "module_graph")]
 #[salsa::db]

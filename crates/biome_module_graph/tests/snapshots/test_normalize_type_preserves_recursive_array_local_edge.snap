@@ -18,23 +18,19 @@ export function readTree(value: Tree): Tree {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof local type 4
+Binding Tree "Tree" => number | instanceof Array<instanceof Tree>
 
-Module TypeId(1) => instanceof local type 4
-
-Module TypeId(2) => instanceof local type 4
-
-Module TypeId(3) => instanceof Array<instanceof local type 4>
-
-Module TypeId(4) => number | instanceof Array<instanceof local type 4>
-
-Module TypeId(5) => sync Function "readTree" {
+Binding readTree "readTree" => sync Function "readTree" {
   accepts: {
     params: [
-      required value: instanceof local type 4
+      required value: instanceof Tree
     ]
     type_args: []
   }
-  returns: instanceof local type 4
+  returns: instanceof Tree
 }
+
+Binding value "value" => instanceof Tree
+
+Expression "value" => instanceof Tree
 ```

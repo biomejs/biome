@@ -20,13 +20,7 @@ export function readNever(value: string & number): string & number {
 ## Inferred types
 
 ```
-Module TypeId(0) => string
-
-Module TypeId(1) => never
-
-Module TypeId(2) => never
-
-Module TypeId(3) => sync Function "readString" {
+Binding readString "readString" => sync Function "readString" {
   accepts: {
     params: [
       required value: string
@@ -36,7 +30,11 @@ Module TypeId(3) => sync Function "readString" {
   returns: string
 }
 
-Module TypeId(4) => sync Function "readNever" {
+Binding value "value" => string
+
+Expression "value" => string
+
+Binding readNever "readNever" => sync Function "readNever" {
   accepts: {
     params: [
       required value: never
@@ -45,4 +43,8 @@ Module TypeId(4) => sync Function "readNever" {
   }
   returns: never
 }
+
+Binding value "value" => never
+
+Expression "value" => never
 ```

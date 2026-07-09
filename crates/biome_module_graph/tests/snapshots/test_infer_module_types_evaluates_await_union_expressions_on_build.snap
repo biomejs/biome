@@ -17,19 +17,7 @@ export async function consume(value: Promise<string> | number) {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof Promise<string>
-
-Module TypeId(1) => instanceof Promise<string> | number
-
-Module TypeId(2) => instanceof Promise<string> | number
-
-Module TypeId(3) => string | number
-
-Module TypeId(4) => string | number
-
-Module TypeId(5) => instanceof Promise<string | number>
-
-Module TypeId(6) => async Function "consume" {
+Binding consume "consume" => async Function "consume" {
   accepts: {
     params: [
       required value: instanceof Promise<string> | number
@@ -38,4 +26,14 @@ Module TypeId(6) => async Function "consume" {
   }
   returns: instanceof Promise<string | number>
 }
+
+Binding value "value" => instanceof Promise<string> | number
+
+Binding awaited "awaited" => string | number
+
+Expression "await value" => string | number
+
+Expression "value" => instanceof Promise<string> | number
+
+Expression "awaited" => string | number
 ```

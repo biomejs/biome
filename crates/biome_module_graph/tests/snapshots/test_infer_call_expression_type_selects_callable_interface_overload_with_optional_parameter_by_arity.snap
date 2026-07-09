@@ -17,27 +17,7 @@ export interface Reader {
 ## Inferred types
 
 ```
-Module TypeId(0) => number | undefined
-
-Module TypeId(1) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: string
-}
-
-Module TypeId(2) => sync Function {
-  accepts: {
-    params: [
-      optional value: number | undefined
-    ]
-    type_args: []
-  }
-  returns: number
-}
-
-Module TypeId(3) => interface "Reader" {
+Binding Reader "Reader" => interface "Reader" {
   extends: []
   type_args: []
   members: [
@@ -62,4 +42,6 @@ Module TypeId(3) => interface "Reader" {
       }
   ]
 }
+
+Binding value "value" => number | undefined
 ```

@@ -24,120 +24,62 @@ export const selected = select(new Derived());
 ## Inferred types
 
 ```
-Module TypeId(0) => local type 11
-
-Module TypeId(1) => instanceof local type 13
-
-Module TypeId(2) => instanceof local type 11
-
-Module TypeId(3) => instanceof local type 13
-
-Module TypeId(4) => instanceof local type 11
-
-Module TypeId(5) => instanceof local type 13 | instanceof local type 11
-
-Module TypeId(6) => string | number
-
-Module TypeId(7) => Object {
-  prototype: No prototype
-  members: [
-    ():
-      sync Function "select" {
-        accepts: {
-          params: [
-            required value: instanceof local type 13
-          ]
-          type_args: []
-        }
-        returns: number
-      }
-    ,
-    ():
-      sync Function "select" {
-        accepts: {
-          params: [
-            required value: instanceof local type 11
-          ]
-          type_args: []
-        }
-        returns: string
-      }
-    ,
-    ():
-      sync Function "select" {
-        accepts: {
-          params: [
-            required _value: instanceof local type 13 | instanceof local type 11
-          ]
-          type_args: []
-        }
-        returns: string | number
-      }
-  ]
-}
-
-Module TypeId(8) => local type 12
-
-Module TypeId(9) => instanceof Derived
-
-Module TypeId(10) => string
-
-Module TypeId(11) => class "Base" {
+Binding Base "Base" => class "Base" {
   extends: none
   implements: []
   type_args: []
 }
 
-Module TypeId(12) => class "Derived" {
-  extends: local type 11
+Binding Derived "Derived" => class "Derived" {
+  extends: Base
   implements: []
   type_args: []
 }
 
-Module TypeId(13) => class "Other" {
+Expression "Base" => class "Base" {
   extends: none
   implements: []
   type_args: []
 }
 
-Module TypeId(14) => sync Function "select" {
+Binding Other "Other" => class "Other" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding select "select" => sync Function "select" {
   accepts: {
     params: [
-      required value: instanceof local type 13
+      required value: instanceof Other
     ]
     type_args: []
   }
   returns: number
 }
 
-Module TypeId(15) => sync Function "select" {
+Binding value "value" => instanceof Other
+
+Binding select "select" => sync Function "select" {
   accepts: {
     params: [
-      required value: instanceof local type 11
+      required value: instanceof Base
     ]
     type_args: []
   }
   returns: string
 }
 
-Module TypeId(16) => sync Function "select" {
-  accepts: {
-    params: [
-      required _value: instanceof local type 13 | instanceof local type 11
-    ]
-    type_args: []
-  }
-  returns: string | number
-}
+Binding value "value" => instanceof Base
 
-Module TypeId(17) => Object {
+Binding select "select" => Object {
   prototype: No prototype
   members: [
     ():
       sync Function "select" {
         accepts: {
           params: [
-            required value: instanceof local type 13
+            required value: instanceof Other
           ]
           type_args: []
         }
@@ -148,7 +90,7 @@ Module TypeId(17) => Object {
       sync Function "select" {
         accepts: {
           params: [
-            required value: instanceof local type 11
+            required value: instanceof Base
           ]
           type_args: []
         }
@@ -159,12 +101,68 @@ Module TypeId(17) => Object {
       sync Function "select" {
         accepts: {
           params: [
-            required _value: instanceof local type 13 | instanceof local type 11
+            required _value: instanceof Other | instanceof Base
           ]
           type_args: []
         }
         returns: string | number
       }
   ]
+}
+
+Binding _value "_value" => instanceof Other | instanceof Base
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number" => string | number
+
+Binding selected "selected" => string
+
+Expression "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Other
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required value: instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required _value: instanceof Other | instanceof Base
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "select(new Derived())" => string
+
+Expression "new Derived()" => instanceof Derived
+
+Expression "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
 }
 ```

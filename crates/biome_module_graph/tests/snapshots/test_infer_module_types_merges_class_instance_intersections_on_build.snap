@@ -18,26 +18,7 @@ export function readPromiseObject(
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof Promise<string>
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
-
-Module TypeId(2) => instanceof class {
-  extends: none
-  implements: []
-  type_args: []
-}
-
-Module TypeId(3) => instanceof class {
-  extends: none
-  implements: []
-  type_args: []
-}
-
-Module TypeId(4) => sync Function "readPromiseObject" {
+Binding readPromiseObject "readPromiseObject" => sync Function "readPromiseObject" {
   accepts: {
     params: [
       required value: instanceof class {
@@ -53,5 +34,17 @@ Module TypeId(4) => sync Function "readPromiseObject" {
     implements: []
     type_args: []
   }
+}
+
+Binding value "value" => instanceof class {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "value" => instanceof class {
+  extends: none
+  implements: []
+  type_args: []
 }
 ```

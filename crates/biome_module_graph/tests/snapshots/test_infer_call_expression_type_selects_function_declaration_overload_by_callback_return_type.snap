@@ -26,105 +26,7 @@ export function readString(): string {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => instanceof Promise<instanceof T>
-
-Module TypeId(2) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}
-
-Module TypeId(3) => instanceof T
-
-Module TypeId(4) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-}
-
-Module TypeId(5) => instanceof T
-
-Module TypeId(6) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-}
-
-Module TypeId(7) => instanceof Promise<instanceof T>
-
-Module TypeId(8) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}
-
-Module TypeId(9) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-} | sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}
-
-Module TypeId(10) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-} | sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}
-
-Module TypeId(11) => instanceof T | instanceof Promise<instanceof T>
-
-Module TypeId(12) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(13) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
-
-Module TypeId(14) => string: value
-
-Module TypeId(15) => instanceof Promise
-
-Module TypeId(16) => T
-
-Module TypeId(17) => undefined
-
-Module TypeId(18) => instanceof T | undefined
-
-Module TypeId(19) => instanceof Promise<instanceof T | undefined>
-
-Module TypeId(20) => sync Function "bestEffort" {
+Binding bestEffort "bestEffort" => sync Function "bestEffort" {
   accepts: {
     params: [
       required cb: sync Function {
@@ -140,9 +42,17 @@ Module TypeId(20) => sync Function "bestEffort" {
   returns: instanceof Promise<instanceof T | undefined>
 }
 
-Module TypeId(21) => instanceof T | undefined
+Binding T "T" => T
 
-Module TypeId(22) => sync Function "bestEffort" {
+Binding cb "cb" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof T>
+}
+
+Binding bestEffort "bestEffort" => sync Function "bestEffort" {
   accepts: {
     params: [
       required cb: sync Function {
@@ -158,47 +68,17 @@ Module TypeId(22) => sync Function "bestEffort" {
   returns: instanceof T | undefined
 }
 
-Module TypeId(23) => sync Function "bestEffort" {
-  accepts: {
-    params: [
-      required cb: sync Function {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: instanceof T
-      } | sync Function {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: instanceof Promise<instanceof T>
-      }
-    ]
-    type_args: [T]
-  }
-  returns: instanceof T | instanceof Promise<instanceof T>
-}
+Binding T "T" => T
 
-Module TypeId(24) => instanceof Promise<string>
-
-Module TypeId(25) => sync Function "readPromise" {
+Binding cb "cb" => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: instanceof Promise<string>
+  returns: instanceof T
 }
 
-Module TypeId(26) => sync Function "readString" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: string
-}
-
-Module TypeId(27) => Object {
+Binding bestEffort "bestEffort" => Object {
   prototype: No prototype
   members: [
     ():
@@ -245,7 +125,8 @@ Module TypeId(27) => Object {
                 type_args: []
               }
               returns: instanceof T
-            } | sync Function {
+            }
+            | sync Function {
               accepts: {
                 params: []
                 type_args: []
@@ -259,4 +140,76 @@ Module TypeId(27) => Object {
       }
   ]
 }
+
+Binding T "T" => T
+
+Binding cb "cb" =>
+  sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof T
+  }
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<instanceof T>
+  }
+
+Expression "cb" =>
+  sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof T
+  }
+  | sync Function {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: instanceof Promise<instanceof T>
+  }
+
+Expression "cb()" => instanceof T | instanceof Promise<instanceof T>
+
+Binding readPromise "readPromise" => sync Function "readPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "Promise.resolve(\"value\")" => instanceof Promise
+
+Expression "\"value\"" => string: value
+
+Binding readString "readString" => sync Function "readString" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "\"value\"" => string: value
 ```

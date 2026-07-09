@@ -30,129 +30,7 @@ export const optionalTupleSpread = readTuple(...optionalTuple);
 ## Inferred types
 
 ```
-Module TypeId(0) => [string]
-
-Module TypeId(1) => [number,
-number]
-
-Module TypeId(2) => [string] | [number,
-number]
-
-Module TypeId(3) => boolean
-
-Module TypeId(4) => string | boolean
-
-Module TypeId(5) => number: 1
-
-Module TypeId(6) => number: 2
-
-Module TypeId(7) => [number: 1,
-number: 2]
-
-Module TypeId(8) => instanceof Array<number>
-
-Module TypeId(9) => Object {
-  prototype: No prototype
-  members: [
-    ():
-      sync Function "readArray" {
-        accepts: {
-          params: [
-            required value: string
-          ]
-          type_args: []
-        }
-        returns: string
-      }
-    ,
-    ():
-      sync Function "readArray" {
-        accepts: {
-          params: [
-            required left: number
-            required right: number
-          ]
-          type_args: []
-        }
-        returns: boolean
-      }
-    ,
-    ():
-      sync Function "readArray" {
-        accepts: {
-          params: [
-            required ..._args: [string] | [number,
-            number]
-          ]
-          type_args: []
-        }
-        returns: string | boolean
-      }
-  ]
-}
-
-Module TypeId(10) => instanceof Array<number>
-
-Module TypeId(11) => boolean
-
-Module TypeId(12) => [string,
-number?]
-
-Module TypeId(13) => string | number
-
-Module TypeId(14) => string: value
-
-Module TypeId(15) => [string: value]
-
-Module TypeId(16) => instanceof [string,
-number?]
-
-Module TypeId(17) => Object {
-  prototype: No prototype
-  members: [
-    ():
-      sync Function "readTuple" {
-        accepts: {
-          params: [
-            required value: string
-          ]
-          type_args: []
-        }
-        returns: string
-      }
-    ,
-    ():
-      sync Function "readTuple" {
-        accepts: {
-          params: [
-            required value: string
-            required count: number
-          ]
-          type_args: []
-        }
-        returns: number
-      }
-    ,
-    ():
-      sync Function "readTuple" {
-        accepts: {
-          params: [
-            required ..._args: [string,
-            number?]
-          ]
-          type_args: []
-        }
-        returns: string | number
-      }
-  ]
-}
-
-Module TypeId(18) => instanceof [string,
-number?]
-
-Module TypeId(19) => string
-
-Module TypeId(20) => sync Function "readArray" {
+Binding readArray "readArray" => sync Function "readArray" {
   accepts: {
     params: [
       required value: string
@@ -162,7 +40,9 @@ Module TypeId(20) => sync Function "readArray" {
   returns: string
 }
 
-Module TypeId(21) => sync Function "readArray" {
+Binding value "value" => string
+
+Binding readArray "readArray" => sync Function "readArray" {
   accepts: {
     params: [
       required left: number
@@ -173,18 +53,113 @@ Module TypeId(21) => sync Function "readArray" {
   returns: boolean
 }
 
-Module TypeId(22) => sync Function "readArray" {
-  accepts: {
-    params: [
-      required ..._args: [string] | [number,
-      number]
-    ]
-    type_args: []
-  }
-  returns: string | boolean
+Binding left "left" => number
+
+Binding right "right" => number
+
+Binding readArray "readArray" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
 }
 
-Module TypeId(23) => sync Function "readTuple" {
+Binding _args "_args" => [string] | [number,
+number]
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | boolean" => string | boolean
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding arraySpread "arraySpread" => boolean
+
+Expression "readArray" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "readArray" {
+        accepts: {
+          params: [
+            required ..._args: [string] | [number,
+            number]
+          ]
+          type_args: []
+        }
+        returns: string | boolean
+      }
+  ]
+}
+
+Expression "readArray(...numbers)" => boolean
+
+Expression "numbers" => instanceof Array<number>
+
+Binding readTuple "readTuple" => sync Function "readTuple" {
   accepts: {
     params: [
       required value: string
@@ -194,7 +169,9 @@ Module TypeId(23) => sync Function "readTuple" {
   returns: string
 }
 
-Module TypeId(24) => sync Function "readTuple" {
+Binding value "value" => string
+
+Binding readTuple "readTuple" => sync Function "readTuple" {
   accepts: {
     params: [
       required value: string
@@ -205,18 +182,11 @@ Module TypeId(24) => sync Function "readTuple" {
   returns: number
 }
 
-Module TypeId(25) => sync Function "readTuple" {
-  accepts: {
-    params: [
-      required ..._args: [string,
-      number?]
-    ]
-    type_args: []
-  }
-  returns: string | number
-}
+Binding value "value" => string
 
-Module TypeId(26) => Object {
+Binding count "count" => number
+
+Binding readTuple "readTuple" => Object {
   prototype: No prototype
   members: [
     ():
@@ -256,11 +226,27 @@ Module TypeId(26) => Object {
   ]
 }
 
-Module TypeId(27) => Object {
+Binding _args "_args" => [string,
+number?]
+
+Expression "undefined" => undefined
+
+Expression "undefined as string | number" => string | number
+
+Binding optionalTuple "optionalTuple" => instanceof [string,
+number?]
+
+Expression "[\"value\"]" => [string: value]
+
+Expression "\"value\"" => string: value
+
+Binding optionalTupleSpread "optionalTupleSpread" => string
+
+Expression "readTuple" => Object {
   prototype: No prototype
   members: [
     ():
-      sync Function "readArray" {
+      sync Function "readTuple" {
         accepts: {
           params: [
             required value: string
@@ -271,28 +257,33 @@ Module TypeId(27) => Object {
       }
     ,
     ():
-      sync Function "readArray" {
+      sync Function "readTuple" {
         accepts: {
           params: [
-            required left: number
-            required right: number
+            required value: string
+            required count: number
           ]
           type_args: []
         }
-        returns: boolean
+        returns: number
       }
     ,
     ():
-      sync Function "readArray" {
+      sync Function "readTuple" {
         accepts: {
           params: [
-            required ..._args: [string] | [number,
-            number]
+            required ..._args: [string,
+            number?]
           ]
           type_args: []
         }
-        returns: string | boolean
+        returns: string | number
       }
   ]
 }
+
+Expression "readTuple(...optionalTuple)" => string
+
+Expression "optionalTuple" => instanceof [string,
+number?]
 ```

@@ -167,7 +167,12 @@ impl LocalTypeId {
 }
 
 #[salsa::db]
-pub trait TypeDb: biome_db::Db {}
+pub trait TypeDb: biome_db::Db {
+    fn local_type_name(&self, module: ModuleKey, type_id: LocalTypeId) -> Option<Text> {
+        let _ = (module, type_id);
+        None
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
 pub struct DivergentType {

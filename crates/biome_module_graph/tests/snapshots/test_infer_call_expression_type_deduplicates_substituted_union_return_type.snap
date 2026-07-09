@@ -16,15 +16,7 @@ export function maybeString<T>(value: T): T | string {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => instanceof T
-
-Module TypeId(2) => T
-
-Module TypeId(3) => instanceof T | string
-
-Module TypeId(4) => sync Function "maybeString" {
+Binding maybeString "maybeString" => sync Function "maybeString" {
   accepts: {
     params: [
       required value: instanceof T
@@ -33,4 +25,10 @@ Module TypeId(4) => sync Function "maybeString" {
   }
   returns: instanceof T | string
 }
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
 ```

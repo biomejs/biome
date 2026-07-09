@@ -24,34 +24,7 @@ export function readPrimitive(
 ## Inferred types
 
 ```
-Module TypeId(0) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: string
-}
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
-
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
-
-Module TypeId(3) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
-
-Module TypeId(4) => string
-
-Module TypeId(5) => string
-
-Module TypeId(6) => sync Function "readCallableObject" {
+Binding readCallableObject "readCallableObject" => sync Function "readCallableObject" {
   accepts: {
     params: [
       required value: Object {
@@ -67,7 +40,17 @@ Module TypeId(6) => sync Function "readCallableObject" {
   }
 }
 
-Module TypeId(7) => sync Function "readPrimitive" {
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["value": number]
+}
+
+Binding readPrimitive "readPrimitive" => sync Function "readPrimitive" {
   accepts: {
     params: [
       required value: string
@@ -76,4 +59,8 @@ Module TypeId(7) => sync Function "readPrimitive" {
   }
   returns: string
 }
+
+Binding value "value" => string
+
+Expression "value" => string
 ```

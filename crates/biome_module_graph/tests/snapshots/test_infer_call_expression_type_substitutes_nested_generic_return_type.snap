@@ -16,31 +16,7 @@ export function wrap<T>(value: T): Promise<T> {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(2) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
-
-Module TypeId(3) => instanceof T
-
-Module TypeId(4) => instanceof Promise
-
-Module TypeId(5) => T
-
-Module TypeId(6) => instanceof Promise<instanceof T>
-
-Module TypeId(7) => sync Function "wrap" {
+Binding wrap "wrap" => sync Function "wrap" {
   accepts: {
     params: [
       required value: instanceof T
@@ -49,4 +25,26 @@ Module TypeId(7) => sync Function "wrap" {
   }
   returns: instanceof Promise<instanceof T>
 }
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "Promise" => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Promise.resolve" => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Expression "Promise.resolve(value)" => instanceof Promise
+
+Expression "value" => instanceof T
 ```

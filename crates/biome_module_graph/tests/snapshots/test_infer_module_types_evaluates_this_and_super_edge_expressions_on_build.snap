@@ -37,57 +37,13 @@ export class Solo {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof local type 13
-
-Module TypeId(1) => number
-
-Module TypeId(2) => number
-
-Module TypeId(3) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown
-}
-
-Module TypeId(4) => instanceof unknown
-
-Module TypeId(5) => unknown
-
-Module TypeId(6) => unknown
-
-Module TypeId(7) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown
-}
-
-Module TypeId(8) => unknown
-
-Module TypeId(9) => unknown
-
-Module TypeId(10) => unknown
-
-Module TypeId(11) => unknown
-
-Module TypeId(12) => sync Function "read" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown
-}
-
-Module TypeId(13) => class "Box" {
+Binding Box "Box" => class "Box" {
   extends: none
   implements: []
   type_args: []
 }
 
-Module TypeId(14) => sync Function "nested" {
+Binding arrow "arrow" => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -95,7 +51,7 @@ Module TypeId(14) => sync Function "nested" {
   returns: unknown
 }
 
-Module TypeId(15) => sync Function "read" {
+Expression "() => { const arrowValue = this.value; return arrowValue; }" => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -103,9 +59,51 @@ Module TypeId(15) => sync Function "read" {
   returns: unknown
 }
 
-Module TypeId(16) => class "Solo" {
+Binding arrowValue "arrowValue" => number
+
+Expression "this" => instanceof Box
+
+Expression "this.value" => number
+
+Expression "arrowValue" => number
+
+Binding nested "nested" => sync Function "nested" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Binding plainValue "plainValue" => unknown
+
+Expression "this" => instanceof unknown
+
+Expression "this.value" => unknown
+
+Expression "plainValue" => unknown
+
+Expression "arrow" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown
+}
+
+Expression "arrow()" => unknown
+
+Binding Solo "Solo" => class "Solo" {
   extends: none
   implements: []
   type_args: []
 }
+
+Binding noParent "noParent" => unknown
+
+Expression "super" => unknown
+
+Expression "super.value" => unknown
+
+Expression "noParent" => unknown
 ```

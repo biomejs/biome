@@ -129,6 +129,8 @@ fn resolve_global_type_id_with_resolver<'db>(
     let mut stack = vec![GlobalTypeWork::TypeId(type_id)];
     let mut values = Vec::new();
     let mut active = FxHashSet::default();
+    let mut active_stack = Vec::new();
+    let mut cycle_contaminated = FxHashSet::default();
 
     // The stack walks finite borrowed raw type trees. `TypeId` references
     // terminate through the memo table or the active-set cycle placeholder.
@@ -138,11 +140,18 @@ fn resolve_global_type_id_with_resolver<'db>(
                 if let Some(ty) = resolved_globals.get(&type_id) {
                     values.push(GlobalTypeValue::Type(*ty));
                 } else if active.contains(&type_id) {
+                    cycle_contaminated.extend(active_stack.iter().copied());
                     values.push(GlobalTypeValue::Type(global_cycle_placeholder(
                         db, resolver, type_id,
                     )));
                 } else {
-                    active.insert(type_id);
+                    let inserted = active.insert(type_id);
+                    debug_assert!(
+                        inserted,
+                        "global type converter activated duplicate TypeId({}); check active set and active_stack updates around TypeId push/rebuild",
+                        type_id.index()
+                    );
+                    active_stack.push(type_id);
                     stack.push(GlobalTypeWork::RebuildTypeId(type_id));
                     stack.push(GlobalTypeWork::Raw(resolver.get_by_id(type_id)));
                 }
@@ -153,8 +162,19 @@ fn resolve_global_type_id_with_resolver<'db>(
             }
             GlobalTypeWork::RebuildTypeId(type_id) => {
                 let ty = pop_global_type(&mut values);
-                active.remove(&type_id);
-                if active.is_empty() {
+                debug_assert_eq!(
+                    active_stack.pop(),
+                    Some(type_id),
+                    "global type converter RebuildTypeId was not paired with the active TypeId; check that every TypeId push has one matching RebuildTypeId"
+                );
+                let removed = active.remove(&type_id);
+                debug_assert!(
+                    removed,
+                    "global type converter rebuilt inactive TypeId({}); check RebuildTypeId ordering and active set removal",
+                    type_id.index()
+                );
+                let was_cycle_contaminated = cycle_contaminated.remove(&type_id);
+                if active.is_empty() && !was_cycle_contaminated {
                     resolved_globals.insert(type_id, ty);
                 }
                 values.push(GlobalTypeValue::Type(ty));
@@ -415,7 +435,19 @@ fn resolve_global_type_id_with_resolver<'db>(
         }
     }
 
-    debug_assert_eq!(values.len(), 1, "global type converter stack imbalance");
+    debug_assert!(
+        active.is_empty(),
+        "global type converter leaked active TypeIds; check that every active TypeId reaches RebuildTypeId"
+    );
+    debug_assert!(
+        active_stack.is_empty(),
+        "global type converter leaked active TypeId stack entries; check active_stack push/pop pairing"
+    );
+    debug_assert_eq!(
+        values.len(),
+        1,
+        "global type converter stack imbalance; check that every GlobalTypeWork rebuild pushes one value"
+    );
     pop_global_type(&mut values)
 }
 
@@ -1036,7 +1068,7 @@ fn pop_global_tuple_elements<'db>(
 fn unexpected_global_value(expected: &'static str) {
     debug_assert!(
         false,
-        "global type converter expected {expected} on the value stack"
+        "global type converter expected {expected} on the value stack; check GlobalTypeWork rebuild order and pop helper calls"
     );
 }
 
@@ -1281,7 +1313,7 @@ mod tests {
     }
 
     #[test]
-    fn global_converter_does_not_memoize_types_built_under_active_ancestor() {
+    fn global_converter_does_not_memoize_cycle_contaminated_types() {
         let db = TestDb::default();
         let resolver = GlobalsResolver::default();
         let promise_id = global_type_id(&resolver, "Promise");
@@ -1291,8 +1323,12 @@ mod tests {
             resolve_global_type_id_with_resolver(&db, &resolver, promise_id, &mut resolved_globals);
 
         assert!(is_class_named(&db, promise_ty, "Promise"));
-        assert_eq!(resolved_globals.len(), 1);
-        assert_eq!(resolved_globals.get(&promise_id), Some(&promise_ty));
+        assert!(resolved_globals.is_empty());
+
+        let promise_ty =
+            resolve_global_type_id_with_resolver(&db, &resolver, promise_id, &mut resolved_globals);
+        assert!(is_class_named(&db, promise_ty, "Promise"));
+        assert!(resolved_globals.is_empty());
     }
 
     #[cfg(debug_assertions)]

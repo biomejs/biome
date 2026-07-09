@@ -22,34 +22,39 @@ export function readSource(value: Source): Source {
 ## Inferred types
 
 ```
-Module TypeId(0) => string: source
-
-Module TypeId(1) => Object {
+Binding source "source" => Object {
   prototype: No prototype
   members: ["name": string: source]
 }
 
-Module TypeId(2) => Object {
+Expression "{ name: \"source\", }" => Object {
   prototype: No prototype
   members: ["name": string: source]
 }
 
-Module TypeId(3) => instanceof local type 5
-
-Module TypeId(4) => instanceof local type 5
-
-Module TypeId(5) => typeof Object {
+Expression "{ name: \"source\", } as const" => Object {
   prototype: No prototype
   members: ["name": string: source]
 }
 
-Module TypeId(6) => sync Function "readSource" {
+Expression "\"source\"" => string: source
+
+Binding Source "Source" => typeof Object {
+  prototype: No prototype
+  members: ["name": string: source]
+}
+
+Binding readSource "readSource" => sync Function "readSource" {
   accepts: {
     params: [
-      required value: instanceof local type 5
+      required value: instanceof Source
     ]
     type_args: []
   }
-  returns: instanceof local type 5
+  returns: instanceof Source
 }
+
+Binding value "value" => instanceof Source
+
+Expression "value" => instanceof Source
 ```

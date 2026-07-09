@@ -20,11 +20,7 @@ export function readNumber(): number {
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
-
-Module TypeId(1) => number: 1
-
-Module TypeId(2) => sync Function "readString" {
+Binding readString "readString" => sync Function "readString" {
   accepts: {
     params: []
     type_args: []
@@ -32,11 +28,15 @@ Module TypeId(2) => sync Function "readString" {
   returns: string
 }
 
-Module TypeId(3) => sync Function "readNumber" {
+Expression "\"value\"" => string: value
+
+Binding readNumber "readNumber" => sync Function "readNumber" {
   accepts: {
     params: []
     type_args: []
   }
   returns: number
 }
+
+Expression "1" => number: 1
 ```

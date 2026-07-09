@@ -36,31 +36,7 @@ export function readAsyncDisposable(value: AsyncDisposable): AsyncDisposable {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof RegExp
-
-Module TypeId(1) => instanceof RegExp
-
-Module TypeId(2) => instanceof Date
-
-Module TypeId(3) => instanceof Date
-
-Module TypeId(4) => instanceof Error
-
-Module TypeId(5) => instanceof Error
-
-Module TypeId(6) => instanceof Symbol
-
-Module TypeId(7) => instanceof Symbol
-
-Module TypeId(8) => instanceof Disposable
-
-Module TypeId(9) => instanceof Disposable
-
-Module TypeId(10) => instanceof AsyncDisposable
-
-Module TypeId(11) => instanceof AsyncDisposable
-
-Module TypeId(12) => sync Function "readRegExp" {
+Binding readRegExp "readRegExp" => sync Function "readRegExp" {
   accepts: {
     params: [
       required value: instanceof RegExp
@@ -70,7 +46,11 @@ Module TypeId(12) => sync Function "readRegExp" {
   returns: instanceof RegExp
 }
 
-Module TypeId(13) => sync Function "readDate" {
+Binding value "value" => instanceof RegExp
+
+Expression "value" => instanceof RegExp
+
+Binding readDate "readDate" => sync Function "readDate" {
   accepts: {
     params: [
       required value: instanceof Date
@@ -80,7 +60,11 @@ Module TypeId(13) => sync Function "readDate" {
   returns: instanceof Date
 }
 
-Module TypeId(14) => sync Function "readError" {
+Binding value "value" => instanceof Date
+
+Expression "value" => instanceof Date
+
+Binding readError "readError" => sync Function "readError" {
   accepts: {
     params: [
       required value: instanceof Error
@@ -90,7 +74,11 @@ Module TypeId(14) => sync Function "readError" {
   returns: instanceof Error
 }
 
-Module TypeId(15) => sync Function "readSymbol" {
+Binding value "value" => instanceof Error
+
+Expression "value" => instanceof Error
+
+Binding readSymbol "readSymbol" => sync Function "readSymbol" {
   accepts: {
     params: [
       required value: instanceof Symbol
@@ -100,7 +88,11 @@ Module TypeId(15) => sync Function "readSymbol" {
   returns: instanceof Symbol
 }
 
-Module TypeId(16) => sync Function "readDisposable" {
+Binding value "value" => instanceof Symbol
+
+Expression "value" => instanceof Symbol
+
+Binding readDisposable "readDisposable" => sync Function "readDisposable" {
   accepts: {
     params: [
       required value: instanceof Disposable
@@ -110,7 +102,11 @@ Module TypeId(16) => sync Function "readDisposable" {
   returns: instanceof Disposable
 }
 
-Module TypeId(17) => sync Function "readAsyncDisposable" {
+Binding value "value" => instanceof Disposable
+
+Expression "value" => instanceof Disposable
+
+Binding readAsyncDisposable "readAsyncDisposable" => sync Function "readAsyncDisposable" {
   accepts: {
     params: [
       required value: instanceof AsyncDisposable
@@ -119,4 +115,8 @@ Module TypeId(17) => sync Function "readAsyncDisposable" {
   }
   returns: instanceof AsyncDisposable
 }
+
+Binding value "value" => instanceof AsyncDisposable
+
+Expression "value" => instanceof AsyncDisposable
 ```

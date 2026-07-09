@@ -20,31 +20,45 @@ export const nullishValue = maybeText ?? 1;
 ## Inferred types
 
 ```
-Module TypeId(0) => bool: true
+Binding flag "flag" => instanceof boolean
 
-Module TypeId(1) => boolean
+Expression "true" => bool: true
 
-Module TypeId(2) => instanceof boolean
+Binding maybeText "maybeText" => instanceof string | undefined
 
-Module TypeId(3) => string: value
+Expression "\"value\"" => string: value
 
-Module TypeId(4) => undefined
+Binding choice "choice" => string: value | number: 1
 
-Module TypeId(5) => string | undefined
+Expression "flag" => instanceof boolean
 
-Module TypeId(6) => instanceof string | undefined
+Expression "flag ? \"value\" : 1" => string: value | number: 1
 
-Module TypeId(7) => instanceof boolean
+Expression "\"value\"" => string: value
 
-Module TypeId(8) => number: 1
+Expression "1" => number: 1
 
-Module TypeId(9) => string: value | number: 1
+Binding andValue "andValue" => string:  | undefined | number: 1
 
-Module TypeId(10) => instanceof string | undefined
+Expression "maybeText" => instanceof string | undefined
 
-Module TypeId(11) => string:  | undefined | number: 1
+Expression "maybeText && 1" => string:  | undefined | number: 1
 
-Module TypeId(12) => string | number: 1
+Expression "1" => number: 1
 
-Module TypeId(13) => string | number: 1
+Binding orValue "orValue" => string | number: 1
+
+Expression "maybeText" => instanceof string | undefined
+
+Expression "maybeText || 1" => string | number: 1
+
+Expression "1" => number: 1
+
+Binding nullishValue "nullishValue" => string | number: 1
+
+Expression "maybeText" => instanceof string | undefined
+
+Expression "maybeText ?? 1" => string | number: 1
+
+Expression "1" => number: 1
 ```

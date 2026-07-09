@@ -92,16 +92,24 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
             Self::Object(object) => write!(f, [object]),
             Self::Tuple(tuple) => write!(f, [tuple]),
             Self::Generic(generic) => write!(f, [generic]),
-            Self::Local(local) => write!(
-                f,
-                [&format_args![
-                    token("local"),
-                    space(),
-                    token("type"),
-                    space(),
-                    text(&local.type_id(db).index().to_string(), None)
-                ]]
-            ),
+            Self::Local(local) => {
+                let module = local.module(db);
+                let type_id = local.type_id(db);
+                if let Some(name) = db.local_type_name(module, type_id) {
+                    write!(f, [text(name.text(), None)])
+                } else {
+                    write!(
+                        f,
+                        [&format_args![
+                            token("local"),
+                            space(),
+                            token("type"),
+                            space(),
+                            text(&type_id.index().to_string(), None)
+                        ]]
+                    )
+                }
+            }
             Self::Intersection(intersection) => write!(
                 f,
                 [FmtInferredTypeList {
@@ -852,14 +860,35 @@ struct FmtInferredTypeList<'a, 'db> {
 
 impl<'a, 'db> Format<FormatInferredTypeContext<'db>> for FmtInferredTypeList<'a, 'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        let needs_break = inferred_type_list_needs_break(f.context().db(), self.types);
         for (index, ty) in self.types.iter().enumerate() {
+            if needs_break && index != 0 {
+                write!(f, [hard_line_break(), token(self.separator), space()])?;
+            }
             write!(f, [ty])?;
-            if index != self.types.len() - 1 {
+            if !needs_break && index != self.types.len() - 1 {
                 write!(f, [space(), token(self.separator), space()])?;
             }
         }
         Ok(())
     }
+}
+
+fn inferred_type_list_needs_break<'db>(db: &'db dyn TypeDb, types: &[TypeData<'db>]) -> bool {
+    types.iter().any(|ty| {
+        matches!(
+            ty,
+            TypeData::Class(_)
+                | TypeData::Constructor(_)
+                | TypeData::Function(_)
+                | TypeData::Interface(_)
+                | TypeData::MergedReference(_)
+                | TypeData::Module(_)
+                | TypeData::Namespace(_)
+                | TypeData::Object(_)
+        )
+        || matches!(ty, TypeData::Literal(literal) if matches!(literal.literal(db), Literal::Object(_)))
+    })
 }
 
 struct FmtInferredTypes<'a, 'db>(&'a [TypeData<'db>]);

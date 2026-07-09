@@ -14,8 +14,9 @@ use biome_js_type_info::{
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
         InternedMergedReference as InferredMergedReference, InternedUnion as InferredUnion,
-        Literal as InferredLiteral, ReturnType as InferredReturnType, TypeData as InferredTypeData,
-        TypeMemberKind as InferredTypeMemberKind,
+        Literal as InferredLiteral, LocalTypeId as InferredLocalTypeId,
+        ModuleKey as InferredModuleKey, ReturnType as InferredReturnType,
+        TypeData as InferredTypeData, TypeMemberKind as InferredTypeMemberKind,
     },
 };
 use biome_languages::JsFileSource;
@@ -26,10 +27,11 @@ use biome_module_graph::{
     infer_module_types_bottom_up, normalize_type as normalize_type_query, resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{AstNode, Text};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
+use salsa::plumbing::{AsId, FromId};
 
 #[salsa::db]
 struct TestModuleDb {
@@ -73,7 +75,24 @@ impl biome_db::Db for TestModuleDb {
 }
 
 #[salsa::db]
-impl biome_module_graph::TypeDb for TestModuleDb {}
+impl biome_module_graph::TypeDb for TestModuleDb {
+    fn local_type_name(
+        &self,
+        module_key: InferredModuleKey,
+        type_id: InferredLocalTypeId,
+    ) -> Option<Text> {
+        let module = ModuleInfo::from_id(module_key.as_id());
+        let current = self.module_for_path(module.path(self))?;
+        if InferredModuleKey::new(current.as_id()) != module_key {
+            return None;
+        }
+
+        let ModuleInfoKind::Js(info) = current.kind(self) else {
+            return None;
+        };
+        info.local_type_name(type_id)
+    }
+}
 
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
@@ -444,19 +463,7 @@ fn assert_inferred_type_snapshot(test_name: &str, db: &dyn ModuleDb, fs: &Memory
         let Some(inferred) = infer_module_types(db, module) else {
             continue;
         };
-        if inferred.types.is_empty() {
-            continue;
-        }
-
-        content.push_str("\n\n## Inferred types\n\n```");
-        for (index, ty) in inferred.types.iter().enumerate() {
-            content.push_str("\nModule TypeId(");
-            content.push_str(&index.to_string());
-            content.push_str(") => ");
-            content.push_str(&format_inferred_type(db, *ty));
-            content.push('\n');
-        }
-        content.push_str("```\n");
+        write_inferred_type_rows(&mut content, db, module, &inferred, source_code);
     }
 
     insta::with_settings!({
@@ -465,6 +472,106 @@ fn assert_inferred_type_snapshot(test_name: &str, db: &dyn ModuleDb, fs: &Memory
     }, {
         insta::assert_snapshot!(test_name, content);
     });
+}
+
+struct InferredTypeSnapshotRow {
+    range: TextRange,
+    text: String,
+}
+
+fn write_inferred_type_rows<'db>(
+    content: &mut String,
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    source_code: &str,
+) {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return;
+    };
+
+    let mut rows = Vec::new();
+    for range in info.raw_binding_types.keys() {
+        let Some(data) = inferred.binding_type_data.get(range) else {
+            continue;
+        };
+        let binding_name = info
+            .semantic_model
+            .as_binding_by_range(*range)
+            .and_then(|binding| binding.tree().name_token().ok())
+            .map_or_else(
+                || "<unknown>".to_string(),
+                |token| token.text_trimmed().to_string(),
+            );
+        rows.push(InferredTypeSnapshotRow {
+            range: *range,
+            text: inferred_type_snapshot_row(
+                format!(
+                    "Binding {binding_name} {:?}",
+                    source_snippet(source_code, *range)
+                ),
+                format_inferred_type(db, inferred.resolve_type(db, data.ty)),
+            ),
+        });
+    }
+
+    for (range, ty) in &inferred.expressions {
+        rows.push(InferredTypeSnapshotRow {
+            range: *range,
+            text: inferred_type_snapshot_row(
+                format!("Expression {:?}", source_snippet(source_code, *range)),
+                format_inferred_type(db, inferred.resolve_type(db, *ty)),
+            ),
+        });
+    }
+
+    if rows.is_empty() {
+        return;
+    }
+
+    rows.sort_by(|left, right| {
+        left.range
+            .start()
+            .cmp(&right.range.start())
+            .then_with(|| left.range.end().cmp(&right.range.end()))
+            .then_with(|| left.text.cmp(&right.text))
+    });
+
+    content.push_str("\n\n## Inferred types\n\n```");
+    for row in rows {
+        content.push('\n');
+        content.push_str(&row.text);
+        content.push('\n');
+    }
+    content.push_str("```\n");
+}
+
+fn inferred_type_snapshot_row(label: String, formatted_ty: String) -> String {
+    if !formatted_ty
+        .lines()
+        .skip(1)
+        .any(|line| line.starts_with("| ") || line.starts_with("& "))
+    {
+        return format!("{label} => {formatted_ty}");
+    }
+
+    let indented_ty = formatted_ty
+        .lines()
+        .map(|line| format!("  {line}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    format!("{label} =>\n{indented_ty}")
+}
+
+fn source_snippet(source_code: &str, range: TextRange) -> String {
+    let start = usize::from(range.start());
+    let end = usize::from(range.end());
+    source_code
+        .get(start..end)
+        .unwrap_or("<invalid range>")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn source_files_from_memory_fs(fs: &MemoryFileSystem) -> BTreeMap<String, String> {
@@ -2004,6 +2111,14 @@ fn test_normalize_type_preserves_recursive_local_edge() {
         panic!("recursive Tree type must normalize to a union, got {normalized_ty:?}");
     };
     let normalized_tree = format_inferred_type(&db, normalized_ty);
+    assert!(
+        normalized_tree.contains("Tree"),
+        "recursive local edge must format with its source type name: {normalized_tree}"
+    );
+    assert!(
+        !normalized_tree.contains("local type"),
+        "recursive local edge must not expose raw local type IDs: {normalized_tree}"
+    );
     assert!(
         union
             .types(&db)

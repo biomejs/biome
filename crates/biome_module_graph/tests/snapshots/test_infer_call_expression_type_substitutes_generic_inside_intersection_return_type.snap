@@ -24,50 +24,30 @@ export function readValue(): { value: number } {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => instanceof T
-
-Module TypeId(2) => instanceof T
-
-Module TypeId(3) => instanceof local type 7
-
-Module TypeId(4) => instanceof T & instanceof local type 7
-
-Module TypeId(5) => number: 1
-
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: ["value": number: 1]
-}
-
-Module TypeId(7) => Object {
+Binding WithName "WithName" => Object {
   prototype: No prototype
   members: ["name": string]
 }
 
-Module TypeId(8) => T
-
-Module TypeId(9) => instanceof local type 7
-
-Module TypeId(10) => instanceof T & instanceof local type 7
-
-Module TypeId(11) => sync Function "withName" {
+Binding withName "withName" => sync Function "withName" {
   accepts: {
     params: [
       required value: instanceof T
     ]
     type_args: [T]
   }
-  returns: instanceof T & instanceof local type 7
+  returns: instanceof T & instanceof WithName
 }
 
-Module TypeId(12) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
+Binding T "T" => T
 
-Module TypeId(13) => sync Function "readValue" {
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
+
+Expression "value as T & WithName" => instanceof T & instanceof WithName
+
+Binding readValue "readValue" => sync Function "readValue" {
   accepts: {
     params: []
     type_args: []
@@ -77,4 +57,11 @@ Module TypeId(13) => sync Function "readValue" {
     members: ["value": number]
   }
 }
+
+Expression "{ value: 1 }" => Object {
+  prototype: No prototype
+  members: ["value": number: 1]
+}
+
+Expression "1" => number: 1
 ```

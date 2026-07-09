@@ -30,63 +30,75 @@ export const [first, ...tupleRest] = tuple;
 ## Inferred types
 
 ```
-Module TypeId(0) => local type 16
-
-Module TypeId(1) => local type 18
-
-Module TypeId(2) => number
-
-Module TypeId(3) => Object {
-  prototype: No prototype
-  members: [static "keep": boolean]
-}
-
-Module TypeId(4) => Object {
-  prototype: No prototype
-  members: []
-}
-
-Module TypeId(5) => instanceof local type 18
-
-Module TypeId(6) => instanceof local type 18
-
-Module TypeId(7) => number
-
-Module TypeId(8) => Object {
-  prototype: No prototype
-  members: ["own": string]
-}
-
-Module TypeId(9) => string: value
-
-Module TypeId(10) => number: 1
-
-Module TypeId(11) => bool: true
-
-Module TypeId(12) => [string: value,
-number: 1,
-bool: true]
-
-Module TypeId(13) => [string: value,
-number: 1,
-bool: true]
-
-Module TypeId(14) => string: value
-
-Module TypeId(15) => [number: 1,
-bool: true]
-
-Module TypeId(16) => class "Base" {
+Binding Base "Base" => class "Base" {
   extends: none
   implements: []
   type_args: []
 }
 
-Module TypeId(17) => boolean
-
-Module TypeId(18) => class "Derived" {
-  extends: local type 16
+Binding Derived "Derived" => class "Derived" {
+  extends: Base
   implements: []
   type_args: []
 }
+
+Expression "Base" => class "Base" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding a "a" => number
+
+Binding staticRest "staticRest" => Object {
+  prototype: No prototype
+  members: [static "keep": boolean]
+}
+
+Expression "Derived" => class "Derived" {
+  extends: Base
+  implements: []
+  type_args: []
+}
+
+Binding derived "derived" => instanceof Derived
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Expression "{} as Derived" => instanceof Derived
+
+Binding inherited "inherited" => number
+
+Binding instanceRest "instanceRest" => Object {
+  prototype: No prototype
+  members: ["own": string]
+}
+
+Expression "derived" => instanceof Derived
+
+Binding tuple "tuple" => [string: value,
+number: 1,
+bool: true]
+
+Expression "[\"value\", 1, true]" => [string: value,
+number: 1,
+bool: true]
+
+Expression "\"value\"" => string: value
+
+Expression "1" => number: 1
+
+Expression "true" => bool: true
+
+Binding first "first" => string: value
+
+Binding tupleRest "tupleRest" => [number: 1,
+bool: true]
+
+Expression "tuple" => [string: value,
+number: 1,
+bool: true]
 ```

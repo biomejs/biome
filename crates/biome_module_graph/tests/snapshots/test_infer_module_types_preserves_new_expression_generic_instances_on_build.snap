@@ -26,47 +26,55 @@ export const inferredValue = inferred.value;
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => instanceof local type 16
-
-Module TypeId(2) => instanceof T
-
-Module TypeId(3) => unknown
-
-Module TypeId(4) => local type 16
-
-Module TypeId(5) => string: value
-
-Module TypeId(6) => instanceof Box<string: value>
-
-Module TypeId(7) => instanceof Box<string: value>
-
-Module TypeId(8) => string: value
-
-Module TypeId(9) => number: 1
-
-Module TypeId(10) => instanceof Box<number: 1>
-
-Module TypeId(11) => instanceof Box<number: 1>
-
-Module TypeId(12) => number: 1
-
-Module TypeId(13) => T
-
-Module TypeId(14) => instanceof T
-
-Module TypeId(15) => constructor {
-  params: [
-    required value: instanceof T
-  ]
-  type_args: []
-  returns: none
-}
-
-Module TypeId(16) => class "Box" {
+Binding Box "Box" => class "Box" {
   extends: none
   implements: []
   type_args: [T]
 }
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "this" => instanceof Box
+
+Expression "this.value = value" => unknown
+
+Expression "value" => instanceof T
+
+Binding explicit "explicit" => instanceof Box<string: value>
+
+Expression "new Box<string>(\"value\")" => instanceof Box<string: value>
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "\"value\"" => string: value
+
+Binding explicitValue "explicitValue" => string: value
+
+Expression "explicit" => instanceof Box<string: value>
+
+Expression "explicit.value" => string: value
+
+Binding inferred "inferred" => instanceof Box<number: 1>
+
+Expression "new Box(1)" => instanceof Box<number: 1>
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "1" => number: 1
+
+Binding inferredValue "inferredValue" => number: 1
+
+Expression "inferred" => instanceof Box<number: 1>
+
+Expression "inferred.value" => number: 1
 ```

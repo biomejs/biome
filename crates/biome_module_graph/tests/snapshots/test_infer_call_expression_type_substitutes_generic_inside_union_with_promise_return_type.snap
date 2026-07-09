@@ -16,17 +16,7 @@ export function maybePromise<T>(value: T): T | Promise<T> {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
-
-Module TypeId(1) => instanceof T
-
-Module TypeId(2) => T
-
-Module TypeId(3) => instanceof Promise<instanceof T>
-
-Module TypeId(4) => instanceof T | instanceof Promise<instanceof T>
-
-Module TypeId(5) => sync Function "maybePromise" {
+Binding maybePromise "maybePromise" => sync Function "maybePromise" {
   accepts: {
     params: [
       required value: instanceof T
@@ -35,4 +25,10 @@ Module TypeId(5) => sync Function "maybePromise" {
   }
   returns: instanceof T | instanceof Promise<instanceof T>
 }
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
 ```

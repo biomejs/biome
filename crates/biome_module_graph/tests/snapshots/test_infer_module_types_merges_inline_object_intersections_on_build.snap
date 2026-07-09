@@ -24,42 +24,7 @@ export function readValue(
 ## Inferred types
 
 ```
-Module TypeId(0) => Object {
-  prototype: No prototype
-  members: ["name": string]
-}
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["value": number]
-}
-
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["name": string, "value": number]
-}
-
-Module TypeId(3) => Object {
-  prototype: No prototype
-  members: ["name": string, "value": number]
-}
-
-Module TypeId(4) => Object {
-  prototype: No prototype
-  members: ["value": string]
-}
-
-Module TypeId(5) => Object {
-  prototype: No prototype
-  members: ["value": string | number]
-}
-
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: ["value": string | number]
-}
-
-Module TypeId(7) => sync Function "readCombined" {
+Binding readCombined "readCombined" => sync Function "readCombined" {
   accepts: {
     params: [
       required value: Object {
@@ -75,7 +40,17 @@ Module TypeId(7) => sync Function "readCombined" {
   }
 }
 
-Module TypeId(8) => sync Function "readValue" {
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Binding readValue "readValue" => sync Function "readValue" {
   accepts: {
     params: [
       required value: Object {
@@ -89,5 +64,15 @@ Module TypeId(8) => sync Function "readValue" {
     prototype: No prototype
     members: ["value": string | number]
   }
+}
+
+Binding value "value" => Object {
+  prototype: No prototype
+  members: ["value": string | number]
+}
+
+Expression "value" => Object {
+  prototype: No prototype
+  members: ["value": string | number]
 }
 ```

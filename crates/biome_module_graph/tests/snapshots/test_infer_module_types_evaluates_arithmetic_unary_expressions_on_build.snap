@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests_v2.rs
-assertion_line: 402
 expression: content
 ---
 
@@ -19,25 +18,39 @@ export const inverted = ~numeric;
 ## Inferred types
 
 ```
-Module TypeId(0) => number: 1
+Binding numeric "numeric" => number
 
-Module TypeId(1) => number: 2
+Expression "1" => number: 1
 
-Module TypeId(2) => number
+Expression "1 + 2" => number
 
-Module TypeId(3) => string: value
+Expression "2" => number: 2
 
-Module TypeId(4) => number
+Binding textual "textual" => string
 
-Module TypeId(5) => string
+Expression "\"value\"" => string: value
 
-Module TypeId(6) => unknown
+Expression "\"value\" + numeric" => string
 
-Module TypeId(7) => unknown
+Expression "numeric" => number
 
-Module TypeId(8) => unknown
+Binding unknown "unknown" => unknown
 
-Module TypeId(9) => number
+Expression "notDeclared" => unknown
 
-Module TypeId(10) => number
+Expression "notDeclared + alsoMissing" => unknown
+
+Expression "alsoMissing" => unknown
+
+Binding negative "negative" => number
+
+Expression "-numeric" => number
+
+Expression "numeric" => number
+
+Binding inverted "inverted" => number
+
+Expression "~numeric" => number
+
+Expression "numeric" => number
 ```

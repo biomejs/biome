@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests_v2.rs
-assertion_line: 402
 expression: content
 ---
 
@@ -26,42 +25,61 @@ export const optionalValue = box.optional;
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
-
-Module TypeId(1) => Object {
-  prototype: No prototype
-  members: ["name": string: value]
-}
-
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["name": string: value]
-}
-
-Module TypeId(3) => string: value
-
-Module TypeId(4) => local type 12
-
-Module TypeId(5) => string
-
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: []
-}
-
-Module TypeId(7) => instanceof local type 12
-
-Module TypeId(8) => instanceof local type 12
-
-Module TypeId(9) => number
-
-Module TypeId(10) => string | undefined
-
-Module TypeId(11) => string | undefined
-
-Module TypeId(12) => class "Box" {
+Binding Box "Box" => class "Box" {
   extends: none
   implements: []
   type_args: []
 }
+
+Binding object "object" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "{ name: \"value\" }" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "\"value\"" => string: value
+
+Binding objectName "objectName" => string: value
+
+Expression "object" => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Expression "object.name" => string: value
+
+Binding staticLabel "staticLabel" => string
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Box.label" => string
+
+Binding box "box" => instanceof Box
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Expression "{} as Box" => instanceof Box
+
+Binding memberValue "memberValue" => number
+
+Expression "box" => instanceof Box
+
+Expression "box.value" => number
+
+Binding optionalValue "optionalValue" => string | undefined
+
+Expression "box" => instanceof Box
+
+Expression "box.optional" => string | undefined
 ```

@@ -43,31 +43,53 @@ export const callbackValue = new CallbackBox(() => true).value;
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof T
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
 
-Module TypeId(1) => instanceof local type 35
+Binding T "T" => T
 
-Module TypeId(2) => instanceof T
+Binding value "value" => instanceof T
 
-Module TypeId(3) => unknown
+Expression "this" => instanceof Box
 
-Module TypeId(4) => instanceof T
+Expression "this.value = value" => unknown
 
-Module TypeId(5) => instanceof Array<instanceof T>
+Expression "value" => instanceof T
 
-Module TypeId(6) => instanceof local type 39
+Binding ArrayBox "ArrayBox" => class "ArrayBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
 
-Module TypeId(7) => instanceof Array<instanceof T>
+Binding T "T" => T
 
-Module TypeId(8) => number: 0
+Binding values "values" => instanceof Array<instanceof T>
 
-Module TypeId(9) => instanceof T | undefined
+Expression "this" => instanceof ArrayBox
 
-Module TypeId(10) => instanceof T
+Expression "this.value = values[0] as T" => unknown
 
-Module TypeId(11) => instanceof T
+Expression "values" => instanceof Array<instanceof T>
 
-Module TypeId(12) => sync Function {
+Expression "values[0]" => instanceof T | undefined
+
+Expression "values[0] as T" => instanceof T
+
+Expression "0" => number: 0
+
+Binding CallbackBox "CallbackBox" => class "CallbackBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Binding T "T" => T
+
+Binding read "read" => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -75,9 +97,11 @@ Module TypeId(12) => sync Function {
   returns: instanceof T
 }
 
-Module TypeId(13) => instanceof local type 43
+Expression "this" => instanceof CallbackBox
 
-Module TypeId(14) => sync Function {
+Expression "this.value = read()" => unknown
+
+Expression "read" => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -85,35 +109,55 @@ Module TypeId(14) => sync Function {
   returns: instanceof T
 }
 
-Module TypeId(15) => instanceof T
+Expression "read()" => instanceof T
 
-Module TypeId(16) => local type 35
+Binding directValue "directValue" => string: text
 
-Module TypeId(17) => string: text
+Expression "new Box(\"text\")" => instanceof Box<string: text>
 
-Module TypeId(18) => instanceof Box<string: text>
+Expression "new Box(\"text\").value" => string: text
 
-Module TypeId(19) => string: text
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
 
-Module TypeId(20) => number: 1
+Expression "\"text\"" => string: text
 
-Module TypeId(21) => [number: 1]
+Binding values "values" => instanceof Array<number>
 
-Module TypeId(22) => instanceof Array<number>
+Expression "[1]" => [number: 1]
 
-Module TypeId(23) => local type 39
+Expression "1" => number: 1
 
-Module TypeId(24) => instanceof Array<number>
+Binding arrayValue "arrayValue" => number
 
-Module TypeId(25) => instanceof ArrayBox<number>
+Expression "new ArrayBox(values)" => instanceof ArrayBox<number>
 
-Module TypeId(26) => number
+Expression "new ArrayBox(values).value" => number
 
-Module TypeId(27) => local type 43
+Expression "ArrayBox" => class "ArrayBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
 
-Module TypeId(28) => bool: true
+Expression "values" => instanceof Array<number>
 
-Module TypeId(29) => sync Function {
+Binding callbackValue "callbackValue" => bool: true
+
+Expression "new CallbackBox(() => true)" => instanceof CallbackBox<bool: true>
+
+Expression "new CallbackBox(() => true).value" => bool: true
+
+Expression "CallbackBox" => class "CallbackBox" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "() => true" => sync Function {
   accepts: {
     params: []
     type_args: []
@@ -121,73 +165,5 @@ Module TypeId(29) => sync Function {
   returns: bool: true
 }
 
-Module TypeId(30) => instanceof CallbackBox<bool: true>
-
-Module TypeId(31) => bool: true
-
-Module TypeId(32) => T
-
-Module TypeId(33) => instanceof T
-
-Module TypeId(34) => constructor {
-  params: [
-    required value: instanceof T
-  ]
-  type_args: []
-  returns: none
-}
-
-Module TypeId(35) => class "Box" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(36) => instanceof T
-
-Module TypeId(37) => instanceof Array<instanceof T>
-
-Module TypeId(38) => constructor {
-  params: [
-    required values: instanceof Array<instanceof T>
-  ]
-  type_args: []
-  returns: none
-}
-
-Module TypeId(39) => class "ArrayBox" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(40) => instanceof T
-
-Module TypeId(41) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-}
-
-Module TypeId(42) => constructor {
-  params: [
-    required read: sync Function {
-      accepts: {
-        params: []
-        type_args: []
-      }
-      returns: instanceof T
-    }
-  ]
-  type_args: []
-  returns: none
-}
-
-Module TypeId(43) => class "CallbackBox" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
+Expression "true" => bool: true
 ```

@@ -41,91 +41,7 @@ export function readReadonly(value: Readonly<Source>): Readonly<Source> {
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof local type 21
-
-Module TypeId(1) => string: name
-
-Module TypeId(2) => string: value
-
-Module TypeId(3) => string: name | string: value
-
-Module TypeId(4) => instanceof Object {
-  prototype: No prototype
-  members: ["name": string, "value": number]
-}
-
-Module TypeId(5) => instanceof Object {
-  prototype: No prototype
-  members: ["name": string, "value": number]
-}
-
-Module TypeId(6) => instanceof local type 21
-
-Module TypeId(7) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "optional"?: string | undefined
-  ]
-}
-
-Module TypeId(8) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "optional"?: string | undefined
-  ]
-}
-
-Module TypeId(9) => instanceof local type 21
-
-Module TypeId(10) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name"?: string | undefined,
-    "value"?: number | undefined,
-    "optional"?: string | undefined
-  ]
-}
-
-Module TypeId(11) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name"?: string | undefined,
-    "value"?: number | undefined,
-    "optional"?: string | undefined
-  ]
-}
-
-Module TypeId(12) => instanceof local type 21
-
-Module TypeId(13) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional": string
-  ]
-}
-
-Module TypeId(14) => instanceof Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional": string
-  ]
-}
-
-Module TypeId(15) => instanceof local type 21
-
-Module TypeId(16) => instanceof Object {
+Binding Source "Source" => Object {
   prototype: No prototype
   members: [
     [string]: string | number | undefined,
@@ -135,7 +51,7 @@ Module TypeId(16) => instanceof Object {
   ]
 }
 
-Module TypeId(17) => instanceof Object {
+Binding key "key" => Object {
   prototype: No prototype
   members: [
     [string]: string | number | undefined,
@@ -145,23 +61,7 @@ Module TypeId(17) => instanceof Object {
   ]
 }
 
-Module TypeId(18) => undefined
-
-Module TypeId(19) => string | number | undefined
-
-Module TypeId(20) => string | undefined
-
-Module TypeId(21) => Object {
-  prototype: No prototype
-  members: [
-    [string]: string | number | undefined,
-    "name": string,
-    "value": number,
-    "optional"?: string | undefined
-  ]
-}
-
-Module TypeId(22) => sync Function "readPick" {
+Binding readPick "readPick" => sync Function "readPick" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -177,7 +77,17 @@ Module TypeId(22) => sync Function "readPick" {
   }
 }
 
-Module TypeId(23) => sync Function "readOmit" {
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: ["name": string, "value": number]
+}
+
+Binding readOmit "readOmit" => sync Function "readOmit" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -201,7 +111,25 @@ Module TypeId(23) => sync Function "readOmit" {
   }
 }
 
-Module TypeId(24) => sync Function "readPartial" {
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding readPartial "readPartial" => sync Function "readPartial" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -227,7 +155,27 @@ Module TypeId(24) => sync Function "readPartial" {
   }
 }
 
-Module TypeId(25) => sync Function "readRequired" {
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name"?: string | undefined,
+    "value"?: number | undefined,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name"?: string | undefined,
+    "value"?: number | undefined,
+    "optional"?: string | undefined
+  ]
+}
+
+Binding readRequired "readRequired" => sync Function "readRequired" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -253,7 +201,27 @@ Module TypeId(25) => sync Function "readRequired" {
   }
 }
 
-Module TypeId(26) => sync Function "readReadonly" {
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional": string
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional": string
+  ]
+}
+
+Binding readReadonly "readReadonly" => sync Function "readReadonly" {
   accepts: {
     params: [
       required value: instanceof Object {
@@ -277,5 +245,25 @@ Module TypeId(26) => sync Function "readReadonly" {
       "optional"?: string | undefined
     ]
   }
+}
+
+Binding value "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
+}
+
+Expression "value" => instanceof Object {
+  prototype: No prototype
+  members: [
+    [string]: string | number | undefined,
+    "name": string,
+    "value": number,
+    "optional"?: string | undefined
+  ]
 }
 ```

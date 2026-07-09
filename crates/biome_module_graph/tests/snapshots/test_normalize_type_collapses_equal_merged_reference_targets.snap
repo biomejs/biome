@@ -22,20 +22,25 @@ export { Foo };
 ## Inferred types
 
 ```
-Module TypeId(0) => string: foo
-
-Module TypeId(1) => Object {
+Binding Foo "Foo" => Object {
   prototype: No prototype
   members: ["name": string: foo]
 }
 
-Module TypeId(2) => Object {
+Binding Foo "Foo" => Object {
   prototype: No prototype
   members: ["name": string: foo]
 }
 
-Module TypeId(3) => (type: local type 1, value: Object {
+Expression "{ name: \"foo\", }" => Object {
   prototype: No prototype
   members: ["name": string: foo]
-}, namespace: none)
+}
+
+Expression "{ name: \"foo\", } as const" => Object {
+  prototype: No prototype
+  members: ["name": string: foo]
+}
+
+Expression "\"foo\"" => string: foo
 ```

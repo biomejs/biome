@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests_v2.rs
-assertion_line: 402
 expression: content
 ---
 
@@ -22,15 +21,11 @@ export const unknownType = typeof notDeclared;
 ## Inferred types
 
 ```
-Module TypeId(0) => number: 1
+Binding value "value" => number: 1
 
-Module TypeId(1) => string: value
+Expression "1" => number: 1
 
-Module TypeId(2) => number: 1
-
-Module TypeId(3) => string: number
-
-Module TypeId(4) => sync Function "readValue" {
+Binding readValue "readValue" => sync Function "readValue" {
   accepts: {
     params: []
     type_args: []
@@ -38,17 +33,29 @@ Module TypeId(4) => sync Function "readValue" {
   returns: string
 }
 
-Module TypeId(5) => string: function
+Expression "\"value\"" => string: value
 
-Module TypeId(6) => unknown
+Binding valueType "valueType" => string: number
 
-Module TypeId(7) => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+Expression "typeof value" => string: number
 
-Module TypeId(8) => sync Function "readValue" {
+Expression "value" => number: 1
+
+Binding functionType "functionType" => string: function
+
+Expression "typeof readValue" => string: function
+
+Expression "readValue" => sync Function "readValue" {
   accepts: {
     params: []
     type_args: []
   }
   returns: string
 }
+
+Binding unknownType "unknownType" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof notDeclared" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "notDeclared" => unknown
 ```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests_v2.rs
-assertion_line: 402
 expression: content
 ---
 
@@ -23,36 +22,50 @@ for (const item of numbers) {
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
-
-Module TypeId(1) => number: 1
-
-Module TypeId(2) => [string: value,
+Binding tuple "tuple" => [string: value,
 number: 1]
 
-Module TypeId(3) => [string: value,
+Expression "[\"value\", 1]" => [string: value,
 number: 1]
 
-Module TypeId(4) => number: 0
+Expression "\"value\"" => string: value
 
-Module TypeId(5) => string: value
+Expression "1" => number: 1
 
-Module TypeId(6) => number: 2
+Binding tupleFirst "tupleFirst" => string: value
 
-Module TypeId(7) => [number: 1,
+Expression "tuple" => [string: value,
+number: 1]
+
+Expression "tuple[0]" => string: value
+
+Expression "0" => number: 0
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => [number: 1,
 number: 2]
 
-Module TypeId(8) => instanceof Array<number>
+Expression "1" => number: 1
 
-Module TypeId(9) => instanceof Array<number>
+Expression "2" => number: 2
 
-Module TypeId(10) => number | undefined
+Binding arrayFirst "arrayFirst" => number | undefined
 
-Module TypeId(11) => string: value
+Expression "numbers" => instanceof Array<number>
 
-Module TypeId(12) => number
+Expression "numbers[0]" => number | undefined
 
-Module TypeId(13) => instanceof Array<number>
+Expression "0" => number: 0
 
-Module TypeId(14) => number
+Binding destructured "destructured" => string: value
+
+Expression "tuple" => [string: value,
+number: 1]
+
+Binding item "item" => number
+
+Expression "numbers" => instanceof Array<number>
+
+Expression "item" => number
 ```

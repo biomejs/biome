@@ -18,27 +18,45 @@ export const conditional = true ? "yes" : 1;
 ## Inferred types
 
 ```
-Module TypeId(0) => string: yes
+Binding truthyAnd "truthyAnd" => number: 1
 
-Module TypeId(1) => number: 1
+Expression "\"yes\"" => string: yes
 
-Module TypeId(2) => number: 1
+Expression "\"yes\" && 1" => number: 1
 
-Module TypeId(3) => number: 0
+Expression "1" => number: 1
 
-Module TypeId(4) => unknown
+Binding falsyAnd "falsyAnd" => number: 0
 
-Module TypeId(5) => number: 0
+Expression "0" => number: 0
 
-Module TypeId(6) => null
+Expression "0 && missing" => number: 0
 
-Module TypeId(7) => number: 1
+Expression "missing" => unknown
 
-Module TypeId(8) => string: s
+Binding nullish "nullish" => number: 1
 
-Module TypeId(9) => string: s
+Expression "null" => null
 
-Module TypeId(10) => bool: true
+Expression "null ?? 1" => number: 1
 
-Module TypeId(11) => string: yes
+Expression "1" => number: 1
+
+Binding nonNullish "nonNullish" => string: s
+
+Expression "\"s\"" => string: s
+
+Expression "\"s\" ?? missing" => string: s
+
+Expression "missing" => unknown
+
+Binding conditional "conditional" => string: yes
+
+Expression "true" => bool: true
+
+Expression "true ? \"yes\" : 1" => string: yes
+
+Expression "\"yes\"" => string: yes
+
+Expression "1" => number: 1
 ```

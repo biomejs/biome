@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/spec_tests_v2.rs
-assertion_line: 402
 expression: content
 ---
 
@@ -24,13 +23,7 @@ export const numeric = identity(1);
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
-
-Module TypeId(1) => instanceof T
-
-Module TypeId(2) => instanceof T
-
-Module TypeId(3) => sync Function "readValue" {
+Binding readValue "readValue" => sync Function "readValue" {
   accepts: {
     params: []
     type_args: []
@@ -38,9 +31,9 @@ Module TypeId(3) => sync Function "readValue" {
   returns: string
 }
 
-Module TypeId(4) => string
+Expression "\"value\"" => string: value
 
-Module TypeId(5) => sync Function "identity" {
+Binding identity "identity" => sync Function "identity" {
   accepts: {
     params: [
       required input: instanceof T
@@ -50,11 +43,15 @@ Module TypeId(5) => sync Function "identity" {
   returns: instanceof T
 }
 
-Module TypeId(6) => number: 1
+Binding T "T" => T
 
-Module TypeId(7) => number: 1
+Binding input "input" => instanceof T
 
-Module TypeId(8) => sync Function "readValue" {
+Expression "input" => instanceof T
+
+Binding text "text" => string
+
+Expression "readValue" => sync Function "readValue" {
   accepts: {
     params: []
     type_args: []
@@ -62,9 +59,11 @@ Module TypeId(8) => sync Function "readValue" {
   returns: string
 }
 
-Module TypeId(9) => T
+Expression "readValue()" => string
 
-Module TypeId(10) => sync Function "identity" {
+Binding numeric "numeric" => number: 1
+
+Expression "identity" => sync Function "identity" {
   accepts: {
     params: [
       required input: instanceof T
@@ -73,4 +72,8 @@ Module TypeId(10) => sync Function "identity" {
   }
   returns: instanceof T
 }
+
+Expression "identity(1)" => number: 1
+
+Expression "1" => number: 1
 ```

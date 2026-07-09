@@ -21,55 +21,46 @@ export const [head, ...tail] = numbers;
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
+Binding object "object" => instanceof Object {
+  prototype: No prototype
+  members: ["a": string, "b"?: number | undefined, "c": boolean]
+}
 
-Module TypeId(1) => bool: true
-
-Module TypeId(2) => Object {
+Expression "{ a: \"value\", c: true, }" => Object {
   prototype: No prototype
   members: ["a": string: value, "c": bool: true]
 }
 
-Module TypeId(3) => number | undefined
+Expression "\"value\"" => string: value
 
-Module TypeId(4) => boolean
+Expression "true" => bool: true
 
-Module TypeId(5) => Object {
-  prototype: No prototype
-  members: ["a": string, "b"?: number | undefined, "c": boolean]
-}
+Binding a "a" => string
 
-Module TypeId(6) => instanceof Object {
-  prototype: No prototype
-  members: ["a": string, "b"?: number | undefined, "c": boolean]
-}
+Binding b "b" => number | undefined
 
-Module TypeId(7) => instanceof Object {
-  prototype: No prototype
-  members: ["a": string, "b"?: number | undefined, "c": boolean]
-}
-
-Module TypeId(8) => string
-
-Module TypeId(9) => number | undefined
-
-Module TypeId(10) => Object {
+Binding rest "rest" => Object {
   prototype: No prototype
   members: ["c": boolean]
 }
 
-Module TypeId(11) => number: 1
+Expression "object" => instanceof Object {
+  prototype: No prototype
+  members: ["a": string, "b"?: number | undefined, "c": boolean]
+}
 
-Module TypeId(12) => number: 2
+Binding numbers "numbers" => instanceof Array<number>
 
-Module TypeId(13) => [number: 1,
+Expression "[1, 2]" => [number: 1,
 number: 2]
 
-Module TypeId(14) => instanceof Array<number>
+Expression "1" => number: 1
 
-Module TypeId(15) => instanceof Array<number>
+Expression "2" => number: 2
 
-Module TypeId(16) => number | undefined
+Binding head "head" => number | undefined
 
-Module TypeId(17) => instanceof Array<number>
+Binding tail "tail" => instanceof Array<number>
+
+Expression "numbers" => instanceof Array<number>
 ```

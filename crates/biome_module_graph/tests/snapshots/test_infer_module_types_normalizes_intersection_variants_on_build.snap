@@ -26,33 +26,27 @@ export function readCombined(
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof local type 5
-
-Module TypeId(1) => instanceof local type 6
-
-Module TypeId(2) => instanceof local type 6 & instanceof local type 5
-
-Module TypeId(3) => instanceof local type 5 & instanceof local type 6
-
-Module TypeId(4) => instanceof local type 5 & instanceof local type 6
-
-Module TypeId(5) => Object {
+Binding WithName "WithName" => Object {
   prototype: No prototype
   members: ["name": string]
 }
 
-Module TypeId(6) => Object {
+Binding WithValue "WithValue" => Object {
   prototype: No prototype
   members: ["value": number]
 }
 
-Module TypeId(7) => sync Function "readCombined" {
+Binding readCombined "readCombined" => sync Function "readCombined" {
   accepts: {
     params: [
-      required value: instanceof local type 5 & instanceof local type 6
+      required value: instanceof WithName & instanceof WithValue
     ]
     type_args: []
   }
-  returns: instanceof local type 5 & instanceof local type 6
+  returns: instanceof WithName & instanceof WithValue
 }
+
+Binding value "value" => instanceof WithName & instanceof WithValue
+
+Expression "value" => instanceof WithName & instanceof WithValue
 ```

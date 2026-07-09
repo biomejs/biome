@@ -17,25 +17,7 @@ export type Reader = {
 ## Inferred types
 
 ```
-Module TypeId(0) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: string
-}
-
-Module TypeId(1) => sync Function {
-  accepts: {
-    params: [
-      required value: number
-    ]
-    type_args: []
-  }
-  returns: number
-}
-
-Module TypeId(2) => Object {
+Binding Reader "Reader" => Object {
   prototype: No prototype
   members: [
     ():
@@ -59,4 +41,6 @@ Module TypeId(2) => Object {
       }
   ]
 }
+
+Binding value "value" => number
 ```

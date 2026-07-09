@@ -19,6 +19,22 @@ import { MyNs } from "./barrel.ts";
 
 export { MyNs };
 ```
+
+## Inferred types
+
+```
+Binding MyNs "MyNs" => namespace Identifier("/src/source.ts") [
+  "alpha":
+    sync Function "alpha" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: number
+    }
+]
+```
+
 # `/src/source.ts`
 
 ## Source
@@ -32,13 +48,13 @@ export function alpha(): number {
 ## Inferred types
 
 ```
-Module TypeId(0) => number: 1
-
-Module TypeId(1) => sync Function "alpha" {
+Binding alpha "alpha" => sync Function "alpha" {
   accepts: {
     params: []
     type_args: []
   }
   returns: number
 }
+
+Expression "1" => number: 1
 ```

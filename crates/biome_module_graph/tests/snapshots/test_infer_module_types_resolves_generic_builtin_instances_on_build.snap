@@ -26,21 +26,7 @@ export function readWeakMap(
 ## Inferred types
 
 ```
-Module TypeId(0) => instanceof Map<string, number>
-
-Module TypeId(1) => instanceof Map<string, number>
-
-Module TypeId(2) => instanceof Set<string>
-
-Module TypeId(3) => instanceof Set<string>
-
-Module TypeId(4) => object
-
-Module TypeId(5) => instanceof WeakMap<object, string>
-
-Module TypeId(6) => instanceof WeakMap<object, string>
-
-Module TypeId(7) => sync Function "readMap" {
+Binding readMap "readMap" => sync Function "readMap" {
   accepts: {
     params: [
       required value: instanceof Map<string, number>
@@ -50,7 +36,11 @@ Module TypeId(7) => sync Function "readMap" {
   returns: instanceof Map<string, number>
 }
 
-Module TypeId(8) => sync Function "readSet" {
+Binding value "value" => instanceof Map<string, number>
+
+Expression "value" => instanceof Map<string, number>
+
+Binding readSet "readSet" => sync Function "readSet" {
   accepts: {
     params: [
       required value: instanceof Set<string>
@@ -60,7 +50,11 @@ Module TypeId(8) => sync Function "readSet" {
   returns: instanceof Set<string>
 }
 
-Module TypeId(9) => sync Function "readWeakMap" {
+Binding value "value" => instanceof Set<string>
+
+Expression "value" => instanceof Set<string>
+
+Binding readWeakMap "readWeakMap" => sync Function "readWeakMap" {
   accepts: {
     params: [
       required value: instanceof WeakMap<object, string>
@@ -69,4 +63,8 @@ Module TypeId(9) => sync Function "readWeakMap" {
   }
   returns: instanceof WeakMap<object, string>
 }
+
+Binding value "value" => instanceof WeakMap<object, string>
+
+Expression "value" => instanceof WeakMap<object, string>
 ```

@@ -18,29 +18,27 @@ export const andResult = zeroOrText && true;
 ## Inferred types
 
 ```
-Module TypeId(0) => string: value
+Binding maybeText "maybeText" => instanceof string | null
 
-Module TypeId(1) => null
+Expression "\"value\"" => string: value
 
-Module TypeId(2) => string | null
+Binding zeroOrText "zeroOrText" => instanceof string | number: 0
 
-Module TypeId(3) => instanceof string | null
+Expression "\"value\"" => string: value
 
-Module TypeId(4) => number: 0
+Binding nullishResult "nullishResult" => string
 
-Module TypeId(5) => string | number: 0
+Expression "maybeText" => instanceof string | null
 
-Module TypeId(6) => instanceof string | number: 0
+Expression "maybeText ?? \"fallback\"" => string
 
-Module TypeId(7) => instanceof string | null
+Expression "\"fallback\"" => string: fallback
 
-Module TypeId(8) => string: fallback
+Binding andResult "andResult" => string:  | number: 0 | bool: true
 
-Module TypeId(9) => string
+Expression "zeroOrText" => instanceof string | number: 0
 
-Module TypeId(10) => instanceof string | number: 0
+Expression "zeroOrText && true" => string:  | number: 0 | bool: true
 
-Module TypeId(11) => bool: true
-
-Module TypeId(12) => string:  | number: 0 | bool: true
+Expression "true" => bool: true
 ```
