@@ -37,22 +37,20 @@ Module TypeId(3) => instanceof T
 Module TypeId(4) => class "Promise" {
   extends: none
   implements: []
-  type_args: [unknown]
+  type_args: [T]
 }
 
-Module TypeId(5) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve
+Module TypeId(5) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
 
 Module TypeId(6) => number: 1
 
-Module TypeId(7) => Call class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve(number: 1)
+Module TypeId(7) => instanceof Promise
 
 Module TypeId(8) => T
 

@@ -1,0 +1,67 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	static label: string;
+	value: number;
+	optional?: string;
+}
+
+export const object = { name: "value" };
+export const objectName = object.name;
+export const staticLabel = Box.label;
+export const box: Box = {} as Box;
+export const memberValue = box.value;
+export const optionalValue = box.optional;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => string: value
+
+Module TypeId(1) => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["name": string: value]
+}
+
+Module TypeId(3) => string: value
+
+Module TypeId(4) => local type 12
+
+Module TypeId(5) => string
+
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(7) => instanceof local type 12
+
+Module TypeId(8) => instanceof local type 12
+
+Module TypeId(9) => number
+
+Module TypeId(10) => string | undefined
+
+Module TypeId(11) => string | undefined
+
+Module TypeId(12) => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

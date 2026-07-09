@@ -1,0 +1,63 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const promised: Promise<string> = Promise.resolve("value");
+
+export async function consume() {
+	const awaited = await promised;
+	const primitive = await 1;
+	return awaited;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => class "Promise" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Module TypeId(1) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Module TypeId(2) => string: value
+
+Module TypeId(3) => instanceof Promise
+
+Module TypeId(4) => instanceof Promise<string>
+
+Module TypeId(5) => instanceof Promise<string>
+
+Module TypeId(6) => string
+
+Module TypeId(7) => number: 1
+
+Module TypeId(8) => number: 1
+
+Module TypeId(9) => string
+
+Module TypeId(10) => instanceof Promise<string>
+
+Module TypeId(11) => async Function "consume" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string>
+}
+```

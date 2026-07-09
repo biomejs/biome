@@ -88,19 +88,7 @@ Module TypeId(10) => sync Function {
   returns: instanceof Promise<instanceof T>
 }
 
-Module TypeId(11) => Call sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-} | sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}(No parameters)
+Module TypeId(11) => instanceof T | instanceof Promise<instanceof T>
 
 Module TypeId(12) => T
 
@@ -163,19 +151,7 @@ Module TypeId(19) => sync Function "bestEffort" {
     ]
     type_args: [T]
   }
-  returns: Call sync Function {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof T
-  } | sync Function {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof Promise<instanceof T>
-  }(No parameters)
+  returns: instanceof T | instanceof Promise<instanceof T>
 }
 
 Module TypeId(20) => Object {
@@ -235,19 +211,7 @@ Module TypeId(20) => Object {
           ]
           type_args: [T]
         }
-        returns: Call sync Function {
-          accepts: {
-            params: []
-            type_args: []
-          }
-          returns: instanceof T
-        } | sync Function {
-          accepts: {
-            params: []
-            type_args: []
-          }
-          returns: instanceof Promise<instanceof T>
-        }(No parameters)
+        returns: instanceof T | instanceof Promise<instanceof T>
       }
   ]
 }
@@ -275,22 +239,20 @@ export function readString(): string {
 Module TypeId(0) => class "Promise" {
   extends: none
   implements: []
-  type_args: [unknown]
+  type_args: [T]
 }
 
-Module TypeId(1) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve
+Module TypeId(1) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
 
 Module TypeId(2) => string: value
 
-Module TypeId(3) => Call class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve(string: value)
+Module TypeId(3) => instanceof Promise
 
 Module TypeId(4) => instanceof Promise<string>
 

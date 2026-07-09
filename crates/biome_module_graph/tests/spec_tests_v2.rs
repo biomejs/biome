@@ -108,6 +108,36 @@ fn is_inferred_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> 
         || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Number(_)))
 }
 
+fn is_inferred_string_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::Literal(literal)
+            if matches!(literal.literal(db), InferredLiteral::String(string) if string.as_str() == value)
+    )
+}
+
+fn contains_inferred_string_literal<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    value: &str,
+) -> bool {
+    if is_inferred_string_literal(db, ty, value) {
+        return true;
+    }
+
+    match ty {
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_string_literal(db, *ty, value)),
+        _ => false,
+    }
+}
+
 fn contains_inferred_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
     if is_inferred_string(db, ty) {
         return true;
@@ -2155,6 +2185,413 @@ fn test_infer_module_types_resolves_imported_anonymous_default_function() {
         .expect("readValue binding type must be inferred");
 
     assert_inferred_function_returns_string(&db, inferred.resolve_type(&db, read_value_ty));
+}
+
+#[test]
+fn test_infer_module_types_evaluates_typeof_operator_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const value = 1;
+            export function readValue(): string {
+                return "value";
+            }
+
+            export const valueType = typeof value;
+            export const functionType = typeof readValue;
+            export const unknownType = typeof notDeclared;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let value_type_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "valueType")
+        .expect("valueType binding type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, value_type_ty),
+        "number"
+    ));
+
+    let function_type_ty =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "functionType")
+            .expect("functionType binding type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, function_type_ty),
+        "function"
+    ));
+
+    let unknown_type_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "unknownType")
+        .expect("unknownType binding type must be inferred");
+    let unknown_type_ty = inferred.resolve_type(&db, unknown_type_ty);
+    let InferredTypeData::Union(union) = unknown_type_ty else {
+        panic!("unknown typeof result must be inferred as a union, got {unknown_type_ty:?}");
+    };
+    assert_eq!(union.types(&db).len(), 8);
+    for value in [
+        "bigint",
+        "boolean",
+        "function",
+        "number",
+        "object",
+        "string",
+        "symbol",
+        "undefined",
+    ] {
+        assert!(contains_inferred_string_literal(
+            &db,
+            unknown_type_ty,
+            value
+        ));
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_typeof_operator_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_arithmetic_unary_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const numeric = 1 + 2;
+            export const textual = "value" + numeric;
+            export const unknown = notDeclared + alsoMissing;
+            export const negative = -numeric;
+            export const inverted = ~numeric;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let numeric_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "numeric")
+        .expect("numeric binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, numeric_ty)
+    ));
+
+    let textual_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "textual")
+        .expect("textual binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, textual_ty)
+    ));
+
+    let unknown_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "unknown")
+        .expect("unknown binding type must be inferred");
+    assert_eq!(
+        inferred.resolve_type(&db, unknown_ty),
+        InferredTypeData::Unknown
+    );
+
+    let negative_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "negative")
+        .expect("negative binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, negative_ty)
+    ));
+
+    let inverted_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "inverted")
+        .expect("inverted binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, inverted_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_arithmetic_unary_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_array_element_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const tuple = ["value", 1];
+            export const tupleFirst = tuple[0];
+            export const numbers: number[] = [1, 2];
+            export const arrayFirst = numbers[0];
+            export const [destructured] = tuple;
+
+            for (const item of numbers) {
+                item;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let tuple_first_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "tupleFirst")
+        .expect("tupleFirst binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, tuple_first_ty)
+    ));
+
+    let array_first_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "arrayFirst")
+        .expect("arrayFirst binding type must be inferred");
+    let array_first_ty = inferred.resolve_type(&db, array_first_ty);
+    assert!(contains_inferred_number(&db, array_first_ty));
+    assert!(contains_inferred_undefined(&db, array_first_ty));
+
+    let destructured_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "destructured")
+        .expect("destructured binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, destructured_ty)
+    ));
+
+    let item_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "item")
+        .expect("item binding type must be inferred");
+    assert!(is_inferred_number(&db, inferred.resolve_type(&db, item_ty)));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_array_element_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_await_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const promised: Promise<string> = Promise.resolve("value");
+
+            export async function consume() {
+                const awaited = await promised;
+                const primitive = await 1;
+                return awaited;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let promised_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "promised")
+        .expect("promised binding type must be inferred");
+    let promised_ty = inferred.resolve_type(&db, promised_ty);
+    assert!(
+        is_inferred_promise_with_type_parameter(&db, promised_ty, |ty| is_inferred_string(&db, ty)),
+        "expected promised to be Promise<string>, got {}",
+        format_inferred_type(&db, promised_ty)
+    );
+
+    let awaited_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "awaited")
+        .expect("awaited binding type must be inferred");
+    let awaited_ty = inferred.resolve_type(&db, awaited_ty);
+    assert!(
+        is_inferred_string(&db, awaited_ty),
+        "expected awaited to be string, got {}",
+        format_inferred_type(&db, awaited_ty)
+    );
+
+    let primitive_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "primitive")
+        .expect("primitive binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, primitive_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_await_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_static_member_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Box {
+                static label: string;
+                value: number;
+                optional?: string;
+            }
+
+            export const object = { name: "value" };
+            export const objectName = object.name;
+            export const staticLabel = Box.label;
+            export const box: Box = {} as Box;
+            export const memberValue = box.value;
+            export const optionalValue = box.optional;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let object_name_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "objectName")
+        .expect("objectName binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, object_name_ty)
+    ));
+
+    let static_label_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "staticLabel")
+        .expect("staticLabel binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, static_label_ty)
+    ));
+
+    let member_value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "memberValue")
+        .expect("memberValue binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, member_value_ty)
+    ));
+
+    let optional_value_ty =
+        inferred_binding_ty_by_name(&db, index_module, &inferred, "optionalValue")
+            .expect("optionalValue binding type must be inferred");
+    let optional_value_ty = inferred.resolve_type(&db, optional_value_ty);
+    assert!(contains_inferred_string(&db, optional_value_ty));
+    assert!(contains_inferred_undefined(&db, optional_value_ty));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_static_member_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_call_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function readValue(): string {
+                return "value";
+            }
+
+            export function identity<T>(input: T): T {
+                return input;
+            }
+
+            export const text = readValue();
+            export const numeric = identity(1);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "text")
+        .expect("text binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, value_ty)
+    ));
+
+    let numeric_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "numeric")
+        .expect("numeric binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, numeric_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_call_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_evaluates_new_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Box {
+                value: string;
+
+                constructor(contents: string) {}
+            }
+
+            export class Empty {
+                count: number;
+            }
+
+            export const box = new Box("value");
+            export const boxValue = box.value;
+            export const empty = new Empty();
+            export const count = empty.count;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let box_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "box")
+        .expect("box binding type must be inferred");
+    assert!(matches!(
+        inferred.resolve_type(&db, box_ty),
+        InferredTypeData::InstanceOf(_)
+    ));
+
+    let value_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "boxValue")
+        .expect("boxValue binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, value_ty)
+    ));
+
+    let count_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "count")
+        .expect("count binding type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, count_ty)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_evaluates_new_expressions_on_build",
+        &db,
+        &fs,
+    );
 }
 
 #[test]

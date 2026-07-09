@@ -325,11 +325,23 @@ impl<'db> TypeData<'db> {
             return false;
         };
 
-        match instance.ty(db) {
+        instance.ty(db).is_promise_class(db)
+    }
+
+    pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
+        self.is_class_named(db, "Array")
+    }
+
+    pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
+        self.is_class_named(db, "Promise")
+    }
+
+    pub fn is_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
+        match self {
             Self::Class(class) => class
                 .name(db)
                 .as_ref()
-                .is_some_and(|name| name.text() == "Promise"),
+                .is_some_and(|name| name.text() == expected_name),
             _ => false,
         }
     }
@@ -1091,6 +1103,10 @@ impl<'db> TypeMemberKind<'db> {
         )
     }
 
+    pub fn is_constructor(&self) -> bool {
+        matches!(self, Self::Constructor | Self::ConstAssertedConstructor)
+    }
+
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
@@ -1319,6 +1335,23 @@ pub struct InternedConstructor<'db> {
     #[returns(ref)]
     pub parameters: Box<[ConstructorParameter<'db>]>,
     pub return_type: Option<TypeData<'db>>,
+}
+
+impl<'db> InternedConstructor<'db> {
+    pub fn accepts_argument_count(self, db: &'db dyn TypeDb, argument_count: usize) -> bool {
+        let parameters = self.parameters(db);
+        let required_count = parameters
+            .iter()
+            .filter(|parameter| {
+                !parameter.parameter.is_optional() && !parameter.parameter.is_rest()
+            })
+            .count();
+        let has_rest = parameters
+            .iter()
+            .any(|parameter| parameter.parameter.is_rest());
+
+        required_count <= argument_count && (has_rest || argument_count <= parameters.len())
+    }
 }
 
 #[salsa::interned]

@@ -1,0 +1,43 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const numeric = 1 + 2;
+export const textual = "value" + numeric;
+export const unknown = notDeclared + alsoMissing;
+export const negative = -numeric;
+export const inverted = ~numeric;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => number: 2
+
+Module TypeId(2) => number
+
+Module TypeId(3) => string: value
+
+Module TypeId(4) => number
+
+Module TypeId(5) => string
+
+Module TypeId(6) => unknown
+
+Module TypeId(7) => unknown
+
+Module TypeId(8) => unknown
+
+Module TypeId(9) => number
+
+Module TypeId(10) => number
+```

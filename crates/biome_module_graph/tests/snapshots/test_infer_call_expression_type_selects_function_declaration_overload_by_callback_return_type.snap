@@ -96,39 +96,25 @@ Module TypeId(10) => sync Function {
   returns: instanceof Promise<instanceof T>
 }
 
-Module TypeId(11) => Call sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof T
-} | sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise<instanceof T>
-}(No parameters)
+Module TypeId(11) => instanceof T | instanceof Promise<instanceof T>
 
 Module TypeId(12) => class "Promise" {
   extends: none
   implements: []
-  type_args: [unknown]
+  type_args: [T]
 }
 
-Module TypeId(13) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve
+Module TypeId(13) => sync Function "Promise.resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
 
 Module TypeId(14) => string: value
 
-Module TypeId(15) => Call class "Promise" {
-  extends: none
-  implements: []
-  type_args: [unknown]
-}.resolve(string: value)
+Module TypeId(15) => instanceof Promise
 
 Module TypeId(16) => T
 
@@ -191,19 +177,7 @@ Module TypeId(23) => sync Function "bestEffort" {
     ]
     type_args: [T]
   }
-  returns: Call sync Function {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof T
-  } | sync Function {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof Promise<instanceof T>
-  }(No parameters)
+  returns: instanceof T | instanceof Promise<instanceof T>
 }
 
 Module TypeId(24) => instanceof Promise<string>
@@ -281,19 +255,7 @@ Module TypeId(27) => Object {
           ]
           type_args: [T]
         }
-        returns: Call sync Function {
-          accepts: {
-            params: []
-            type_args: []
-          }
-          returns: instanceof T
-        } | sync Function {
-          accepts: {
-            params: []
-            type_args: []
-          }
-          returns: instanceof Promise<instanceof T>
-        }(No parameters)
+        returns: instanceof T | instanceof Promise<instanceof T>
       }
   ]
 }

@@ -1,0 +1,68 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export class Box {
+	value: string;
+
+	constructor(contents: string) {}
+}
+
+export class Empty {
+	count: number;
+}
+
+export const box = new Box("value");
+export const boxValue = box.value;
+export const empty = new Empty();
+export const count = empty.count;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => local type 10
+
+Module TypeId(1) => string: value
+
+Module TypeId(2) => instanceof Box
+
+Module TypeId(3) => instanceof Box
+
+Module TypeId(4) => string
+
+Module TypeId(5) => local type 11
+
+Module TypeId(6) => instanceof Empty
+
+Module TypeId(7) => instanceof Empty
+
+Module TypeId(8) => number
+
+Module TypeId(9) => constructor {
+  params: [
+    required contents: string
+  ]
+  type_args: []
+  returns: none
+}
+
+Module TypeId(10) => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(11) => class "Empty" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

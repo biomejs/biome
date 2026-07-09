@@ -1,0 +1,54 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const value = 1;
+export function readValue(): string {
+	return "value";
+}
+
+export const valueType = typeof value;
+export const functionType = typeof readValue;
+export const unknownType = typeof notDeclared;
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => string: value
+
+Module TypeId(2) => number: 1
+
+Module TypeId(3) => string: number
+
+Module TypeId(4) => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(5) => string: function
+
+Module TypeId(6) => unknown
+
+Module TypeId(7) => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Module TypeId(8) => sync Function "readValue" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+```

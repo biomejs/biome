@@ -468,6 +468,14 @@ impl TypeData {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(resolver, scope_id, expr)
             }
+            AnyJsExpression::JsAwaitExpression(expr) => {
+                Self::from(TypeofExpression::Await(TypeofAwaitExpression {
+                    argument: expr
+                        .argument()
+                        .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                        .unwrap_or_default(),
+                }))
+            }
             AnyJsExpression::JsBinaryExpression(expr) => {
                 Self::from_js_binary_expression(resolver, scope_id, expr)
             }

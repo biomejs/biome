@@ -1,0 +1,58 @@
+---
+source: crates/biome_module_graph/tests/spec_tests_v2.rs
+assertion_line: 402
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const tuple = ["value", 1];
+export const tupleFirst = tuple[0];
+export const numbers: number[] = [1, 2];
+export const arrayFirst = numbers[0];
+export const [destructured] = tuple;
+
+for (const item of numbers) {
+	item;
+}
+```
+
+## Inferred types
+
+```
+Module TypeId(0) => string: value
+
+Module TypeId(1) => number: 1
+
+Module TypeId(2) => [string: value,
+number: 1]
+
+Module TypeId(3) => [string: value,
+number: 1]
+
+Module TypeId(4) => number: 0
+
+Module TypeId(5) => string: value
+
+Module TypeId(6) => number: 2
+
+Module TypeId(7) => [number: 1,
+number: 2]
+
+Module TypeId(8) => instanceof Array<number>
+
+Module TypeId(9) => instanceof Array<number>
+
+Module TypeId(10) => number | undefined
+
+Module TypeId(11) => string: value
+
+Module TypeId(12) => number
+
+Module TypeId(13) => instanceof Array<number>
+
+Module TypeId(14) => number
+```

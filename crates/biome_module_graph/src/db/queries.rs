@@ -7,6 +7,10 @@
 //!
 //! The queries are also interned, so that Salsa can reuse the same computation
 //! when the inputs are the same.
+//!
+//! This module should contain only tracked functions, exposed to the consumers. Middle
+//! functions that aren't queries should be moved somewhere else, unless they are used
+//! directly by the tracked functions e.g. cycle detection
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::db::type_inference::{
@@ -60,6 +64,7 @@ pub fn infer_module_types<'db>(
     Some(resolve_raw_types(db, module, &js_info, &import_types))
 }
 
+// NOTE: this is the only exception to the rule.
 /// Infers the types of a module, preparing the modules it imports first.
 ///
 /// This is the entry point to use when answering an outside request, such as
@@ -156,7 +161,17 @@ pub fn infer_call_expression_type<'db>(
     let module = input.module(db);
     let callee = input.callee(db);
     let args = input.args(db);
-    let ty = match callee {
+    let ty = infer_call_expression_return_type(db, callee, args);
+
+    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
+}
+
+pub(crate) fn infer_call_expression_return_type<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+    args: &[InferredTypeData<'db>],
+) -> InferredTypeData<'db> {
+    match callee {
         InferredTypeData::Union(union) => collected_type_result(
             db,
             union
@@ -167,9 +182,7 @@ pub fn infer_call_expression_type<'db>(
         )
         .unwrap_or(InferredTypeData::Unknown),
         callee => infer_function_call_type(db, callee, args).unwrap_or(InferredTypeData::Unknown),
-    };
-
-    normalize_type(db, NormalizeTypeInput::new(db, module, ty))
+    }
 }
 
 fn infer_function_call_type<'db>(
