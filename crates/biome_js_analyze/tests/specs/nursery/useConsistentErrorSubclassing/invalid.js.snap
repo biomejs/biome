@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Name does not end in `Error`.
+class Foo extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "Foo";
+	}
+}
+
+// Name does not end in `Error` (non-`Error` built-in).
+class Bar extends TypeError {
+	constructor(message) {
+		super(message);
+		this.name = "Bar";
+	}
+}
+
+// Constructor never assigns `this.name`.
+class DatabaseError extends Error {
+	constructor(message) {
+		super(message);
+	}
+}
+
+// `this.name` assigned dynamically.
+class ApiError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = this.constructor.name;
+	}
+}
+
+// `this.name` string literal doesn't match the class name.
+class CacheError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "WrongName";
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:7 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of a custom error class should end in Error.
+  
+    3 │ // Name does not end in `Error`.
+  > 4 │ class Foo extends Error {
+      │       ^^^
+    5 │ 	constructor(message) {
+    6 │ 		super(message);
+  
+  i A name ending in Error makes the class recognizable as an error type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of a custom error class should end in Error.
+  
+    11 │ // Name does not end in `Error` (non-`Error` built-in).
+  > 12 │ class Bar extends TypeError {
+       │       ^^^
+    13 │ 	constructor(message) {
+    14 │ 		super(message);
+  
+  i A name ending in Error makes the class recognizable as an error type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:2 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This custom error class doesn't set this.name.
+  
+    19 │ // Constructor never assigns `this.name`.
+    20 │ class DatabaseError extends Error {
+  > 21 │ 	constructor(message) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+  > 22 │ 		super(message);
+  > 23 │ 	}
+       │ 	^
+    24 │ }
+    25 │ 
+  
+  i Set this.name to a string literal matching the class name so the error is identifiable at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i this.name should be assigned a string literal, not a computed value.
+  
+    28 │ 	constructor(message) {
+    29 │ 		super(message);
+  > 30 │ 		this.name = this.constructor.name;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	}
+    32 │ }
+  
+  i Computed names like this.constructor.name break after minification. Use a string literal matching the class name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:3 lint/nursery/useConsistentErrorSubclassing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i this.name should match the class name CacheError.
+  
+    36 │ 	constructor(message) {
+    37 │ 		super(message);
+  > 38 │ 		this.name = "WrongName";
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 	}
+    40 │ }
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
