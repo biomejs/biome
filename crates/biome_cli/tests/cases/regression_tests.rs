@@ -174,3 +174,32 @@ export const protectedProcedure = trpc.baseProcedure.use;
         result,
     ));
 }
+
+/// Regression test for https://github.com/biomejs/biome/issues/9196
+#[test]
+fn issue_9196() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let jsx_file = Utf8Path::new("test.jsx");
+    fs.insert(
+        jsx_file.into(),
+        "<div>\n\ttext // first\n\t{/* ok */}\n\ttail /* second */ more\n</div>;\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", jsx_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_9196",
+        fs,
+        console,
+        result,
+    ));
+}
