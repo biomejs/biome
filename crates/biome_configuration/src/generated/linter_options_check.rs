@@ -2095,6 +2095,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_react_async_server_function::UseReactAsyncServerFunctionOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useReactCompiler",
+        TypeId::of::<biome_rule_options::use_react_compiler::UseReactCompilerOptions>(),
+    ));
     result.push(("nursery", "useReactFunctionComponentDefinition", TypeId::of::<biome_rule_options::use_react_function_component_definition::UseReactFunctionComponentDefinitionOptions>()));
     result.push((
         "style",

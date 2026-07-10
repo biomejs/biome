@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: useMemoUnused.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useMemo } from "react";
+
+function Component(props) {
+    useMemo(() => props.value, [props.value]);
+
+    return <div>{props.value}</div>;
+}
+
+```
+
+# Diagnostics
+```
+useMemoUnused.jsx:6:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This useMemo result is unused.
+  
+    5 │ function Component(props) {
+  > 6 │     useMemo(() => props.value, [props.value]);
+      │     ^^^^^^^
+    7 │ 
+    8 │     return <div>{props.value}</div>;
+  
+  i useMemo should compute a value that is used during render. An unused memo usually means the callback is being used for a side effect.
+  
+  i Use the memoized value, remove the useMemo call, or move side effects into useEffect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

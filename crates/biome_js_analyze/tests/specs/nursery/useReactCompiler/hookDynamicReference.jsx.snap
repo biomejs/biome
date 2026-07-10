@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: hookDynamicReference.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useEffect, useState } from "react";
+
+function Component(props) {
+    const hook = props.enabled ? useState : useEffect;
+
+    hook(0);
+
+    return <div />;
+}
+
+```
+
+# Diagnostics
+```
+hookDynamicReference.jsx:6:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │     hook(0);
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+hookDynamicReference.jsx:6:34 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                                  ^^^^^^^^
+    7 │ 
+    8 │     hook(0);
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+hookDynamicReference.jsx:6:45 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+    5 │ function Component(props) {
+  > 6 │     const hook = props.enabled ? useState : useEffect;
+      │                                             ^^^^^^^^^
+    7 │ 
+    8 │     hook(0);
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+hookDynamicReference.jsx:8:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook usage does not follow React's rules.
+  
+     6 │     const hook = props.enabled ? useState : useEffect;
+     7 │ 
+   > 8 │     hook(0);
+       │     ^^^^
+     9 │ 
+    10 │     return <div />;
+  
+  i Hooks must be called directly at the top level of a component or custom hook, and in the same order on every render.
+  
+  i Move the hook call to the top level, and call a statically known hook directly instead of passing, storing, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
