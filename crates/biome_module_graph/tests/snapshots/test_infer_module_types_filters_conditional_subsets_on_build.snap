@@ -10,9 +10,12 @@ expression: content
 ```ts
 export let maybeText: string | null = "value";
 export let zeroOrText: string | 0 = "value";
+export class Box {}
+export let maybeBox: Box | null = new Box();
 
 export const nullishResult = maybeText ?? "fallback";
 export const andResult = zeroOrText && true;
+export const nullishBox = maybeBox ?? "fallback";
 ```
 
 ## Inferred types
@@ -25,6 +28,22 @@ Expression "\"value\"" => string: value
 Binding zeroOrText "zeroOrText" => instanceof string | number: 0
 
 Expression "\"value\"" => string: value
+
+Binding Box "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding maybeBox "maybeBox" => instanceof instanceof Box | null
+
+Expression "new Box()" => instanceof Box
+
+Expression "Box" => class "Box" {
+  extends: none
+  implements: []
+  type_args: []
+}
 
 Binding nullishResult "nullishResult" => string
 
@@ -41,4 +60,12 @@ Expression "zeroOrText" => instanceof string | number: 0
 Expression "zeroOrText && true" => string:  | number: 0 | bool: true
 
 Expression "true" => bool: true
+
+Binding nullishBox "nullishBox" => instanceof Box | string: fallback
+
+Expression "maybeBox" => instanceof instanceof Box | null
+
+Expression "maybeBox ?? \"fallback\"" => instanceof Box | string: fallback
+
+Expression "\"fallback\"" => string: fallback
 ```

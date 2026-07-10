@@ -5,7 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 pub mod queries;
 mod type_inference;
 
-/// Extends `Db` with module-graph-specific lookups.
+/// Extends `TypeDb` with module-graph-specific lookups.
 #[salsa::db]
 pub trait ModuleDb: TypeDb {
     /// Given a path, it retrieves its corresponding module info.

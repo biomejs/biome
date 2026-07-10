@@ -3056,8 +3056,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 });
             }
 
-            // Operations intentially kept inside blocks so that we
-            // The forks created by `get_db` are dropped.
+            // Operations are intentionally kept inside blocks so that the
+            // forks created by `get_db` are dropped before the setter runs.
             let new_root = {
                 let workspace_db = self.get_db();
                 update_snippets(parse.into(), workspace_db.clone(), new_snippets)?

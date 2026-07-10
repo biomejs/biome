@@ -10,7 +10,7 @@ use biome_workspace_db::{ParsedSourceUpdateMode, SharedWorkspaceDb, WorkspaceDb,
 use camino::Utf8Path;
 use parking_lot::Mutex;
 use std::cell::Cell;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::panic::resume_unwind;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::error;
@@ -40,7 +40,7 @@ thread_local! {
 ///
 /// NOTE: This is a runtime safety check, not a complete guarantee. Calling
 /// [`Self::into_untracked_db`] or cloning the inner [`WorkspaceDb`] through
-/// [`Deref`] can create a database handle no longer counted here. Keep
+/// [`Deref`] can create a database handle that is no longer counted here. Keep
 /// those escapes limited to read-only leaf operations.
 pub(crate) struct DbReadGuard {
     db: WorkspaceDb,
@@ -59,9 +59,9 @@ impl DbReadGuard {
     ///
     /// NOTE: After this returns, same-thread writes cannot see that this
     /// database handle is live. Do not call this before code that may perform a
-    /// [`DbState`] write on the same thread. Keep the guard alive for normal
-    /// reads, a reads this only when a lower-level read-only API needs a plain
-    /// [`WorkspaceDb`].
+    /// [`DbState`] write on the same thread. Prefer keeping the guard alive for
+    /// normal reads, and only use this when a lower-level read-only API needs a
+    /// plain [`WorkspaceDb`].
     pub(crate) fn into_untracked_db(self) -> WorkspaceDb {
         self.db
     }
@@ -103,12 +103,6 @@ impl Deref for DbReadGuard {
 
     fn deref(&self) -> &Self::Target {
         &self.db
-    }
-}
-
-impl DerefMut for DbReadGuard {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.db
     }
 }
 

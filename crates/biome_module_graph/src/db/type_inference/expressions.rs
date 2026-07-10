@@ -1434,6 +1434,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Interface(_)
             | InferredTypeData::Object(_)
             | InferredTypeData::ObjectKeyword
+            | InferredTypeData::Tuple(_)
             | InferredTypeData::String => Some(InferredTypeData::String),
             InferredTypeData::Literal(literal) => match literal.literal(self.db) {
                 InferredLiteral::BigInt(_) => Some(InferredTypeData::BigInt),
@@ -1454,7 +1455,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Function(_)
             | InferredTypeData::Module(_)
             | InferredTypeData::Namespace(_)
-            | InferredTypeData::Tuple(_)
             | InferredTypeData::Generic(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
@@ -1707,6 +1707,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                         let target = self.resolve_inferred_type(instance.ty(self.db));
                         if target.should_flatten_instance(instance.type_parameters(self.db)) {
                             pending.push(target);
+                        } else {
+                            types.push(ty);
                         }
                     }
                     InferredTypeData::Union(union) => {

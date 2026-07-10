@@ -265,6 +265,17 @@ fn contains_inferred_null<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>)
     }
 }
 
+fn contains_inferred_instance<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    match ty {
+        InferredTypeData::InstanceOf(_) => true,
+        InferredTypeData::Union(union) => union
+            .types(db)
+            .iter()
+            .any(|ty| contains_inferred_instance(db, *ty)),
+        _ => false,
+    }
+}
+
 fn assert_inferred_function_returns_number<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
     let InferredTypeData::Function(function) = ty else {
         panic!("type must be inferred as a function");
@@ -2737,6 +2748,34 @@ fn test_infer_module_types_evaluates_call_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_coerces_tuples_in_additions() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const values = [1, 2] as const;
+            export const text = values + "!";
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    let text_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "text")
+        .expect("text binding type must be inferred");
+    assert!(is_inferred_string(&db, inferred.resolve_type(&db, text_ty)));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_coerces_tuples_in_additions",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_evaluates_new_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -3338,9 +3377,12 @@ fn test_infer_module_types_filters_conditional_subsets_on_build() {
         r#"
             export let maybeText: string | null = "value";
             export let zeroOrText: string | 0 = "value";
+            export class Box {}
+            export let maybeBox: Box | null = new Box();
 
             export const nullishResult = maybeText ?? "fallback";
             export const andResult = zeroOrText && true;
+            export const nullishBox = maybeBox ?? "fallback";
         "#,
     );
 
@@ -3362,6 +3404,12 @@ fn test_infer_module_types_filters_conditional_subsets_on_build() {
     let and_result_ty = inferred.resolve_type(&db, and_result_ty);
     assert!(contains_inferred_number_literal(&db, and_result_ty, "0"));
     assert!(contains_inferred_boolean(&db, and_result_ty));
+
+    let nullish_box_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "nullishBox")
+        .expect("nullishBox binding type must be inferred");
+    let nullish_box_ty = inferred.resolve_type(&db, nullish_box_ty);
+    assert!(contains_inferred_instance(&db, nullish_box_ty));
+    assert!(contains_inferred_string(&db, nullish_box_ty));
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_filters_conditional_subsets_on_build",

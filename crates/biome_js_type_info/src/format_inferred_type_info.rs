@@ -792,7 +792,19 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     &expr.right
                 ])]]
             ),
-            Self::New(expr) => write!(f, [&format_args![token("new"), space(), &expr.callee]]),
+            Self::New(expr) => write!(
+                f,
+                [&format_args![
+                    token("new"),
+                    space(),
+                    &expr.callee,
+                    token("("),
+                    group(&soft_block_indent(&FmtInferredCallArgumentTypes(
+                        &expr.arguments
+                    ))),
+                    token(")")
+                ]]
+            ),
             Self::NullishCoalescing(expr) => write!(
                 f,
                 [&format_args![&group(&format_args![
