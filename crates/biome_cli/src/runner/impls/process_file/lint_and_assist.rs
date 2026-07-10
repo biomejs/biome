@@ -208,7 +208,7 @@ impl ProcessFile for LintAssistProcessFile {
         })?;
 
         if file_features.is_ignored() {
-            console.append(markup! {{content}});
+            console.write_raw(content);
             return Ok(());
         }
 
@@ -221,7 +221,7 @@ impl ProcessFile for LintAssistProcessFile {
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
-            console.append(markup! {{content}});
+            console.write_raw(content);
 
             return Ok(());
         };
@@ -304,18 +304,14 @@ impl ProcessFile for LintAssistProcessFile {
 
         match new_content {
             Cow::Borrowed(original_content) => {
-                console.append(markup! {
-                    {original_content}
-                });
+                console.write_raw(original_content);
 
                 if !execution.requires_write_access() {
                     return Err(StdinDiagnostic::new_not_formatted().into());
                 }
             }
             Cow::Owned(ref new_content) => {
-                console.append(markup! {
-                    {new_content}
-                });
+                console.write_raw(new_content);
             }
         }
         workspace

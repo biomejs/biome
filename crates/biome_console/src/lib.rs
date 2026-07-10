@@ -40,6 +40,21 @@ pub trait Console: Send + Sync + RefUnwindSafe {
     /// It reads from a source, and if this source contains something, it's converted into a [String]
     fn read(&mut self) -> Option<String>;
 
+    /// Writes `content` to the console's log stream verbatim, byte-for-byte,
+    /// bypassing the markup/color sanitization applied by [Console::print] and
+    /// [Console::println].
+    ///
+    /// This must be used instead of [ConsoleExt::append] whenever `content` is
+    /// arbitrary file content being echoed back (for instance the formatted
+    /// output of `--stdin-file-path`) rather than diagnostic text intended for
+    /// human reading: sanitization can silently rewrite non-ASCII characters,
+    /// which is only appropriate for biome's own diagnostic UI symbols, not for
+    /// user source code.
+    fn write_raw(&mut self, content: &str) {
+        use crate as biome_console;
+        self.print(LogLevel::Log, markup! { {content} });
+    }
+
     /// It returns a string of the messages have been written to the buffer. Applicable only to certain consoles
     fn dump(&mut self) -> Option<String> {
         None
@@ -187,6 +202,11 @@ impl Console for EnvConsole {
         let result = handle.read_to_string(&mut buffer);
         // Skipping the error for now
         if result.is_ok() { Some(buffer) } else { None }
+    }
+
+    fn write_raw(&mut self, content: &str) {
+        let mut out = self.out.lock();
+        out.write_all(content.as_bytes()).unwrap();
     }
 }
 
