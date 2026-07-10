@@ -183,8 +183,8 @@ MdDocument {
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
-                        marker: MINUS@153..155 "- " [] [],
-                        post_marker_space_token: missing (optional),
+                        marker: MINUS@153..154 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@154..155 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
@@ -509,8 +509,8 @@ MdDocument {
         0: MD_BULLET@153..156
           0: MD_LIST_MARKER_PREFIX@153..155
             0: MD_INDENT_TOKEN_LIST@153..153
-            1: MINUS@153..155 "- " [] []
-            2: (empty)
+            1: MINUS@153..154 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@154..155 " " [] []
             3: MD_INDENT_TOKEN_LIST@155..155
           1: MD_BLOCK_LIST@155..156
             0: MD_NEWLINE@155..156
