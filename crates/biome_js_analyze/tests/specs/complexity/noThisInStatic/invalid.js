@@ -45,3 +45,42 @@ class FactoryCases {
         new this.Factory();
     }
 }
+
+class BaseWithHasInstance {
+    constructor(name) {
+        this.name = name;
+    }
+
+    static [Symbol.hasInstance](instance) {
+        if (
+            instance === null ||
+            instance === undefined ||
+            typeof instance !== "object"
+        ) {
+            return false;
+        }
+
+        if (
+            this.prototype &&
+            Object.prototype.isPrototypeOf.call(this.prototype, instance)
+        ) {
+            return true;
+        }
+
+        let proto = Object.getPrototypeOf(instance);
+        while (proto !== null) {
+            if (proto.constructor?.name === this.name) {
+                return true;
+            }
+            proto = Object.getPrototypeOf(proto);
+        }
+
+        return false;
+    }
+}
+
+class HasInstanceSub1 extends BaseWithHasInstance {}
+class HasInstanceSub2 extends BaseWithHasInstance {}
+
+const hasInstanceSub1 = new HasInstanceSub1("sub1");
+hasInstanceSub1 instanceof HasInstanceSub2;
