@@ -9,7 +9,8 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{InferredType, Type};
 use biome_module_graph::{
-    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types_bottom_up,
+    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, NormalizeTypeInput,
+    infer_module_types_bottom_up, normalize_type,
 };
 use biome_rowan::{AstNode, TextRange};
 use std::rc::Rc;
@@ -47,7 +48,7 @@ impl TypedService {
         let db = typed_module.db.as_ref();
         let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
         let ty = inferred.expressions.get(&expression.range()).copied()?;
-        let ty = inferred.resolve_type(db, ty);
+        let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
         Some(InferredType::new(db, ty))
     }

@@ -274,6 +274,15 @@ fn infer_function_call_type<'db>(
             InferredTypeData::Object(object) => {
                 infer_call_signature_type(db, object.members(db), args)
             }
+            InferredTypeData::Union(union) => {
+                infer_function_call_type(db, InferredTypeData::Union(union), args)
+            }
+            InferredTypeData::TypeofType(typeof_type) => {
+                infer_function_call_type(db, typeof_type.ty(db), args)
+            }
+            InferredTypeData::TypeofValue(typeof_value) => {
+                infer_function_call_type(db, typeof_value.ty(db), args)
+            }
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
@@ -293,14 +302,11 @@ fn infer_function_call_type<'db>(
             | InferredTypeData::Generic(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
             | InferredTypeData::AnyKeyword
             | InferredTypeData::NeverKeyword
             | InferredTypeData::ObjectKeyword
@@ -312,6 +318,20 @@ fn infer_function_call_type<'db>(
             infer_call_signature_type(db, interface.members(db), args)
         }
         InferredTypeData::Object(object) => infer_call_signature_type(db, object.members(db), args),
+        InferredTypeData::Union(union) => collected_type_result(
+            db,
+            union
+                .types(db)
+                .iter()
+                .filter_map(|callee| infer_function_call_type(db, *callee, args))
+                .collect(),
+        ),
+        InferredTypeData::TypeofType(typeof_type) => {
+            infer_function_call_type(db, typeof_type.ty(db), args)
+        }
+        InferredTypeData::TypeofValue(typeof_value) => {
+            infer_function_call_type(db, typeof_value.ty(db), args)
+        }
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
@@ -331,13 +351,10 @@ fn infer_function_call_type<'db>(
         | InferredTypeData::Generic(_)
         | InferredTypeData::Local(_)
         | InferredTypeData::Intersection(_)
-        | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
-        | InferredTypeData::TypeofType(_)
-        | InferredTypeData::TypeofValue(_)
         | InferredTypeData::AnyKeyword
         | InferredTypeData::NeverKeyword
         | InferredTypeData::ObjectKeyword

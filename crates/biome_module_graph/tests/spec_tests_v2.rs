@@ -135,6 +135,21 @@ fn is_inferred_boolean<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) ->
         || matches!(ty, InferredTypeData::Literal(literal) if matches!(literal.literal(db), InferredLiteral::Boolean(_)))
 }
 
+fn is_inferred_array_of_promises<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> bool {
+    let InferredTypeData::InstanceOf(instance) = ty else {
+        return false;
+    };
+
+    instance.ty(db).is_array_class(db)
+        && instance
+            .type_parameters(db)
+            .first()
+            .is_some_and(|ty| ty.is_promise_instance(db))
+}
+
 fn is_inferred_string_literal<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -2952,6 +2967,136 @@ fn test_infer_module_types_infers_new_expression_nested_generic_instances_on_bui
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_infers_new_expression_nested_generic_instances_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_resolves_promise_member_chain() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Parent {
+                async returnsPromise(): Promise<string> {
+                    return "value";
+                }
+            }
+
+            export class Child extends Parent {}
+
+            export const direct = new Child().returnsPromise();
+            export const then = direct.then(() => {});
+            export const finalResult = then.finally(() => {});
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["direct", "then", "finalResult"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, &inferred, name)
+            .expect("binding type must be inferred");
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            ty.is_promise_instance(&db),
+            "{name} must be a Promise, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_resolves_promise_member_chain",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_preserves_floating_promise_shapes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Cheating<T extends 1> = T extends 1 ? Promise<string> : Promise<string>;
+
+            async function promiseLike(): Cheating<1> {
+                return "value";
+            }
+
+            const sneakyObject = {
+                get something() {
+                    return new Promise((_, reject) => reject("value"));
+                },
+            };
+
+            function wrapper<F extends (...args: any) => any>(fn: F): F {
+                return fn;
+            }
+
+            async function doWork(): Promise<void> {}
+
+            export const mappedAsync = [1, 2, 3].map(async (value) => value + 1);
+            export const mappedPromise = [1, 2, 3].map((value) => Promise.resolve(value + 1));
+            export const conditional = promiseLike();
+            export const getter = sneakyObject.something;
+            export const wrapped = wrapper(doWork)();
+            export const maybeDoWork: typeof doWork | undefined = doWork;
+            export const optional = maybeDoWork?.();
+            export const globalChain = globalThis.Promise.reject("value").finally();
+
+            await new Promise((resolve) => resolve("value"));
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["mappedAsync", "mappedPromise"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, &inferred, name)
+            .expect("array binding type must be inferred");
+        let ty = normalize_type(&db, index_module, ty);
+        assert!(
+            is_inferred_array_of_promises(&db, ty),
+            "{name} must be an array of Promises, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    for name in ["conditional", "getter", "wrapped", "optional", "globalChain"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, &inferred, name)
+            .expect("Promise binding type must be inferred");
+        let ty = normalize_type(&db, index_module, ty);
+        assert!(
+            ty.is_promise_instance(&db),
+            "{name} must be a Promise, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    let maybe_do_work = inferred_binding_ty_by_name(&db, index_module, &inferred, "maybeDoWork")
+        .expect("maybeDoWork binding type must be inferred");
+    let optional_call = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, maybe_do_work),
+        Vec::new(),
+    );
+    assert!(
+        optional_call.is_promise_instance(&db),
+        "optional call must return a Promise, got {}",
+        format_inferred_type(&db, optional_call),
+    );
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_preserves_floating_promise_shapes",
         &db,
         &fs,
     );

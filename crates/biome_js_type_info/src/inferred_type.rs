@@ -59,6 +59,32 @@ impl<'db> InferredType<'db> {
         matches!(self.data, TypeData::InstanceOf(instance) if instance.ty(self.db).is_array_class(self.db))
     }
 
+    pub fn is_array_of_promise(self) -> bool {
+        let TypeData::InstanceOf(instance) = self.data else {
+            return false;
+        };
+
+        instance.ty(self.db).is_array_class(self.db)
+            && instance
+                .type_parameters(self.db)
+                .first()
+                .is_some_and(|ty| is_promise_instance(self.db, *ty))
+    }
+
+    pub fn is_promise_instance(self) -> bool {
+        is_promise_instance(self.db, self.data)
+    }
+
+    pub fn has_promise_variant(self) -> bool {
+        match self.data {
+            TypeData::Union(union) => union
+                .types(self.db)
+                .iter()
+                .any(|ty| is_promise_instance(self.db, *ty)),
+            _ => false,
+        }
+    }
+
     pub const fn is_null(self) -> bool {
         matches!(self.data, TypeData::Null)
     }
@@ -66,4 +92,15 @@ impl<'db> InferredType<'db> {
     pub const fn is_undefined(self) -> bool {
         matches!(self.data, TypeData::Undefined)
     }
+}
+
+fn is_promise_instance<'db>(db: &'db dyn TypeDb, mut data: TypeData<'db>) -> bool {
+    while let TypeData::InstanceOf(instance) = data {
+        data = instance.ty(db);
+        if data.is_promise_class(db) {
+            return true;
+        }
+    }
+
+    false
 }

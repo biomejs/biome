@@ -7,16 +7,19 @@ use super::{
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
+use biome_js_semantic::ScopeId;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
+    GLOBAL_RESOLVER, Path, TypeReferenceQualifier, TypeResolver,
     TypeofExpression as RawTypeofExpression,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
-        InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
-        Literal as InferredLiteral, ReturnType as InferredReturnType,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
+        InternedFunction as InferredFunction, InternedLiteral as InferredInternedLiteral,
+        InternedTuple as InferredTuple, Literal as InferredLiteral,
+        ReturnType as InferredReturnType, TupleElementType as InferredTupleElementType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeofExpression as InferredTypeofExpression,
     },
     literal::NumberLiteral,
 };
@@ -698,10 +701,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             };
             let target = self.resolve_inferred_type(instance.ty(self.db));
             if self.is_promise_like_target(target) {
-                return instance
-                    .type_parameters(self.db)
-                    .first()
-                    .map(|ty| self.resolve_inferred_type(*ty));
+                return Some(
+                    instance
+                        .type_parameters(self.db)
+                        .first()
+                        .map_or(InferredTypeData::Unknown, |ty| {
+                            self.resolve_inferred_type(*ty)
+                        }),
+                );
             }
 
             if let InferredTypeData::Class(class) = target
@@ -827,6 +834,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
             InferredTypeData::InstanceOf(instance) => {
                 let target = self.resolve_inferred_type(instance.ty(self.db));
+                if let Some((ty, is_optional)) = self.promise_member_type(target, member_name) {
+                    return Some(self.member_type(ty, is_optional));
+                }
                 let substitutions = substitutions_for_instance(
                     self.db,
                     target,
@@ -889,9 +899,26 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 collected_type_result(self.db, types).or(Some(InferredTypeData::Unknown))
             }
+            InferredTypeData::Global => self.resolve_global_name(member_name),
+            InferredTypeData::Tuple(tuple) => {
+                let element_ty = InferredTypeData::union_from_types(
+                    self.db,
+                    tuple
+                        .elements(self.db)
+                        .iter()
+                        .map(|element| element.ty)
+                        .collect(),
+                );
+                let target = self.resolve_global_name("Array")?;
+                let substitutions = substitutions_for_instance(self.db, target, &[element_ty], &[]);
+                self.find_static_member_on_resolved_type(target, member_name)
+                    .map(|(ty, is_optional)| {
+                        let ty = apply_substitutions(self.db, ty, &substitutions);
+                        self.member_type(ty, is_optional)
+                    })
+            }
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -906,7 +933,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Module(_)
             | InferredTypeData::Namespace(_)
             | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
             | InferredTypeData::Generic(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
@@ -1051,6 +1077,39 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         None
+    }
+
+    fn promise_member_type(
+        &self,
+        target: InferredTypeData<'db>,
+        member_name: &str,
+    ) -> Option<(InferredTypeData<'db>, bool)> {
+        if !target.is_promise_class(self.db) || !matches!(member_name, "catch" | "finally" | "then")
+        {
+            return None;
+        }
+
+        let return_type = InferredTypeData::instance_of(self.db, target, Box::default());
+        Some((
+            InferredTypeData::Function(InferredFunction::new(
+                self.db,
+                Box::default(),
+                Box::default(),
+                InferredReturnType::Type(return_type),
+                false,
+                None,
+            )),
+            false,
+        ))
+    }
+
+    fn resolve_global_name(&mut self, name: &str) -> Option<InferredTypeData<'db>> {
+        GLOBAL_RESOLVER
+            .resolve_qualifier(&TypeReferenceQualifier::from_path(
+                ScopeId::GLOBAL,
+                Path::from(Text::new_owned(name.into())),
+            ))
+            .map(|resolved_id| self.resolve_resolved_id(resolved_id))
     }
 
     fn member_type(
