@@ -851,6 +851,78 @@ function() {
         )
     }
 
+    fn assert_range_formatting_preserves_leading_comments(input: &str, closing_paren: &str) {
+        let tree = parse_script(input, JsParserOptions::default());
+        let root = tree.syntax();
+        let offset =
+            TextSize::try_from(input.find(closing_paren).unwrap() + closing_paren.len()).unwrap();
+        let token = root.token_at_offset(offset).left_biased().unwrap();
+        let parent = token.parent().unwrap();
+        let printed = format_range(
+            JsFormatOptions::new(JsFileSource::js_script()).with_indent_style(IndentStyle::Tab),
+            &root,
+            parent.text_trimmed_range(),
+        )
+        .expect("range formatting failed");
+
+        let range = printed.range().unwrap();
+        let mut output = input.to_string();
+        output.replace_range(
+            usize::from(range.start())..usize::from(range.end()),
+            printed.as_code(),
+        );
+        assert_eq!(output, input);
+    }
+
+    #[test]
+    fn range_formatting_preserves_if_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// Add a new check
+	// TODO: try removing and re-adding closing paren
+	if (num < 0.5 && num < 0.4) {
+		console.log("Less than 0.5");
+	}
+}
+"#,
+            "num < 0.4)",
+        );
+    }
+
+    #[test]
+    fn range_formatting_preserves_while_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// A loop
+	while (num < 0.5) {
+		console.log("Less than 0.5");
+	}
+}
+"#,
+            "num < 0.5)",
+        );
+    }
+
+    #[test]
+    fn range_formatting_preserves_for_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// A loop
+	for (let index = 0; index < num; index++) {
+		console.log(index);
+	}
+}
+"#,
+            "index++)",
+        );
+    }
+
     #[test]
     fn format_range_out_of_bounds() {
         let src = "statement();";
