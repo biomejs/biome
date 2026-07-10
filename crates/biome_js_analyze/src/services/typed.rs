@@ -7,8 +7,10 @@ use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
     JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
-use biome_js_type_info::Type;
-use biome_module_graph::{ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver};
+use biome_js_type_info::{InferredType, Type};
+use biome_module_graph::{
+    ModuleDb, ModuleInfo, ModuleInfoKind, ModuleResolver, infer_module_types_bottom_up,
+};
 use biome_rowan::{AstNode, TextRange};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -36,6 +38,20 @@ pub struct TypedService {
 }
 
 impl TypedService {
+    /// Returns the Salsa-inferred type for an expression.
+    pub fn inferred_type_of_expression<'db>(
+        &'db self,
+        expression: &AnyJsExpression,
+    ) -> Option<InferredType<'db>> {
+        let typed_module = self.module.as_ref()?;
+        let db = typed_module.db.as_ref();
+        let inferred = infer_module_types_bottom_up(db, typed_module.module)?;
+        let ty = inferred.expressions.get(&expression.range()).copied()?;
+        let ty = inferred.resolve_type(db, ty);
+
+        Some(InferredType::new(db, ty))
+    }
+
     #[expect(
         clippy::arc_with_non_send_sync,
         reason = "The legacy ModuleResolver and Type APIs require Arc while this migration keeps them in place."
