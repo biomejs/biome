@@ -394,6 +394,39 @@ async fn on_type_formatting_does_not_edit_formatted_css_block() -> Result<()> {
 }
 
 #[tokio::test]
+async fn on_type_formatting_does_not_edit_css_block_with_leading_comment() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let uri = uri!("document.css");
+    let text = "a {\n\tcolor: blue;\n}\n\n/* heading */\nb {\n\tcolor: red;\n}\n";
+    server.open_named_document(text, uri.clone(), "css").await?;
+
+    let edits = request_on_type_formatting(
+        &mut server,
+        uri,
+        position_after(text, "\tcolor: red;\n}"),
+        "}",
+    )
+    .await?;
+
+    assert_no_edits(edits);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn on_type_formatting_formats_css_closing_curly() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
