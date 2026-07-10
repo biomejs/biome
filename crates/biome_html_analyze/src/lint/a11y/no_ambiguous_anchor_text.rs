@@ -111,13 +111,12 @@ impl Rule for NoAmbiguousAnchorText {
 }
 
 fn get_aria_label(node: &AnyHtmlTagElement) -> Option<String> {
-    let attribute = node.attributes().find_by_name("aria-label")?;
-    let initializer = attribute.initializer()?;
-    let value = initializer.value().ok()?;
-    let html_string = value.as_html_string()?;
-    let text = html_string.inner_string_text().ok()?;
+    let attribute = node
+        .attributes()
+        .find_attribute_or_vue_binding("aria-label")?;
+    let attribute_value = attribute.as_static_value()?;
 
-    Some(text.to_string())
+    Some(attribute_value.text().to_string())
 }
 
 fn get_img_alt(node: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<String> {
@@ -125,13 +124,10 @@ fn get_img_alt(node: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option
         return None;
     }
 
-    let attribute = node.attributes().find_by_name("alt")?;
-    let initializer = attribute.initializer()?;
-    let value = initializer.value().ok()?;
-    let html_string = value.as_html_string()?;
-    let text = html_string.inner_string_text().ok()?;
+    let attribute = node.attributes().find_attribute_or_vue_binding("alt")?;
+    let attribute_value = attribute.as_static_value()?;
 
-    Some(text.to_string())
+    Some(attribute_value.text().to_string())
 }
 
 fn standardize_space_and_case(input: &str) -> String {

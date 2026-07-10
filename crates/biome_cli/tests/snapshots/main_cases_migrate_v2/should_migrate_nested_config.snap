@@ -2,7 +2,7 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `foo/biome.json`
+## `bar/biome.json`
 
 ```json
 { "linter": { "rules": { "recommended": true } } }
@@ -14,7 +14,7 @@ expression: redactor(content)
 { "linter": { "rules": { "recommended": true } } }
 ```
 
-## `bar/biome.json`
+## `foo/biome.json`
 
 ```json
 { "linter": { "rules": { "recommended": true } } }

@@ -309,3 +309,9 @@ function collapseNumber(): 1 | 2 | number { return 1; }
 function collapseBigint(): 1n | bigint { return 1n; }
 
 function collapseMismatchLiteral(): "a" | string { return "b"; }
+
+function widenStringAssertion(b: boolean): string { if (b) return "a" as string; return "b" as string; }
+function widenSatisfiesAssertion(b: boolean): string { if (b) return ("a" as string) satisfies string; return "b" as string; }
+type WidenedAlias = string;
+function widenAliasAssertion(b: boolean): WidenedAlias { if (b) return "a" as WidenedAlias; return "b" as WidenedAlias; }
+function assertedBooleanLiteralsCollapse(b: boolean): boolean { if (b) return true as true; return false as false; }

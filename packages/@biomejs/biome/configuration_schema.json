@@ -2358,6 +2358,25 @@
 				}
 			]
 		},
+		"IgnorePrimitives": {
+			"oneOf": [
+				{
+					"description": "When true, ignore all primitive types.",
+					"type": "boolean"
+				},
+				{
+					"description": "Ignore specific primitive types.",
+					"type": "object",
+					"properties": {
+						"bigint": { "type": "boolean" },
+						"boolean": { "type": "boolean" },
+						"number": { "type": "boolean" },
+						"string": { "type": "boolean" }
+					},
+					"additionalProperties": false
+				}
+			]
+		},
 		"ImportGroup": {
 			"anyOf": [
 				{ "type": "null" },
@@ -15111,6 +15130,13 @@
 		},
 		"UseDomQuerySelectorOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of receiver identifiers to ignore.\n\nIn the expression `document.querySelector('div')`, the receiver is `document`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseEnumInitializersConfiguration": {
@@ -15833,6 +15859,10 @@
 				"ignoreMixedLogicalExpressions": {
 					"description": "Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).",
 					"type": ["boolean", "null"]
+				},
+				"ignorePrimitives": {
+					"description": "Whether to ignore `||` and `||=` operations whose non-nullish operand types are all primitives of the configured kinds. Accepts `true` for every primitive, or an object selecting `string`, `number`, `boolean`, `bigint` (default: none).",
+					"anyOf": [{ "$ref": "#/$defs/IgnorePrimitives" }, { "type": "null" }]
 				},
 				"ignoreTernaryTests": {
 					"description": "Ignore ternary expressions that check for `null` or `undefined` (default: `false`).",

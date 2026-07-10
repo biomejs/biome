@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
-assertion_line: 384
 expression: content
 ---
 ## `custom/biome.json`

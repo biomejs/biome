@@ -2,12 +2,6 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `node_modules/@shared/linter/biome.jsonc`
-
-```json
-{ "linter": { "enabled": false } }
-```
-
 ## `biome.json`
 
 ```json
@@ -18,6 +12,12 @@ expression: redactor(content)
 
 ```json
 { "javascript": { "formatter": { "quoteStyle": "single" } } }
+```
+
+## `node_modules/@shared/linter/biome.jsonc`
+
+```json
+{ "linter": { "enabled": false } }
 ```
 
 ## `node_modules/@shared/format/package.json`

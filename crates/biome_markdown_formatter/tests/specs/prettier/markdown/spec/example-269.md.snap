@@ -24,12 +24,13 @@ info: markdown/spec/example-269.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,7 +2,7 @@
+@@ -1,7 +1,8 @@
+ - a
  - b
  - c
- - d
--- e
-+  - e
+-- d - e
++- d
++- e
  - f
  - g
  - h
@@ -42,7 +43,7 @@ info: markdown/spec/example-269.md
 - b
 - c
 - d
-  - e
+- e
 - f
 - g
 - h

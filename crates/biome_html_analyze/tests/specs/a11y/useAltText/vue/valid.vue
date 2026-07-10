@@ -8,3 +8,7 @@
 
 <!-- img with dynamic :alt and :src -->
 <img :src="image.src" :alt="image.description" />
+
+<!-- static Vue bindings with known alt text are valid -->
+<img :alt="'description'" src="image.png" />
+<img v-bind:alt="'text'" src="image.png" />

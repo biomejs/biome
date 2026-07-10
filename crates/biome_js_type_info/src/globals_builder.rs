@@ -5,7 +5,7 @@ use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeStore};
 
 use super::{globals::GlobalsResolver, globals_ids::GlobalTypeId};
 
-/// Requires every predefined manifest slot to be populated before producing a [`GlobalsResolver`].
+/// Tracks predefined manifest slots before producing a [`GlobalsResolver`].
 pub(crate) struct GlobalsResolverBuilder {
     /// `None` reserves a manifest row until its `TypeData` is written.
     types: Vec<Option<TypeData>>,
@@ -50,6 +50,13 @@ impl GlobalsResolverBuilder {
 
     /// Consumes the builder and produces the immutable [`GlobalsResolver`].
     pub(crate) fn build(self) -> GlobalsResolver {
+        for (index, slot) in self.types.iter().enumerate() {
+            debug_assert!(
+                slot.is_some(),
+                "global type resolver slot {index} was not populated"
+            );
+        }
+
         let types: Vec<Arc<TypeData>> = self
             .types
             .into_iter()
@@ -89,5 +96,11 @@ mod tests {
         let mut builder = GlobalsResolverBuilder::default();
         builder.set_type_data(UNKNOWN_ID_GLOBAL_TYPE_ID, TypeData::Unknown);
         builder.set_type_data(UNKNOWN_ID_GLOBAL_TYPE_ID, TypeData::Unknown);
+    }
+
+    #[test]
+    #[should_panic(expected = "global type resolver slot 0 was not populated")]
+    fn build_panics_on_missing_slot() {
+        GlobalsResolverBuilder::with_capacity(1).build();
     }
 }

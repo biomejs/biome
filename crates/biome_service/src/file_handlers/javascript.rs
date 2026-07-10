@@ -5,7 +5,8 @@ use super::{
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult,
     ParseEmbeddedParams, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions,
-    ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
+    ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes, format_on_type_noop,
+    matches_on_type_char,
 };
 use crate::configuration::to_analyzer_rules;
 #[cfg(feature = "js_embeds")]
@@ -94,12 +95,15 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;
+use biome_rowan::SyntaxKind;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
 use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use either::Either;
+#[cfg(feature = "js_embeds")]
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -850,7 +854,7 @@ fn debug_formatter_ir(
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree, false)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -1274,7 +1278,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                                     &params.document_file_source,
                                 ),
                                 tree.syntax(),
-                                false,
+                                Vec::new(),
                             ))
                         } else {
                             Either::Right(tree.syntax().to_string())
@@ -1371,7 +1375,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         &params.document_file_source,
                     ),
                     tree.syntax(),
-                    false,
+                    Vec::new(),
                 ))
             } else {
                 Either::Right(tree.syntax().to_string())
@@ -1391,7 +1395,7 @@ pub(crate) fn format(
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree, false)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -1453,12 +1457,27 @@ pub(crate) fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_js_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: JsSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let printed = biome_js_formatter::format_range(options, &tree, root_node.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -1474,11 +1493,17 @@ fn format_embedded(
     {
         let tree = parse.syntax(&workspace_db);
         let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-        let mut formatted = format_node(options, &tree, true)?;
+
+        // Hand the snippet ranges to the formatter, so it only emits embedded
+        // tags for chunks that were actually parsed as embedded languages.
+        let snippets: FxHashMap<TextRange, ParsedSnippet> = embedded_nodes
+            .into_iter()
+            .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+            .collect();
+        let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
 
         formatted.format_embedded(move |range| {
-            let mut iter = embedded_nodes.iter();
-            let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
+            let snippet = snippets.get(&range)?;
             let snippet_file_source =
                 workspace_db.source_from_index(snippet.document_source_index(&workspace_db))?;
 

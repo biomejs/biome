@@ -9,6 +9,7 @@ impl FormatRule<AnyMdInline> for FormatAnyMdInline {
     fn fmt(&self, node: &AnyMdInline, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdInline::MdAutolink(node) => node.format().fmt(f),
+            AnyMdInline::MdCodeContent(node) => node.format().fmt(f),
             AnyMdInline::MdEntityReference(node) => node.format().fmt(f),
             AnyMdInline::MdHardLine(node) => node.format().fmt(f),
             AnyMdInline::MdHtmlBlock(node) => node.format().fmt(f),

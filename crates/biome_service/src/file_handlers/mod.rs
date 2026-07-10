@@ -106,6 +106,18 @@ use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use tracing::trace;
 
+/// Characters that will enable the format on type
+pub const ON_TYPE_CHARS: &[char] = &['}', ']', ')'];
+
+pub(crate) fn matches_on_type_char(value: &str) -> bool {
+    if value.len() != 1 || value.is_empty() {
+        return false;
+    }
+
+    // SATEFY: we checked that we have exactly one character.
+    ON_TYPE_CHARS.contains(&value.chars().next().unwrap())
+}
+
 pub struct FixAllParams<'a> {
     pub(crate) parsed_source: AnyParsedSource,
     pub(crate) fix_file_mode: FixFileMode,
@@ -840,6 +852,16 @@ type FormatOnType = fn(
     TextSize,
     WorkspaceDb,
 ) -> Result<Printed, WorkspaceError>;
+
+pub(crate) fn format_on_type_noop(offset: TextSize) -> Printed {
+    // The LSP layer treats `range: None` as a whole-file replacement.
+    Printed::new(
+        String::new(),
+        Some(TextRange::at(offset, TextSize::from(0))),
+        Vec::new(),
+        Vec::new(),
+    )
+}
 
 type FormatEmbedded = fn(
     &BiomePath,

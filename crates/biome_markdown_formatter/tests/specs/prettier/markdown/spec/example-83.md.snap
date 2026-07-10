@@ -26,12 +26,12 @@ Heading
  
      foo
 -
- ## Heading
+-Heading
+-------
++## Heading
  
      foo
--
-----
-+----
+ 
 ```
 
 # Output
@@ -43,5 +43,6 @@ Heading
 ## Heading
 
     foo
-----
+
+---
 ```

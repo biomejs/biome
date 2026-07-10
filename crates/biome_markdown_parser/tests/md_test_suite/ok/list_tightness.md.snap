@@ -460,19 +460,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@320..327 " Mixed " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@327..328 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@328..345 " Tight with Multi" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@345..346 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@346..358 "line Content" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@320..358 " Mixed - Tight with Multi-line Content" [] [],
                     },
                 ],
             },
@@ -487,19 +475,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@360..403 "Tight list where items have multiple lines " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@403..404 "(" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@404..415 "still tight" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@416..417 ":" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@360..417 "Tight list where items have multiple lines (still tight):" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@417..418 "\n" [] [],
@@ -528,10 +504,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@429..430 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@430..431 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@431..432 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@430..432 "  " [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@432..446 "continues here" [] [],
@@ -560,10 +533,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@457..458 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@458..459 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@459..460 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@458..460 "  " [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@460..474 "also continues" [] [],
@@ -590,13 +560,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@477..491 " Nested Lists " [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@491..492 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@477..508 " Nested Lists - Mixed Tightness" [] [],
                     },
                 ],
             },
@@ -644,10 +608,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@547..548 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@548..549 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@547..549 "  " [] [],
                                 },
                             ],
                         },
@@ -680,10 +641,7 @@ MdDocument {
                                     prefix: MdListMarkerPrefix {
                                         pre_marker_indent: MdIndentTokenList [
                                             MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@560..561 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@561..562 " " [] [],
+                                                md_indent_char_token: MD_INDENT_CHAR@560..562 "  " [] [],
                                             },
                                         ],
                                         marker: MINUS@562..563 "-" [] [],
@@ -791,10 +749,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@631..632 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@632..633 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@631..633 "  " [] [],
                                 },
                             ],
                         },
@@ -824,10 +779,7 @@ MdDocument {
                                     prefix: MdListMarkerPrefix {
                                         pre_marker_indent: MdIndentTokenList [
                                             MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@643..644 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@644..645 " " [] [],
+                                                md_indent_char_token: MD_INDENT_CHAR@643..645 "  " [] [],
                                             },
                                         ],
                                         marker: MINUS@645..646 "-" [] [],
@@ -1111,16 +1063,8 @@ MdDocument {
           0: HASH@319..320 "#" [] []
       2: MD_PARAGRAPH@320..358
         0: MD_INLINE_ITEM_LIST@320..358
-          0: MD_TEXTUAL@320..327
-            0: MD_TEXTUAL_LITERAL@320..327 " Mixed " [] []
-          1: MD_TEXTUAL@327..328
-            0: MD_TEXTUAL_LITERAL@327..328 "-" [] []
-          2: MD_TEXTUAL@328..345
-            0: MD_TEXTUAL_LITERAL@328..345 " Tight with Multi" [] []
-          3: MD_TEXTUAL@345..346
-            0: MD_TEXTUAL_LITERAL@345..346 "-" [] []
-          4: MD_TEXTUAL@346..358
-            0: MD_TEXTUAL_LITERAL@346..358 "line Content" [] []
+          0: MD_TEXTUAL@320..358
+            0: MD_TEXTUAL_LITERAL@320..358 " Mixed - Tight with Multi-line Content" [] []
       3: MD_HASH_LIST@358..358
     23: MD_NEWLINE@358..359
       0: NEWLINE@358..359 "\n" [] []
@@ -1128,17 +1072,9 @@ MdDocument {
       0: NEWLINE@359..360 "\n" [] []
     25: MD_PARAGRAPH@360..418
       0: MD_INLINE_ITEM_LIST@360..418
-        0: MD_TEXTUAL@360..403
-          0: MD_TEXTUAL_LITERAL@360..403 "Tight list where items have multiple lines " [] []
-        1: MD_TEXTUAL@403..404
-          0: MD_TEXTUAL_LITERAL@403..404 "(" [] []
-        2: MD_TEXTUAL@404..415
-          0: MD_TEXTUAL_LITERAL@404..415 "still tight" [] []
-        3: MD_TEXTUAL@415..416
-          0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
-        4: MD_TEXTUAL@416..417
-          0: MD_TEXTUAL_LITERAL@416..417 ":" [] []
-        5: MD_TEXTUAL@417..418
+        0: MD_TEXTUAL@360..417
+          0: MD_TEXTUAL_LITERAL@360..417 "Tight list where items have multiple lines (still tight):" [] []
+        1: MD_TEXTUAL@417..418
           0: MD_TEXTUAL_LITERAL@417..418 "\n" [] []
     26: MD_NEWLINE@418..419
       0: NEWLINE@418..419 "\n" [] []
@@ -1157,13 +1093,11 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@421..429 "Item one" [] []
                 1: MD_TEXTUAL@429..430
                   0: MD_TEXTUAL_LITERAL@429..430 "\n" [] []
-                2: MD_INDENT_TOKEN@430..431
-                  0: MD_INDENT_CHAR@430..431 " " [] []
-                3: MD_INDENT_TOKEN@431..432
-                  0: MD_INDENT_CHAR@431..432 " " [] []
-                4: MD_TEXTUAL@432..446
+                2: MD_INDENT_TOKEN@430..432
+                  0: MD_INDENT_CHAR@430..432 "  " [] []
+                3: MD_TEXTUAL@432..446
                   0: MD_TEXTUAL_LITERAL@432..446 "continues here" [] []
-                5: MD_TEXTUAL@446..447
+                4: MD_TEXTUAL@446..447
                   0: MD_TEXTUAL_LITERAL@446..447 "\n" [] []
         1: MD_BULLET@447..475
           0: MD_LIST_MARKER_PREFIX@447..449
@@ -1178,13 +1112,11 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@449..457 "Item two" [] []
                 1: MD_TEXTUAL@457..458
                   0: MD_TEXTUAL_LITERAL@457..458 "\n" [] []
-                2: MD_INDENT_TOKEN@458..459
-                  0: MD_INDENT_CHAR@458..459 " " [] []
-                3: MD_INDENT_TOKEN@459..460
-                  0: MD_INDENT_CHAR@459..460 " " [] []
-                4: MD_TEXTUAL@460..474
+                2: MD_INDENT_TOKEN@458..460
+                  0: MD_INDENT_CHAR@458..460 "  " [] []
+                3: MD_TEXTUAL@460..474
                   0: MD_TEXTUAL_LITERAL@460..474 "also continues" [] []
-                5: MD_TEXTUAL@474..475
+                4: MD_TEXTUAL@474..475
                   0: MD_TEXTUAL_LITERAL@474..475 "\n" [] []
     28: MD_NEWLINE@475..476
       0: NEWLINE@475..476 "\n" [] []
@@ -1195,12 +1127,8 @@ MdDocument {
           0: HASH@476..477 "#" [] []
       2: MD_PARAGRAPH@477..508
         0: MD_INLINE_ITEM_LIST@477..508
-          0: MD_TEXTUAL@477..491
-            0: MD_TEXTUAL_LITERAL@477..491 " Nested Lists " [] []
-          1: MD_TEXTUAL@491..492
-            0: MD_TEXTUAL_LITERAL@491..492 "-" [] []
-          2: MD_TEXTUAL@492..508
-            0: MD_TEXTUAL_LITERAL@492..508 " Mixed Tightness" [] []
+          0: MD_TEXTUAL@477..508
+            0: MD_TEXTUAL_LITERAL@477..508 " Nested Lists - Mixed Tightness" [] []
       3: MD_HASH_LIST@508..508
     30: MD_NEWLINE@508..509
       0: NEWLINE@508..509 "\n" [] []
@@ -1231,10 +1159,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@546..547 "\n" [] []
             1: MD_CONTINUATION_INDENT@547..549
               0: MD_INDENT_TOKEN_LIST@547..549
-                0: MD_INDENT_TOKEN@547..548
-                  0: MD_INDENT_CHAR@547..548 " " [] []
-                1: MD_INDENT_TOKEN@548..549
-                  0: MD_INDENT_CHAR@548..549 " " [] []
+                0: MD_INDENT_TOKEN@547..549
+                  0: MD_INDENT_CHAR@547..549 "  " [] []
             2: MD_BULLET_LIST_ITEM@549..572
               0: MD_BULLET_LIST@549..572
                 0: MD_BULLET@549..560
@@ -1255,10 +1181,8 @@ MdDocument {
                 1: MD_BULLET@560..572
                   0: MD_LIST_MARKER_PREFIX@560..564
                     0: MD_INDENT_TOKEN_LIST@560..562
-                      0: MD_INDENT_TOKEN@560..561
-                        0: MD_INDENT_CHAR@560..561 " " [] []
-                      1: MD_INDENT_TOKEN@561..562
-                        0: MD_INDENT_CHAR@561..562 " " [] []
+                      0: MD_INDENT_TOKEN@560..562
+                        0: MD_INDENT_CHAR@560..562 "  " [] []
                     1: MINUS@562..563 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@563..564 " " [] []
                     3: MD_INDENT_TOKEN_LIST@564..564
@@ -1324,10 +1248,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@630..631 "\n" [] []
             1: MD_CONTINUATION_INDENT@631..633
               0: MD_INDENT_TOKEN_LIST@631..633
-                0: MD_INDENT_TOKEN@631..632
-                  0: MD_INDENT_CHAR@631..632 " " [] []
-                1: MD_INDENT_TOKEN@632..633
-                  0: MD_INDENT_CHAR@632..633 " " [] []
+                0: MD_INDENT_TOKEN@631..633
+                  0: MD_INDENT_CHAR@631..633 "  " [] []
             2: MD_BULLET_LIST_ITEM@633..655
               0: MD_BULLET_LIST@633..655
                 0: MD_BULLET@633..643
@@ -1346,10 +1268,8 @@ MdDocument {
                 1: MD_BULLET@643..655
                   0: MD_LIST_MARKER_PREFIX@643..647
                     0: MD_INDENT_TOKEN_LIST@643..645
-                      0: MD_INDENT_TOKEN@643..644
-                        0: MD_INDENT_CHAR@643..644 " " [] []
-                      1: MD_INDENT_TOKEN@644..645
-                        0: MD_INDENT_CHAR@644..645 " " [] []
+                      0: MD_INDENT_TOKEN@643..645
+                        0: MD_INDENT_CHAR@643..645 "  " [] []
                     1: MINUS@645..646 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@646..647 " " [] []
                     3: MD_INDENT_TOKEN_LIST@647..647

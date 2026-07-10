@@ -102,13 +102,7 @@ MdDocument {
         MdSetextHeader {
             content: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@74..79 "Multi" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@79..80 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@80..92 "line content" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@74..92 "Multi-line content" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@92..93 "\n" [] [],
@@ -182,17 +176,13 @@ MdDocument {
       0: NEWLINE@73..74 "\n" [] []
     12: MD_SETEXT_HEADER@74..126
       0: MD_INLINE_ITEM_LIST@74..110
-        0: MD_TEXTUAL@74..79
-          0: MD_TEXTUAL_LITERAL@74..79 "Multi" [] []
-        1: MD_TEXTUAL@79..80
-          0: MD_TEXTUAL_LITERAL@79..80 "-" [] []
-        2: MD_TEXTUAL@80..92
-          0: MD_TEXTUAL_LITERAL@80..92 "line content" [] []
-        3: MD_TEXTUAL@92..93
+        0: MD_TEXTUAL@74..92
+          0: MD_TEXTUAL_LITERAL@74..92 "Multi-line content" [] []
+        1: MD_TEXTUAL@92..93
           0: MD_TEXTUAL_LITERAL@92..93 "\n" [] []
-        4: MD_TEXTUAL@93..109
+        2: MD_TEXTUAL@93..109
           0: MD_TEXTUAL_LITERAL@93..109 "that spans lines" [] []
-        5: MD_TEXTUAL@109..110
+        3: MD_TEXTUAL@109..110
           0: MD_TEXTUAL_LITERAL@109..110 "\n" [] []
       1: MD_SETEXT_UNDERLINE_LITERAL@110..126 "================" [] []
     13: MD_NEWLINE@126..127

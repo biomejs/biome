@@ -23,19 +23,13 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@9..10 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..14 "text" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@9..14 "[text" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@14..15 "]" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@15..16 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@15..30 "[unclosed label" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
@@ -57,17 +51,13 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@0..31
         0: MD_TEXTUAL@0..9
           0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
-        1: MD_TEXTUAL@9..10
-          0: MD_TEXTUAL_LITERAL@9..10 "[" [] []
-        2: MD_TEXTUAL@10..14
-          0: MD_TEXTUAL_LITERAL@10..14 "text" [] []
-        3: MD_TEXTUAL@14..15
+        1: MD_TEXTUAL@9..14
+          0: MD_TEXTUAL_LITERAL@9..14 "[text" [] []
+        2: MD_TEXTUAL@14..15
           0: MD_TEXTUAL_LITERAL@14..15 "]" [] []
-        4: MD_TEXTUAL@15..16
-          0: MD_TEXTUAL_LITERAL@15..16 "[" [] []
-        5: MD_TEXTUAL@16..30
-          0: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] []
-        6: MD_TEXTUAL@30..31
+        3: MD_TEXTUAL@15..30
+          0: MD_TEXTUAL_LITERAL@15..30 "[unclosed label" [] []
+        4: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
   2: EOF@31..31 "" [] []
 

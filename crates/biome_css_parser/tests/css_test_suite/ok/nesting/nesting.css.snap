@@ -183,6 +183,11 @@ article {
 	}
 }
 
+.foo {
+	color: blue;
+	&_title { color: green; }
+}
+
 ```
 
 
@@ -3163,17 +3168,100 @@ CssRoot {
                 r_curly_token: R_CURLY@1953..1955 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@1955..1958 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1958..1962 "foo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@1962..1963 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1963..1970 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1970..1972 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@1972..1976 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1976..1977 ";" [] [],
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        CssNestedSelector {
+                                            amp_token: AMP@1977..1980 "&" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                    ],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@1980..1987 "_title" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@1987..1989 "{" [] [Whitespace(" ")],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1989..1994 "color" [] [],
+                                            },
+                                            colon_token: COLON@1994..1996 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@1996..2001 "green" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@2001..2003 ";" [] [Whitespace(" ")],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@2003..2004 "}" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@2004..2006 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@1955..1956 "" [Newline("\n")] [],
+    eof_token: EOF@2006..2007 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..1956
+0: CSS_ROOT@0..2007
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..1955
+  1: CSS_ROOT_ITEM_LIST@0..2006
     0: CSS_QUALIFIED_RULE@0..219
       0: CSS_SELECTOR_LIST@0..17
         0: CSS_COMPOUND_SELECTOR@0..17
@@ -5099,6 +5187,59 @@ CssRoot {
                       2: R_CURLY@1946..1950 "}" [Newline("\n"), Whitespace("\t\t")] []
                 2: R_CURLY@1950..1953 "}" [Newline("\n"), Whitespace("\t")] []
         2: R_CURLY@1953..1955 "}" [Newline("\n")] []
-  2: EOF@1955..1956 "" [Newline("\n")] []
+    25: CSS_QUALIFIED_RULE@1955..2006
+      0: CSS_SELECTOR_LIST@1955..1962
+        0: CSS_COMPOUND_SELECTOR@1955..1962
+          0: CSS_NESTED_SELECTOR_LIST@1955..1955
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@1955..1962
+            0: CSS_CLASS_SELECTOR@1955..1962
+              0: DOT@1955..1958 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@1958..1962
+                0: IDENT@1958..1962 "foo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@1962..2006
+        0: L_CURLY@1962..1963 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@1963..2004
+          0: CSS_DECLARATION_WITH_SEMICOLON@1963..1977
+            0: CSS_DECLARATION@1963..1976
+              0: CSS_GENERIC_PROPERTY@1963..1976
+                0: CSS_IDENTIFIER@1963..1970
+                  0: IDENT@1963..1970 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1970..1972 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1972..1976
+                  0: CSS_IDENTIFIER@1972..1976
+                    0: IDENT@1972..1976 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@1976..1977 ";" [] []
+          1: CSS_NESTED_QUALIFIED_RULE@1977..2004
+            0: CSS_RELATIVE_SELECTOR_LIST@1977..1987
+              0: CSS_RELATIVE_SELECTOR@1977..1987
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@1977..1987
+                  0: CSS_NESTED_SELECTOR_LIST@1977..1980
+                    0: CSS_NESTED_SELECTOR@1977..1980
+                      0: AMP@1977..1980 "&" [Newline("\n"), Whitespace("\t")] []
+                  1: CSS_TYPE_SELECTOR@1980..1987
+                    0: (empty)
+                    1: CSS_IDENTIFIER@1980..1987
+                      0: IDENT@1980..1987 "_title" [] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@1987..1987
+            1: CSS_DECLARATION_OR_RULE_BLOCK@1987..2004
+              0: L_CURLY@1987..1989 "{" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_LIST@1989..2003
+                0: CSS_DECLARATION_WITH_SEMICOLON@1989..2003
+                  0: CSS_DECLARATION@1989..2001
+                    0: CSS_GENERIC_PROPERTY@1989..2001
+                      0: CSS_IDENTIFIER@1989..1994
+                        0: IDENT@1989..1994 "color" [] []
+                      1: COLON@1994..1996 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1996..2001
+                        0: CSS_IDENTIFIER@1996..2001
+                          0: IDENT@1996..2001 "green" [] []
+                    1: (empty)
+                  1: SEMICOLON@2001..2003 ";" [] [Whitespace(" ")]
+              2: R_CURLY@2003..2004 "}" [] []
+        2: R_CURLY@2004..2006 "}" [Newline("\n")] []
+  2: EOF@2006..2007 "" [Newline("\n")] []
 
 ```

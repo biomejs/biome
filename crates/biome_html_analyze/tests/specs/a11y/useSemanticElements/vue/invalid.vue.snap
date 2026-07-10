@@ -49,6 +49,10 @@ expression: invalid.vue
 <input role="textbox" />
 <th role="columnheader"></th>
 <th role="rowheader"></th>
+<!-- static Vue role bindings that map to semantic elements should also be flagged -->
+<div :role="'button'"></div>
+<div v-bind:role="'checkbox'"></div>
+<div :role="'heading'"></div>
 
 ```
 
@@ -893,7 +897,7 @@ invalid.vue:44:5 lint/a11y/useSemanticElements ━━━━━━━━━━━
   > 44 │ <th role="columnheader"></th>
        │     ^^^^^^^^^^^^^^^^^^^
     45 │ <th role="rowheader"></th>
-    46 │ 
+    46 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -913,13 +917,81 @@ invalid.vue:45:5 lint/a11y/useSemanticElements ━━━━━━━━━━━
     44 │ <th role="columnheader"></th>
   > 45 │ <th role="rowheader"></th>
        │     ^^^^^^^^^^^^^^^^
-    46 │ 
+    46 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
+    47 │ <div :role="'button'"></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
   i Replace with one of these elements:
   
   - <th scope="row">
+  
+
+```
+
+```
+invalid.vue:47:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    45 │ <th role="rowheader"></th>
+    46 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
+  > 47 │ <div :role="'button'"></div>
+       │      ^^^^^^^^^^^^^^^^
+    48 │ <div v-bind:role="'checkbox'"></div>
+    49 │ <div :role="'heading'"></div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <button>
+  
+
+```
+
+```
+invalid.vue:48:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    46 │ <!-- static Vue role bindings that map to semantic elements should also be flagged -->
+    47 │ <div :role="'button'"></div>
+  > 48 │ <div v-bind:role="'checkbox'"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ <div :role="'heading'"></div>
+    50 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="checkbox">
+  
+
+```
+
+```
+invalid.vue:49:6 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to semantic elements.
+  
+    47 │ <div :role="'button'"></div>
+    48 │ <div v-bind:role="'checkbox'"></div>
+  > 49 │ <div :role="'heading'"></div>
+       │      ^^^^^^^^^^^^^^^^^
+    50 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <h1>
+  - <h2>
+  - <h3>
+  - <h4>
+  - <h5>
+  - <h6>
   
 
 ```

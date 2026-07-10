@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlElement, HtmlSelfClosingElement};
+use biome_html_syntax::{AnyHtmlAttribute, HtmlElement, HtmlSelfClosingElement};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_autofocus::NoAutofocusOptions;
@@ -67,7 +67,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoAutofocus {
-    type Query = Ast<HtmlAttribute>;
+    type Query = Ast<AnyHtmlAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoAutofocusOptions;
@@ -77,7 +77,7 @@ impl Rule for NoAutofocus {
         let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if this is an autofocus attribute
-        if !is_autofocus_attribute(node) {
+        if !node.is_attribute_or_vue_binding("autofocus") {
             return None;
         }
 
@@ -118,20 +118,15 @@ impl Rule for NoAutofocus {
     }
 }
 
-/// Check if the attribute is an autofocus attribute
-fn is_autofocus_attribute(node: &HtmlAttribute) -> bool {
-    node.name().is_ok_and(|name| {
-        name.value_token()
-            .is_ok_and(|value_token| value_token.text_trimmed().eq_ignore_ascii_case("autofocus"))
-    })
-}
-
 /// Check if the element is inside an allowed context (dialog or popover)
 ///
 /// Note: We skip the first [HtmlElement] (the one containing the autofocus attribute)
 /// because we only want to check if it's *inside* a dialog/popover, not if
 /// it *is* the dialog/popover itself.
-fn is_inside_allowed_context(attr: &HtmlAttribute, source_type: &HtmlFileSource) -> Option<bool> {
+fn is_inside_allowed_context(
+    attr: &AnyHtmlAttribute,
+    source_type: &HtmlFileSource,
+) -> Option<bool> {
     let mut skip_first_element = true;
 
     // Walk up the ancestors to find if we're inside a dialog or popover
@@ -166,5 +161,5 @@ fn get_tag_element(node: &biome_html_syntax::HtmlSyntaxNode) -> Option<AnyHtmlTa
 /// Check if the tag element is a dialog or has popover attribute
 fn is_dialog_or_popover(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> bool {
     is_html_tag(element, source_type, "dialog")
-        || element.find_attribute_by_name("popover").is_some()
+        || element.find_attribute_or_vue_binding("popover").is_some()
 }

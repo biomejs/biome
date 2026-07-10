@@ -6,7 +6,7 @@ use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TriviaPieceKind};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 
 /// Find the start position of the current line in source text.
 ///
@@ -173,6 +173,13 @@ impl<'source> MarkdownTokenSource<'source> {
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
+    }
+
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind.
+    pub fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.lexer.lexer_mut().set_relex_span(end.into(), kind);
+        self.lexer.re_lex(MarkdownReLexContext::Span)
     }
 
     /// Bump the current token using the LinkDefinition context.

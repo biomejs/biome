@@ -45,11 +45,12 @@ quote              = "1.0.14"
 schemars           = { workspace = true }
 
 [features]
-default   = ["console_error_panic_hook"]
-lang_md   = ["biome_service/lang_md"]
-lang_scss = ["biome_service/lang_scss"]
-lang_yaml = ["biome_service/lang_yaml"]
-unstable  = ["lang_md", "lang_scss", "lang_yaml"]
+default                      = ["console_error_panic_hook"]
+lang_md                      = ["biome_service/lang_md"]
+lang_scss                    = ["biome_service/lang_scss"]
+lang_yaml                    = ["biome_service/lang_yaml"]
+report_scss_exclusive_syntax = ["biome_service/report_scss_exclusive_syntax"]
+unstable                     = ["lang_md", "lang_scss", "lang_yaml", "report_scss_exclusive_syntax"]
 
 [lints]
 workspace = true

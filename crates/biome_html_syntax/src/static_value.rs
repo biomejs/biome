@@ -58,11 +58,25 @@ impl StaticValue {
             | Self::BigInt(token) => token.text_trimmed(),
             Self::String(token) => {
                 let text = token.text_trimmed();
-                if matches!(token.kind(), HtmlSyntaxKind::HTML_STRING_LITERAL) {
-                    // SAFETY: string literal token have a delimiters at the start and the end of the string
-                    return &text[1..text.len() - 1];
+                // Strip outer HTML attribute delimiter quotes
+                let inner = if text.len() >= 2
+                    && matches!(token.kind(), HtmlSyntaxKind::HTML_STRING_LITERAL)
+                {
+                    // SAFETY: delimiter is a single ASCII character at both ends
+                    &text[1..text.len() - 1]
+                } else {
+                    text
+                };
+                // Also strip JS string literal quotes (e.g. Vue binding :attr="'value'" yields inner = 'value')
+                if inner.len() >= 2
+                    && ((inner.starts_with('"') && inner.ends_with('"'))
+                        || (inner.starts_with('\'') && inner.ends_with('\'')))
+                {
+                    // SAFETY: delimiter is a single ASCII character at both ends
+                    &inner[1..inner.len() - 1]
+                } else {
+                    inner
                 }
-                text
             }
             Self::EmptyString(_) => "",
         }

@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -91,7 +91,7 @@ declare_lint_rule! {
 
 /// State to track whether the issue is aria-hidden on the anchor itself
 pub struct UseAnchorContentState {
-    aria_hidden_attribute: Option<HtmlAttribute>,
+    aria_hidden_attribute: Option<AnyHtmlAttribute>,
 }
 
 impl Rule for UseAnchorContent {
@@ -221,12 +221,13 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                     false
                 }
                 Some(name) if name.eq_ignore_ascii_case("input") => {
-                    let is_hidden = element.find_attribute_by_name("type").is_some_and(|attr| {
-                        attr.initializer()
-                            .and_then(|init| init.value().ok())
-                            .and_then(|value| value.string_value())
-                            .is_some_and(|s| s.eq_ignore_ascii_case("hidden"))
-                    });
+                    let is_hidden =
+                        element
+                            .find_attribute_or_vue_binding("type")
+                            .is_some_and(|attr| {
+                                attr.as_static_value()
+                                    .is_some_and(|s| s.text().eq_ignore_ascii_case("hidden"))
+                            });
                     !is_hidden
                 }
                 // Custom components (PascalCase) may render accessible content

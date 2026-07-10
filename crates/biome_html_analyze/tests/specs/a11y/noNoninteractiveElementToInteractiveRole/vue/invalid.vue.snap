@@ -83,6 +83,10 @@ expression: invalid.vue
 <td role="menuitem" />
 <tfoot role="menuitem" />
 <thead role="menuitem" />
+<!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
+<h1 :role="'button'"></h1>
+<main v-bind:role="'button'" />
+<ol :role="'menuitem'" />
 
 ```
 
@@ -1671,7 +1675,7 @@ invalid.vue:78:8 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
   > 78 │ <tfoot role="menuitem" />
        │        ^^^^^^^^^^^^^^^
     79 │ <thead role="menuitem" />
-    80 │ 
+    80 │ <!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
   
   i Replace tfoot with a div or a span.
   
@@ -1691,7 +1695,8 @@ invalid.vue:79:8 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
     78 │ <tfoot role="menuitem" />
   > 79 │ <thead role="menuitem" />
        │        ^^^^^^^^^^^^^^^
-    80 │ 
+    80 │ <!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
+    81 │ <h1 :role="'button'"></h1>
   
   i Replace thead with a div or a span.
   
@@ -1699,5 +1704,67 @@ invalid.vue:79:8 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  �
   
     79 │ <thead·role="menuitem"·/>
        │        ----------------  
+
+```
+
+```
+invalid.vue:81:5 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element h1 is non-interactive and should not have an interactive role.
+  
+    79 │ <thead role="menuitem" />
+    80 │ <!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
+  > 81 │ <h1 :role="'button'"></h1>
+       │     ^^^^^^^^^^^^^^^^
+    82 │ <main v-bind:role="'button'" />
+    83 │ <ol :role="'menuitem'" />
+  
+  i Replace h1 with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    81 │ <h1·:role="'button'"></h1>
+       │     ----------------      
+
+```
+
+```
+invalid.vue:82:7 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element main is non-interactive and should not have an interactive role.
+  
+    80 │ <!-- static Vue role bindings assigning interactive roles to non-interactive elements should also be flagged -->
+    81 │ <h1 :role="'button'"></h1>
+  > 82 │ <main v-bind:role="'button'" />
+       │       ^^^^^^^^^^^^^^^^^^^^^^
+    83 │ <ol :role="'menuitem'" />
+    84 │ 
+  
+  i Replace main with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    82 │ <main·v-bind:role="'button'"·/>
+       │       -----------------------  
+
+```
+
+```
+invalid.vue:83:5 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element ol is non-interactive and should not have an interactive role.
+  
+    81 │ <h1 :role="'button'"></h1>
+    82 │ <main v-bind:role="'button'" />
+  > 83 │ <ol :role="'menuitem'" />
+       │     ^^^^^^^^^^^^^^^^^^
+    84 │ 
+  
+  i Replace ol with a div or a span.
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    83 │ <ol·:role="'menuitem'"·/>
+       │     -------------------  
 
 ```

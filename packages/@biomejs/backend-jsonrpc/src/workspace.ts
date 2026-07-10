@@ -8436,7 +8436,14 @@ Default: `"it"`
 }
 export type UseDisposablesOptions = {};
 export type UseDomNodeTextContentOptions = {};
-export type UseDomQuerySelectorOptions = {};
+export interface UseDomQuerySelectorOptions {
+	/**
+	* A list of receiver identifiers to ignore.
+
+In the expression `document.querySelector('div')`, the receiver is `document`. 
+	 */
+	ignore?: string[];
+}
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
 /**
@@ -8482,6 +8489,10 @@ export interface UseNullishCoalescingOptions {
 	 * Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).
 	 */
 	ignoreMixedLogicalExpressions?: boolean;
+	/**
+	 * Whether to ignore `||` and `||=` operations whose non-nullish operand types are all primitives of the configured kinds. Accepts `true` for every primitive, or an object selecting `string`, `number`, `boolean`, `bigint` (default: none).
+	 */
+	ignorePrimitives?: IgnorePrimitives;
 	/**
 	 * Ignore ternary expressions that check for `null` or `undefined` (default: `false`).
 	 */
@@ -9226,6 +9237,9 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type IgnorePrimitives =
+	| boolean
+	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
 export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"

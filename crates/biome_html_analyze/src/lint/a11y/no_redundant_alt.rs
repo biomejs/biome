@@ -4,9 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, AnySvelteTemplateElement};
+use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement};
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::is_redundant_alt;
 use biome_rule_options::no_redundant_alt::NoRedundantAltOptions;
 
@@ -51,7 +51,7 @@ declare_lint_rule! {
 
 impl Rule for NoRedundantAlt {
     type Query = Ast<AnyHtmlTagElement>;
-    type State = AnyHtmlAttributeInitializer;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoRedundantAltOptions;
 
@@ -68,17 +68,23 @@ impl Rule for NoRedundantAlt {
             return None;
         }
 
-        let alt = node
-            .find_attribute_by_name("alt")?
-            .initializer()?
-            .value()
-            .ok()?;
+        let alt_attribute = node.find_attribute_or_vue_binding("alt")?;
 
-        match alt {
+        // For Vue static bindings (:alt="'image'"), use as_static_value()
+        if !matches!(alt_attribute, AnyHtmlAttribute::HtmlAttribute(_)) {
+            let value = alt_attribute.as_static_value()?;
+            return is_redundant_alt(value.text()).then_some(alt_attribute.range());
+        }
+
+        // For HTML attributes (including Svelte templates)
+        let alt_html_attribute = alt_attribute.as_html_attribute()?;
+        let initializer = alt_html_attribute.initializer()?.value().ok()?;
+
+        match initializer {
             AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_) => None,
             AnyHtmlAttributeInitializer::HtmlString(ref value) => {
                 let inner_string_text = value.inner_string_text().ok()?;
-                is_redundant_alt(inner_string_text.text()).then_some(alt)
+                is_redundant_alt(inner_string_text.text()).then_some(initializer.range())
             }
             AnyHtmlAttributeInitializer::SvelteTemplateAttributeValue(ref value) => value
                 .elements()
@@ -90,7 +96,7 @@ impl Rule for NoRedundantAlt {
                     AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => None,
                 })
                 .any(|t| is_redundant_alt(t.text_trimmed()))
-                .then_some(alt),
+                .then_some(initializer.range()),
             AnyHtmlAttributeInitializer::VueVForValue(_) => None,
         }
     }
@@ -99,7 +105,7 @@ impl Rule for NoRedundantAlt {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range(),
+                state,
                 markup! {
                     "Avoid the words \"image\", \"picture\", or \"photo\" in " <Emphasis>"img"</Emphasis>" element alt text."
                 },
