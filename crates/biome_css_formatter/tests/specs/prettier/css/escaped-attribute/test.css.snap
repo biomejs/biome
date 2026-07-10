@@ -39,7 +39,7 @@ long long long long long long long long long long long long"] {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,17 +1,19 @@
+@@ -1,22 +1,26 @@
 -div span[foo="bar short\
 +div
 +  span[foo="bar short\
@@ -48,8 +48,8 @@ long long long long long long long long long long long long"] {
  }
  
  /* Should not break before `span`, since it doesn't reach printWidth */
- div
--  span[foo="bar long long long\
+-div span[foo="bar long long long\
++div
 +span[foo="bar long long long\
  long long long long long long long long long long long long"] {
    color: red;
@@ -60,6 +60,14 @@ long long long long long long long long long long long long"] {
 +  &
 +    span[foo="bar short\
  short"] {
+     color: red;
+   }
+ 
+   /* Should not break before `span`, since it doesn't reach printWidth */
+-  & span[foo="bar long long long\
++  &
++    span[foo="bar long long long\
+ long long long long long long long long long long long long"] {
      color: red;
    }
 ```

@@ -133,6 +133,7 @@ impl SemanticEvent {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// let mut extractor = SemanticEventExtractor::default();
 /// for e in tree.syntax().preorder() {
@@ -575,7 +576,7 @@ impl SemanticEventExtractor {
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
-                        declaration_kind = JsDeclarationKind::HoistedValue;
+                        declaration_kind = JsDeclarationKind::Function;
                         let is_in_strict_mode = self
                             .scopes
                             .last()
@@ -587,8 +588,12 @@ impl SemanticEventExtractor {
                         };
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
-                    AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                    | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+                    AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_) => {
+                        declaration_kind = JsDeclarationKind::Function;
+                        hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
                     | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
                         declaration_kind = JsDeclarationKind::HoistedValue;
                         hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
@@ -1441,6 +1446,7 @@ impl Iterator for SemanticEventIterator {
 /// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
+/// use biome_languages::JsFileSource;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// for e in semantic_events(tree.syntax()) {
 ///     dbg!(e);

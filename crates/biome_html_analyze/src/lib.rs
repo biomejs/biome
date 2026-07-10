@@ -16,7 +16,7 @@ use crate::suppression_action::HtmlSuppressionAction;
 /// Services available to HTML lint rules.
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
-    pub module_db: Option<ProjectDatabase>,
+    pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -36,11 +36,13 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
-use biome_module_graph::ProjectDatabase;
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
+use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
+use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
@@ -66,10 +68,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = html_services.module_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         source_type,
         html_services,
@@ -176,7 +183,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_html_parser::parse_html;
-    use biome_html_syntax::HtmlFileSource;
+    use biome_languages::HtmlFileSource;
     use biome_rowan::TextRange;
     use std::slice;
 

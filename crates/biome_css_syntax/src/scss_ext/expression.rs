@@ -1,7 +1,7 @@
 use crate::{
     AnyCssExpression, AnyScssExpression, AnyScssExpressionItem, CssLanguage, CssSyntaxNode,
     CssSyntaxToken, ScssExpression, ScssIfAtRule, ScssKeywordArgument, ScssParenthesizedExpression,
-    ScssWhileAtRule, T,
+    ScssWhileAtRule,
 };
 use biome_rowan::{AstNode, AstNodeList};
 

@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::AnyHtmlAttribute;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
 use biome_string_case::StrLikeExtension;
@@ -46,7 +47,7 @@ declare_lint_rule! {
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     pub UseValidAriaValues {
-        version: "next",
+        version: "2.5.0",
         name: "useValidAriaValues",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("aria-proptypes").inspired()],
@@ -69,15 +70,7 @@ impl Rule for UseValidAriaValues {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();
 
-        // Only process plain HTML attributes with static values.
-        // Vue dynamic bindings (:aria-x="expr") are runtime expressions — skip.
-        let html_attr = match attr {
-            AnyHtmlAttribute::HtmlAttribute(a) => a,
-            AnyHtmlAttribute::AnyVueDirective(_) => return None,
-            _ => return None,
-        };
-
-        let name = extract_html_attribute_name(html_attr)?;
+        let name = attr.name()?;
         let is_html_file = ctx.source_type::<HtmlFileSource>().is_html();
 
         // Case-insensitive matching only for .html files.
@@ -89,13 +82,19 @@ impl Rule for UseValidAriaValues {
         };
 
         if let Ok(aria_property) = AriaAttribute::from_str(&name_ref) {
-            // For valueless attributes like <div aria-hidden>, treat as "true"
-            // per HTML spec (boolean attribute presence = true).
-            let value_text = html_attr.value();
-            let value_str = match &value_text {
-                Some(v) => v.text(),
-                None => "true",
+            let static_value = attr.as_static_value();
+            let value_str = if let Some(ref v) = static_value {
+                v.text()
+            } else {
+                // For HTML attributes with no initializer (e.g. bare `aria-hidden`),
+                // treat as "true" per HTML spec. For dynamic expressions and Vue
+                // bindings with non-literal values, skip validation.
+                match attr.as_html_attribute() {
+                    Some(html_attr) if html_attr.initializer().is_none() => "true",
+                    _ => return None,
+                }
             };
+
             if !aria_property.value_type().contains(value_str) {
                 return Some(UseValidAriaValuesState {
                     attribute_name: name,
@@ -168,8 +167,4 @@ impl Rule for UseValidAriaValues {
             "Use a valid value for the "<Emphasis>{attribute_name}</Emphasis>" attribute according to the "<Hyperlink href="https://www.w3.org/TR/wai-aria/#states_and_properties">"WAI-ARIA specification"</Hyperlink>"."
         }))
     }
-}
-
-fn extract_html_attribute_name(attr: &HtmlAttribute) -> Option<TokenText> {
-    Some(attr.name().ok()?.value_token().ok()?.token_text_trimmed())
 }

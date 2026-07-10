@@ -868,7 +868,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::TypeScriptNoShadow(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.suspicious.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     let options = conf.option_or_default();
                     group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
@@ -904,6 +904,21 @@ fn migrate_eslint_rule(
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
+        eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_svelte_unnecessary_state_wrap =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
                                 options: conf.option_or_default().into(),
                             },
                         ));

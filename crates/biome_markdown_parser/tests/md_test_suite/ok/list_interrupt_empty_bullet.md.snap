@@ -34,7 +34,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@43..44 "\n" [] [],
@@ -60,7 +59,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@41..42 "+" [] []
         3: MD_TEXTUAL@42..43
           0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@43..44
       0: NEWLINE@43..44 "\n" [] []
   2: EOF@44..44 "" [] []

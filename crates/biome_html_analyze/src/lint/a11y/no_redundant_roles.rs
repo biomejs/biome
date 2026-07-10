@@ -5,8 +5,11 @@ use biome_aria::AriaRoles;
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource, element_ext::AnyHtmlTagElement};
-use biome_rowan::{AstNode, BatchMutationExt, Text};
+use biome_html_syntax::{
+    AnyHtmlAttribute, element_ext::AnyHtmlTagElement, static_value::StaticValue,
+};
+use biome_languages::HtmlFileSource;
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
 use crate::HtmlRuleAction;
@@ -49,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantRoles {
-        version: "next",
+        version: "2.5.0",
         name: "noRedundantRoles",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").inspired(), RuleSource::HtmlEslint("no-redundant-role").same()],
@@ -78,9 +81,9 @@ impl Rule for NoRedundantRoles {
             }
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let trimmed = role_attribute_value.trim();
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_value = role_attribute.as_static_value()?;
+        let trimmed = role_attribute_value.text().trim();
         let explicit_role = AriaRole::from_roles(trimmed)?;
 
         if AriaRoles.get_implicit_role(node)? == explicit_role {
@@ -97,7 +100,7 @@ impl Rule for NoRedundantRoles {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let element_name = ctx.query().tag_name()?;
         let element_name = element_name.text();
-        let role_attribute = state.role_attribute_value.to_string();
+        let role_attribute = state.role_attribute_value.text();
         Some(RuleDiagnostic::new(
             rule_category!(),
             state.redundant_attribute.range(),
@@ -123,7 +126,7 @@ impl Rule for NoRedundantRoles {
 }
 
 pub struct RuleState {
-    redundant_attribute: HtmlAttribute,
-    role_attribute_value: Text,
+    redundant_attribute: AnyHtmlAttribute,
+    role_attribute_value: StaticValue,
     has_multiple_roles: bool,
 }

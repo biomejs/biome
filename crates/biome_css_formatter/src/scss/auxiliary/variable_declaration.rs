@@ -1,4 +1,3 @@
-use crate::comments::FormatCssLeadingComment;
 use crate::prelude::*;
 use crate::utils::comment_trivia::{
     has_block_comment_gap_before_token, has_source_gap_before_token,
@@ -8,7 +7,7 @@ use biome_css_syntax::{
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
-use biome_formatter::{FormatRefWithRule, format_args, write};
+use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssVariableDeclaration;
@@ -17,7 +16,6 @@ impl FormatNodeRule<ScssVariableDeclaration> for FormatScssVariableDeclaration {
     fn fmt_fields(&self, node: &ScssVariableDeclaration, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssVariableDeclarationFields {
             name,
-            value,
             modifiers,
             semicolon_token,
             ..
@@ -29,7 +27,7 @@ impl FormatNodeRule<ScssVariableDeclaration> for FormatScssVariableDeclaration {
 
         write!(f, [name.format()])?;
         variable_comments.fmt_colon_boundary(f)?;
-        write!(f, [space(), value.format()])?;
+        variable_comments.fmt_value_boundary(f)?;
 
         if !modifiers.is_empty() {
             write!(f, [modifiers.format()])?;
@@ -51,8 +49,8 @@ impl FormatNodeRule<ScssVariableDeclaration> for FormatScssVariableDeclaration {
         _node: &ScssVariableDeclaration,
         _f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        // No-op: `fmt_colon_boundary` prints `$color/* c */ : red;` before `:`,
-        // not at the declaration end.
+        // No-op: boundary helpers print `$color/* c */: red;` and
+        // `$font: /* c */ Arial;` around `:`, not at the declaration end.
         Ok(())
     }
 }
@@ -67,33 +65,40 @@ impl<'a> ScssVariableDeclarationComments<'a> {
         Self { node }
     }
 
-    /// Prints `/* note */ $color: red;` as a comment, then the declaration.
+    /// Writes declaration-leading comments on their own lines.
+    ///
+    /// ```scss
+    /// /* note */
+    /// $color: red;
+    /// ```
     fn fmt_leading_comments(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let comments = f.comments().clone();
         let leading_comments = comments.leading_comments(self.node.syntax());
 
         for comment in leading_comments {
-            let format_comment = FormatRefWithRule::new(comment, FormatCssLeadingComment);
-            write!(f, [format_comment])?;
+            write!(f, [format_dangling_comment(comment)])?;
 
             if comment.lines_after() > 1 {
                 write!(f, [empty_line()])?;
             } else {
                 write!(f, [hard_line_break()])?;
             }
-
-            // This override fully prints these leading comments.
-            comment.mark_formatted();
         }
 
         Ok(())
     }
 
-    /// Writes `$color/* c */ : red;` name/colon comments.
+    /// Writes comments between the variable name and `:`.
+    ///
+    /// ```scss
+    /// $color/* c */: red;
+    /// ```
     fn fmt_colon_boundary(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let colon = self.node.colon_token();
         let comments = f.comments().clone();
-        let colon_boundary_comments = comments.dangling_comments(self.node.syntax());
+        let dangling_comments = comments.dangling_comments(self.node.syntax());
+        let value_boundary_start = self.value_boundary_comment_start(dangling_comments);
+        let (colon_boundary_comments, _) = dangling_comments.split_at(value_boundary_start);
 
         if colon_boundary_comments.is_empty() {
             return write!(f, [colon.format()]);
@@ -126,7 +131,7 @@ impl<'a> ScssVariableDeclarationComments<'a> {
         }
     }
 
-    /// Writes one name/colon comment, as in `$color/* c */ : red;`.
+    /// Writes one comment between the variable name and `:`.
     fn fmt_name_boundary_comment(
         &self,
         comment: &SourceComment<CssLanguage>,
@@ -141,7 +146,99 @@ impl<'a> ScssVariableDeclarationComments<'a> {
         }
     }
 
-    /// Writes `;`, preserving `$x: red !default /* c */ ;`.
+    /// Writes comments between `:` and the variable value.
+    ///
+    /// ```scss
+    /// $font:
+    ///   // c
+    ///   Arial;
+    /// ```
+    fn fmt_value_boundary(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        let value = self.node.value();
+        let comments = f.comments().clone();
+        let dangling_comments = comments.dangling_comments(self.node.syntax());
+        let value_boundary_start = self.value_boundary_comment_start(dangling_comments);
+        let (_, value_boundary_comments) = dangling_comments.split_at(value_boundary_start);
+
+        if value_boundary_comments.is_empty() {
+            return write!(f, [space(), value.format()]);
+        }
+
+        let should_break_before_value = value_boundary_comments
+            .iter()
+            .any(|comment| comment.kind().is_line());
+
+        for comment in value_boundary_comments {
+            self.fmt_value_boundary_comment(comment, f)?;
+        }
+
+        if should_break_before_value {
+            write!(f, [hard_line_break(), value.format()])
+        } else {
+            write!(f, [space(), value.format()])
+        }
+    }
+
+    /// Returns `true` for comments between `:` and the value:
+    ///
+    /// ```scss
+    /// $font:
+    ///   // c
+    ///   Arial;
+    /// ```
+    ///
+    /// `$font: Arial; // c` stays a trailing declaration comment.
+    fn is_value_boundary_comment(&self, comment: &SourceComment<CssLanguage>) -> bool {
+        let Ok(colon) = self.node.colon_token() else {
+            return false;
+        };
+
+        let Some(value_start) = self
+            .node
+            .value()
+            .ok()
+            .and_then(|value| value.syntax().first_token())
+            .map(|token| token.text_trimmed_range().start())
+        else {
+            return false;
+        };
+
+        let comment_start = comment.piece().text_range().start();
+
+        comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+    }
+
+    /// Writes one comment between `:` and the variable value.
+    fn fmt_value_boundary_comment(
+        &self,
+        comment: &SourceComment<CssLanguage>,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        let formatted = format_dangling_comment(comment);
+
+        if comment.lines_before() > 0 {
+            if comment.kind().is_line() {
+                return write!(f, [indent(&format_args![hard_line_break(), formatted])]);
+            }
+
+            return write!(
+                f,
+                [dedent_to_root(&format_args![hard_line_break(), formatted])]
+            );
+        }
+
+        write!(f, [space(), formatted])
+    }
+
+    /// Finds the first dangling comment between `:` and the value.
+    fn value_boundary_comment_start(&self, comments: &[SourceComment<CssLanguage>]) -> usize {
+        comments
+            .iter()
+            .position(|comment| self.is_value_boundary_comment(comment))
+            .unwrap_or(comments.len())
+    }
+
+    /// Writes the declaration `;`, preserving `$x: red !default /* c */ ;`.
     fn fmt_semicolon_boundary(
         &self,
         semicolon_token: Option<CssSyntaxToken>,
@@ -156,7 +253,7 @@ impl<'a> ScssVariableDeclarationComments<'a> {
 
             write!(f, [semicolon.format()])
         } else {
-            Ok(())
+            write!(f, [token(";")])
         }
     }
 }

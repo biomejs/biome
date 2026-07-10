@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_rowan::AstNode;
 use biome_yaml_syntax::{YamlFlowYamlNode, YamlFlowYamlNodeFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlFlowYamlNode;
@@ -11,11 +10,20 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
             content,
         } = node.as_fields();
 
-        if properties.len() > 0 {
-            // TODO: Implement formatting for flow YAML nodes with tag or anchor properties.
-            return format_verbatim_node(node.syntax()).fmt(f);
+        write!(f, [properties.format()])?;
+
+        if let Some(content) = content {
+            if !properties.is_empty() {
+                if get_lines_before(content.syntax()) > 0 {
+                    write!(f, [hard_line_break()])?;
+                } else {
+                    write!(f, [space()])?;
+                }
+            }
+
+            write!(f, [content.format()])?;
         }
 
-        write!(f, [content.format()])
+        Ok(())
     }
 }

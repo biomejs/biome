@@ -77,11 +77,12 @@ impl TransformSourceMap {
             self.source_offset(transformed_range.end(), RangePosition::End),
         );
 
+        let source_text_end = self.source_text.offset + self.source_text.text.text_len();
         debug_assert!(
-            range.end() <= self.source_text.text.text_len() - self.source_text.offset,
+            range.end() <= source_text_end,
             "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.",
             range,
-            self.source_text.text.text_len() - self.source_text.offset
+            source_text_end
         );
         range
     }
@@ -211,8 +212,8 @@ impl TransformSourceMap {
     /// in the original, untransformed source code.
     ///
     /// The printer creates a source map that allows mapping positions from the newly formatted document
-    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::Text]
-    /// and [crate::FormatElement::LocatedTokenText] are relative to the transformed tree
+    /// back to the locations of the tree. However, the source positions stored in [crate::FormatElement::MappedText]
+    /// and [crate::FormatElement::MappedLocatedTokenText] are relative to the transformed tree
     /// and not the original tree passed to [crate::format_node].
     ///
     /// This function re-maps the positions from the positions in the transformed tree back to the positions

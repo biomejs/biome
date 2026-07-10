@@ -68,7 +68,8 @@ pub(crate) fn format_as_or_satisfies_expression(
 #[cfg(test)]
 mod tests {
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsFileSource, TsAsExpression};
+    use biome_js_syntax::TsAsExpression;
+    use biome_languages::JsFileSource;
 
     #[test]
     fn needs_parentheses() {

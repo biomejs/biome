@@ -134,7 +134,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedAttributes {
-        version: "next",
+        version: "2.5.0",
         name: "useSortedAttributes",
         language: "html",
         recommended: false,
@@ -246,11 +246,7 @@ impl Rule for UseSortedAttributes {
 
 fn is_v_bind_object(attr: &AnyHtmlAttribute) -> bool {
     if let AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(dir)) = attr {
-        if let Ok(attr_name) = dir.name_token().as_ref().map(|token| token.text_trimmed()) {
-            attr_name == "v-bind" && dir.arg().is_none()
-        } else {
-            false
-        }
+        dir.is_binding() && dir.arg().is_none()
     } else {
         false
     }

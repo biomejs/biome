@@ -21,6 +21,7 @@ serde                  = { workspace = true, features = ["derive"], optional = t
 biome_configuration   = { path = "../biome_configuration" }
 biome_formatter_test  = { path = "../biome_formatter_test", features = ["lang_md"] }
 biome_fs              = { path = "../biome_fs" }
+biome_languages       = { path = "../biome_languages", features = ["lang_md"] }
 biome_markdown_parser = { path = "../biome_markdown_parser" }
 biome_parser          = { path = "../biome_parser" }
 biome_service         = { path = "../biome_service", features = ["lang_md"] }

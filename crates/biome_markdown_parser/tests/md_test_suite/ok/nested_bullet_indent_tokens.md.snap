@@ -37,15 +37,11 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@4..5 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@5..6 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@5..7 "  " [] [],
                                 },
                             ],
                         },
@@ -68,7 +64,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@11..12 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -104,13 +99,10 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..4 "ff" [] []
                 1: MD_TEXTUAL@4..5
                   0: MD_TEXTUAL_LITERAL@4..5 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@5..7
               0: MD_INDENT_TOKEN_LIST@5..7
-                0: MD_INDENT_TOKEN@5..6
-                  0: MD_INDENT_CHAR@5..6 " " [] []
-                1: MD_INDENT_TOKEN@6..7
-                  0: MD_INDENT_CHAR@6..7 " " [] []
+                0: MD_INDENT_TOKEN@5..7
+                  0: MD_INDENT_CHAR@5..7 "  " [] []
             2: MD_BULLET_LIST_ITEM@7..12
               0: MD_BULLET_LIST@7..12
                 0: MD_BULLET@7..12
@@ -126,7 +118,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@9..11 "ff" [] []
                         1: MD_TEXTUAL@11..12
                           0: MD_TEXTUAL_LITERAL@11..12 "\n" [] []
-                      1: (empty)
   2: EOF@12..12 "" [] []
 
 ```

@@ -1,4 +1,5 @@
 use crate::{diagnostics::LspError, session::Session};
+use biome_service::Workspace;
 use biome_service::workspace::{
     FeaturesBuilder, GetSyntaxTreeParams, IgnoreKind, PathIsIgnoredParams,
 };
@@ -22,18 +23,23 @@ pub(crate) fn syntax_tree(session: &Session, url: &Uri) -> Result<Option<String>
     };
     let features = FeaturesBuilder::new().build();
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
+    if session
+        .workspace_for_request()
+        .is_path_ignored(PathIsIgnoredParams {
+            path: path.clone(),
+            is_dir: false,
+            project_key: doc.project_key,
+            features,
+            ignore_kind: IgnoreKind::Ancestors,
+        })?
+    {
         return Ok(None);
     }
-    let syntax_tree = session.workspace.get_syntax_tree(GetSyntaxTreeParams {
-        project_key: doc.project_key,
-        path,
-    })?;
+    let syntax_tree = session
+        .workspace_for_request()
+        .get_syntax_tree(GetSyntaxTreeParams {
+            project_key: doc.project_key,
+            path,
+        })?;
     Ok(Some(syntax_tree.ast))
 }

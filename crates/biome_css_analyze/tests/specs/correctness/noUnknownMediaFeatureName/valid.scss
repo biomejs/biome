@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+@media #{"(unknown-feature)"} {}
+
+@media not #{"(unknown-feature)"} {}
+
+@media (width) and #{"(unknown-feature)"} {}

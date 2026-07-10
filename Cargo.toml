@@ -13,12 +13,13 @@ keywords   = ["formatter", "linter", "parser"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-anyhow                       = "1.0.102"
+anyhow                       = "1.0.103"
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
+biome_workspace_db           = { path = "./crates/biome_workspace_db" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -83,6 +84,7 @@ biome_markdown_syntax        = { path = "./crates/biome_markdown_syntax", versio
 biome_markup                 = { path = "./crates/biome_markup", version = "0.5.7" }
 biome_migrate                = { path = "./crates/biome_migrate" }
 biome_module_graph           = { path = "./crates/biome_module_graph", version = "0.0.1" }
+biome_module_replacements    = { path = "./crates/biome_module_replacements", version = "0.5.7" }
 biome_package                = { path = "./crates/biome_package", version = "0.5.7" }
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
@@ -106,10 +108,11 @@ biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version =
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
+biome_languages              = { path = "./crates/biome_languages", version = "0.1.0" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.26", features = ["derive"] }
-camino                       = "1.2.2"
+camino                       = "1.2.4"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.4"
@@ -124,8 +127,8 @@ grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.0" }
-insta                        = "1.47.2"
-jiff                         = "0.2.28"
+insta                        = "1.48.0"
+jiff                         = "0.2.31"
 libc                         = "0.2.186"
 mimalloc                     = "0.1.48"
 notify                       = "8.2.0"
@@ -139,17 +142,17 @@ quickcheck                   = "1.1.0"
 quickcheck_macros            = "1.2.0"
 quote                        = "1.0.45"
 rayon                        = "1.12.0"
-regex                        = "1.12.3"
+regex                        = "1.12.4"
 reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.2"
-salsa                        = "0.26.2"
+salsa                        = "0.27.2"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.150"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.15.1", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"
@@ -169,6 +172,7 @@ uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
+parking_lot                  = { version = "0.12.5" }
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }
@@ -242,8 +246,9 @@ zero_sized_map_values             = "warn"
 ambiguous-negative-literals    = "warn"
 dead_code                      = "warn"
 explicit-outlives-requirements = "warn"
+# that's for salsa
 impl-trait-overcaptures        = "warn"
-impl-trait-redundant-captures  = "warn"
+impl-trait-redundant-captures  = "allow"
 missing-unsafe-on-extern       = "warn"
 redundant-lifetimes            = "warn"
 trivial_numeric_casts          = "warn"

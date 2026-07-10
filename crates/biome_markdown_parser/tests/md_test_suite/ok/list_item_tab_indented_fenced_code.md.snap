@@ -40,7 +40,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@7..8 "\n" [] [],
@@ -61,10 +60,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                                 },
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@13..14 "\t" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@14..23 "code body" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@13..23 "\tcode body" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
@@ -110,7 +106,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
                 1: MD_TEXTUAL@6..7
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
             2: MD_CONTINUATION_INDENT@8..9
@@ -124,11 +119,9 @@ MdDocument {
               3: MD_INLINE_ITEM_LIST@12..24
                 0: MD_TEXTUAL@12..13
                   0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-                1: MD_TEXTUAL@13..14
-                  0: MD_TEXTUAL_LITERAL@13..14 "\t" [] []
-                2: MD_TEXTUAL@14..23
-                  0: MD_TEXTUAL_LITERAL@14..23 "code body" [] []
-                3: MD_TEXTUAL@23..24
+                1: MD_TEXTUAL@13..23
+                  0: MD_TEXTUAL_LITERAL@13..23 "\tcode body" [] []
+                2: MD_TEXTUAL@23..24
                   0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
               4: MD_INDENT_TOKEN_LIST@24..25
                 0: MD_INDENT_TOKEN@24..25

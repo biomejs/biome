@@ -6,7 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS, SymbolName, find_js_exported_symbol,
+    JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS, SymbolFromModuleInfo,
+    find_js_exported_symbol,
 };
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
@@ -269,8 +270,7 @@ fn get_unresolved_imports_from_module_source(
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
     find_js_exported_symbol(
         options.module_db,
-        options.target_info,
-        SymbolName::new(options.module_db, import_name.text()),
+        SymbolFromModuleInfo::new(options.module_db, import_name.text(), options.target_info),
     )
     .is_some()
 }

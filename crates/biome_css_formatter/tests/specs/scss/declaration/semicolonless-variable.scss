@@ -1,0 +1,11 @@
+@if true {
+  $color: red
+}
+
+@if false {
+  $newKey: ($key: ( $theme-name: $value ))
+}
+
+$map: (
+"a": 1,
+)

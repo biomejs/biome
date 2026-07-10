@@ -3,8 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
@@ -48,7 +49,7 @@ declare_lint_rule! {
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
     ///
     pub NoAriaHiddenOnFocusable {
-        version: "next",
+        version: "2.5.0",
         name: "noAriaHiddenOnFocusable",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable").inspired(), RuleSource::HtmlEslint("no-aria-hidden-on-focusable").same()],
@@ -59,7 +60,7 @@ declare_lint_rule! {
 }
 
 pub struct NoAriaHiddenOnFocusableState {
-    aria_hidden_attribute: HtmlAttribute,
+    aria_hidden_attribute: AnyHtmlAttribute,
 }
 
 impl Rule for NoAriaHiddenOnFocusable {
@@ -75,10 +76,11 @@ impl Rule for NoAriaHiddenOnFocusable {
 
         // Tabindex overrides native focusability: negative removes from tab order,
         // non-negative makes the element focusable regardless of element type.
-        if let Some(tabindex_attr) = element.find_attribute_by_name("tabindex")
-            && let Some(tabindex_value) = get_tabindex_value(&tabindex_attr)
+        if let Some(tabindex_attr) = element.find_attribute_or_vue_binding("tabindex")
+            && let Some(tabindex_sv) = tabindex_attr.as_static_value()
+            && let Ok(num) = tabindex_sv.text().trim().parse::<i32>()
         {
-            if tabindex_value < 0 {
+            if num < 0 {
                 return None;
             }
             return Some(NoAriaHiddenOnFocusableState {
@@ -125,16 +127,6 @@ impl Rule for NoAriaHiddenOnFocusable {
     }
 }
 
-/// Parses the tabindex attribute value as an integer.
-///
-/// Returns `None` if the attribute has no value or cannot be parsed as an integer.
-/// Non-integer values (e.g., `tabindex="abc"`) are ignored and treated as if
-/// tabindex was not set.
-fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
-    let value = attribute.value()?;
-    value.trim().parse::<i32>().ok()
-}
-
 /// Returns whether the element is natively focusable per the HTML spec.
 ///
 /// Returns `Some(true)` when the element is one of:
@@ -148,7 +140,7 @@ fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
 fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<bool> {
     // <a> and <area> are only focusable when they have an href attribute
     if (is_html_tag(element, source_type, "a") || is_html_tag(element, source_type, "area"))
-        && element.find_attribute_by_name("href").is_some()
+        && element.find_attribute_or_vue_binding("href").is_some()
     {
         return Some(true);
     }
@@ -166,9 +158,9 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
     // <input> is focusable unless type="hidden"
     if is_html_tag(element, source_type, "input") {
         let is_hidden = element
-            .find_attribute_by_name("type")
-            .and_then(|attr| attr.value())
-            .is_some_and(|value| value.trim().eq_ignore_ascii_case("hidden"));
+            .find_attribute_or_vue_binding("type")
+            .and_then(|attr| attr.as_static_value())
+            .is_some_and(|value| value.text().trim().eq_ignore_ascii_case("hidden"));
         return Some(!is_hidden);
     }
 
@@ -190,11 +182,11 @@ fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSourc
 /// Ref: <https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable>
 fn has_contenteditable_true(element: &AnyHtmlTagElement) -> bool {
     element
-        .find_attribute_by_name("contenteditable")
-        .is_some_and(|attr| match attr.value() {
+        .find_attribute_or_vue_binding("contenteditable")
+        .is_some_and(|attr| match attr.as_static_value() {
             None => true, // bare attribute = True state per HTML spec
             Some(value) => {
-                let trimmed = value.trim();
+                let trimmed = value.text().trim();
                 trimmed.is_empty()
                     || trimmed.eq_ignore_ascii_case("true")
                     || trimmed.eq_ignore_ascii_case("plaintext-only")

@@ -41,7 +41,7 @@ info: yaml/json/trailing-comma/json.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,24 +1,26 @@
+@@ -1,12 +1,15 @@
  [
    {
      "object-does-not-fit-within-print-width": "------",
@@ -59,27 +59,7 @@ info: yaml/json/trailing-comma/json.yml
 +    "TEST": "comma NOT here — but object's now a string due to '>'"
    },
    [
--    "object-does-not-fit-within-print-width",
--    "------",
--    "TEST",
--    "comma IS added here",
-+    "object-does-not-fit-within-print-width", "------",
-+    "TEST", "comma IS added here"
-   ],
--  ["object-fits-within-print-width", "", "TEST", "comma NOT here"],
-   [
--    "object-does-not-fit-within-print-width",
--    "------",
--    "TEST",
--    "comma NOT here — but object's now a string due to '>'",
-+    "object-fits-within-print-width", "",
-+    "TEST", "comma NOT here"
-   ],
-+  [
-+    "object-does-not-fit-within-print-width", "------",
-+    "TEST", "comma NOT here — but object's now a string due to '>'"
-+  ]
- ]
+     "object-does-not-fit-within-print-width",
 ```
 
 # Output
@@ -99,16 +79,17 @@ info: yaml/json/trailing-comma/json.yml
     "TEST": "comma NOT here — but object's now a string due to '>'"
   },
   [
-    "object-does-not-fit-within-print-width", "------",
-    "TEST", "comma IS added here"
+    "object-does-not-fit-within-print-width",
+    "------",
+    "TEST",
+    "comma IS added here",
   ],
+  ["object-fits-within-print-width", "", "TEST", "comma NOT here"],
   [
-    "object-fits-within-print-width", "",
-    "TEST", "comma NOT here"
+    "object-does-not-fit-within-print-width",
+    "------",
+    "TEST",
+    "comma NOT here — but object's now a string due to '>'",
   ],
-  [
-    "object-does-not-fit-within-print-width", "------",
-    "TEST", "comma NOT here — but object's now a string due to '>'"
-  ]
 ]
 ```

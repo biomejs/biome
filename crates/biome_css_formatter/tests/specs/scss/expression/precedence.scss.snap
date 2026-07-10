@@ -6,6 +6,7 @@ info: scss/expression/precedence.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $expr1:$a+$b*$c;
 
 $expr2:(
@@ -116,6 +117,7 @@ $expr24:$a/
 # Formatted
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 $expr1: $a + $b * $c;
 
 $expr2: ($a + $b) * $c;
@@ -123,9 +125,9 @@ $expr2: ($a + $b) * $c;
 $expr3: -$a + $b;
 $expr4: not $a and $b;
 
-$expr5: $a== $b or $c!= $d;
+$expr5: $a == $b or $c != $d;
 
-$expr6: $a>= $b and not($c<=$d);
+$expr6: $a >= $b and not($c <= $d);
 $expr7: $a + $b + $c * $d / $e % $f;
 
 $expr8: ($a + $b) * ($c - $d) / $e;
@@ -139,7 +141,7 @@ $expr12: ($a + $b) * $c + $d / ($e - $f);
 $expr13: -($a + $b) * $c;
 $expr14: $a and $b or $c and $d;
 
-$expr15: $a!=($b + $c * $d);
+$expr15: $a != ($b + $c * $d);
 
 $expr16: $a + $b / $c - $d * $e + $f;
 
@@ -147,9 +149,9 @@ $expr17: 1 + 2 * 3 - 4 / 5;
 $expr18: -1 + 2;
 $expr19: ($a + $b) * ($c + $d) / ($e - $f);
 
-$expr20: $a== $b and $c== $d or $e;
+$expr20: $a == $b and $c == $d or $e;
 
-$expr21: not($a == $b or $c== $d);
+$expr21: not($a == $b or $c == $d);
 
 $expr22: $a or $b and $c or $d;
 

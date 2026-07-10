@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseIncludes {
-        version: "next",
+        version: "2.5.0",
         name: "useIncludes",
         language: "js",
         recommended: false,

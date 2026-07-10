@@ -1,11 +1,13 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/interpolation/3943.scss
 ---
 
 # Input
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 .class-#{$var} {
   #{$var}: #7b3d66;
   #{$attr}-color: blue;
@@ -134,23 +136,26 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 ```diff
 --- Prettier
 +++ Biome
-@@ -66,10 +66,7 @@
-   }
- }
- 
--$icons:
--  wifi "\600",
--  wifi-hotspot "\601",
--  weather "\602";
-+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
- 
- @each $icon in $icons {
-   .icon-#{nth($icon, 1)},
+@@ -1,3 +1,4 @@
++// Biome intentionally normalizes spaces around SCSS binary operators.
+ .class-#{$var} {
+   #{$var}: #7b3d66;
+   #{$attr}-color: blue;
+@@ -8,7 +9,7 @@
+   height: 1#{$var};
+   width: calc(100% - #{$sidebar-width});
+   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
+-  font: #{$font-size}/#{$line-height};
++  font: #{$font-size} / #{$line-height};
+   content: "I have #{8 + 2} books on SASS!";
+   border: #{$var} #{$var} #{$var};
+   filter: #{$var}#{$var}#{$var};
 ```
 
 # Output
 
 ```scss
+// Biome intentionally normalizes spaces around SCSS binary operators.
 .class-#{$var} {
   #{$var}: #7b3d66;
   #{$attr}-color: blue;
@@ -161,7 +166,7 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
   height: 1#{$var};
   width: calc(100% - #{$sidebar-width});
   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
-  font: #{$font-size}/#{$line-height};
+  font: #{$font-size} / #{$line-height};
   content: "I have #{8 + 2} books on SASS!";
   border: #{$var} #{$var} #{$var};
   filter: #{$var}#{$var}#{$var};
@@ -219,7 +224,10 @@ $foundation-dir: "foundation";
   }
 }
 
-$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+$icons:
+  wifi "\600",
+  wifi-hotspot "\601",
+  weather "\602";
 
 @each $icon in $icons {
   .icon-#{nth($icon, 1)},
@@ -231,6 +239,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 
 # Lines exceeding max width of 80 characters
 ```
-   48: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
-   49: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+   49: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+   50: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
 ```

@@ -1,15 +1,15 @@
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-use crate::file_handlers::DocumentFileSource;
 use crate::settings::SettingsWithEditor;
 use crate::workspace::{PatternId, SearchLanguage, SearchQuery};
-use biome_css_syntax::TextRange;
 use biome_fs::BiomePath;
 use biome_grit_patterns::{
     CompilePatternOptions, CssTargetLanguage, GritQuery, GritQueryEffect, GritTargetFile,
     GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage, compile_pattern_with_options,
 };
+use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
+use biome_rowan::TextRange;
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 

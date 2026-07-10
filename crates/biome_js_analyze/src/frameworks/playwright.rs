@@ -463,7 +463,7 @@ pub(crate) fn has_string_property(obj_expr: &JsObjectExpression, key: &str, valu
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn get_callee(source: &str) -> AnyJsExpression {
         let parsed = parse(

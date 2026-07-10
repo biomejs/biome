@@ -6,4 +6,5 @@
 	<input type="text" autocomplete="home url" />
 	<Bar autocomplete="baz"></Bar>
 	<Input type="text" autocomplete="baz" />
+	<Input type="text" autoComplete="baz" />
 </>

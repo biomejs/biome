@@ -2,10 +2,10 @@ use biome_formatter::TrailingNewline;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_service::workspace::{
-    ChangeFileParams, DocumentFileSource, FileContent, FormatFileParams, GetFormatterIRParams,
-    OpenFileParams, OpenProjectParams, server,
+    ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
+    OpenProjectParams, server,
 };
 use std::sync::Arc;
 
@@ -99,7 +99,7 @@ fn test_trailing_newline_enabled() {
     let options =
         JsFormatOptions::new(source_type).with_trailing_newline(TrailingNewline::from(true));
 
-    let doc = format_node(options, &tree.syntax(), false).unwrap();
+    let doc = format_node(options, &tree.syntax(), Vec::new()).unwrap();
     let result = doc.print().unwrap();
 
     // With trailing newline enabled (default), should end with newline
@@ -117,7 +117,7 @@ fn test_trailing_newline_disabled() {
     let options =
         JsFormatOptions::new(source_type).with_trailing_newline(TrailingNewline::from(false));
 
-    let doc = format_node(options, &tree.syntax(), false).unwrap();
+    let doc = format_node(options, &tree.syntax(), Vec::new()).unwrap();
     let result = doc.print().unwrap();
 
     // With trailing newline disabled, should NOT end with newline

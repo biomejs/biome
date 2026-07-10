@@ -1,11 +1,11 @@
 use biome_formatter::{IndentWidth, LineEnding, LineWidth};
 use biome_formatter_test::TestFormatLanguage;
+use biome_languages::{DocumentFileSource, yaml::YamlFileSource};
 use biome_parser::AnyParse;
 use biome_service::settings::Settings;
-use biome_service::workspace::DocumentFileSource;
 use biome_yaml_formatter::{YamlFormatContext, YamlFormatLanguage, YamlFormatOptions};
 use biome_yaml_parser::parse_yaml;
-use biome_yaml_syntax::{YamlFileSource, YamlLanguage};
+use biome_yaml_syntax::YamlLanguage;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]

@@ -10,6 +10,14 @@ info: markdown/inline_image.md
 
 ![alt text](image.png "title")
 
+![alt text](image.png "")
+
+![alt text](image.png '')
+
+![alt text](image.png " ")
+
+![alt text](image.png ' ')
+
 ![](image.png)
 
 ![alt text](image.png "title with spaces")
@@ -36,6 +44,10 @@ info: markdown/inline_image.md
 
 ![alt with `code`](<url>)
 
+![encoded](https://www.google.fr/()foo->bar)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
+
 ```
 
 
@@ -45,6 +57,14 @@ info: markdown/inline_image.md
 ![alt text](image.png)
 
 ![alt text](image.png "title")
+
+![alt text](image.png)
+
+![alt text](image.png)
+
+![alt text](image.png " ")
+
+![alt text](image.png ' ')
 
 ![](image.png)
 
@@ -72,9 +92,13 @@ info: markdown/inline_image.md
 
 ![alt with `code`](url)
 
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
+
+![encoded](<https://www.google.fr/()foo-%3Ebar>)
+
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   23: ![This is a long alt text that describes the image in great detail for accessibility purposes](https://example.com/very/long/path/to/some/deeply/nested/image.png "And a long title too")
+   31: ![This is a long alt text that describes the image in great detail for accessibility purposes](https://example.com/very/long/path/to/some/deeply/nested/image.png "And a long title too")
 ```

@@ -45,6 +45,14 @@ impl MdBulletListItem {
         )
     }
 }
+impl MdCodeContent {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl MdContinuationIndent {
     pub fn with_indent(self, element: MdIndentTokenList) -> Self {
         Self::unwrap_cast(
@@ -168,14 +176,14 @@ impl MdHtmlBlock {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_content(self, element: MdInlineItemList) -> Self {
+    pub fn with_content(self, element: MdHtmlContent) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MdIndent {
+impl MdHtmlContent {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -478,12 +486,6 @@ impl MdParagraph {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_hard_line(self, element: Option<MdHardLine>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
 }
 impl MdQuote {
     pub fn with_prefix(self, element: MdQuotePrefix) -> Self {
@@ -616,14 +618,6 @@ impl MdSetextHeader {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MdSoftBreak {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

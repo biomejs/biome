@@ -35,7 +35,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
                 f,
                 [format_replaced(
                     &self.token,
-                    &text(&lowercase, self.token.text_trimmed_range().start()),
+                    &text(&lowercase, Some(self.token.text_trimmed_range().start())),
                 )]
             ),
         }
@@ -330,7 +330,7 @@ impl Format<CssFormatContext> for FormatDimensionUnit {
                         f,
                         [format_replaced(
                             &self.token,
-                            &text(&uppercase, self.token.text_trimmed_range().start()),
+                            &text(&uppercase, Some(self.token.text_trimmed_range().start())),
                         )]
                     )
                 } else {
@@ -345,7 +345,7 @@ impl Format<CssFormatContext> for FormatDimensionUnit {
                         &self.token,
                         &text(
                             &map_dimension_unit(lowercase.as_str()).unwrap_or(lowercase),
-                            self.token.text_trimmed_range().start()
+                            Some(self.token.text_trimmed_range().start()),
                         ),
                     )]
                 )

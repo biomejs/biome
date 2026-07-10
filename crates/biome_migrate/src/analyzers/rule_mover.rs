@@ -52,6 +52,10 @@ const RULE_RENAMING: &[(&str, RuleName)] = &[
     ("useUniqueGraphqlOperationName", RuleName::NoDuplicateGraphqlOperationName),
     ("useUniqueInputFieldNames", RuleName::NoDuplicateInputFieldNames),
     ("useUniqueVariableNames", RuleName::NoDuplicateVariableNames),
+    ("noFloatingClasses", RuleName::NoUnusedInstantiation),
+    ("noMultiStr", RuleName::NoMultilineString),
+    ("useFind", RuleName::UseArrayFind),
+    ("useSpread", RuleName::UseSpreadOverApply)
 ];
 
 /// Assist actions that have been renamed.
@@ -248,6 +252,8 @@ impl Rule for RuleMover {
             let mut is_rule_migrated = false;
             for elt in old_list.elements() {
                 let node = elt.node.ok()?;
+                let trailing_separator = elt.trailing_separator.ok()?;
+                last_has_separator = trailing_separator.is_some();
                 if let Some(name) = node.name().ok().and_then(|name| name.inner_string_text()) {
                     if name.text() == new_rule_name {
                         // This happens when:
@@ -260,8 +266,6 @@ impl Rule for RuleMover {
                         continue;
                     }
                 }
-                let trailing_separator = elt.trailing_separator.ok()?;
-                last_has_separator = trailing_separator.is_some();
                 new_elements.push((node, trailing_separator));
             }
             if !is_rule_migrated {

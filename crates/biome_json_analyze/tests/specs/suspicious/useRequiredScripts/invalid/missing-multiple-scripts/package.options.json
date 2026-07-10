@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"useRequiredScripts": {
+					"level": "error",
+					"options": {
+						"requiredScripts": ["test", "build", "lint"]
+					}
+				}
+			}
+		}
+	}
+}

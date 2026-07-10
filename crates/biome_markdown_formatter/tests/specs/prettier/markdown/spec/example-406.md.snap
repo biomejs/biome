@@ -17,12 +17,12 @@ ____ is not an empty strong emphasis
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
--\_\_\_\_ is not an empty strong emphasis
-+____ is not an empty strong emphasis
+-____ is not an empty strong emphasis
++\_\_\_\_ is not an empty strong emphasis
 ```
 
 # Output
 
 ```md
-____ is not an empty strong emphasis
+\_\_\_\_ is not an empty strong emphasis
 ```

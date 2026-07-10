@@ -33,7 +33,7 @@ expression: with_options.jsonc
 	"linter": {
 		"rules": {
 			"preset": "none",
-			"nursery": {
+			"suspicious": {
 				"noShadow": {
 					"level": "warn",
 					"options": {

@@ -1,0 +1,5 @@
+records
+coverage
+OutOfScope { reason: "unsupported_export_clause", file: "collector.export-unsupported.d.ts", scope: Global, range: 7..19, syntax_kind: TS_EXPORT_ASSIGNMENT_CLAUSE }
+OutOfScope { reason: "unsupported_export_clause", file: "collector.export-unsupported.d.ts", scope: Global, range: 27..46, syntax_kind: TS_EXPORT_AS_NAMESPACE_CLAUSE }
+OutOfScope { reason: "unsupported_export_clause", file: "collector.export-unsupported.d.ts", scope: Global, range: 54..83, syntax_kind: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE }

@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/grid-template-areas-value-comments.css
+---
+
+# Input
+
+```css
+.grid{grid-template-areas:/* row */"header header" "footer footer";}
+.grid{grid-template-areas:
+/* row */
+"header header"
+"footer footer";}
+
+```
+
+
+# Formatted
+
+```css
+.grid {
+	grid-template-areas:/* row */ "header header" "footer footer";
+}
+.grid {
+	grid-template-areas:
+/* row */
+		"header header"
+		"footer footer";
+}
+
+```

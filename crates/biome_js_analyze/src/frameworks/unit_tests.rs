@@ -202,7 +202,8 @@ pub(crate) fn describe_body(call: &JsCallExpression) -> Option<JsStatementList> 
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{JsCallExpression, JsFileSource};
+    use biome_js_syntax::JsCallExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, AstNodeList};
 
     use super::{LifecycleHook, describe_body, is_describe_call, is_unit_test};

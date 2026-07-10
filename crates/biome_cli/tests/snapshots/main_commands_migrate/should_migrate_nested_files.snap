@@ -12,7 +12,7 @@ expression: redactor(content)
 }
 ```
 
-## `lorem/biome.json`
+## `ipsum/biome.json`
 
 ```json
 {
@@ -22,7 +22,7 @@ expression: redactor(content)
 }
 ```
 
-## `ipsum/biome.json`
+## `lorem/biome.json`
 
 ```json
 {

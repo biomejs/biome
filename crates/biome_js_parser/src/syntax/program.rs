@@ -11,8 +11,9 @@ use crate::syntax::function::{ParameterContext, parse_parameter_list};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
+use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_js_syntax::{JsSyntaxKind, ModuleKind};
+use biome_languages::javascript::ModuleKind;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 

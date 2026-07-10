@@ -37,6 +37,7 @@ use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
@@ -95,6 +96,13 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
     p.state_mut().block_quote_depth += 1;
+    // A `>` marker interrupts a paragraph (CommonMark §5.1), so a pending
+    // link-reference-definition continuation from a block before the quote
+    // does not extend into the quote's content. Without this reset, an
+    // ordered list starting at a number other than 1 (e.g. `> 2. q`) is
+    // wrongly demoted to a paragraph by the §5.2 interrupt check. A
+    // definition *inside* the quote sets the flag again after this point.
+    p.state_mut().link_reference_definition_continuation = false;
 
     let marker_space = emit_quote_prefix_node(p);
     relex_after_quote_prefix_consumed(p);
@@ -239,33 +247,32 @@ fn emit_quote_pre_marker_indents(p: &mut MarkdownParser) {
     // Direct bounded scan (0-3 cols per CommonMark §5.1): simpler than ParseNodeList
     // here because we immediately validate `>` and keep this path no-recovery.
     let indent_list_m = p.start();
-    let mut consumed = 0usize;
 
-    while p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if !is_whitespace_only(text) {
-            break;
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdQuoteIndent.
+    if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        let mut consumed = 0usize;
+        let mut len = 0usize;
+        for byte in p.source_after_current().bytes() {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if consumed + width > MAX_BLOCK_PREFIX_INDENT {
+                break;
+            }
+            consumed += width;
+            len += 1;
         }
 
-        let indent = calculate_indent_width(text);
-        if consumed + indent > MAX_BLOCK_PREFIX_INDENT {
-            break;
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_QUOTE_PRE_MARKER_INDENT, MD_QUOTE_INDENT);
         }
-
-        consumed += indent;
-        let indent_m = p.start();
-        p.bump_remap(MD_QUOTE_PRE_MARKER_INDENT);
-        indent_m.complete(p, MD_QUOTE_INDENT);
     }
 
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
-}
-
-/// Calculate indent width accounting for tab expansion (CommonMark §2.2).
-fn calculate_indent_width(text: &str) -> usize {
-    text.chars()
-        .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-        .sum()
 }
 
 /// Try to consume a `>` marker token.

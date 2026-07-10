@@ -5,8 +5,9 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImportSpecifier,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsStatement, AnyTsName,
-    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, T, TriviaPieceKind,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use biome_string_case::Case;
@@ -412,7 +413,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
         module.syntax(),
-        false,
+        vec![],
     )
     .unwrap();
     let printed = formatted.print().unwrap();

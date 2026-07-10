@@ -32,6 +32,7 @@ use crate::ParsedSyntax::{Absent, Present};
 use crate::span::Span;
 use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet, parser};
 use biome_js_syntax::{JsSyntaxKind::*, *};
+use biome_languages::javascript::ModuleKind;
 use biome_parser::ParserProgress;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};

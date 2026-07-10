@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 190
 expression: snapshot
 ---
 
@@ -59,7 +58,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@1..34 " Blank lines between bullet items" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -88,7 +86,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@42..43 "\n" [] [],
@@ -112,7 +109,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@48..49 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@49..50 "\n" [] [],
@@ -136,7 +132,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -158,7 +153,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@58..92 " Blank lines between ordered items" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -187,7 +181,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@102..103 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@103..104 "\n" [] [],
@@ -211,7 +204,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@113..114 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@114..115 "\n" [] [],
@@ -235,7 +227,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@123..124 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -257,7 +248,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@126..161 " Multiple blank lines between items" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -286,7 +276,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@170..171 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@171..172 "\n" [] [],
@@ -313,7 +302,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@179..180 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -335,7 +323,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@182..220 " Mixed: some items separated, some not" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -364,7 +351,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@227..228 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -385,7 +371,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@233..234 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@234..235 "\n" [] [],
@@ -409,7 +394,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@242..243 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -435,7 +419,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@1..34
           0: MD_TEXTUAL@1..34
             0: MD_TEXTUAL_LITERAL@1..34 " Blank lines between bullet items" [] []
-        1: (empty)
       3: MD_HASH_LIST@34..34
     1: MD_NEWLINE@34..35
       0: NEWLINE@34..35 "\n" [] []
@@ -456,7 +439,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@38..41 "foo" [] []
                 1: MD_TEXTUAL@41..42
                   0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@42..43
               0: NEWLINE@42..43 "\n" [] []
         1: MD_BULLET@43..50
@@ -472,7 +454,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@45..48 "bar" [] []
                 1: MD_TEXTUAL@48..49
                   0: MD_TEXTUAL_LITERAL@48..49 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@49..50
               0: NEWLINE@49..50 "\n" [] []
         2: MD_BULLET@50..56
@@ -488,7 +469,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@52..55 "baz" [] []
                 1: MD_TEXTUAL@55..56
                   0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
-              1: (empty)
     4: MD_NEWLINE@56..57
       0: NEWLINE@56..57 "\n" [] []
     5: MD_HEADER@57..92
@@ -500,7 +480,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@58..92
           0: MD_TEXTUAL@58..92
             0: MD_TEXTUAL_LITERAL@58..92 " Blank lines between ordered items" [] []
-        1: (empty)
       3: MD_HASH_LIST@92..92
     6: MD_NEWLINE@92..93
       0: NEWLINE@92..93 "\n" [] []
@@ -521,7 +500,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@97..102 "first" [] []
                 1: MD_TEXTUAL@102..103
                   0: MD_TEXTUAL_LITERAL@102..103 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@103..104
               0: NEWLINE@103..104 "\n" [] []
         1: MD_BULLET@104..115
@@ -537,7 +515,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@107..113 "second" [] []
                 1: MD_TEXTUAL@113..114
                   0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@114..115
               0: NEWLINE@114..115 "\n" [] []
         2: MD_BULLET@115..124
@@ -553,7 +530,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@118..123 "third" [] []
                 1: MD_TEXTUAL@123..124
                   0: MD_TEXTUAL_LITERAL@123..124 "\n" [] []
-              1: (empty)
     9: MD_NEWLINE@124..125
       0: NEWLINE@124..125 "\n" [] []
     10: MD_HEADER@125..161
@@ -565,7 +541,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@126..161
           0: MD_TEXTUAL@126..161
             0: MD_TEXTUAL_LITERAL@126..161 " Multiple blank lines between items" [] []
-        1: (empty)
       3: MD_HASH_LIST@161..161
     11: MD_NEWLINE@161..162
       0: NEWLINE@161..162 "\n" [] []
@@ -586,7 +561,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@165..170 "alpha" [] []
                 1: MD_TEXTUAL@170..171
                   0: MD_TEXTUAL_LITERAL@170..171 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@171..172
               0: NEWLINE@171..172 "\n" [] []
             2: MD_NEWLINE@172..173
@@ -604,7 +578,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@175..179 "beta" [] []
                 1: MD_TEXTUAL@179..180
                   0: MD_TEXTUAL_LITERAL@179..180 "\n" [] []
-              1: (empty)
     14: MD_NEWLINE@180..181
       0: NEWLINE@180..181 "\n" [] []
     15: MD_HEADER@181..220
@@ -616,7 +589,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@182..220
           0: MD_TEXTUAL@182..220
             0: MD_TEXTUAL_LITERAL@182..220 " Mixed: some items separated, some not" [] []
-        1: (empty)
       3: MD_HASH_LIST@220..220
     16: MD_NEWLINE@220..221
       0: NEWLINE@220..221 "\n" [] []
@@ -637,7 +609,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@224..227 "one" [] []
                 1: MD_TEXTUAL@227..228
                   0: MD_TEXTUAL_LITERAL@227..228 "\n" [] []
-              1: (empty)
         1: MD_BULLET@228..235
           0: MD_LIST_MARKER_PREFIX@228..230
             0: MD_INDENT_TOKEN_LIST@228..228
@@ -651,7 +622,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@230..233 "two" [] []
                 1: MD_TEXTUAL@233..234
                   0: MD_TEXTUAL_LITERAL@233..234 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@234..235
               0: NEWLINE@234..235 "\n" [] []
         2: MD_BULLET@235..243
@@ -667,7 +637,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@237..242 "three" [] []
                 1: MD_TEXTUAL@242..243
                   0: MD_TEXTUAL_LITERAL@242..243 "\n" [] []
-              1: (empty)
   2: EOF@243..243 "" [] []
 
 ```

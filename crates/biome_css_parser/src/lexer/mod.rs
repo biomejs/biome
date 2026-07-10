@@ -11,9 +11,10 @@ use self::scan_cursor::{
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
-    CssFileSource, CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange,
-    TextSize, scan_css_number,
+    CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    scan_css_number,
 };
+use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -68,7 +69,8 @@ pub enum CssLexContext {
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
-    /// Applied when lexing Tailwind CSS utility names in `@utility`.
+    /// Applied when lexing Tailwind CSS utility and variant names in
+    /// `@utility` and `@variant`.
     TailwindUtilityName,
 }
 
@@ -1546,6 +1548,21 @@ impl<'src> CssLexer<'src> {
     fn consume_token_tailwind_utility_name(&mut self, current: u8) -> CssSyntaxKind {
         if self.is_ident_start() {
             return self.consume_identifier_with_slash(true);
+        }
+
+        // Tailwind utility and variant names may start with a digit, such as
+        // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
+        // CSS lexer would split that into a number and an identifier, so consume
+        // the whole run as a single identifier here.
+        let dispatched = lookup_byte(current);
+        if matches!(dispatched, DIG | ZER) {
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
         }
 
         self.consume_token(current)

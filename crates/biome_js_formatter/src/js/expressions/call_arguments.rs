@@ -43,15 +43,15 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
 
         let call_expression = node.parent::<JsCallExpression>();
 
-        let (is_commonjs_or_amd_call, is_test_call) =
-            call_expression
-                .as_ref()
-                .map_or((Ok(false), Ok(false)), |call| {
-                    (
-                        is_commonjs_or_amd_call(node, call),
-                        call.is_test_call_expression(),
-                    )
-                });
+        let (is_commonjs_or_amd_call, is_test_call, is_curried_test_each_call) = call_expression
+            .as_ref()
+            .map_or((Ok(false), Ok(false), Ok(false)), |call| {
+                (
+                    is_commonjs_or_amd_call(node, call),
+                    call.is_test_call_expression(),
+                    is_curried_test_each_call(call),
+                )
+            });
 
         let is_first_arg_string_literal_or_template = if args.len() != 2 {
             true
@@ -69,7 +69,9 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
         if is_commonjs_or_amd_call?
             || is_multiline_template_only_args(node)
             || is_react_hook_with_deps_array(node, f.comments())
-            || (is_test_call? && is_first_arg_string_literal_or_template)
+            || (is_test_call?
+                && !is_curried_test_each_call?
+                && is_first_arg_string_literal_or_template)
         {
             let l_paren = format_with(|f: &mut JsFormatter| {
                 if f.options().delimiter_spacing().value() {
@@ -187,7 +189,7 @@ enum FormatCallArgument {
 
     /// The argument has been formatted because a caller inspected if it [Self::will_break].
     ///
-    /// Allows to re-use the formatted output rather than having to call into the formatting again.
+    /// Allows reusing the formatted output rather than having to call into the formatting again.
     Inspected {
         /// The formatted element
         content: FormatResult<Option<FormatElement>>,
@@ -1262,6 +1264,17 @@ fn can_group_expression_argument(
     };
 
     Ok(result)
+}
+
+fn is_curried_test_each_call(call: &JsCallExpression) -> SyntaxResult<bool> {
+    // Matches `test.each([...])("name", callback)`: the outer call is applied to
+    // the result of the inner `test.each(...)` call, so it should use the normal
+    // breakable argument layout instead of the direct test-call single-line layout.
+    let AnyJsExpression::JsCallExpression(inner_call) = call.callee()? else {
+        return Ok(false);
+    };
+
+    Ok(inner_call.callee()?.contains_a_test_each_pattern())
 }
 
 /// Tests if this is a call to commonjs [`require`](https://nodejs.org/api/modules.html#requireid)

@@ -46,5 +46,6 @@ pub(crate) mod snippet_closing_block;
 pub(crate) mod snippet_opening_block;
 pub(crate) mod square_destructured_name;
 pub(crate) mod style_directive;
+pub(crate) mod template_chunk_element;
 pub(crate) mod transition_directive;
 pub(crate) mod use_directive;

@@ -1,0 +1,133 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+[x]: /url
+> 2. q
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..2 "x" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@2..3 "]" [] [],
+            colon_token: COLON@3..4 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@4..5 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@5..9 "/url" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@9..10 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@10..11 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] [],
+            },
+            content: MdBlockList [
+                MdOrderedListItem {
+                    md_bullet_list: MdBulletList [
+                        MdBullet {
+                            prefix: MdListMarkerPrefix {
+                                pre_marker_indent: MdIndentTokenList [],
+                                marker: MD_ORDERED_LIST_MARKER@12..14 "2." [] [],
+                                post_marker_space_token: MD_LIST_POST_MARKER_SPACE@14..15 " " [] [],
+                                content_indent: MdIndentTokenList [],
+                            },
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@15..16 "q" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@17..17 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..17
+  0: (empty)
+  1: MD_BLOCK_LIST@0..17
+    0: MD_LINK_REFERENCE_DEFINITION@0..9
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_BRACK@0..1 "[" [] []
+      2: MD_LINK_LABEL@1..2
+        0: MD_INLINE_ITEM_LIST@1..2
+          0: MD_TEXTUAL@1..2
+            0: MD_TEXTUAL_LITERAL@1..2 "x" [] []
+      3: R_BRACK@2..3 "]" [] []
+      4: COLON@3..4 ":" [] []
+      5: MD_LINK_DESTINATION@4..9
+        0: MD_INLINE_ITEM_LIST@4..9
+          0: MD_TEXTUAL@4..5
+            0: MD_TEXTUAL_LITERAL@4..5 " " [] []
+          1: MD_TEXTUAL@5..9
+            0: MD_TEXTUAL_LITERAL@5..9 "/url" [] []
+      6: (empty)
+    1: MD_NEWLINE@9..10
+      0: NEWLINE@9..10 "\n" [] []
+    2: MD_QUOTE@10..17
+      0: MD_QUOTE_PREFIX@10..12
+        0: MD_QUOTE_INDENT_LIST@10..10
+        1: R_ANGLE@10..11 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] []
+      1: MD_BLOCK_LIST@12..17
+        0: MD_ORDERED_LIST_ITEM@12..17
+          0: MD_BULLET_LIST@12..17
+            0: MD_BULLET@12..17
+              0: MD_LIST_MARKER_PREFIX@12..15
+                0: MD_INDENT_TOKEN_LIST@12..12
+                1: MD_ORDERED_LIST_MARKER@12..14 "2." [] []
+                2: MD_LIST_POST_MARKER_SPACE@14..15 " " [] []
+                3: MD_INDENT_TOKEN_LIST@15..15
+              1: MD_BLOCK_LIST@15..17
+                0: MD_PARAGRAPH@15..17
+                  0: MD_INLINE_ITEM_LIST@15..17
+                    0: MD_TEXTUAL@15..16
+                      0: MD_TEXTUAL_LITERAL@15..16 "q" [] []
+                    1: MD_TEXTUAL@16..17
+                      0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
+  2: EOF@17..17 "" [] []
+
+```

@@ -287,6 +287,12 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
+    /// Returns whether this type is a thenable (has a callable `then` member).
+    pub fn is_thenable(&self) -> bool {
+        self.find_member_type("then")
+            .is_some_and(|then_ty| then_ty.is_function())
+    }
+
     /// Returns whether this type is an instance of `RegExp`.
     pub fn is_regexp_instance(&self) -> bool {
         self.resolved_data()
@@ -327,12 +333,9 @@ impl Type {
             return true;
         }
 
-        self.resolved_data().is_some_and(|ty| {
-            ty.find_member(self.resolver.as_ref(), |member| {
-                member.is_index_signature_with_ty(|ty| {
-                    self.resolve(ty)
-                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_DISPOSE_ID)
-                })
+        self.resolved_data().is_some_and(|data| {
+            data.find_member(self.resolver.as_ref(), |member| {
+                self.has_symbol_keyed_member(member, GLOBAL_SYMBOL_DISPOSE_ID)
             })
             .is_some()
         })
@@ -343,14 +346,28 @@ impl Type {
             return true;
         }
 
-        self.resolved_data().is_some_and(|ty| {
-            ty.find_member(self.resolver.as_ref(), |member| {
-                member.is_index_signature_with_ty(|ty| {
-                    self.resolve(ty)
-                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
-                })
+        self.resolved_data().is_some_and(|data| {
+            data.find_member(self.resolver.as_ref(), |member| {
+                self.has_symbol_keyed_member(member, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
             })
             .is_some()
+        })
+    }
+
+    /// Returns whether `member` is keyed by the well-known symbol `symbol_id`.
+    ///
+    /// The key is accepted whether it is spelled as an index signature (how
+    /// object and class members are inferred from source) or as a computed
+    /// value (how the generated `Disposable`/`AsyncDisposable` globals encode
+    /// it).
+    fn has_symbol_keyed_member(
+        &self,
+        member: &ResolvedTypeMember,
+        symbol_id: ResolvedTypeId,
+    ) -> bool {
+        member.is_keyed_member_with_ty(|reference| {
+            self.resolve(reference)
+                .is_some_and(|resolved| resolved.id == symbol_id)
         })
     }
 

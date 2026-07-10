@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<html lang="en"></html>
+<html v-bind:lang="langValue"></html>
+<html :lang="langValue"></html>
+
+```

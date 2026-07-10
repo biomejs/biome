@@ -1,14 +1,15 @@
 use crate::prelude::*;
+use crate::shared::TextPrintMode;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdHeader, MdNewline, MdSetextHeader};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdNewline {
-    should_remove: bool,
+    print_mode: TextPrintMode,
 }
 impl FormatNodeRule<MdNewline> for FormatMdNewline {
     fn fmt_fields(&self, node: &MdNewline, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.should_remove {
+        if self.print_mode.is_remove() {
             return write!(f, [format_removed(&node.value_token()?)]);
         }
 
@@ -27,14 +28,14 @@ impl FormatNodeRule<MdNewline> for FormatMdNewline {
 }
 
 pub(crate) struct FormatMdNewlineOptions {
-    pub(crate) should_remove: bool,
+    pub(crate) print_mode: TextPrintMode,
 }
 
 impl FormatRuleWithOptions<MdNewline> for FormatMdNewline {
     type Options = FormatMdNewlineOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.should_remove = options.should_remove;
+        self.print_mode = options.print_mode;
         self
     }
 }

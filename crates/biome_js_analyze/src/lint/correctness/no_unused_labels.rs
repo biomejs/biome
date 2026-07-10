@@ -6,16 +6,16 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsStatement, JsBreakStatement, JsContinueStatement, JsFileSource, JsLabeledStatement,
-    JsLanguage, TextRange, WalkEvent,
+    AnyJsStatement, JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage,
+    TextRange, WalkEvent,
 };
 use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 
-use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
-use rustc_hash::FxHashSet;
-
 use crate::JsRuleAction;
 use crate::services::control_flow::AnyJsControlFlowRoot;
+use biome_languages::JsFileSource;
+use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
+use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
     /// Disallow unused labels.

@@ -38,7 +38,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -66,7 +65,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -98,7 +96,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "one" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-              1: (empty)
     1: MD_NEWLINE@6..7
       0: NEWLINE@6..7 "\n" [] []
     2: MD_BULLET_LIST_ITEM@7..13
@@ -116,7 +113,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@9..12 "two" [] []
                 1: MD_TEXTUAL@12..13
                   0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-              1: (empty)
   2: EOF@13..13 "" [] []
 
 ```

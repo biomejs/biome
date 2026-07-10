@@ -3,7 +3,6 @@ use crate::settings::{
     LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
     to_json_language_settings,
 };
-use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, Style};
 use biome_configuration::html::{HtmlConfiguration, HtmlParserConfiguration};
@@ -17,8 +16,10 @@ use biome_configuration::{
 };
 use biome_fs::BiomePath;
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
+use biome_languages::DocumentFileSource;
+use biome_languages::HtmlFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use std::num::NonZeroU64;

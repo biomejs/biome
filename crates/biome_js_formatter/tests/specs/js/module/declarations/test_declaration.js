@@ -32,3 +32,9 @@ describe("with retry option", { retry: 2 }, () => {
 it("with timeout option", { timeout: 5000 }, () => {
   console.log("test");
 });
+
+// Chained table test
+test.concurrent.each(arr)(
+  "works as expected", () => {
+  expect();
+});

@@ -1,11 +1,12 @@
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TriviaPieceKind};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 
 /// Find the start position of the current line in source text.
 ///
@@ -105,10 +106,12 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.source()
     }
 
-    /// Count leading indentation on the current line, including whitespace inside the current token.
+    /// Count leading indentation on the current line, including whitespace
+    /// inside the current token.
     ///
-    /// This scans from the start of the current line to the first non-whitespace character.
-    /// Tab characters are counted as 4 spaces per CommonMark spec.
+    /// Scans from the start of the current line to the first non-whitespace
+    /// character. Tabs expand to the next multiple of `TAB_STOP_SPACES`,
+    /// per CommonMark §2.2.
     pub fn line_start_leading_indent(&self) -> usize {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
@@ -117,15 +120,15 @@ impl<'source> MarkdownTokenSource<'source> {
         let line_start = find_line_start(&source[..start]);
 
         let line = &source[line_start..];
-        let mut count = 0usize;
+        let mut column = 0usize;
         for c in line.chars() {
             match c {
-                ' ' => count += 1,
-                '\t' => count += 4,
+                ' ' => column += 1,
+                '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
                 _ => break,
             }
         }
-        count
+        column
     }
 
     /// Returns true if the current token starts on a line with only whitespace before it.
@@ -170,6 +173,13 @@ impl<'source> MarkdownTokenSource<'source> {
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
+    }
+
+    /// Re-lex from the current token start up to `end` as a single token of
+    /// the given kind.
+    pub fn re_lex_span(&mut self, end: TextSize, kind: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.lexer.lexer_mut().set_relex_span(end.into(), kind);
+        self.lexer.re_lex(MarkdownReLexContext::Span)
     }
 
     /// Bump the current token using the LinkDefinition context.

@@ -3,7 +3,7 @@ use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsFileSource, ModuleKind};
+use biome_languages::{JsFileSource, javascript::ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
 use biome_string_case::StrOnlyExtension;
 use camino::Utf8Path;

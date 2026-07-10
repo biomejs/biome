@@ -19,12 +19,12 @@ expression: redactor(content)
 ## `test.js`
 
 ```js
-for (let i = 0; i < 10; i++) {
-    if (i >= 5) {
-        continue;
-    }
-    console.log(i);
+const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
 }
+shared = 100;
 
 ```
 

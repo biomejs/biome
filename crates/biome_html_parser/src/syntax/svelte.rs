@@ -300,10 +300,32 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
         return (Absent, false);
     }
 
-    p.bump_with_context(
-        T![each],
-        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
-    );
+    // check whether the collection expression
+    // contains a TypeScript `as const` assertion before the Svelte binding `as`.
+    // If so, we use `AsOrCommaSkipFirstAs` so the lexer includes the TypeScript
+    // `as const` in the expression token and stops only at the binding `as`.
+    let stop_at = if p.lookahead(|p| {
+        p.bump_with_context(
+            T![each],
+            HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::AsOrComma),
+        );
+        if p.at(HTML_LITERAL) {
+            p.bump_any();
+            p.re_lex(HtmlReLexContext::Svelte);
+            p.at(T![as]) && {
+                p.bump_with_context(T![as], HtmlLexContext::Svelte);
+                p.at(T![const])
+            }
+        } else {
+            false
+        }
+    }) {
+        RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+    } else {
+        RestrictedExpressionStopAt::AsOrComma
+    };
+
+    p.bump_with_context(T![each], HtmlLexContext::restricted_expression(stop_at));
     // Flags used to track possible errors so that the final block can be emitted as a bogus node
     let mut has_errors = false;
 

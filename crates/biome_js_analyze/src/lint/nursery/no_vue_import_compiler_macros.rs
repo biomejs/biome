@@ -2,7 +2,8 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsFileSource};
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_vue_import_compiler_macros::NoVueImportCompilerMacrosOptions;
 

@@ -24,21 +24,15 @@ info: yaml/prettier-ignore/trailing-comma.yml
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,9 @@
+@@ -1,7 +1,7 @@
  [
    # prettier-ignore
--  {  sss  }, # 123
+   {  sss  }, # 123
 -  { qqqq },
--
-+             {  sss  },       # 123
-+    {  qqqq },
-+  
++  {  qqqq },
+ 
    # prettier-ignore
--  [ccc    ], # 777
--  [ddd],
-+          [ccc    ]       # 777
-+  , [ddd    ]
- ]
+   [ccc    ], # 777
 ```
 
 # Output
@@ -46,11 +40,11 @@ info: yaml/prettier-ignore/trailing-comma.yml
 ```yml
 [
   # prettier-ignore
-             {  sss  },       # 123
-    {  qqqq },
-  
+  {  sss  }, # 123
+  {  qqqq },
+
   # prettier-ignore
-          [ccc    ]       # 777
-  , [ddd    ]
+  [ccc    ], # 777
+  [ddd],
 ]
 ```

@@ -1,14 +1,11 @@
-use std::str::FromStr;
-
 use anyhow::{Result, bail};
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::Configuration;
 use biome_fs::BiomePath;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_languages::DocumentFileSource;
+use biome_service::settings::{ServiceLanguage, Settings};
 use camino::Utf8PathBuf;
+use std::str::FromStr;
 
 /// Represents a single code block used for evaluating doc tests.
 ///

@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
 
@@ -40,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInteractiveElementToNoninteractiveRole {
-        version: "next",
+        version: "2.5.0",
         name: "noInteractiveElementToNoninteractiveRole",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").inspired()],
@@ -64,12 +65,8 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
 
         // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
@@ -105,7 +102,8 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             }
 
             // a tag without href is considered non-interactive
-            if is_html_tag(node, source_type, "a") && node.find_attribute_by_name("href").is_none()
+            if is_html_tag(node, source_type, "a")
+                && node.find_attribute_or_vue_binding("href").is_none()
             {
                 return None;
             }
@@ -137,7 +135,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);

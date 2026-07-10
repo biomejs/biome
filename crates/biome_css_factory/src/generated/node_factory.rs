@@ -323,14 +323,14 @@ pub fn css_composes_import_specifier(
 pub fn css_composes_property(
     name: CssIdentifier,
     colon_token: SyntaxToken,
-    value: CssComposesPropertyValue,
+    values: CssComposesPropertyValueList,
 ) -> CssComposesProperty {
     CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPOSES_PROPERTY,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(values.into_syntax())),
         ],
     ))
 }
@@ -1512,7 +1512,7 @@ pub fn css_margin_at_rule(
     ))
 }
 pub fn css_media_and_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     and_token: SyntaxToken,
     right: AnyCssMediaAndCombinableCondition,
 ) -> CssMediaAndCondition {
@@ -1599,7 +1599,7 @@ pub fn css_media_feature_in_parens(
 }
 pub fn css_media_not_condition(
     not_token: SyntaxToken,
-    condition: AnyCssMediaInParens,
+    condition: AnyCssMediaConditionOperand,
 ) -> CssMediaNotCondition {
     CssMediaNotCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_NOT_CONDITION,
@@ -1610,7 +1610,7 @@ pub fn css_media_not_condition(
     ))
 }
 pub fn css_media_or_condition(
-    left: AnyCssMediaInParens,
+    left: AnyCssMediaConditionOperand,
     or_token: SyntaxToken,
     right: AnyCssMediaOrCombinableCondition,
 ) -> CssMediaOrCondition {
@@ -3833,6 +3833,12 @@ pub fn scss_interpolation(
         ],
     ))
 }
+pub fn scss_keyframes_name(name: AnyScssKeyframesName) -> ScssKeyframesName {
+    ScssKeyframesName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_NAME,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
 pub fn scss_keyframes_selector(selector: ScssInterpolation) -> ScssKeyframesSelectorBuilder {
     ScssKeyframesSelectorBuilder {
         selector,
@@ -3857,6 +3863,14 @@ impl ScssKeyframesSelectorBuilder {
             ],
         ))
     }
+}
+pub fn scss_keyframes_variable_declaration(
+    declaration: ScssVariableDeclaration,
+) -> ScssKeyframesVariableDeclaration {
+    ScssKeyframesVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYFRAMES_VARIABLE_DECLARATION,
+        [Some(SyntaxElement::Node(declaration.into_syntax()))],
+    ))
 }
 pub fn scss_keyword_argument(
     name: ScssVariable,
@@ -4249,6 +4263,14 @@ pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
     ScssStringText::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_STRING_TEXT,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn scss_supports_interpolated_condition(
+    condition: ScssInterpolation,
+) -> ScssSupportsInterpolatedCondition {
+    ScssSupportsInterpolatedCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_SUPPORTS_INTERPOLATED_CONDITION,
+        [Some(SyntaxElement::Node(condition.into_syntax()))],
     ))
 }
 pub fn scss_unary_expression(
@@ -4771,6 +4793,30 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_property_value_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssComposesPropertyValueList
+where
+    I: IntoIterator<Item = CssComposesPropertyValue>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssComposesPropertyValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_compound_selector_list<I, S>(items: I, separators: S) -> CssCompoundSelectorList

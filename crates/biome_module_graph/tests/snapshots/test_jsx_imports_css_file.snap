@@ -3,32 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/styles.css`
-
-## Source
-
-```css
-.button {
-	color: red;
-}
-.header {
-	font-size: 24px;
-}
-```
-
-## Module Info
-
-```
-Classes {
-  button,
-  header,
-}
-Imports {
-  No imports
-}
-```
-
-
 # `/src/App.jsx`
 
 ## Source
@@ -73,4 +47,29 @@ App => BindingTypeData {
 
 ```
 Module TypeId(0) => unknown
+```
+
+# `/src/styles.css`
+
+## Source
+
+```css
+.button {
+	color: red;
+}
+.header {
+	font-size: 24px;
+}
+```
+
+## Module Info
+
+```
+Classes {
+  button,
+  header,
+}
+Imports {
+  No imports
+}
 ```

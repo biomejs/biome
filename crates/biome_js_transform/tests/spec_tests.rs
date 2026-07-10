@@ -2,7 +2,8 @@ use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, 
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsLanguage;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_diagnostics_expectation_comment, assert_errors_are_absent, create_analyzer_options,
@@ -115,7 +116,7 @@ pub(crate) fn analyze_and_snap(
                 let node = transformation.mutation.commit();
 
                 let formatted =
-                    format_node(JsFormatOptions::new(source_type), &node, false).unwrap();
+                    format_node(JsFormatOptions::new(source_type), &node, Vec::new()).unwrap();
 
                 transformations.push(formatted.print().unwrap().as_code().to_string());
             }

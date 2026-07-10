@@ -1,6 +1,7 @@
+use crate::markdown::auxiliary::inline_link::format_inline_destination;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::{TextContext, TextPrintMode, TrimMode};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdInlineImage, MdInlineImageFields};
 
@@ -28,22 +29,19 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
                         keep_fences_in_italics: false,
-                        inside_list: false,
+                        text_context: TextContext::Neutral,
                     }),
                 r_brack_token.format(),
                 l_paren_token.format(),
-                destination
-                    .format()
-                    .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike),
-                        keep_fences_in_italics: false,
-                        inside_list: false,
-                    })
+                format_inline_destination(
+                    &destination,
+                    TextPrintMode::Trim(TrimMode::AutoLinkLike)
+                )
             ]
         )?;
 
         if let Some(title) = title {
-            write!(f, [space(), title.format()])?;
+            write!(f, [title.format()])?;
         }
 
         write!(f, [r_paren_token.format()])

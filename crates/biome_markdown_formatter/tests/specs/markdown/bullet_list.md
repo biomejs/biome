@@ -6,4 +6,14 @@
 
 * - - -
 
-* - - -\n  __bold__
+* - - -
+
+__bold__
+
+* - - -
+
++ item after dash thematic break
+
+-   
+
+1.   

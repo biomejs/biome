@@ -6,6 +6,7 @@ info: scss/at-rule/if-else.scss
 # Input
 
 ```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
 @if $type==ocean{
 color:red;
 }@else if $type ==matador{
@@ -44,9 +45,10 @@ padding:
 # Formatted
 
 ```scss
-@if $type==ocean {
+// Biome intentionally normalizes SCSS comparison operator spacing.
+@if $type == ocean {
 	color: red;
-} @else if $type ==matador {
+} @else if $type == matador {
 	color: blue;
 } @else {
 	color: green;

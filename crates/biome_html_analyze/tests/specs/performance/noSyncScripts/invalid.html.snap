@@ -1,0 +1,45 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<script src=""></script>
+
+<script src="" type=""></script>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected synchronous script.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script src=""></script>
+      │ ^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <script src="" type=""></script>
+  
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
+  
+
+```
+
+```
+invalid.html:4:1 lint/performance/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected synchronous script.
+  
+    2 │ <script src=""></script>
+    3 │ 
+  > 4 │ <script src="" type=""></script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
+  
+
+```

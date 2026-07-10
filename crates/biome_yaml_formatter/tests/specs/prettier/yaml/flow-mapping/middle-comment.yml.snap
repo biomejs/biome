@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-mapping/middle-comment.yml
+---
+
+# Input
+
+```yml
+!!map #comment
+{}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-!!map #comment
+-{}
++!!map {} #comment
+```
+
+# Output
+
+```yml
+!!map {} #comment
+```

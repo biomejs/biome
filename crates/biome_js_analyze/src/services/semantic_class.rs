@@ -1054,7 +1054,8 @@ fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> 
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, Parse, parse};
-    use biome_js_syntax::{AnyJsRoot, JsFileSource, JsObjectBindingPattern};
+    use biome_js_syntax::{AnyJsRoot, JsObjectBindingPattern};
+    use biome_languages::JsFileSource;
     use biome_rowan::AstNode;
 
     struct TestCase<'a> {

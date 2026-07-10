@@ -4,10 +4,10 @@ use biome_fs::BiomePath;
 use biome_json_formatter::JsonFormatLanguage;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_languages::{DocumentFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_service::settings::{ServiceLanguage, Settings};
-use biome_service::workspace::DocumentFileSource;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]

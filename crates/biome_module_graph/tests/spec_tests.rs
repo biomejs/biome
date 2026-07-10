@@ -2,6 +2,7 @@
 
 mod snap;
 
+use std::collections::BTreeMap;
 use std::fs::read_link;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -11,36 +12,35 @@ use biome_resolver::ResolveError;
 use crate::snap::ModuleGraphSnapshot;
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_syntax::{
-    CssFileSource, EmbeddingHtmlKind, EmbeddingKind, EmbeddingStyleApplicability,
-};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
-use biome_html_syntax::HtmlFileSource;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
+use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
+use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath, SymbolName,
-    collect_available_classes_for_js_file, find_js_exported_symbol,
-    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
-    transitive_importers_of, traverse_import_tree_for_html_classes,
+    ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
+    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Text, TextRange, TextSize};
 use biome_service::Workspace;
-use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
+use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashSet;
 use walkdir::WalkDir;
 
 fn build_js_db(
@@ -48,8 +48,8 @@ fn build_js_db(
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
     infer_types: bool,
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
         let (module_info, _, _) = resolve_js_module(
@@ -79,8 +79,8 @@ fn build_html_db(
         biome_html_syntax::HtmlRoot,
         Vec<HtmlEmbeddedContent>,
     )],
-) -> ProjectDatabase {
-    let db = ProjectDatabase::default();
+) -> WorkspaceDb {
+    let db = WorkspaceDb::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, embedded_content) in html_data {
         let (module_info, _, _) = resolve_html_module(
@@ -102,7 +102,7 @@ fn build_html_db(
 }
 
 fn add_js_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
@@ -129,7 +129,7 @@ fn add_js_modules(
 }
 
 fn add_css_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
@@ -148,7 +148,7 @@ fn add_css_modules(
 }
 
 fn add_html_modules(
-    db: &ProjectDatabase,
+    db: &WorkspaceDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     html_data: &[(
@@ -550,8 +550,8 @@ fn test_export_default_imported_binding() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     // Test that the default export's type is correctly resolved as a function returning number
     let default_export_ty = resolver
@@ -809,8 +809,8 @@ export const promise = makePromiseCb();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let promise_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -839,8 +839,8 @@ fn test_resolve_generic_mapped_value() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let mapped_id = resolver
         .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
@@ -898,8 +898,8 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -941,8 +941,8 @@ fn test_resolve_import_as_namespace() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -982,8 +982,8 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
@@ -1015,8 +1015,8 @@ fn test_resolve_return_value_of_function() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let foo_id = resolver
         .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
@@ -1070,8 +1070,8 @@ fn test_resolve_type_of_property_with_getter() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let foo_id = resolver
         .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
@@ -1103,8 +1103,8 @@ fn test_writable_annotated_binding_does_not_become_singleton_union() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let sink_id = resolver
         .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
@@ -1194,8 +1194,8 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=7 {
         let name = format!("foo{i}");
@@ -1266,8 +1266,8 @@ fn test_resolve_type_of_this_in_object() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=5 {
         let name = format!("foo{i}");
@@ -1355,8 +1355,8 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     for i in 1..=5 {
         let name = format!("notFoo{i}");
@@ -1730,8 +1730,8 @@ fn test_resolve_react_types() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let use_callback_id = resolver
         .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
@@ -1827,8 +1827,8 @@ fn test_resolve_single_reexport() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -1888,8 +1888,8 @@ fn test_resolve_type_of_union_from_imported_module() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
@@ -1951,8 +1951,8 @@ fn test_resolve_multiple_reexports() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result1_id = resolver
         .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
@@ -2039,8 +2039,8 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -2099,8 +2099,8 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let resolved_id = resolver
         .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
@@ -2150,8 +2150,8 @@ const { mutate } = useSWRConfig();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let use_swr_config_id = resolver
         .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
@@ -2207,8 +2207,8 @@ type Intersection = Foo & Bar;"#,
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let intersection_id = resolver
         .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
@@ -2299,8 +2299,7 @@ fn test_resolve_swr_types() {
         })
     );
 
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let mutate_id = resolver
         .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
@@ -2340,8 +2339,8 @@ function f() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
 
@@ -2373,8 +2372,8 @@ function g() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
 
@@ -2544,14 +2543,16 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     // the re-export chain to a binding in `source.ts`).
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
 
-    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "renamedSymbol"));
+    let found =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel));
     assert!(
         found.is_some(),
         "`renamedSymbol` must be found via the aliased re-export chain; got None"
     );
 
     // `originalName` must NOT be visible under the barrel's public API.
-    let not_found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "originalName"));
+    let not_found =
+        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel));
     assert!(
         not_found.is_none(),
         "`originalName` must not be directly exported from the barrel"
@@ -2616,7 +2617,7 @@ fn test_namespace_reexport_is_own_export() {
     );
 
     // Confirm `find_js_exported_symbol` returns `Some` as the lint rule sees it.
-    let found = find_js_exported_symbol(&db, barrel, SymbolName::new(&db, "MyNs"));
+    let found = find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "MyNs", barrel));
     assert!(
         found.is_some(),
         "`MyNs` must be found by find_js_exported_symbol"
@@ -2673,8 +2674,8 @@ fn test_namespace_reexport_type_inference() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
 
     let result_id = resolver
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
@@ -2724,7 +2725,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2803,7 +2804,7 @@ export function Component() {
     let js_paths = [BiomePath::new("/src/Component.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
     let styles_css = db
@@ -2811,11 +2812,14 @@ export function Component() {
         .unwrap();
 
     assert!(
-        is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "used")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "used", styles_css)),
         "'used' class should be referenced by Component.jsx"
     );
     assert!(
-        !is_class_referenced_by_importers(&db, styles_css, SymbolName::new(&db, "unused")),
+        !is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "unused", styles_css)
+        ),
         "'unused' class should not be referenced by any importer"
     );
 }
@@ -2861,7 +2865,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2877,13 +2881,13 @@ export function App() {
 
     // The 'base' class is used by App.jsx, so it should be considered referenced.
     assert!(
-        is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "base")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "base", module)),
         "'base' class must be referenced transitively"
     );
 
     // The 'orphan' class is never used anywhere.
     assert!(
-        !is_class_referenced_by_importers(&db, module, SymbolName::new(&db, "orphan")),
+        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "orphan", module)),
         "'orphan' class must not be referenced"
     );
 }
@@ -2956,7 +2960,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.tsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2977,12 +2981,18 @@ export function App() {
 
     // Classes used in App.tsx should be detected even from nested CSS
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button"),),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "button", components_css)
+        ),
         "'button' class from components.css should be detected as used"
     );
 
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "card", components_css)
+        ),
         "'card' class from components.css should be detected as used"
     );
 
@@ -2990,20 +3000,19 @@ export function App() {
     assert!(
         !is_class_referenced_by_importers(
             &db,
-            components_css,
-            SymbolName::new(&db, "unused-component-class"),
+            SymbolFromModuleInfo::new(&db, "unused-component-class", components_css)
         ),
         "'unused-component-class' should be detected as unused"
     );
 
     // Utils classes should also work
     assert!(
-        is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "flex")),
+        is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "flex", utils_css)),
         "'flex' class from utils.css should be detected as used"
     );
 
     assert!(
-        !is_class_referenced_by_importers(&db, utils_css, SymbolName::new(&db, "grid")),
+        !is_class_referenced_by_importers(&db, SymbolFromModuleInfo::new(&db, "grid", utils_css)),
         "'grid' class from utils.css should be detected as unused"
     );
 }
@@ -3067,7 +3076,7 @@ export function Dashboard() {
     ];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -3096,100 +3105,33 @@ export function Dashboard() {
 
     // button used in App.tsx
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "button")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "button", components_css)
+        ),
         "'button' should be detected as used"
     );
 
     // card used in Dashboard.tsx
     assert!(
-        is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "card")),
+        is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "card", components_css)
+        ),
         "'card' should be detected as used"
     );
 
     // modal not used anywhere
     assert!(
-        !is_class_referenced_by_importers(&db, components_css, SymbolName::new(&db, "modal")),
+        !is_class_referenced_by_importers(
+            &db,
+            SymbolFromModuleInfo::new(&db, "modal", components_css)
+        ),
         "'modal' should be detected as unused"
     );
 }
 
-/// Verifies deep nesting: 3 levels of CSS imports.
-///
-/// App.tsx → main.css → theme.css → base.css (defines .primary)
-#[test]
-fn test_deeply_nested_css_import_chain() {
-    let fs = MemoryFileSystem::default();
-
-    fs.insert(
-        "/src/base.css".into(),
-        r#"
-.primary { color: blue; }
-.secondary { color: gray; }
-"#,
-    );
-
-    fs.insert(
-        "/src/theme.css".into(),
-        r#"
-@import "./base.css";
-"#,
-    );
-
-    fs.insert(
-        "/src/main.css".into(),
-        r#"
-@import "./theme.css";
-"#,
-    );
-
-    fs.insert(
-        "/src/App.tsx".into(),
-        r#"
-import "./main.css";
-
-export function App() {
-    return <button className="primary">Primary Button</button>;
-}
-"#,
-    );
-
-    let css_paths = [
-        BiomePath::new("/src/base.css"),
-        BiomePath::new("/src/theme.css"),
-        BiomePath::new("/src/main.css"),
-    ];
-    let css_roots = get_css_added_paths(&fs, &css_paths);
-    let js_paths = [BiomePath::new("/src/App.tsx")];
-    let js_roots = get_added_js_paths(&fs, &js_paths);
-
-    let db = ProjectDatabase::default();
-    add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
-    add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
-
-    // App.tsx should be found even for deeply nested base.css
-    let base_css = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
-    let consumers = transitive_importers_of(&db, base_css);
-    assert!(
-        consumers
-            .iter()
-            .any(|p| p.as_path() == Utf8Path::new("/src/App.tsx")),
-        "App.tsx should be a consumer of base.css through 3-level import chain; got: {consumers:?}"
-    );
-
-    // primary used in App.tsx
-    assert!(
-        is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "primary")),
-        "'primary' from deeply nested base.css should be detected as used"
-    );
-
-    // secondary not used
-    assert!(
-        !is_class_referenced_by_importers(&db, base_css, SymbolName::new(&db, "secondary")),
-        "'secondary' should be detected as unused"
-    );
-}
-
-/// Tests `collect_available_classes_for_js_file` for a JSX file that directly
+/// Tests `traverse_import_tree_for_classes` for a JSX file that directly
 /// imports CSS.
 #[test]
 fn test_collect_available_classes_for_js_file() {
@@ -3217,14 +3159,19 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) = collect_available_classes_for_js_file(
+    let traversal = traverse_import_tree_for_classes(
         &db,
         db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
     );
+    let classes: FxHashSet<String> = traversal
+        .iter()
+        .flat_map(|step| step.css_classes.values())
+        .map(|class| class.text().to_string())
+        .collect();
 
     // Should find both CSS classes
     assert!(classes.contains("button"), "Should find .button class");
@@ -3239,7 +3186,7 @@ export function App() {
     );
 }
 
-/// Tests `collect_available_classes_for_js_file` with multiple CSS imports.
+/// Tests `traverse_import_tree_for_classes` with multiple CSS imports.
 #[test]
 fn test_collect_available_classes_for_js_file_multiple_css() {
     let fs = MemoryFileSystem::default();
@@ -3277,14 +3224,19 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) = collect_available_classes_for_js_file(
+    let traversal = traverse_import_tree_for_classes(
         &db,
         db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
     );
+    let classes: FxHashSet<String> = traversal
+        .iter()
+        .flat_map(|step| step.css_classes.values())
+        .map(|class| class.text().to_string())
+        .collect();
 
     // Should find all CSS classes from both imports
     assert!(classes.contains("btn"), "Should find .btn class");
@@ -3332,14 +3284,19 @@ fn test_export_equals_namespace_without_type_inference() {
         .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
         .expect("react module must exist");
 
-    let use_state = find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useState"));
+    let use_state = find_js_exported_symbol(
+        &db,
+        SymbolFromModuleInfo::new(&db, "useState", react_module),
+    );
     assert!(
         use_state.is_some(),
         "`useState` must be visible as a named export from `@types/react` even without type inference"
     );
 
-    let use_callback =
-        find_js_exported_symbol(&db, react_module, SymbolName::new(&db, "useCallback"));
+    let use_callback = find_js_exported_symbol(
+        &db,
+        SymbolFromModuleInfo::new(&db, "useCallback", react_module),
+    );
     assert!(
         use_callback.is_some(),
         "`useCallback` must be visible as a named export from `@types/react` even without type inference"
@@ -3366,10 +3323,10 @@ fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedCont
     // Mirror the workspace server: enable CSS modules parsing for embedded CSS
     // in framework files (Vue → Vue dialect; Svelte/Astro → Classic).
     let css_modules_kind = match file_source.as_embedding_kind() {
-        EmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
-        EmbeddingKind::Html(EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. }) => {
-            CssModulesKind::Classic
-        }
+        CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
+        CssEmbeddingKind::Html(
+            EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. },
+        ) => CssModulesKind::Classic,
         _ => CssModulesKind::None,
     };
     let options = CssParserOptions {
@@ -3388,40 +3345,40 @@ fn parse_html_src(src: &str, file_source: HtmlFileSource) -> biome_html_syntax::
 
 /// Returns a `CssFileSource` for a plain HTML `<style>` block (always Global).
 fn html_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Html))
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
 }
 
 /// Returns a `CssFileSource` for a Vue `<style>` (unscoped → Global).
 fn vue_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
         applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Vue `<style scoped>` (Local).
 fn vue_scoped_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style>` (default → Local).
 fn astro_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style is:global>` (Global).
 fn astro_global_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
         applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Svelte `<style>` (default → Local).
 fn svelte_local_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
+    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
         applicability: EmbeddingStyleApplicability::Local,
     }))
 }
@@ -3604,7 +3561,7 @@ fn test_vue_mixed_scoped_and_unscoped() {
     // Only Global class appears in the traversal.
     let module = db.module_for_path(Utf8Path::new("/src/Mixed.vue")).unwrap();
     let traversal_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .into_iter()
+        .iter()
         .flat_map(|step| {
             step.css_classes
                 .values()
@@ -3786,8 +3743,8 @@ fn test_svelte_global_pseudo_class_is_visible() {
 #[test]
 fn test_vue_upward_traversal() {
     use biome_html_parser::HtmlParserOptions;
-    use biome_html_syntax::HtmlFileSource;
     use biome_js_parser::JsParserOptions;
+    use biome_languages::HtmlFileSource;
 
     let fs = MemoryFileSystem::default();
 
@@ -3798,7 +3755,7 @@ fn test_vue_upward_traversal() {
     fs.insert("/src/Button.vue".into(), "");
 
     let layout = ProjectLayout::default();
-    let db = ProjectDatabase::default();
+    let db = WorkspaceDb::default();
 
     // Add CSS
     let css_paths = [BiomePath::new("/src/app.css")];
@@ -3814,7 +3771,7 @@ fn test_vue_upward_traversal() {
     // App.vue's embedded <script> imports app.css and Page.vue
     let app_script = biome_js_parser::parse(
         r#"import "./app.css"; import Page from "./Page.vue";"#,
-        biome_js_parser::JsFileSource::ts(),
+        JsFileSource::ts(),
         JsParserOptions::default(),
     );
     let app_embedded = vec![HtmlEmbeddedContent::Js(app_script.tree())];
@@ -3827,7 +3784,7 @@ fn test_vue_upward_traversal() {
     // Page.vue's embedded <script> imports Button.vue
     let page_script = biome_js_parser::parse(
         r#"import Button from "./Button.vue";"#,
-        biome_js_parser::JsFileSource::ts(),
+        JsFileSource::ts(),
         JsParserOptions::default(),
     );
     let page_embedded = vec![HtmlEmbeddedContent::Js(page_script.tree())];
@@ -3878,8 +3835,8 @@ fn test_vue_upward_traversal() {
         .module_for_path(Utf8Path::new("/src/Button.vue"))
         .unwrap();
     let available_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
-        .into_iter()
-        .flat_map(|step| step.css_classes.into_values())
+        .iter()
+        .flat_map(|step| step.css_classes.values())
         .collect();
 
     assert!(
@@ -3958,6 +3915,10 @@ fn test_astro_component_imports_snapshot() {
 <style>
   .hero { color: navy; }
 </style>
+
+<style is:global>
+  .hero { color: navy; }
+</style>
 "#,
         ),
         (
@@ -4028,7 +3989,7 @@ import Card from "./Card.svelte";
 /// This mirrors production behavior: `open_file` triggers
 /// `parse_embedded_nodes`, which correctly extracts `<style>`, `<script>`, and
 /// Astro frontmatter (`---...---`) blocks with their scoping semantics.
-fn build_module_db_via_workspace(files: &[(&str, &str)]) -> ProjectDatabase {
+fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {
     let mem_fs = MemoryFileSystem::default();
     for (path, content) in files {
         mem_fs.insert(Utf8PathBuf::from(*path), *content);
@@ -4064,7 +4025,7 @@ fn build_module_db_via_workspace(files: &[(&str, &str)]) -> ProjectDatabase {
 
 /// Converts a `&[(&str, &str)]` file list into the owned form expected by
 /// [`ModuleGraphSnapshot::from_files`].
-fn files_to_snapshot_vec(files: &[(&str, &str)]) -> Vec<(String, String)> {
+fn files_to_snapshot_vec(files: &[(&str, &str)]) -> BTreeMap<String, String> {
     files
         .iter()
         .map(|(path, content)| ((*path).to_string(), (*content).to_string()))
@@ -4087,8 +4048,7 @@ fn test_property_const_assertion_flows_through_module_resolver() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc = db.clone();
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
     let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
     let TypeData::Object(object) = object.deref() else {
         panic!("expected object type");

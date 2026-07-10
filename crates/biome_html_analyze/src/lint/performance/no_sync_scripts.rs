@@ -1,0 +1,99 @@
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
+use biome_console::markup;
+use biome_diagnostics::Severity;
+use biome_html_syntax::{HtmlOpeningElement, element_ext::AnyHtmlTagElement};
+use biome_languages::HtmlFileSource;
+use biome_rowan::AstNode;
+use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
+
+use crate::utils::is_html_tag;
+
+declare_lint_rule! {
+    /// Prevent the usage of synchronous scripts.
+    ///
+    /// A synchronous script can impact your webpage performance, read more on how to [Efficiently load third-party JavaScript](https://web.dev/articles/efficiently-load-third-party-javascript).
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```html,expect_diagnostic
+    /// <script src=""></script>
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```html
+    /// <script src="" async></script>
+    /// <script src="" defer></script>
+    /// <script src="" type="module"></script>
+    /// ```
+    ///
+    pub NoSyncScripts {
+        version: "2.3.6",
+        name: "noSyncScripts",
+        language: "html",
+        recommended: false,
+        severity: Severity::Warning,
+        sources: &[RuleSource::EslintNext("no-sync-scripts").same()],
+    }
+}
+
+impl Rule for NoSyncScripts {
+    type Query = Ast<HtmlOpeningElement>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoSyncScriptsOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let binding = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
+
+        if !is_html_tag(
+            &AnyHtmlTagElement::from(binding.clone()),
+            source_type,
+            "script",
+        ) {
+            return None;
+        }
+
+        let attributes = binding.attributes();
+        if attributes.find_attribute_by_name("src").is_none()
+            || attributes.find_attribute_by_name("async").is_some()
+            || attributes.find_attribute_by_name("defer").is_some()
+            || attributes
+                .find_attribute_by_name("type")
+                .is_some_and(|attribute| {
+                    let Some(attribute) = attribute.as_html_attribute() else {
+                        return false;
+                    };
+
+                    attribute
+                        .as_static_value()
+                        .is_some_and(|value| value.text() == "module")
+                })
+        {
+            return None;
+        }
+
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Unexpected synchronous script."
+                },
+            )
+            .note(markup! {
+                "Synchronous scripts can impact your webpage performance. Add the \"async\" or \"defer\" attribute."
+            }),
+        )
+    }
+}

@@ -49,7 +49,7 @@ use biome_markdown_syntax::{
     MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
     MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
     MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    MdReferenceLinkLabel, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -883,7 +883,7 @@ impl<'a> HtmlRenderer<'a> {
                 .and_then(biome_markdown_syntax::MdInlineItemList::cast)
                 .is_some();
             if is_inline {
-                let content = collect_raw_inline_text(&html.content());
+                let content = collect_html_content_text(&html.content());
                 self.push_str(&content);
             } else {
                 let block_indent = self.block_indent(html.syntax().text_trimmed_range());
@@ -1046,11 +1046,6 @@ impl<'a> HtmlRenderer<'a> {
             } else {
                 self.push_str("<br />\n");
             }
-            return;
-        }
-
-        if MdSoftBreak::cast(node.clone()).is_some() {
-            self.push_str("\n");
             return;
         }
 
@@ -1495,7 +1490,7 @@ fn render_html_block(
 ) {
     // Prepend the block prefix indent (now in explicit slot, not trivia)
     let mut content = indent_list_text(&html.indent());
-    content.push_str(&collect_raw_inline_text(&html.content()));
+    content.push_str(&collect_html_content_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }
@@ -1675,6 +1670,18 @@ fn collect_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String
 }
 
 /// Collect raw inline text without processing escapes.
+/// The raw text of HTML block content: a single literal token holding the
+/// whole content verbatim, container prefixes included.
+fn collect_html_content_text(
+    content: &biome_rowan::SyntaxResult<biome_markdown_syntax::MdHtmlContent>,
+) -> String {
+    content
+        .as_ref()
+        .ok()
+        .and_then(|content| content.value_token().ok())
+        .map_or_else(String::new, |token| token.text().to_string())
+}
+
 fn collect_raw_inline_text(list: &biome_markdown_syntax::MdInlineItemList) -> String {
     let mut text = String::new();
     for item in list.iter() {
@@ -1691,11 +1698,13 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
                 out.push_str(token.text());
             }
         }
-        AnyMdInline::MdSoftBreak(_) => {
-            out.push('\n');
-        }
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
+        }
+        AnyMdInline::MdCodeContent(code) => {
+            if let Ok(token) = code.value_token() {
+                out.push_str(token.text());
+            }
         }
         _ => {
             // For other inline elements, collect their tokens
@@ -1941,7 +1950,7 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
             let content = collect_raw_inline_text(&autolink.value());
             out.push_str(&content);
         }
-        AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
+        AnyMdInline::MdHardLine(_) => {
             out.push(' ');
         }
         AnyMdInline::MdEntityReference(entity) => {
@@ -1964,6 +1973,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdIndentToken(_) => {
             // Indent tokens don't contribute text to alt attributes
+        }
+        AnyMdInline::MdCodeContent(_) => {
+            // Fenced code content never appears inside link or image text
         }
     }
 }

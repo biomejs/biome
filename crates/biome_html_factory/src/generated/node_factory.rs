@@ -381,6 +381,22 @@ pub fn html_opening_element(
         ],
     ))
 }
+pub fn html_processing_instruction(
+    start_token: SyntaxToken,
+    target: AnyHtmlTagName,
+    attributes: HtmlAttributeList,
+    end_token: SyntaxToken,
+) -> HtmlProcessingInstruction {
+    HtmlProcessingInstruction::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_PROCESSING_INSTRUCTION,
+        [
+            Some(SyntaxElement::Token(start_token)),
+            Some(SyntaxElement::Node(target.into_syntax())),
+            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Token(end_token)),
+        ],
+    ))
+}
 pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
         html,
@@ -1396,6 +1412,28 @@ pub fn svelte_style_directive(
         ],
     ))
 }
+pub fn svelte_template_attribute_value(
+    l_quote_token: SyntaxToken,
+    elements: SvelteTemplateElementList,
+    r_quote_token: SyntaxToken,
+) -> SvelteTemplateAttributeValue {
+    SvelteTemplateAttributeValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_ATTRIBUTE_VALUE,
+        [
+            Some(SyntaxElement::Token(l_quote_token)),
+            Some(SyntaxElement::Node(elements.into_syntax())),
+            Some(SyntaxElement::Token(r_quote_token)),
+        ],
+    ))
+}
+pub fn svelte_template_chunk_element(
+    html_template_chunk_token: SyntaxToken,
+) -> SvelteTemplateChunkElement {
+    SvelteTemplateChunkElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_CHUNK_ELEMENT,
+        [Some(SyntaxElement::Token(html_template_chunk_token))],
+    ))
+}
 pub fn svelte_transition_directive(
     transition_token: SyntaxToken,
     value: SvelteDirectiveValue,
@@ -1848,6 +1886,18 @@ where
 {
     SvelteElseIfClauseList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_template_element_list<I>(items: I) -> SvelteTemplateElementList
+where
+    I: IntoIterator<Item = AnySvelteTemplateElement>,
+    I::IntoIter: ExactSizeIterator,
+{
+    SvelteTemplateElementList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_TEMPLATE_ELEMENT_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

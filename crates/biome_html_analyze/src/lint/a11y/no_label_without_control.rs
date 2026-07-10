@@ -4,9 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{
-    AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnyHtmlElement, AnyHtmlTagName, HtmlAttribute,
-    HtmlFileSource, HtmlSyntaxKind,
+    AnyHtmlAttributeInitializer, AnyHtmlElement, AnyHtmlTagName, HtmlAttribute, HtmlSyntaxKind,
 };
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
 
@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoLabelWithoutControl {
-        version: "next",
+        version: "2.5.0",
         name: "noLabelWithoutControl",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").inspired()],
@@ -103,8 +103,8 @@ impl Rule for NoLabelWithoutControl {
         }
 
         let has_text_content = has_accessible_label(options, node);
-        let has_control_association =
-            has_for_attribute(node) || has_nested_control(options, node, source_type);
+        let has_control_association = node.find_attribute_or_vue_binding("for").is_some()
+            || has_nested_control(options, node, source_type);
 
         if has_text_content && has_control_association {
             return None;
@@ -263,22 +263,6 @@ fn has_element_name(
 pub struct NoLabelWithoutControlState {
     pub has_text_content: bool,
     pub has_control_association: bool,
-}
-
-/// Returns true whether the passed `AnyHtmlElement` has a `for` attribute
-fn has_for_attribute(html_element: &AnyHtmlElement) -> bool {
-    let Some(attributes) = html_element.attributes() else {
-        return false;
-    };
-
-    attributes.into_iter().any(|attribute| match attribute {
-        AnyHtmlAttribute::HtmlAttribute(html_attribute) => html_attribute
-            .name()
-            .ok()
-            .and_then(|attribute_name| attribute_name.token_text_trimmed())
-            .is_some_and(|text| text.eq_ignore_ascii_case("for")),
-        _ => false,
-    })
 }
 
 /// Returns whether the passed `html_attribute_value` has a valid value inside it

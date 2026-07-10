@@ -5,7 +5,8 @@ use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,
 };
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxToken, TextRange, TextSize, WalkEvent};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, NodeOrToken};
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;

@@ -149,3 +149,6 @@
 {"markdown":"* a\n*\n\n\n* c\n","html":"<ul>\n<li>\n<p>a</p>\n</li>\n<li></li>\n<li>\n<p>c</p>\n</li>\n</ul>\n"}
 {"markdown":"* a\n*\n\n- c\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<ul>\n<li>c</li>\n</ul>\n"}
 {"markdown":"* a\n*\n\nfoo\n","html":"<ul>\n<li>a</li>\n<li></li>\n</ul>\n<p>foo</p>\n"}
+{"markdown":"[x]: /url\n> 2. q\n","html":"<blockquote>\n<ol start=\"2\">\n<li>q</li>\n</ol>\n</blockquote>\n"}
+{"markdown":"> [x]: /url\n> 2. q\n","html":"<blockquote>\n<p>2. q</p>\n</blockquote>\n"}
+{"markdown":"> [x]: /url\n> > 2. q\n","html":"<blockquote>\n<blockquote>\n<ol start=\"2\">\n<li>q</li>\n</ol>\n</blockquote>\n</blockquote>\n"}

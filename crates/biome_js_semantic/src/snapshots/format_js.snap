@@ -126,7 +126,7 @@ Scope {
       Scope: ScopeId(2)
       Imported: false
       Exported: true
-      Kind: HoistedValue
+      Kind: Function
       ident: add
       JsDoc Comments: Adds two numbers.
 @param x - first operand
@@ -205,7 +205,7 @@ Scope {
       Scope: ScopeId(9)
       Imported: false
       Exported: true
-      Kind: HoistedValue
+      Kind: Function
       ident: outer
     }
     Scope {

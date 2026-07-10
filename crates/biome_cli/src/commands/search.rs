@@ -15,9 +15,10 @@ use biome_deserialize::Merge;
 use biome_diagnostics::Severity;
 use biome_diagnostics::{Category, DiagnosticExt, category};
 use biome_fs::FileSystem;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
-    DocumentFileSource, DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder,
-    FeaturesSupported, ParsePatternParams, PatternId, ScanKind, SearchLanguage, SupportKind,
+    DropPatternParams, FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported,
+    ParsePatternParams, PatternId, ScanKind, SearchLanguage, SupportKind,
 };
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;

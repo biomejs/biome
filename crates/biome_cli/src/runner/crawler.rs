@@ -7,9 +7,10 @@ use biome_diagnostics::{Error, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
+use biome_service::workspace::FeaturesSupported;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
-use papaya::{HashSet, HashSetRef, LocalGuard};
+use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -127,6 +128,8 @@ pub trait CrawlerContext: TraversalContext {
     fn workspace(&self) -> &dyn Workspace;
     fn project_key(&self) -> ProjectKey;
     fn execution(&self) -> &dyn Execution;
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported);
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported>;
 }
 
 /// Context object shared between directory traversal tasks
@@ -151,6 +154,8 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) messages: Sender<Message>,
     /// List of paths that should be processed
     pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
+    /// File features already computed during path evaluation.
+    pub(crate) file_features: papaya::HashMap<BiomePath, FeaturesSupported>,
     /// Maximum number of diagnostics to pull from the workspace.
     pub(crate) max_diagnostics: u32,
     /// Minimum severity for diagnostics to be included.
@@ -210,6 +215,14 @@ where
     fn execution(&self) -> &dyn Execution {
         self.execution
     }
+
+    fn insert_file_features(&self, path: BiomePath, features: FeaturesSupported) {
+        self.file_features.pin().insert(path, features);
+    }
+
+    fn get_file_features(&self, path: &BiomePath) -> Option<FeaturesSupported> {
+        self.file_features.pin().get(path).cloned()
+    }
 }
 
 impl<'ctx, 'app, I, P> CrawlerOptions<'ctx, 'app, I, P>
@@ -235,6 +248,7 @@ where
             interner,
             messages: sender,
             evaluated_paths: HashSet::default(),
+            file_features: HashMap::default(),
             handler: I::default(),
             changed: AtomicUsize::new(0),
             unchanged: AtomicUsize::new(0),

@@ -1,0 +1,14 @@
+records
+DeclarationRecord { file_repo_relative: "collector.external-module.d.ts", scope: ExternalModule("fs"), declared_name: "ReadOptions", kind: Interface, text_range: 26..50, syntax_kind: TS_INTERFACE_DECLARATION }
+DeclarationRecord { file_repo_relative: "collector.external-module.d.ts", scope: ExternalModule("fs"), declared_name: "readFile", kind: DeclareFunction, text_range: 55..93, syntax_kind: TS_DECLARE_FUNCTION_DECLARATION }
+DeclarationRecord { file_repo_relative: "collector.external-module.d.ts", scope: ExternalModuleNamespace { module: "x", namespace: ["N"] }, declared_name: "I", kind: Interface, text_range: 144..193, syntax_kind: TS_INTERFACE_DECLARATION }
+coverage
+EnteredScope { scope: ExternalModule("fs"), file: "collector.external-module.d.ts", range: 8..95 }
+Collected(0)
+Collected(1)
+ExitedScope { scope: ExternalModule("fs"), file: "collector.external-module.d.ts", range: 8..95 }
+EnteredScope { scope: ExternalModule("x"), file: "collector.external-module.d.ts", range: 105..201 }
+EnteredScope { scope: ExternalModuleNamespace { module: "x", namespace: ["N"] }, file: "collector.external-module.d.ts", range: 122..199 }
+Collected(2)
+ExitedScope { scope: ExternalModuleNamespace { module: "x", namespace: ["N"] }, file: "collector.external-module.d.ts", range: 122..199 }
+ExitedScope { scope: ExternalModule("x"), file: "collector.external-module.d.ts", range: 105..201 }

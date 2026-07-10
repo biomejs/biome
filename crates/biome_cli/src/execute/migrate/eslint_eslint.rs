@@ -601,6 +601,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
                             }
                         }
+                        "svelte/no-unnecessary-state-wrap" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
@@ -824,6 +829,7 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -853,6 +859,9 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::SvelteNoUnnecessaryStateWrap(_) => {
+                Cow::Borrowed("svelte/no-unnecessary-state-wrap")
+            }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
@@ -869,5 +878,25 @@ impl PartialEq for Rule {
 impl Hash for Rule {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name().hash(state);
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct SvelteNoUnnecessaryStateWrapOptions {
+    #[deserializable(rename = "additionalReactiveClasses")]
+    pub(crate) additional_reactive_classes: Box<[Box<str>]>,
+    #[deserializable(rename = "allowReassign")]
+    pub(crate) allow_reassign: Option<bool>,
+}
+
+impl From<SvelteNoUnnecessaryStateWrapOptions>
+    for biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions
+{
+    fn from(value: SvelteNoUnnecessaryStateWrapOptions) -> Self {
+        Self {
+            additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
+                .then_some(value.additional_reactive_classes),
+            allow_reassign: value.allow_reassign,
+        }
     }
 }

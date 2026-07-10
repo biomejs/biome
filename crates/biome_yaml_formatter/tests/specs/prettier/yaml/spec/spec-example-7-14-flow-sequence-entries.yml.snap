@@ -23,22 +23,20 @@ single: pair,
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,8 @@
+@@ -1,10 +1,10 @@
  [
--  "double
+   "double
 -  quoted",
 -  "single
 -  quoted",
--  plain
--  text,
--  [nested],
--  single: pair,
-+"double
-+ quoted", 'single
++ quoted",
++  'single
 +           quoted',
-+plain
-+ text, [ nested ],
-+single: pair,
+   plain
+-  text,
++ text,
+   [nested],
+   single: pair,
  ]
 ```
 
@@ -46,11 +44,13 @@ single: pair,
 
 ```yml
 [
-"double
- quoted", 'single
+  "double
+ quoted",
+  'single
            quoted',
-plain
- text, [ nested ],
-single: pair,
+  plain
+ text,
+  [nested],
+  single: pair,
 ]
 ```

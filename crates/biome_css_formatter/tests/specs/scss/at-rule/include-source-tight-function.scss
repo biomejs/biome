@@ -1,4 +1,14 @@
+// Biome normalizes SCSS slash binary expressions. Prettier preserves some tight
+// forms because its parser keeps them as one value word.
 @include transition(min-height ($spacer/2) ease-in-out);
+@include transition(min-height ($spacer /2) ease-in-out);
+@include transition(min-height ($spacer/ 2) ease-in-out);
 @include transition(min-height($spacer/2) ease-in-out);
+@include transition(min-height($spacer /2) ease-in-out);
+@include transition(min-height($spacer/ 2) ease-in-out);
 @include transition(min-height ($spacer / 2) ease-in-out);
 @include transition(min-height($spacer / 2) ease-in-out);
+@include transition(min-height, $spacer/2, ease-in-out);
+@include transition(min-height, $spacer /2, ease-in-out);
+@include transition(min-height, $spacer/ 2, ease-in-out);
+@include transition(min-height, $spacer / 2, ease-in-out);

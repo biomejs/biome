@@ -32,3 +32,6 @@
 
 <button type="button" id="burger">Menu</button>
 <label for="burger">Menu</label>
+
+<label :for="inputId">Name</label>
+<input :id="inputId">

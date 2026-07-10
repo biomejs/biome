@@ -6,12 +6,12 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsArrowFunctionExpression, JsCallExpression, JsFileSource, JsFormalParameter,
-    JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
-    JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectExpression,
-    JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement, JsStatementList,
-    JsSyntaxKind, JsVariableDeclarator,
+    JsArrowFunctionExpression, JsCallExpression, JsFormalParameter, JsFunctionDeclaration,
+    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReturnStatement, JsStatementList, JsSyntaxKind, JsVariableDeclarator,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNodeList;
 use biome_rowan::{
     AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange, TokenText, declare_node_union,

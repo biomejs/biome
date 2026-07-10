@@ -140,7 +140,7 @@ impl Format<YamlFormatContext> for FormatYamlVerbatimNode<'_> {
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            verbatim_text_start,
+            Some(verbatim_text_start),
         )
         .fmt(f)?;
 

@@ -34,6 +34,17 @@ use tower_lsp_server::ls_types::{
     WorkspaceFolder,
 };
 
+#[test]
+fn catches_regular_panics_as_panic_errors() {
+    let result: std::result::Result<
+        std::result::Result<(), salsa::Cancelled>,
+        biome_diagnostics::panic::PanicError,
+    > = super::catch_lsp_operation(|| panic!("boom"));
+
+    let error = result.expect_err("regular panic should be caught as a panic error");
+    assert!(error.info.contains("boom"), "{error:?}");
+}
+
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
         range: Range {
@@ -120,6 +131,14 @@ fn create_document_content_change_event() -> Vec<TextDocumentContentChangeEvent>
             text: String::from("statement"),
         },
     ]
+}
+
+fn full_document_change(text: impl Into<String>) -> Vec<TextDocumentContentChangeEvent> {
+    vec![TextDocumentContentChangeEvent {
+        range: None,
+        range_length: None,
+        text: text.into(),
+    }]
 }
 
 const EXPECTED_CST: &str = "0: JS_MODULE@0..57
@@ -559,6 +578,88 @@ async fn pull_diagnostics() -> Result<()> {
     );
 
     server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn debounces_diagnostics_after_rapid_changes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server
+        .change_document(2, full_document_change("const c = 1; c = 2;"))
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected publishDiagnostics notification");
+    };
+
+    assert_eq!(params.version, Some(2));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_publish_debounced_diagnostics_after_close() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+    let _ = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    server
+        .change_document(1, full_document_change("const b = 1; b = 2;"))
+        .await?;
+    server.close_document().await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: None,
+                diagnostics: vec![],
+            }
+        ))
+    );
+
+    wait_for_no_notification(&mut receiver, Duration::from_millis(750), |n| {
+        n.is_publish_diagnostics()
+    })
+    .await;
 
     server.shutdown().await?;
     reader.abort();
@@ -3553,8 +3654,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3782,8 +3884,9 @@ export function bar() {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3966,8 +4069,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -5098,6 +5202,135 @@ async fn relative_configuration_path_resolves_against_correct_workspace_folder()
         res.is_none(),
         "Expected no formatting edits because test_two/configs/biome.json disables the formatter. \
          If this fails, the relative configurationPath was resolved against the wrong workspace folder."
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Regression test for <https://github.com/biomejs/biome/issues/9566>.
+///
+/// In a multi-root workspace, a configuration that fails to load in one workspace
+/// folder must not disable lint/assist diagnostics for files in another, healthy
+/// workspace folder.
+#[tokio::test]
+#[expect(deprecated)]
+async fn broken_configuration_in_one_workspace_folder_does_not_disable_another() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // `good` has a valid config that enables a lint rule; `bad` has a malformed
+    // config that cannot be parsed, so loading it yields an error status.
+    let good_config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "suspicious": { "noDoubleEquals": "error" }
+            }
+        }
+    }"#;
+    let bad_config = r#"{ "linter": { "rules": "#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("good/biome.json")), good_config);
+    fs.insert(to_utf8_file_path_buf(uri!("bad/biome.json")), bad_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("/")),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        name: "good".to_string(),
+                        uri: uri!("good"),
+                    },
+                    WorkspaceFolder {
+                        name: "bad".to_string(),
+                        uri: uri!("bad"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    server.initialized().await?;
+
+    let good_uri = uri!("good/document.js");
+
+    // Open the healthy file: it must produce a lint diagnostic.
+    server
+        .open_named_document("a == b;", good_uri.clone(), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "Expected a lint diagnostic for the healthy file on open"
+    );
+
+    // Open a file in the folder with the broken configuration. Its configuration
+    // fails to load; previously this overwrote the shared status.
+    server
+        .open_named_document("a == b;", uri!("bad/document.js"), "javascript")
+        .await?;
+
+    // Re-trigger diagnostics for the healthy file. The lint diagnostic must still
+    // be reported, proving the broken folder did not disable the healthy one.
+    server
+        .notify(
+            "textDocument/didChange",
+            lsp::DidChangeTextDocumentParams {
+                text_document: lsp::VersionedTextDocumentIdentifier {
+                    uri: good_uri.clone(),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: "a == b;".to_string(),
+                }],
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(
+        &mut receiver,
+        |n| matches!(n, ServerNotification::PublishDiagnostics(params) if params.uri == good_uri),
+    )
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("Expected PublishDiagnostics for the healthy file, got {notification:?}");
+    };
+    assert!(
+        !params.diagnostics.is_empty(),
+        "The healthy file must keep its lint diagnostic even after a sibling \
+         workspace folder failed to load its configuration"
     );
 
     server.shutdown().await?;

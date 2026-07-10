@@ -11,6 +11,9 @@ use biome_rule_options::use_flat_map::UseFlatMapOptions;
 declare_lint_rule! {
     /// Promotes the use of `.flatMap()` when `map().flat()` are used together.
     ///
+    /// Using `.flatMap()` instead of `map().flat()` avoids the creation of
+    /// an intermediate array.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -97,7 +100,9 @@ impl Rule for UseFlatMap {
             markup! {
                 "The call chain "<Emphasis>".map().flat()"</Emphasis>" can be replaced with a single "<Emphasis>".flatMap()"</Emphasis>" call."
             },
-        ))
+        ).note(markup! {
+            "Using "<Emphasis>".flatMap()"</Emphasis>" avoids the creation of an intermediate array."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, flat_call: &Self::State) -> Option<JsRuleAction> {

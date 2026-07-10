@@ -9,7 +9,7 @@ expression: redactor(content)
   "linter": {
     "rules": {
       "nursery": {
-        "noContinue": "error"
+        "noLoopFunc": "error"
       }
     }
   }
@@ -19,12 +19,12 @@ expression: redactor(content)
 ## `test.js`
 
 ```js
-for (let i = 0; i < 10; i++) {
-    if (i >= 5) {
-        continue;
-    }
-    console.log(i);
+const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
 }
+shared = 100;
 
 ```
 
@@ -42,18 +42,22 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test.js:3:9 lint/nursery/noContinue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test.js:4:16 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected use of continue statement.
+  × This function declared in a loop contains unsafe references to outer variables.
   
-    1 │ for (let i = 0; i < 10; i++) {
-    2 │     if (i >= 5) {
-  > 3 │         continue;
-      │         ^^^^^^^^^
-    4 │     }
-    5 │     console.log(i);
+    2 │ let shared = 0;
+    3 │ for (let i = 0; i < 10; i += 1) {
+  > 4 │     queue.push(() => shared);
+      │                ^^^^^^^^^^^^
+    5 │ }
+    6 │ shared = 100;
   
-  i The continue statement terminates execution of the statements in the current iteration, when used incorrectly it makes code less testable, less readable and less maintainable. Structured control flow statements such as if should be used instead.
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: shared
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

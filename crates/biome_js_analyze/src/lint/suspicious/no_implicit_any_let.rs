@@ -1,7 +1,8 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
+use biome_js_syntax::{JsVariableDeclaration, JsVariableDeclarator};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_implicit_any_let::NoImplicitAnyLetOptions;
 
 declare_lint_rule! {

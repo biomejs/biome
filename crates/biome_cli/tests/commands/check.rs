@@ -910,7 +910,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
 /// Creating a symbolic link will fail on Windows if the current process is
 /// unprivileged. Since running tests as administrator is uncommon and
 /// constraining, this error gets silently ignored if we're not running on CI
-/// (the workflows are being being run with the correct permissions on CI)
+/// (the workflows are being run with the correct permissions on CI)
 #[cfg(target_os = "windows")]
 macro_rules! check_windows_symlink {
     ($result:expr) => {

@@ -1,0 +1,328 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote/list.md
+---
+
+# Input
+
+```md
+> - list in quote
+>   with multiple lines
+>   - nested list item
+>   - nested list item 2
+>     across multiple lines
+>     > quote in nested list in quote
+>     > with multiple lines
+
+- > quote in list
+  > with multiple lines
+  > - list item in quote in list
+  >   > quote in list item in quote in list
+  >   > with multiple lines
+  - nested list
+
+-   > quote in list
+	> this line is indented by tab
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,13 +3,13 @@
+   - nested list item
+     - nested list item 2
+       across multiple lines
+-        > quote in nested list in quote
+-        > with multiple lines
++      > quote in nested list in quote
++      > with multiple lines
+ - > quote in list
+   > with multiple lines
+   > - list item in quote in list
+       > quote in list item in quote in list
+-      > with multiple lines
++  >   > with multiple lines
+       - nested list
+ 
+ -   > quote in list
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -15,182 +15,171 @@
+     source_position(12),
+     "quote",
+     hard_line_break,
+-    source_position(20),
++    source_position(22),
+     "with ",
+-    source_position(25),
++    source_position(27),
+     "multiple ",
+-    source_position(34),
++    source_position(36),
+     "lines",
+     hard_line_break,
+     hard_line_break,
+-    source_position(42),
++    source_position(46),
+     "-",
+-    source_position(43),
++    source_position(47),
+     " ",
+     align("  ", [
+-      source_position(44),
++      source_position(48),
+       "nested ",
+-      source_position(51),
++      source_position(55),
+       "list ",
+-      source_position(56),
++      source_position(60),
+       "item",
+       hard_line_break,
+       hard_line_break,
+-      source_position(65),
++      source_position(69),
+       "-",
+-      source_position(66),
++      source_position(70),
+       " ",
+       align("  ", [
+-        source_position(67),
++        source_position(71),
+         "nested ",
+-        source_position(74),
++        source_position(78),
+         "list ",
+-        source_position(79),
++        source_position(83),
+         "item ",
+-        source_position(84),
++        source_position(88),
+         "2",
+         hard_line_break,
+-        source_position(92),
++        source_position(96),
+         "across ",
+-        source_position(99),
++        source_position(103),
+         "multiple ",
+-        source_position(108),
++        source_position(112),
+         "lines",
+         hard_line_break,
++        source_position(124),
++        "> ",
++        source_position(126),
++        "quote ",
++        source_position(132),
++        "in ",
++        source_position(135),
++        "nested ",
++        source_position(142),
++        "list ",
++        source_position(147),
++        "in ",
++        source_position(150),
++        "quote",
+         hard_line_break,
+-        source_position(118),
+-        "  ",
+-        source_position(120),
+-        ">",
+-        source_position(121),
+-        " quote in nested list in quote",
+-        source_position(151),
+-        "
+-",
++        source_position(162),
++        "> ",
++        source_position(164),
++        "with ",
++        source_position(169),
++        "multiple ",
++        source_position(178),
++        "lines",
+         hard_line_break,
+-        source_position(156),
+-        "  ",
+-        source_position(158),
+-        ">",
+-        source_position(159),
+-        " with multiple lines",
+-        source_position(179),
+-        "
+-",
+         hard_line_break
+       ]),
+       hard_line_break
+     ]),
+     hard_line_break
+   ]),
+-  source_position(180),
++  hard_line_break,
++  source_position(185),
+   "-",
+-  source_position(181),
++  source_position(186),
+   " ",
+   align("  ", [
+-    source_position(182),
++    source_position(187),
+     ">",
+     align("  ", [
+-      source_position(183),
++      source_position(188),
+       " quote in list",
+       dedentRoot([hard_line_break, "  > "]),
+-      source_position(202),
++      source_position(207),
+       "with multiple lines",
+-      source_position(221),
++      source_position(226),
+       "
+ ",
+-      source_position(222),
++      source_position(227),
+       "  ",
+-      source_position(224),
++      source_position(229),
+       ">",
+-      source_position(225),
++      source_position(230),
+       " ",
+-      source_position(226),
++      source_position(231),
+       "-",
+-      source_position(227),
++      source_position(232),
+       " ",
+       align("  ", [
+-        source_position(228),
+-        "list ",
+         source_position(233),
+-        "item ",
++        "list ",
+         source_position(238),
+-        "in ",
+-        source_position(241),
+-        "quote ",
+-        source_position(247),
+-        "in ",
+-        source_position(250),
+-        "list",
+-        hard_line_break,
+-        source_position(261),
+-        "> ",
+-        source_position(263),
+-        "quote ",
+-        source_position(269),
+-        "in ",
+-        source_position(272),
+-        "list ",
+-        source_position(277),
+         "item ",
+-        source_position(282),
++        source_position(243),
+         "in ",
+-        source_position(285),
++        source_position(246),
+         "quote ",
+-        source_position(291),
++        source_position(252),
+         "in ",
+-        source_position(294),
++        source_position(255),
+         "list",
+         hard_line_break,
+         hard_line_break,
+-        source_position(305),
++        source_position(266),
+         ">",
+-        source_position(306),
+-        " with multiple lines",
+-        source_position(326),
+-        "
+-",
+-        source_position(327),
+-        "  ",
+-        source_position(329),
+-        " ",
+-        source_position(330),
+-        " ",
+-        source_position(331),
+-        " ",
+-        source_position(332),
++        align("  ", [
++          source_position(267),
++          " quote in list item in quote in list",
++          dedentRoot([hard_line_break, "  >   > "]),
++          source_position(312),
++          "with multiple lines",
++          source_position(331),
++          "
++"
++        ]),
++        hard_line_break,
++        source_position(334),
++        "-",
++        source_position(335),
+         " ",
+-        source_position(333),
+-        "- nested list",
+-        source_position(346),
+-        "
+-",
++        align("  ", [
++          source_position(336),
++          "nested ",
++          source_position(343),
++          "list",
++          hard_line_break,
++          hard_line_break
++        ]),
+         hard_line_break
+       ])
+     ]),
+     empty_line
+   ]),
+-  source_position(348),
++  source_position(349),
+   "-",
+-  source_position(349),
+-  " ",
+   source_position(350),
+   " ",
+   source_position(351),
+   " ",
++  source_position(352),
++  " ",
+   align("    ", [
+-    source_position(352),
++    source_position(353),
+     ">",
+-    source_position(353),
++    source_position(354),
+     " quote in list",
+-    source_position(367),
++    source_position(368),
+     "
+ ",
+-    source_position(368),
++    source_position(369),
+     "	",
+-    source_position(369),
++    source_position(370),
+     "> this line is indented by tab",
+-    source_position(399),
++    source_position(400),
+     "
+ ",
+     hard_line_break
+
+```

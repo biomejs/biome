@@ -1,0 +1,33 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: index.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+export const prerender = true;
+
+import Playground from './file.svelte';
+---
+
+<!doctype html>
+<html lang="en">
+	<Playground client:only="svelte" />
+</html>
+
+<style is:global>
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+</style>
+
+```

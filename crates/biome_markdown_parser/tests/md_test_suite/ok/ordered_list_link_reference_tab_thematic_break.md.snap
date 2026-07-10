@@ -54,7 +54,6 @@ MdDocument {
                         },
                         MdParagraph {
                             list: MdInlineItemList [],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@13..14 "\n" [] [],
@@ -62,10 +61,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@15..16 "\t" [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@14..16 " \t" [] [],
                                 },
                             ],
                         },
@@ -127,15 +123,12 @@ MdDocument {
               6: (empty)
             1: MD_PARAGRAPH@13..13
               0: MD_INLINE_ITEM_LIST@13..13
-              1: (empty)
             2: MD_NEWLINE@13..14
               0: NEWLINE@13..14 "\n" [] []
             3: MD_CONTINUATION_INDENT@14..16
               0: MD_INDENT_TOKEN_LIST@14..16
-                0: MD_INDENT_TOKEN@14..15
-                  0: MD_INDENT_CHAR@14..15 " " [] []
-                1: MD_INDENT_TOKEN@15..16
-                  0: MD_INDENT_CHAR@15..16 "\t" [] []
+                0: MD_INDENT_TOKEN@14..16
+                  0: MD_INDENT_CHAR@14..16 " \t" [] []
             4: MD_THEMATIC_BREAK_BLOCK@16..19
               0: MD_THEMATIC_BREAK_PART_LIST@16..19
                 0: MD_THEMATIC_BREAK_CHAR@16..17

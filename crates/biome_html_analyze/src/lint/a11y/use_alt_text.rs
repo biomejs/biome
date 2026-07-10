@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
@@ -184,7 +185,7 @@ impl Rule for UseAltText {
 /// Check if the element has a type="image" attribute
 fn has_type_image_attribute(element: &AnyHtmlTagElement) -> bool {
     element
-        .find_attribute_by_name("type")
+        .find_attribute_or_vue_binding("type")
         .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 

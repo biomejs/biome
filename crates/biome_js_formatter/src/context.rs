@@ -8,7 +8,9 @@ use biome_formatter::{
     FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
+use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
+use biome_languages::JsFileSource;
+use biome_rowan::TextRange;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -46,7 +48,10 @@ pub struct JsFormatContext {
 
     source_map: Option<TransformSourceMap>,
 
-    should_delegate_fmt_embedded_nodes: bool,
+    /// Ranges of template chunks whose content was parsed as an embedded
+    /// language. Formatting them is delegated to the corresponding language
+    /// formatter, see [crate::format_node].
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl JsFormatContext {
@@ -56,7 +61,7 @@ impl JsFormatContext {
             comments: Rc::new(comments),
             cached_function_body: None,
             source_map: None,
-            should_delegate_fmt_embedded_nodes: false,
+            embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -95,13 +100,16 @@ impl JsFormatContext {
         self
     }
 
-    pub fn with_fmt_embedded_nodes(mut self) -> Self {
-        self.should_delegate_fmt_embedded_nodes = true;
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
         self
     }
 
-    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
-        self.should_delegate_fmt_embedded_nodes
+    /// Ranges of template chunks whose content was parsed as an embedded
+    /// language, and whose formatting is therefore delegated to the
+    /// corresponding language formatter.
+    pub fn embedded_node_ranges(&self) -> &[TextRange] {
+        &self.embedded_node_ranges
     }
 }
 
