@@ -31,4 +31,7 @@
 
   <!-- Should not apply to other directives -->
   <MyComp v-foo:bar="asdf"></MyComp>
+
+  <!-- PrimeVue pass-through props: colon-separated segments that are each kebab-case/lowercase -->
+  <Panel pt:root:class="border" pt:header:id="headerId" pt:header:data-test-id="testId"></Panel>
 </template>

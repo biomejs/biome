@@ -274,8 +274,12 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
 }
 
 fn is_hyphenated(name: &str) -> bool {
-    // Treat pure lowercase and kebab-case as valid.
-    matches!(Case::identify(name, true), Case::Kebab | Case::Lower)
+    // Colon-separated names (e.g. PrimeVue pass-through props like `pt:header:data-test-id`)
+    // are valid as long as every segment is itself hyphenated.
+    name.split(':').all(|segment| {
+        // Treat pure lowercase and kebab-case as valid.
+        matches!(Case::identify(segment, true), Case::Kebab | Case::Lower)
+    })
 }
 
 fn is_svg_element(element: &AnyHtmlTagElement) -> bool {
