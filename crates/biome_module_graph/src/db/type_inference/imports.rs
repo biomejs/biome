@@ -95,13 +95,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let mut collection = NamespaceExportCollection::new();
 
-        if !self.collect_namespace_members(module, inferred_types, true, &mut collection) {
-            return InferredTypeData::Unknown;
-        }
+        self.collect_namespace_members(module, inferred_types, true, &mut collection);
 
         while let Some((module, include_default)) = collection.stack.pop() {
             if collection.remaining_steps == 0 {
-                return InferredTypeData::Unknown;
+                break;
             }
             collection.remaining_steps -= 1;
 
@@ -109,14 +107,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
 
-            if !self.collect_namespace_members(
+            self.collect_namespace_members(
                 module,
                 &inferred_types,
                 include_default,
                 &mut collection,
-            ) {
-                return InferredTypeData::Unknown;
-            }
+            );
         }
 
         InferredTypeData::Namespace(InferredNamespace::new(
@@ -132,14 +128,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         inferred_types: &InferredModuleTypes<'db>,
         include_default: bool,
         collection: &mut NamespaceExportCollection<'db>,
-    ) -> bool {
+    ) {
         let module_key = ModuleKey::new(module.as_id());
         if !collection.seen_modules.insert(module_key) {
-            return true;
+            return;
         }
 
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return true;
+            return;
         };
 
         for (name, _) in js_info.exports.iter() {
@@ -150,11 +146,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             if !collection.seen_names.insert(name.text().to_string()) {
                 continue;
             }
-
-            if collection.remaining_steps == 0 {
-                return false;
-            }
-            collection.remaining_steps -= 1;
 
             collection.members.push(InferredTypeMember {
                 kind: InferredTypeMemberKind::Named(name.clone()),
@@ -167,8 +158,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                 collection.stack.push((module, false));
             }
         }
-
-        true
     }
 
     fn resolve_export_name(

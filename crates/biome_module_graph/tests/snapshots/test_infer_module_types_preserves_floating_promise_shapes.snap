@@ -344,15 +344,13 @@ Expression "doWork" => async Function "doWork" {
   returns: instanceof Promise<void>
 }
 
-Binding maybeDoWork "maybeDoWork" =>
-  instanceof async Function "doWork" {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof Promise<void>
+Binding maybeDoWork "maybeDoWork" => instanceof typeof async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
   }
-  | undefined
+  returns: instanceof Promise<void>
+} | undefined
 
 Expression "doWork" => async Function "doWork" {
   accepts: {
@@ -362,19 +360,17 @@ Expression "doWork" => async Function "doWork" {
   returns: instanceof Promise<void>
 }
 
-Binding optional "optional" => instanceof Promise<void>
+Binding optional "optional" => instanceof Promise<void> | undefined
 
-Expression "maybeDoWork" =>
-  instanceof async Function "doWork" {
-    accepts: {
-      params: []
-      type_args: []
-    }
-    returns: instanceof Promise<void>
+Expression "maybeDoWork" => instanceof typeof async Function "doWork" {
+  accepts: {
+    params: []
+    type_args: []
   }
-  | undefined
+  returns: instanceof Promise<void>
+} | undefined
 
-Expression "maybeDoWork?.()" => instanceof Promise<void>
+Expression "maybeDoWork?.()" => instanceof Promise<void> | undefined
 
 Binding globalChain "globalChain" => instanceof Promise
 

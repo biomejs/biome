@@ -24,6 +24,7 @@ use biome_js_type_info::{
         PredicateReturnType as InferredPredicateReturnType, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+        well_known_symbol_name,
     },
 };
 use biome_rowan::Text;
@@ -867,15 +868,29 @@ fn global_member_kind_from_raw<'db>(
 ) -> InferredTypeMemberKind<'db> {
     match kind {
         RawTypeMemberKind::CallSignature => InferredTypeMemberKind::CallSignature,
-        RawTypeMemberKind::ComputedValue(_) => {
-            InferredTypeMemberKind::ComputedValue(key_ty.unwrap_or(InferredTypeData::Unknown))
-        }
+        RawTypeMemberKind::ComputedValue(reference) => well_known_symbol_name(reference).map_or(
+            InferredTypeMemberKind::ComputedValue(key_ty.unwrap_or(InferredTypeData::Unknown)),
+            |name| {
+                InferredTypeMemberKind::ComputedValueNamed(
+                    name,
+                    key_ty.unwrap_or(InferredTypeData::Unknown),
+                )
+            },
+        ),
         RawTypeMemberKind::ConstAssertedCallSignature => {
             InferredTypeMemberKind::ConstAssertedCallSignature
         }
-        RawTypeMemberKind::ConstAssertedComputedValue(_) => {
-            InferredTypeMemberKind::ConstAssertedComputedValue(
-                key_ty.unwrap_or(InferredTypeData::Unknown),
+        RawTypeMemberKind::ConstAssertedComputedValue(reference) => {
+            well_known_symbol_name(reference).map_or(
+                InferredTypeMemberKind::ConstAssertedComputedValue(
+                    key_ty.unwrap_or(InferredTypeData::Unknown),
+                ),
+                |name| {
+                    InferredTypeMemberKind::ConstAssertedComputedValueNamed(
+                        name,
+                        key_ty.unwrap_or(InferredTypeData::Unknown),
+                    )
+                },
             )
         }
         RawTypeMemberKind::ConstAssertedConstructor => {

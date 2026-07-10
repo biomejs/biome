@@ -6,8 +6,11 @@ use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb, ResolvedPath};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
-    RawTypeData, ResolvedTypeId, TypeId, TypeReference, TypeResolverLevel,
-    interned_types::{LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData},
+    RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel,
+    interned_types::{
+        InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
+    },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
@@ -199,6 +202,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             return ty;
         }
 
+        if let RawTypeData::TypeofValue(value) = raw {
+            let ty = if value.ty.is_unknown() {
+                self.resolve_qualifier(&TypeReferenceQualifier::from_path(
+                    value.scope_id.unwrap_or(ScopeId::GLOBAL),
+                    value.identifier.clone(),
+                ))
+            } else {
+                self.resolve(&value.ty)
+            };
+            return InferredTypeData::TypeofValue(InternedTypeofValue::new(
+                self.db,
+                ty,
+                value.identifier.clone(),
+                value.scope_id,
+            ));
+        }
+
         let db = self.db;
         let ty = InferredTypeData::from_raw_with_resolver(db, raw, &mut |reference| {
             self.resolve(reference)
@@ -217,54 +237,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         .resolve_inferred_typeof_expression(expression.expression(self.db))
                         .unwrap_or(InferredTypeData::Unknown);
                 }
-                InferredTypeData::TypeofType(typeof_type) => {
-                    ty = typeof_type.ty(self.db);
-                }
-                InferredTypeData::TypeofValue(typeof_value) => {
-                    ty = typeof_value.ty(self.db);
-                }
                 InferredTypeData::InstanceOf(instance) => {
                     let target = instance.ty(self.db);
-                    let target = match target {
-                        InferredTypeData::TypeofExpression(expression) => self
-                            .resolve_inferred_typeof_expression(expression.expression(self.db))
-                            .unwrap_or(InferredTypeData::Unknown),
-                        InferredTypeData::TypeofType(typeof_type) => typeof_type.ty(self.db),
-                        InferredTypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
-                        InferredTypeData::Unknown
-                        | InferredTypeData::Divergent(_)
-                        | InferredTypeData::Global
-                        | InferredTypeData::BigInt
-                        | InferredTypeData::Boolean
-                        | InferredTypeData::Null
-                        | InferredTypeData::Number
-                        | InferredTypeData::String
-                        | InferredTypeData::Symbol
-                        | InferredTypeData::Undefined
-                        | InferredTypeData::Conditional
-                        | InferredTypeData::Class(_)
-                        | InferredTypeData::Constructor(_)
-                        | InferredTypeData::Function(_)
-                        | InferredTypeData::Interface(_)
-                        | InferredTypeData::Module(_)
-                        | InferredTypeData::Namespace(_)
-                        | InferredTypeData::Object(_)
-                        | InferredTypeData::Tuple(_)
-                        | InferredTypeData::Generic(_)
-                        | InferredTypeData::Local(_)
-                        | InferredTypeData::Intersection(_)
-                        | InferredTypeData::Union(_)
-                        | InferredTypeData::TypeOperator(_)
-                        | InferredTypeData::Literal(_)
-                        | InferredTypeData::InstanceOf(_)
-                        | InferredTypeData::MergedReference(_)
-                        | InferredTypeData::AnyKeyword
-                        | InferredTypeData::NeverKeyword
-                        | InferredTypeData::ObjectKeyword
-                        | InferredTypeData::ThisKeyword
-                        | InferredTypeData::UnknownKeyword
-                        | InferredTypeData::VoidKeyword => return ty,
+                    let InferredTypeData::TypeofExpression(expression) = target else {
+                        return ty;
                     };
+                    let target = self
+                        .resolve_inferred_typeof_expression(expression.expression(self.db))
+                        .unwrap_or(InferredTypeData::Unknown);
                     if target.should_flatten_instance(instance.type_parameters(self.db)) {
                         ty = target;
                     } else {
@@ -304,6 +284,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
                 | InferredTypeData::AnyKeyword
                 | InferredTypeData::NeverKeyword
                 | InferredTypeData::ObjectKeyword

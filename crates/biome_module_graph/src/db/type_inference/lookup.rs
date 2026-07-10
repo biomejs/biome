@@ -531,6 +531,17 @@ fn find_member_in_members<'db>(
         return named_member;
     }
 
+    let computed_member = members.iter().find_map(|member| {
+        member
+            .kind
+            .computed_value_type()
+            .is_some_and(|ty| ty.is_string_literal_key(db, name))
+            .then_some((member.ty, false))
+    });
+    if computed_member.is_some() {
+        return computed_member;
+    }
+
     allow_index_signature.then(|| {
         members.iter().find_map(|member| {
             member

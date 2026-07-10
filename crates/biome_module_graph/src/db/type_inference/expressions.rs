@@ -843,6 +843,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                     instance.type_parameters(self.db),
                     &[],
                 );
+                if matches!(target, InferredTypeData::Union(_)) {
+                    let ty = self.resolve_static_member_expression(target, member_name)?;
+                    return Some(apply_substitutions(self.db, ty, &substitutions));
+                }
                 self.find_static_member_on_resolved_type(target, member_name)
                     .map(|(ty, is_optional)| {
                         let ty = apply_substitutions(self.db, ty, &substitutions);
@@ -1013,22 +1017,32 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                 }
                 InferredTypeData::Module(module) => {
-                    if let Some(member) = find_member_in_members_for_mode(
-                        self.db,
-                        module.members(self.db),
-                        member_name,
-                        StaticMemberMode::Instance,
-                    ) {
+                    if let Some(member) = [StaticMemberMode::Instance, StaticMemberMode::Class]
+                        .into_iter()
+                        .find_map(|mode| {
+                            find_member_in_members_for_mode(
+                                self.db,
+                                module.members(self.db),
+                                member_name,
+                                mode,
+                            )
+                        })
+                    {
                         return Some(member);
                     }
                 }
                 InferredTypeData::Namespace(namespace) => {
-                    if let Some(member) = find_member_in_members_for_mode(
-                        self.db,
-                        namespace.members(self.db),
-                        member_name,
-                        StaticMemberMode::Instance,
-                    ) {
+                    if let Some(member) = [StaticMemberMode::Instance, StaticMemberMode::Class]
+                        .into_iter()
+                        .find_map(|mode| {
+                            find_member_in_members_for_mode(
+                                self.db,
+                                namespace.members(self.db),
+                                member_name,
+                                mode,
+                            )
+                        })
+                    {
                         return Some(member);
                     }
                 }

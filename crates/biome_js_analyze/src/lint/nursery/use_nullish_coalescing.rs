@@ -12,7 +12,7 @@ use biome_js_syntax::{
     JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
     JsWhileStatement, OperatorPrecedence, T,
 };
-use biome_js_type_info::{ConditionalType, TypeData};
+use biome_js_type_info::InferredType;
 use biome_rowan::{
     AstNode, BatchMutationExt, SyntaxResult, TextRange, declare_node_union,
     trim_leading_trivia_pieces,
@@ -472,18 +472,18 @@ fn run_logical_or(
     }
 
     let left = logical.left().ok()?;
-    let left_ty = ctx.type_of_expression(&left);
+    let left_ty = ctx.inferred_type_of_expression(&left)?;
 
-    if !is_possibly_nullish(&left_ty) {
+    if !left_ty.has_nullish_variant() {
         return None;
     }
 
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty) {
         return None;
     }
 
     let can_fix =
-        is_safe_type_for_replacement(&left_ty) && is_safe_syntax_context_for_replacement(logical);
+        left_ty.is_safe_for_nullish_coalescing() && is_safe_syntax_context_for_replacement(logical);
 
     Some(UseNullishCoalescingState::LogicalOr {
         operator_range: logical.operator_token().ok()?.text_trimmed_range(),
@@ -519,50 +519,25 @@ fn run_logical_or_assignment(
         AnyJsAssignmentPattern::AnyJsAssignment(assign) => {
             let id = assign.as_js_identifier_assignment()?;
             let name = id.name_token().ok()?;
-            ctx.type_of_named_value(assignment.range(), name.text_trimmed())
+            ctx.inferred_type_of_named_value(assignment.range(), name.text_trimmed())?
         }
         _ => return None,
     };
 
-    if !is_possibly_nullish(&left_ty) {
+    if !left_ty.has_nullish_variant() {
         return None;
     }
 
-    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, &left_ty) {
+    if options.has_any_ignore_primitives() && should_ignore_for_primitives(options, left_ty) {
         return None;
     }
 
-    let can_fix = is_safe_type_for_replacement(&left_ty);
+    let can_fix = left_ty.is_safe_for_nullish_coalescing();
 
     Some(UseNullishCoalescingState::LogicalOrAssignment {
         operator_range: assignment.operator_token().ok()?.text_trimmed_range(),
         can_fix,
     })
-}
-
-fn is_safe_type_for_replacement(ty: &biome_js_type_info::Type) -> bool {
-    if ty.is_union() {
-        ty.flattened_union_variants().all(|variant| {
-            matches!(
-                variant.conditional_semantics(),
-                ConditionalType::Truthy | ConditionalType::Nullish
-            )
-        })
-    } else {
-        matches!(
-            ty.conditional_semantics(),
-            ConditionalType::Truthy | ConditionalType::Nullish
-        )
-    }
-}
-
-fn is_possibly_nullish(ty: &biome_js_type_info::Type) -> bool {
-    if ty.is_union() {
-        ty.flattened_union_variants()
-            .any(|variant| variant.conditional_semantics().is_nullish())
-    } else {
-        ty.conditional_semantics().is_nullish()
-    }
 }
 
 /// Returns `true` when every non-nullish variant of `ty` is a primitive that the
@@ -571,36 +546,14 @@ fn is_possibly_nullish(ty: &biome_js_type_info::Type) -> bool {
 /// union in the first place.
 fn should_ignore_for_primitives(
     options: &UseNullishCoalescingOptions,
-    ty: &biome_js_type_info::Type,
+    ty: InferredType,
 ) -> bool {
-    if !ty.is_union() {
-        return false;
-    }
-    ty.flattened_union_variants()
-        .filter(|variant| !variant.conditional_semantics().is_nullish())
-        .all(|variant| is_ignored_primitive(options, &variant))
-}
-
-/// Maps a resolved primitive (or primitive literal) type to its matching
-/// `ignorePrimitives` selector. Non-primitive types are never ignored.
-fn is_ignored_primitive(
-    options: &UseNullishCoalescingOptions,
-    ty: &biome_js_type_info::Type,
-) -> bool {
-    ty.resolved_data().is_some_and(|data| match data.as_raw_data() {
-        TypeData::String => options.should_ignore_primitive_string(),
-        TypeData::Number => options.should_ignore_primitive_number(),
-        TypeData::Boolean => options.should_ignore_primitive_boolean(),
-        TypeData::BigInt => options.should_ignore_primitive_bigint(),
-        TypeData::Literal(literal) => match literal.as_ref() {
-            biome_js_type_info::Literal::String(_) => options.should_ignore_primitive_string(),
-            biome_js_type_info::Literal::Number(_) => options.should_ignore_primitive_number(),
-            biome_js_type_info::Literal::Boolean(_) => options.should_ignore_primitive_boolean(),
-            biome_js_type_info::Literal::BigInt(_) => options.should_ignore_primitive_bigint(),
-            _ => false,
-        },
-        _ => false,
-    })
+    ty.nullish_union_matches_ignored_primitives(
+        options.should_ignore_primitive_string(),
+        options.should_ignore_primitive_number(),
+        options.should_ignore_primitive_boolean(),
+        options.should_ignore_primitive_bigint(),
+    )
 }
 
 fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool {
@@ -804,8 +757,8 @@ fn run_ternary(
 
     let options = ctx.options();
     if options.has_any_ignore_primitives() {
-        let checked_ty = ctx.type_of_expression(&checked_expr);
-        if should_ignore_for_primitives(options, &checked_ty) {
+        let checked_ty = ctx.inferred_type_of_expression(&checked_expr)?;
+        if should_ignore_for_primitives(options, checked_ty) {
             return None;
         }
     }
@@ -821,10 +774,10 @@ fn run_ternary(
             // A single strict check only covers one nullish variant. The fix to `??`
             // is safe only if the type cannot be the opposite variant.
             NullishCheckKind::StrictSingle(lit) => {
-                let ty = ctx.type_of_expression(&checked_expr);
+                let ty = ctx.inferred_type_of_expression(&checked_expr)?;
                 match lit {
-                    NullishLiteral::Null => !type_has_undefined(&ty),
-                    NullishLiteral::Undefined => !type_has_null(&ty),
+                    NullishLiteral::Null => !ty.has_undefined_variant(),
+                    NullishLiteral::Undefined => !ty.has_null_variant(),
                 }
             }
         };
@@ -983,30 +936,6 @@ fn contains_call_or_new_expression(expr: &AnyJsExpression) -> bool {
             JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_NEW_EXPRESSION
         )
     })
-}
-
-fn type_has_null(ty: &biome_js_type_info::Type) -> bool {
-    let is_null = |t: &biome_js_type_info::Type| {
-        t.resolved_data()
-            .is_some_and(|d| matches!(d.as_raw_data(), TypeData::Null))
-    };
-    if ty.is_union() {
-        ty.flattened_union_variants().any(|v| is_null(&v))
-    } else {
-        is_null(ty)
-    }
-}
-
-fn type_has_undefined(ty: &biome_js_type_info::Type) -> bool {
-    let is_undef = |t: &biome_js_type_info::Type| {
-        t.resolved_data()
-            .is_some_and(|d| matches!(d.as_raw_data(), TypeData::Undefined | TypeData::VoidKeyword))
-    };
-    if ty.is_union() {
-        ty.flattened_union_variants().any(|v| is_undef(&v))
-    } else {
-        is_undef(ty)
-    }
 }
 
 /// Wraps the expression in parentheses if it would be invalid or change meaning
