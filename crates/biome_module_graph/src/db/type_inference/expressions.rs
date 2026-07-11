@@ -4,6 +4,7 @@ use super::{
         StaticMemberMode, apply_substitutions, find_member_in_members_for_mode,
         substitutions_for_instance,
     },
+    normalize_structural_type,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{ResolvedCallArgument, infer_call_expression_return_type_from_args};
@@ -17,9 +18,9 @@ use biome_js_type_info::{
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
         InternedFunction as InferredFunction, InternedLiteral as InferredInternedLiteral,
         InternedTuple as InferredTuple, Literal as InferredLiteral,
-        ReturnType as InferredReturnType, TupleElementType as InferredTupleElementType,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeofExpression as InferredTypeofExpression,
+        ReturnType as InferredReturnType, StructuralMapError,
+        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
+        TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
     literal::NumberLiteral,
 };
@@ -32,6 +33,7 @@ const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_STATIC_MEMBER_LOOKUP_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
+const MAX_CALL_CALLEE_SPINE_DEPTH: usize = 64;
 
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn resolve_typeof_expression(
@@ -308,6 +310,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_call_arguments(arguments);
+        let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
@@ -317,7 +320,63 @@ impl<'db> ResolutionCtx<'db, '_> {
         arguments: &[InferredCallArgumentType<'db>],
     ) -> InferredTypeData<'db> {
         let args = self.resolve_inferred_call_arguments(arguments);
+        let callee = self.resolve_call_callee(callee);
         infer_call_expression_return_type_from_args(self.db, callee, &args)
+    }
+
+    fn resolve_call_callee(&mut self, callee: InferredTypeData<'db>) -> InferredTypeData<'db> {
+        let original = callee;
+        let mut seen = FxHashSet::default();
+        let db = self.db;
+        let callee = self.resolve_call_callee_spine(callee, MAX_CALL_CALLEE_SPINE_DEPTH, &mut seen);
+
+        normalize_structural_type(db, callee, |ty| {
+            if let InferredTypeData::Local(local) = ty
+                && local.module(db) == self.module_key
+            {
+                ty
+            } else {
+                self.resolve_inferred_type(ty)
+            }
+        })
+        .unwrap_or_else(|error| {
+            debug_assert_eq!(error, StructuralMapError::StepLimitExceeded);
+            original
+        })
+    }
+
+    fn resolve_call_callee_spine(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        remaining_depth: usize,
+        seen: &mut FxHashSet<InferredTypeData<'db>>,
+    ) -> InferredTypeData<'db> {
+        if remaining_depth == 0 {
+            return ty;
+        }
+
+        let ty = self.resolve_inferred_type(ty);
+        if !seen.insert(ty) {
+            return ty;
+        }
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            return ty;
+        };
+
+        let target =
+            self.resolve_call_callee_spine(instance.ty(self.db), remaining_depth - 1, seen);
+        if target.should_flatten_instance(instance.type_parameters(self.db)) {
+            target
+        } else {
+            InferredTypeData::instance_of(
+                self.db,
+                target,
+                instance
+                    .type_parameters(self.db)
+                    .to_vec()
+                    .into_boxed_slice(),
+            )
+        }
     }
 
     fn resolve_call_arguments(
@@ -636,47 +695,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
 
-            match ty {
-                InferredTypeData::Union(union) => {
-                    pending.extend(union.types(self.db).iter().rev().copied());
+            if let InferredTypeData::Union(union) = ty {
+                pending.extend(union.types(self.db).iter().rev().copied());
+            } else if matches!(ty, InferredTypeData::InstanceOf(_)) {
+                if let Some(value_ty) = self.resolve_promise_value_type(ty) {
+                    pending.push(value_ty);
+                } else {
+                    types.push(ty);
                 }
-                ty @ InferredTypeData::InstanceOf(_) => {
-                    types.push(self.resolve_promise_value_type(ty).unwrap_or(ty))
-                }
-                ty @ (InferredTypeData::BigInt
-                | InferredTypeData::Boolean
-                | InferredTypeData::Class(_)
-                | InferredTypeData::Function(_)
-                | InferredTypeData::Literal(_)
-                | InferredTypeData::Null
-                | InferredTypeData::Number
-                | InferredTypeData::Object(_)
-                | InferredTypeData::String) => types.push(ty),
-                InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
-                | InferredTypeData::Global
-                | InferredTypeData::Symbol
-                | InferredTypeData::Undefined
-                | InferredTypeData::Conditional
-                | InferredTypeData::Constructor(_)
-                | InferredTypeData::Interface(_)
-                | InferredTypeData::Module(_)
-                | InferredTypeData::Namespace(_)
-                | InferredTypeData::Tuple(_)
-                | InferredTypeData::Generic(_)
-                | InferredTypeData::Local(_)
-                | InferredTypeData::Intersection(_)
-                | InferredTypeData::TypeOperator(_)
-                | InferredTypeData::MergedReference(_)
-                | InferredTypeData::TypeofExpression(_)
-                | InferredTypeData::TypeofType(_)
-                | InferredTypeData::TypeofValue(_)
-                | InferredTypeData::AnyKeyword
-                | InferredTypeData::NeverKeyword
-                | InferredTypeData::ObjectKeyword
-                | InferredTypeData::ThisKeyword
-                | InferredTypeData::UnknownKeyword
-                | InferredTypeData::VoidKeyword => {}
+            } else {
+                types.push(ty);
             }
         }
 
@@ -993,6 +1021,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     }
                 }
                 InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
+                InferredTypeData::Intersection(intersection) => {
+                    pending.extend(intersection.types(self.db).iter().rev().copied());
+                }
                 InferredTypeData::Interface(interface) => {
                     if let Some(member) = find_member_in_members_for_mode(
                         self.db,
@@ -1059,6 +1090,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                         pending.push(prototype);
                     }
                 }
+                InferredTypeData::MergedReference(reference) => {
+                    pending.extend(reference.targets(self.db));
+                }
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().rev().copied());
+                }
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
@@ -1074,10 +1111,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::Function(_)
                 | InferredTypeData::Tuple(_)
                 | InferredTypeData::Local(_)
-                | InferredTypeData::Intersection(_)
-                | InferredTypeData::Union(_)
                 | InferredTypeData::TypeOperator(_)
-                | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofExpression(_)
                 | InferredTypeData::TypeofType(_)
                 | InferredTypeData::TypeofValue(_)
@@ -1275,7 +1309,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         match self.resolve_inferred_type(subject) {
             InferredTypeData::Class(class) => {
                 let mut members = Vec::new();
-                let mut seen_names = Vec::new();
+                let mut seen_names = FxHashSet::default();
                 collect_rest_members(
                     &mut members,
                     &mut seen_names,
@@ -1332,7 +1366,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         excluded_names: &[Text],
     ) -> InferredTypeData<'db> {
         let mut members = Vec::new();
-        let mut seen_names = Vec::new();
+        let mut seen_names = FxHashSet::default();
         let mut seen_types = FxHashSet::default();
         let mut pending = Vec::from([ty]);
         for _ in 0..MAX_REST_MEMBER_STEPS {
@@ -1982,7 +2016,7 @@ enum RestMemberMode {
 
 fn collect_rest_members<'db>(
     members: &mut Vec<InferredTypeMember<'db>>,
-    seen_names: &mut Vec<Text>,
+    seen_names: &mut FxHashSet<Text>,
     source_members: &[InferredTypeMember<'db>],
     excluded_names: &[Text],
     mode: RestMemberMode,
@@ -2000,14 +2034,10 @@ fn collect_rest_members<'db>(
         {
             continue;
         }
-        if seen_names
-            .iter()
-            .any(|seen_name| seen_name.text() == name.text())
-        {
+        if !seen_names.insert(name) {
             continue;
         }
 
-        seen_names.push(name);
         members.push(member.clone());
     }
 }

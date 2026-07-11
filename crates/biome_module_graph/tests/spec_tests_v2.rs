@@ -10,7 +10,7 @@ use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_type_info::{
-    InferredType, format_inferred_type,
+    InferredType, TypeResolverLevel, format_inferred_type,
     interned_types::{
         FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
         InternedMergedReference as InferredMergedReference, InternedUnion as InferredUnion,
@@ -22,8 +22,8 @@ use biome_js_type_info::{
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport, ModuleDb, ModuleInfo,
-    ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport, ModuleDb,
+    ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
     infer_call_expression_type as infer_call_expression_type_query, infer_module_types,
     infer_module_types_bottom_up, normalize_type as normalize_type_query, resolve_js_module,
 };
@@ -157,7 +157,7 @@ fn test_namespace_import_preserves_members_above_export_step_limit() {
 impl TestModuleDb {
     fn new() -> Self {
         let events = Events::default();
-        Self {
+        let db = Self {
             modules: BTreeMap::new(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
@@ -166,7 +166,26 @@ impl TestModuleDb {
                 }
             }))),
             events,
+        };
+        ModuleGraphGeneration::new(&db, 0);
+        db
+    }
+
+    fn insert_module(&mut self, path: Utf8PathBuf, module: ModuleInfo) {
+        self.modules.insert(path, module);
+        self.bump_module_graph_generation();
+    }
+
+    fn remove_module(&mut self, path: &Utf8Path) {
+        if self.modules.remove(path).is_some() {
+            self.bump_module_graph_generation();
         }
+    }
+
+    fn bump_module_graph_generation(&mut self) {
+        let generation = ModuleGraphGeneration::get(self);
+        let next = generation.value(self).wrapping_add(1);
+        salsa::Setter::to(generation.set_value(self), next);
     }
 
     fn take_salsa_events(&mut self) -> Vec<salsa::Event> {
@@ -210,11 +229,17 @@ impl biome_module_graph::TypeDb for TestModuleDb {
 
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
+    fn module_graph_generation(&self) -> u64 {
+        ModuleGraphGeneration::get(self).value(self)
+    }
+
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        let _ = self.module_graph_generation();
         self.modules.get(path).copied()
     }
 
     fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
+        let _ = self.module_graph_generation();
         for (path, module) in &self.modules {
             f(path, &module.kind(self));
         }
@@ -809,7 +834,7 @@ fn build_js_test_module_db_with_layout(
             Utf8PathBuf::from(*path),
             resolve_js_module_kind_with_layout(fs, project_layout, path, infer_types),
         );
-        db.modules.insert(Utf8PathBuf::from(*path), module_info);
+        db.insert_module(Utf8PathBuf::from(*path), module_info);
     }
     db
 }
@@ -1374,6 +1399,121 @@ fn test_infer_module_types_bottom_up_warms_blanket_reexports() {
     assert!(
         leaf_position < mid_position && mid_position < index_position,
         "bottom-up inference must warm blanket re-export dependencies before their importers"
+    );
+}
+
+#[test]
+fn test_infer_module_types_bottom_up_handles_deep_import_chains() {
+    const MODULE_COUNT: usize = 512;
+
+    let fs = MemoryFileSystem::default();
+    let paths = (0..MODULE_COUNT)
+        .map(|index| format!("/src/module_{index}.ts"))
+        .collect::<Vec<_>>();
+
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index + 1 == MODULE_COUNT {
+            r#"export const value = "leaf";"#.to_string()
+        } else {
+            format!(
+                r#"
+                    import {{ value as next }} from "./module_{}.ts";
+                    export const value = next;
+                "#,
+                index + 1
+            )
+        };
+        fs.insert(path.clone().into(), source);
+    }
+
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let root = db
+        .module_for_path(Utf8Path::new("/src/module_0.ts"))
+        .expect("root module must exist");
+    infer_module_types_bottom_up(&db, root).expect("types must be inferred");
+
+    let inferred = infer_module_types(&db, root).expect("warmed types must be available");
+    let value_ty = inferred_binding_ty_by_name(&db, root, &inferred, "value")
+        .expect("value type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, value_ty),
+        "leaf"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_preserves_local_types_in_import_cycles() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+            import { importedB } from "./b";
+            import { sideC } from "./c";
+            export const localA = "a";
+            export const fromB = importedB;
+            export const fromC = sideC;
+        "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"
+            import { localA } from "./a";
+            export const localB = 1;
+            export const importedB = localA;
+        "#,
+    );
+    fs.insert(
+        "/src/c.ts".into(),
+        r#"
+            export const sideC = "c";
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts", "/src/c.ts"], true);
+    let a_module = db
+        .module_for_path(Utf8Path::new("/src/a.ts"))
+        .expect("a module must exist");
+    let b_module = db
+        .module_for_path(Utf8Path::new("/src/b.ts"))
+        .expect("b module must exist");
+    let a_types = infer_module_types(&db, a_module).expect("a types must be inferred");
+    let b_types = infer_module_types(&db, b_module).expect("b types must be inferred");
+
+    let local_a = inferred_binding_ty_by_name(&db, a_module, &a_types, "localA")
+        .expect("localA type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        a_types.resolve_type(&db, local_a),
+        "a"
+    ));
+
+    let local_b = inferred_binding_ty_by_name(&db, b_module, &b_types, "localB")
+        .expect("localB type must be inferred");
+    assert!(is_inferred_number_literal(
+        &db,
+        b_types.resolve_type(&db, local_b),
+        "1"
+    ));
+
+    let from_b = inferred_binding_ty_by_name(&db, a_module, &a_types, "fromB")
+        .expect("fromB type must be present");
+    assert_eq!(a_types.resolve_type(&db, from_b), InferredTypeData::Unknown);
+
+    let from_c = inferred_binding_ty_by_name(&db, a_module, &a_types, "fromC")
+        .expect("fromC type must be present");
+    assert!(is_inferred_string_literal(
+        &db,
+        a_types.resolve_type(&db, from_c),
+        "c"
+    ));
+
+    let imported_b = inferred_binding_ty_by_name(&db, b_module, &b_types, "importedB")
+        .expect("importedB type must be present");
+    assert_eq!(
+        b_types.resolve_type(&db, imported_b),
+        InferredTypeData::Unknown
     );
 }
 
@@ -2073,8 +2213,19 @@ fn test_infer_module_types_resolves_computed_string_literal_members() {
     fs.insert(
         "/src/index.ts".into(),
         r#"
+            declare const key: string;
+
             export const object = {
                 ["name"]: "object",
+            };
+
+            export const broad = {
+                [key]: 1,
+            };
+
+            export const disposable = {
+                [Symbol.dispose]() {},
+                [Symbol.asyncDispose]() {},
             };
         "#,
     );
@@ -2093,6 +2244,52 @@ fn test_infer_module_types_resolves_computed_string_literal_members() {
     assert!(is_inferred_string(&db, name_ty));
 
     assert!(inferred.find_member_type(&db, object_ty, "other").is_none());
+
+    let broad_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "broad")
+        .expect("broad binding type must be inferred");
+    let arbitrary_ty = inferred
+        .find_member_type(&db, broad_ty, "anything")
+        .expect("computed string member must match arbitrary string names");
+    assert!(is_inferred_number(&db, arbitrary_ty));
+
+    let disposable_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "disposable")
+        .expect("disposable binding type must be inferred");
+    let disposable_ty = InferredType::new(&db, inferred.resolve_type(&db, disposable_ty));
+    assert!(disposable_ty.is_disposable());
+    assert!(disposable_ty.is_async_disposable());
+}
+
+#[test]
+fn test_infer_module_types_preserves_const_asserted_object_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"export const object = { value: "x" as const };"#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let object_ty = inferred_binding_ty_by_name(&db, module, &inferred, "object")
+        .expect("object binding type must be inferred");
+    let InferredTypeData::Object(object) = inferred.resolve_type(&db, object_ty) else {
+        panic!("object binding must resolve to an object");
+    };
+    let value = object
+        .members(&db)
+        .iter()
+        .find(|member| {
+            member
+                .kind
+                .name()
+                .is_some_and(|name| name.text() == "value")
+        })
+        .expect("value member must exist");
+
+    assert!(value.kind.is_const_asserted());
+    assert!(is_inferred_string_literal(&db, value.ty, "x"));
 }
 
 #[test]
@@ -2138,6 +2335,324 @@ fn test_infer_module_types_resolves_merged_reference_members() {
         .find_member_type(&db, foo_ty, "valueName")
         .expect("merged value side must expose Foo.valueName");
     assert!(is_inferred_number(&db, value_name_ty));
+}
+
+#[test]
+fn test_infer_module_types_resolves_destructured_intersection_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Config {
+                mutate: () => Promise<void>;
+            }
+
+            interface Other {
+                value: string;
+            }
+
+            type Full = Config & Other;
+            declare function config(): Full;
+            export const { mutate } = config();
+            export const result = mutate();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let mutate_ty = inferred_binding_ty_by_name(&db, module, &inferred, "mutate")
+        .expect("mutate binding type must be inferred");
+    assert!(
+        inferred
+            .resolve_type(&db, mutate_ty)
+            .callable_function(&db)
+            .is_some()
+    );
+
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result binding type must be inferred");
+    assert!(is_inferred_promise_instance(
+        &db,
+        inferred.resolve_type(&db, result_ty)
+    ));
+}
+
+#[test]
+fn test_infer_module_types_resolves_class_getter_properties() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Value {
+                get text() {
+                    return "value";
+                }
+            }
+
+            export const result = new Value().text;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, result),
+        "value"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_widens_assignment_values() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export let boolean = false;
+            function setBoolean() {
+                boolean = true;
+            }
+
+            export let mixed = undefined;
+            function setString() {
+                mixed = "value";
+            }
+            function setNumber() {
+                mixed = 123;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let boolean = inferred_binding_ty_by_name(&db, module, &inferred, "boolean")
+        .expect("boolean type must be inferred");
+    let mixed = inferred_binding_ty_by_name(&db, module, &inferred, "mixed")
+        .expect("mixed type must be inferred");
+
+    assert!(contains_inferred_boolean(
+        &db,
+        inferred.resolve_type(&db, boolean)
+    ));
+    let mixed = inferred.resolve_type(&db, mixed);
+    assert!(contains_inferred_string_literal(&db, mixed, "value"));
+    assert!(contains_inferred_number_literal(&db, mixed, "123"));
+    assert!(contains_inferred_undefined(&db, mixed));
+}
+
+#[test]
+fn test_infer_module_types_calls_through_function_type_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type AsyncCallback = () => Promise<void>;
+            declare const callback: AsyncCallback;
+            export const result = callback();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let callback_ty = inferred_binding_ty_by_name(&db, module, &inferred, "callback")
+        .expect("callback type must be inferred");
+    let public_call_ty = infer_call_expression_type(&db, module, callback_ty, Vec::new());
+    assert!(is_inferred_promise_instance(&db, public_call_ty));
+
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    assert!(is_inferred_promise_instance(
+        &db,
+        inferred.resolve_type(&db, result_ty)
+    ));
+}
+
+#[test]
+fn test_infer_module_types_calls_generic_function_type_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Factory<T> = () => Promise<T>;
+            declare const makeString: Factory<string>;
+            export const result = makeString();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    let result_ty = inferred.resolve_type(&db, result_ty);
+
+    assert!(is_inferred_promise_with_type_parameter(
+        &db,
+        result_ty,
+        |ty| is_inferred_string(&db, ty)
+    ));
+}
+
+#[test]
+fn test_infer_module_types_calls_generic_callable_interfaces() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Factory<T> {
+                (): Promise<T>;
+            }
+
+            declare const makeString: Factory<string>;
+            export const result = makeString();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    let result_ty = inferred.resolve_type(&db, result_ty);
+
+    assert!(is_inferred_promise_with_type_parameter(
+        &db,
+        result_ty,
+        |ty| is_inferred_string(&db, ty)
+    ));
+}
+
+#[test]
+fn test_infer_module_types_calls_nested_generic_callable_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Callable<T> {
+                (value: T): T;
+            }
+
+            type First<T> = Callable<T>;
+            type Second<T> = First<T>;
+            declare const call: Second<string>;
+            export const result = call("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    let result_ty = inferred.resolve_type(&db, result_ty);
+    assert!(
+        is_inferred_string(&db, result_ty),
+        "nested callable alias must return string, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
+fn test_infer_module_types_calls_nested_zero_argument_generic_callable_aliases() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Factory<T> {
+                (): T;
+            }
+
+            type First<T> = Factory<T>;
+            type Second<T> = First<T>;
+            declare const makePromise: Second<Promise<void>>;
+            export const result = makePromise();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    let result_ty = inferred.resolve_type(&db, result_ty);
+
+    assert!(
+        is_inferred_promise_instance(&db, result_ty),
+        "nested zero-argument callable alias must return Promise<void>, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
+fn test_infer_module_types_calls_swr_style_mutator_interface() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type ScopedMutator<Data = any, T = Data> = (
+                key: string,
+                data?: T | Promise<T>,
+            ) => Promise<T | undefined>;
+
+            interface InternalConfiguration {
+                mutate: ScopedMutator;
+            }
+
+            interface PublicConfiguration {
+                errorRetryInterval: number;
+            }
+
+            type FullConfiguration = InternalConfiguration & PublicConfiguration;
+            declare const useSWRConfig: () => FullConfiguration;
+            const { mutate } = useSWRConfig();
+            export const mutateResult = mutate("key");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let mutate_ty = inferred_binding_ty_by_name(&db, module, &inferred, "mutate")
+        .expect("mutate type must be inferred");
+    assert!(
+        normalize_type(&db, module, mutate_ty)
+            .callable_function(&db)
+            .is_some()
+    );
+
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "mutateResult")
+        .expect("mutateResult type must be inferred");
+    assert!(is_inferred_promise_instance(
+        &db,
+        inferred.resolve_type(&db, result_ty)
+    ));
 }
 
 #[test]
@@ -2246,6 +2761,39 @@ fn test_normalize_type_resolves_typeof_type() {
     assert!(is_inferred_string(&db, name_ty));
 
     assert_inferred_type_snapshot("test_normalize_type_resolves_typeof_type", &db, &fs);
+}
+
+#[test]
+fn test_normalize_type_resolves_local_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Result = Promise<void>;
+            const callback = (): Result => Promise.resolve();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let callback_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "callback")
+        .expect("callback binding type must be inferred");
+    let normalized_ty = normalize_type(&db, index_module, callback_ty);
+    let function = normalized_ty
+        .callable_function(&db)
+        .expect("callback must normalize to a function");
+    assert!(InferredType::new(&db, normalized_ty).function_returns_promise());
+    let InferredReturnType::Type(return_ty) = function.return_type(&db) else {
+        panic!("callback return type must be inferred as a type");
+    };
+
+    assert!(
+        return_ty.is_promise_instance(&db),
+        "callback return type must normalize to Promise, got {return_ty:?}"
+    );
 }
 
 #[test]
@@ -3310,7 +3858,7 @@ fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
     fs.insert(
         "/src/index.ts".into(),
         r#"
-            export async function consume(value: Promise<string> | number) {
+            export async function consume(value: Promise<Promise<string>> | number | undefined) {
                 const awaited = await value;
                 return awaited;
             }
@@ -3328,6 +3876,7 @@ fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
     let awaited_ty = inferred.resolve_type(&db, awaited_ty);
     assert!(contains_inferred_string(&db, awaited_ty));
     assert!(contains_inferred_number(&db, awaited_ty));
+    assert!(contains_inferred_undefined(&db, awaited_ty));
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_evaluates_await_union_expressions_on_build",
@@ -4622,6 +5171,108 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
 }
 
 #[test]
+fn test_infer_call_expression_type_substitutes_generic_in_function_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function wrap<T>(value: T): () => T {
+                return () => value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let wrap_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "wrap")
+        .expect("wrap binding type must be inferred");
+    let call_ty = infer_call_expression_type(
+        &db,
+        index_module,
+        inferred.resolve_type(&db, wrap_ty),
+        Vec::from([InferredTypeData::Number]),
+    );
+
+    let InferredTypeData::Function(function) = call_ty else {
+        panic!("wrap must return a function, got {call_ty:?}");
+    };
+    let InferredReturnType::Type(return_ty) = function.return_type(&db) else {
+        panic!("nested function return type must be inferred as a type");
+    };
+    assert!(
+        is_inferred_number(&db, *return_ty),
+        "nested function return type must substitute T with number, got {return_ty:?}"
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_preserves_shadowed_nested_function_generic() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function makeIdentity<T>(value: T): <T>(value: T) => T {
+                return value => value;
+            }
+
+            const identity = makeIdentity(1);
+            export const result = identity("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    let result_ty = inferred.resolve_type(&db, result_ty);
+    assert!(
+        is_inferred_string_literal(&db, result_ty, "value"),
+        "shadowed nested generic must return the argument literal, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
+fn test_infer_module_types_preserves_shadowed_class_method_generic() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            class Box<T> {
+                map<T>(value: T): T {
+                    return value;
+                }
+            }
+
+            declare const box: Box<number>;
+            export const result = box.map("value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+
+    let result_ty = inferred.resolve_type(&db, result_ty);
+    assert!(
+        is_inferred_string_literal(&db, result_ty, "value"),
+        "shadowed method generic must return the argument literal, got {}",
+        format_inferred_type(&db, result_ty)
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_substitutes_generic_inside_promise_union_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -5447,12 +6098,131 @@ fn test_infer_module_types_is_memoized() {
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
 
+    let first = infer_module_types(&db, index_module).expect("types must be inferred");
+    let first_ptr = std::sync::Arc::as_ptr(&first) as usize;
+    drop(first);
+    db.clear_salsa_events();
+    let second = infer_module_types(&db, index_module).expect("types must be inferred");
+    let second_ptr = std::sync::Arc::as_ptr(&second) as usize;
+    drop(second);
+    let events = db.take_salsa_events();
+
+    assert_eq!(first_ptr, second_ptr);
+    assert_function_query_was_not_run(&db, infer_module_types, index_module, &events);
+}
+
+#[test]
+fn test_infer_module_types_invalidates_changed_dependencies_only() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/base.ts".into(),
+        r#"export const value: string = "value";"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { value } from "./base.ts";
+            export const result = value;
+        "#,
+    );
+    fs.insert(
+        "/src/unrelated.ts".into(),
+        r#"export const unrelated = true;"#,
+    );
+
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/base.ts", "/src/index.ts", "/src/unrelated.ts"],
+        true,
+    );
+    let base_module = db
+        .module_for_path(Utf8Path::new("/src/base.ts"))
+        .expect("base module must exist");
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let unrelated_module = db
+        .module_for_path(Utf8Path::new("/src/unrelated.ts"))
+        .expect("unrelated module must exist");
     let _ = infer_module_types(&db, index_module);
+
+    fs.insert("/src/base.ts".into(), r#"export const value: number = 1;"#);
+    let base_kind = resolve_js_module_kind_for_test(&fs, "/src/base.ts", true);
+    salsa::Setter::to(base_module.set_kind(&mut db), base_kind);
+    db.clear_salsa_events();
+
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let result_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "result")
+        .expect("result type must be inferred");
+    assert!(is_inferred_number(
+        &db,
+        inferred.resolve_type(&db, result_ty)
+    ));
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, infer_module_types, base_module, &events);
+    assert_function_query_was_run(&db, infer_module_types, index_module, &events);
+
+    fs.insert(
+        "/src/unrelated.ts".into(),
+        r#"export const unrelated = false;"#,
+    );
+    let unrelated_kind = resolve_js_module_kind_for_test(&fs, "/src/unrelated.ts", true);
+    salsa::Setter::to(unrelated_module.set_kind(&mut db), unrelated_kind);
     db.clear_salsa_events();
     let _ = infer_module_types(&db, index_module);
     let events = db.take_salsa_events();
-
     assert_function_query_was_not_run(&db, infer_module_types, index_module, &events);
+}
+
+#[test]
+fn test_infer_module_types_invalidates_when_imported_modules_are_added_or_removed() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+            import { value } from "./b.ts";
+            export const result = value;
+        "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"export const value: string = "value";"#,
+    );
+
+    let mut db = build_js_test_module_db(&fs, &["/src/a.ts"], true);
+    let a_module = db
+        .module_for_path(Utf8Path::new("/src/a.ts"))
+        .expect("a module must exist");
+
+    let inferred = infer_module_types(&db, a_module).expect("a types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, a_module, &inferred, "result")
+        .expect("result type must be present");
+    assert_eq!(
+        inferred.resolve_type(&db, result),
+        InferredTypeData::Unknown
+    );
+    drop(inferred);
+
+    let b_path = Utf8PathBuf::from("/src/b.ts");
+    let b_kind = resolve_js_module_kind_for_test(&fs, b_path.as_str(), true);
+    let b_module = ModuleInfo::new(&db, b_path.clone(), b_kind);
+    db.insert_module(b_path.clone(), b_module);
+
+    let inferred = infer_module_types(&db, a_module).expect("a types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, a_module, &inferred, "result")
+        .expect("result type must be present");
+    assert!(is_inferred_string(&db, inferred.resolve_type(&db, result)));
+    drop(inferred);
+
+    db.remove_module(&b_path);
+
+    let inferred = infer_module_types(&db, a_module).expect("a types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, a_module, &inferred, "result")
+        .expect("result type must be present");
+    assert_eq!(
+        inferred.resolve_type(&db, result),
+        InferredTypeData::Unknown
+    );
 }
 
 #[test]
@@ -5494,7 +6264,7 @@ fn test_infer_module_types_backdates_equal_output() {
 }
 
 #[test]
-fn test_infer_module_types_documents_react_export_equals_gap() {
+fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/node_modules/@types/react/index.d.ts".into(),
@@ -5530,20 +6300,59 @@ fn test_infer_module_types_documents_react_export_equals_gap() {
     let index_module = db
         .module_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
+    let react_module = db
+        .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
+        .expect("React module must exist");
+    let ModuleInfoKind::Js(react_info) = react_module.kind(&db) else {
+        panic!("React module must be JavaScript");
+    };
+    let react_types = infer_module_types(&db, react_module).expect("React types must be inferred");
+    for export in react_info.exports.values() {
+        let Some(JsOwnExport::Type(resolved_id)) = export.as_own_export() else {
+            continue;
+        };
+        if resolved_id.level() == TypeResolverLevel::Thin {
+            assert!(
+                react_types.types.get(resolved_id.index()).is_some(),
+                "raw export type ID must index the raw Salsa type table"
+            );
+        }
+    }
+    let use_callback_export = react_info
+        .exports
+        .get("useCallback")
+        .and_then(JsExport::as_own_export)
+        .expect("React must export useCallback");
+    let use_callback_source_ty = match use_callback_export {
+        JsOwnExport::Binding(range) => react_types
+            .binding_type_data
+            .get(range)
+            .map(|data| data.ty)
+            .expect("useCallback source binding type must be inferred"),
+        JsOwnExport::Type(use_callback_id) => react_types
+            .types
+            .get(use_callback_id.index())
+            .copied()
+            .expect("useCallback raw export ID must be in bounds"),
+        JsOwnExport::Namespace(_) => panic!("useCallback must reference its raw source type"),
+    };
+    assert!(
+        react_types
+            .resolve_type(&db, use_callback_source_ty)
+            .callable_function(&db)
+            .is_some()
+    );
     let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
 
-    // React types are exposed through `export = React`, which the new engine
-    // does not resolve yet. Once it does, these assertions must be upgraded to
-    // expect a callable `useCallback` and a `Promise` instance for `promise`.
     let use_callback_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "useCallback")
         .expect("useCallback binding type must be inferred");
     let use_callback_ty = inferred.resolve_type(&db, use_callback_ty);
-    assert!(use_callback_ty.callable_function(&db).is_none());
+    assert!(use_callback_ty.callable_function(&db).is_some());
 
     let promise_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "promise")
         .expect("promise binding type must be inferred");
     let promise_ty = inferred.resolve_type(&db, promise_ty);
-    assert!(!promise_ty.is_promise_instance(&db));
+    assert!(promise_ty.is_promise_instance(&db));
 }
 
 #[test]

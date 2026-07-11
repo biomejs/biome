@@ -20,38 +20,10 @@ export type Foo = Foo.Bar;
 ```
 Exports {
   "Foo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
   }
 }
 Imports {
   No imports
 }
-```
-
-## Registered types
-
-```
-Module TypeId(0) => Namespace {
-    path: Identifier(
-        "Foo",
-    ),
-    members: [
-        TypeMember {
-            kind: NamedStatic(
-                "Bar",
-            ),
-            ty: Resolved(
-                Module(0) TypeId(1),
-            ),
-        },
-    ],
-}
-
-Module TypeId(1) => interface "Bar" {
-  extends: []
-  type_args: []
-  members: []
-}
-
-Module TypeId(2) => (type: Module(0) TypeId(1), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
 ```

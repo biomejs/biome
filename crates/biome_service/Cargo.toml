@@ -99,6 +99,7 @@ web-time                 = { workspace = true }
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
+static_assertions   = { workspace = true }
 
 [features]
 # To parse snippets and embeds inside HTML files

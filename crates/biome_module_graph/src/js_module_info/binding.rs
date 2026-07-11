@@ -73,17 +73,4 @@ impl JsBinding {
             scope: self.semantic_binding.scope(),
         }
     }
-
-    /// Returns the binding's type.
-    ///
-    /// Returns an owned TypeReference since we may need to return
-    /// a default unknown type when no augmentation data exists.
-    pub fn ty(&self) -> TypeReference {
-        // Look up type augmentation data by binding range
-        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
-        self.data
-            .binding_type_data
-            .get(&binding_range)
-            .map_or_else(TypeReference::unknown, |data| data.ty.clone())
-    }
 }

@@ -4,7 +4,6 @@ mod snap;
 
 use std::collections::BTreeMap;
 use std::fs::read_link;
-use std::ops::Deref;
 use std::sync::Arc;
 
 use biome_resolver::ResolveError;
@@ -15,20 +14,20 @@ use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
-use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{TypeData, TypeResolver};
+use biome_js_type_info::{format_inferred_type, interned_types::TypeData as InferredTypeData};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
-    find_js_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    CallExpressionTypeInput, HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath,
+    JsImportPhase, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic,
+    ModuleInfo, ModuleInfoKind, PathInfoCache, ResolvedPath, SymbolFromModuleInfo,
+    find_js_exported_symbol, infer_call_expression_type, infer_module_types_bottom_up,
+    is_class_referenced_by_importers, resolve_css_module, resolve_html_module, resolve_js_module,
+    transitive_importers_of, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -517,56 +516,6 @@ fn test_export_default_function_declaration() {
 }
 
 #[test]
-fn test_export_default_imported_binding() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-            /**
-             * @returns {number}
-             */
-            export function foo(): number {
-                return 42;
-            }
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-            import { foo } from "./foo.ts";
-
-            export default foo;
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    // Test that the default export's type is correctly resolved as a function returning number
-    let default_export_ty = resolver
-        .resolved_type_of_default_export()
-        .expect("default export must exist");
-    assert!(
-        default_export_ty.is_function(),
-        "Default export should be a function, got: {default_export_ty:?}"
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_export_default_imported_binding");
-}
-
-#[test]
 fn test_export_const_type_declaration_with_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -781,594 +730,6 @@ fn test_resolve_export_types() {
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs);
     snapshot.assert_snapshot("test_resolve_export_types");
-}
-
-#[test]
-fn test_resolve_generic_return_value() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"function useCallback<T extends Function>(
-    callback: T,
-    deps: DependencyList,
-): T;
-
-export const makePromise = (): Promise => Promise.resolve(1);
-
-export const makePromiseCb = useCallback(makePromise);
-
-export const promise = makePromiseCb();
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let promise_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-    let promise_ty = resolver.resolved_type_for_id(promise_id);
-    assert!(promise_ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_generic_return_value");
-}
-
-#[test]
-fn test_resolve_generic_mapped_value() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"const mapped = [1, 2, 3].map(async (x) => x + 1);
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let mapped_id = resolver
-        .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
-        .expect("mapped variable not found");
-    let mapped_ty = resolver.resolved_type_for_id(mapped_id);
-    let _mapped_ty_string = format!("{:?}", mapped_ty.deref()); // for debugging
-    assert!(mapped_ty.is_array_of(|elem_ty| {
-        let _elem_ty_string = format!("{:?}", elem_ty.deref()); // for debugging
-        elem_ty.is_promise_instance()
-    }));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_generic_mapped_value");
-}
-
-#[test]
-fn test_resolve_generic_return_value_with_multiple_modules() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/bar.ts".into(),
-        r#"
-        export type Bar = { bar: "bar" };
-        "#,
-    );
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        import type { Bar } from "./bar.ts";
-
-        export function foo<T>(foo: T, bar: Bar): T;
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import type { Bar } from "./bar.ts";
-        import { foo } from "./foo.ts";
-
-        const bar: Bar = { bar: "bar" };
-
-        const stringyBar = bar.bar;
-
-        const result = foo(bar.bar, 1);
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/bar.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_string_or_string_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot("test_resolve_generic_return_value_with_multiple_modules");
-}
-
-#[test]
-fn test_resolve_import_as_namespace() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import * as fooNs from "./foo.ts";
-
-        const result = fooNs.foo();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_number_or_number_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_import_as_namespace");
-}
-
-#[test]
-fn test_resolve_nested_function_call_with_namespace_in_return_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): Type {}
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./foo.ts";
-
-        const result = bar(foo());
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
-}
-
-#[test]
-fn test_resolve_return_value_of_function() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        export function foo(input: number) {
-            switch (input) {
-                case 0: return null;
-                case 1: return "one";
-                case 2: return "two";
-                default: return "many";
-            }
-            return "many"; // Check if this one gets deduplicated.
-        }
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let foo_id = resolver
-        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
-        .expect("foo variable not found");
-    let foo_ty = resolver.resolved_type_for_id(foo_id);
-    let _foo_string_ty = format!("{foo_ty:?}");
-    let return_ty = foo_ty
-        .as_function()
-        .expect("foo must be a function")
-        .return_type
-        .as_type()
-        .and_then(|return_ty| foo_ty.resolve(return_ty))
-        .expect("expected a resolvable return type");
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("one")));
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("two")));
-    assert!(return_ty.has_variant(|ty| ty.is_string_literal("many")));
-    assert!(return_ty.has_variant(|ty| ty.is_null()));
-    match return_ty.resolved_data().unwrap().as_raw_data() {
-        TypeData::Union(union) => assert_eq!(union.types().len(), 4),
-        _ => panic!("expected a union type"),
-    }
-}
-
-#[test]
-fn test_resolve_type_of_property_with_getter() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        class Foo {
-            get foo() {
-                if (!this.initialised) {
-                    this.initialise();
-                    return "foo";
-                }
-
-                return "foo";
-            }
-        }
-
-        const fooness = new Foo();
-        const foo = fooness.foo;
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let foo_id = resolver
-        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
-        .expect("foo variable not found");
-    let foo_ty = resolver.resolved_type_for_id(foo_id);
-    let _foo_string_ty = format!("{foo_ty:?}");
-    assert!(foo_ty.is_string_literal("foo"));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
-}
-
-#[test]
-fn test_writable_annotated_binding_does_not_become_singleton_union() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        declare let sink: string;
-        sink += "";
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let sink_id = resolver
-        .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
-        .expect("sink variable not found");
-    let sink_ty = resolver.resolved_type_for_id(sink_id);
-
-    assert!(sink_ty.is_string_or_string_literal());
-    assert!(!matches!(
-        sink_ty.resolved_data().unwrap().as_raw_data(),
-        TypeData::Union(_)
-    ));
-}
-
-macro_rules! class_tests {
-    ($($name:ident: $prefix:expr,)*) => {
-    $(
-        #[test]
-        fn $name() {
-            class_this_test_helper(stringify!($name), $prefix);
-        }
-    )*
-    }
-}
-
-class_tests! {
-    test_resolve_type_of_this_in_class_plain: "class Foo",
-    test_resolve_type_of_this_in_class_assign: "const Foo = class",
-    test_resolve_type_of_this_in_class_export: "export default class Foo",
-}
-
-fn class_this_test_helper(case_name: &str, prefix: &str) {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        format!(
-            "{prefix} {}",
-            r#"
-        {
-            x = 'foo';
-            y = this.x;
-
-            get fooGetter() {
-                return this.x
-            }
-
-            arrow = () => this.x
-
-            func = function() {
-                return this.x
-            }
-
-            meth() {
-                return this.x
-            }
-
-            nestedArrow() {
-                const fn = () => this.x;
-                return fn();
-            }
-
-            inObject() {
-                const inner = {
-                    x: this.x
-                };
-                return inner.x;
-            }
-        }
-
-        const obj = new Foo();
-
-        const foo1 = obj.y;
-        const foo2 = obj.fooGetter;
-        const foo3 = obj.arrow();
-        const foo4 = obj.func();
-        const foo5 = obj.meth();
-        const foo6 = obj.nestedArrow();
-        const foo7 = obj.inObject();
-        "#
-        ),
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=7 {
-        let name = format!("foo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot(case_name);
-}
-
-#[test]
-fn test_resolve_type_of_this_in_object() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        const obj = {
-            x: 'foo',
-            y: this.x,
-
-            get fooGetter() {
-                return this.x
-            },
-
-            arrow: () => this.x,
-
-            func: function() {
-                return this.x
-            },
-
-            meth() {
-                return this.x
-            },
-
-            nestedArrow() {
-                const fn = () => this.x;
-                return fn();
-            },
-
-            inObject() {
-                const inner = {
-                    x: this.x
-                };
-                return inner.x;
-            },
-        };
-
-        const foo1 = obj.fooGetter;
-        const foo2 = obj.func();
-        const foo3 = obj.meth();
-        const foo4 = obj.nestedArrow();
-        const foo5 = obj.inObject();
-
-        const notFoo1 = obj.y;
-        const notFoo2 = obj.arrow();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=5 {
-        let name = format!("foo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-    for i in 1..=2 {
-        let name = format!("notFoo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_this_in_object");
-}
-
-#[test]
-fn test_resolve_type_of_this_in_class_wrong_scope() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        class Foo {
-            x = 'foo';
-
-            nested() {
-                const fn = function() {
-                    return this.x;
-                }
-                return fn();
-            }
-            nested2() {
-                function fn() {
-                    return this.x;
-                }
-                return fn();
-            }
-
-            nestedObject() {
-                const inner = {
-                    fn: function() {
-                        return this.x;
-                    }
-                };
-                return inner.fn();
-            }
-            nestedObject2() {
-                const inner = {
-                    fn() {
-                        return this.x;
-                    }
-                };
-                return inner.fn();
-            }
-
-            nestedInArrow = () => {
-                const fn = function() {
-                    return this.x;
-                }
-                return fn();
-            }
-        }
-
-        const obj = new Foo();
-
-        const notFoo1 = obj.nested();
-        const notFoo2 = obj.nested2();
-        const notFoo3 = obj.nestedInArrow();
-        const notFoo4 = obj.nestedObject();
-        const notFoo5 = obj.nestedObject2();
-        "#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    for i in 1..=5 {
-        let name = format!("notFoo{i}");
-        let foo_id = resolver
-            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
-            .unwrap_or_else(|| panic!("{name} variable not found"));
-        let foo_ty = resolver.resolved_type_for_id(foo_id);
-        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
-    }
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
-    snapshot.assert_snapshot("test_resolve_type_of_this_in_class_wrong_scope");
 }
 
 #[test]
@@ -1692,285 +1053,6 @@ export = vfile
 }
 
 #[test]
-fn test_resolve_react_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/@types/react/index.d.ts".into(),
-        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { useCallback } from "react";
-
-        const fn = useCallback(async () => {});
-        const promise = fn();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/node_modules/@types/react/index.d.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
-    );
-
-    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout
-        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
-
-    let db = build_js_db(&fs, &project_layout, &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let use_callback_id = resolver
-        .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
-        .expect("useCallback variable not found");
-    let use_callback_ty = resolver.resolved_type_for_id(use_callback_id);
-    assert!(use_callback_ty.is_function());
-
-    let promise_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-    let promise_ty = resolver.resolved_type_for_id(promise_id);
-    assert!(promise_ty.is_promise_instance());
-}
-
-#[test]
-fn test_resolve_redis_commander_types() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/RedisCommander.d.ts".into(),
-        include_bytes!("../benches/RedisCommander.d.ts"),
-    );
-    fs.insert(
-        "/index.ts".into(),
-        r#"import RedisCommander from "./RedisCommander.d.ts";
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/RedisCommander.d.ts"),
-        BiomePath::new("/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    // We previously had an issue with `RedisCommander.d.ts` that caused types
-    // to be duplicated. We should look out in this snapshot that method
-    // signatures are registered only once per signature.
-    let redis_commander_module = db
-        .js_module_info_for_path(Utf8Path::new("/RedisCommander.d.ts"))
-        .expect("module must exist");
-    let num_registered_signatures = redis_commander_module
-        .types()
-        .iter()
-        .filter(|ty| {
-            matches!(
-                ty,
-                TypeData::Function(function)
-                    if function
-                        .name
-                        .as_ref()
-                        .is_some_and(|name| *name == "zunionstore")
-            )
-        })
-        .count();
-    assert_eq!(num_registered_signatures, 24);
-}
-
-#[test]
-fn test_resolve_single_reexport() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        r#"
-        export * from "./foo.ts";
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./reexport.ts";
-
-        const result = foo();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexport.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.is_number_or_number_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_single_reexport");
-}
-
-#[test]
-fn test_resolve_type_of_union_from_imported_module() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/node_modules/react.d.ts".into(),
-        r#"
-        type BogusType = false;
-
-        export type ReactPortal = BogusType;
-
-        export type ReactElement = BogusType;
-
-        export type ReactNode =
-            | ReactElement
-            | string
-            | number
-            | Iterable<ReactNode>
-            | ReactPortal
-            | boolean
-            | null
-            | undefined;
-        "#,
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        r#"export { type ReactElement, type ReactNode } from "../node_modules/react.d.ts";"#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { type ReactNode } from "./reexport.ts";
-
-        const foo: ReactNode = undefined;
-        const bar = foo && 1;
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexport.ts"),
-        BiomePath::new("/node_modules/react.d.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
-        .expect("bar variable not found");
-    let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.has_variant(|ty| ty.is_null()));
-    assert!(ty.has_variant(|ty| ty.is_undefined()));
-    assert!(ty.has_variant(|ty| ty.is_boolean_literal(false)));
-    assert!(ty.has_variant(|ty| ty.is_number_literal(0.)));
-    assert!(ty.has_variant(|ty| ty.is_number_literal(1.)));
-}
-
-#[test]
-fn test_resolve_multiple_reexports() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/foo.ts".into(),
-        r#"
-        export function foo(): number {
-            return 1;
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/bar.ts".into(),
-        r#"
-        export function bar(): string {
-            return "bar";
-        }
-        "#,
-    );
-    fs.insert(
-        "/src/reexports.ts".into(),
-        r#"
-        export * from "./foo.ts";
-        export * from "./bar.ts";
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { foo } from "./reexports.ts";
-        import * as reexports from "./reexports.ts";
-
-        const result1 = foo();
-        const result2 = reexports.bar();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/foo.ts"),
-        BiomePath::new("/src/bar.ts"),
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/reexports.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result1_id = resolver
-        .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
-        .expect("result1 variable not found");
-    let ty = resolver.resolved_type_for_id(result1_id);
-    assert!(ty.is_number_or_number_literal());
-
-    let result2_id = resolver
-        .resolve_type_of(&Text::new_static("result2"), ScopeId::GLOBAL)
-        .expect("result2 variable not found");
-    let ty = resolver.resolved_type_for_id(result2_id);
-    assert!(ty.is_string_or_string_literal());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_resolve_multiple_reexports");
-}
-
-#[test]
 fn test_resolve_export_type_referencing_imported_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -1999,226 +1081,6 @@ fn test_resolve_export_type_referencing_imported_type() {
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs);
     snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
-}
-
-#[test]
-fn test_resolve_promise_from_imported_function_returning_imported_promise_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/promisedResult.ts".into(),
-        "export type PromisedResult = Promise<{ result: true | false }>;\n",
-    );
-    fs.insert(
-        "/src/returnPromiseResult.ts".into(),
-        r#"import type { PromisedResult } from "./promisedResult.ts";
-
-        function returnPromiseResult(): PromisedResult {
-            return new Promise(resolve => resolve({ result: true }));
-        }
-
-        export { returnPromiseResult };
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-        const promise = returnPromiseResult();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/promisedResult.ts"),
-        BiomePath::new("/src/returnPromiseResult.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let resolved_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-
-    let ty = resolver.resolved_type_for_id(resolved_id);
-    let _ty_string = format!("{:?}", ty.deref()); // for debugging
-    assert!(ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_imported_promise_type",
-    );
-}
-
-#[test]
-fn test_resolve_promise_from_imported_function_returning_reexported_promise_type() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/promisedResult.ts".into(),
-        "export type PromisedResult = Promise<{ result: true | false }>;\n",
-    );
-    fs.insert(
-        "/src/reexport.ts".into(),
-        "export { PromisedResult } from \"./promisedResult.ts\";\n",
-    );
-    fs.insert(
-        "/src/returnPromiseResult.ts".into(),
-        r#"import type { PromisedResult } from "./reexport.ts";
-
-        function returnPromiseResult(): PromisedResult {
-            return new Promise(resolve => resolve({ result: true }));
-        }
-
-        export { returnPromiseResult };
-        "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
-
-        const promise = returnPromiseResult();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/index.ts"),
-        BiomePath::new("/src/promisedResult.ts"),
-        BiomePath::new("/src/reexport.ts"),
-        BiomePath::new("/src/returnPromiseResult.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let resolved_id = resolver
-        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
-        .expect("promise variable not found");
-
-    let ty = resolver.resolved_type_for_id(resolved_id);
-    let _ty_string = format!("{:?}", ty.deref()); // for debugging
-    assert!(ty.is_promise_instance());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot(
-        "test_resolve_promise_from_imported_function_returning_reexported_promise_type",
-    );
-}
-
-#[test]
-fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-
-type FullConfiguration = InternalConfiguration & PublicConfiguration;
-
-type ScopedMutator<Data = any, T = Data> = (key: Arguments, data?: T | Promise<T> | MutatorCallback<T>, opts?: boolean | MutatorOptions<Data, T>) => Promise<T | undefined>;
-
-interface InternalConfiguration {
-    cache: Cache;
-    mutate: ScopedMutator;
-}
-
-interface PublicConfiguration {
-    errorRetryInterval: number;
-}
-
-declare const useSWRConfig: () => FullConfiguration;
-
-const { mutate } = useSWRConfig();
-"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let use_swr_config_id = resolver
-        .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-    let use_swr_config_ty = resolver.resolved_type_for_id(use_swr_config_id);
-    let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
-    assert!(use_swr_config_ty.is_function_with_return_type(|return_ty| {
-        let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-        return_ty.is_interface()
-    }));
-
-    let mutate_id = resolver
-        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
-    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(
-        mutate_ty.is_instance_of(|instance_ty| instance_ty.is_function_with_return_type(
-            |return_ty| {
-                let _return_ty_string = format!("{:?}", return_ty.deref()); // for debugging
-                return_ty.is_promise_instance()
-            }
-        ))
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot
-        .assert_snapshot("test_resolve_type_of_destructured_field_of_intersection_of_interfaces");
-}
-
-#[test]
-fn test_resolve_type_of_intersection_of_interfaces() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"interface Foo {
-    foo(): string;
-}
-
-interface Bar {
-    foo(): number;
-    bar(): boolean;
-}
-
-type Intersection = Foo & Bar;"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let intersection_id = resolver
-        .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
-        .expect("Intersection type not found");
-    let intersection_ty = resolver.resolved_type_for_id(intersection_id);
-    let _intersection_ty = format!("{:?}", intersection_ty.deref()); // for debugging
-    assert!(intersection_ty.is_interface());
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
-    snapshot.assert_snapshot("test_resolve_type_of_intersection_of_interfaces");
 }
 
 #[test]
@@ -2299,23 +1161,61 @@ fn test_resolve_swr_types() {
         })
     );
 
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let mutate_id = resolver
-        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
-        .expect("mutate variable not found");
-
-    let mutate_ty = resolver.resolved_type_for_id(mutate_id);
-    let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
-    assert!(mutate_ty.is_interface_with_member(|member| member.kind().is_call_signature()));
-
-    let mutate_result_id = resolver
-        .resolve_type_of(&Text::new_static("mutateResult"), ScopeId::GLOBAL)
-        .expect("mutateResult variable not found");
-
-    let mutate_result_ty = resolver.resolved_type_for_id(mutate_result_id);
-    let _mutate_result_ty_string = format!("{:?}", mutate_result_ty.deref()); // for debugging
-    assert!(mutate_result_ty.is_promise_instance());
+    let index_module_input = db
+        .module_for_path(Utf8Path::new(&format!(
+            "{fixtures_path}/frontend/src/index.ts"
+        )))
+        .expect("module input must exist");
+    let inferred = infer_module_types_bottom_up(&db, index_module_input)
+        .expect("Salsa types must be inferred");
+    let ModuleInfoKind::Js(index_info) = index_module_input.kind(&db) else {
+        panic!("index module must be JavaScript");
+    };
+    let mutate_result_binding = index_info
+        .semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == "mutateResult")
+        })
+        .expect("mutateResult binding must exist");
+    let mutate_binding = index_info
+        .semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == "mutate")
+        })
+        .expect("mutate binding must exist");
+    let raw_mutate_ty = inferred
+        .binding_type_data
+        .get(&mutate_binding.syntax().text_trimmed_range())
+        .map(|data| data.ty)
+        .expect("Salsa mutate type must be inferred");
+    let direct_mutate_result = infer_call_expression_type(
+        &db,
+        CallExpressionTypeInput::new(
+            &db,
+            index_module_input,
+            raw_mutate_ty,
+            Vec::from([InferredTypeData::String]).into_boxed_slice(),
+        ),
+    );
+    assert!(direct_mutate_result.is_promise_instance(&db));
+    let mutate_result_ty = inferred
+        .binding_type_data
+        .get(&mutate_result_binding.syntax().text_trimmed_range())
+        .map(|data| inferred.resolve_type(&db, data.ty))
+        .expect("Salsa mutateResult type must be inferred");
+    assert!(
+        mutate_result_ty.is_promise_instance(&db),
+        "Salsa mutateResult must be a Promise, got {}",
+        format_inferred_type(&db, mutate_result_ty)
+    );
 }
 
 #[test]
@@ -2336,13 +1236,7 @@ function f() {
 
     let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
 
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
+    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
 
     snapshot.assert_snapshot("test_widening_via_assignment");
 }
@@ -2369,13 +1263,7 @@ function g() {
 
     let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
 
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
+    let snapshot = ModuleGraphSnapshot::new(&db, &fs);
 
     snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
 }
@@ -2629,71 +1517,6 @@ fn test_namespace_reexport_is_own_export() {
 /// calling `MyNs.alpha()` must resolve to the return type of `alpha` in
 /// the source module. This verifies the `JsOwnExport::Namespace(JsReexport)`
 /// variant drives the correct `TypeData::ImportNamespace` path.
-#[test]
-fn test_namespace_reexport_type_inference() {
-    let fs = MemoryFileSystem::default();
-
-    // Source module with a typed export.
-    fs.insert(
-        "/src/source.ts".into(),
-        r#"
-            /**
-            * @description
-            * I am a jsdoc
-            */
-            export function alpha(): number {
-                return 1;
-            }
-        "#,
-    );
-
-    // Barrel: re-exports entire source namespace under `MyNs`.
-    fs.insert(
-        "/src/barrel.ts".into(),
-        r#"export * as MyNs from "./source.ts";"#,
-    );
-
-    // Consumer: imports the namespace and calls a member.
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"import { MyNs } from "./barrel.ts";
-
-        const result = MyNs.alpha();
-        "#,
-    );
-
-    let added_paths = [
-        BiomePath::new("/src/source.ts"),
-        BiomePath::new("/src/barrel.ts"),
-        BiomePath::new("/src/index.ts"),
-    ];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-
-    let result_id = resolver
-        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
-        .expect("result variable not found");
-    let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(
-        result_ty.is_number_or_number_literal(),
-        "expected `MyNs.alpha()` to resolve to number, got: {result_ty:?}"
-    );
-
-    let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
-    snapshot.assert_snapshot("test_namespace_reexport_type_inference");
-}
-
-/// Verifies that a JSX file that imports a CSS file shows:
-/// - the CSS import edge in `static_import_paths`
-/// - `referenced_classes` populated from `className="..."` attributes
-/// - the CSS module info showing the defined classes
 #[test]
 fn test_jsx_imports_css_file() {
     let fs = MemoryFileSystem::default();
@@ -3283,6 +2106,12 @@ fn test_export_equals_namespace_without_type_inference() {
     let react_module = db
         .module_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
         .expect("react module must exist");
+    let ModuleInfoKind::Js(react_info) = react_module.kind(&db) else {
+        panic!("react module must be JavaScript");
+    };
+    assert!(react_info.raw_types.is_empty());
+    assert!(react_info.raw_expressions.is_empty());
+    assert!(react_info.raw_binding_types.is_empty());
 
     let use_state = find_js_exported_symbol(
         &db,
@@ -4030,38 +2859,4 @@ fn files_to_snapshot_vec(files: &[(&str, &str)]) -> BTreeMap<String, String> {
         .iter()
         .map(|(path, content)| ((*path).to_string(), (*content).to_string()))
         .collect()
-}
-
-#[test]
-fn test_property_const_assertion_flows_through_module_resolver() {
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"const object = { value: "x" as const };"#,
-    );
-
-    let added_paths = [BiomePath::new("/src/index.ts")];
-    let added_paths = get_added_js_paths(&fs, &added_paths);
-
-    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
-
-    let index_module = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .expect("module must exist");
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, db.rc_module_db()));
-    let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
-    let TypeData::Object(object) = object.deref() else {
-        panic!("expected object type");
-    };
-    let value = object
-        .members
-        .iter()
-        .find(|member| member.has_name("value"))
-        .expect("value member");
-    assert!(value.is_const_asserted());
-    let value_type = resolver
-        .resolve_and_get(&value.ty)
-        .expect("value type")
-        .to_data();
-    assert_eq!(value_type.to_string(), "string: x");
 }

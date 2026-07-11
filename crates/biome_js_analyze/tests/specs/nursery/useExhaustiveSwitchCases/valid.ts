@@ -174,3 +174,16 @@ switch (true) {
 	case x % 5 === 0:
 		break;
 }
+declare const exhaustiveBigintUnion: 1n | 2n;
+switch (exhaustiveBigintUnion) {
+    case 1n:
+        break;
+    case 2n:
+        break;
+}
+
+declare const alternateBigintSpelling: 1n;
+switch (alternateBigintSpelling) {
+    case 0x1n:
+        break;
+}

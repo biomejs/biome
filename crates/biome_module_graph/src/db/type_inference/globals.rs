@@ -1091,6 +1091,7 @@ fn unexpected_global_value(expected: &'static str) {
 mod tests {
     use super::*;
 
+    use crate::ModuleGraphGeneration;
     use crate::module_graph::{ModuleInfo, ModuleInfoKind};
     use std::borrow::Cow;
 
@@ -1105,9 +1106,18 @@ mod tests {
     use salsa::Storage;
 
     #[salsa::db]
-    #[derive(Default)]
     struct TestDb {
         storage: Storage<Self>,
+    }
+
+    impl Default for TestDb {
+        fn default() -> Self {
+            let db = Self {
+                storage: Storage::default(),
+            };
+            ModuleGraphGeneration::new(&db, 0);
+            db
+        }
     }
 
     #[salsa::db]
@@ -1125,11 +1135,18 @@ mod tests {
 
     #[salsa::db]
     impl ModuleDb for TestDb {
+        fn module_graph_generation(&self) -> u64 {
+            ModuleGraphGeneration::get(self).value(self)
+        }
+
         fn module_for_path(&self, _path: &Utf8Path) -> Option<ModuleInfo> {
+            let _ = self.module_graph_generation();
             None
         }
 
-        fn for_each_module(&self, _f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {}
+        fn for_each_module(&self, _f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
+            let _ = self.module_graph_generation();
+        }
     }
 
     struct NoopTypeResolver;

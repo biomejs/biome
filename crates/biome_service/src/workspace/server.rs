@@ -85,6 +85,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{NodeCache, SendNode};
+#[cfg(any(test, feature = "module_graph", feature = "testing"))]
 use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
@@ -1418,6 +1419,8 @@ impl WorkspaceServerWithDb<'_> {
         path: &BiomePath,
         update_kind: &UpdateKind,
     ) -> Result<ExtractedModuleInputs, WorkspaceError> {
+        #[cfg(not(feature = "html_embeds"))]
+        let _ = path;
         match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
                 #[cfg(feature = "lang_js")]

@@ -8,10 +8,10 @@ use biome_js_syntax::{
     JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
-    Module, Namespace, RawTypeData, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
-    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Module, Namespace,
+    RawTypeData, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId, TypeImportQualifier,
+    TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -21,8 +21,8 @@ use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
     JsModuleInfoInner, JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData,
 };
-use crate::js_module_info::{scope::TsBindingReferenceExt, utils::reached_too_many_types};
-use crate::{BindingTypeData, JsImportPath, JsImportPhase};
+use crate::js_module_info::scope::TsBindingReferenceExt;
+use crate::{JsImportPath, JsImportPhase};
 
 /// Responsible for collecting all the information from which to build the
 /// [`JsModuleInfo`].
@@ -386,28 +386,21 @@ impl JsModuleInfoCollector {
 
         self.populate_namespace_and_module_members();
 
-        self.register_export_types();
+        let exports = self.collect_exports_from(self.exports.clone());
 
-        let raw_types = self.raw_types();
-        let raw_expressions = self.raw_expressions();
-        let raw_binding_types = self.raw_binding_types();
-
-        if self.inference_mode == TypeInferenceMode::Complete {
-            self.resolve_all_and_downgrade_project_references();
-
-            // Purging before flattening will save us from duplicate work during
-            // flattening. We'll purge again after for a final cleanup.
-            self.purge_redundant_types();
-            self.flatten_all();
-            self.purge_redundant_types();
-        }
-
-        let exports = self.collect_exports();
-        let binding_type_data = self.build_binding_type_data(semantic_model);
+        let (raw_types, raw_expressions, raw_binding_types) =
+            if self.inference_mode == TypeInferenceMode::Disabled {
+                (Vec::new(), FxHashMap::default(), FxHashMap::default())
+            } else {
+                (
+                    self.raw_types(),
+                    self.raw_expressions(),
+                    self.raw_binding_types(),
+                )
+            };
 
         FinalisedModuleTypes {
             exports,
-            binding_type_data,
             raw_types,
             raw_expressions,
             raw_binding_types,
@@ -645,48 +638,6 @@ impl JsModuleInfoCollector {
         }
     }
 
-    /// After the first pass of the collector, import references have been
-    /// resolved to an import binding. But we can't store the information of the
-    /// import target inside the `ResolvedTypeId`, because it resides in the
-    /// module's semantic data, and `ResolvedTypeId` is only 8 bytes. So during
-    /// resolving, we "downgrade" the import references from
-    /// [`TypeReference::Resolved`] to [`TypeReference::Import`].
-    fn resolve_all_and_downgrade_project_references(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            let ty = self.types.get(i);
-            let mut ty = match ty.resolved(self) {
-                Some(ty) => ty,
-                None => ty.as_ref().clone(),
-            };
-            ty.update_all_references(|reference| match reference {
-                TypeReference::Resolved(resolved)
-                    if resolved.level() == TypeResolverLevel::Import =>
-                {
-                    let binding = &self.bindings[resolved.index()];
-                    *reference = self.static_imports.get(&binding.name).map_or(
-                        TypeReference::unknown(),
-                        |import| {
-                            TypeReference::from(TypeImportQualifier {
-                                symbol: import.symbol.clone(),
-                                resolved_path: import.resolved_path.clone(),
-                                type_only: binding.declaration_kind.is_import_type_declaration(),
-                            })
-                        },
-                    );
-                }
-                TypeReference::Qualifier(_) => {
-                    // Qualifiers that haven't been resolved yet will never
-                    // be resolved.
-                    *reference = TypeReference::unknown();
-                }
-                _ => {}
-            });
-            self.types.replace(i, ty);
-            i += 1;
-        }
-    }
-
     fn find_binding_for_type_index(&self, type_index: usize) -> Option<&JsBindingData> {
         self.bindings.iter().find(|binding| match binding.ty {
             TypeReference::Resolved(resolved) => {
@@ -764,69 +715,6 @@ impl JsModuleInfoCollector {
                     .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
             }
         }
-    }
-
-    fn flatten_all(&mut self) {
-        for _ in 0..MAX_FLATTEN_DEPTH {
-            let mut did_flatten = false;
-
-            let mut i = 0;
-            while i < self.types.len() {
-                if let Err(diagnostic) = reached_too_many_types(i) {
-                    self.diagnostics.push(diagnostic);
-                    return;
-                }
-
-                if let Some(ty) = self.types.get(i).flattened(self) {
-                    self.types.replace(i, ty);
-                    did_flatten = true;
-                }
-                i += 1;
-            }
-
-            if !did_flatten {
-                break;
-            }
-        }
-    }
-
-    fn purge_redundant_types(&mut self) {
-        let Some(update_resolved_id) = self.types.deduplicate(TypeResolverLevel::Thin) else {
-            return;
-        };
-
-        for binding in &mut self.bindings {
-            if let TypeReference::Resolved(resolved_id) = &mut binding.ty {
-                update_resolved_id(resolved_id);
-            }
-        }
-
-        for collected_export in &mut self.exports {
-            match collected_export {
-                JsCollectedExport::ExportDefault { ty }
-                | JsCollectedExport::ExportDefaultAssignment { ty } => {
-                    if let TypeReference::Resolved(resolved_id) = ty {
-                        update_resolved_id(resolved_id);
-                    }
-                }
-                JsCollectedExport::ExportNamedSymbol { .. }
-                | JsCollectedExport::ExportNamedDefault { .. }
-                | JsCollectedExport::Reexport { .. } => {}
-            }
-        }
-
-        for resolved_id in self.parsed_expressions.values_mut() {
-            update_resolved_id(resolved_id);
-        }
-    }
-
-    fn register_export_types(&mut self) {
-        let _ = self.collect_exports_from(self.exports.clone());
-    }
-
-    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
-        let exports = std::mem::take(&mut self.exports);
-        self.collect_exports_from(exports)
     }
 
     fn collect_exports_from(
@@ -1115,29 +1003,6 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 }
 
-impl JsModuleInfoCollector {
-    /// Build type augmentation data from the temporary bindings collected during traversal.
-    ///
-    /// Maps binding ranges to their type information and JSDoc comments.
-    fn build_binding_type_data(
-        &self,
-        _semantic_model: &SemanticModel,
-    ) -> FxHashMap<TextRange, BindingTypeData> {
-        let mut binding_type_data = FxHashMap::default();
-
-        for binding in &self.bindings {
-            binding_type_data.insert(
-                binding.range,
-                BindingTypeData {
-                    ty: binding.ty.clone(),
-                },
-            );
-        }
-
-        binding_type_data
-    }
-}
-
 /// Selects how much type inference work the collector performs while
 /// finalizing a module.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1147,9 +1012,6 @@ pub enum TypeInferenceMode {
     /// Collects the raw type table for the salsa-backed inference engine,
     /// without running the legacy resolution and flattening passes.
     RawTypesOnly,
-    /// Collects the raw type table and runs the legacy resolution and
-    /// flattening passes.
-    Complete,
 }
 
 impl JsModuleInfo {
@@ -1168,12 +1030,9 @@ impl JsModuleInfo {
             exports: Exports(finalised.exports),
             blanket_reexports: collector.blanket_reexports,
             semantic_model,
-            binding_type_data: finalised.binding_type_data,
             raw_types: finalised.raw_types,
             raw_expressions: finalised.raw_expressions,
             raw_binding_types: finalised.raw_binding_types,
-            expressions: collector.parsed_expressions,
-            types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
@@ -1183,7 +1042,6 @@ impl JsModuleInfo {
 
 struct FinalisedModuleTypes {
     exports: IndexMap<Text, JsExport>,
-    binding_type_data: FxHashMap<TextRange, BindingTypeData>,
     raw_types: Vec<RawTypeData>,
     raw_expressions: FxHashMap<TextRange, TypeReference>,
     raw_binding_types: FxHashMap<TextRange, TypeReference>,

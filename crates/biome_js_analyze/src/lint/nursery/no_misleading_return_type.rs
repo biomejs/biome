@@ -330,6 +330,9 @@ fn run_for_member_with_body<'db>(
     body: &AnyJsFunctionBody,
 ) -> Option<RuleState> {
     let info = collect_return_info(ctx, body);
+    if !return_type.is_inferred() || info.has_uninferred_return {
+        return None;
+    }
     let analysis = return_type.check_misleading_return_type(
         &info.types,
         ReturnTypeEvidence {
@@ -400,6 +403,7 @@ fn is_class_method_overload_implementation(method: &JsMethodClassMember) -> bool
 #[derive(Default)]
 struct ReturnInfo<'db> {
     types: Vec<InferredType<'db>>,
+    has_uninferred_return: bool,
     has_any_const: bool,
     /// Count of return expressions with an assertion target treated as at least
     /// as wide as `object`.
@@ -435,8 +439,9 @@ fn collect_return_info<'db>(
                 }
             }
             info.has_pinning_assertion |= is_pinned_by_assertion(expr);
-            if let Some(ty) = infer_expression_type(ctx, expr) {
-                info.types.push(ty);
+            match infer_expression_type(ctx, expr) {
+                Some(ty) => info.types.push(ty),
+                None => info.has_uninferred_return = true,
             }
         }
     }
@@ -468,8 +473,9 @@ fn collect_block_returns<'db>(
                 }
             }
             info.has_pinning_assertion |= is_pinned_by_assertion(&expr);
-            if let Some(ty) = infer_expression_type(ctx, &expr) {
-                info.types.push(ty);
+            match infer_expression_type(ctx, &expr) {
+                Some(ty) => info.types.push(ty),
+                None => info.has_uninferred_return = true,
             }
         }
     }

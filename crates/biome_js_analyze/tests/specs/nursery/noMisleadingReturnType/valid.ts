@@ -315,3 +315,6 @@ function widenSatisfiesAssertion(b: boolean): string { if (b) return ("a" as str
 type WidenedAlias = string;
 function widenAliasAssertion(b: boolean): WidenedAlias { if (b) return "a" as WidenedAlias; return "b" as WidenedAlias; }
 function assertedBooleanLiteralsCollapse(b: boolean): boolean { if (b) return true as true; return false as false; }
+function unresolvedReturnType(): MissingType {
+    return "value" as const;
+}

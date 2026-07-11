@@ -548,12 +548,12 @@ fn should_ignore_for_primitives(
     options: &UseNullishCoalescingOptions,
     ty: InferredType,
 ) -> bool {
-    ty.nullish_union_matches_ignored_primitives(
-        options.should_ignore_primitive_string(),
-        options.should_ignore_primitive_number(),
-        options.should_ignore_primitive_boolean(),
-        options.should_ignore_primitive_bigint(),
-    )
+    ty.nullish_union_matches_ignored_primitives(biome_js_type_info::IgnoredPrimitiveTypes {
+        string: options.should_ignore_primitive_string(),
+        number: options.should_ignore_primitive_number(),
+        boolean: options.should_ignore_primitive_boolean(),
+        bigint: options.should_ignore_primitive_bigint(),
+    })
 }
 
 fn is_safe_syntax_context_for_replacement(logical: &JsLogicalExpression) -> bool {
@@ -756,11 +756,12 @@ fn run_ternary(
         check_ternary_nullish_pattern(&test, &consequent, &alternate)?;
 
     let options = ctx.options();
-    if options.has_any_ignore_primitives() {
-        let checked_ty = ctx.inferred_type_of_expression(&checked_expr)?;
-        if should_ignore_for_primitives(options, checked_ty) {
-            return None;
-        }
+    if options.has_any_ignore_primitives()
+        && ctx
+            .inferred_type_of_expression(&checked_expr)
+            .is_some_and(|ty| should_ignore_for_primitives(options, ty))
+    {
+        return None;
     }
 
     // The fix is unsafe when the checked expression contains calls or `new`, because
@@ -773,13 +774,12 @@ fn run_ternary(
             NullishCheckKind::Loose | NullishCheckKind::Compound => true,
             // A single strict check only covers one nullish variant. The fix to `??`
             // is safe only if the type cannot be the opposite variant.
-            NullishCheckKind::StrictSingle(lit) => {
-                let ty = ctx.inferred_type_of_expression(&checked_expr)?;
-                match lit {
+            NullishCheckKind::StrictSingle(lit) => ctx
+                .inferred_type_of_expression(&checked_expr)
+                .is_some_and(|ty| match lit {
                     NullishLiteral::Null => !ty.has_undefined_variant(),
                     NullishLiteral::Undefined => !ty.has_null_variant(),
-                }
-            }
+                }),
         };
 
     Some(UseNullishCoalescingState::Ternary {

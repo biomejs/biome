@@ -361,7 +361,7 @@ impl<'db> MemberLookupState<'db> {
     }
 }
 
-pub(in crate::db::type_inference) fn substitutions_for_instance<'db>(
+pub(in crate::db) fn substitutions_for_instance<'db>(
     db: &'db dyn ModuleDb,
     target: InferredTypeData<'db>,
     type_parameters: &[InferredTypeData<'db>],
@@ -438,13 +438,24 @@ fn declared_type_parameters<'db>(
     }
 }
 
-pub(in crate::db::type_inference) fn apply_substitutions<'db>(
+pub(in crate::db) fn apply_substitutions<'db>(
     db: &'db dyn ModuleDb,
     mut ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
     for substitution in substitutions {
         ty = ty.substitute_type(db, *substitution);
+    }
+    ty
+}
+
+pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
+    db: &'db dyn ModuleDb,
+    mut ty: InferredTypeData<'db>,
+    substitutions: &[InferredTypeSubstitution<'db>],
+) -> InferredTypeData<'db> {
+    for substitution in substitutions {
+        ty = ty.substitute_type_in_root_body(db, *substitution);
     }
     ty
 }
@@ -535,8 +546,11 @@ fn find_member_in_members<'db>(
         member
             .kind
             .computed_value_type()
-            .is_some_and(|ty| ty.is_string_literal_key(db, name))
-            .then_some((member.ty, false))
+            .is_some_and(|ty| {
+                ty.is_string_literal_key(db, name)
+                    || allow_index_signature && ty.is_string_key_type(db)
+            })
+            .then_some((member_value_type(db, member), false))
     });
     if computed_member.is_some() {
         return computed_member;
