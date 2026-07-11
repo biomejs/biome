@@ -2,8 +2,7 @@
 //! Row position is the `TypeId` value, so the manifest is append-only: reordering
 //! or removing rows shifts every consumer's `*_ID` constant.
 
-use std::cmp::Ordering;
-use std::sync::LazyLock;
+use std::{cmp::Ordering, sync::LazyLock};
 
 use biome_rowan::Text;
 
@@ -15,14 +14,23 @@ use super::globals::GLOBAL_LEVEL;
 const PREDEFINED_TYPE_COUNT: usize = 65;
 
 /// Type ID that is known to index the predefined global resolver.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct GlobalTypeId(TypeId);
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct GlobalTypeId(TypeId);
 
 impl GlobalTypeId {
-    /// Wraps a `TypeId` that has been verified by the caller to address a
-    /// predefined manifest slot. Internal constructor only.
-    const fn from_type_id(id: TypeId) -> Self {
+    /// Wraps a manifest type ID whose index is known at compile time.
+    pub(crate) const fn new(id: TypeId) -> Self {
         Self(id)
+    }
+
+    /// Converts a type ID into a predefined global type ID when it indexes the
+    /// global manifest.
+    pub const fn try_from_type_id(id: TypeId) -> Option<Self> {
+        if id.index() < NUM_PREDEFINED_TYPES {
+            Some(Self(id))
+        } else {
+            None
+        }
     }
 
     /// Test-only constructor for synthesizing `GlobalTypeId` values at
@@ -187,7 +195,7 @@ macro_rules! predefined_global_ids {
     ($index:expr;) => {};
     ($index:expr; ($id:ident, $id_name:ident, $global_type_id:ident, $resolved_id:ident, $name:literal, $role:ident $(,)?) $(, ($tail_id:ident, $tail_id_name:ident, $tail_global_type_id:ident, $tail_resolved_id:ident, $tail_name:literal, $tail_role:ident $(,)?))* $(,)?) => {
         pub const $id: TypeId = TypeId::new($index);
-        pub(crate) const $global_type_id: GlobalTypeId = GlobalTypeId::from_type_id($id);
+        pub(crate) const $global_type_id: GlobalTypeId = GlobalTypeId::new($id);
         pub const $id_name: &str = $name;
         pub const $resolved_id: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, $id);
 
@@ -516,6 +524,12 @@ mod tests {
     #[test]
     fn global_type_name_out_of_range_returns_none() {
         assert!(global_type_name(TypeId::new(NUM_PREDEFINED_TYPES)).is_none());
+    }
+
+    #[test]
+    fn global_type_id_conversion_checks_manifest_bounds() {
+        assert!(GlobalTypeId::try_from_type_id(TypeId::new(NUM_PREDEFINED_TYPES - 1)).is_some());
+        assert!(GlobalTypeId::try_from_type_id(TypeId::new(NUM_PREDEFINED_TYPES)).is_none());
     }
 
     #[test]

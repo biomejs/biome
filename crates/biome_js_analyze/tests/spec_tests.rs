@@ -1,10 +1,10 @@
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
-    Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerOptions, AnalyzerPluginSlice,
+    ControlFlow, Never, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_db::ParsedSource;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_fs::OsFileSystem;
+use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -12,14 +12,16 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_for_test_file, register_leak_checker, scripts_from_json,
+    get_added_js_paths, has_bogus_nodes_or_empty_slots, module_graph_for_test_file,
+    parse_test_path, project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
+use biome_workspace_db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use std::ops::Deref;
@@ -73,6 +75,203 @@ fn embedded_db(
     db.parsed = Some(parsed);
     db.source_type = Some(DocumentFileSource::from(*source_type));
     Rc::new(db)
+}
+
+fn assert_exhaustive_switch_collector_exhaustion(source: &str) {
+    assert_exhaustive_switch_has_no_diagnostic(source, None);
+}
+
+fn assert_exhaustive_switch_has_no_diagnostic(source: &str, module_source: Option<&str>) {
+    use biome_module_graph::{ModuleInfo, ModuleInfoKind, PathInfoCache, resolve_js_module};
+
+    let fs = MemoryFileSystem::default();
+    let path = BiomePath::new("/test.ts");
+    fs.insert(path.as_path().to_path_buf(), source);
+    let paths = [path];
+    let [(path, root, semantic_model)] = get_added_js_paths(&fs, &paths).try_into().unwrap();
+    let project_layout = ProjectLayout::default();
+    let module_info = if let Some(module_source) = module_source {
+        let module_fs = MemoryFileSystem::default();
+        let module_path = BiomePath::new("/test.ts");
+        module_fs.insert(module_path.as_path().to_path_buf(), module_source);
+        let module_paths = [module_path];
+        let [(module_path, module_root, module_semantic_model)] =
+            get_added_js_paths(&module_fs, &module_paths)
+                .try_into()
+                .unwrap();
+        resolve_js_module(
+            module_root,
+            module_path,
+            &module_fs,
+            &project_layout,
+            module_semantic_model,
+            &PathInfoCache::default(),
+            true,
+        )
+        .0
+    } else {
+        resolve_js_module(
+            root.clone(),
+            path,
+            &fs,
+            &project_layout,
+            semantic_model.clone(),
+            &PathInfoCache::default(),
+            true,
+        )
+        .0
+    };
+    let mut module_db = WorkspaceDb::default();
+    let module = ModuleInfo::new(
+        &module_db,
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
+    );
+    module_db.insert_module(path.as_path().to_path_buf(), module);
+
+    let services = JsAnalyzerServices::default()
+        .with_source_type(JsFileSource::ts())
+        .with_semantic_model(&semantic_model)
+        .with_project_layout(Arc::new(project_layout))
+        .with_language_db(embedded_db(&root, path.as_path(), &JsFileSource::ts()))
+        .with_module_db(module_db.rc_module_db());
+    let rule_filter = RuleFilter::Rule("nursery", "useExhaustiveSwitchCases");
+    let filter = AnalysisFilter {
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
+        ..AnalysisFilter::default()
+    };
+    let mut diagnostics = 0;
+    let mut fixes = 0;
+    let (_, errors) = biome_js_analyze::analyze(
+        &root,
+        filter,
+        &AnalyzerOptions::default(),
+        &[],
+        services,
+        |event| {
+            diagnostics += usize::from(event.diagnostic().is_some());
+            fixes += event
+                .actions(ActionFilter::all())
+                .filter(|action| !action.is_suppression())
+                .count();
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    assert!(errors.is_empty());
+    assert_eq!(diagnostics, 0);
+    assert_eq!(fixes, 0);
+}
+
+#[test]
+fn exhaustive_switch_suppresses_discriminant_collector_exhaustion() {
+    let variants = (0..1024)
+        .map(|variant| variant.to_string())
+        .collect::<Vec<_>>()
+        .join(" | ");
+    let source = format!(
+        "type Exhausted = {variants};\ndeclare const value: Exhausted;\nswitch (value) {{ case 0: break; }}"
+    );
+
+    assert_exhaustive_switch_collector_exhaustion(&source);
+}
+
+#[test]
+fn exhaustive_switch_suppresses_case_expression_collector_exhaustion() {
+    let mut source = String::from("declare const case0: \"missing\";\n");
+    for index in 1..=1024 {
+        source.push_str(&format!(
+            "declare const case{index}: typeof case{};\n",
+            index - 1
+        ));
+    }
+    source.push_str(
+        "declare const value: \"missing\" | \"other\";\nswitch (value) { case case1024: break; }",
+    );
+
+    assert_exhaustive_switch_collector_exhaustion(&source);
+}
+
+#[test]
+fn exhaustive_switch_suppresses_when_a_case_expression_has_no_type() {
+    let module_source = r#"
+        type Value = "first" | "second";
+        declare const value: Value;
+        switch (value) {
+            case "first": break;
+        }
+    "#;
+    let source = r#"
+        type Value = "first" | "second";
+        declare const value: Value;
+        switch (value) {
+            case "first": break;
+            case missing: break;
+        }
+    "#;
+
+    assert_exhaustive_switch_has_no_diagnostic(source, Some(module_source));
+}
+
+#[test]
+fn await_thenable_suppresses_member_lookup_exhaustion() {
+    use biome_module_graph::{ModuleInfo, ModuleInfoKind, PathInfoCache, resolve_js_module};
+
+    let mut source = String::from("type Type0 = {};\n");
+    for index in 1..=1024 {
+        source.push_str(&format!("type Type{index} = Type{};\n", index - 1));
+    }
+    source.push_str("declare const value: Type1024;\nasync function test() { await value; }");
+
+    let fs = MemoryFileSystem::default();
+    let path = BiomePath::new("/test.ts");
+    fs.insert(path.as_path().to_path_buf(), source);
+    let paths = [path];
+    let [(path, root, semantic_model)] = get_added_js_paths(&fs, &paths).try_into().unwrap();
+    let project_layout = ProjectLayout::default();
+    let (module_info, _, _) = resolve_js_module(
+        root.clone(),
+        path,
+        &fs,
+        &project_layout,
+        semantic_model.clone(),
+        &PathInfoCache::default(),
+        true,
+    );
+    let mut module_db = WorkspaceDb::default();
+    let module = ModuleInfo::new(
+        &module_db,
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
+    );
+    module_db.insert_module(path.as_path().to_path_buf(), module);
+
+    let services = JsAnalyzerServices::default()
+        .with_source_type(JsFileSource::ts())
+        .with_semantic_model(&semantic_model)
+        .with_project_layout(Arc::new(project_layout))
+        .with_language_db(embedded_db(&root, path.as_path(), &JsFileSource::ts()))
+        .with_module_db(module_db.rc_module_db());
+    let rule_filter = RuleFilter::Rule("nursery", "useAwaitThenable");
+    let filter = AnalysisFilter {
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
+        ..AnalysisFilter::default()
+    };
+    let mut diagnostics = 0;
+    let (_, errors) = biome_js_analyze::analyze(
+        &root,
+        filter,
+        &AnalyzerOptions::default(),
+        &[],
+        services,
+        |event| {
+            diagnostics += usize::from(event.diagnostic().is_some());
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    assert!(errors.is_empty());
+    assert_eq!(diagnostics, 0);
 }
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.

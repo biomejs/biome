@@ -1,5 +1,5 @@
 use super::{
-    collected_type_result,
+    collected_type_result, expand_canonical_global,
     lookup::{
         StaticMemberMode, apply_substitutions, find_member_in_members_for_mode,
         substitutions_for_instance,
@@ -13,19 +13,17 @@ use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
     GLOBAL_RESOLVER, Path, TypeReferenceQualifier, TypeResolver,
     TypeofExpression as RawTypeofExpression,
-    interned_types::{
-        CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
-        InternedClass as InferredClass, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction, InternedLiteral as InferredInternedLiteral,
-        InternedTuple as InferredTuple, Literal as InferredLiteral,
-        ReturnType as InferredReturnType, StructuralMapError,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
-    },
     literal::NumberLiteral,
+    resolved::{
+        ConditionalSubset, ConditionalType, InferredCallArgumentType, InferredClass,
+        InferredConstructor, InferredFunction, InferredInternedLiteral, InferredLiteral,
+        InferredReturnType, InferredTuple, InferredTupleElementType, InferredTypeData,
+        InferredTypeMember, InferredTypeofExpression,
+    },
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
+use std::collections::VecDeque;
 
 const MAX_CONDITIONAL_TYPE_STEPS: usize = 1024;
 const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
@@ -34,6 +32,17 @@ const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_STATIC_MEMBER_LOOKUP_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 const MAX_CALL_CALLEE_SPINE_DEPTH: usize = 64;
+
+enum PromiseValueResolution<'db> {
+    Found(InferredTypeData<'db>),
+    NotPromise,
+    Indeterminate,
+}
+
+enum ConditionalFilterResult<'db> {
+    Complete(Option<InferredTypeData<'db>>),
+    Indeterminate,
+}
 
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn resolve_typeof_expression(
@@ -256,9 +265,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             Some(right)
         } else {
             conditional.is_inferred().then(|| {
-                let left = self
-                    .filter_type_to_subset(left, ConditionalSubset::Falsy)
-                    .unwrap_or(left);
+                let left = match self.filter_type_to_subset(left, ConditionalSubset::Falsy) {
+                    ConditionalFilterResult::Complete(Some(filtered)) => filtered,
+                    ConditionalFilterResult::Complete(None) => left,
+                    ConditionalFilterResult::Indeterminate => InferredTypeData::Unknown,
+                };
                 InferredTypeData::union_from_types(self.db, Vec::from([left, right]))
             })
         }
@@ -276,9 +287,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             Some(right)
         } else {
             conditional.is_inferred().then(|| {
-                let left = self
-                    .filter_type_to_subset(left, ConditionalSubset::Truthy)
-                    .unwrap_or(left);
+                let left = match self.filter_type_to_subset(left, ConditionalSubset::Truthy) {
+                    ConditionalFilterResult::Complete(Some(filtered)) => filtered,
+                    ConditionalFilterResult::Complete(None) => left,
+                    ConditionalFilterResult::Indeterminate => InferredTypeData::Unknown,
+                };
                 InferredTypeData::union_from_types(self.db, Vec::from([left, right]))
             })
         }
@@ -296,9 +309,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             Some(right)
         } else {
             conditional.is_inferred().then(|| {
-                let left = self
-                    .filter_type_to_subset(left, ConditionalSubset::NonNullish)
-                    .unwrap_or(left);
+                let left = match self.filter_type_to_subset(left, ConditionalSubset::NonNullish) {
+                    ConditionalFilterResult::Complete(Some(filtered)) => filtered,
+                    ConditionalFilterResult::Complete(None) => left,
+                    ConditionalFilterResult::Indeterminate => InferredTypeData::Unknown,
+                };
                 InferredTypeData::union_from_types(self.db, Vec::from([left, right]))
             })
         }
@@ -325,7 +340,6 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_call_callee(&mut self, callee: InferredTypeData<'db>) -> InferredTypeData<'db> {
-        let original = callee;
         let mut seen = FxHashSet::default();
         let db = self.db;
         let callee = self.resolve_call_callee_spine(callee, MAX_CALL_CALLEE_SPINE_DEPTH, &mut seen);
@@ -339,10 +353,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.resolve_inferred_type(ty)
             }
         })
-        .unwrap_or_else(|error| {
-            debug_assert_eq!(error, StructuralMapError::StepLimitExceeded);
-            original
-        })
+        .unwrap_or(InferredTypeData::Unknown)
     }
 
     fn resolve_call_callee_spine(
@@ -352,12 +363,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         seen: &mut FxHashSet<InferredTypeData<'db>>,
     ) -> InferredTypeData<'db> {
         if remaining_depth == 0 {
-            return ty;
+            return InferredTypeData::Unknown;
         }
 
         let ty = self.resolve_inferred_type(ty);
+        let ty = expand_canonical_global(self.db, ty);
         if !seen.insert(ty) {
-            return ty;
+            return InferredTypeData::Unknown;
         }
         let InferredTypeData::InstanceOf(instance) = ty else {
             return ty;
@@ -437,6 +449,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -511,6 +524,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -557,6 +571,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -597,9 +612,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         let type_parameters = if !explicit_type_parameters.is_empty() {
             explicit_type_parameters
         } else if constructed_ty == class_ty {
-            constructor
-                .map(|constructor| self.infer_constructor_type_parameters(class, constructor, args))
-                .unwrap_or_default()
+            match constructor {
+                Some(constructor) => {
+                    let Some(type_parameters) =
+                        infer_constructor_type_parameters(self.db, class, constructor, args)
+                    else {
+                        return Some(InferredTypeData::Unknown);
+                    };
+                    type_parameters
+                }
+                None => Box::default(),
+            }
         } else {
             Box::default()
         };
@@ -609,73 +632,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             constructed_ty,
             type_parameters,
         ))
-    }
-
-    fn infer_constructor_type_parameters(
-        &self,
-        class: InferredClass<'db>,
-        constructor: InferredConstructor<'db>,
-        args: &[InferredTypeData<'db>],
-    ) -> Box<[InferredTypeData<'db>]> {
-        let declared_parameters = class.type_parameters(self.db);
-        if declared_parameters.is_empty() {
-            return Box::default();
-        }
-
-        let mut inferred_parameters = declared_parameters.to_vec();
-        for (parameter, arg) in constructor.parameters(self.db).iter().zip(args) {
-            let parameter_ty = parameter.parameter.ty();
-            for substitution in parameter_ty.collect_generic_replacements(self.db, *arg) {
-                for (index, declared_parameter) in declared_parameters.iter().enumerate() {
-                    if substitution.generic == *declared_parameter
-                        || substitution.generic
-                            == InferredTypeData::instance_of(
-                                self.db,
-                                *declared_parameter,
-                                Box::default(),
-                            )
-                    {
-                        inferred_parameters[index] = substitution.replacement;
-                    }
-                }
-            }
-
-            let Some(parameter_function) = parameter_ty.callable_function(self.db) else {
-                continue;
-            };
-            let InferredReturnType::Type(parameter_return_ty) =
-                parameter_function.return_type(self.db)
-            else {
-                continue;
-            };
-            let Some(argument_function) = arg.callable_function(self.db) else {
-                continue;
-            };
-            let InferredReturnType::Type(argument_return_ty) =
-                argument_function.return_type(self.db)
-            else {
-                continue;
-            };
-
-            for substitution in
-                parameter_return_ty.collect_generic_replacements(self.db, *argument_return_ty)
-            {
-                for (index, declared_parameter) in declared_parameters.iter().enumerate() {
-                    if substitution.generic == *declared_parameter
-                        || substitution.generic
-                            == InferredTypeData::instance_of(
-                                self.db,
-                                *declared_parameter,
-                                Box::default(),
-                            )
-                    {
-                        inferred_parameters[index] = substitution.replacement;
-                    }
-                }
-            }
-        }
-
-        inferred_parameters.into_boxed_slice()
     }
 
     fn resolve_await_expression(
@@ -695,32 +651,99 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             }
 
-            if let InferredTypeData::Union(union) = ty {
+            if matches!(
+                ty,
+                InferredTypeData::Unknown
+                    | InferredTypeData::Divergent(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::TypeofExpression(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::UnknownKeyword
+            ) {
+                return Some(InferredTypeData::Unknown);
+            } else if let InferredTypeData::Union(union) = ty {
                 pending.extend(union.types(self.db).iter().rev().copied());
             } else if matches!(ty, InferredTypeData::InstanceOf(_)) {
-                if let Some(value_ty) = self.resolve_promise_value_type(ty) {
-                    pending.push(value_ty);
-                } else {
-                    types.push(ty);
+                match self.resolve_promise_value_type(ty) {
+                    PromiseValueResolution::Found(value_ty) => pending.push(value_ty),
+                    PromiseValueResolution::NotPromise => types.push(ty),
+                    PromiseValueResolution::Indeterminate => {
+                        return Some(InferredTypeData::Unknown);
+                    }
                 }
             } else {
                 types.push(ty);
             }
         }
 
-        None
+        Some(InferredTypeData::Unknown)
     }
 
     fn resolve_promise_value_type(
         &mut self,
         ty: InferredTypeData<'db>,
-    ) -> Option<InferredTypeData<'db>> {
-        let mut seen = FxHashSet::default();
-        let mut pending = Vec::from([ty]);
+    ) -> PromiseValueResolution<'db> {
+        let mut completed = FxHashSet::default();
+        let mut pending = VecDeque::from([(ty, Vec::new())]);
+        let mut processed = 0;
+        let mut indeterminate = false;
 
-        for _ in 0..MAX_PROMISE_UNWRAP_STEPS {
-            let ty = self.resolve_inferred_type(pending.pop()?);
-            if !seen.insert(ty) {
+        while let Some((ty, path)) = pending.pop_front() {
+            let ty = self.resolve_inferred_type(ty);
+            if path.contains(&ty) {
+                indeterminate = true;
+                continue;
+            }
+            if !completed.insert(ty) {
+                continue;
+            }
+            if processed == MAX_PROMISE_UNWRAP_STEPS {
+                indeterminate = true;
+                continue;
+            }
+            processed += 1;
+
+            if matches!(
+                ty,
+                InferredTypeData::Unknown
+                    | InferredTypeData::Divergent(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::TypeofExpression(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::UnknownKeyword
+            ) {
+                indeterminate = true;
+                continue;
+            }
+            if let InferredTypeData::Union(union) = ty {
+                let mut child_path = path;
+                child_path.push(ty);
+                pending.extend(
+                    union
+                        .types(self.db)
+                        .iter()
+                        .copied()
+                        .map(|ty| (ty, child_path.clone())),
+                );
+                continue;
+            }
+
+            let direct_bases: Vec<InferredTypeData<'db>> =
+                if let InferredTypeData::Class(class) = ty {
+                    class.extends(self.db).into_iter().collect()
+                } else if let InferredTypeData::Interface(interface) = ty {
+                    interface.extends(self.db).to_vec()
+                } else {
+                    Vec::new()
+                };
+            if !direct_bases.is_empty() {
+                let mut child_path = path;
+                child_path.push(ty);
+                pending.extend(
+                    direct_bases
+                        .into_iter()
+                        .map(|base| (base, child_path.clone())),
+                );
                 continue;
             }
 
@@ -728,46 +751,101 @@ impl<'db> ResolutionCtx<'db, '_> {
                 continue;
             };
             let target = self.resolve_inferred_type(instance.ty(self.db));
-            if self.is_promise_like_target(target) {
-                return Some(
-                    instance
-                        .type_parameters(self.db)
-                        .first()
-                        .map_or(InferredTypeData::Unknown, |ty| {
-                            self.resolve_inferred_type(*ty)
-                        }),
-                );
+            match self.is_promise_like_target(target) {
+                Some(true) => {
+                    return PromiseValueResolution::Found(
+                        instance
+                            .type_parameters(self.db)
+                            .first()
+                            .map_or(InferredTypeData::Unknown, |ty| {
+                                self.resolve_inferred_type(*ty)
+                            }),
+                    );
+                }
+                None => {
+                    indeterminate = true;
+                    continue;
+                }
+                Some(false) => {}
             }
 
-            if let InferredTypeData::Class(class) = target
-                && let Some(extends) = class.extends(self.db)
-            {
-                let substitutions = substitutions_for_instance(
+            if let InferredTypeData::InstanceOf(_) = target {
+                let mut child_path = path;
+                child_path.push(ty);
+                pending.push_back((target, child_path));
+                continue;
+            }
+            if let InferredTypeData::Union(union) = target {
+                let mut child_path = path;
+                child_path.push(ty);
+                pending.extend(union.types(self.db).iter().copied().map(|target| {
+                    (
+                        InferredTypeData::instance_of(
+                            self.db,
+                            target,
+                            instance
+                                .type_parameters(self.db)
+                                .to_vec()
+                                .into_boxed_slice(),
+                        ),
+                        child_path.clone(),
+                    )
+                }));
+                continue;
+            }
+
+            let bases: Vec<InferredTypeData<'db>> = if let InferredTypeData::Class(class) = target {
+                class.extends(self.db).into_iter().collect()
+            } else if let InferredTypeData::Interface(interface) = target {
+                interface.extends(self.db).to_vec()
+            } else {
+                Vec::new()
+            };
+            if !bases.is_empty() {
+                let Ok(substitutions) = substitutions_for_instance(
                     self.db,
                     target,
                     instance.type_parameters(self.db),
                     &[],
-                );
-                pending.push(apply_substitutions(self.db, extends, &substitutions));
+                ) else {
+                    return PromiseValueResolution::Indeterminate;
+                };
+                let mut child_path = path;
+                child_path.push(ty);
+                for base in bases {
+                    let Ok(base) = apply_substitutions(self.db, base, &substitutions) else {
+                        return PromiseValueResolution::Indeterminate;
+                    };
+                    pending.push_back((base, child_path.clone()));
+                }
             }
         }
 
-        None
+        if indeterminate {
+            PromiseValueResolution::Indeterminate
+        } else {
+            PromiseValueResolution::NotPromise
+        }
     }
 
-    fn is_promise_like_target(&mut self, target: InferredTypeData<'db>) -> bool {
+    fn is_promise_like_target(&mut self, target: InferredTypeData<'db>) -> Option<bool> {
         match self.resolve_inferred_type(target) {
-            target if target.is_promise_class(self.db) => true,
+            target if target.is_promise_class(self.db) => Some(true),
             InferredTypeData::Class(class) => class
                 .name(self.db)
                 .as_ref()
-                .is_some_and(|name| name.text() == "PromiseLike"),
+                .map_or(Some(false), |name| Some(name.text() == "PromiseLike")),
             InferredTypeData::Interface(interface) => {
-                interface.name(self.db).text() == "PromiseLike"
+                Some(interface.name(self.db).text() == "PromiseLike")
             }
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
+            | InferredTypeData::Local(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::UnknownKeyword => None,
+            InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -782,23 +860,19 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Namespace(_)
             | InferredTypeData::Object(_)
             | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
             | InferredTypeData::NeverKeyword
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => false,
+            | InferredTypeData::VoidKeyword => Some(false),
+            InferredTypeData::Generic(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_) => None,
         }
     }
 
@@ -812,6 +886,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -852,7 +927,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         object: InferredTypeData<'db>,
         member_name: &str,
     ) -> Option<InferredTypeData<'db>> {
-        match self.resolve_inferred_type(object) {
+        if let InferredTypeData::Local(local) = object
+            && let Some(ty) = self.resolve_in_progress_local_member(local, member_name)
+        {
+            return Some(ty);
+        }
+        let object = self.resolve_inferred_type(object);
+        let object = expand_canonical_global(self.db, object);
+        match object {
             InferredTypeData::Class(class) => find_member_in_members_for_mode(
                 self.db,
                 class.members(self.db),
@@ -861,7 +943,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             )
             .map(|(ty, is_optional)| self.member_type(ty, is_optional)),
             InferredTypeData::InstanceOf(instance) => {
-                let target = self.resolve_inferred_type(instance.ty(self.db));
+                let target = instance.ty(self.db);
+                if let InferredTypeData::Local(local) = target
+                    && let Some(ty) = self.resolve_in_progress_local_member(local, member_name)
+                {
+                    return Some(ty);
+                }
+                let target = self.resolve_inferred_type(target);
+                let target = expand_canonical_global(self.db, target);
                 if let Some((ty, is_optional)) = self.promise_member_type(target, member_name) {
                     return Some(self.member_type(ty, is_optional));
                 }
@@ -870,15 +959,24 @@ impl<'db> ResolutionCtx<'db, '_> {
                     target,
                     instance.type_parameters(self.db),
                     &[],
-                );
+                )
+                .ok();
+                let Some(substitutions) = substitutions else {
+                    return Some(InferredTypeData::Unknown);
+                };
                 if matches!(target, InferredTypeData::Union(_)) {
                     let ty = self.resolve_static_member_expression(target, member_name)?;
-                    return Some(apply_substitutions(self.db, ty, &substitutions));
+                    return Some(
+                        apply_substitutions(self.db, ty, &substitutions)
+                            .unwrap_or(InferredTypeData::Unknown),
+                    );
                 }
                 self.find_static_member_on_resolved_type(target, member_name)
                     .map(|(ty, is_optional)| {
-                        let ty = apply_substitutions(self.db, ty, &substitutions);
-                        self.member_type(ty, is_optional)
+                        apply_substitutions(self.db, ty, &substitutions)
+                            .map_or(InferredTypeData::Unknown, |ty| {
+                                self.member_type(ty, is_optional)
+                            })
                     })
             }
             InferredTypeData::Union(union) => {
@@ -889,6 +987,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         InferredTypeData::Unknown => types.push(InferredTypeData::Unknown),
                         ty @ (InferredTypeData::Divergent(_)
                         | InferredTypeData::Global
+                        | InferredTypeData::GlobalType(_)
                         | InferredTypeData::BigInt
                         | InferredTypeData::Boolean
                         | InferredTypeData::Null
@@ -932,6 +1031,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 collected_type_result(self.db, types).or(Some(InferredTypeData::Unknown))
             }
             InferredTypeData::Global => self.resolve_global_name(member_name),
+            InferredTypeData::GlobalType(_) => None,
             InferredTypeData::Tuple(tuple) => {
                 let element_ty = InferredTypeData::union_from_types(
                     self.db,
@@ -942,11 +1042,17 @@ impl<'db> ResolutionCtx<'db, '_> {
                         .collect(),
                 );
                 let target = self.resolve_global_name("Array")?;
-                let substitutions = substitutions_for_instance(self.db, target, &[element_ty], &[]);
+                let substitutions =
+                    substitutions_for_instance(self.db, target, &[element_ty], &[]).ok();
+                let Some(substitutions) = substitutions else {
+                    return Some(InferredTypeData::Unknown);
+                };
                 self.find_static_member_on_resolved_type(target, member_name)
                     .map(|(ty, is_optional)| {
-                        let ty = apply_substitutions(self.db, ty, &substitutions);
-                        self.member_type(ty, is_optional)
+                        apply_substitutions(self.db, ty, &substitutions)
+                            .map_or(InferredTypeData::Unknown, |ty| {
+                                self.member_type(ty, is_optional)
+                            })
                     })
             }
             ty @ (InferredTypeData::Unknown
@@ -985,6 +1091,91 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    fn resolve_in_progress_local_member(
+        &mut self,
+        local: biome_js_type_info::resolved::LocalTypeHandle<'db>,
+        member_name: &str,
+    ) -> Option<InferredTypeData<'db>> {
+        if local.module(self.db) != self.module_key {
+            return None;
+        }
+
+        let type_id = biome_js_type_info::TypeId::new(local.type_id(self.db).index());
+        if !self.in_progress.contains(&type_id) {
+            return None;
+        }
+
+        let raw = self.js_info.raw_types.get(type_id.index())?;
+        if let biome_js_type_info::RawTypeData::TypeofExpression(expression) = raw
+            && let RawTypeofExpression::This(expression) = expression.as_ref()
+        {
+            let parent = expression.parent.clone();
+            let parent = self.resolve(&parent);
+            return self.resolve_static_member_expression(parent, member_name);
+        }
+
+        let member = match raw {
+            biome_js_type_info::RawTypeData::Object(object) => object
+                .members
+                .iter()
+                .find(|member| member.kind.has_name(member_name)),
+            biome_js_type_info::RawTypeData::Literal(literal) => {
+                let biome_js_type_info::Literal::Object(object) = literal.as_ref() else {
+                    return None;
+                };
+                object
+                    .members()
+                    .iter()
+                    .find(|member| member.kind.has_name(member_name))
+            }
+            biome_js_type_info::RawTypeData::Unknown
+            | biome_js_type_info::RawTypeData::Global
+            | biome_js_type_info::RawTypeData::BigInt
+            | biome_js_type_info::RawTypeData::Boolean
+            | biome_js_type_info::RawTypeData::Null
+            | biome_js_type_info::RawTypeData::Number
+            | biome_js_type_info::RawTypeData::String
+            | biome_js_type_info::RawTypeData::Symbol
+            | biome_js_type_info::RawTypeData::Undefined
+            | biome_js_type_info::RawTypeData::Conditional
+            | biome_js_type_info::RawTypeData::ImportNamespace(_)
+            | biome_js_type_info::RawTypeData::Class(_)
+            | biome_js_type_info::RawTypeData::Constructor(_)
+            | biome_js_type_info::RawTypeData::Function(_)
+            | biome_js_type_info::RawTypeData::Interface(_)
+            | biome_js_type_info::RawTypeData::Module(_)
+            | biome_js_type_info::RawTypeData::Namespace(_)
+            | biome_js_type_info::RawTypeData::Tuple(_)
+            | biome_js_type_info::RawTypeData::Generic(_)
+            | biome_js_type_info::RawTypeData::Intersection(_)
+            | biome_js_type_info::RawTypeData::Union(_)
+            | biome_js_type_info::RawTypeData::TypeOperator(_)
+            | biome_js_type_info::RawTypeData::InstanceOf(_)
+            | biome_js_type_info::RawTypeData::Reference(_)
+            | biome_js_type_info::RawTypeData::MergedReference(_)
+            | biome_js_type_info::RawTypeData::TypeofExpression(_)
+            | biome_js_type_info::RawTypeData::TypeofType(_)
+            | biome_js_type_info::RawTypeData::TypeofValue(_)
+            | biome_js_type_info::RawTypeData::AnyKeyword
+            | biome_js_type_info::RawTypeData::NeverKeyword
+            | biome_js_type_info::RawTypeData::ObjectKeyword
+            | biome_js_type_info::RawTypeData::ThisKeyword
+            | biome_js_type_info::RawTypeData::UnknownKeyword
+            | biome_js_type_info::RawTypeData::VoidKeyword => return None,
+        }?;
+        let reference = member.ty.clone();
+        let is_getter = member.is_getter();
+        let is_optional = member.is_optional();
+        let mut ty = self.resolve(&reference);
+        if is_getter
+            && let InferredTypeData::Function(function) = ty
+            && let InferredReturnType::Type(return_ty) = function.return_type(self.db)
+        {
+            ty = *return_ty;
+        }
+        Some(self.member_type(ty, is_optional))
+    }
+
     fn find_static_member_on_resolved_type(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -992,13 +1183,14 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<(InferredTypeData<'db>, bool)> {
         let mut seen_types = FxHashSet::default();
         let mut pending = Vec::from([ty]);
-        for _ in 0..MAX_STATIC_MEMBER_LOOKUP_STEPS {
-            let Some(ty) = pending.pop() else {
-                break;
-            };
+        while let Some(ty) = pending.pop() {
             let ty = self.resolve_inferred_type(ty);
+            let ty = expand_canonical_global(self.db, ty);
             if !seen_types.insert(ty) {
                 continue;
+            }
+            if seen_types.len() > MAX_STATIC_MEMBER_LOOKUP_STEPS {
+                return Some((InferredTypeData::Unknown, false));
             }
 
             match ty {
@@ -1018,6 +1210,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(self.db) {
                         pending.push(constraint);
+                    } else {
+                        return Some((InferredTypeData::Unknown, false));
                     }
                 }
                 InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
@@ -1094,11 +1288,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                     pending.extend(reference.targets(self.db));
                 }
                 InferredTypeData::Union(union) => {
-                    pending.extend(union.types(self.db).iter().rev().copied());
+                    if union.types(self.db).is_empty() {
+                        return None;
+                    }
+                    return Some((InferredTypeData::Unknown, false));
                 }
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -1120,7 +1318,21 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
-                | InferredTypeData::VoidKeyword => {}
+                | InferredTypeData::VoidKeyword => {
+                    if matches!(
+                        ty,
+                        InferredTypeData::Unknown
+                            | InferredTypeData::Divergent(_)
+                            | InferredTypeData::Global
+                            | InferredTypeData::GlobalType(_)
+                            | InferredTypeData::Local(_)
+                            | InferredTypeData::TypeofExpression(_)
+                            | InferredTypeData::AnyKeyword
+                            | InferredTypeData::UnknownKeyword
+                    ) {
+                        return Some((InferredTypeData::Unknown, false));
+                    }
+                }
             }
         }
 
@@ -1198,6 +1410,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1266,6 +1479,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1326,6 +1540,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             subject @ (InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1365,110 +1580,11 @@ impl<'db> ResolutionCtx<'db, '_> {
         ty: InferredTypeData<'db>,
         excluded_names: &[Text],
     ) -> InferredTypeData<'db> {
-        let mut members = Vec::new();
-        let mut seen_names = FxHashSet::default();
-        let mut seen_types = FxHashSet::default();
-        let mut pending = Vec::from([ty]);
-        for _ in 0..MAX_REST_MEMBER_STEPS {
-            let Some(ty) = pending.pop() else {
-                break;
-            };
-            let ty = self.resolve_inferred_type(ty);
-            if !seen_types.insert(ty) {
-                continue;
-            }
-
-            match ty {
-                InferredTypeData::Class(class) => {
-                    collect_rest_members(
-                        &mut members,
-                        &mut seen_names,
-                        class.members(self.db),
-                        excluded_names,
-                        RestMemberMode::Instance,
-                    );
-                    if let Some(extends) = class.extends(self.db) {
-                        pending.push(extends);
-                    }
-                }
-                InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
-                InferredTypeData::Interface(interface) => collect_rest_members(
-                    &mut members,
-                    &mut seen_names,
-                    interface.members(self.db),
-                    excluded_names,
-                    RestMemberMode::Instance,
-                ),
-                InferredTypeData::Literal(literal) => {
-                    if let InferredLiteral::Object(own_members) = literal.literal(self.db) {
-                        collect_rest_members(
-                            &mut members,
-                            &mut seen_names,
-                            own_members,
-                            excluded_names,
-                            RestMemberMode::Instance,
-                        );
-                    }
-                }
-                InferredTypeData::Module(module) => collect_rest_members(
-                    &mut members,
-                    &mut seen_names,
-                    module.members(self.db),
-                    excluded_names,
-                    RestMemberMode::Instance,
-                ),
-                InferredTypeData::Namespace(namespace) => collect_rest_members(
-                    &mut members,
-                    &mut seen_names,
-                    namespace.members(self.db),
-                    excluded_names,
-                    RestMemberMode::Instance,
-                ),
-                InferredTypeData::Object(object) => {
-                    collect_rest_members(
-                        &mut members,
-                        &mut seen_names,
-                        object.members(self.db),
-                        excluded_names,
-                        RestMemberMode::Instance,
-                    );
-                    if let Some(prototype) = object.prototype(self.db) {
-                        pending.push(prototype);
-                    }
-                }
-                InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
-                | InferredTypeData::Global
-                | InferredTypeData::BigInt
-                | InferredTypeData::Boolean
-                | InferredTypeData::Null
-                | InferredTypeData::Number
-                | InferredTypeData::String
-                | InferredTypeData::Symbol
-                | InferredTypeData::Undefined
-                | InferredTypeData::Conditional
-                | InferredTypeData::Constructor(_)
-                | InferredTypeData::Function(_)
-                | InferredTypeData::Tuple(_)
-                | InferredTypeData::Generic(_)
-                | InferredTypeData::Local(_)
-                | InferredTypeData::Intersection(_)
-                | InferredTypeData::Union(_)
-                | InferredTypeData::TypeOperator(_)
-                | InferredTypeData::MergedReference(_)
-                | InferredTypeData::TypeofExpression(_)
-                | InferredTypeData::TypeofType(_)
-                | InferredTypeData::TypeofValue(_)
-                | InferredTypeData::AnyKeyword
-                | InferredTypeData::NeverKeyword
-                | InferredTypeData::ObjectKeyword
-                | InferredTypeData::ThisKeyword
-                | InferredTypeData::UnknownKeyword
-                | InferredTypeData::VoidKeyword => {}
-            }
-        }
-
-        InferredTypeData::object_from_members(self.db, members)
+        let db = self.db;
+        collect_rest_object_members(db, ty, excluded_names, |ty| self.resolve_inferred_type(ty))
+            .map_or(InferredTypeData::Unknown, |members| {
+                InferredTypeData::object_from_members(db, members)
+            })
     }
 
     fn resolve_iterable_value_type(
@@ -1556,6 +1672,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
             InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Symbol
             | InferredTypeData::Conditional
             | InferredTypeData::Constructor(_)
@@ -1588,6 +1705,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Boolean
             | InferredTypeData::Null
             | InferredTypeData::Number
@@ -1653,6 +1771,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Conditional
             | InferredTypeData::Class(_)
             | InferredTypeData::Constructor(_)
@@ -1752,6 +1871,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -1793,14 +1913,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         ty: InferredTypeData<'db>,
         subset: ConditionalSubset,
-    ) -> Option<InferredTypeData<'db>> {
+    ) -> ConditionalFilterResult<'db> {
         let mut types = Vec::new();
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([ty]);
 
         for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
             let Some(ty) = pending.pop() else {
-                return collected_type_result(self.db, types);
+                return ConditionalFilterResult::Complete(collected_type_result(self.db, types));
             };
             let ty = self.resolve_inferred_type(ty);
             if !seen.insert(ty) {
@@ -1830,6 +1950,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Divergent(_)
                     | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -1863,7 +1984,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
 
-        None
+        ConditionalFilterResult::Indeterminate
     }
 
     fn filter_action(
@@ -1880,6 +2001,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Null
                 | InferredTypeData::Symbol
                 | InferredTypeData::Undefined
@@ -1924,6 +2046,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Null
                 | InferredTypeData::Number
@@ -2008,10 +2131,186 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 }
 
+fn infer_constructor_type_parameters<'db>(
+    db: &'db dyn crate::ModuleDb,
+    class: InferredClass<'db>,
+    constructor: InferredConstructor<'db>,
+    args: &[InferredTypeData<'db>],
+) -> Option<Box<[InferredTypeData<'db>]>> {
+    let declared_parameters = class.type_parameters(db);
+    if declared_parameters.is_empty() {
+        return Some(Box::default());
+    }
+
+    let mut inferred_parameters = declared_parameters.to_vec();
+    for (parameter, arg) in constructor.parameters(db).iter().zip(args) {
+        let parameter_ty = parameter.parameter.ty();
+        let substitutions = parameter_ty.collect_generic_replacements(db, *arg)?;
+        for substitution in substitutions {
+            for (index, declared_parameter) in declared_parameters.iter().enumerate() {
+                if substitution.generic == *declared_parameter
+                    || substitution.generic
+                        == InferredTypeData::instance_of(db, *declared_parameter, Box::default())
+                {
+                    inferred_parameters[index] = substitution.replacement;
+                }
+            }
+        }
+
+        let Some(parameter_function) = parameter_ty.callable_function(db) else {
+            continue;
+        };
+        let InferredReturnType::Type(parameter_return_ty) = parameter_function.return_type(db)
+        else {
+            continue;
+        };
+        let Some(argument_function) = arg.callable_function(db) else {
+            continue;
+        };
+        let InferredReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {
+            continue;
+        };
+
+        let substitutions =
+            parameter_return_ty.collect_generic_replacements(db, *argument_return_ty)?;
+        for substitution in substitutions {
+            for (index, declared_parameter) in declared_parameters.iter().enumerate() {
+                if substitution.generic == *declared_parameter
+                    || substitution.generic
+                        == InferredTypeData::instance_of(db, *declared_parameter, Box::default())
+                {
+                    inferred_parameters[index] = substitution.replacement;
+                }
+            }
+        }
+    }
+
+    Some(inferred_parameters.into_boxed_slice())
+}
+
 #[derive(Clone, Copy)]
 enum RestMemberMode {
     Instance,
     ClassStatic,
+}
+
+fn collect_rest_object_members<'db>(
+    db: &'db dyn biome_js_type_info::TypeDb,
+    ty: InferredTypeData<'db>,
+    excluded_names: &[Text],
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> Option<Vec<InferredTypeMember<'db>>> {
+    let mut members = Vec::new();
+    let mut seen_names = FxHashSet::default();
+    let mut seen_types = FxHashSet::default();
+    let mut pending = Vec::from([ty]);
+
+    while let Some(ty) = pending.pop() {
+        let ty = resolve(ty);
+        if seen_types.contains(&ty) {
+            continue;
+        }
+        if seen_types.len() == MAX_REST_MEMBER_STEPS {
+            return None;
+        }
+        seen_types.insert(ty);
+
+        match ty {
+            InferredTypeData::Class(class) => {
+                collect_rest_members(
+                    &mut members,
+                    &mut seen_names,
+                    class.members(db),
+                    excluded_names,
+                    RestMemberMode::Instance,
+                );
+                if let Some(extends) = class.extends(db) {
+                    pending.push(extends);
+                }
+            }
+            InferredTypeData::InstanceOf(instance) => pending.push(instance.ty(db)),
+            InferredTypeData::Interface(interface) => {
+                collect_rest_members(
+                    &mut members,
+                    &mut seen_names,
+                    interface.members(db),
+                    excluded_names,
+                    RestMemberMode::Instance,
+                );
+                pending.extend(interface.extends(db).iter().rev().copied());
+            }
+            InferredTypeData::Literal(literal) => {
+                let InferredLiteral::Object(own_members) = literal.literal(db) else {
+                    return None;
+                };
+                collect_rest_members(
+                    &mut members,
+                    &mut seen_names,
+                    own_members,
+                    excluded_names,
+                    RestMemberMode::Instance,
+                );
+            }
+            InferredTypeData::Module(module) => collect_rest_members(
+                &mut members,
+                &mut seen_names,
+                module.members(db),
+                excluded_names,
+                RestMemberMode::Instance,
+            ),
+            InferredTypeData::Namespace(namespace) => collect_rest_members(
+                &mut members,
+                &mut seen_names,
+                namespace.members(db),
+                excluded_names,
+                RestMemberMode::Instance,
+            ),
+            InferredTypeData::Object(object) => {
+                collect_rest_members(
+                    &mut members,
+                    &mut seen_names,
+                    object.members(db),
+                    excluded_names,
+                    RestMemberMode::Instance,
+                );
+                if let Some(prototype) = object.prototype(db) {
+                    pending.push(prototype);
+                }
+            }
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => return None,
+        }
+    }
+
+    Some(members)
 }
 
 fn collect_rest_members<'db>(
@@ -2053,4 +2352,282 @@ enum FilterAction<'db> {
     Mapped(InferredTypeData<'db>),
     Retained,
     Stripped,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{ModuleGraphGeneration, module_graph::ModuleInfoKind};
+    use biome_db::ParsedSource;
+    use biome_js_type_info::{
+        TypeDb,
+        resolved::{
+            InferredConstructorParameter, InferredFunctionParameter,
+            InferredInternedGenericTypeParameter, InferredNamedFunctionParameter, InferredObject,
+            InferredTypeMemberKind,
+        },
+    };
+    use camino::Utf8Path;
+    use salsa::Storage;
+
+    #[salsa::db]
+    struct TestDb {
+        storage: Storage<Self>,
+    }
+
+    #[salsa::input]
+    struct RestChainSteps {
+        steps: usize,
+    }
+
+    #[salsa::tracked]
+    fn infer_rest_for_chain_steps<'db>(
+        db: &'db dyn crate::ModuleDb,
+        input: RestChainSteps,
+    ) -> InferredTypeData<'db> {
+        rest_type_for_chain(db, input.steps(db))
+    }
+
+    impl Default for TestDb {
+        fn default() -> Self {
+            let db = Self {
+                storage: Storage::default(),
+            };
+            ModuleGraphGeneration::new(&db, 0);
+            db
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[salsa::db]
+    impl crate::ModuleDb for TestDb {
+        fn module_graph_generation(&self) -> u64 {
+            ModuleGraphGeneration::get(self).value(self)
+        }
+
+        fn module_for_path(&self, _path: &Utf8Path) -> Option<crate::ModuleInfo> {
+            let _ = self.module_graph_generation();
+            None
+        }
+
+        fn for_each_module(&self, _f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
+            let _ = self.module_graph_generation();
+        }
+    }
+
+    fn replacement_chain<'db>(
+        db: &'db TestDb,
+        steps: usize,
+        leaf: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let wrapper = InferredTypeData::Class(InferredClass::new(
+            db,
+            Box::default(),
+            None,
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static("Wrapper")),
+        ));
+        (0..steps - 2).fold(leaf, |ty, _| {
+            InferredTypeData::instance_of(db, wrapper, Box::new([ty]))
+        })
+    }
+
+    fn rest_member<'db>(name: &'static str) -> InferredTypeMember<'db> {
+        InferredTypeMember {
+            kind: InferredTypeMemberKind::Named(Text::new_static(name)),
+            ty: InferredTypeData::Number,
+        }
+    }
+
+    fn rest_class_chain<'db>(db: &'db dyn TypeDb, steps: usize) -> InferredTypeData<'db> {
+        assert!(steps > 0);
+        let leaf = InferredTypeData::Class(InferredClass::new(
+            db,
+            Box::default(),
+            None,
+            Box::default(),
+            Vec::from([rest_member("kept")]).into_boxed_slice(),
+            None,
+        ));
+        (1..steps).fold(leaf, |extends, _| {
+            InferredTypeData::Class(InferredClass::new(
+                db,
+                Box::default(),
+                Some(extends),
+                Box::default(),
+                Box::default(),
+                None,
+            ))
+        })
+    }
+
+    fn rest_type_for_chain<'db>(db: &'db dyn TypeDb, steps: usize) -> InferredTypeData<'db> {
+        collect_rest_object_members(db, rest_class_chain(db, steps), &[], |ty| ty)
+            .map_or(InferredTypeData::Unknown, |members| {
+                InferredTypeData::object_from_members(db, members)
+            })
+    }
+
+    #[test]
+    fn constructor_generic_replacement_budget_boundaries() {
+        const LIMIT: usize = 64;
+
+        let db = TestDb::default();
+        for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
+            let generic = InferredTypeData::Generic(InferredInternedGenericTypeParameter::new(
+                &db,
+                None,
+                None,
+                Text::new_static("T"),
+            ));
+            let class = InferredClass::new(
+                &db,
+                Vec::from([generic]).into_boxed_slice(),
+                None,
+                Box::default(),
+                Box::default(),
+                Some(Text::new_static("Box")),
+            );
+            let constructor = InferredConstructor::new(
+                &db,
+                Box::default(),
+                Vec::from([InferredConstructorParameter {
+                    parameter: InferredFunctionParameter::Named(InferredNamedFunctionParameter {
+                        name: Text::new_static("value"),
+                        ty: replacement_chain(&db, steps, generic),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    accessibility: None,
+                }])
+                .into_boxed_slice(),
+                None,
+            );
+            let argument = replacement_chain(&db, steps, InferredTypeData::Number);
+            let result = infer_constructor_type_parameters(&db, class, constructor, &[argument]);
+
+            if steps <= LIMIT {
+                assert_eq!(
+                    result.as_deref(),
+                    Some([InferredTypeData::Number].as_slice())
+                );
+            } else {
+                assert_eq!(result, None);
+            }
+        }
+    }
+
+    #[test]
+    fn object_rest_member_budget_boundaries_and_repeated_result() {
+        let db = TestDb::default();
+
+        for steps in [
+            MAX_REST_MEMBER_STEPS - 1,
+            MAX_REST_MEMBER_STEPS,
+            MAX_REST_MEMBER_STEPS + 1,
+        ] {
+            let result = rest_type_for_chain(&db, steps);
+            if steps <= MAX_REST_MEMBER_STEPS {
+                let InferredTypeData::Object(object) = result else {
+                    panic!("chain with {steps} steps must produce a complete object");
+                };
+                assert_eq!(object.members(&db).as_ref(), [rest_member("kept")]);
+            } else {
+                assert_eq!(result, InferredTypeData::Unknown);
+            }
+        }
+
+        let first = rest_type_for_chain(&db, MAX_REST_MEMBER_STEPS);
+        let second = rest_type_for_chain(&db, MAX_REST_MEMBER_STEPS);
+        assert_eq!(first, second);
+    }
+
+    #[test]
+    fn object_rest_unknown_container_discards_partial_members() {
+        let db = TestDb::default();
+
+        for prototype in [InferredTypeData::Unknown, InferredTypeData::UnknownKeyword] {
+            let object = InferredTypeData::Object(InferredObject::new(
+                &db,
+                Some(prototype),
+                Vec::from([rest_member("partial")]).into_boxed_slice(),
+            ));
+            assert_eq!(collect_rest_object_members(&db, object, &[], |ty| ty), None);
+        }
+    }
+
+    #[test]
+    fn object_rest_deduplicated_prototype_cycle_is_complete() {
+        let db = TestDb::default();
+        let first = InferredTypeData::Object(InferredObject::new(
+            &db,
+            Some(InferredTypeData::String),
+            Vec::from([rest_member("first")]).into_boxed_slice(),
+        ));
+        let second = InferredTypeData::Object(InferredObject::new(
+            &db,
+            Some(InferredTypeData::Number),
+            Vec::from([rest_member("second")]).into_boxed_slice(),
+        ));
+        let members = collect_rest_object_members(&db, InferredTypeData::Number, &[], |ty| {
+            if ty == InferredTypeData::Number {
+                first
+            } else if ty == InferredTypeData::String {
+                second
+            } else {
+                ty
+            }
+        })
+        .expect("deduplicated cycle must drain");
+
+        assert_eq!(members, [rest_member("first"), rest_member("second")]);
+    }
+
+    #[test]
+    fn object_rest_unsupported_aggregate_discards_partial_members() {
+        let db = TestDb::default();
+        let object = InferredTypeData::Object(InferredObject::new(
+            &db,
+            None,
+            Vec::from([rest_member("partial")]).into_boxed_slice(),
+        ));
+        let intersection = InferredTypeData::intersection_from_types(
+            &db,
+            Vec::from([object, InferredTypeData::ObjectKeyword]),
+        );
+
+        assert_eq!(
+            collect_rest_object_members(&db, intersection, &[], |ty| ty),
+            None
+        );
+    }
+
+    #[test]
+    fn object_rest_budget_unknown_invalidates_to_complete_object() {
+        let mut db = TestDb::default();
+        let input = RestChainSteps::new(&db, MAX_REST_MEMBER_STEPS + 1);
+        assert_eq!(
+            infer_rest_for_chain_steps(&db, input),
+            InferredTypeData::Unknown
+        );
+
+        salsa::Setter::to(input.set_steps(&mut db), MAX_REST_MEMBER_STEPS);
+        let InferredTypeData::Object(object) = infer_rest_for_chain_steps(&db, input) else {
+            panic!("under-budget chain must invalidate to a complete object");
+        };
+        assert_eq!(object.members(&db).as_ref(), [rest_member("kept")]);
+    }
 }

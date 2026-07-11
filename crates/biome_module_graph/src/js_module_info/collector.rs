@@ -393,7 +393,7 @@ impl JsModuleInfoCollector {
                 (Vec::new(), FxHashMap::default(), FxHashMap::default())
             } else {
                 (
-                    self.raw_types(),
+                    self.take_raw_types(),
                     self.raw_expressions(),
                     self.raw_binding_types(),
                 )
@@ -407,8 +407,11 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn raw_types(&self) -> Vec<RawTypeData> {
-        self.types.as_references().into_iter().cloned().collect()
+    fn take_raw_types(&mut self) -> Vec<RawTypeData> {
+        Vec::<Arc<RawTypeData>>::from(std::mem::take(&mut self.types))
+            .into_iter()
+            .map(Arc::unwrap_or_clone)
+            .collect()
     }
 
     fn raw_expressions(&self) -> FxHashMap<TextRange, TypeReference> {

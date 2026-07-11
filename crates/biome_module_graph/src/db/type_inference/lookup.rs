@@ -1,17 +1,16 @@
-use super::{InferredModuleTypes, collected_type_result};
+use super::{InferredModuleTypes, collected_type_result, expand_canonical_global};
 use crate::ModuleDb;
 use crate::db::queries::infer_module_types;
 use crate::module_graph::ModuleInfo;
-use biome_js_type_info::interned_types::{
-    Literal as InferredLiteral, LocalTypeHandle, ModuleKey, ReturnType as InferredReturnType,
-    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
+use biome_js_type_info::resolved::{
+    InferredLiteral, InferredReturnType, InferredTypeData, InferredTypeMember,
+    InferredTypeMemberKind, InferredTypeSubstitution, LocalTypeHandle, ModuleKey,
+    StructuralMapError,
 };
 use rustc_hash::FxHashSet;
 use salsa::plumbing::{AsId, FromId};
 use std::rc::Rc;
 
-const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
 
 impl<'db> InferredModuleTypes<'db> {
@@ -22,7 +21,7 @@ impl<'db> InferredModuleTypes<'db> {
     ) -> InferredTypeData<'db> {
         let mut seen = FxHashSet::default();
 
-        for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+        loop {
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };
@@ -30,15 +29,16 @@ impl<'db> InferredModuleTypes<'db> {
             let module_key = local.module(db);
             let type_id = local.type_id(db);
             if !seen.insert((module_key, type_id)) {
-                return ty;
+                return InferredTypeData::Unknown;
+            }
+            if seen.len() % 256 == 0 {
+                db.unwind_if_revision_cancelled();
             }
 
             ty = self
                 .type_for_local_handle(db, local)
                 .unwrap_or(InferredTypeData::Unknown);
         }
-
-        ty
     }
 
     fn type_for_local_handle(
@@ -66,26 +66,44 @@ impl<'db> InferredModuleTypes<'db> {
         let mut pending = vec![MemberLookupState::new(ty, MemberLookup::Any, false)];
         let mut found = Vec::new();
         let mut remaining_steps = MAX_MEMBER_LOOKUP_STEPS;
+        let mut exhausted = false;
 
         while let Some(mut state) = pending.pop() {
             let lookup = state.lookup;
             let collect = state.collect;
-            let ty = self.resolve_type_iterative(db, state.ty);
+            let Some(ty) = self.resolve_type_for_member_lookup(db, state.ty) else {
+                if collect {
+                    found.push(InferredTypeData::Unknown);
+                    continue;
+                }
+                return Some(InferredTypeData::Unknown);
+            };
+            let ty = expand_canonical_global(db, ty);
             let (ty, lookup) = match ty {
                 InferredTypeData::InstanceOf(instance) => {
-                    let target = self.resolve_type_iterative(db, instance.ty(db));
-                    state.substitutions = substitutions_for_instance(
+                    let Some(target) = self.resolve_type_for_member_lookup(db, instance.ty(db))
+                    else {
+                        if collect {
+                            found.push(InferredTypeData::Unknown);
+                            continue;
+                        }
+                        return Some(InferredTypeData::Unknown);
+                    };
+                    let Ok(substitutions) = substitutions_for_instance(
                         db,
                         target,
                         instance.type_parameters(db),
                         &state.substitutions,
-                    )
-                    .into();
+                    ) else {
+                        return Some(InferredTypeData::Unknown);
+                    };
+                    state.substitutions = substitutions.into();
                     (target, MemberLookup::Instance)
                 }
                 ty @ (InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -127,12 +145,25 @@ impl<'db> InferredModuleTypes<'db> {
             // Deduplicated entries above don't count against the budget, so
             // the limit measures distinct types visited, not queue churn.
             if remaining_steps == 0 {
+                exhausted = true;
                 break;
             }
             remaining_steps -= 1;
 
             if let Some(member_ty) = self.find_own_member_type(db, ty, name, lookup) {
-                let member_ty = apply_substitutions(db, member_ty, &state.substitutions);
+                let Ok(member_ty) = apply_substitutions(db, member_ty, &state.substitutions) else {
+                    return Some(InferredTypeData::Unknown);
+                };
+                let member_ty = if matches!(
+                    member_ty,
+                    InferredTypeData::Unknown
+                        | InferredTypeData::AnyKeyword
+                        | InferredTypeData::UnknownKeyword
+                ) {
+                    InferredTypeData::Unknown
+                } else {
+                    member_ty
+                };
                 if collect {
                     found.push(member_ty);
                     continue;
@@ -146,8 +177,12 @@ impl<'db> InferredModuleTypes<'db> {
                         if matches!(lookup, MemberLookup::Any) {
                             extends = class_side_type(db, extends);
                         }
+                        let Ok(extends) = apply_substitutions(db, extends, &state.substitutions)
+                        else {
+                            return Some(InferredTypeData::Unknown);
+                        };
                         pending.push(MemberLookupState {
-                            ty: apply_substitutions(db, extends, &state.substitutions),
+                            ty: extends,
                             lookup,
                             collect,
                             substitutions: state.substitutions.clone(),
@@ -155,19 +190,27 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Interface(interface) => {
-                    pending.extend(interface.extends(db).iter().rev().copied().map(|ty| {
-                        MemberLookupState {
-                            ty: apply_substitutions(db, ty, &state.substitutions),
+                    for ty in interface.extends(db).iter().rev() {
+                        let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
+                            return Some(InferredTypeData::Unknown);
+                        };
+                        pending.push(MemberLookupState {
+                            ty,
                             lookup,
                             collect,
                             substitutions: state.substitutions.clone(),
-                        }
-                    }));
+                        });
+                    }
                 }
                 InferredTypeData::Generic(generic) => {
                     if let Some(constraint) = generic.constraint(db) {
+                        let Ok(constraint) =
+                            apply_substitutions(db, constraint, &state.substitutions)
+                        else {
+                            return Some(InferredTypeData::Unknown);
+                        };
                         pending.push(MemberLookupState {
-                            ty: apply_substitutions(db, constraint, &state.substitutions),
+                            ty: constraint,
                             lookup,
                             collect,
                             substitutions: state.substitutions.clone(),
@@ -175,27 +218,40 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Intersection(intersection) => {
-                    pending.extend(intersection.types(db).iter().rev().copied().map(|ty| {
-                        MemberLookupState {
-                            ty: apply_substitutions(db, ty, &state.substitutions),
+                    for ty in intersection.types(db).iter().rev() {
+                        let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
+                            return Some(InferredTypeData::Unknown);
+                        };
+                        pending.push(MemberLookupState {
+                            ty,
                             lookup,
                             collect: true,
                             substitutions: state.substitutions.clone(),
-                        }
-                    }));
+                        });
+                    }
                 }
                 InferredTypeData::MergedReference(reference) => {
-                    pending.extend(reference.targets(db).map(|ty| MemberLookupState {
-                        ty: apply_substitutions(db, ty, &state.substitutions),
-                        lookup,
-                        collect: true,
-                        substitutions: state.substitutions.clone(),
-                    }));
+                    for ty in reference.targets(db) {
+                        let Ok(ty) = apply_substitutions(db, ty, &state.substitutions) else {
+                            return Some(InferredTypeData::Unknown);
+                        };
+                        pending.push(MemberLookupState {
+                            ty,
+                            lookup,
+                            collect: true,
+                            substitutions: state.substitutions.clone(),
+                        });
+                    }
                 }
                 InferredTypeData::Object(object) => {
                     if let Some(prototype) = object.prototype(db) {
+                        let Ok(prototype) =
+                            apply_substitutions(db, prototype, &state.substitutions)
+                        else {
+                            return Some(InferredTypeData::Unknown);
+                        };
                         pending.push(MemberLookupState {
-                            ty: apply_substitutions(db, prototype, &state.substitutions),
+                            ty: prototype,
                             lookup,
                             collect,
                             substitutions: state.substitutions.clone(),
@@ -203,18 +259,30 @@ impl<'db> InferredModuleTypes<'db> {
                     }
                 }
                 InferredTypeData::Union(union) => {
-                    pending.extend(union.types(db).iter().rev().copied().map(|ty| {
-                        MemberLookupState {
-                            ty: apply_substitutions(db, ty, &state.substitutions),
+                    for ty in union.types(db).iter().rev() {
+                        let Ok(ty) = apply_substitutions(db, *ty, &state.substitutions) else {
+                            return Some(InferredTypeData::Unknown);
+                        };
+                        pending.push(MemberLookupState {
+                            ty,
                             lookup,
                             collect: true,
                             substitutions: state.substitutions.clone(),
-                        }
-                    }));
+                        });
+                    }
                 }
                 InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::UnknownKeyword => {
+                    if collect {
+                        found.push(InferredTypeData::Unknown);
+                    } else {
+                        return Some(InferredTypeData::Unknown);
+                    }
+                }
+                InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -235,16 +303,41 @@ impl<'db> InferredModuleTypes<'db> {
                 | InferredTypeData::TypeofExpression(_)
                 | InferredTypeData::TypeofType(_)
                 | InferredTypeData::TypeofValue(_)
-                | InferredTypeData::AnyKeyword
                 | InferredTypeData::NeverKeyword
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::ThisKeyword
-                | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {}
             }
         }
 
-        collected_type_result(db, found)
+        if exhausted || found.contains(&InferredTypeData::Unknown) {
+            Some(InferredTypeData::Unknown)
+        } else {
+            collected_type_result(db, found)
+        }
+    }
+
+    fn resolve_type_for_member_lookup(
+        &self,
+        db: &'db dyn ModuleDb,
+        mut ty: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let mut seen = FxHashSet::default();
+
+        loop {
+            let InferredTypeData::Local(local) = ty else {
+                return Some(ty);
+            };
+
+            let key = (local.module(db), local.type_id(db));
+            if !seen.insert(key) {
+                return None;
+            }
+            if seen.len() % 256 == 0 {
+                db.unwind_if_revision_cancelled();
+            }
+            ty = self.type_for_local_handle(db, local)?;
+        }
     }
 
     fn find_own_member_type(
@@ -288,6 +381,7 @@ impl<'db> InferredModuleTypes<'db> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -368,18 +462,18 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     target: InferredTypeData<'db>,
     type_parameters: &[InferredTypeData<'db>],
     inherited: &[InferredTypeSubstitution<'db>],
-) -> Vec<InferredTypeSubstitution<'db>> {
+) -> Result<Vec<InferredTypeSubstitution<'db>>, StructuralMapError> {
     let Some(declared_parameters) = declared_type_parameters(db, target) else {
-        return inherited.to_vec();
+        return Ok(inherited.to_vec());
     };
     if declared_parameters.is_empty() {
-        return inherited.to_vec();
+        return Ok(inherited.to_vec());
     }
 
     let mut substitutions = inherited.to_vec();
     for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
-        let declared = apply_substitutions(db, *declared, inherited);
-        let replacement = apply_substitutions(db, *replacement, inherited);
+        let declared = apply_substitutions(db, *declared, inherited)?;
+        let replacement = apply_substitutions(db, *replacement, inherited)?;
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
         if declared_instance != declared {
             substitutions.push(InferredTypeSubstitution {
@@ -393,7 +487,7 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
         });
     }
 
-    substitutions
+    Ok(substitutions)
 }
 
 pub(super) fn declared_type_parameters<'db>(
@@ -408,6 +502,7 @@ pub(super) fn declared_type_parameters<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -444,22 +539,22 @@ pub(in crate::db) fn apply_substitutions<'db>(
     db: &'db dyn ModuleDb,
     mut ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
-) -> InferredTypeData<'db> {
+) -> Result<InferredTypeData<'db>, StructuralMapError> {
     for substitution in substitutions {
-        ty = ty.substitute_type(db, *substitution);
+        ty = ty.substitute_type(db, *substitution)?;
     }
-    ty
+    Ok(ty)
 }
 
 pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     db: &'db dyn ModuleDb,
     mut ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
-) -> InferredTypeData<'db> {
+) -> Result<InferredTypeData<'db>, StructuralMapError> {
     for substitution in substitutions {
-        ty = ty.substitute_type_in_root_body(db, *substitution);
+        ty = ty.substitute_type_in_root_body(db, *substitution)?;
     }
-    ty
+    Ok(ty)
 }
 
 fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
@@ -468,6 +563,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         ty @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null

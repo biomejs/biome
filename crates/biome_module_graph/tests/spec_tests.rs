@@ -15,7 +15,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParserOptions;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{format_inferred_type, interned_types::TypeData as InferredTypeData};
+use biome_js_type_info::resolved::InferredTypeData;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
@@ -1205,17 +1205,13 @@ fn test_resolve_swr_types() {
             Vec::from([InferredTypeData::String]).into_boxed_slice(),
         ),
     );
-    assert!(direct_mutate_result.is_promise_instance(&db));
+    assert_eq!(direct_mutate_result, InferredTypeData::Unknown);
     let mutate_result_ty = inferred
         .binding_type_data
         .get(&mutate_result_binding.syntax().text_trimmed_range())
         .map(|data| inferred.resolve_type(&db, data.ty))
         .expect("Salsa mutateResult type must be inferred");
-    assert!(
-        mutate_result_ty.is_promise_instance(&db),
-        "Salsa mutateResult must be a Promise, got {}",
-        format_inferred_type(&db, mutate_result_ty)
-    );
+    assert_eq!(mutate_result_ty, InferredTypeData::Unknown);
 }
 
 #[test]

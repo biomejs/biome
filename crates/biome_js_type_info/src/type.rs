@@ -284,7 +284,8 @@ impl Type {
     /// Returns whether this type is an instance of a `Promise`.
     pub fn is_promise_instance(&self) -> bool {
         self.resolved_data()
-            .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
+            .and_then(|ty| ty.is_promise_instance(self.resolver.as_ref()))
+            == Some(true)
     }
 
     /// Returns whether this type is a thenable (has a callable `then` member).

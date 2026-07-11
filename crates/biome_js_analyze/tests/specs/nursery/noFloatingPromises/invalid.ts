@@ -369,3 +369,15 @@ getReadonlyP().p;
 type AsyncCallback<T> = () => Promise<T>;
 declare const aliasedCallback: AsyncCallback<void>;
 aliasedCallback();
+
+declare const explicitArray: Array<number>;
+explicitArray.map(async value => value);
+[1, 2, 3].map(value => value).map(async value => value);
+
+const objectApi = {
+	promise: Promise.resolve("value"),
+	getPromise() {
+		return this.promise;
+	},
+};
+objectApi.getPromise();

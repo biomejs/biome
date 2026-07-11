@@ -231,8 +231,7 @@ fn find_misused_promise_expression(
 
     // Uncomment the following line for debugging convenience:
     //let printed = format!("type of {expression:?} = {ty:?}");
-    let should_signal = ty.is_promise_instance() || ty.has_promise_variant();
-    should_signal.then_some(state)
+    (ty.is_promise_instance() == Some(true)).then_some(state)
 }
 
 fn find_misused_promise_returning_callback(
@@ -240,7 +239,7 @@ fn find_misused_promise_returning_callback(
     expression: &AnyJsExpression,
     ty: InferredType,
 ) -> Option<NoMisusedPromisesState> {
-    if !ty.function_returns_promise() {
+    if ty.function_returns_promise() != Some(true) {
         return None;
     }
 

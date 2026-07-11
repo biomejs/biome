@@ -1,3 +1,8 @@
+#![allow(
+    unused_lifetimes,
+    reason = "Salsa interned handle lifetimes are used by generated code."
+)]
+
 use crate::ModuleDb;
 use biome_js_type_info::{
     ConstructorParameter as RawConstructorParameter, FunctionParameter as RawFunctionParameter,
@@ -6,35 +11,22 @@ use biome_js_type_info::{
     TupleElementType as RawTupleElementType, TypeId, TypeMember as RawTypeMember,
     TypeMemberAccessibility, TypeMemberKind as RawTypeMemberKind, TypeOperator as RawTypeOperator,
     TypeReference, TypeResolver, TypeResolverLevel,
-    interned_types::{
-        AssertsReturnType as InferredAssertsReturnType,
-        ConstructorParameter as InferredConstructorParameter,
-        FunctionParameter as InferredFunctionParameter,
-        FunctionParameterBinding as InferredFunctionParameterBinding,
-        InternedClass as InferredInternedClass, InternedConstructor as InferredInternedConstructor,
-        InternedFunction as InferredInternedFunction,
-        InternedGenericTypeParameter as InferredInternedGenericTypeParameter,
-        InternedInterface as InferredInternedInterface, InternedLiteral as InferredInternedLiteral,
-        InternedMergedReference as InferredInternedMergedReference,
-        InternedModule as InferredInternedModule, InternedNamespace as InferredNamespace,
-        InternedObject as InferredInternedObject, InternedTuple as InferredInternedTuple,
-        InternedTypeOperatorType as InferredInternedTypeOperatorType, Literal as InferredLiteral,
-        NamedFunctionParameter as InferredNamedFunctionParameter,
-        PatternFunctionParameter as InferredPatternFunctionParameter,
-        PredicateReturnType as InferredPredicateReturnType, ReturnType as InferredReturnType,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-        well_known_symbol_name,
+    resolved::{
+        GlobalTypeId, InferredAssertsReturnType, InferredClass, InferredConstructor,
+        InferredConstructorParameter, InferredFunction, InferredFunctionParameter,
+        InferredFunctionParameterBinding, InferredInterface, InferredInternedGenericTypeParameter,
+        InferredInternedLiteral, InferredLiteral, InferredMergedReference, InferredModule,
+        InferredNamedFunctionParameter, InferredNamespace, InferredObject,
+        InferredPatternFunctionParameter, InferredPredicateReturnType, InferredReturnType,
+        InferredTuple, InferredTupleElementType, InferredTypeData, InferredTypeMember,
+        InferredTypeMemberKind, InferredTypeOperatorType, well_known_symbol_name,
     },
 };
 use biome_rowan::Text;
-use rustc_hash::{FxHashMap, FxHashSet};
 
 enum GlobalTypeWork<'a> {
-    TypeId(TypeId),
     Raw(&'a RawTypeData),
     Reference(&'a TypeReference),
-    RebuildTypeId(TypeId),
     RebuildClass {
         type_parameters: usize,
         has_extends: bool,
@@ -109,76 +101,41 @@ enum GlobalTypeValue<'db> {
     TupleElement(InferredTupleElementType<'db>),
 }
 
-pub(in crate::db::type_inference) fn resolve_global_type_id<'db>(
+#[salsa::interned]
+struct GlobalTypeInput<'db> {
+    id: GlobalTypeId,
+}
+
+pub(in crate::db::type_inference) fn global_type<'db>(
     db: &'db dyn ModuleDb,
-    type_id: TypeId,
-    resolved_globals: &mut FxHashMap<TypeId, InferredTypeData<'db>>,
+    type_id: GlobalTypeId,
 ) -> InferredTypeData<'db> {
-    resolve_global_type_id_with_resolver(db, GLOBAL_RESOLVER.as_ref(), type_id, resolved_globals)
+    expand_global_type(db, GlobalTypeInput::new(db, type_id))
+}
+
+#[salsa::tracked]
+fn expand_global_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: GlobalTypeInput<'db>,
+) -> InferredTypeData<'db> {
+    resolve_global_type_id_with_resolver(db, GLOBAL_RESOLVER.as_ref(), input.id(db).as_type_id())
 }
 
 fn resolve_global_type_id_with_resolver<'db>(
     db: &'db dyn ModuleDb,
     resolver: &dyn TypeResolver,
     type_id: TypeId,
-    resolved_globals: &mut FxHashMap<TypeId, InferredTypeData<'db>>,
 ) -> InferredTypeData<'db> {
-    if let Some(ty) = resolved_globals.get(&type_id) {
-        return *ty;
-    }
-
-    let mut stack = vec![GlobalTypeWork::TypeId(type_id)];
+    let mut stack = vec![GlobalTypeWork::Raw(resolver.get_by_id(type_id))];
     let mut values = Vec::new();
-    let mut active = FxHashSet::default();
-    let mut active_stack = Vec::new();
-    let mut cycle_contaminated = FxHashSet::default();
 
-    // The stack walks finite borrowed raw type trees. `TypeId` references
-    // terminate through the memo table or the active-set cycle placeholder.
+    // Nested global references remain identity handles. Only the requested root
+    // is expanded, so recursive declarations cannot recurse during conversion.
     while let Some(work) = stack.pop() {
         match work {
-            GlobalTypeWork::TypeId(type_id) => {
-                if let Some(ty) = resolved_globals.get(&type_id) {
-                    values.push(GlobalTypeValue::Type(*ty));
-                } else if active.contains(&type_id) {
-                    cycle_contaminated.extend(active_stack.iter().copied());
-                    values.push(GlobalTypeValue::Type(global_cycle_placeholder(
-                        db, resolver, type_id,
-                    )));
-                } else {
-                    let inserted = active.insert(type_id);
-                    debug_assert!(
-                        inserted,
-                        "global type converter activated duplicate TypeId({}); check active set and active_stack updates around TypeId push/rebuild",
-                        type_id.index()
-                    );
-                    active_stack.push(type_id);
-                    stack.push(GlobalTypeWork::RebuildTypeId(type_id));
-                    stack.push(GlobalTypeWork::Raw(resolver.get_by_id(type_id)));
-                }
-            }
             GlobalTypeWork::Raw(raw) => push_global_raw_type(db, raw, &mut stack, &mut values),
             GlobalTypeWork::Reference(reference) => {
                 push_global_reference(resolver, reference, &mut stack, &mut values)
-            }
-            GlobalTypeWork::RebuildTypeId(type_id) => {
-                let ty = pop_global_type(&mut values);
-                debug_assert_eq!(
-                    active_stack.pop(),
-                    Some(type_id),
-                    "global type converter RebuildTypeId was not paired with the active TypeId; check that every TypeId push has one matching RebuildTypeId"
-                );
-                let removed = active.remove(&type_id);
-                debug_assert!(
-                    removed,
-                    "global type converter rebuilt inactive TypeId({}); check RebuildTypeId ordering and active set removal",
-                    type_id.index()
-                );
-                let was_cycle_contaminated = cycle_contaminated.remove(&type_id);
-                if active.is_empty() && !was_cycle_contaminated {
-                    resolved_globals.insert(type_id, ty);
-                }
-                values.push(GlobalTypeValue::Type(ty));
             }
             GlobalTypeWork::RebuildClass {
                 type_parameters,
@@ -192,7 +149,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let extends = has_extends.then(|| pop_global_type(&mut values));
                 let type_parameters = pop_global_types(&mut values, type_parameters);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Class(
-                    InferredInternedClass::new(
+                    InferredClass::new(
                         db,
                         type_parameters.into_boxed_slice(),
                         extends,
@@ -211,7 +168,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let parameters = pop_global_constructor_parameters(&mut values, parameters);
                 let type_parameters = pop_global_types(&mut values, type_parameters);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Constructor(
-                    InferredInternedConstructor::new(
+                    InferredConstructor::new(
                         db,
                         type_parameters.into_boxed_slice(),
                         parameters.into_boxed_slice(),
@@ -229,7 +186,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let parameters = pop_global_function_parameters(&mut values, parameters);
                 let type_parameters = pop_global_types(&mut values, type_parameters);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Function(
-                    InferredInternedFunction::new(
+                    InferredFunction::new(
                         db,
                         type_parameters.into_boxed_slice(),
                         parameters.into_boxed_slice(),
@@ -249,7 +206,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let extends = pop_global_types(&mut values, extends);
                 let type_parameters = pop_global_types(&mut values, type_parameters);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Interface(
-                    InferredInternedInterface::new(
+                    InferredInterface::new(
                         db,
                         type_parameters.into_boxed_slice(),
                         extends.into_boxed_slice(),
@@ -265,13 +222,13 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let members = pop_global_members(&mut values, members);
                 let prototype = has_prototype.then(|| pop_global_type(&mut values));
                 values.push(GlobalTypeValue::Type(InferredTypeData::Object(
-                    InferredInternedObject::new(db, prototype, members.into_boxed_slice()),
+                    InferredObject::new(db, prototype, members.into_boxed_slice()),
                 )));
             }
             GlobalTypeWork::RebuildModule { members, name } => {
                 let members = pop_global_members(&mut values, members);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Module(
-                    InferredInternedModule::new(db, members.into_boxed_slice(), name),
+                    InferredModule::new(db, members.into_boxed_slice(), name),
                 )));
             }
             GlobalTypeWork::RebuildNamespace { members, path } => {
@@ -283,7 +240,7 @@ fn resolve_global_type_id_with_resolver<'db>(
             GlobalTypeWork::RebuildTuple(elements) => {
                 let elements = pop_global_tuple_elements(&mut values, elements);
                 values.push(GlobalTypeValue::Type(InferredTypeData::Tuple(
-                    InferredInternedTuple::new(db, elements.into_boxed_slice()),
+                    InferredTuple::new(db, elements.into_boxed_slice()),
                 )));
             }
             GlobalTypeWork::RebuildGeneric {
@@ -321,7 +278,7 @@ fn resolve_global_type_id_with_resolver<'db>(
             GlobalTypeWork::RebuildTypeOperator(operator) => {
                 let ty = pop_global_type(&mut values);
                 values.push(GlobalTypeValue::Type(InferredTypeData::TypeOperator(
-                    InferredInternedTypeOperatorType::new(db, ty, operator),
+                    InferredTypeOperatorType::new(db, ty, operator),
                 )));
             }
             GlobalTypeWork::RebuildLiteralObject(members) => {
@@ -342,7 +299,7 @@ fn resolve_global_type_id_with_resolver<'db>(
                 let value_ty = has_value_ty.then(|| pop_global_type(&mut values));
                 let ty = has_ty.then(|| pop_global_type(&mut values));
                 values.push(GlobalTypeValue::Type(InferredTypeData::MergedReference(
-                    InferredInternedMergedReference::new(db, ty, value_ty, namespace_ty),
+                    InferredMergedReference::new(db, ty, value_ty, namespace_ty),
                 )));
             }
             GlobalTypeWork::RebuildTypeMember(kind) => {
@@ -436,85 +393,12 @@ fn resolve_global_type_id_with_resolver<'db>(
         }
     }
 
-    debug_assert!(
-        active.is_empty(),
-        "global type converter leaked active TypeIds; check that every active TypeId reaches RebuildTypeId"
-    );
-    debug_assert!(
-        active_stack.is_empty(),
-        "global type converter leaked active TypeId stack entries; check active_stack push/pop pairing"
-    );
     debug_assert_eq!(
         values.len(),
         1,
         "global type converter stack imbalance; check that every GlobalTypeWork rebuild pushes one value"
     );
     pop_global_type(&mut values)
-}
-
-fn global_cycle_placeholder<'db>(
-    db: &'db dyn ModuleDb,
-    resolver: &dyn TypeResolver,
-    type_id: TypeId,
-) -> InferredTypeData<'db> {
-    // Until globals have identity handles like local types, recursive edges are
-    // represented by shallow placeholders. This preserves nominal checks but
-    // caps structural member traversal through recursive global cycles.
-    match resolver.get_by_id(type_id) {
-        RawTypeData::Class(class) => InferredTypeData::Class(InferredInternedClass::new(
-            db,
-            Box::default(),
-            None,
-            Box::default(),
-            Box::default(),
-            class.name.clone(),
-        )),
-        RawTypeData::Interface(interface) => {
-            InferredTypeData::Interface(InferredInternedInterface::new(
-                db,
-                Box::default(),
-                Box::default(),
-                Box::default(),
-                interface.name.clone(),
-            ))
-        }
-        RawTypeData::Generic(generic) => InferredTypeData::Generic(
-            InferredInternedGenericTypeParameter::new(db, None, None, generic.name.clone()),
-        ),
-        RawTypeData::BigInt => InferredTypeData::BigInt,
-        RawTypeData::Boolean => InferredTypeData::Boolean,
-        RawTypeData::Conditional => InferredTypeData::Conditional,
-        RawTypeData::Global => InferredTypeData::Global,
-        RawTypeData::Null => InferredTypeData::Null,
-        RawTypeData::Number => InferredTypeData::Number,
-        RawTypeData::String => InferredTypeData::String,
-        RawTypeData::Symbol => InferredTypeData::Symbol,
-        RawTypeData::Undefined => InferredTypeData::Undefined,
-        RawTypeData::AnyKeyword => InferredTypeData::AnyKeyword,
-        RawTypeData::NeverKeyword => InferredTypeData::NeverKeyword,
-        RawTypeData::ObjectKeyword => InferredTypeData::ObjectKeyword,
-        RawTypeData::ThisKeyword => InferredTypeData::ThisKeyword,
-        RawTypeData::UnknownKeyword => InferredTypeData::UnknownKeyword,
-        RawTypeData::VoidKeyword => InferredTypeData::VoidKeyword,
-        RawTypeData::Unknown
-        | RawTypeData::ImportNamespace(_)
-        | RawTypeData::Constructor(_)
-        | RawTypeData::Function(_)
-        | RawTypeData::Module(_)
-        | RawTypeData::Namespace(_)
-        | RawTypeData::Object(_)
-        | RawTypeData::Tuple(_)
-        | RawTypeData::Intersection(_)
-        | RawTypeData::Union(_)
-        | RawTypeData::TypeOperator(_)
-        | RawTypeData::Literal(_)
-        | RawTypeData::InstanceOf(_)
-        | RawTypeData::Reference(_)
-        | RawTypeData::MergedReference(_)
-        | RawTypeData::TypeofExpression(_)
-        | RawTypeData::TypeofType(_)
-        | RawTypeData::TypeofValue(_) => InferredTypeData::Unknown,
-    }
 }
 
 fn push_global_raw_type<'a, 'db>(
@@ -695,18 +579,22 @@ fn push_global_raw_type<'a, 'db>(
 fn push_global_reference<'a, 'db>(
     resolver: &'a dyn TypeResolver,
     reference: &'a TypeReference,
-    stack: &mut Vec<GlobalTypeWork<'a>>,
+    _stack: &mut Vec<GlobalTypeWork<'a>>,
     values: &mut Vec<GlobalTypeValue<'db>>,
 ) {
     match reference {
         TypeReference::Resolved(resolved_id)
             if resolved_id.level() == TypeResolverLevel::Global =>
         {
-            stack.push(GlobalTypeWork::TypeId(resolved_id.id()));
+            let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
+                .expect("global reference TypeId must index the predefined global manifest");
+            values.push(GlobalTypeValue::Type(InferredTypeData::GlobalType(type_id)));
         }
         TypeReference::Qualifier(qualifier) => {
             if let Some(resolved_id) = resolver.resolve_qualifier(qualifier) {
-                stack.push(GlobalTypeWork::TypeId(resolved_id.id()));
+                let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
+                    .expect("global qualifier TypeId must index the predefined global manifest");
+                values.push(GlobalTypeValue::Type(InferredTypeData::GlobalType(type_id)));
             } else {
                 values.push(GlobalTypeValue::Type(InferredTypeData::Unknown));
             }
@@ -1215,12 +1103,8 @@ mod tests {
         ResolvedTypeId::new(TypeResolverLevel::Global, type_id).into()
     }
 
-    fn is_class_named(db: &dyn ModuleDb, ty: InferredTypeData, name: &str) -> bool {
-        matches!(ty, InferredTypeData::Class(class) if class.name(db).as_ref().is_some_and(|class_name| class_name.text() == name))
-    }
-
     #[test]
-    fn global_converter_normalizes_compound_rebuilds() {
+    fn global_converter_keeps_nested_references_as_canonical_handles() {
         let db = TestDb::default();
         let mut resolver = GlobalsResolver::default();
         let unresolved = NoopTypeResolver;
@@ -1232,135 +1116,43 @@ mod tests {
             Box::new([global_type_ref(promise_id), global_type_ref(array_id)]),
         );
         let inner_union_id = resolver.register_type(Cow::Owned(inner_union));
-        let outer_union = RawTypeData::union_of(
-            &unresolved,
-            Box::new([global_type_ref(inner_union_id), global_type_ref(promise_id)]),
-        );
-        let outer_union_id = resolver.register_type(Cow::Owned(outer_union));
-        let union_ty = resolve_global_type_id_with_resolver(
-            &db,
-            &resolver,
-            outer_union_id,
-            &mut FxHashMap::default(),
-        );
-        let InferredTypeData::Union(union) = union_ty else {
-            panic!("outer union must stay a union, got {union_ty:?}");
+        let ty = resolve_global_type_id_with_resolver(&db, &resolver, inner_union_id);
+        let InferredTypeData::Union(union) = ty else {
+            panic!("global union must stay a union, got {ty:?}");
         };
-        assert_eq!(union.types(&db).len(), 2);
-        assert!(
-            union
-                .types(&db)
-                .iter()
-                .all(|ty| !matches!(ty, InferredTypeData::Union(_)))
+        assert_eq!(
+            union.types(&db).as_ref(),
+            &[
+                InferredTypeData::GlobalType(
+                    GlobalTypeId::try_from_type_id(promise_id).expect("Promise ID must be global"),
+                ),
+                InferredTypeData::GlobalType(
+                    GlobalTypeId::try_from_type_id(array_id).expect("Array ID must be global"),
+                ),
+            ]
         );
-        assert!(
-            union
-                .types(&db)
-                .iter()
-                .any(|ty| is_class_named(&db, *ty, "Promise"))
-        );
-        assert!(
-            union
-                .types(&db)
-                .iter()
-                .any(|ty| is_class_named(&db, *ty, "Array"))
-        );
-
-        let inner_intersection = RawTypeData::intersection_of(Vec::from([
-            global_type_ref(promise_id),
-            global_type_ref(array_id),
-        ]));
-        let inner_intersection_id = resolver.register_type(Cow::Owned(inner_intersection));
-        let outer_intersection = RawTypeData::intersection_of(Vec::from([
-            global_type_ref(inner_intersection_id),
-            global_type_ref(promise_id),
-        ]));
-        let outer_intersection_id = resolver.register_type(Cow::Owned(outer_intersection));
-        let intersection_ty = resolve_global_type_id_with_resolver(
-            &db,
-            &resolver,
-            outer_intersection_id,
-            &mut FxHashMap::default(),
-        );
-        match intersection_ty {
-            InferredTypeData::Intersection(intersection) => {
-                assert_eq!(intersection.types(&db).len(), 2);
-                assert!(
-                    intersection
-                        .types(&db)
-                        .iter()
-                        .all(|ty| !matches!(ty, InferredTypeData::Intersection(_)))
-                );
-                assert!(
-                    intersection
-                        .types(&db)
-                        .iter()
-                        .any(|ty| is_class_named(&db, *ty, "Promise"))
-                );
-                assert!(
-                    intersection
-                        .types(&db)
-                        .iter()
-                        .any(|ty| is_class_named(&db, *ty, "Array"))
-                );
-            }
-            InferredTypeData::Object(_) => {}
-            InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => panic!(
-                "outer intersection must become a normalized intersection or object, got {intersection_ty:?}"
-            ),
-        }
     }
 
     #[test]
-    fn global_converter_does_not_memoize_cycle_contaminated_types() {
+    fn global_query_memoizes_one_root_with_canonical_nested_handles() {
         let db = TestDb::default();
         let resolver = GlobalsResolver::default();
         let promise_id = global_type_id(&resolver, "Promise");
-        let mut resolved_globals = FxHashMap::default();
+        let promise_id =
+            GlobalTypeId::try_from_type_id(promise_id).expect("Promise ID must be global");
+        let first = global_type(&db, promise_id);
+        let second = global_type(&db, promise_id);
 
-        let promise_ty =
-            resolve_global_type_id_with_resolver(&db, &resolver, promise_id, &mut resolved_globals);
-
-        assert!(is_class_named(&db, promise_ty, "Promise"));
-        assert!(resolved_globals.is_empty());
-
-        let promise_ty =
-            resolve_global_type_id_with_resolver(&db, &resolver, promise_id, &mut resolved_globals);
-        assert!(is_class_named(&db, promise_ty, "Promise"));
-        assert!(resolved_globals.is_empty());
+        assert_eq!(first, second);
+        let InferredTypeData::Class(class) = first else {
+            panic!("Promise root must expand to a class, got {first:?}");
+        };
+        assert!(
+            class
+                .members(&db)
+                .iter()
+                .any(|member| { matches!(member.ty, InferredTypeData::GlobalType(_)) })
+        );
     }
 
     #[cfg(debug_assertions)]

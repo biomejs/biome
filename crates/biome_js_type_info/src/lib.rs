@@ -13,6 +13,8 @@ mod helpers;
 mod inferred_type;
 pub mod interned_types;
 mod local_inference;
+mod misleading_return;
+pub mod resolved;
 mod resolver;
 mod r#type;
 mod type_data;
@@ -23,10 +25,11 @@ pub use flattening::MAX_FLATTEN_DEPTH;
 pub use globals::{GLOBAL_RESOLVER, GlobalsResolver};
 pub use globals_ids::{GLOBAL_BOOLEAN_ID, GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES};
 pub use inferred_type::{
-    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, MisleadingReturnType,
-    ReturnTypeEvidence, StringificationMode, StringificationUsefulness,
+    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, StringificationMode,
+    StringificationUsefulness,
 };
 pub use interned_types::{RawTypeData, TypeDb};
+pub use misleading_return::{MisleadingReturnType, ReturnTypeEvidence};
 pub use resolver::*;
 pub use r#type::Type;
 pub use type_data::*;

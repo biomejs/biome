@@ -11,7 +11,7 @@ use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, ResolvedTypeId, TypeReference, TypeResolverLevel,
-    interned_types::LocalTypeId,
+    resolved::LocalTypeId,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};

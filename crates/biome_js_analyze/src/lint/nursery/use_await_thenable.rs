@@ -64,10 +64,12 @@ impl Rule for UseAwaitThenable {
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
 
-        let is_maybe_promise = ty.is_promise_instance()
-            || ty.has_promise_variant()
-            || ctx.inferred_expression_has_callable_member(&expression, "then");
-        (ty.is_inferred() && !is_maybe_promise).then_some(())
+        match ty.is_promise_instance() {
+            Some(true) | None => return None,
+            Some(false) => {}
+        }
+
+        (!ctx.inferred_expression_has_callable_member(&expression, "then")?).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

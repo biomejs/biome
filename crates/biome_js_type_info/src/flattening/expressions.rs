@@ -841,6 +841,7 @@ fn select_overload_from_resolved(
 ) -> OverloadSelection {
     let mut call_signature_count = 0;
     let mut selected_function = None;
+    let mut indeterminate = false;
 
     for member in resolved
         .all_members(resolver)
@@ -854,9 +855,12 @@ fn select_overload_from_resolved(
             if let Some(TypeData::Function(function)) = resolver
                 .resolve_and_get(&signature)
                 .map(ResolvedTypeData::to_data)
-                && signature_accepts_arguments(&function, arguments, resolver)
             {
-                selected_function = Some(function);
+                match signature_accepts_arguments(&function, arguments, resolver) {
+                    Some(true) if !indeterminate => selected_function = Some(function),
+                    Some(_) => {}
+                    None => indeterminate = true,
+                }
             }
         }
 
@@ -868,7 +872,11 @@ fn select_overload_from_resolved(
     if call_signature_count < MIN_OVERLOAD_SIGNATURE_COUNT {
         OverloadSelection::NotOverloaded
     } else {
-        selected_function.map_or(OverloadSelection::NoMatch, OverloadSelection::Selected)
+        if indeterminate {
+            OverloadSelection::NoMatch
+        } else {
+            selected_function.map_or(OverloadSelection::NoMatch, OverloadSelection::Selected)
+        }
     }
 }
 
@@ -890,7 +898,7 @@ fn signature_accepts_arguments(
     function: &Function,
     arguments: &[CallArgumentType],
     resolver: &dyn TypeResolver,
-) -> bool {
+) -> Option<bool> {
     let parameters = &function.parameters;
     let accepts_rest = parameters.last().is_some_and(FunctionParameter::is_rest);
     let required = parameters
@@ -898,71 +906,95 @@ fn signature_accepts_arguments(
         .filter(|parameter| !parameter.is_optional() && !parameter.is_rest())
         .count();
     if arguments.len() < required || (!accepts_rest && arguments.len() > parameters.len()) {
-        return false;
+        return Some(false);
     }
 
-    parameters
-        .iter()
-        .zip(arguments)
-        .all(|(parameter, argument)| {
-            let (CallArgumentType::Argument(argument) | CallArgumentType::Spread(argument)) =
-                argument;
-            match (
-                resolve_function(parameter.ty(), resolver),
-                resolve_function(argument, resolver),
-            ) {
-                (Some(parameter_fn), Some(argument_fn)) => {
-                    function_returns_promise(&parameter_fn, resolver)
-                        == function_returns_promise(&argument_fn, resolver)
+    for (parameter, argument) in parameters.iter().zip(arguments) {
+        let (CallArgumentType::Argument(argument) | CallArgumentType::Spread(argument)) = argument;
+        match (
+            resolve_function(parameter.ty(), resolver),
+            resolve_function(argument, resolver),
+        ) {
+            (FunctionResolution::Found(parameter_fn), FunctionResolution::Found(argument_fn)) => {
+                match (
+                    function_returns_promise(&parameter_fn, resolver),
+                    function_returns_promise(&argument_fn, resolver),
+                ) {
+                    (Some(parameter_returns_promise), Some(argument_returns_promise))
+                        if parameter_returns_promise == argument_returns_promise => {}
+                    (Some(_), Some(_)) => return Some(false),
+                    _ => return None,
                 }
-                _ => true,
             }
-        })
+            (FunctionResolution::Indeterminate, _) | (_, FunctionResolution::Indeterminate) => {
+                return None;
+            }
+            (FunctionResolution::NotFunction, _) | (_, FunctionResolution::NotFunction) => {}
+        }
+    }
+    Some(true)
+}
+
+enum FunctionResolution {
+    Found(Box<Function>),
+    NotFunction,
+    Indeterminate,
 }
 
 fn resolve_function(
     type_reference: &TypeReference,
     resolver: &dyn TypeResolver,
-) -> Option<Box<Function>> {
+) -> FunctionResolution {
     let mut current_type_reference = Cow::Borrowed(type_reference);
     let mut remaining_steps = MAX_FLATTEN_DEPTH;
 
     while remaining_steps > 0 {
         remaining_steps -= 1;
 
-        let resolved = resolver.resolve_and_get(current_type_reference.as_ref())?;
+        let Some(resolved) = resolver.resolve_and_get(current_type_reference.as_ref()) else {
+            return FunctionResolution::Indeterminate;
+        };
         match resolved.as_raw_data() {
-            TypeData::Function(function) => return Some(function.clone()),
+            TypeData::Function(function) => return FunctionResolution::Found(function.clone()),
             // Callable interfaces/objects: `interface Cb { (): Promise<void> }`
             TypeData::Interface(interface) => {
-                let member = interface
+                let Some(member) = interface
                     .members
                     .iter()
-                    .find(|member| member.kind.is_call_signature())?;
+                    .find(|member| member.kind.is_call_signature())
+                else {
+                    return FunctionResolution::NotFunction;
+                };
                 let member = ResolvedTypeMember::from((resolved.resolver_id(), member));
                 current_type_reference = Cow::Owned(member.deref_ty(resolver).into_owned());
             }
             TypeData::Object(object) => {
-                let member = object
+                let Some(member) = object
                     .members
                     .iter()
-                    .find(|member| member.kind.is_call_signature())?;
+                    .find(|member| member.kind.is_call_signature())
+                else {
+                    return FunctionResolution::NotFunction;
+                };
                 let member = ResolvedTypeMember::from((resolved.resolver_id(), member));
                 current_type_reference = Cow::Owned(member.deref_ty(resolver).into_owned());
             }
-            _ => return None,
+            _ => return FunctionResolution::NotFunction,
         }
     }
 
-    None
+    FunctionResolution::Indeterminate
 }
 
-fn function_returns_promise(function: &Function, resolver: &dyn TypeResolver) -> bool {
+fn function_returns_promise(function: &Function, resolver: &dyn TypeResolver) -> Option<bool> {
     function
         .return_type
         .as_type()
-        .and_then(|return_ty| resolver.resolve_and_get(return_ty))
-        .is_some_and(|resolved| resolved.is_promise_instance(resolver))
+        .map_or(Some(false), |return_ty| {
+            resolver
+                .resolve_and_get(return_ty)
+                .and_then(|resolved| resolved.is_promise_instance(resolver))
+        })
 }
 
 fn flattened_destructure(

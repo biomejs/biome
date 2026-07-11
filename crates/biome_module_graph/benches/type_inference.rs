@@ -2,10 +2,11 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
+use biome_js_type_info::resolved::InferredTypeData;
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode, infer_module_types_bottom_up,
-    resolve_js_module_with_inference_mode,
+    InferredModuleTypes, ModuleDb, ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode,
+    infer_module_types_bottom_up, resolve_js_module_with_inference_mode,
 };
 use biome_project_layout::ProjectLayout;
 use biome_workspace_db::WorkspaceDb;
@@ -56,6 +57,123 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
 
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
     INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
+}
+
+#[divan::bench(args = [4, 8, 16])]
+fn member_lookup_deep_generic_inheritance(bencher: Bencher, depth: usize) {
+    let mut source = String::from("interface Level0<T> { value: T; }\n");
+    for level in 1..=depth {
+        source.push_str(&format!(
+            "interface Level{level}<T> extends Level{}<T> {{}}\n",
+            level - 1
+        ));
+    }
+    source.push_str(&format!(
+        "export declare const subject: Level{depth}<string>;\n"
+    ));
+
+    bench_member_lookup(bencher, &source, None);
+}
+
+#[divan::bench(args = [16, 64, 256])]
+fn member_lookup_wide_generic_intersection(bencher: Bencher, width: usize) {
+    bench_member_lookup(bencher, &generic_fanout_source(width, " & "), Some(width));
+}
+
+#[divan::bench(args = [16, 64, 256])]
+fn member_lookup_wide_generic_union(bencher: Bencher, width: usize) {
+    bench_member_lookup(bencher, &generic_fanout_source(width, " | "), Some(width));
+}
+
+fn generic_fanout_source(width: usize, separator: &str) -> String {
+    let mut source = String::new();
+    for index in 0..width {
+        source.push_str(&format!(
+            "interface Leaf{index}<T> {{ value: [T, \"leaf{index}\"]; }}\n"
+        ));
+    }
+    source.push_str("export declare const subject: ");
+    for index in 0..width {
+        if index > 0 {
+            source.push_str(separator);
+        }
+        source.push_str(&format!("Leaf{index}<string>"));
+    }
+    source.push_str(";\n");
+    source
+}
+
+fn bench_member_lookup(bencher: Bencher, source: &str, expected_variants: Option<usize>) {
+    let (db, module) = build_module_from_source(source);
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+    let subject = inferred_binding_type(&db, module, &inferred, "subject")
+        .expect("subject binding must be inferred");
+    let member = inferred
+        .find_member_type(&db, subject, "value")
+        .expect("value member must be inferred");
+    if let Some(expected_variants) = expected_variants {
+        let InferredTypeData::Union(union) = member else {
+            panic!("fan-out member must collect all branch types");
+        };
+        assert_eq!(union.types(&db).len(), expected_variants);
+    }
+
+    bencher.bench_local(|| {
+        divan::black_box(inferred.find_member_type(
+            divan::black_box(&db),
+            divan::black_box(subject),
+            divan::black_box("value"),
+        ))
+    });
+}
+
+fn build_module_from_source(source: &str) -> (WorkspaceDb, ModuleInfo) {
+    let fs = MemoryFileSystem::default();
+    let path = BiomePath::new("member_lookup.ts");
+    fs.insert(path.as_path().to_path_buf(), source);
+
+    let root = get_js_root(&fs, &path);
+    let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+    let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        root,
+        &path,
+        &fs,
+        &ProjectLayout::default(),
+        semantic_model,
+        &PathInfoCache::default(),
+        TypeInferenceMode::RawTypesOnly,
+    );
+    let db = WorkspaceDb::default();
+    let module = ModuleInfo::new(
+        &db,
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
+    );
+    db.modules
+        .pin()
+        .insert(path.as_path().to_path_buf(), module);
+    (db, module)
+}
+
+fn inferred_binding_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    inferred: &InferredModuleTypes<'db>,
+    name: &str,
+) -> Option<InferredTypeData<'db>> {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    let binding = info.semantic_model.all_bindings().find(|binding| {
+        binding
+            .tree()
+            .name_token()
+            .is_ok_and(|token| token.text_trimmed() == name)
+    })?;
+    inferred
+        .binding_type_data
+        .get(&binding.syntax().text_trimmed_range())
+        .map(|data| data.ty)
 }
 
 #[divan::bench(name = "bench_index_d_ts_salsa_end_to_end", args = index_d_ts_cases())]

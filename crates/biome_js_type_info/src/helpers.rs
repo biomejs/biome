@@ -171,40 +171,70 @@ impl<'a> ResolvedTypeData<'a> {
     }
 
     pub fn is_instance_of(self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
+        self.is_instance_of_status(resolver, id) == Some(true)
+    }
+
+    fn is_instance_of_status(
+        self,
+        resolver: &dyn TypeResolver,
+        id: ResolvedTypeId,
+    ) -> Option<bool> {
         let mut seen_types = Vec::new();
         let mut current_object = Some(self);
         while let Some(current) = current_object {
             let Some(prototype) = current.prototype(resolver) else {
-                match current.as_raw_data() {
+                return match current.as_raw_data() {
                     TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
-                        return *resolved_id == id;
+                        Some(*resolved_id == id)
                     }
-                    _ => break,
-                }
+                    TypeData::Unknown | TypeData::AnyKeyword | TypeData::UnknownKeyword => None,
+                    _ => Some(false),
+                };
             };
 
-            let Some(next_id) = resolver.resolve_reference(&prototype) else {
-                break;
-            };
+            let next_id = resolver.resolve_reference(&prototype)?;
 
             if next_id == id {
-                return true;
+                return Some(true);
             }
 
             if seen_types.contains(&next_id) {
-                break;
+                return None;
             }
 
             seen_types.push(next_id);
-            current_object = resolver.get_by_resolved_id(next_id);
+            current_object = Some(resolver.get_by_resolved_id(next_id)?);
         }
 
-        false
+        Some(false)
     }
 
     /// Returns whether this type is an instance of a `Promise`.
-    pub fn is_promise_instance(self, resolver: &dyn TypeResolver) -> bool {
-        self.is_instance_of(resolver, GLOBAL_PROMISE_ID)
+    pub fn is_promise_instance(self, resolver: &dyn TypeResolver) -> Option<bool> {
+        match self.is_instance_of_status(resolver, GLOBAL_PROMISE_ID) {
+            Some(true) => return Some(true),
+            None => return None,
+            Some(false) => {}
+        }
+        match self.as_raw_data() {
+            TypeData::Unknown | TypeData::AnyKeyword | TypeData::UnknownKeyword => None,
+            TypeData::Union(union) => {
+                let mut indeterminate = false;
+                for ty in union.types() {
+                    let Some(resolved) = resolver.resolve_and_get(ty) else {
+                        indeterminate = true;
+                        continue;
+                    };
+                    match resolved.is_promise_instance(resolver) {
+                        Some(true) => return Some(true),
+                        Some(false) => {}
+                        None => indeterminate = true,
+                    }
+                }
+                if indeterminate { None } else { Some(false) }
+            }
+            _ => Some(false),
+        }
     }
 
     /// Returns a reference to the type's prototype, if any.

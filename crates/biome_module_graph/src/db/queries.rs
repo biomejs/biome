@@ -21,13 +21,10 @@ use crate::{ImportTreeNode, JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, TypeReference, TypeResolverLevel,
-    interned_types::{
-        FunctionParameter as InferredFunctionParameter, InternedFunction as InferredFunction,
-        InternedMergedReference as InferredMergedReference, Literal as InferredLiteral,
-        LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
-        ModuleKey as InferredModuleKey, ReturnType, StructuralMapError,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeSubstitution as InferredTypeSubstitution,
+    resolved::{
+        InferredFunction, InferredFunctionParameter, InferredLiteral, InferredLocalTypeHandle,
+        InferredLocalTypeId, InferredMergedReference, InferredModuleKey, InferredTypeData,
+        InferredTypeMember, InferredTypeSubstitution, ReturnType,
     },
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -213,11 +210,12 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| {
+                .map(|callee| {
                     if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
-                        Some(InferredTypeData::Undefined)
+                        InferredTypeData::Undefined
                     } else {
                         infer_function_call_type(db, *callee, args)
+                            .unwrap_or(InferredTypeData::Unknown)
                     }
                 })
                 .collect(),
@@ -226,6 +224,7 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
         callee @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -273,8 +272,8 @@ fn infer_function_call_type<'db>(
         InferredTypeData::InstanceOf(instance) => {
             let target = instance.ty(db);
             let substitutions =
-                substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
-            let target = apply_substitutions_to_root_body(db, target, &substitutions);
+                substitutions_for_instance(db, target, instance.type_parameters(db), &[]).ok()?;
+            let target = apply_substitutions_to_root_body(db, target, &substitutions).ok()?;
             infer_function_call_type(db, target, args)
         }
         InferredTypeData::Interface(interface) => {
@@ -286,11 +285,12 @@ fn infer_function_call_type<'db>(
             union
                 .types(db)
                 .iter()
-                .filter_map(|callee| {
+                .map(|callee| {
                     if matches!(callee, InferredTypeData::Null | InferredTypeData::Undefined) {
-                        Some(InferredTypeData::Undefined)
+                        InferredTypeData::Undefined
                     } else {
                         infer_function_call_type(db, *callee, args)
+                            .unwrap_or(InferredTypeData::Unknown)
                     }
                 })
                 .collect(),
@@ -304,6 +304,7 @@ fn infer_function_call_type<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -338,11 +339,16 @@ fn infer_call_signature_type<'db>(
     members: &[InferredTypeMember<'db>],
     args: &[ResolvedCallArgument<'db>],
 ) -> Option<InferredTypeData<'db>> {
-    let signatures = members
-        .iter()
-        .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db))
-        .collect::<Vec<_>>();
+    let mut signatures = Vec::new();
+    for member in members {
+        if !member.kind.is_call_signature() {
+            continue;
+        }
+        let Some(function) = member.ty.callable_function(db) else {
+            return Some(InferredTypeData::Unknown);
+        };
+        signatures.push(function);
+    }
 
     if signatures.len() < 2 {
         return signatures
@@ -350,32 +356,44 @@ fn infer_call_signature_type<'db>(
             .and_then(|function| infer_function_return_type(db, *function, args));
     }
 
-    signatures
-        .into_iter()
-        .find(|function| signature_accepts_arguments(db, *function, args))
-        .and_then(|function| infer_function_return_type(db, function, args))
+    for function in signatures {
+        match signature_accepts_arguments(db, function, args) {
+            Some(true) => return infer_function_return_type(db, function, args),
+            Some(false) => {}
+            None => return Some(InferredTypeData::Unknown),
+        }
+    }
+
+    None
 }
 
 fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     args: &[ResolvedCallArgument<'db>],
-) -> bool {
+) -> Option<bool> {
     let parameters = function.parameters(db);
-    let mut pending = Vec::from([(0, 0)]);
+    let mut pending = Vec::from([(0, 0, false)]);
     let mut seen = FxHashSet::default();
+    let mut processed_states = 0;
+    let mut found_uncertain_match = false;
 
-    for _ in 0..MAX_ARGUMENT_SEQUENCE_STEPS {
-        let Some((parameter_index, argument_index)) = pending.pop() else {
-            return false;
-        };
-        if !seen.insert((parameter_index, argument_index)) {
+    while let Some((parameter_index, argument_index, uncertain)) = pending.pop() {
+        if !seen.insert((parameter_index, argument_index, uncertain)) {
             continue;
         }
+        if processed_states == MAX_ARGUMENT_SEQUENCE_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         let Some(argument) = args.get(argument_index).copied() else {
             if remaining_parameters_accept_zero(parameters, parameter_index) {
-                return true;
+                if uncertain {
+                    found_uncertain_match = true;
+                } else {
+                    return Some(true);
+                }
             }
             continue;
         };
@@ -387,21 +405,23 @@ fn signature_accepts_arguments<'db>(
                 parameter_index,
                 argument_index + 1,
                 arg_ty,
+                uncertain,
                 &mut pending,
             ),
             ResolvedCallArgument::Optional(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1));
+                pending.push((parameter_index, argument_index + 1, uncertain));
                 push_consumed_argument_state(
                     db,
                     parameters,
                     parameter_index,
                     argument_index + 1,
                     arg_ty,
+                    uncertain,
                     &mut pending,
                 );
             }
             ResolvedCallArgument::Spread(arg_ty) => {
-                pending.push((parameter_index, argument_index + 1));
+                pending.push((parameter_index, argument_index + 1, uncertain));
                 let arg_ty = spread_argument_element_type(db, arg_ty);
                 push_consumed_spread_state(
                     db,
@@ -409,13 +429,18 @@ fn signature_accepts_arguments<'db>(
                     parameter_index,
                     argument_index,
                     arg_ty,
+                    uncertain,
                     &mut pending,
                 );
             }
         }
     }
 
-    true
+    if found_uncertain_match {
+        None
+    } else {
+        Some(false)
+    }
 }
 
 fn push_consumed_argument_state<'db>(
@@ -424,18 +449,22 @@ fn push_consumed_argument_state<'db>(
     parameter_index: usize,
     next_argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    pending: &mut Vec<(usize, usize)>,
+    uncertain: bool,
+    pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    if !argument_satisfies_parameter(db, parameter, arg_ty) {
-        return;
-    }
+    let uncertain = match argument_satisfies_parameter(db, parameter, arg_ty) {
+        Some(true) => uncertain,
+        Some(false) => return,
+        None => true,
+    };
 
     pending.push((
         next_parameter_index(parameter, parameter_index),
         next_argument_index,
+        uncertain,
     ));
 }
 
@@ -445,19 +474,22 @@ fn push_consumed_spread_state<'db>(
     parameter_index: usize,
     argument_index: usize,
     arg_ty: InferredTypeData<'db>,
-    pending: &mut Vec<(usize, usize)>,
+    uncertain: bool,
+    pending: &mut Vec<(usize, usize, bool)>,
 ) {
     let Some(parameter) = parameter_for_argument(parameters, parameter_index) else {
         return;
     };
-    if !argument_satisfies_parameter(db, parameter, arg_ty) {
-        return;
-    }
+    let uncertain = match argument_satisfies_parameter(db, parameter, arg_ty) {
+        Some(true) => uncertain,
+        Some(false) => return,
+        None => true,
+    };
 
     if parameter.is_rest() {
-        pending.push((parameter_index, argument_index + 1));
+        pending.push((parameter_index, argument_index + 1, uncertain));
     } else {
-        pending.push((parameter_index + 1, argument_index));
+        pending.push((parameter_index + 1, argument_index, uncertain));
     }
 }
 
@@ -465,20 +497,30 @@ fn argument_satisfies_parameter<'db>(
     db: &'db dyn ModuleDb,
     parameter: &InferredFunctionParameter<'db>,
     arg_ty: InferredTypeData<'db>,
-) -> bool {
+) -> Option<bool> {
     let parameter_ty = parameter_argument_type(db, parameter);
-    if !argument_may_match_parameter(db, parameter_ty, arg_ty) {
-        return false;
-    }
+    let type_match = argument_may_match_parameter(db, parameter_ty, arg_ty);
 
-    match (
+    let callable_match = match (
         parameter_ty.callable_function(db),
         arg_ty.callable_function(db),
     ) {
-        (Some(parameter_function), Some(argument_function)) => {
-            parameter_function.returns_promise(db) == argument_function.returns_promise(db)
-        }
-        _ => true,
+        (Some(parameter_function), Some(argument_function)) => match (
+            parameter_function.returns_promise(db),
+            argument_function.returns_promise(db),
+        ) {
+            (Some(parameter_returns_promise), Some(argument_returns_promise)) => {
+                Some(parameter_returns_promise == argument_returns_promise)
+            }
+            _ => None,
+        },
+        _ => Some(true),
+    };
+
+    match (type_match, callable_match) {
+        (Some(false), _) | (_, Some(false)) => Some(false),
+        (Some(true), Some(true)) => Some(true),
+        (None, Some(true)) | (_, None) => None,
     }
 }
 
@@ -526,6 +568,7 @@ fn parameter_argument_type<'db>(
         ty @ (InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -566,50 +609,61 @@ fn argument_may_match_parameter<'db>(
     db: &'db dyn ModuleDb,
     parameter_ty: InferredTypeData<'db>,
     arg_ty: InferredTypeData<'db>,
-) -> bool {
-    let mut pending = Vec::from([Vec::from([(parameter_ty, arg_ty)])]);
-    let mut remaining_steps = MAX_ARGUMENT_MATCH_STEPS;
+) -> Option<bool> {
+    let mut pending = Vec::from([(Vec::from([(parameter_ty, arg_ty)]), false)]);
+    let mut processed_states = 0;
+    let mut found_uncertain_match = false;
 
-    while let Some(mut required_pairs) = pending.pop() {
+    while let Some((mut required_pairs, uncertain)) = pending.pop() {
         let Some((parameter_ty, arg_ty)) = required_pairs.pop() else {
-            return true;
+            if uncertain {
+                found_uncertain_match = true;
+                continue;
+            }
+            return Some(true);
         };
-        if remaining_steps == 0 {
-            return true;
+        if processed_states == MAX_ARGUMENT_MATCH_STEPS {
+            return None;
         }
-        remaining_steps -= 1;
+        processed_states += 1;
 
         let parameter_ty = literal_base_type(db, parameter_ty).unwrap_or(parameter_ty);
         let arg_ty = literal_base_type(db, arg_ty).unwrap_or(arg_ty);
 
         if parameter_ty == arg_ty {
-            pending.push(required_pairs);
+            pending.push((required_pairs, uncertain));
             continue;
         }
 
         match argument_match_action(db, parameter_ty, arg_ty) {
-            ArgumentMatchAction::Match => pending.push(required_pairs),
+            ArgumentMatchAction::Match => pending.push((required_pairs, uncertain)),
             ArgumentMatchAction::Mismatch => {}
+            ArgumentMatchAction::Unknown => pending.push((required_pairs, true)),
             ArgumentMatchAction::All(pairs) => {
                 required_pairs.extend(pairs);
-                pending.push(required_pairs);
+                pending.push((required_pairs, uncertain));
             }
             ArgumentMatchAction::Any(pairs) => {
                 for pair in pairs.into_iter().rev() {
                     let mut branch_pairs = required_pairs.clone();
                     branch_pairs.push(pair);
-                    pending.push(branch_pairs);
+                    pending.push((branch_pairs, uncertain));
                 }
             }
         }
     }
 
-    false
+    if found_uncertain_match {
+        None
+    } else {
+        Some(false)
+    }
 }
 
 enum ArgumentMatchAction<'db> {
     Match,
     Mismatch,
+    Unknown,
     All(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
     Any(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
 }
@@ -642,21 +696,21 @@ fn argument_match_action<'db>(
             match argument_type_extends_parameter_local(db, arg_ty, parameter) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Match,
+                None => ArgumentMatchAction::Unknown,
             }
         }
         (parameter_ty, InferredTypeData::Local(argument)) => {
             match argument_local_extends_parameter_type(db, argument, parameter_ty) {
                 Some(true) => ArgumentMatchAction::Match,
                 Some(false) => ArgumentMatchAction::Mismatch,
-                None => ArgumentMatchAction::Match,
+                None => ArgumentMatchAction::Unknown,
             }
         }
         (InferredTypeData::Class(_), InferredTypeData::Class(_)) => {
-            if argument_type_extends_parameter_type(db, arg_ty, parameter_ty) {
-                ArgumentMatchAction::Match
-            } else {
-                ArgumentMatchAction::Mismatch
+            match argument_type_extends_parameter_type(db, arg_ty, parameter_ty) {
+                Some(true) => ArgumentMatchAction::Match,
+                Some(false) => ArgumentMatchAction::Mismatch,
+                None => ArgumentMatchAction::Unknown,
             }
         }
         (InferredTypeData::Union(union), arg_ty) => ArgumentMatchAction::Any(
@@ -750,6 +804,7 @@ fn argument_match_action<'db>(
             InferredTypeData::Conditional
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::TypeOperator(_)
@@ -761,6 +816,7 @@ fn argument_match_action<'db>(
             InferredTypeData::Conditional
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::ObjectKeyword
             | InferredTypeData::TypeOperator(_)
@@ -847,6 +903,7 @@ fn spread_argument_element_type<'db>(
         | InferredTypeData::UnknownKeyword => InferredTypeData::Unknown,
         ty @ (InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -899,17 +956,19 @@ fn argument_type_extends_parameter_local<'db>(
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([argument_ty]);
     let mut resolved_known_type = false;
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(ty) = pending.pop() else {
-            return resolved_known_type.then_some(false);
-        };
+    while let Some(ty) = pending.pop() {
         if ty == parameter_ty {
             return Some(true);
         }
         if !seen.insert(ty) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         match ty {
             InferredTypeData::Class(class) => {
@@ -947,6 +1006,7 @@ fn argument_type_extends_parameter_local<'db>(
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::Conditional
             | InferredTypeData::Constructor(_)
             | InferredTypeData::Function(_)
@@ -972,7 +1032,7 @@ fn argument_type_extends_parameter_local<'db>(
         }
     }
 
-    None
+    resolved_known_type.then_some(false)
 }
 
 fn argument_local_extends_parameter_type<'db>(
@@ -983,7 +1043,7 @@ fn argument_local_extends_parameter_type<'db>(
     match parameter_ty {
         InferredTypeData::Class(parameter) => {
             let parameter_name = parameter.name(db).as_ref()?.text();
-            Some(raw_local_extends_class_name(db, argument, parameter_name))
+            raw_local_extends_class_name(db, argument, parameter_name)
         }
         InferredTypeData::BigInt
         | InferredTypeData::Boolean
@@ -996,6 +1056,7 @@ fn argument_local_extends_parameter_type<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Divergent(_)
         | InferredTypeData::Global
+        | InferredTypeData::GlobalType(_)
         | InferredTypeData::Conditional
         | InferredTypeData::Constructor(_)
         | InferredTypeData::Function(_)
@@ -1027,24 +1088,26 @@ fn argument_type_extends_parameter_type<'db>(
     db: &'db dyn ModuleDb,
     argument_ty: InferredTypeData<'db>,
     parameter_ty: InferredTypeData<'db>,
-) -> bool {
+) -> Option<bool> {
     if argument_ty == parameter_ty {
-        return true;
+        return Some(true);
     }
 
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([argument_ty]);
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(ty) = pending.pop() else {
-            return false;
-        };
+    while let Some(ty) = pending.pop() {
         if ty == parameter_ty {
-            return true;
+            return Some(true);
         }
         if !seen.insert(ty) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         match ty {
             InferredTypeData::Class(class) => {
@@ -1056,14 +1119,18 @@ fn argument_type_extends_parameter_type<'db>(
             InferredTypeData::Local(local) => {
                 if let InferredTypeData::Class(parameter) = parameter_ty
                     && let Some(parameter_name) = parameter.name(db).as_ref()
-                    && raw_local_extends_class_name(db, local, parameter_name.text())
                 {
-                    return true;
+                    match raw_local_extends_class_name(db, local, parameter_name.text()) {
+                        Some(true) => return Some(true),
+                        Some(false) => {}
+                        None => return None,
+                    }
                 }
             }
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1097,34 +1164,36 @@ fn argument_type_extends_parameter_type<'db>(
         }
     }
 
-    false
+    Some(false)
 }
 
 fn raw_local_extends_class_name<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
     parameter_name: &str,
-) -> bool {
+) -> Option<bool> {
     let mut seen = FxHashSet::default();
     let mut pending = Vec::from([local]);
+    let mut processed_states = 0;
 
-    for _ in 0..MAX_LOCAL_EXTENDS_STEPS {
-        let Some(local) = pending.pop() else {
-            return false;
-        };
+    while let Some(local) = pending.pop() {
         if !seen.insert(local) {
             continue;
         }
+        if processed_states == MAX_LOCAL_EXTENDS_STEPS {
+            return None;
+        }
+        processed_states += 1;
 
         if raw_local_class_name(db, local).as_deref() == Some(parameter_name) {
-            return true;
+            return Some(true);
         }
         if let Some(extends) = raw_local_class_extends(db, local) {
             pending.push(extends);
         }
     }
 
-    false
+    Some(false)
 }
 
 fn raw_local_class_name<'db>(
@@ -1225,13 +1294,16 @@ fn infer_generic_return_type<'db>(
     {
         let parameter_ty = parameter.ty();
         if parameter_ty.is_generic_reference(db) {
-            return_ty = return_ty.substitute_type(
+            let Ok(substituted) = return_ty.substitute_type(
                 db,
                 InferredTypeSubstitution {
                     generic: parameter_ty,
                     replacement: arg,
                 },
-            );
+            ) else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
             continue;
         }
 
@@ -1248,10 +1320,16 @@ fn infer_generic_return_type<'db>(
             continue;
         };
 
-        for substitution in
+        let Some(substitutions) =
             parameter_return_ty.collect_generic_replacements(db, *argument_return_ty)
-        {
-            return_ty = return_ty.substitute_type(db, substitution);
+        else {
+            return InferredTypeData::Unknown;
+        };
+        for substitution in substitutions {
+            let Ok(substituted) = return_ty.substitute_type(db, substitution) else {
+                return InferredTypeData::Unknown;
+            };
+            return_ty = substituted;
         }
     }
 
@@ -1276,10 +1354,8 @@ pub fn normalize_type<'db>(
         return ty;
     };
 
-    normalize_structural_type(db, ty, |ty| inferred.resolve_type(db, ty)).unwrap_or_else(|error| {
-        debug_assert_eq!(error, StructuralMapError::StepLimitExceeded);
-        ty
-    })
+    normalize_structural_type(db, ty, |ty| inferred.resolve_type(db, ty))
+        .unwrap_or(InferredTypeData::Unknown)
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.
@@ -1905,4 +1981,89 @@ pub(crate) fn build_parent_nodes(
     }
 
     parents
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_type_info::{
+        TypeDb,
+        interned_types::{InternedGenericTypeParameter, InternedTypeInstance, InternedTypeofType},
+    };
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    #[salsa::db]
+    impl ModuleDb for TestDb {
+        fn module_for_path(&self, _path: &Utf8Path) -> Option<ModuleInfo> {
+            None
+        }
+
+        fn for_each_module(&self, _f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {}
+    }
+
+    fn typeof_chain<'db>(
+        db: &'db TestDb,
+        distinct_types: usize,
+        leaf: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        (1..distinct_types).fold(leaf, |ty, _| {
+            InferredTypeData::TypeofType(InternedTypeofType::new(db, ty))
+        })
+    }
+
+    #[test]
+    fn call_return_root_body_substitution_reports_step_boundaries() {
+        let db = TestDb::default();
+
+        for distinct_types in [1023, 1024, 1025] {
+            let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+                &db,
+                None,
+                None,
+                biome_rowan::Text::new_static("T"),
+            ));
+            let function = InferredTypeData::Function(InferredFunction::new(
+                &db,
+                Vec::from([generic]).into_boxed_slice(),
+                Box::default(),
+                ReturnType::Type(typeof_chain(&db, distinct_types, generic)),
+                false,
+                None,
+            ));
+            let callee = InferredTypeData::InstanceOf(InternedTypeInstance::new(
+                &db,
+                function,
+                Vec::from([InferredTypeData::Number]).into_boxed_slice(),
+            ));
+            let result = infer_call_expression_return_type(&db, callee, &[]);
+
+            if distinct_types <= 1024 {
+                let mut leaf = result;
+                while let InferredTypeData::TypeofType(typeof_type) = leaf {
+                    leaf = typeof_type.ty(&db);
+                }
+                assert_eq!(leaf, InferredTypeData::Number);
+            } else {
+                assert_eq!(result, InferredTypeData::Unknown);
+            }
+        }
+    }
 }

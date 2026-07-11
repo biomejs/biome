@@ -11,7 +11,7 @@ mod path_info_cache;
 
 pub use biome_js_type_info::{
     ImportSymbol,
-    interned_types::{LocalTypeId, ModuleKey},
+    resolved::{LocalTypeId, ModuleKey},
 };
 pub use biome_resolver::ResolvedPath;
 pub use css_module_info::{

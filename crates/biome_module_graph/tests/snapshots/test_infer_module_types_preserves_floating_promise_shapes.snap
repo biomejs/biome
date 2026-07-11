@@ -164,23 +164,7 @@ Expression "[1, 2, 3]" => [number: 1,
 number: 2,
 number: 3]
 
-Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
-  accepts: {
-    params: [
-      : sync Function "<U>(item: T) => U" {
-        accepts: {
-          params: [
-            : U
-          ]
-          type_args: []
-        }
-        returns: U
-      }
-    ]
-    type_args: [U]
-  }
-  returns: instanceof Array<U>
-}
+Expression "[1, 2, 3].map" => Array.prototype.map
 
 Expression "[1, 2, 3].map(async (value) => value + 1)" => instanceof Array<instanceof Promise<unknown>>
 
@@ -214,23 +198,7 @@ Expression "[1, 2, 3]" => [number: 1,
 number: 2,
 number: 3]
 
-Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
-  accepts: {
-    params: [
-      : sync Function "<U>(item: T) => U" {
-        accepts: {
-          params: [
-            : U
-          ]
-          type_args: []
-        }
-        returns: U
-      }
-    ]
-    type_args: [U]
-  }
-  returns: instanceof Array<U>
-}
+Expression "[1, 2, 3].map" => Array.prototype.map
 
 Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise>
 
@@ -258,13 +226,7 @@ Expression "Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "Promise.resolve" => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Expression "Promise.resolve" => Promise.resolve
 
 Expression "Promise.resolve(value + 1)" => instanceof Promise
 
@@ -382,13 +344,7 @@ Expression "globalThis.Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "globalThis.Promise.reject" => sync Function "Promise.reject" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Expression "globalThis.Promise.reject" => Promise.reject
 
 Expression "globalThis.Promise.reject(\"value\")" => instanceof Promise
 

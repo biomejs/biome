@@ -11,12 +11,13 @@ use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_type_info::{
     InferredType, TypeResolverLevel, format_inferred_type,
-    interned_types::{
-        FunctionParameter as InferredFunctionParameter, InternedInterface as InferredInterface,
-        InternedMergedReference as InferredMergedReference, InternedUnion as InferredUnion,
-        Literal as InferredLiteral, LocalTypeId as InferredLocalTypeId,
-        ModuleKey as InferredModuleKey, ReturnType as InferredReturnType,
-        TypeData as InferredTypeData, TypeMemberKind as InferredTypeMemberKind,
+    interned_types::{InternedClass, InternedTypeInstance, InternedTypeofType},
+    resolved::{
+        InferredFunction, InferredFunctionParameter, InferredInterface,
+        InferredInternedGenericTypeParameter, InferredLiteral, InferredLocalTypeHandle,
+        InferredLocalTypeId, InferredMergedReference, InferredModuleKey,
+        InferredNamedFunctionParameter, InferredObject, InferredReturnType, InferredTypeData,
+        InferredTypeMember, InferredTypeMemberKind, InferredUnion,
     },
 };
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -40,6 +41,159 @@ struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     events: Events,
     storage: Storage<Self>,
+}
+
+#[salsa::input]
+struct GenericReplacementBudget {
+    steps: usize,
+}
+
+#[salsa::input]
+#[derive(Debug)]
+struct NormalizationBudget {
+    module: ModuleInfo,
+    distinct_types: usize,
+}
+
+#[salsa::input]
+#[derive(Debug)]
+struct MemberLookupBudget {
+    module: ModuleInfo,
+    steps: usize,
+}
+
+#[salsa::input]
+#[derive(Debug)]
+struct IndeterminateCallSignature {
+    module: ModuleInfo,
+    is_indeterminate: bool,
+}
+
+#[salsa::tracked]
+fn infer_generic_call_for_budget<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    budget: GenericReplacementBudget,
+) -> InferredTypeData<'db> {
+    let (callee, argument) = generic_call_types(db, budget.steps(db));
+    infer_call_expression_type(db, module, callee, Vec::from([argument]))
+}
+
+#[salsa::tracked]
+fn normalize_type_for_budget<'db>(
+    db: &'db dyn ModuleDb,
+    budget: NormalizationBudget,
+) -> InferredTypeData<'db> {
+    let ty = inferred_typeof_chain(db, budget.distinct_types(db), InferredTypeData::String);
+    normalize_type(db, budget.module(db), ty)
+}
+
+#[salsa::tracked]
+fn lookup_member_for_budget<'db>(
+    db: &'db dyn ModuleDb,
+    budget: MemberLookupBudget,
+) -> Option<InferredTypeData<'db>> {
+    let module = budget.module(db);
+    let leaf = InferredTypeData::Interface(InferredInterface::new(
+        db,
+        Box::default(),
+        Box::default(),
+        Vec::from([InferredTypeMember {
+            kind: InferredTypeMemberKind::Named(Text::new_static("target")),
+            ty: InferredTypeData::Number,
+        }])
+        .into_boxed_slice(),
+        Text::new_static("Known"),
+    ));
+    local_alias_member_lookup(db, module, budget.steps(db), leaf)
+}
+
+#[salsa::tracked]
+fn resolve_local_for_budget<'db>(
+    db: &'db dyn ModuleDb,
+    budget: MemberLookupBudget,
+) -> InferredTypeData<'db> {
+    let leaf = if budget.steps(db).is_multiple_of(2) {
+        InferredTypeData::String
+    } else {
+        InferredTypeData::Number
+    };
+    let (inferred, local) = local_alias_types(db, budget.module(db), budget.steps(db), leaf);
+    inferred.resolve_type(db, local)
+}
+
+#[salsa::tracked]
+fn lookup_inherited_member_for_budget<'db>(
+    db: &'db dyn ModuleDb,
+    budget: MemberLookupBudget,
+) -> Option<InferredTypeData<'db>> {
+    let module = budget.module(db);
+    let mut ty = InferredTypeData::Interface(InferredInterface::new(
+        db,
+        Box::default(),
+        Box::default(),
+        Vec::from([InferredTypeMember {
+            kind: InferredTypeMemberKind::Named(Text::new_static("target")),
+            ty: InferredTypeData::Number,
+        }])
+        .into_boxed_slice(),
+        Text::new_static("Known"),
+    ));
+    for _ in 1..budget.steps(db) {
+        ty = InferredTypeData::Interface(InferredInterface::new(
+            db,
+            Box::default(),
+            Vec::from([ty]).into_boxed_slice(),
+            Box::default(),
+            Text::new_static("Derived"),
+        ));
+    }
+    let inferred = InferredModuleTypes {
+        module_key: InferredModuleKey::new(module.as_id()),
+        named_type_ids: Box::default(),
+        types: Box::default(),
+        expressions: Default::default(),
+        binding_type_data: Default::default(),
+    };
+
+    inferred.find_member_type(db, ty, "target")
+}
+
+#[salsa::tracked]
+fn infer_call_with_indeterminate_signature<'db>(
+    db: &'db dyn ModuleDb,
+    input: IndeterminateCallSignature,
+) -> InferredTypeData<'db> {
+    let function = InferredTypeData::Function(InferredFunction::new(
+        db,
+        Box::default(),
+        Box::default(),
+        InferredReturnType::Type(InferredTypeData::Number),
+        false,
+        None,
+    ));
+    let second = if input.is_indeterminate(db) {
+        InferredTypeData::Unknown
+    } else {
+        function
+    };
+    let callee = InferredTypeData::Object(InferredObject::new(
+        db,
+        None,
+        Vec::from([
+            InferredTypeMember {
+                kind: InferredTypeMemberKind::CallSignature,
+                ty: function,
+            },
+            InferredTypeMember {
+                kind: InferredTypeMemberKind::CallSignature,
+                ty: second,
+            },
+        ])
+        .into_boxed_slice(),
+    ));
+
+    infer_call_expression_type(db, input.module(db), callee, Vec::new())
 }
 
 #[test]
@@ -152,6 +306,198 @@ fn test_namespace_import_preserves_members_above_export_step_limit() {
             .expect("namespace member type must be inferred");
         assert!(is_inferred_number(&db, normalize_type(&db, module, ty)));
     }
+}
+
+fn insert_blanket_reexport_chain(
+    fs: &MemoryFileSystem,
+    reexport_count: usize,
+    leaf_reexport: Option<usize>,
+) -> Vec<String> {
+    let mut paths = Vec::with_capacity(reexport_count + 1);
+    for index in 0..reexport_count {
+        let path = format!("/src/module{index}.ts");
+        fs.insert(
+            path.clone().into(),
+            format!("export * from \"./module{}.ts\";", index + 1),
+        );
+        paths.push(path);
+    }
+
+    let leaf_path = format!("/src/module{reexport_count}.ts");
+    let leaf_reexport = leaf_reexport.map_or_else(String::new, |index| {
+        format!("export * from \"./module{index}.ts\";")
+    });
+    fs.insert(
+        leaf_path.clone().into(),
+        format!("export const leaf = 1;{leaf_reexport}"),
+    );
+    paths.push(leaf_path);
+    paths
+}
+
+fn insert_namespace_import(fs: &MemoryFileSystem, path: &str, start: usize) {
+    fs.insert(
+        path.into(),
+        format!("import * as namespace from \"./module{start}.ts\"; export {{ namespace }};"),
+    );
+}
+
+#[test]
+fn test_namespace_import_blanket_reexport_step_boundaries_and_cycle() {
+    const LIMIT: usize = 1024;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = insert_blanket_reexport_chain(&fs, LIMIT + 1, Some(LIMIT + 1));
+    for (path, start) in [
+        ("/src/under.ts", 2),
+        ("/src/exact.ts", 1),
+        ("/src/over.ts", 0),
+    ] {
+        insert_namespace_import(&fs, path, start);
+        paths.push(path.to_string());
+    }
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+
+    for path in ["/src/under.ts", "/src/exact.ts"] {
+        let module = db
+            .module_for_path(Utf8Path::new(path))
+            .expect("importer module must exist");
+        let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+        let namespace_ty = inferred_binding_ty_by_name(&db, module, &inferred, "namespace")
+            .expect("namespace binding must exist");
+        let InferredTypeData::Namespace(namespace) = namespace_ty else {
+            panic!("chain at or below the limit must produce a namespace");
+        };
+        assert!(
+            namespace
+                .members(&db)
+                .iter()
+                .any(|member| { member.kind.name().is_some_and(|name| name.text() == "leaf") })
+        );
+    }
+
+    let exact_module = db
+        .module_for_path(Utf8Path::new("/src/exact.ts"))
+        .expect("exact-limit importer must exist");
+    let first = infer_module_types(&db, exact_module).expect("types must be inferred");
+    let second = infer_module_types(&db, exact_module).expect("types must be cached");
+    assert!(std::sync::Arc::ptr_eq(&first, &second));
+    let first_ty = inferred_binding_ty_by_name(&db, exact_module, &first, "namespace")
+        .expect("namespace binding must exist");
+    let second_ty = inferred_binding_ty_by_name(&db, exact_module, &second, "namespace")
+        .expect("namespace binding must remain present");
+    let (
+        InferredTypeData::Namespace(first_namespace),
+        InferredTypeData::Namespace(second_namespace),
+    ) = (first_ty, second_ty)
+    else {
+        panic!("repeated query must preserve the namespace");
+    };
+    assert_eq!(first_namespace.as_id(), second_namespace.as_id());
+
+    let over_module = db
+        .module_for_path(Utf8Path::new("/src/over.ts"))
+        .expect("over-limit importer must exist");
+    let inferred = infer_module_types_bottom_up(&db, over_module).expect("types must be inferred");
+    let namespace_ty = inferred_binding_ty_by_name(&db, over_module, &inferred, "namespace")
+        .expect("namespace binding must exist");
+    assert_eq!(namespace_ty, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_namespace_import_invalidates_over_budget_unknown_after_chain_replacement() {
+    const LIMIT: usize = 1024;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = insert_blanket_reexport_chain(&fs, LIMIT + 1, None);
+    insert_namespace_import(&fs, "/src/index.ts", 0);
+    paths.push("/src/index.ts".to_string());
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let mut db = build_js_test_module_db(&fs, &path_refs, true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+
+    let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
+    let namespace_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "namespace")
+        .expect("namespace binding must exist");
+    assert_eq!(namespace_ty, InferredTypeData::Unknown);
+    drop(inferred);
+
+    let replacement_path = format!("/src/module{}.ts", LIMIT - 1);
+    fs.insert(replacement_path.clone().into(), "export const leaf = 1;");
+    let replacement_module = db
+        .module_for_path(Utf8Path::new(&replacement_path))
+        .expect("replacement module must exist");
+    let replacement_kind = resolve_js_module_kind_for_test(&fs, &replacement_path, true);
+    salsa::Setter::to(replacement_module.set_kind(&mut db), replacement_kind);
+
+    let inferred = infer_module_types(&db, index_module).expect("types must be invalidated");
+    let namespace_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "namespace")
+        .expect("namespace binding must exist");
+    let InferredTypeData::Namespace(namespace) = namespace_ty else {
+        panic!("shortened chain must produce a complete namespace");
+    };
+    assert!(
+        namespace
+            .members(&db)
+            .iter()
+            .any(|member| { member.kind.name().is_some_and(|name| name.text() == "leaf") })
+    );
+}
+
+#[test]
+fn test_namespace_import_discards_known_members_when_blanket_path_is_unresolved() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        "export const known = 1; export * from './missing';",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        "import * as namespace from './source'; export { namespace };",
+    );
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+
+    assert_eq!(
+        inferred_binding_ty_by_name(&db, module, &inferred, "namespace"),
+        Some(InferredTypeData::Unknown)
+    );
+}
+
+#[test]
+fn test_namespace_import_discards_known_members_when_blanket_module_cannot_infer() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        "export const known = 1; export * from './unavailable';",
+    );
+    fs.insert("/src/unavailable.ts".into(), "export const hidden = 2;");
+    fs.insert(
+        "/src/index.ts".into(),
+        "import * as namespace from './source'; export { namespace };",
+    );
+    let mut db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let unavailable = ModuleInfo::new(
+        &db,
+        Utf8PathBuf::from("/src/unavailable.ts"),
+        resolve_js_module_kind_for_test(&fs, "/src/unavailable.ts", false),
+    );
+    db.insert_module(Utf8PathBuf::from("/src/unavailable.ts"), unavailable);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+
+    assert_eq!(
+        inferred_binding_ty_by_name(&db, module, &inferred, "namespace"),
+        Some(InferredTypeData::Unknown)
+    );
 }
 
 impl TestModuleDb {
@@ -523,7 +869,8 @@ fn is_inferred_promise_with_type_parameter<'db>(
         return false;
     };
 
-    ty.is_promise_instance(db) && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
+    ty.is_promise_instance(db) == Some(true)
+        && instance.type_parameters(db).iter().any(|ty| predicate(*ty))
 }
 
 fn assert_inferred_function_returns_string<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) {
@@ -561,6 +908,176 @@ fn infer_call_expression_type<'db>(
         db,
         CallExpressionTypeInput::new(db, module, callee, args.into_boxed_slice()),
     )
+}
+
+fn nested_instance_type<'db>(
+    db: &'db dyn ModuleDb,
+    depth: usize,
+    leaf: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    (0..depth).fold(leaf, |ty, _| {
+        InferredTypeData::InstanceOf(InternedTypeInstance::new(
+            db,
+            ty,
+            Vec::new().into_boxed_slice(),
+        ))
+    })
+}
+
+fn inferred_typeof_chain<'db>(
+    db: &'db dyn ModuleDb,
+    distinct_types: usize,
+    leaf: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    assert!(distinct_types > 0);
+    (1..distinct_types).fold(leaf, |ty, _| {
+        InferredTypeData::TypeofType(InternedTypeofType::new(db, ty))
+    })
+}
+
+fn substitution_generic<'db>(db: &'db dyn ModuleDb) -> InferredTypeData<'db> {
+    InferredTypeData::Generic(InferredInternedGenericTypeParameter::new(
+        db,
+        None,
+        None,
+        Text::new_static("T"),
+    ))
+}
+
+fn generic_interface_instance_with_member<'db>(
+    db: &'db dyn ModuleDb,
+    distinct_types: usize,
+) -> InferredTypeData<'db> {
+    let generic = substitution_generic(db);
+    let interface = InferredTypeData::Interface(InferredInterface::new(
+        db,
+        Vec::from([generic]).into_boxed_slice(),
+        Box::default(),
+        Vec::from([InferredTypeMember {
+            kind: InferredTypeMemberKind::Named(Text::new_static("target")),
+            ty: inferred_typeof_chain(db, distinct_types, generic),
+        }])
+        .into_boxed_slice(),
+        Text::new_static("Container"),
+    ));
+    InferredTypeData::InstanceOf(InternedTypeInstance::new(
+        db,
+        interface,
+        Vec::from([InferredTypeData::Number]).into_boxed_slice(),
+    ))
+}
+
+fn local_alias_member_lookup<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    steps: usize,
+    leaf: InferredTypeData<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let (inferred, ty) = local_alias_types(db, module, steps, leaf);
+    inferred.find_member_type(db, ty, "target")
+}
+
+fn local_alias_types<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    steps: usize,
+    leaf: InferredTypeData<'db>,
+) -> (InferredModuleTypes<'db>, InferredTypeData<'db>) {
+    assert!(steps >= 1);
+    let module_key = InferredModuleKey::new(module.as_id());
+    let mut types = Vec::with_capacity(steps);
+    for index in 0..steps {
+        let ty = if index + 1 == steps {
+            leaf
+        } else {
+            InferredTypeData::Local(InferredLocalTypeHandle::new(
+                db,
+                module_key,
+                InferredLocalTypeId::new(index + 1),
+            ))
+        };
+        types.push(ty);
+    }
+    let inferred = InferredModuleTypes {
+        module_key,
+        named_type_ids: Box::default(),
+        types: types.into_boxed_slice(),
+        expressions: Default::default(),
+        binding_type_data: Default::default(),
+    };
+    let ty = InferredTypeData::Local(InferredLocalTypeHandle::new(
+        db,
+        module_key,
+        InferredLocalTypeId::new(0),
+    ));
+    (inferred, ty)
+}
+
+fn generic_replacement_chain<'db>(
+    db: &'db dyn ModuleDb,
+    steps: usize,
+    leaf: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    assert!(steps >= 2);
+    let wrapper = InferredTypeData::Class(InternedClass::new(
+        db,
+        Box::default(),
+        None,
+        Box::default(),
+        Box::default(),
+        Some(Text::new_static("Wrapper")),
+    ));
+    (0..steps - 2).fold(leaf, |ty, _| {
+        InferredTypeData::instance_of(db, wrapper, Box::new([ty]))
+    })
+}
+
+fn generic_callback<'db>(
+    db: &'db dyn ModuleDb,
+    return_ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    InferredTypeData::Function(InferredFunction::new(
+        db,
+        Box::default(),
+        Box::default(),
+        InferredReturnType::Type(return_ty),
+        false,
+        None,
+    ))
+}
+
+fn generic_call_types<'db>(
+    db: &'db dyn ModuleDb,
+    steps: usize,
+) -> (InferredTypeData<'db>, InferredTypeData<'db>) {
+    let generic = InferredTypeData::Generic(InferredInternedGenericTypeParameter::new(
+        db,
+        None,
+        None,
+        Text::new_static("T"),
+    ));
+    let parameter_ty = generic_callback(db, generic_replacement_chain(db, steps, generic));
+    let callee = InferredTypeData::Function(InferredFunction::new(
+        db,
+        Vec::from([generic]).into_boxed_slice(),
+        Vec::from([InferredFunctionParameter::Named(
+            InferredNamedFunctionParameter {
+                name: Text::new_static("callback"),
+                ty: parameter_ty,
+                is_optional: false,
+                is_rest: false,
+            },
+        )])
+        .into_boxed_slice(),
+        InferredReturnType::Type(generic),
+        false,
+        Some(Text::new_static("run")),
+    ));
+    let argument = generic_callback(
+        db,
+        generic_replacement_chain(db, steps, InferredTypeData::Number),
+    );
+    (callee, argument)
 }
 
 fn normalize_type<'db>(
@@ -870,10 +1387,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(map_instance) = map_ty else {
         panic!("readMap must return a Map instance, got {map_ty:?}");
     };
-    let InferredTypeData::Class(map_class) = map_instance.ty(&db) else {
-        panic!("readMap must return a class instance");
-    };
-    assert_eq!(map_class.name(&db).as_ref().map(Text::text), Some("Map"));
+    assert_eq!(map_instance.ty(&db), InferredTypeData::map_class(&db));
     assert_eq!(map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
         &db,
@@ -889,10 +1403,7 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(set_instance) = set_ty else {
         panic!("readSet must return a Set instance, got {set_ty:?}");
     };
-    let InferredTypeData::Class(set_class) = set_instance.ty(&db) else {
-        panic!("readSet must return a class instance");
-    };
-    assert_eq!(set_class.name(&db).as_ref().map(Text::text), Some("Set"));
+    assert_eq!(set_instance.ty(&db), InferredTypeData::set_class(&db));
     assert_eq!(set_instance.type_parameters(&db).len(), 1);
     assert!(is_inferred_string(
         &db,
@@ -905,12 +1416,9 @@ fn test_infer_module_types_resolves_generic_builtin_instances_on_build() {
     let InferredTypeData::InstanceOf(weak_map_instance) = weak_map_ty else {
         panic!("readWeakMap must return a WeakMap instance, got {weak_map_ty:?}");
     };
-    let InferredTypeData::Class(weak_map_class) = weak_map_instance.ty(&db) else {
-        panic!("readWeakMap must return a class instance");
-    };
     assert_eq!(
-        weak_map_class.name(&db).as_ref().map(Text::text),
-        Some("WeakMap")
+        weak_map_instance.ty(&db),
+        InferredTypeData::weak_map_class(&db)
     );
     assert_eq!(weak_map_instance.type_parameters(&db).len(), 2);
     assert!(is_inferred_string(
@@ -2056,6 +2564,223 @@ fn test_infer_module_types_resolves_inherited_interface_members() {
 }
 
 #[test]
+fn test_local_alias_resolution_and_member_lookup_exceed_old_limit_and_memoize() {
+    const LIMIT: usize = 1024;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "interface Known { target: number } declare const known: Known;",
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
+        let budget = MemberLookupBudget::new(&db, module, steps);
+        let result = lookup_member_for_budget(&db, budget);
+        assert_eq!(
+            result,
+            Some(InferredTypeData::Number),
+            "lookup steps {steps}"
+        );
+
+        let resolved = resolve_local_for_budget(&db, budget);
+        let expected = if steps.is_multiple_of(2) {
+            InferredTypeData::String
+        } else {
+            InferredTypeData::Number
+        };
+        assert_eq!(resolved, expected, "resolution steps {steps}");
+
+        if steps == LIMIT + 1 {
+            db.events.0.lock().unwrap().clear();
+            assert_eq!(lookup_member_for_budget(&db, budget), result);
+            assert_eq!(resolve_local_for_budget(&db, budget), resolved);
+            let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+            assert_function_query_was_not_run(&db, lookup_member_for_budget, budget, &events);
+            assert_function_query_was_not_run(&db, resolve_local_for_budget, budget, &events);
+        }
+    }
+}
+
+#[test]
+fn test_member_lookup_interface_inheritance_boundaries() {
+    const LIMIT: usize = 1024;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
+        let budget = MemberLookupBudget::new(&db, module, steps);
+        let result = lookup_inherited_member_for_budget(&db, budget);
+        let expected = if steps <= LIMIT {
+            Some(InferredTypeData::Number)
+        } else {
+            Some(InferredTypeData::Unknown)
+        };
+        assert_eq!(result, expected, "interface lookup steps {steps}");
+    }
+}
+
+#[test]
+fn test_local_alias_resolution_invalidates_after_budget_replacement() {
+    const LIMIT: usize = 1024;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "interface Known { target: number } declare const known: Known;",
+    );
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let budget = MemberLookupBudget::new(&db, module, LIMIT + 1);
+
+    assert_eq!(
+        lookup_member_for_budget(&db, budget),
+        Some(InferredTypeData::Number)
+    );
+    assert_eq!(
+        resolve_local_for_budget(&db, budget),
+        InferredTypeData::Number
+    );
+    db.events.0.lock().unwrap().clear();
+    salsa::Setter::to(budget.set_steps(&mut db), LIMIT);
+    assert_eq!(
+        lookup_member_for_budget(&db, budget),
+        Some(InferredTypeData::Number)
+    );
+    assert_eq!(
+        resolve_local_for_budget(&db, budget),
+        InferredTypeData::String
+    );
+    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+    assert_function_query_was_run(&db, lookup_member_for_budget, budget, &events);
+    assert_function_query_was_run(&db, resolve_local_for_budget, budget, &events);
+}
+
+#[test]
+fn test_member_lookup_distinguishes_absence_from_uncertainty_and_completed_cycles() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Known { target: number }
+            interface ExplicitUnknown { target: unknown }
+            interface CycleA extends CycleB {}
+            interface CycleB extends CycleA {}
+            declare const known: Known;
+            declare const explicitUnknown: ExplicitUnknown;
+            declare const cycle: CycleA;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let known = inferred_binding_ty_by_name(&db, module, &inferred, "known")
+        .expect("known binding must exist");
+    let explicit_unknown = inferred_binding_ty_by_name(&db, module, &inferred, "explicitUnknown")
+        .expect("explicitUnknown binding must exist");
+    let cycle = inferred_binding_ty_by_name(&db, module, &inferred, "cycle")
+        .expect("cycle binding must exist");
+
+    for ty in [
+        InferredTypeData::Unknown,
+        InferredTypeData::UnknownKeyword,
+        InferredTypeData::AnyKeyword,
+        explicit_unknown,
+    ] {
+        assert_eq!(
+            inferred.find_member_type(&db, ty, "target"),
+            Some(InferredTypeData::Unknown)
+        );
+    }
+
+    for variants in [
+        [known, InferredTypeData::Unknown],
+        [InferredTypeData::Unknown, known],
+    ] {
+        let partially_known = InferredTypeData::Union(InferredUnion::new(
+            &db,
+            Vec::from(variants).into_boxed_slice(),
+        ));
+        assert_eq!(
+            inferred.find_member_type(&db, partially_known, "target"),
+            Some(InferredTypeData::Unknown)
+        );
+    }
+
+    assert_eq!(inferred.find_member_type(&db, cycle, "target"), None);
+    let known_with_cycle = InferredTypeData::Union(InferredUnion::new(
+        &db,
+        Vec::from([known, cycle]).into_boxed_slice(),
+    ));
+    assert_eq!(
+        inferred.find_member_type(&db, known_with_cycle, "target"),
+        Some(InferredTypeData::Number)
+    );
+
+    let module_key = InferredModuleKey::new(module.as_id());
+    let local_cycle = InferredModuleTypes {
+        module_key,
+        named_type_ids: Box::default(),
+        types: Vec::from([
+            InferredTypeData::Local(InferredLocalTypeHandle::new(
+                &db,
+                module_key,
+                InferredLocalTypeId::new(1),
+            )),
+            InferredTypeData::Local(InferredLocalTypeHandle::new(
+                &db,
+                module_key,
+                InferredLocalTypeId::new(0),
+            )),
+        ])
+        .into_boxed_slice(),
+        expressions: Default::default(),
+        binding_type_data: Default::default(),
+    };
+    let local = InferredTypeData::Local(InferredLocalTypeHandle::new(
+        &db,
+        module_key,
+        InferredLocalTypeId::new(0),
+    ));
+    assert_eq!(
+        local_cycle.find_member_type(&db, local, "target"),
+        Some(InferredTypeData::Unknown)
+    );
+    assert_eq!(
+        local_cycle.resolve_type(&db, local),
+        InferredTypeData::Unknown
+    );
+
+    let self_cycle = InferredModuleTypes {
+        module_key,
+        named_type_ids: Box::default(),
+        types: Vec::from([local]).into_boxed_slice(),
+        expressions: Default::default(),
+        binding_type_data: Default::default(),
+    };
+    assert_eq!(
+        self_cycle.resolve_type(&db, local),
+        InferredTypeData::Unknown
+    );
+    assert_eq!(
+        self_cycle.find_member_type(&db, local, "target"),
+        Some(InferredTypeData::Unknown)
+    );
+}
+
+#[test]
 fn test_infer_module_types_resolves_intersection_members() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -2764,6 +3489,59 @@ fn test_normalize_type_resolves_typeof_type() {
 }
 
 #[test]
+fn test_normalize_type_reports_structural_step_boundaries() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for distinct_types in [1023, 1024, 1025] {
+        let ty = inferred_typeof_chain(&db, distinct_types, InferredTypeData::String);
+        let expected = if distinct_types <= 1024 {
+            InferredTypeData::String
+        } else {
+            InferredTypeData::Unknown
+        };
+        assert_eq!(
+            normalize_type(&db, module, ty),
+            expected,
+            "distinct types {distinct_types}"
+        );
+    }
+}
+
+#[test]
+fn test_normalize_type_exhaustion_is_cached_and_invalidates_to_known() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let budget = NormalizationBudget::new(&db, module, 1025);
+
+    assert_eq!(
+        normalize_type_for_budget(&db, budget),
+        InferredTypeData::Unknown
+    );
+    db.events.0.lock().unwrap().clear();
+    assert_eq!(
+        normalize_type_for_budget(&db, budget),
+        InferredTypeData::Unknown
+    );
+    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+    assert_function_query_was_not_run(&db, normalize_type_for_budget, budget, &events);
+
+    salsa::Setter::to(budget.set_distinct_types(&mut db), 1024);
+    assert_eq!(
+        normalize_type_for_budget(&db, budget),
+        InferredTypeData::String
+    );
+}
+
+#[test]
 fn test_normalize_type_resolves_local_function_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -2785,13 +3563,16 @@ fn test_normalize_type_resolves_local_function_return_type() {
     let function = normalized_ty
         .callable_function(&db)
         .expect("callback must normalize to a function");
-    assert!(InferredType::new(&db, normalized_ty).function_returns_promise());
+    assert_eq!(
+        InferredType::new(&db, normalized_ty).function_returns_promise(),
+        Some(true)
+    );
     let InferredReturnType::Type(return_ty) = function.return_type(&db) else {
         panic!("callback return type must be inferred as a type");
     };
 
     assert!(
-        return_ty.is_promise_instance(&db),
+        return_ty.is_promise_instance(&db) == Some(true),
         "callback return type must normalize to Promise, got {return_ty:?}"
     );
 }
@@ -2908,14 +3689,7 @@ fn test_normalize_type_preserves_recursive_array_local_edge() {
             matches!(
                 ty,
                 InferredTypeData::InstanceOf(instance)
-                    if matches!(
-                        instance.ty(&db),
-                        InferredTypeData::Class(class)
-                            if class
-                                .name(&db)
-                                .as_ref()
-                                .is_some_and(|name| name.text() == "Array")
-                    )
+                    if instance.ty(&db).is_array_class(&db)
                     && instance.type_parameters(&db).iter().any(|parameter| {
                         matches!(
                             parameter,
@@ -3739,7 +4513,7 @@ fn test_infer_module_types_preserves_floating_promise_shapes() {
         );
     }
 
-    for name in ["conditional", "getter", "wrapped", "globalChain"] {
+    for name in ["conditional", "getter", "wrapped"] {
         let ty = inferred_binding_ty_by_name(&db, index_module, &inferred, name)
             .expect("Promise binding type must be inferred");
         let ty = normalize_type(&db, index_module, ty);
@@ -3749,6 +4523,10 @@ fn test_infer_module_types_preserves_floating_promise_shapes() {
             format_inferred_type(&db, ty)
         );
     }
+    let global_chain = inferred_binding_ty_by_name(&db, index_module, &inferred, "globalChain")
+        .expect("globalChain binding type must be inferred");
+    let global_chain = normalize_type(&db, index_module, global_chain);
+    assert!(is_inferred_promise_instance(&db, global_chain));
 
     let optional = inferred_binding_ty_by_name(&db, index_module, &inferred, "optional")
         .expect("optional binding type must be inferred");
@@ -3883,6 +4661,95 @@ fn test_infer_module_types_evaluates_await_union_expressions_on_build() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_await_promise_resolution_boundaries_and_unresolved_paths() {
+    let fs = MemoryFileSystem::default();
+    let mut source = String::from(
+        r#"
+            interface PromiseLike<T> {
+                then(resolve: (value: T) => void): void;
+            }
+        "#,
+    );
+    for index in 1..=64 {
+        let promise_base = if index == 1 {
+            "Promise<number>".to_string()
+        } else {
+            format!("PromiseChain{}", index - 1)
+        };
+        source.push_str(&format!(
+            "class PromiseChain{index} extends {promise_base} {{}}\n"
+        ));
+
+        let like_base = if index == 1 {
+            "PromiseLike<number>".to_string()
+        } else {
+            format!("PromiseLikeChain{}", index - 1)
+        };
+        source.push_str(&format!(
+            "interface PromiseLikeChain{index} extends {like_base} {{}}\n"
+        ));
+    }
+    source.push_str(
+        r#"
+            declare const promise63: PromiseChain62;
+            declare const promise64: PromiseChain63;
+            declare const promise65: PromiseChain64;
+            declare const like63: PromiseLikeChain62;
+            declare const like64: PromiseLikeChain63;
+            declare const like65: PromiseLikeChain64;
+            declare const unresolved: unknown;
+            declare const complete: string;
+
+            export const awaitedPromise63 = await promise63;
+            export const awaitedPromise64 = await promise64;
+            export const awaitedPromise65 = await promise65;
+            export const awaitedLike63 = await like63;
+            export const awaitedLike64 = await like64;
+            export const awaitedLike65 = await like65;
+            export const awaitedUnresolved = await unresolved;
+            export const awaitedComplete = await complete;
+        "#,
+    );
+    fs.insert("/src/index.ts".into(), source);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for name in [
+        "awaitedPromise63",
+        "awaitedPromise64",
+        "awaitedLike63",
+        "awaitedLike64",
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("awaited binding type must be inferred");
+        assert!(
+            is_inferred_number(&db, inferred.resolve_type(&db, ty)),
+            "{name} must resolve to number, got {}",
+            format_inferred_type(&db, inferred.resolve_type(&db, ty))
+        );
+    }
+    for name in ["awaitedPromise65", "awaitedLike65", "awaitedUnresolved"] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("awaited binding type must be inferred");
+        assert_eq!(
+            inferred.resolve_type(&db, ty),
+            InferredTypeData::Unknown,
+            "{name} must discard partial resolution"
+        );
+    }
+    let complete = inferred_binding_ty_by_name(&db, module, &inferred, "awaitedComplete")
+        .expect("awaited binding type must be inferred");
+    assert!(is_inferred_string(
+        &db,
+        inferred.resolve_type(&db, complete)
+    ));
 }
 
 #[test]
@@ -4876,6 +5743,378 @@ fn test_infer_call_expression_type_selects_callable_object_overload_by_arity() {
 }
 
 #[test]
+fn test_infer_call_expression_type_reports_sequence_budget_uncertainty() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(...values: number[]): string;
+            export function select(...values: any[]): number;
+            export function select(..._values: any[]): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+
+    for (argument_count, expected) in [
+        (1023, InferredTypeData::String),
+        (1024, InferredTypeData::Unknown),
+        (1025, InferredTypeData::Unknown),
+    ] {
+        let call_ty = infer_call_expression_type(
+            &db,
+            module,
+            select_ty,
+            vec![InferredTypeData::Number; argument_count],
+        );
+        assert_eq!(call_ty, expected, "argument count {argument_count}");
+    }
+}
+
+#[test]
+fn test_infer_call_expression_type_reports_pair_budget_uncertainty() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: string): string;
+            export function select(value: any): number;
+            export function select(_value: any): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+
+    for (depth, expected) in [
+        (1023, InferredTypeData::Number),
+        (1024, InferredTypeData::Unknown),
+        (1025, InferredTypeData::Unknown),
+    ] {
+        let arg_ty = nested_instance_type(&db, depth, InferredTypeData::Number);
+        let call_ty = infer_call_expression_type(&db, module, select_ty, vec![arg_ty]);
+        assert_eq!(call_ty, expected, "instance depth {depth}");
+    }
+}
+
+#[test]
+fn test_infer_call_expression_type_reports_extends_budget_uncertainty() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export class Base {}
+            export function select(value: Base): string;
+            export function select(value: any): number;
+            export function select(_value: any): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let base_ty = inferred_binding_ty_by_name(&db, module, &inferred, "Base")
+        .expect("Base type must be inferred");
+    let mut class_ty = normalize_type(&db, module, base_ty);
+    let mut arguments = Vec::new();
+    for depth in 1..=1025 {
+        class_ty = InferredTypeData::Class(InternedClass::new(
+            &db,
+            Vec::new().into_boxed_slice(),
+            Some(class_ty),
+            Vec::new().into_boxed_slice(),
+            Vec::new().into_boxed_slice(),
+            Some(Text::new_static("Derived")),
+        ));
+        if depth >= 1023 {
+            arguments.push((
+                depth,
+                InferredTypeData::instance_of(&db, class_ty, Box::new([])),
+            ));
+        }
+    }
+
+    for ((depth, arg_ty), expected) in arguments.into_iter().zip([
+        InferredTypeData::String,
+        InferredTypeData::String,
+        InferredTypeData::Unknown,
+    ]) {
+        let call_ty = infer_call_expression_type(&db, module, select_ty, vec![arg_ty]);
+        assert_eq!(call_ty, expected, "extends depth {depth}");
+    }
+}
+
+#[test]
+fn test_infer_call_expression_type_keeps_earlier_definite_match() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: number): boolean;
+            export function select(value: string): string;
+            export function select(_value: number | string): boolean | string {
+                return true;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let call_ty =
+        infer_call_expression_type(&db, module, select_ty, vec![InferredTypeData::Number]);
+
+    assert_eq!(call_ty, InferredTypeData::Boolean);
+}
+
+#[test]
+fn test_infer_call_expression_type_blocks_later_distinct_return_after_uncertainty() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(value: string): string;
+            export function select(value: any): number;
+            export function select(_value: any): string | number {
+                return 0;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let arg_ty = nested_instance_type(&db, 1024, InferredTypeData::Number);
+    let call_ty = infer_call_expression_type(&db, module, select_ty, vec![arg_ty]);
+
+    assert_eq!(call_ty, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_infer_call_expression_type_rejects_partial_call_signature_set_repeatedly() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let input = IndeterminateCallSignature::new(&db, module, true);
+
+    assert_eq!(
+        infer_call_with_indeterminate_signature(&db, input),
+        InferredTypeData::Unknown
+    );
+    db.events.0.lock().unwrap().clear();
+    assert_eq!(
+        infer_call_with_indeterminate_signature(&db, input),
+        InferredTypeData::Unknown
+    );
+    let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+    assert_function_query_was_not_run(&db, infer_call_with_indeterminate_signature, input, &events);
+}
+
+#[test]
+fn test_infer_call_expression_type_invalidates_indeterminate_call_signature() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let input = IndeterminateCallSignature::new(&db, module, true);
+
+    assert_eq!(
+        infer_call_with_indeterminate_signature(&db, input),
+        InferredTypeData::Unknown
+    );
+    salsa::Setter::to(input.set_is_indeterminate(&mut db), false);
+    assert_eq!(
+        infer_call_with_indeterminate_signature(&db, input),
+        InferredTypeData::Number
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_bypasses_matching_for_single_callable_object_signature() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export type Reader = {
+                (value: string): string;
+            };
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let reader_ty = inferred
+        .types
+        .iter()
+        .copied()
+        .find(|ty| matches!(ty, InferredTypeData::Object(object) if object.members(&db).iter().any(|member| member.kind.is_call_signature())))
+        .expect("Reader object type must be inferred");
+    let arg_ty = nested_instance_type(&db, 1025, InferredTypeData::Number);
+    let call_ty = infer_call_expression_type(&db, module, reader_ty, vec![arg_ty]);
+
+    assert_eq!(call_ty, InferredTypeData::String);
+}
+
+#[test]
+fn test_infer_call_expression_type_bypasses_matching_for_direct_function() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function read(value: string): string {
+                return value;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let read_ty = inferred_binding_ty_by_name(&db, module, &inferred, "read")
+        .expect("read function type must be inferred");
+    let arg_ty = nested_instance_type(&db, 1025, InferredTypeData::Number);
+    let call_ty = infer_call_expression_type(
+        &db,
+        module,
+        inferred.resolve_type(&db, read_ty),
+        vec![arg_ty],
+    );
+
+    assert_eq!(call_ty, InferredTypeData::String);
+}
+
+#[test]
+fn test_generic_replacement_budget_boundaries_for_call_query() {
+    const LIMIT: usize = 64;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+
+    for steps in [LIMIT - 1, LIMIT, LIMIT + 1] {
+        let (callee, argument) = generic_call_types(&db, steps);
+        let input = CallExpressionTypeInput::new(
+            &db,
+            module,
+            callee,
+            Vec::from([argument]).into_boxed_slice(),
+        );
+        let result = infer_call_expression_type_query(&db, input);
+        let expected = if steps <= LIMIT {
+            InferredTypeData::Number
+        } else {
+            InferredTypeData::Unknown
+        };
+        assert_eq!(result, expected, "replacement steps {steps}");
+
+        if steps == LIMIT {
+            db.events.0.lock().unwrap().clear();
+            assert_eq!(infer_call_expression_type_query(&db, input), result);
+            let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+            assert_function_query_was_not_run(
+                &db,
+                infer_call_expression_type_query,
+                input,
+                &events,
+            );
+        }
+    }
+}
+
+#[test]
+fn test_generic_replacement_exhaustion_invalidates_after_input_replacement() {
+    const LIMIT: usize = 64;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let budget = GenericReplacementBudget::new(&db, LIMIT + 1);
+    assert_eq!(
+        infer_generic_call_for_budget(&db, module, budget),
+        InferredTypeData::Unknown
+    );
+
+    salsa::Setter::to(budget.set_steps(&mut db), LIMIT - 1);
+    assert_eq!(
+        infer_generic_call_for_budget(&db, module, budget),
+        InferredTypeData::Number
+    );
+}
+
+#[test]
+fn test_member_substitution_reports_step_boundaries_without_partial_results() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), "export {};".to_string());
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for distinct_types in [1023, 1024, 1025] {
+        let instance = generic_interface_instance_with_member(&db, distinct_types);
+        let result = inferred
+            .find_member_type(&db, instance, "target")
+            .expect("the member must be present");
+        let expected = if distinct_types <= 1024 {
+            InferredTypeData::Number
+        } else {
+            InferredTypeData::Unknown
+        };
+        assert_eq!(
+            normalize_type(&db, module, result),
+            expected,
+            "distinct types {distinct_types}"
+        );
+    }
+}
+
+#[test]
 fn test_infer_call_expression_type_selects_function_declaration_overload_by_callback_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -4916,7 +6155,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
     assert!(
-        promise_result_ty.is_promise_instance(&db),
+        promise_result_ty.is_promise_instance(&db) == Some(true),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
     let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
@@ -4938,7 +6177,7 @@ fn test_infer_call_expression_type_selects_function_declaration_overload_by_call
     );
     assert_ne!(sync_result_ty, InferredTypeData::Unknown);
     assert!(
-        !sync_result_ty.is_promise_instance(&db),
+        sync_result_ty.is_promise_instance(&db) == Some(false),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
     );
     assert_inferred_type_snapshot(
@@ -4997,7 +6236,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
         Vec::from([inferred.resolve_type(&db, read_promise_ty)]),
     );
     assert!(
-        promise_result_ty.is_promise_instance(&db),
+        promise_result_ty.is_promise_instance(&db) == Some(true),
         "promise callback overload must return a Promise, got {promise_result_ty:?}",
     );
     let InferredTypeData::InstanceOf(instance) = promise_result_ty else {
@@ -5019,7 +6258,7 @@ fn test_infer_call_expression_type_selects_imported_function_declaration_overloa
     );
     assert_ne!(sync_result_ty, InferredTypeData::Unknown);
     assert!(
-        !sync_result_ty.is_promise_instance(&db),
+        sync_result_ty.is_promise_instance(&db) == Some(false),
         "sync callback overload must not return a Promise, got {sync_result_ty:?}",
     );
     assert_inferred_type_snapshot(
@@ -5156,7 +6395,7 @@ fn test_infer_call_expression_type_substitutes_nested_generic_return_type() {
         panic!("wrap must return a Promise instance, got {call_ty:?}");
     };
 
-    assert!(call_ty.is_promise_instance(&db));
+    assert_eq!(call_ty.is_promise_instance(&db), Some(true));
     assert!(
         instance
             .type_parameters(&db)
@@ -5492,6 +6731,45 @@ fn test_infer_call_expression_type_substitutes_generic_from_callback_promise_ret
 }
 
 #[test]
+fn test_infer_call_expression_type_suppresses_indeterminate_callback_promise_selection() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function select(callback: () => Promise<void>): number;
+            export function select(callback: () => void): string;
+            export function select(_callback: () => unknown): number | string {
+                return 1;
+            }
+
+            export function unknownCallback(): unknown {
+                return undefined;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let select_ty = inferred_overload_ty_by_name(&db, module, &inferred, "select")
+        .expect("select overload type must be inferred");
+    let callback_ty = inferred_binding_ty_by_name(&db, module, &inferred, "unknownCallback")
+        .expect("callback type must be inferred");
+
+    assert_eq!(
+        infer_call_expression_type(
+            &db,
+            module,
+            select_ty,
+            Vec::from([inferred.resolve_type(&db, callback_ty)]),
+        ),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_resolves_union_function_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -5546,6 +6824,50 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_infer_call_expression_type_poisoned_by_indeterminate_union_variants_in_both_orders() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "export function known(): number { return 1; }".to_string(),
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let known = inferred_binding_ty_by_name(&db, module, &inferred, "known")
+        .expect("known function type must be inferred");
+    let known = inferred.resolve_type(&db, known);
+
+    for indeterminate in [InferredTypeData::Unknown, InferredTypeData::Number] {
+        for variants in [[known, indeterminate], [indeterminate, known]] {
+            let callee = InferredTypeData::Union(InferredUnion::new(
+                &db,
+                Vec::from(variants).into_boxed_slice(),
+            ));
+            let input = CallExpressionTypeInput::new(&db, module, callee, Box::default());
+
+            assert_eq!(
+                infer_call_expression_type_query(&db, input),
+                InferredTypeData::Unknown
+            );
+            db.events.0.lock().unwrap().clear();
+            assert_eq!(
+                infer_call_expression_type_query(&db, input),
+                InferredTypeData::Unknown
+            );
+            let events = std::mem::take(&mut *db.events.0.lock().unwrap());
+            assert_function_query_was_not_run(
+                &db,
+                infer_call_expression_type_query,
+                input,
+                &events,
+            );
+        }
+    }
 }
 
 #[test]
@@ -5928,10 +7250,16 @@ fn test_infer_module_types_merges_class_instance_intersections_on_build() {
     let promise_object_ty =
         inferred_function_return_ty_by_name(&db, index_module, &inferred, "readPromiseObject")
             .expect("readPromiseObject return type must be inferred");
-    let InferredTypeData::InstanceOf(instance) = promise_object_ty else {
-        panic!("readPromiseObject must return a merged class instance, got {promise_object_ty:?}");
+    let promise_object_ty = normalize_type(&db, index_module, promise_object_ty);
+    let InferredTypeData::Intersection(intersection) = promise_object_ty else {
+        panic!("readPromiseObject must preserve the intersection, got {promise_object_ty:?}");
     };
-    assert!(matches!(instance.ty(&db), InferredTypeData::Class(_)));
+    assert!(
+        intersection
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_promise_instance(&db, *ty))
+    );
 
     let value_ty = inferred
         .find_member_type(&db, promise_object_ty, "value")
@@ -6264,6 +7592,50 @@ fn test_infer_module_types_backdates_equal_output() {
 }
 
 #[test]
+fn test_infer_module_types_updates_replaced_range_map_keys() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"export const value: string = "value";"#,
+    );
+
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let first = infer_module_types(&db, index_module).expect("types must be inferred");
+    let mut first_expression_ranges = first.expressions.keys().copied().collect::<Vec<_>>();
+    let mut first_binding_ranges = first.binding_type_data.keys().copied().collect::<Vec<_>>();
+    first_expression_ranges.sort_unstable();
+    first_binding_ranges.sort_unstable();
+    drop(first);
+
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"// Shift every syntax range.
+export const value: number = 1;"#,
+    );
+    let replacement = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+    salsa::Setter::to(index_module.set_kind(&mut db), replacement);
+
+    let updated = infer_module_types(&db, index_module).expect("updated types must be inferred");
+    let mut updated_expression_ranges = updated.expressions.keys().copied().collect::<Vec<_>>();
+    let mut updated_binding_ranges = updated
+        .binding_type_data
+        .keys()
+        .copied()
+        .collect::<Vec<_>>();
+    updated_expression_ranges.sort_unstable();
+    updated_binding_ranges.sort_unstable();
+    assert_ne!(first_expression_ranges, updated_expression_ranges);
+    assert_ne!(first_binding_ranges, updated_binding_ranges);
+
+    let value = inferred_binding_ty_by_name(&db, index_module, &updated, "value")
+        .expect("updated value type must be inferred");
+    assert!(is_inferred_number(&db, updated.resolve_type(&db, value)));
+}
+
+#[test]
 fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -6352,7 +7724,7 @@ fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let promise_ty = inferred_binding_ty_by_name(&db, index_module, &inferred, "promise")
         .expect("promise binding type must be inferred");
     let promise_ty = inferred.resolve_type(&db, promise_ty);
-    assert!(promise_ty.is_promise_instance(&db));
+    assert_eq!(promise_ty.is_promise_instance(&db), Some(true));
 }
 
 #[test]
@@ -6384,4 +7756,135 @@ fn test_infer_module_types_resolves_redis_commander_types() {
         .expect("RedisCommander binding type must be inferred");
     let commander_ty = inferred.resolve_type(&db, commander_ty);
     assert_ne!(commander_ty, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_infer_module_types_resolves_members_of_explicit_array_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/index.ts".into(),
+        r#"
+            declare const values: Array<number>;
+            export const mapped = values.map(async value => value);
+            export const chained = [1, 2, 3].map(value => value).map(async value => value);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+
+    for name in ["mapped", "chained"] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("binding type must be inferred");
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            is_inferred_array_of_promises(&db, ty),
+            "{name} must be inferred as an array of promises, got {}",
+            format_inferred_type(&db, ty),
+        );
+    }
+}
+
+#[test]
+fn test_infer_module_types_resolves_this_member_in_object_method() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/index.ts".into(),
+        r#"
+            const api = {
+                promise: Promise.resolve("value"),
+                getPromise() {
+                    return this.promise;
+                },
+            };
+
+            export const result = api.getPromise();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+    let result = inferred_binding_ty_by_name(&db, module, &inferred, "result")
+        .expect("result type must be inferred");
+    let result = inferred.resolve_type(&db, result);
+
+    assert!(
+        is_inferred_promise_instance(&db, result),
+        "result must be inferred as a promise, got {result:?}"
+    );
+}
+
+#[test]
+fn test_infer_module_types_preserves_lexical_this_in_object_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/index.ts".into(),
+        r#"
+            const api = {
+                value: "value",
+                topLevel: this.value,
+                get getter() {
+                    return this.value;
+                },
+                method() {
+                    return this.value;
+                },
+                nestedArrow() {
+                    const read = () => this.value;
+                    return read();
+                },
+                nestedObject() {
+                    const inner = { value: this.value };
+                    return inner.value;
+                },
+                arrow: () => this.value,
+            };
+
+            export const getterResult = api.getter;
+            export const methodResult = api.method();
+            export const nestedArrowResult = api.nestedArrow();
+            export const nestedObjectResult = api.nestedObject();
+            export const topLevelResult = api.topLevel;
+            export const arrowResult = api.arrow();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types_bottom_up(&db, module).expect("types must be inferred");
+
+    for name in [
+        "getterResult",
+        "methodResult",
+        "nestedArrowResult",
+        "nestedObjectResult",
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("binding type must be inferred");
+        let ty = normalize_type(&db, module, ty);
+        assert!(
+            is_inferred_string_literal(&db, ty, "value"),
+            "{name} must be the object member value, got {}",
+            format_inferred_type(&db, ty),
+        );
+    }
+
+    for name in ["topLevelResult", "arrowResult"] {
+        let ty = inferred_binding_ty_by_name(&db, module, &inferred, name)
+            .expect("binding type must be inferred");
+        let ty = normalize_type(&db, module, ty);
+        assert!(
+            !is_inferred_string_literal(&db, ty, "value"),
+            "{name} must not bind this to the object, got {}",
+            format_inferred_type(&db, ty),
+        );
+    }
 }

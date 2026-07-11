@@ -2,10 +2,7 @@ use super::{lookup::declared_type_parameters, resolver::ResolutionCtx};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
-    interned_types::{
-        Literal as InferredLiteral, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
-    },
+    resolved::{InferredLiteral, InferredTypeData, InferredTypeMember, InferredTypeMemberKind},
 };
 use biome_rowan::Text;
 
@@ -305,6 +302,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Divergent(_)
                 | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -359,6 +357,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -407,6 +406,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Divergent(_)
             | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null

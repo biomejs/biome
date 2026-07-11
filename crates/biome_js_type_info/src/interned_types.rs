@@ -17,11 +17,15 @@ use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
     globals_ids::{
-        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID,
-        GLOBAL_DATE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID,
-        GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
+        ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID,
+        GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_BOOLEAN_ID, GLOBAL_CONDITIONAL_ID, GLOBAL_DATE_ID,
+        GLOBAL_DISPOSABLE_ID, GLOBAL_ERROR_ID, GLOBAL_GLOBAL_ID, GLOBAL_MAP_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_REGEXP_ID, GLOBAL_SET_ID, GLOBAL_STRING_ID,
         GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_SYMBOL_ID,
-        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID,
+        GLOBAL_UNDEFINED_ID, GLOBAL_UNKNOWN_ID, GLOBAL_VOID_ID, GLOBAL_WEAK_MAP_ID, GlobalTypeId,
+        MAP_ID_GLOBAL_TYPE_ID, PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID,
+        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -150,6 +154,7 @@ pub enum TypeData<'db> {
     Tuple(InternedTuple<'db>),
     Generic(InternedGenericTypeParameter<'db>),
     Local(LocalTypeHandle<'db>),
+    GlobalType(GlobalTypeId),
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
@@ -354,6 +359,7 @@ impl<'db> TypeData<'db> {
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
             Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::TypeofType(_)
@@ -398,6 +404,7 @@ impl<'db> TypeData<'db> {
             Self::Class(_)
             | Self::Divergent(_)
             | Self::Generic(_)
+            | Self::GlobalType(_)
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
@@ -407,20 +414,16 @@ impl<'db> TypeData<'db> {
         }
     }
 
-    pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> bool {
-        let Self::InstanceOf(instance) = self else {
-            return false;
-        };
-
-        instance.ty(db).is_promise_class(db)
+    pub fn is_promise_instance(self, db: &'db dyn TypeDb) -> Option<bool> {
+        crate::inferred_type::is_promise_instance(db, self)
     }
 
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Array")
+        self == Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID) || self.is_class_named(db, "Array")
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
-        self.is_class_named(db, "Promise")
+        self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID) || self.is_class_named(db, "Promise")
     }
 
     pub fn is_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
@@ -459,13 +462,14 @@ impl<'db> TypeData<'db> {
     /// `Promise<string>` returns a replacement where `generic` is `T` and
     /// `replacement` is `string`.
     ///
-    /// The walk is iterative and stops after a fixed number of steps so a bad
-    /// or cyclic type shape cannot loop forever.
+    /// The walk is iterative and returns `None` if it cannot finish within a
+    /// fixed number of steps. Already-seen edges can still complete after the
+    /// budget is consumed, so cyclic shapes terminate without false exhaustion.
     pub fn collect_generic_replacements(
         self,
         db: &'db dyn TypeDb,
         actual: Self,
-    ) -> Vec<TypeSubstitution<'db>> {
+    ) -> Option<Vec<TypeSubstitution<'db>>> {
         let mut replacements = Vec::new();
         let mut stack = Vec::from([(self, actual)]);
         let mut seen = FxHashSet::default();
@@ -476,7 +480,7 @@ impl<'db> TypeData<'db> {
                 continue;
             }
             if remaining_steps == 0 {
-                break;
+                return None;
             }
             remaining_steps -= 1;
 
@@ -503,10 +507,14 @@ impl<'db> TypeData<'db> {
             stack.push((pattern.ty(db), actual.ty(db)));
         }
 
-        replacements
+        Some(replacements)
     }
 
-    pub fn substitute_type(self, db: &'db dyn TypeDb, substitution: TypeSubstitution<'db>) -> Self {
+    pub fn substitute_type(
+        self,
+        db: &'db dyn TypeDb,
+        substitution: TypeSubstitution<'db>,
+    ) -> Result<Self, StructuralMapError> {
         let binder_generic = substitution.binder_generic(db);
         self.try_map_structural(
             db,
@@ -522,17 +530,13 @@ impl<'db> TypeData<'db> {
             },
             |ty| ty,
         )
-        .unwrap_or_else(|error| {
-            debug_assert_eq!(error, StructuralMapError::StepLimitExceeded);
-            self
-        })
     }
 
     pub fn substitute_type_in_root_body(
         self,
         db: &'db dyn TypeDb,
         substitution: TypeSubstitution<'db>,
-    ) -> Self {
+    ) -> Result<Self, StructuralMapError> {
         if !self.declares_generic(db, substitution.binder_generic(db)) {
             return self.substitute_type(db, substitution);
         }
@@ -540,10 +544,8 @@ impl<'db> TypeData<'db> {
         let children = structural_type_children(db, self)
             .into_iter()
             .map(|child| child.substitute_type(db, substitution))
-            .collect();
-        let rebuilt = rebuild_structural_type(db, self, children);
-        debug_assert!(rebuilt.is_some());
-        rebuilt.unwrap_or(self)
+            .collect::<Result<_, _>>()?;
+        rebuild_structural_type(db, self, children).ok_or(StructuralMapError::InvalidRebuild)
     }
 
     fn declares_generic(self, db: &'db dyn TypeDb, generic: Self) -> bool {
@@ -582,15 +584,15 @@ impl<'db> TypeData<'db> {
         while let Some(item) = stack.pop() {
             match item {
                 StructuralTypeMapItem::Enter(ty) => {
-                    if remaining_steps == 0 {
-                        return Err(StructuralMapError::StepLimitExceeded);
-                    }
-                    remaining_steps -= 1;
-
                     if active.contains(&ty) {
                         results.push(ty);
                         continue;
                     }
+
+                    if remaining_steps == 0 {
+                        return Err(StructuralMapError::StepLimitExceeded);
+                    }
+                    remaining_steps -= 1;
 
                     let source = ty;
                     let ty = match map(ty) {
@@ -679,69 +681,48 @@ impl<'db> TypeData<'db> {
         crate::builders::with_all_required_members(db, members)
     }
 
-    fn builtin_class(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Class(InternedClass::new(
-            db,
-            Box::default(),
-            None,
-            Box::default(),
-            Box::default(),
-            Some(Text::new_static(name)),
-        ))
+    pub fn array_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
     }
 
-    fn builtin_interface(db: &'db dyn TypeDb, name: &'static str) -> Self {
-        Self::Interface(InternedInterface::new(
-            db,
-            Box::default(),
-            Box::default(),
-            Box::default(),
-            Text::new_static(name),
-        ))
+    pub fn async_disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn array_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Array")
+    pub fn date_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DATE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn async_disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "AsyncDisposable")
+    pub fn disposable_interface(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(DISPOSABLE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn date_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Date")
+    pub fn error_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(ERROR_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn disposable_interface(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_interface(db, "Disposable")
+    pub fn map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(MAP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn error_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Error")
+    pub fn promise_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Map")
+    pub fn regexp_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(REGEXP_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn promise_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Promise")
+    pub fn set_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SET_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn regexp_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "RegExp")
+    pub fn symbol_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(SYMBOL_ID_GLOBAL_TYPE_ID)
     }
 
-    pub fn set_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Set")
-    }
-
-    pub fn symbol_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "Symbol")
-    }
-
-    pub fn weak_map_class(db: &'db dyn TypeDb) -> Self {
-        Self::builtin_class(db, "WeakMap")
+    pub fn weak_map_class(_db: &'db dyn TypeDb) -> Self {
+        Self::GlobalType(WEAK_MAP_ID_GLOBAL_TYPE_ID)
     }
 
     pub fn instance_of(db: &'db dyn TypeDb, ty: Self, type_parameters: Box<[Self]>) -> Self {
@@ -1044,7 +1025,7 @@ impl<'db> TypeData<'db> {
                     TypeData::to_raw_reference_lossy,
                 ),
             })),
-            Self::Local(_) => raw::TypeData::Unknown,
+            Self::Local(_) | Self::GlobalType(_) => raw::TypeData::Unknown,
             Self::Intersection(intersection) => raw::TypeData::Intersection(Box::new(
                 raw::Intersection(raw_references_from_types(intersection.types(db))),
             )),
@@ -1102,6 +1083,10 @@ impl<'db> TypeData<'db> {
             Self::Conditional => raw::TypeReference::Resolved(GLOBAL_CONDITIONAL_ID),
             Self::VoidKeyword => raw::TypeReference::Resolved(GLOBAL_VOID_ID),
             Self::Local(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
+            Self::GlobalType(id) => raw::TypeReference::Resolved(crate::ResolvedTypeId::new(
+                crate::TypeResolverLevel::Global,
+                id.as_type_id(),
+            )),
             _ => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
         }
     }
@@ -1198,6 +1183,7 @@ fn structural_type_children<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Vec<
         | TypeData::Undefined
         | TypeData::Conditional
         | TypeData::Local(_)
+        | TypeData::GlobalType(_)
         | TypeData::AnyKeyword
         | TypeData::NeverKeyword
         | TypeData::ObjectKeyword
@@ -1460,6 +1446,7 @@ fn rebuild_structural_type<'db>(
         | TypeData::Undefined
         | TypeData::Conditional
         | TypeData::Local(_)
+        | TypeData::GlobalType(_)
         | TypeData::AnyKeyword
         | TypeData::NeverKeyword
         | TypeData::ObjectKeyword
@@ -2098,10 +2085,10 @@ impl<'db> InternedFunction<'db> {
         Self::new(db, Box::default(), Box::default(), return_type, false, None)
     }
 
-    pub fn returns_promise(self, db: &'db dyn TypeDb) -> bool {
+    pub fn returns_promise(self, db: &'db dyn TypeDb) -> Option<bool> {
         match self.return_type(db) {
             ReturnType::Type(ty) => ty.is_promise_instance(db),
-            ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
+            ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(false),
         }
     }
 }
@@ -2834,6 +2821,7 @@ fn raw_call_arguments_from_types<'db>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use salsa::plumbing::FromId;
 
     #[salsa::db]
     #[derive(Default)]
@@ -2985,6 +2973,127 @@ mod tests {
             ty.try_map_structural(&db, 1, ControlFlow::Continue, std::convert::identity,),
             Err(StructuralMapError::StepLimitExceeded)
         );
+    }
+
+    fn typeof_chain<'db>(
+        db: &'db TestDb,
+        distinct_types: usize,
+        leaf: TypeData<'db>,
+    ) -> TypeData<'db> {
+        assert!(distinct_types > 0);
+        (1..distinct_types).fold(leaf, |ty, _| {
+            TypeData::TypeofType(InternedTypeofType::new(db, ty))
+        })
+    }
+
+    fn generic<'db>(db: &'db TestDb) -> TypeData<'db> {
+        TypeData::Generic(InternedGenericTypeParameter::new(db, None, None, text("T")))
+    }
+
+    #[test]
+    fn substitution_reports_direct_step_boundaries() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+
+        for distinct_types in [1023, 1024, 1025] {
+            let result =
+                typeof_chain(&db, distinct_types, generic).substitute_type(&db, substitution);
+            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
+                assert!(result.is_ok(), "distinct types {distinct_types}");
+            } else {
+                assert_eq!(
+                    result,
+                    Err(StructuralMapError::StepLimitExceeded),
+                    "distinct types {distinct_types}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn root_body_substitution_reports_direct_step_boundaries() {
+        let db = TestDb::default();
+        let generic = generic(&db);
+        let substitution = TypeSubstitution {
+            generic,
+            replacement: TypeData::String,
+        };
+
+        for distinct_types in [1023, 1024, 1025] {
+            let function = TypeData::Function(InternedFunction::new(
+                &db,
+                boxed([generic]),
+                Box::default(),
+                ReturnType::Type(typeof_chain(&db, distinct_types, generic)),
+                false,
+                None,
+            ));
+            let result = function.substitute_type_in_root_body(&db, substitution);
+            if distinct_types <= MAX_TYPE_SUBSTITUTION_STEPS {
+                assert!(result.is_ok(), "distinct types {distinct_types}");
+            } else {
+                assert_eq!(
+                    result,
+                    Err(StructuralMapError::StepLimitExceeded),
+                    "distinct types {distinct_types}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn substitution_completes_back_edge_after_budget_is_consumed() {
+        let db = TestDb::default();
+        // IDs 0..1022 build the path. The next interned value receives ID 1023,
+        // which closes the final child back to the root.
+        let root_reference = InternedTypeofType::from_id(unsafe { salsa::Id::from_index(1023) });
+        let child = (0..MAX_TYPE_SUBSTITUTION_STEPS - 1)
+            .fold(TypeData::TypeofType(root_reference), |ty, _| {
+                TypeData::TypeofType(InternedTypeofType::new(&db, ty))
+            });
+        let root = TypeData::TypeofType(InternedTypeofType::new(&db, child));
+
+        assert_eq!(
+            root.substitute_type(
+                &db,
+                TypeSubstitution {
+                    generic: TypeData::Number,
+                    replacement: TypeData::String,
+                }
+            ),
+            Ok(root)
+        );
+    }
+
+    #[test]
+    fn generic_replacement_collection_completes_seen_back_edges_at_the_limit() {
+        let db = TestDb::default();
+        let generic = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            None,
+            None,
+            text("T"),
+        ));
+        let pattern = (0..MAX_GENERIC_REPLACEMENT_STEPS - 3).fold(generic, |ty, _| {
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([ty]))
+        });
+        let actual = (0..MAX_GENERIC_REPLACEMENT_STEPS - 3).fold(TypeData::String, |ty, _| {
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([ty]))
+        });
+        let pattern =
+            TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([pattern, pattern]));
+        let actual = TypeData::instance_of(&db, TypeData::ObjectKeyword, boxed([actual, actual]));
+
+        let replacements = pattern
+            .collect_generic_replacements(&db, actual)
+            .expect("an already-seen back edge must complete after the budget is consumed");
+
+        assert_eq!(replacements.len(), 1);
+        assert_eq!(replacements[0].replacement, TypeData::String);
     }
 
     #[test]

@@ -1,16 +1,15 @@
-use super::{InferredModuleTypes, globals::resolve_global_type_id, resolver::ResolutionCtx};
+use super::{InferredModuleTypes, globals::global_type, resolver::ResolutionCtx};
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_js_type_info::{
     ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeResolverLevel,
-    interned_types::{
-        InternedNamespace as InferredNamespace, LocalTypeHandle, LocalTypeId, ModuleKey,
-        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-        TypeMemberKind as InferredTypeMemberKind,
+    resolved::{
+        GlobalTypeId, InferredNamespace, InferredTypeData, InferredTypeMember,
+        InferredTypeMemberKind, LocalTypeHandle, LocalTypeId, ModuleKey,
     },
 };
 use biome_rowan::Text;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashSet;
 use salsa::plumbing::AsId;
 
 const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
@@ -90,24 +89,36 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let mut collection = NamespaceExportCollection::new();
 
-        self.collect_namespace_members(module, inferred_types, true, &mut collection);
+        collection
+            .seen_modules
+            .insert(ModuleKey::new(module.as_id()));
+        if !self.collect_namespace_members(module, inferred_types, true, &mut collection) {
+            return InferredTypeData::Unknown;
+        }
 
         while let Some((module, include_default)) = collection.stack.pop() {
+            let module_key = ModuleKey::new(module.as_id());
+            if collection.seen_modules.contains(&module_key) {
+                continue;
+            }
             if collection.remaining_steps == 0 {
-                break;
+                return InferredTypeData::Unknown;
             }
             collection.remaining_steps -= 1;
+            collection.seen_modules.insert(module_key);
 
             let Some(inferred_types) = self.infer_imported_module(module) else {
-                continue;
+                return InferredTypeData::Unknown;
             };
 
-            self.collect_namespace_members(
+            if !self.collect_namespace_members(
                 module,
                 &inferred_types,
                 include_default,
                 &mut collection,
-            );
+            ) {
+                return InferredTypeData::Unknown;
+            }
         }
 
         InferredTypeData::Namespace(InferredNamespace::new(
@@ -123,14 +134,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         inferred_types: &InferredModuleTypes<'db>,
         include_default: bool,
         collection: &mut NamespaceExportCollection<'db>,
-    ) {
-        let module_key = ModuleKey::new(module.as_id());
-        if !collection.seen_modules.insert(module_key) {
-            return;
-        }
-
+    ) -> bool {
         let ModuleInfoKind::Js(js_info) = module.kind(self.db) else {
-            return;
+            return false;
         };
 
         for (name, _) in js_info.exports.iter() {
@@ -149,10 +155,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         for reexport in js_info.blanket_reexports.iter().rev() {
-            if let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) {
-                collection.stack.push((module, false));
-            }
+            let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) else {
+                return false;
+            };
+            collection.stack.push((module, false));
         }
+
+        true
     }
 
     fn resolve_export_name(
@@ -305,8 +314,9 @@ fn inferred_type_from_resolved_id<'db>(
             }
         }
         TypeResolverLevel::Global => {
-            let mut resolved_globals = FxHashMap::default();
-            resolve_global_type_id(db, resolved_id.id(), &mut resolved_globals)
+            let type_id = GlobalTypeId::try_from_type_id(resolved_id.id())
+                .expect("global export TypeId must index the predefined global manifest");
+            global_type(db, type_id)
         }
         TypeResolverLevel::Full | TypeResolverLevel::Import => InferredTypeData::Unknown,
     }

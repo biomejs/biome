@@ -1,6 +1,4 @@
-use super::{
-    BindingTypeData, InferredModuleTypes, globals::resolve_global_type_id, lookup::module_for_key,
-};
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::module_for_key};
 use crate::db::queries::infer_module_types;
 use crate::js_module_info::is_named_type_declaration;
 use crate::module_graph::ModuleInfo;
@@ -8,13 +6,14 @@ use crate::{JsModuleInfo, ModuleDb};
 use biome_js_type_info::{
     RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
     TypeResolverLevel,
-    interned_types::{
-        InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
+    resolved::{
+        GlobalTypeId, InferredTypeData, InternedTypeofValue, LocalTypeHandle, LocalTypeId,
+        ModuleKey,
     },
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
-use std::sync::Arc;
+use std::{hash::Hash, ops::ControlFlow, sync::Arc};
 
 /// Unlike the other limits, this one guards actual stack recursion: each level
 /// of `ResolutionCtx::resolve` clones a raw type and runs the conversion walk,
@@ -23,7 +22,6 @@ use std::sync::Arc;
 /// single declaration on the stack -- real-world code stays well below this.
 const MAX_RAW_TYPE_RESOLUTION_DEPTH: usize = 64;
 const MAX_INFERRED_EXPRESSION_WRAPPER_STEPS: usize = 64;
-const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 
 #[derive(Clone, Copy)]
 pub(in crate::db) enum ImportResolution<'a> {
@@ -39,7 +37,6 @@ pub(in crate::db::type_inference) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) named_type_ids: FxHashSet<TypeId>,
     pub(in crate::db::type_inference) resolved: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) in_progress: FxHashSet<TypeId>,
-    pub(in crate::db::type_inference) resolved_globals: FxHashMap<TypeId, InferredTypeData<'db>>,
     pub(in crate::db::type_inference) resolution_depth: usize,
 }
 
@@ -59,7 +56,6 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         named_type_ids,
         resolved: FxHashMap::default(),
         in_progress: FxHashSet::default(),
-        resolved_globals: FxHashMap::default(),
         resolution_depth: 0,
     };
 
@@ -166,7 +162,9 @@ impl<'db> ResolutionCtx<'db, '_> {
     }
 
     fn resolve_global_type_id(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
-        resolve_global_type_id(self.db, type_id, &mut self.resolved_globals)
+        let type_id = GlobalTypeId::try_from_type_id(type_id)
+            .expect("global resolved TypeId must index the predefined global manifest");
+        global_type(self.db, type_id)
     }
 
     fn resolve_raw_type_reference(&mut self, type_id: TypeId) -> InferredTypeData<'db> {
@@ -191,7 +189,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         if !self.in_progress.insert(type_id) {
-            return InferredTypeData::Unknown;
+            return self.local_type(type_id);
         }
 
         let js_info = self.js_info;
@@ -238,74 +236,70 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_inferred_expression_wrappers(
         &mut self,
-        mut ty: InferredTypeData<'db>,
+        ty: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
-        for _ in 0..MAX_INFERRED_EXPRESSION_WRAPPER_STEPS {
-            match ty {
-                InferredTypeData::TypeofExpression(expression) => {
-                    ty = self
-                        .resolve_inferred_typeof_expression(expression.expression(self.db))
-                        .unwrap_or(InferredTypeData::Unknown);
+        walk_wrapper_chain(ty, InferredTypeData::Unknown, |ty| match ty {
+            InferredTypeData::TypeofExpression(expression) => ControlFlow::Continue(
+                self.resolve_inferred_typeof_expression(expression.expression(self.db))
+                    .unwrap_or(InferredTypeData::Unknown),
+            ),
+            InferredTypeData::InstanceOf(instance) => {
+                let target = instance.ty(self.db);
+                let InferredTypeData::TypeofExpression(expression) = target else {
+                    return ControlFlow::Break(ty);
+                };
+                let target = self
+                    .resolve_inferred_typeof_expression(expression.expression(self.db))
+                    .unwrap_or(InferredTypeData::Unknown);
+                if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                    ControlFlow::Continue(target)
+                } else {
+                    ControlFlow::Break(InferredTypeData::instance_of(
+                        self.db,
+                        target,
+                        instance
+                            .type_parameters(self.db)
+                            .to_vec()
+                            .into_boxed_slice(),
+                    ))
                 }
-                InferredTypeData::InstanceOf(instance) => {
-                    let target = instance.ty(self.db);
-                    let InferredTypeData::TypeofExpression(expression) = target else {
-                        return ty;
-                    };
-                    let target = self
-                        .resolve_inferred_typeof_expression(expression.expression(self.db))
-                        .unwrap_or(InferredTypeData::Unknown);
-                    if target.should_flatten_instance(instance.type_parameters(self.db)) {
-                        ty = target;
-                    } else {
-                        return InferredTypeData::instance_of(
-                            self.db,
-                            target,
-                            instance
-                                .type_parameters(self.db)
-                                .to_vec()
-                                .into_boxed_slice(),
-                        );
-                    }
-                }
-                InferredTypeData::Unknown
-                | InferredTypeData::Divergent(_)
-                | InferredTypeData::Global
-                | InferredTypeData::BigInt
-                | InferredTypeData::Boolean
-                | InferredTypeData::Null
-                | InferredTypeData::Number
-                | InferredTypeData::String
-                | InferredTypeData::Symbol
-                | InferredTypeData::Undefined
-                | InferredTypeData::Conditional
-                | InferredTypeData::Class(_)
-                | InferredTypeData::Constructor(_)
-                | InferredTypeData::Function(_)
-                | InferredTypeData::Interface(_)
-                | InferredTypeData::Module(_)
-                | InferredTypeData::Namespace(_)
-                | InferredTypeData::Object(_)
-                | InferredTypeData::Tuple(_)
-                | InferredTypeData::Generic(_)
-                | InferredTypeData::Local(_)
-                | InferredTypeData::Intersection(_)
-                | InferredTypeData::Union(_)
-                | InferredTypeData::TypeOperator(_)
-                | InferredTypeData::Literal(_)
-                | InferredTypeData::MergedReference(_)
-                | InferredTypeData::TypeofType(_)
-                | InferredTypeData::TypeofValue(_)
-                | InferredTypeData::AnyKeyword
-                | InferredTypeData::NeverKeyword
-                | InferredTypeData::ObjectKeyword
-                | InferredTypeData::ThisKeyword
-                | InferredTypeData::UnknownKeyword
-                | InferredTypeData::VoidKeyword => return ty,
             }
-        }
-
-        ty
+            InferredTypeData::Unknown
+            | InferredTypeData::Divergent(_)
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => ControlFlow::Break(ty),
+        })
     }
 
     pub(in crate::db::type_inference) fn resolve_inferred_type(
@@ -314,7 +308,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         let mut seen = FxHashSet::default();
 
-        for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+        loop {
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };
@@ -322,7 +316,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             let module_key = local.module(self.db);
             let local_type_id = local.type_id(self.db);
             if !seen.insert((module_key, local_type_id)) {
-                return ty;
+                return InferredTypeData::Unknown;
+            }
+            if seen.len() % 256 == 0 {
+                self.db.unwind_if_revision_cancelled();
             }
 
             ty = if module_key == self.module_key {
@@ -334,7 +331,42 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .unwrap_or(InferredTypeData::Unknown)
             };
         }
+    }
+}
 
-        ty
+fn walk_wrapper_chain<T: Copy + Eq + Hash>(
+    mut value: T,
+    fallback: T,
+    mut step: impl FnMut(T) -> ControlFlow<T, T>,
+) -> T {
+    let mut seen = FxHashSet::default();
+    for _ in 0..MAX_INFERRED_EXPRESSION_WRAPPER_STEPS {
+        if !seen.insert(value) {
+            return fallback;
+        }
+        match step(value) {
+            ControlFlow::Break(result) => return result,
+            ControlFlow::Continue(next) => value = next,
+        }
+    }
+    fallback
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inferred_expression_wrapper_cycle_returns_fallback() {
+        let result = walk_wrapper_chain(0, usize::MAX, |value| {
+            ControlFlow::Continue((value + 1) % 2)
+        });
+        assert_eq!(result, usize::MAX);
+    }
+
+    #[test]
+    fn inferred_expression_wrapper_exhaustion_returns_fallback() {
+        let result = walk_wrapper_chain(0, usize::MAX, |value| ControlFlow::Continue(value + 1));
+        assert_eq!(result, usize::MAX);
     }
 }
