@@ -160,7 +160,7 @@ impl JsModuleInfo {
     }
 }
 
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
+pub(crate) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
     matches!(
         declaration_kind,
         JsDeclarationKind::Class

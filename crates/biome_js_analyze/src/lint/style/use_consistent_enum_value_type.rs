@@ -100,7 +100,7 @@ impl Rule for UseConsistentEnumValueType {
                 continue;
             };
 
-            let expr_type = ctx.inferred_type_of_expression(&expr);
+            let expr_type = ctx.type_of_expression(&expr);
 
             if expr_type.is_some_and(|ty| ty.is_string_or_string_literal()) {
                 if let Some(enum_type) = enum_type.clone() {

@@ -52,6 +52,11 @@ impl DbReadGuard {
         }
     }
 
+    /// Clones the raw database without extending read tracking to the clone.
+    pub(crate) fn clone_untracked_db(&self) -> WorkspaceDb {
+        self.db.clone()
+    }
+
     /// Consumes the guard and returns the raw database without read tracking.
     ///
     /// NOTE: After this returns, same-thread writes cannot see that this

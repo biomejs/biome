@@ -941,7 +941,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: parse.into(),
                 cursor_offset,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
             if result.is_some() {
                 let capabilities = resolve_capabilities(&result, capabilities);
@@ -973,7 +973,7 @@ impl WorkspaceServerWithDb<'_> {
                 parsed_source: snippet.into(),
                 cursor_offset: local_cursor,
                 path: path.to_path_buf(),
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
             });
 
             // If binding is Local, adjust range back to parent document coordinates
@@ -2549,7 +2549,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2668,7 +2668,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language,
                 categories,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2697,7 +2697,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2768,7 +2768,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             range,
             settings: &settings,
             path: &path,
-            workspace_db: workspace_db.clone(),
+            workspace_db: workspace_db.clone_untracked_db(),
             project_layout: self.project_layout.clone(),
             language,
             only: &only,
@@ -2798,7 +2798,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 range,
                 settings: &settings,
                 path: &path,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 project_layout: self.project_layout.clone(),
                 language: file_source,
                 only: &only,
@@ -3035,7 +3035,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     settings: &settings,
                     should_format,
                     biome_path: &path,
-                    workspace_db: workspace_db.clone(),
+                    workspace_db: workspace_db.clone_untracked_db(),
                     project_layout: self.project_layout.clone(),
                     document_file_source,
                     only: &only,
@@ -3063,7 +3063,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             // forks created by `get_db` are dropped before the setter runs.
             let new_root = {
                 let workspace_db = self.get_db();
-                update_snippets(parse.into(), workspace_db.clone(), new_snippets)?
+                update_snippets(
+                    parse.into(),
+                    workspace_db.clone_untracked_db(),
+                    new_snippets,
+                )?
             };
             self.db_update_parsed_root(path.as_path(), new_root);
             parse = {
@@ -3081,7 +3085,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             settings: &settings,
             should_format,
             biome_path: &path,
-            workspace_db: workspace_db.clone(),
+            workspace_db: workspace_db.clone_untracked_db(),
             project_layout: self.project_layout.clone(),
             document_file_source: language,
             only: &only,
@@ -3201,7 +3205,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let result = resolve_definition(ResolveDefinitionParams {
                 path,
                 definition_ref: &definition_ref,
-                workspace_db: workspace_db.clone(),
+                workspace_db: workspace_db.clone_untracked_db(),
                 parsed_source: snippet.into(),
             });
 

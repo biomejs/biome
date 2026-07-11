@@ -1,16 +1,14 @@
-//! This module represents the database queries used by the module graph.
+//! Tracked query API used by the module graph.
 //!
-//! The queries are defined in terms of `ModuleInfo` inputs.
-//!
-//! The queries are tracked so that Salsa can invalidate them when the inputs
-//! change.
-//!
-//! The queries are also interned, so that Salsa can reuse the same computation
-//! when the inputs are the same.
-//!
-//! This module should contain only tracked functions, exposed to the consumers. Middle
-//! functions that aren't queries should be moved somewhere else, unless they are used
-//! directly by the tracked functions e.g. cycle detection
+//! Interned query inputs and private implementation helpers coexist here with
+//! the tracked queries. Salsa uses the tracked dependencies to invalidate query
+//! results when their inputs change.
+
+#![deny(clippy::wildcard_enum_match_arm)]
+#![allow(
+    unused_lifetimes,
+    reason = "Salsa interned handle lifetimes are used by generated code."
+)]
 
 use crate::css_module_info::traverse::{CssClassStep, ImportTreeTraversal};
 use crate::db::type_inference::{
@@ -47,7 +45,6 @@ const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 1024;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 
 #[salsa::tracked(cycle_result=infer_module_types_cycle_result)]
-#[deny(clippy::wildcard_enum_match_arm)]
 pub fn infer_module_types<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -86,7 +83,6 @@ pub fn infer_module_types<'db>(
 ///
 /// From within other database queries, call [`infer_module_types`] directly
 /// instead: there, the imported modules are already taken care of.
-#[deny(clippy::wildcard_enum_match_arm)]
 pub fn infer_module_types_bottom_up<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,
@@ -181,7 +177,6 @@ impl<'db> ResolvedCallArgument<'db> {
 }
 
 #[salsa::tracked]
-#[deny(clippy::wildcard_enum_match_arm)]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallExpressionTypeInput<'db>,
@@ -207,7 +202,6 @@ pub(crate) fn infer_call_expression_return_type<'db>(
     infer_call_expression_return_type_from_args(db, callee, &args)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 pub(crate) fn infer_call_expression_return_type_from_args<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
@@ -269,7 +263,6 @@ pub(crate) fn infer_call_expression_return_type_from_args<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_function_call_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
@@ -340,7 +333,6 @@ fn infer_function_call_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_call_signature_type<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
@@ -364,7 +356,6 @@ fn infer_call_signature_type<'db>(
         .and_then(|function| infer_function_return_type(db, function, args))
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn signature_accepts_arguments<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -427,7 +418,6 @@ fn signature_accepts_arguments<'db>(
     true
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn push_consumed_argument_state<'db>(
     db: &'db dyn ModuleDb,
     parameters: &'db [InferredFunctionParameter<'db>],
@@ -449,7 +439,6 @@ fn push_consumed_argument_state<'db>(
     ));
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn push_consumed_spread_state<'db>(
     db: &'db dyn ModuleDb,
     parameters: &'db [InferredFunctionParameter<'db>],
@@ -472,7 +461,6 @@ fn push_consumed_spread_state<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_satisfies_parameter<'db>(
     db: &'db dyn ModuleDb,
     parameter: &InferredFunctionParameter<'db>,
@@ -494,7 +482,6 @@ fn argument_satisfies_parameter<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn remaining_parameters_accept_zero<'db>(
     parameters: &'db [InferredFunctionParameter<'db>],
     parameter_index: usize,
@@ -505,7 +492,6 @@ fn remaining_parameters_accept_zero<'db>(
         .all(|parameter| parameter.is_optional() || parameter.is_rest())
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn parameter_for_argument<'db>(
     parameters: &'db [InferredFunctionParameter<'db>],
     index: usize,
@@ -515,7 +501,6 @@ fn parameter_for_argument<'db>(
         .or_else(|| parameters.last().filter(|parameter| parameter.is_rest()))
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn next_parameter_index<'db>(parameter: &InferredFunctionParameter<'db>, index: usize) -> usize {
     if parameter.is_rest() {
         index
@@ -524,7 +509,6 @@ fn next_parameter_index<'db>(parameter: &InferredFunctionParameter<'db>, index: 
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn parameter_argument_type<'db>(
     db: &'db dyn ModuleDb,
     parameter: &InferredFunctionParameter<'db>,
@@ -578,7 +562,6 @@ fn parameter_argument_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_may_match_parameter<'db>(
     db: &'db dyn ModuleDb,
     parameter_ty: InferredTypeData<'db>,
@@ -631,7 +614,6 @@ enum ArgumentMatchAction<'db> {
     Any(Vec<(InferredTypeData<'db>, InferredTypeData<'db>)>),
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_match_action<'db>(
     db: &'db dyn ModuleDb,
     parameter_ty: InferredTypeData<'db>,
@@ -841,7 +823,6 @@ fn argument_match_action<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn spread_argument_element_type<'db>(
     db: &'db dyn ModuleDb,
     arg_ty: InferredTypeData<'db>,
@@ -899,7 +880,6 @@ fn spread_argument_element_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn merged_reference_targets<'db>(
     db: &'db dyn ModuleDb,
     reference: InferredMergedReference<'db>,
@@ -907,7 +887,6 @@ fn merged_reference_targets<'db>(
     reference.targets(db).collect()
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_type_extends_parameter_local<'db>(
     db: &'db dyn ModuleDb,
     argument_ty: InferredTypeData<'db>,
@@ -996,7 +975,6 @@ fn argument_type_extends_parameter_local<'db>(
     None
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_local_extends_parameter_type<'db>(
     db: &'db dyn ModuleDb,
     argument: InferredLocalTypeHandle<'db>,
@@ -1045,7 +1023,6 @@ fn argument_local_extends_parameter_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn argument_type_extends_parameter_type<'db>(
     db: &'db dyn ModuleDb,
     argument_ty: InferredTypeData<'db>,
@@ -1123,7 +1100,6 @@ fn argument_type_extends_parameter_type<'db>(
     false
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_extends_class_name<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
@@ -1151,7 +1127,6 @@ fn raw_local_extends_class_name<'db>(
     false
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_class_name<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
@@ -1171,7 +1146,6 @@ fn raw_local_class_name<'db>(
     class.name.as_ref().map(|name| name.text().to_string())
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn raw_local_class_extends<'db>(
     db: &'db dyn ModuleDb,
     local: InferredLocalTypeHandle<'db>,
@@ -1191,7 +1165,6 @@ fn raw_local_class_extends<'db>(
     local_handle_from_reference(db, module_key, class.extends.as_ref()?)
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn local_handle_from_reference<'db>(
     db: &'db dyn ModuleDb,
     module_key: InferredModuleKey,
@@ -1211,7 +1184,6 @@ fn local_handle_from_reference<'db>(
     ))
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn literal_base_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
@@ -1229,7 +1201,6 @@ fn literal_base_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_function_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -1241,7 +1212,6 @@ fn infer_function_return_type<'db>(
     }
 }
 
-#[deny(clippy::wildcard_enum_match_arm)]
 fn infer_generic_return_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
@@ -1296,7 +1266,6 @@ pub struct NormalizeTypeInput<'db> {
 }
 
 #[salsa::tracked(cycle_result=normalize_type_cycle_result)]
-#[deny(clippy::wildcard_enum_match_arm)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,
@@ -1503,8 +1472,8 @@ pub fn traverse_import_tree_for_html_classes(
         .collect()
 }
 
-#[salsa::interned]
 /// Generic symbol used by queries to track a generic "symbol", which can represent everything (variable name, class name, etc.)
+#[salsa::interned]
 pub struct SymbolFromModuleInfo {
     #[returns(clone)]
     name: String,

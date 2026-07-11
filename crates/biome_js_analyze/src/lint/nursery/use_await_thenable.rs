@@ -59,7 +59,7 @@ impl Rule for UseAwaitThenable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let expression = node.argument().ok()?;
-        let ty = ctx.inferred_type_of_expression(&expression)?;
+        let ty = ctx.type_of_expression(&expression)?;
 
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");

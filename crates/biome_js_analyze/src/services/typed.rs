@@ -65,8 +65,8 @@ impl TypedService {
         Some(InferredType::new(db, ty))
     }
 
-    /// Returns the Salsa-inferred type for an expression.
-    pub fn inferred_type_of_expression<'db>(
+    /// Returns the inferred type for an expression.
+    pub fn type_of_expression<'db>(
         &'db self,
         expression: &AnyJsExpression,
     ) -> Option<InferredType<'db>> {
@@ -79,16 +79,8 @@ impl TypedService {
         Some(InferredType::new(db, ty))
     }
 
-    /// Returns the inferred type for an expression.
-    pub fn type_of_expression<'db>(
-        &'db self,
-        expression: &AnyJsExpression,
-    ) -> Option<InferredType<'db>> {
-        self.inferred_type_of_expression(expression)
-    }
-
-    /// Returns the Salsa-inferred type for a named value visible at `range`.
-    pub fn inferred_type_of_named_value<'db>(
+    /// Returns the inferred type of a named value visible at `range`.
+    pub fn type_of_named_value<'db>(
         &'db self,
         range: TextRange,
         name: &str,
@@ -112,15 +104,6 @@ impl TypedService {
         let ty = normalize_type(db, NormalizeTypeInput::new(db, typed_module.module, ty));
 
         Some(InferredType::new(db, ty))
-    }
-
-    /// Returns the inferred type of a named value visible at `range`.
-    pub fn type_of_named_value<'db>(
-        &'db self,
-        range: TextRange,
-        name: &str,
-    ) -> Option<InferredType<'db>> {
-        self.inferred_type_of_named_value(range, name)
     }
 
     /// Returns the normalized inferred type for a function.

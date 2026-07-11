@@ -1,8 +1,4 @@
 #![deny(clippy::use_self)]
-#![allow(
-    unused_lifetimes,
-    reason = "salsa interned handle lifetimes are used by generated code"
-)]
 
 mod builders;
 mod conditionals;
@@ -30,10 +26,9 @@ pub use inferred_type::{
     IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, MisleadingReturnType,
     ReturnTypeEvidence, StringificationMode, StringificationUsefulness,
 };
-pub use interned_types::TypeDb;
+pub use interned_types::{RawTypeData, TypeDb};
 pub use resolver::*;
 pub use r#type::Type;
-pub use type_data::TypeData as RawTypeData;
 pub use type_data::*;
 pub use type_store::*;
 

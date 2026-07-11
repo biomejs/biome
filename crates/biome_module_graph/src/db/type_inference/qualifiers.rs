@@ -1,4 +1,4 @@
-use super::resolver::ResolutionCtx;
+use super::{lookup::declared_type_parameters, resolver::ResolutionCtx};
 use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_type_info::{
     GLOBAL_RESOLVER, Path, TypeImportQualifier, TypeReferenceQualifier, TypeResolver,
@@ -209,7 +209,8 @@ impl<'db> ResolutionCtx<'db, '_> {
             return target;
         }
 
-        let Some(declared_parameters) = self.declared_type_parameters(target) else {
+        let declared_target = self.resolve_inferred_type(target);
+        let Some(declared_parameters) = declared_type_parameters(self.db, declared_target) else {
             return target;
         };
 
@@ -231,56 +232,6 @@ impl<'db> ResolutionCtx<'db, '_> {
             .into_boxed_slice();
 
         InferredTypeData::instance_of(self.db, target, merged_parameters)
-    }
-
-    fn declared_type_parameters(
-        &mut self,
-        target: InferredTypeData<'db>,
-    ) -> Option<Box<[InferredTypeData<'db>]>> {
-        match self.resolve_inferred_type(target) {
-            InferredTypeData::Class(class) => Some(class.type_parameters(self.db).to_vec().into()),
-            InferredTypeData::Function(function) => {
-                Some(function.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::InstanceOf(instance) => {
-                Some(instance.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::Interface(interface) => {
-                Some(interface.type_parameters(self.db).to_vec().into())
-            }
-            InferredTypeData::Unknown
-            | InferredTypeData::Divergent(_)
-            | InferredTypeData::Global
-            | InferredTypeData::BigInt
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => None,
-        }
     }
 
     fn resolve_pick_or_omit(

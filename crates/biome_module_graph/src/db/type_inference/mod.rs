@@ -1,5 +1,6 @@
 #![deny(clippy::wildcard_enum_match_arm)]
 
+use crate::db::queries::NormalizeTypeInput;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsExport, JsOwnExport, ModuleDb, ResolvedPath};
 use biome_css_syntax::TextRange;
@@ -22,6 +23,10 @@ mod resolver;
 pub(in crate::db) use lookup::{apply_substitutions_to_root_body, substitutions_for_instance};
 pub(in crate::db) use resolver::{ImportResolution, resolve_raw_types};
 
+/// Type metadata for a binding.
+///
+/// This remains a wrapper because it is part of the public
+/// [`InferredModuleTypes::binding_type_data`] value shape.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
 pub struct BindingTypeData<'db> {
     pub ty: InferredTypeData<'db>,
@@ -250,7 +255,7 @@ fn inferable_dependencies(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<ModuleIn
 pub(super) fn normalize_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
-    _input: crate::db::queries::NormalizeTypeInput<'db>,
+    _input: NormalizeTypeInput<'db>,
 ) -> InferredTypeData<'db> {
     InferredTypeData::Unknown
 }

@@ -128,7 +128,7 @@ impl Rule for UseExhaustiveSwitchCases {
             .filter_map(|case| match case {
                 AnyJsSwitchClause::JsCaseClause(case) => {
                     let test = case.test().ok()?;
-                    ctx.inferred_type_of_expression(&test)
+                    ctx.type_of_expression(&test)
                         .map(|ty| ty.switch_case_variants())
                 }
                 _ => None,
@@ -154,7 +154,7 @@ impl Rule for UseExhaustiveSwitchCases {
         };
 
         let variants = ctx
-            .inferred_type_of_expression(&discriminant)?
+            .type_of_expression(&discriminant)?
             .switch_case_variants();
 
         for variant in variants {

@@ -108,7 +108,7 @@ impl Rule for NoMisusedPromises {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
-        let ty = ctx.inferred_type_of_expression(expression)?;
+        let ty = ctx.type_of_expression(expression)?;
         if ty.is_function() {
             find_misused_promise_returning_callback(ctx, expression, ty)
         } else {

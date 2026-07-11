@@ -472,7 +472,7 @@ fn run_logical_or(
     }
 
     let left = logical.left().ok()?;
-    let left_ty = ctx.inferred_type_of_expression(&left)?;
+    let left_ty = ctx.type_of_expression(&left)?;
 
     if !left_ty.has_nullish_variant() {
         return None;
@@ -519,7 +519,7 @@ fn run_logical_or_assignment(
         AnyJsAssignmentPattern::AnyJsAssignment(assign) => {
             let id = assign.as_js_identifier_assignment()?;
             let name = id.name_token().ok()?;
-            ctx.inferred_type_of_named_value(assignment.range(), name.text_trimmed())?
+            ctx.type_of_named_value(assignment.range(), name.text_trimmed())?
         }
         _ => return None,
     };
@@ -758,7 +758,7 @@ fn run_ternary(
     let options = ctx.options();
     if options.has_any_ignore_primitives()
         && ctx
-            .inferred_type_of_expression(&checked_expr)
+            .type_of_expression(&checked_expr)
             .is_some_and(|ty| should_ignore_for_primitives(options, ty))
     {
         return None;
@@ -775,7 +775,7 @@ fn run_ternary(
             // A single strict check only covers one nullish variant. The fix to `??`
             // is safe only if the type cannot be the opposite variant.
             NullishCheckKind::StrictSingle(lit) => ctx
-                .inferred_type_of_expression(&checked_expr)
+                .type_of_expression(&checked_expr)
                 .is_some_and(|ty| match lit {
                     NullishLiteral::Null => !ty.has_undefined_variant(),
                     NullishLiteral::Undefined => !ty.has_null_variant(),

@@ -9,6 +9,7 @@ use biome_js_type_info::interned_types::{
 };
 use rustc_hash::FxHashSet;
 use salsa::plumbing::{AsId, FromId};
+use std::rc::Rc;
 
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_MEMBER_LOOKUP_STEPS: usize = 1024;
@@ -78,7 +79,8 @@ impl<'db> InferredModuleTypes<'db> {
                         target,
                         instance.type_parameters(db),
                         &state.substitutions,
-                    );
+                    )
+                    .into();
                     (target, MemberLookup::Instance)
                 }
                 ty @ (InferredTypeData::Unknown
@@ -347,7 +349,7 @@ struct MemberLookupState<'db> {
     ty: InferredTypeData<'db>,
     lookup: MemberLookup,
     collect: bool,
-    substitutions: Vec<InferredTypeSubstitution<'db>>,
+    substitutions: Rc<[InferredTypeSubstitution<'db>]>,
 }
 
 impl<'db> MemberLookupState<'db> {
@@ -356,7 +358,7 @@ impl<'db> MemberLookupState<'db> {
             ty,
             lookup,
             collect,
-            substitutions: Vec::new(),
+            substitutions: Rc::default(),
         }
     }
 }
@@ -394,7 +396,7 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     substitutions
 }
 
-fn declared_type_parameters<'db>(
+pub(super) fn declared_type_parameters<'db>(
     db: &'db dyn ModuleDb,
     target: InferredTypeData<'db>,
 ) -> Option<&'db [InferredTypeData<'db>]> {

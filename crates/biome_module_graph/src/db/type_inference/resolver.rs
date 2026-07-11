@@ -2,9 +2,9 @@ use super::{
     BindingTypeData, InferredModuleTypes, globals::resolve_global_type_id, lookup::module_for_key,
 };
 use crate::db::queries::infer_module_types;
+use crate::js_module_info::is_named_type_declaration;
 use crate::module_graph::ModuleInfo;
 use crate::{JsModuleInfo, ModuleDb};
-use biome_js_semantic::JsDeclarationKind;
 use biome_js_type_info::{
     RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference, TypeReferenceQualifier,
     TypeResolverLevel,
@@ -119,18 +119,6 @@ fn named_type_ids(js_info: &JsModuleInfo) -> FxHashSet<TypeId> {
         .collect()
 }
 
-fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> bool {
-    matches!(
-        declaration_kind,
-        JsDeclarationKind::Class
-            | JsDeclarationKind::Enum
-            | JsDeclarationKind::Interface
-            | JsDeclarationKind::Module
-            | JsDeclarationKind::Namespace
-            | JsDeclarationKind::Type
-    )
-}
-
 impl<'db> ResolutionCtx<'db, '_> {
     pub(in crate::db::type_inference) fn infer_imported_module(
         &self,
@@ -138,9 +126,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> Option<Arc<InferredModuleTypes<'db>>> {
         match self.import_resolution {
             ImportResolution::Full => infer_module_types(self.db, module),
-            ImportResolution::CycleFallback(blocked) => (!blocked.contains(&module))
-                .then(|| infer_module_types(self.db, module))
-                .flatten(),
+            ImportResolution::CycleFallback(blocked) => {
+                if blocked.contains(&module) {
+                    None
+                } else {
+                    infer_module_types(self.db, module)
+                }
+            }
         }
     }
 

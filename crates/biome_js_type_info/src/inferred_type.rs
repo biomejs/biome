@@ -1,11 +1,12 @@
 use crate::TypeDb;
 use crate::interned_types::{
-    ConditionalType, Literal, ReturnType, TypeData, TypeMember, TypeMemberKind,
+    ConditionalType, InternedClass, Literal, ReturnType, TypeData, TypeMember, TypeMemberKind,
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 
 const MAX_TYPE_VARIANT_STEPS: usize = 1024;
+const MAX_GENERIC_CONSTRAINT_HOPS: usize = 6;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum InferredSwitchCase {
@@ -1162,7 +1163,7 @@ fn is_only_property_literal_widening(
 }
 
 fn resolve_generic_chain<'db>(db: &'db dyn TypeDb, mut ty: TypeData<'db>) -> TypeData<'db> {
-    for _ in 0..6 {
+    for _ in 0..MAX_GENERIC_CONSTRAINT_HOPS {
         let TypeData::Generic(generic) = ty else {
             break;
         };
@@ -1206,7 +1207,7 @@ fn is_strictly_narrower_than_object_keyword(db: &dyn TypeDb, ty: TypeData<'_>) -
 
 fn class_has_instance_shape<'db>(
     db: &'db dyn TypeDb,
-    class: crate::interned_types::InternedClass<'db>,
+    class: InternedClass<'db>,
     seen: &mut FxHashSet<TypeData<'db>>,
     depth: usize,
 ) -> bool {
@@ -1893,7 +1894,7 @@ fn combine_base_stringification(results: impl Iterator<Item = Option<bool>>) -> 
     saw_true.then_some(true)
 }
 
-fn has_custom_stringification_member(members: &[crate::interned_types::TypeMember<'_>]) -> bool {
+fn has_custom_stringification_member(members: &[TypeMember<'_>]) -> bool {
     members.iter().any(|member| {
         ["toLocaleString", "toString", "valueOf"]
             .iter()

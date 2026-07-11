@@ -4,6 +4,11 @@
 //! for now. This module introduces the interned resolved representation that
 //! later phases will wire into module inference.
 
+#![allow(
+    unused_lifetimes,
+    reason = "Salsa interned handle lifetimes are used by generated code."
+)]
+
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 use std::ops::ControlFlow;
@@ -77,6 +82,11 @@ pub struct ModuleKey {
 }
 
 impl ModuleKey {
+    /// Creates a key from the Salsa ID of a module-graph `ModuleInfo`.
+    ///
+    /// The ID must belong to a `ModuleInfo` in the same database. After
+    /// reconstruction, callers use its path to verify that the path index still
+    /// maps to the same ID before reading any other module data.
     pub fn new(id: salsa::Id) -> Self {
         Self { id }
     }
@@ -789,16 +799,16 @@ impl<'db> TypeData<'db> {
             raw::TypeData::ImportNamespace(_) => Self::Unknown,
             raw::TypeData::Class(class) => Self::Class(InternedClass::new(
                 db,
-                convert_references(db, &class.type_parameters, resolve_reference),
+                convert_references(&class.type_parameters, resolve_reference),
                 class.extends.as_ref().map(&mut *resolve_reference),
-                convert_references(db, &class.implements, resolve_reference),
-                convert_type_members(db, &class.members, resolve_reference),
+                convert_references(&class.implements, resolve_reference),
+                convert_type_members(&class.members, resolve_reference),
                 class.name.clone(),
             )),
             raw::TypeData::Constructor(constructor) => Self::Constructor(InternedConstructor::new(
                 db,
-                convert_references(db, &constructor.type_parameters, resolve_reference),
-                convert_constructor_parameters(db, &constructor.parameters, resolve_reference),
+                convert_references(&constructor.type_parameters, resolve_reference),
+                convert_constructor_parameters(&constructor.parameters, resolve_reference),
                 constructor
                     .return_type
                     .as_ref()
@@ -806,33 +816,33 @@ impl<'db> TypeData<'db> {
             )),
             raw::TypeData::Function(function) => Self::Function(InternedFunction::new(
                 db,
-                convert_references(db, &function.type_parameters, resolve_reference),
-                convert_function_parameters(db, &function.parameters, resolve_reference),
-                convert_return_type(db, &function.return_type, resolve_reference),
+                convert_references(&function.type_parameters, resolve_reference),
+                convert_function_parameters(&function.parameters, resolve_reference),
+                convert_return_type(&function.return_type, resolve_reference),
                 function.is_async,
                 function.name.clone(),
             )),
             raw::TypeData::Interface(interface) => Self::Interface(InternedInterface::new(
                 db,
-                convert_references(db, &interface.type_parameters, resolve_reference),
-                convert_references(db, &interface.extends, resolve_reference),
-                convert_type_members(db, &interface.members, resolve_reference),
+                convert_references(&interface.type_parameters, resolve_reference),
+                convert_references(&interface.extends, resolve_reference),
+                convert_type_members(&interface.members, resolve_reference),
                 interface.name.clone(),
             )),
             raw::TypeData::Module(module) => Self::Module(InternedModule::new(
                 db,
-                convert_type_members(db, &module.members, resolve_reference),
+                convert_type_members(&module.members, resolve_reference),
                 module.name.clone(),
             )),
             raw::TypeData::Namespace(namespace) => Self::Namespace(InternedNamespace::new(
                 db,
-                convert_type_members(db, &namespace.members, resolve_reference),
+                convert_type_members(&namespace.members, resolve_reference),
                 namespace.path.clone(),
             )),
             raw::TypeData::Object(object) => Self::Object(InternedObject::new(
                 db,
                 object.prototype.as_ref().map(&mut *resolve_reference),
-                convert_type_members(db, &object.members, resolve_reference),
+                convert_type_members(&object.members, resolve_reference),
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
                 db,
@@ -861,11 +871,11 @@ impl<'db> TypeData<'db> {
             )),
             raw::TypeData::Intersection(intersection) => Self::intersection_from_types(
                 db,
-                convert_references(db, intersection.types(), resolve_reference).into_vec(),
+                convert_references(intersection.types(), resolve_reference).into_vec(),
             ),
             raw::TypeData::Union(union) => Self::union_from_types(
                 db,
-                convert_references(db, union.types(), resolve_reference).into_vec(),
+                convert_references(union.types(), resolve_reference).into_vec(),
             ),
             raw::TypeData::TypeOperator(type_operator) => {
                 Self::TypeOperator(InternedTypeOperatorType::new(
@@ -876,12 +886,12 @@ impl<'db> TypeData<'db> {
             }
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
                 db,
-                convert_literal(db, literal.as_ref(), resolve_reference),
+                convert_literal(literal.as_ref(), resolve_reference),
             )),
             raw::TypeData::InstanceOf(instance) => Self::instance_of(
                 db,
                 resolve_reference(&instance.ty),
-                convert_references(db, &instance.type_parameters, resolve_reference),
+                convert_references(&instance.type_parameters, resolve_reference),
             ),
             raw::TypeData::Reference(reference) => resolve_reference(reference),
             raw::TypeData::MergedReference(reference) => {
@@ -895,7 +905,7 @@ impl<'db> TypeData<'db> {
             raw::TypeData::TypeofExpression(expression) => {
                 Self::TypeofExpression(InternedTypeofExpression::new(
                     db,
-                    convert_typeof_expression(db, expression.as_ref(), resolve_reference),
+                    convert_typeof_expression(expression.as_ref(), resolve_reference),
                 ))
             }
             raw::TypeData::TypeofType(ty) => {
@@ -969,32 +979,34 @@ impl<'db> TypeData<'db> {
             Self::Conditional => raw::TypeData::Conditional,
             Self::Class(class) => raw::TypeData::Class(Box::new(raw::Class {
                 name: class.name(db).clone(),
-                type_parameters: raw_references_from_types(db, class.type_parameters(db)),
-                extends: self.raw_reference_from_option(db, class.extends(db)),
-                implements: raw_references_from_types(db, class.implements(db)),
+                type_parameters: raw_references_from_types(class.type_parameters(db)),
+                extends: class.extends(db).map(Self::to_raw_reference_lossy),
+                implements: raw_references_from_types(class.implements(db)),
                 members: raw_type_members_from_types(db, class.members(db)),
             })),
             Self::Constructor(constructor) => {
                 raw::TypeData::Constructor(Box::new(raw::Constructor {
-                    type_parameters: raw_references_from_types(db, constructor.type_parameters(db)),
+                    type_parameters: raw_references_from_types(constructor.type_parameters(db)),
                     parameters: raw_constructor_parameters_from_types(
                         db,
                         constructor.parameters(db),
                     ),
-                    return_type: self.raw_reference_from_option(db, constructor.return_type(db)),
+                    return_type: constructor
+                        .return_type(db)
+                        .map(Self::to_raw_reference_lossy),
                 }))
             }
             Self::Function(function) => raw::TypeData::Function(Box::new(raw::Function {
                 is_async: function.is_async(db),
-                type_parameters: raw_references_from_types(db, function.type_parameters(db)),
+                type_parameters: raw_references_from_types(function.type_parameters(db)),
                 name: function.name(db).clone(),
                 parameters: raw_function_parameters_from_types(db, function.parameters(db)),
                 return_type: raw_return_type_from_type(db, function.return_type(db)),
             })),
             Self::Interface(interface) => raw::TypeData::Interface(Box::new(raw::Interface {
                 name: interface.name(db).clone(),
-                type_parameters: raw_references_from_types(db, interface.type_parameters(db)),
-                extends: raw_references_from_types(db, interface.extends(db)),
+                type_parameters: raw_references_from_types(interface.type_parameters(db)),
+                extends: raw_references_from_types(interface.extends(db)),
                 members: raw_type_members_from_types(db, interface.members(db)),
             })),
             Self::Module(module) => raw::TypeData::Module(Box::new(raw::Module {
@@ -1006,7 +1018,7 @@ impl<'db> TypeData<'db> {
                 members: raw_type_members_from_types(db, namespace.members(db)),
             })),
             Self::Object(object) => raw::TypeData::Object(Box::new(raw::Object {
-                prototype: self.raw_reference_from_option(db, object.prototype(db)),
+                prototype: object.prototype(db).map(Self::to_raw_reference_lossy),
                 members: raw_type_members_from_types(db, object.members(db)),
             })),
             Self::Tuple(tuple) => raw::TypeData::Tuple(Box::new(raw::Tuple(
@@ -1034,10 +1046,10 @@ impl<'db> TypeData<'db> {
             })),
             Self::Local(_) => raw::TypeData::Unknown,
             Self::Intersection(intersection) => raw::TypeData::Intersection(Box::new(
-                raw::Intersection(raw_references_from_types(db, intersection.types(db))),
+                raw::Intersection(raw_references_from_types(intersection.types(db))),
             )),
             Self::Union(union) => raw::TypeData::Union(Box::new(raw::Union(
-                raw_references_from_types(db, union.types(db)),
+                raw_references_from_types(union.types(db)),
             ))),
             Self::TypeOperator(type_operator) => {
                 raw::TypeData::TypeOperator(Box::new(raw::TypeOperatorType {
@@ -1050,13 +1062,13 @@ impl<'db> TypeData<'db> {
             }
             Self::InstanceOf(instance) => raw::TypeData::InstanceOf(Box::new(raw::TypeInstance {
                 ty: instance.ty(db).to_raw_reference_lossy(),
-                type_parameters: raw_references_from_types(db, instance.type_parameters(db)),
+                type_parameters: raw_references_from_types(instance.type_parameters(db)),
             })),
             Self::MergedReference(reference) => {
                 raw::TypeData::MergedReference(Box::new(raw::MergedReference {
-                    ty: self.raw_reference_from_option(db, reference.ty(db)),
-                    value_ty: self.raw_reference_from_option(db, reference.value_ty(db)),
-                    namespace_ty: self.raw_reference_from_option(db, reference.namespace_ty(db)),
+                    ty: reference.ty(db).map(Self::to_raw_reference_lossy),
+                    value_ty: reference.value_ty(db).map(Self::to_raw_reference_lossy),
+                    namespace_ty: reference.namespace_ty(db).map(Self::to_raw_reference_lossy),
                 }))
             }
             Self::TypeofExpression(expression) => raw::TypeData::TypeofExpression(Box::new(
@@ -1092,14 +1104,6 @@ impl<'db> TypeData<'db> {
             Self::Local(_) => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
             _ => raw::TypeReference::Resolved(GLOBAL_UNKNOWN_ID),
         }
-    }
-
-    fn raw_reference_from_option(
-        self,
-        _db: &'db dyn TypeDb,
-        ty: Option<Self>,
-    ) -> Option<raw::TypeReference> {
-        ty.map(Self::to_raw_reference_lossy)
     }
 }
 
@@ -2285,34 +2289,29 @@ pub struct InternedTypeofValue<'db> {
 }
 
 fn convert_references<'db>(
-    db: &'db dyn TypeDb,
     references: &[raw::TypeReference],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[TypeData<'db>]> {
-    let _ = db;
     references.iter().map(resolve_reference).collect()
 }
 
 fn convert_type_members<'db>(
-    db: &'db dyn TypeDb,
     members: &[raw::TypeMember],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[TypeMember<'db>]> {
     members
         .iter()
         .map(|member| TypeMember {
-            kind: convert_type_member_kind(db, &member.kind, resolve_reference),
+            kind: convert_type_member_kind(&member.kind, resolve_reference),
             ty: resolve_reference(&member.ty),
         })
         .collect()
 }
 
 fn convert_type_member_kind<'db>(
-    db: &'db dyn TypeDb,
     kind: &raw::TypeMemberKind,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> TypeMemberKind<'db> {
-    let _ = db;
     match kind {
         raw::TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
         raw::TypeMemberKind::ComputedValue(ty) => {
@@ -2359,36 +2358,32 @@ fn convert_type_member_kind<'db>(
 }
 
 fn convert_constructor_parameters<'db>(
-    db: &'db dyn TypeDb,
     parameters: &[raw::ConstructorParameter],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[ConstructorParameter<'db>]> {
     parameters
         .iter()
         .map(|parameter| ConstructorParameter {
-            parameter: convert_function_parameter(db, &parameter.parameter, resolve_reference),
+            parameter: convert_function_parameter(&parameter.parameter, resolve_reference),
             accessibility: parameter.accessibility,
         })
         .collect()
 }
 
 fn convert_function_parameters<'db>(
-    db: &'db dyn TypeDb,
     parameters: &[raw::FunctionParameter],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[FunctionParameter<'db>]> {
     parameters
         .iter()
-        .map(|parameter| convert_function_parameter(db, parameter, resolve_reference))
+        .map(|parameter| convert_function_parameter(parameter, resolve_reference))
         .collect()
 }
 
 fn convert_function_parameter<'db>(
-    db: &'db dyn TypeDb,
     parameter: &raw::FunctionParameter,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> FunctionParameter<'db> {
-    let _ = db;
     match parameter {
         raw::FunctionParameter::Named(named) => FunctionParameter::Named(NamedFunctionParameter {
             name: named.name.clone(),
@@ -2415,11 +2410,9 @@ fn convert_function_parameter<'db>(
 }
 
 fn convert_return_type<'db>(
-    db: &'db dyn TypeDb,
     return_type: &raw::ReturnType,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> ReturnType<'db> {
-    let _ = db;
     match return_type {
         raw::ReturnType::Type(ty) => ReturnType::Type(resolve_reference(ty)),
         raw::ReturnType::Predicate(predicate) => ReturnType::Predicate(PredicateReturnType {
@@ -2434,7 +2427,6 @@ fn convert_return_type<'db>(
 }
 
 fn convert_literal<'db>(
-    db: &'db dyn TypeDb,
     literal: &raw::Literal,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Literal<'db> {
@@ -2442,11 +2434,9 @@ fn convert_literal<'db>(
         raw::Literal::BigInt(text) => Literal::BigInt(text.clone()),
         raw::Literal::Boolean(boolean) => Literal::Boolean(boolean.clone()),
         raw::Literal::Number(number) => Literal::Number(number.clone()),
-        raw::Literal::Object(object) => Literal::Object(convert_type_members(
-            db,
-            object.members(),
-            resolve_reference,
-        )),
+        raw::Literal::Object(object) => {
+            Literal::Object(convert_type_members(object.members(), resolve_reference))
+        }
         raw::Literal::RegExp(regexp) => Literal::RegExp(regexp.clone()),
         raw::Literal::String(string) => Literal::String(string.clone()),
         raw::Literal::Template(text) => Literal::Template(text.clone()),
@@ -2454,11 +2444,9 @@ fn convert_literal<'db>(
 }
 
 fn convert_typeof_expression<'db>(
-    db: &'db dyn TypeDb,
     expression: &raw::TypeofExpression,
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> TypeofExpression<'db> {
-    let _ = db;
     match expression {
         raw::TypeofExpression::Addition(expression) => {
             TypeofExpression::Addition(TypeofAdditionExpression {
@@ -2478,7 +2466,7 @@ fn convert_typeof_expression<'db>(
         }
         raw::TypeofExpression::Call(expression) => TypeofExpression::Call(TypeofCallExpression {
             callee: resolve_reference(&expression.callee),
-            arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
+            arguments: convert_call_arguments(&expression.arguments, resolve_reference),
         }),
         raw::TypeofExpression::Conditional(expression) => {
             TypeofExpression::Conditional(TypeofConditionalExpression {
@@ -2518,7 +2506,7 @@ fn convert_typeof_expression<'db>(
         }
         raw::TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
             callee: resolve_reference(&expression.callee),
-            arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
+            arguments: convert_call_arguments(&expression.arguments, resolve_reference),
         }),
         raw::TypeofExpression::NullishCoalescing(expression) => {
             TypeofExpression::NullishCoalescing(TypeofNullishCoalescingExpression {
@@ -2556,11 +2544,9 @@ fn convert_typeof_expression<'db>(
 }
 
 fn convert_call_arguments<'db>(
-    db: &'db dyn TypeDb,
     arguments: &[raw::CallArgumentType],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
 ) -> Box<[CallArgumentType<'db>]> {
-    let _ = db;
     arguments
         .iter()
         .map(|argument| match argument {
@@ -2572,10 +2558,7 @@ fn convert_call_arguments<'db>(
         .collect()
 }
 
-fn raw_references_from_types<'db>(
-    _db: &'db dyn TypeDb,
-    types: &[TypeData<'db>],
-) -> Box<[raw::TypeReference]> {
+fn raw_references_from_types(types: &[TypeData<'_>]) -> Box<[raw::TypeReference]> {
     types.iter().map(|ty| ty.to_raw_reference_lossy()).collect()
 }
 

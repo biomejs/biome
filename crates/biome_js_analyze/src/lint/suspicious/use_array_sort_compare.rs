@@ -63,7 +63,7 @@ impl Rule for UseArraySortCompare {
 
         let call_object = callee.object().ok()?;
         if !ctx
-            .inferred_type_of_expression(&call_object)
+            .type_of_expression(&call_object)
             .is_some_and(|ty| ty.is_array())
         {
             return None;
@@ -82,7 +82,7 @@ impl Rule for UseArraySortCompare {
         let binding = arguments.first()?.ok()?;
         let first_arg = binding.as_any_js_expression()?;
         if ctx
-            .inferred_type_of_expression(first_arg)
+            .type_of_expression(first_arg)
             .is_some_and(|ty| ty.is_undefined() || ty.is_null())
         {
             return Some(());
