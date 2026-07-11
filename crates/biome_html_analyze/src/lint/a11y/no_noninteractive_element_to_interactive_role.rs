@@ -74,12 +74,8 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
             return None;
         }
 
-        let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute
-            .initializer()?
-            .value()
-            .ok()?
-            .as_static_value()?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
 
         // Exception: role `treeitem` is allowed on `<li>`
@@ -128,7 +124,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = node.find_attribute_or_vue_binding("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);

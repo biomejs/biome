@@ -15796,6 +15796,7 @@ impl AnyCssQueryFeature {
 pub enum AnyCssQueryFeatureName {
     CssIdentifier(CssIdentifier),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureName {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
@@ -15810,6 +15811,12 @@ impl AnyCssQueryFeatureName {
             _ => None,
         }
     }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeatureValue {
@@ -15818,8 +15825,10 @@ pub enum AnyCssQueryFeatureValue {
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
+    ScssExpression(ScssExpression),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolation(ScssInterpolation),
+    ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureValue {
     pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
@@ -15852,6 +15861,12 @@ impl AnyCssQueryFeatureValue {
             _ => None,
         }
     }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
         match &self {
             Self::ScssInterpolatedIdentifier(item) => Some(item),
@@ -15861,6 +15876,12 @@ impl AnyCssQueryFeatureValue {
     pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
         match &self {
             Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -16117,6 +16138,7 @@ pub enum AnyCssSubSelector {
     CssBogusSubSelector(CssBogusSubSelector),
     CssClassSelector(CssClassSelector),
     CssIdSelector(CssIdSelector),
+    CssNestedSelector(CssNestedSelector),
     CssPseudoClassSelector(CssPseudoClassSelector),
     CssPseudoElementSelector(CssPseudoElementSelector),
 }
@@ -16142,6 +16164,12 @@ impl AnyCssSubSelector {
     pub fn as_css_id_selector(&self) -> Option<&CssIdSelector> {
         match &self {
             Self::CssIdSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_nested_selector(&self) -> Option<&CssNestedSelector> {
+        match &self {
+            Self::CssNestedSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -40657,12 +40685,21 @@ impl From<ScssInterpolatedIdentifier> for AnyCssQueryFeatureName {
         Self::ScssInterpolatedIdentifier(node)
     }
 }
+impl From<ScssVariable> for AnyCssQueryFeatureName {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
 impl AstNode for AnyCssQueryFeatureName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -40670,6 +40707,7 @@ impl AstNode for AnyCssQueryFeatureName {
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -40678,12 +40716,14 @@ impl AstNode for AnyCssQueryFeatureName {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -40692,6 +40732,7 @@ impl std::fmt::Debug for AnyCssQueryFeatureName {
         match self {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -40700,6 +40741,7 @@ impl From<AnyCssQueryFeatureName> for SyntaxNode {
         match n {
             AnyCssQueryFeatureName::CssIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyCssQueryFeatureName::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -40724,6 +40766,11 @@ impl From<CssRatio> for AnyCssQueryFeatureValue {
         Self::CssRatio(node)
     }
 }
+impl From<ScssExpression> for AnyCssQueryFeatureValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedIdentifier> for AnyCssQueryFeatureValue {
     fn from(node: ScssInterpolatedIdentifier) -> Self {
         Self::ScssInterpolatedIdentifier(node)
@@ -40734,6 +40781,11 @@ impl From<ScssInterpolation> for AnyCssQueryFeatureValue {
         Self::ScssInterpolation(node)
     }
 }
+impl From<ScssVariable> for AnyCssQueryFeatureValue {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
 impl AstNode for AnyCssQueryFeatureValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
@@ -40741,15 +40793,19 @@ impl AstNode for AnyCssQueryFeatureValue {
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
-        .union(ScssInterpolation::KIND_SET);
+        .union(ScssInterpolation::KIND_SET)
+        .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
+            | SCSS_EXPRESSION
             | SCSS_INTERPOLATED_IDENTIFIER
-            | SCSS_INTERPOLATION => true,
+            | SCSS_INTERPOLATION
+            | SCSS_VARIABLE => true,
             k if AnyCssDimension::can_cast(k) => true,
             k if AnyCssFunction::can_cast(k) => true,
             _ => false,
@@ -40760,10 +40816,12 @@ impl AstNode for AnyCssQueryFeatureValue {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_RATIO => Self::CssRatio(CssRatio { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
             SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             _ => {
                 let syntax = match AnyCssDimension::try_cast(syntax) {
                     Ok(any_css_dimension) => {
@@ -40784,8 +40842,10 @@ impl AstNode for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssRatio(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
         }
@@ -40795,8 +40855,10 @@ impl AstNode for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssRatio(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -40810,8 +40872,10 @@ impl std::fmt::Debug for AnyCssQueryFeatureValue {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -40823,8 +40887,10 @@ impl From<AnyCssQueryFeatureValue> for SyntaxNode {
             AnyCssQueryFeatureValue::CssIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssNumber(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssRatio(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::ScssExpression(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::ScssInterpolation(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -41570,6 +41636,11 @@ impl From<CssIdSelector> for AnyCssSubSelector {
         Self::CssIdSelector(node)
     }
 }
+impl From<CssNestedSelector> for AnyCssSubSelector {
+    fn from(node: CssNestedSelector) -> Self {
+        Self::CssNestedSelector(node)
+    }
+}
 impl From<CssPseudoClassSelector> for AnyCssSubSelector {
     fn from(node: CssPseudoClassSelector) -> Self {
         Self::CssPseudoClassSelector(node)
@@ -41586,6 +41657,7 @@ impl AstNode for AnyCssSubSelector {
         .union(CssBogusSubSelector::KIND_SET)
         .union(CssClassSelector::KIND_SET)
         .union(CssIdSelector::KIND_SET)
+        .union(CssNestedSelector::KIND_SET)
         .union(CssPseudoClassSelector::KIND_SET)
         .union(CssPseudoElementSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -41595,6 +41667,7 @@ impl AstNode for AnyCssSubSelector {
                 | CSS_BOGUS_SUB_SELECTOR
                 | CSS_CLASS_SELECTOR
                 | CSS_ID_SELECTOR
+                | CSS_NESTED_SELECTOR
                 | CSS_PSEUDO_CLASS_SELECTOR
                 | CSS_PSEUDO_ELEMENT_SELECTOR
         )
@@ -41605,6 +41678,7 @@ impl AstNode for AnyCssSubSelector {
             CSS_BOGUS_SUB_SELECTOR => Self::CssBogusSubSelector(CssBogusSubSelector { syntax }),
             CSS_CLASS_SELECTOR => Self::CssClassSelector(CssClassSelector { syntax }),
             CSS_ID_SELECTOR => Self::CssIdSelector(CssIdSelector { syntax }),
+            CSS_NESTED_SELECTOR => Self::CssNestedSelector(CssNestedSelector { syntax }),
             CSS_PSEUDO_CLASS_SELECTOR => {
                 Self::CssPseudoClassSelector(CssPseudoClassSelector { syntax })
             }
@@ -41621,6 +41695,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => it.syntax(),
             Self::CssClassSelector(it) => it.syntax(),
             Self::CssIdSelector(it) => it.syntax(),
+            Self::CssNestedSelector(it) => it.syntax(),
             Self::CssPseudoClassSelector(it) => it.syntax(),
             Self::CssPseudoElementSelector(it) => it.syntax(),
         }
@@ -41631,6 +41706,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => it.into_syntax(),
             Self::CssClassSelector(it) => it.into_syntax(),
             Self::CssIdSelector(it) => it.into_syntax(),
+            Self::CssNestedSelector(it) => it.into_syntax(),
             Self::CssPseudoClassSelector(it) => it.into_syntax(),
             Self::CssPseudoElementSelector(it) => it.into_syntax(),
         }
@@ -41643,6 +41719,7 @@ impl std::fmt::Debug for AnyCssSubSelector {
             Self::CssBogusSubSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNestedSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementSelector(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -41655,6 +41732,7 @@ impl From<AnyCssSubSelector> for SyntaxNode {
             AnyCssSubSelector::CssBogusSubSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssIdSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssNestedSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoElementSelector(it) => it.into_syntax(),
         }

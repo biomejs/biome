@@ -53,12 +53,14 @@ impl Rule for NoVueVOnNumberValues {
         let node = ctx.query();
         match node {
             AnyVueDirective::VueDirective(dir) => {
-                if dir.name_token().ok()?.text_trimmed() != "v-on" {
+                if !dir.is_event_listener() {
                     return None;
                 }
                 find_number_modifier(&dir.modifiers())
             }
-            AnyVueDirective::VueVOnShorthandDirective(dir) => find_number_modifier(&dir.modifiers()),
+            AnyVueDirective::VueVOnShorthandDirective(dir) => {
+                find_number_modifier(&dir.modifiers())
+            }
             _ => None,
         }
     }
@@ -85,7 +87,11 @@ impl Rule for NoVueVOnNumberValues {
 fn find_number_modifier(modifiers: &VueModifierList) -> Option<TextRange> {
     for modifier in modifiers {
         let modifier_token = modifier.modifier_token().ok()?;
-        if modifier_token.text_trimmed().chars().all(|c| c.is_ascii_digit()) {
+        if modifier_token
+            .text_trimmed()
+            .chars()
+            .all(|c| c.is_ascii_digit())
+        {
             return Some(modifier_token.text_trimmed_range());
         }
     }

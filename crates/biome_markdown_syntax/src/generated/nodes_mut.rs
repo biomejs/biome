@@ -45,6 +45,14 @@ impl MdBulletListItem {
         )
     }
 }
+impl MdCodeContent {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl MdContinuationIndent {
     pub fn with_indent(self, element: MdIndentTokenList) -> Self {
         Self::unwrap_cast(
@@ -168,10 +176,18 @@ impl MdHtmlBlock {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_content(self, element: MdInlineItemList) -> Self {
+    pub fn with_content(self, element: MdHtmlContent) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl MdHtmlContent {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

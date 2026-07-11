@@ -19,11 +19,11 @@ pub(crate) use interpolation::{
 };
 pub(crate) use list::{
     complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,
-    parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
-    parse_scss_optional_value_until,
+    parse_scss_expression_from_head, parse_scss_expression_in_args_until,
+    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
+    parse_scss_inner_expression_in_string_until, parse_scss_optional_value_until,
 };
-pub(crate) use precedence::SCSS_UNARY_OPERATOR_TOKEN_SET;
+pub(crate) use precedence::{SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator};
 
 /// Carries the caller-specific rules for parsing ambiguous SCSS expressions.
 ///

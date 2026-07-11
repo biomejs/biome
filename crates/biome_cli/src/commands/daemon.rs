@@ -93,8 +93,9 @@ pub(crate) fn run_server(
     let cancellation = factory.cancellation();
 
     let workspace = factory.workspace();
+    let db_state = factory.db_state();
     rt.spawn_blocking(move || {
-        workspace.start_watcher(watcher);
+        workspace.start_watcher(&db_state, watcher);
     });
 
     rt.block_on(async move {
@@ -261,7 +262,7 @@ impl LoggingFilter {
         let filter = if meta.target().starts_with("biome") {
             SELF_FILTER
         } else {
-            LevelFilter::INFO
+            return false;
         };
 
         meta.level() <= &filter

@@ -1,3 +1,9 @@
+use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::prelude::*;
+use biome_formatter::write;
+use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock};
+
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 pub(crate) enum TextPrintMode {
     /// Keep the original formatting. Don't attempt to optimize it. This is usually achieved
@@ -100,5 +106,28 @@ impl TextPrintMode {
 
     pub(crate) const fn fill() -> Self {
         Self::Fill
+    }
+}
+
+pub(crate) fn format_removed_quote_boundary(
+    node: &AnyMdBlock,
+    f: &mut MarkdownFormatter,
+) -> FormatResult<()> {
+    match node {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) => {
+            write!(
+                f,
+                [newline.format().with_options(FormatMdNewlineOptions {
+                    print_mode: TextPrintMode::Remove,
+                })]
+            )
+        }
+        AnyMdBlock::MdQuotePrefix(prefix) => write!(
+            f,
+            [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                should_remove: true,
+            })]
+        ),
+        _ => write!(f, [node.format()]),
     }
 }

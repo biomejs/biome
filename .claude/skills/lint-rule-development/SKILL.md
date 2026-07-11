@@ -381,13 +381,16 @@ impl Rule for UseMyRuleName {
 
 **Step 3.** Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
 
-**Step 4.** Run codegen: `just gen-rules && just gen-configuration`
+**Step 4.** Document the options in the rule's rustdoc comments, including valid and invalid test cases for each option.
+
+**Step 5.** Run codegen: `just gen-rules && just gen-configuration`
 
 **Key rules:**
 - All fields must be `Option<T>` for config merging to work
 - Use `Box<[Box<str>]>` instead of `Vec<String>` for collection fields
 - Use `#[derive(Merge)]` for simple cases, implement `Merge` manually for collections
 - Only add options when truly needed (conflicting community preferences, multiple valid interpretations)
+- All options must be documented in the rule's documentation.
 
 ## Tips
 

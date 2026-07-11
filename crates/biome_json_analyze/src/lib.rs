@@ -143,7 +143,7 @@ where
         .cloned()
         .collect();
 
-    if !json_plugins.is_empty() {
+    if filter.match_plugins() && !json_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target JSON above.
         unsafe {
             analyzer.add_visitor(

@@ -54,19 +54,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@1..3 " 1" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@3..4 ")" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@4..10 " Quote" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@10..11 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@1..43 " 1) Quote-only blank line inside list item" [] [],
                     },
                 ],
             },
@@ -108,10 +96,7 @@ MdDocument {
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@61..62 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@62..63 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@61..63 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@63..64 ">" [] [],
@@ -123,10 +108,7 @@ MdDocument {
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
                                         MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@65..66 " " [] [],
-                                        },
-                                        MdQuoteIndent {
-                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@66..67 " " [] [],
+                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@65..67 "  " [] [],
                                         },
                                     ],
                                     marker_token: R_ANGLE@67..68 ">" [] [],
@@ -184,19 +166,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@108..110 " 2" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@110..111 ")" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@111..118 " Marker" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@118..119 "-" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@108..151 " 2) Marker-only item followed by blank line" [] [],
                     },
                 ],
             },
@@ -213,8 +183,8 @@ MdDocument {
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
-                        marker: MINUS@153..155 "- " [] [],
-                        post_marker_space_token: missing (optional),
+                        marker: MINUS@153..154 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@154..155 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
@@ -231,13 +201,7 @@ MdDocument {
         MdParagraph {
             list: MdInlineItemList [
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@187..188 "-" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@188..203 "only list item." [] [],
+                    value_token: MD_TEXTUAL_LITERAL@157..203 "Outside paragraph after marker-only list item." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@203..204 "\n" [] [],
@@ -257,13 +221,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@206..208 " 3" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@208..209 ")" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@209..270 " Nested list with continuation requiring virtual line restore" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@206..270 " 3) Nested list with continuation requiring virtual line restore" [] [],
                     },
                 ],
             },
@@ -298,10 +256,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@285..286 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@286..287 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@285..287 "  " [] [],
                                 },
                             ],
                         },
@@ -324,16 +279,7 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@299..300 "\n" [] [],
                                                 },
                                                 MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@300..301 " " [] [],
-                                                },
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@301..302 " " [] [],
-                                                },
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@302..303 " " [] [],
-                                                },
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@303..304 " " [] [],
+                                                    md_indent_char_token: MD_INDENT_CHAR@300..304 "    " [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@304..322 "inner continuation" [] [],
@@ -399,13 +345,7 @@ MdDocument {
             content: MdParagraph {
                 list: MdInlineItemList [
                     MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@387..389 " 4" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@389..390 ")" [] [],
-                    },
-                    MdTextual {
-                        value_token: MD_TEXTUAL_LITERAL@390..449 " Lazy continuation with insufficient indent after paragraph" [] [],
+                        value_token: MD_TEXTUAL_LITERAL@387..449 " 4) Lazy continuation with insufficient indent after paragraph" [] [],
                     },
                 ],
             },
@@ -485,16 +425,8 @@ MdDocument {
           0: HASH@0..1 "#" [] []
       2: MD_PARAGRAPH@1..43
         0: MD_INLINE_ITEM_LIST@1..43
-          0: MD_TEXTUAL@1..3
-            0: MD_TEXTUAL_LITERAL@1..3 " 1" [] []
-          1: MD_TEXTUAL@3..4
-            0: MD_TEXTUAL_LITERAL@3..4 ")" [] []
-          2: MD_TEXTUAL@4..10
-            0: MD_TEXTUAL_LITERAL@4..10 " Quote" [] []
-          3: MD_TEXTUAL@10..11
-            0: MD_TEXTUAL_LITERAL@10..11 "-" [] []
-          4: MD_TEXTUAL@11..43
-            0: MD_TEXTUAL_LITERAL@11..43 "only blank line inside list item" [] []
+          0: MD_TEXTUAL@1..43
+            0: MD_TEXTUAL_LITERAL@1..43 " 1) Quote-only blank line inside list item" [] []
       3: MD_HASH_LIST@43..43
     1: MD_NEWLINE@43..44
       0: NEWLINE@43..44 "\n" [] []
@@ -523,20 +455,16 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
                 1: MD_QUOTE_PREFIX@61..64
                   0: MD_QUOTE_INDENT_LIST@61..63
-                    0: MD_QUOTE_INDENT@61..62
-                      0: MD_QUOTE_PRE_MARKER_INDENT@61..62 " " [] []
-                    1: MD_QUOTE_INDENT@62..63
-                      0: MD_QUOTE_PRE_MARKER_INDENT@62..63 " " [] []
+                    0: MD_QUOTE_INDENT@61..63
+                      0: MD_QUOTE_PRE_MARKER_INDENT@61..63 "  " [] []
                   1: R_ANGLE@63..64 ">" [] []
                   2: (empty)
                 2: MD_NEWLINE@64..65
                   0: NEWLINE@64..65 "\n" [] []
                 3: MD_QUOTE_PREFIX@65..69
                   0: MD_QUOTE_INDENT_LIST@65..67
-                    0: MD_QUOTE_INDENT@65..66
-                      0: MD_QUOTE_PRE_MARKER_INDENT@65..66 " " [] []
-                    1: MD_QUOTE_INDENT@66..67
-                      0: MD_QUOTE_PRE_MARKER_INDENT@66..67 " " [] []
+                    0: MD_QUOTE_INDENT@65..67
+                      0: MD_QUOTE_PRE_MARKER_INDENT@65..67 "  " [] []
                   1: R_ANGLE@67..68 ">" [] []
                   2: MD_QUOTE_POST_MARKER_SPACE@68..69 " " [] []
                 4: MD_PARAGRAPH@69..90
@@ -569,16 +497,8 @@ MdDocument {
           0: HASH@107..108 "#" [] []
       2: MD_PARAGRAPH@108..151
         0: MD_INLINE_ITEM_LIST@108..151
-          0: MD_TEXTUAL@108..110
-            0: MD_TEXTUAL_LITERAL@108..110 " 2" [] []
-          1: MD_TEXTUAL@110..111
-            0: MD_TEXTUAL_LITERAL@110..111 ")" [] []
-          2: MD_TEXTUAL@111..118
-            0: MD_TEXTUAL_LITERAL@111..118 " Marker" [] []
-          3: MD_TEXTUAL@118..119
-            0: MD_TEXTUAL_LITERAL@118..119 "-" [] []
-          4: MD_TEXTUAL@119..151
-            0: MD_TEXTUAL_LITERAL@119..151 "only item followed by blank line" [] []
+          0: MD_TEXTUAL@108..151
+            0: MD_TEXTUAL_LITERAL@108..151 " 2) Marker-only item followed by blank line" [] []
       3: MD_HASH_LIST@151..151
     6: MD_NEWLINE@151..152
       0: NEWLINE@151..152 "\n" [] []
@@ -589,8 +509,8 @@ MdDocument {
         0: MD_BULLET@153..156
           0: MD_LIST_MARKER_PREFIX@153..155
             0: MD_INDENT_TOKEN_LIST@153..153
-            1: MINUS@153..155 "- " [] []
-            2: (empty)
+            1: MINUS@153..154 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@154..155 " " [] []
             3: MD_INDENT_TOKEN_LIST@155..155
           1: MD_BLOCK_LIST@155..156
             0: MD_NEWLINE@155..156
@@ -599,13 +519,9 @@ MdDocument {
       0: NEWLINE@156..157 "\n" [] []
     10: MD_PARAGRAPH@157..204
       0: MD_INLINE_ITEM_LIST@157..204
-        0: MD_TEXTUAL@157..187
-          0: MD_TEXTUAL_LITERAL@157..187 "Outside paragraph after marker" [] []
-        1: MD_TEXTUAL@187..188
-          0: MD_TEXTUAL_LITERAL@187..188 "-" [] []
-        2: MD_TEXTUAL@188..203
-          0: MD_TEXTUAL_LITERAL@188..203 "only list item." [] []
-        3: MD_TEXTUAL@203..204
+        0: MD_TEXTUAL@157..203
+          0: MD_TEXTUAL_LITERAL@157..203 "Outside paragraph after marker-only list item." [] []
+        1: MD_TEXTUAL@203..204
           0: MD_TEXTUAL_LITERAL@203..204 "\n" [] []
     11: MD_NEWLINE@204..205
       0: NEWLINE@204..205 "\n" [] []
@@ -616,12 +532,8 @@ MdDocument {
           0: HASH@205..206 "#" [] []
       2: MD_PARAGRAPH@206..270
         0: MD_INLINE_ITEM_LIST@206..270
-          0: MD_TEXTUAL@206..208
-            0: MD_TEXTUAL_LITERAL@206..208 " 3" [] []
-          1: MD_TEXTUAL@208..209
-            0: MD_TEXTUAL_LITERAL@208..209 ")" [] []
-          2: MD_TEXTUAL@209..270
-            0: MD_TEXTUAL_LITERAL@209..270 " Nested list with continuation requiring virtual line restore" [] []
+          0: MD_TEXTUAL@206..270
+            0: MD_TEXTUAL_LITERAL@206..270 " 3) Nested list with continuation requiring virtual line restore" [] []
       3: MD_HASH_LIST@270..270
     13: MD_NEWLINE@270..271
       0: NEWLINE@270..271 "\n" [] []
@@ -644,10 +556,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@284..285 "\n" [] []
             1: MD_CONTINUATION_INDENT@285..287
               0: MD_INDENT_TOKEN_LIST@285..287
-                0: MD_INDENT_TOKEN@285..286
-                  0: MD_INDENT_CHAR@285..286 " " [] []
-                1: MD_INDENT_TOKEN@286..287
-                  0: MD_INDENT_CHAR@286..287 " " [] []
+                0: MD_INDENT_TOKEN@285..287
+                  0: MD_INDENT_CHAR@285..287 "  " [] []
             2: MD_BULLET_LIST_ITEM@287..366
               0: MD_BULLET_LIST@287..366
                 0: MD_BULLET@287..366
@@ -663,25 +573,19 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@289..299 "inner item" [] []
                         1: MD_TEXTUAL@299..300
                           0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
-                        2: MD_INDENT_TOKEN@300..301
-                          0: MD_INDENT_CHAR@300..301 " " [] []
-                        3: MD_INDENT_TOKEN@301..302
-                          0: MD_INDENT_CHAR@301..302 " " [] []
-                        4: MD_INDENT_TOKEN@302..303
-                          0: MD_INDENT_CHAR@302..303 " " [] []
-                        5: MD_INDENT_TOKEN@303..304
-                          0: MD_INDENT_CHAR@303..304 " " [] []
-                        6: MD_TEXTUAL@304..322
+                        2: MD_INDENT_TOKEN@300..304
+                          0: MD_INDENT_CHAR@300..304 "    " [] []
+                        3: MD_TEXTUAL@304..322
                           0: MD_TEXTUAL_LITERAL@304..322 "inner continuation" [] []
-                        7: MD_TEXTUAL@322..323
+                        4: MD_TEXTUAL@322..323
                           0: MD_TEXTUAL_LITERAL@322..323 "\n" [] []
-                        8: MD_TEXTUAL@323..324
+                        5: MD_TEXTUAL@323..324
                           0: MD_TEXTUAL_LITERAL@323..324 " " [] []
-                        9: MD_TEXTUAL@324..325
+                        6: MD_TEXTUAL@324..325
                           0: MD_TEXTUAL_LITERAL@324..325 " " [] []
-                        10: MD_TEXTUAL@325..365
+                        7: MD_TEXTUAL@325..365
                           0: MD_TEXTUAL_LITERAL@325..365 "outer continuation at parent indentation" [] []
-                        11: MD_TEXTUAL@365..366
+                        8: MD_TEXTUAL@365..366
                           0: MD_TEXTUAL_LITERAL@365..366 "\n" [] []
             3: MD_NEWLINE@366..367
               0: NEWLINE@366..367 "\n" [] []
@@ -707,12 +611,8 @@ MdDocument {
           0: HASH@386..387 "#" [] []
       2: MD_PARAGRAPH@387..449
         0: MD_INLINE_ITEM_LIST@387..449
-          0: MD_TEXTUAL@387..389
-            0: MD_TEXTUAL_LITERAL@387..389 " 4" [] []
-          1: MD_TEXTUAL@389..390
-            0: MD_TEXTUAL_LITERAL@389..390 ")" [] []
-          2: MD_TEXTUAL@390..449
-            0: MD_TEXTUAL_LITERAL@390..449 " Lazy continuation with insufficient indent after paragraph" [] []
+          0: MD_TEXTUAL@387..449
+            0: MD_TEXTUAL_LITERAL@387..449 " 4) Lazy continuation with insufficient indent after paragraph" [] []
       3: MD_HASH_LIST@449..449
     18: MD_NEWLINE@449..450
       0: NEWLINE@449..450 "\n" [] []

@@ -202,6 +202,12 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
     // when validation fails, the original flow falls through to the reference/shortcut
     // path rather than rolling back. E.g., `[foo](/url1)(not a link)` — the `(not a link)`
     // fails inline validation, so `[foo]` is tried as a shortcut reference instead.
+    // In Regular context `(` lexes as plain text, because parens are only
+    // link syntax. When the character after `]` is `(`, re-lex it as link
+    // syntax so the inline tail check below sees an L_PAREN token.
+    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('(') {
+        p.re_lex_link_definition();
+    }
     let inline_validation = if p.at(L_PAREN) {
         inline_link_is_valid(p)
     } else {
@@ -432,7 +438,10 @@ fn lookahead_reference_common(
 
         p.bump(R_BRACK);
 
-        if p.at(L_PAREN) {
+        // `(` after `]` means an inline link tail, not a reference.
+        // Check the text as well: in Regular context `(` lexes as plain text,
+        // and re-lexing is not possible inside a lookahead.
+        if p.at(L_PAREN) || p.cur_text().starts_with('(') {
             return None;
         }
 
@@ -624,7 +633,10 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
             return InlineLinkValidation::Invalid;
         }
 
-        p.bump(L_PAREN);
+        // Bump in LinkDefinition context so the destination tokens after `(`
+        // lex with parens and whitespace as their own tokens (mirrors the
+        // real tail parse, which uses eat_with_context).
+        p.bump_with_context(L_PAREN, MarkdownLexContext::LinkDefinition);
 
         // Skip leading whitespace before angle bracket check
         // (parse_inline_link_destination_tokens only skips whitespace in the raw path).
@@ -767,7 +779,10 @@ fn is_title_separator_token(p: &MarkdownParser) -> bool {
 fn bump_link_def_separator(p: &mut MarkdownParser) {
     if p.at(NEWLINE) {
         let item = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
+        // Stay in LinkDefinition context: the token after the newline is
+        // still part of the link tail (destination or title), where parens
+        // and whitespace must lex as their own tokens.
+        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::LinkDefinition);
         item.complete(p, MD_TEXTUAL);
     } else {
         bump_textual_link_def(p);

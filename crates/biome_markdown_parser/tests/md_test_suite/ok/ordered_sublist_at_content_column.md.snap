@@ -54,13 +54,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@7..10 "   " [] [],
                                 },
                             ],
                         },
@@ -117,16 +111,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@26..27 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@27..28 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@28..29 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@29..30 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@26..30 "    " [] [],
                                 },
                             ],
                         },
@@ -180,16 +165,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@47..48 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@48..49 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@49..50 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@50..51 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@47..51 "    " [] [],
                                 },
                             ],
                         },
@@ -393,12 +369,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
             1: MD_CONTINUATION_INDENT@7..10
               0: MD_INDENT_TOKEN_LIST@7..10
-                0: MD_INDENT_TOKEN@7..8
-                  0: MD_INDENT_CHAR@7..8 " " [] []
-                1: MD_INDENT_TOKEN@8..9
-                  0: MD_INDENT_CHAR@8..9 " " [] []
-                2: MD_INDENT_TOKEN@9..10
-                  0: MD_INDENT_CHAR@9..10 " " [] []
+                0: MD_INDENT_TOKEN@7..10
+                  0: MD_INDENT_CHAR@7..10 "   " [] []
             2: MD_BULLET_LIST_ITEM@10..16
               0: MD_BULLET_LIST@10..16
                 0: MD_BULLET@10..16
@@ -433,14 +405,8 @@ MdDocument {
               0: NEWLINE@25..26 "\n" [] []
             2: MD_CONTINUATION_INDENT@26..30
               0: MD_INDENT_TOKEN_LIST@26..30
-                0: MD_INDENT_TOKEN@26..27
-                  0: MD_INDENT_CHAR@26..27 " " [] []
-                1: MD_INDENT_TOKEN@27..28
-                  0: MD_INDENT_CHAR@27..28 " " [] []
-                2: MD_INDENT_TOKEN@28..29
-                  0: MD_INDENT_CHAR@28..29 " " [] []
-                3: MD_INDENT_TOKEN@29..30
-                  0: MD_INDENT_CHAR@29..30 " " [] []
+                0: MD_INDENT_TOKEN@26..30
+                  0: MD_INDENT_CHAR@26..30 "    " [] []
             3: MD_BULLET_LIST_ITEM@30..36
               0: MD_BULLET_LIST@30..36
                 0: MD_BULLET@30..36
@@ -473,14 +439,8 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
             1: MD_CONTINUATION_INDENT@47..51
               0: MD_INDENT_TOKEN_LIST@47..51
-                0: MD_INDENT_TOKEN@47..48
-                  0: MD_INDENT_CHAR@47..48 " " [] []
-                1: MD_INDENT_TOKEN@48..49
-                  0: MD_INDENT_CHAR@48..49 " " [] []
-                2: MD_INDENT_TOKEN@49..50
-                  0: MD_INDENT_CHAR@49..50 " " [] []
-                3: MD_INDENT_TOKEN@50..51
-                  0: MD_INDENT_CHAR@50..51 " " [] []
+                0: MD_INDENT_TOKEN@47..51
+                  0: MD_INDENT_CHAR@47..51 "    " [] []
             2: MD_BULLET_LIST_ITEM@51..59
               0: MD_BULLET_LIST@51..59
                 0: MD_BULLET@51..59

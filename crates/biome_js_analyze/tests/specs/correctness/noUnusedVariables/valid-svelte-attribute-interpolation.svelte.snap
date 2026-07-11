@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-svelte-attribute-interpolation.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+let top = 0;
+let cls = "active";
+let open = true;
+</script>
+
+<div style="top: {top}px" class="card {cls}"></div>
+<dialog bind:open></dialog>
+
+```

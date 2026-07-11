@@ -7,9 +7,9 @@ expression: redactor(content)
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN|ACTION>
-]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--staged] [--changed] [--since=REF] [--profile-rules] [
---watch] [PATH]...
+Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=
+<GROUP|RULE|DOMAIN|ACTION|PLUGIN>]... [--skip=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>]... [--staged] [
+--changed] [--since=REF] [--profile-rules] [--watch] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -108,20 +108,22 @@ Available options:
         --suppress            Fixes lint rule violations with comment suppressions instead of using
                               a rule code action (fix)
         --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
-        --only=<GROUP|RULE|DOMAIN|ACTION>  Run only the given lint rule, assist action, group of
-                              rules and actions, or domain. If the severity level of a rule is
+        --only=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>  Run only the given lint rule, assist action, group
+                              of rules and actions, or domain. If the severity level of a rule is
                               `off`, then the severity level of the rule is set to `error` if it is
-                              a recommended rule or `warn` otherwise.
+                              a recommended rule or `warn` otherwise. Use the `plugin` group to run
+                              only the analyzer plugins.
                               Example:
                               ```shell
-                              biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
+                              biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
                               ```
-        --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
-                              and actions, or domain by setting the severity level of the rules to
-                              `off`. This option takes precedence over `--only`.
+        --skip=<GROUP|RULE|DOMAIN|ACTION|PLUGIN>  Skip the given lint rule, assist action, group of
+                              rules and actions, or domain by setting the severity level of the
+                              rules to `off`. This option takes precedence over `--only`. Use the
+                              `plugin` group to skip the analyzer plugins.
                               Example:
                               ```shell
-                              biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+                              biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
                               ```
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.

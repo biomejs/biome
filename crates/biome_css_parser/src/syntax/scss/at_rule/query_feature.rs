@@ -38,8 +38,8 @@ pub(crate) fn parse_scss_interpolated_query_feature(p: &mut CssParser) -> Parsed
     parse_scss_interpolated_query_feature_from_head(p, head)
 }
 
-/// Completes an interpolation-led query feature after the shared head has
-/// already been parsed by an ambiguous caller.
+/// Parses an interpolation-led query feature after the shared head has already
+/// been parsed by an ambiguous caller.
 #[inline]
 pub(crate) fn parse_scss_interpolated_query_feature_from_head(
     p: &mut CssParser,

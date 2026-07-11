@@ -9,3 +9,11 @@
 * - - -
 
 __bold__
+
+* - - -
+
++ item after dash thematic break
+
+-   
+
+1.   

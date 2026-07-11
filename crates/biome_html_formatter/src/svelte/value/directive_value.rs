@@ -63,11 +63,18 @@ impl FormatSvelteDirectiveValue {
             else {
                 return Ok(false);
             };
-            let Some(initializer_value) = initializer.value().ok().and_then(|v| v.string_value())
-            else {
+            let Some(initializer_value) = initializer.value().ok().and_then(|v| {
+                Some(
+                    v.as_html_attribute_single_text_expression()?
+                        .expression()
+                        .ok()?
+                        .to_trimmed_text(),
+                )
+            }) else {
                 return Ok(false);
             };
 
+            print!("{:?}", initializer_value.text());
             if initializer_value.text() != binding_value.text_trimmed() {
                 return Ok(false);
             }

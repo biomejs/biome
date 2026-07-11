@@ -2,19 +2,6 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/lib/biome.jsonc`
-
-```json
-{
-  "extends": "//",
-  "linter": {
-    "rules": {
-      "correctness": { "noUnusedVariables": "error" }
-    }
-  }
-}
-```
-
 ## `biome.jsonc`
 
 ```json
@@ -23,6 +10,19 @@ expression: redactor(content)
     "rules": {
       "correctness": { "noUnusedVariables": "off" },
       "suspicious": { "noDebugger": "off" }
+    }
+  }
+}
+```
+
+## `packages/lib/biome.jsonc`
+
+```json
+{
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "correctness": { "noUnusedVariables": "error" }
     }
   }
 }

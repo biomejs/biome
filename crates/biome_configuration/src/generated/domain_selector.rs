@@ -109,6 +109,8 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
+static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
+    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap")]);
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
@@ -175,6 +177,7 @@ impl DomainSelector {
             "react" => REACT_FILTERS.clone(),
             "reactNative" => REACTNATIVE_FILTERS.clone(),
             "solid" => SOLID_FILTERS.clone(),
+            "svelte" => SVELTE_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -203,6 +206,7 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule::<R>()),
             "solid" => SOLID_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
+            "svelte" => SVELTE_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "test" => TEST_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "turborepo" => TURBOREPO_FILTERS
                 .iter()

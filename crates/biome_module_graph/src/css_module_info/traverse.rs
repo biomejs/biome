@@ -120,21 +120,30 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                             })
                         })
                         .collect::<Vec<_>>(),
-                    ModuleInfoKind::Html(html_info) => html_info
-                        .imported_stylesheets
-                        .iter()
-                        .chain(html_info.static_import_paths.values())
-                        .chain(html_info.dynamic_import_paths.values())
-                        .filter_map(|stylesheet_path| {
-                            let path = stylesheet_path.as_path()?;
-                            let css_info = self.module_database.css_module_info_for_path(path)?;
+                    ModuleInfoKind::Html(html_info) => {
+                        let mut steps = html_info
+                            .imported_stylesheets
+                            .iter()
+                            .chain(html_info.static_import_paths.values())
+                            .chain(html_info.dynamic_import_paths.values())
+                            .filter_map(|stylesheet_path| {
+                                let path = stylesheet_path.as_path()?;
+                                let css_info =
+                                    self.module_database.css_module_info_for_path(path)?;
 
-                            Some(CssClassStep {
-                                css_path: path.to_path_buf(),
-                                css_classes: css_info.classes.clone(),
+                                Some(CssClassStep {
+                                    css_path: path.to_path_buf(),
+                                    css_classes: css_info.classes.clone(),
+                                })
                             })
-                        })
-                        .collect::<Vec<_>>(),
+                            .collect::<Vec<_>>();
+
+                        steps.push(CssClassStep {
+                            css_path: file_path.to_path_buf(),
+                            css_classes: html_info.get_global_styles(),
+                        });
+                        steps
+                    }
                     ModuleInfoKind::Css(_) => Vec::new(),
                 });
             }

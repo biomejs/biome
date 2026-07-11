@@ -11,7 +11,7 @@ impl FormatNodeRule<YamlBlockSequenceEntry> for FormatYamlBlockSequenceEntry {
         write!(f, [minus_token.format()])?;
 
         if let Some(value) = value {
-            write!(f, [space(), align(2, &value.format())])?;
+            write!(f, [space(), align("  ", &value.format())])?;
         }
 
         Ok(())

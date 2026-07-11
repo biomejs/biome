@@ -200,13 +200,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@221..222 "*" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@222..225 "not" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@225..226 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@226..234 "emphasis" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@222..234 "not-emphasis" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@234..235 "*" [] [],
@@ -478,13 +472,9 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@201..221 "https://example.com/" [] []
             1: MD_TEXTUAL@221..222
               0: MD_TEXTUAL_LITERAL@221..222 "*" [] []
-            2: MD_TEXTUAL@222..225
-              0: MD_TEXTUAL_LITERAL@222..225 "not" [] []
-            3: MD_TEXTUAL@225..226
-              0: MD_TEXTUAL_LITERAL@225..226 "-" [] []
-            4: MD_TEXTUAL@226..234
-              0: MD_TEXTUAL_LITERAL@226..234 "emphasis" [] []
-            5: MD_TEXTUAL@234..235
+            2: MD_TEXTUAL@222..234
+              0: MD_TEXTUAL_LITERAL@222..234 "not-emphasis" [] []
+            3: MD_TEXTUAL@234..235
               0: MD_TEXTUAL_LITERAL@234..235 "*" [] []
           2: R_ANGLE@235..236 ">" [] []
         2: MD_TEXTUAL@236..237

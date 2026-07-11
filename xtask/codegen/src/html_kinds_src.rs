@@ -10,6 +10,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("-", "MINUS"),
         ("<![CDATA[", "CDATA_START"),
         ("]]>", "CDATA_END"),
+        ("<?", "PI_START"),
+        ("?>", "PI_END"),
         ("---", "FENCE"),
         ("{", "L_CURLY"),
         ("}", "R_CURLY"),
@@ -103,6 +105,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_SPREAD_ATTRIBUTE",
         "HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION",
         "HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION",
+        "HTML_PROCESSING_INSTRUCTION",
         // Astro nodes
         "ASTRO_FRONTMATTER_ELEMENT",
         "ASTRO_EMBEDDED_CONTENT",

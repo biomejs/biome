@@ -4,6 +4,8 @@ use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::instrument;
 
+mod db;
+
 #[cfg(feature = "lang_css")]
 pub mod css;
 #[cfg(feature = "lang_graphql")]
@@ -37,6 +39,8 @@ pub use crate::json::JsonFileSource;
 pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
 pub use crate::yaml::YamlFileSource;
+
+pub use crate::db::LanguageDb;
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
 pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";

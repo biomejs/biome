@@ -21,8 +21,7 @@ info: yaml/spec/spec-example-7-23-flow-content.yml
 --- Prettier
 +++ Biome
 @@ -1,5 +1,5 @@
--- [a, b]
-+- [ a, b ]
+ - [a, b]
  - { a: b }
  - "a"
 -- "b"
@@ -33,7 +32,7 @@ info: yaml/spec/spec-example-7-23-flow-content.yml
 # Output
 
 ```yml
-- [ a, b ]
+- [a, b]
 - { a: b }
 - "a"
 - 'b'

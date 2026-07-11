@@ -90,7 +90,7 @@ impl Rule for UseVueValidVFor {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let directive = ctx.query();
-        if directive.name_token().ok()?.text_trimmed() != "v-for" {
+        if !directive.is_for() {
             return None;
         }
 
@@ -243,9 +243,7 @@ fn validate_secondary_binding(
 }
 
 /// "Iteration bindings" are the bindings introduced by the v-for directive.
-fn collect_iteration_bindings(
-    value: &VueVForValue,
-) -> impl Iterator<Item = TokenText> + '_ {
+fn collect_iteration_bindings(value: &VueVForValue) -> impl Iterator<Item = TokenText> + '_ {
     value
         .binding()
         .ok()
@@ -367,10 +365,7 @@ fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
             continue;
         };
 
-        if directive
-            .name_token()
-            .is_ok_and(|token| token.text_trimmed() == "v-for")
-        {
+        if directive.is_for() {
             return Some(directive.clone());
         }
     }

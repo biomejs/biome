@@ -3,6 +3,7 @@
 pub(crate) mod autolink;
 pub(crate) mod bullet;
 pub(crate) mod bullet_list_item;
+pub(crate) mod code_content;
 pub(crate) mod continuation_indent;
 pub(crate) mod document;
 pub(crate) mod entity_reference;
@@ -11,6 +12,7 @@ pub(crate) mod hard_line;
 pub(crate) mod hash;
 pub(crate) mod header;
 pub(crate) mod html_block;
+pub(crate) mod html_content;
 pub(crate) mod indent_code_block;
 pub(crate) mod indent_token;
 pub(crate) mod inline_code;

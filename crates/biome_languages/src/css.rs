@@ -55,6 +55,16 @@ pub enum EmbeddingStyleApplicability {
     Unknown,
 }
 
+impl EmbeddingStyleApplicability {
+    pub const fn is_local(&self) -> bool {
+        matches!(self, EmbeddingStyleApplicability::Local)
+    }
+
+    pub const fn is_global(&self) -> bool {
+        matches!(self, EmbeddingStyleApplicability::Global)
+    }
+}
+
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,

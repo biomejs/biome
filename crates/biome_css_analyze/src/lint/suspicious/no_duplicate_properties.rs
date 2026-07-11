@@ -12,7 +12,7 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow duplicate properties within declaration blocks.
     ///
-    /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties.
+    /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties and declarations inside `@keyframes` blocks.
     ///
     /// ## Examples
     ///

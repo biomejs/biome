@@ -387,6 +387,7 @@ fn media_feature_name_from_query_name(name: AnyCssQueryFeatureName) -> Option<Me
         AnyCssQueryFeatureName::CssIdentifier(identifier) => Some(MediaFeatureName::Literal(
             identifier.value_token().ok()?.token_text_trimmed(),
         )),
-        AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_) => Some(MediaFeatureName::Dynamic),
+        AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
+        | AnyCssQueryFeatureName::ScssVariable(_) => Some(MediaFeatureName::Dynamic),
     }
 }

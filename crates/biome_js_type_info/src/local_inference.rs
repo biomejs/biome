@@ -606,7 +606,7 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(resolver, scope_id, &inner)
                 } else {
-                    Self::unknown()
+                    Self::from_any_ts_type(resolver, scope_id, &annotation)
                 }
             }
             AnyJsExpression::TsTypeAssertionExpression(expr) => {
@@ -619,7 +619,7 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(resolver, scope_id, &inner)
                 } else {
-                    Self::unknown()
+                    Self::from_any_ts_type(resolver, scope_id, &annotation)
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {

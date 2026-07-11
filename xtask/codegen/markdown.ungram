@@ -130,12 +130,15 @@ MdFencedCodeBlock =
 
 MdCodeNameList = MdTextual*
 
+MdCodeContent = value: 'md_code_literal'
+
 // <div>
 // ^^^^^
-// html block - content is stored as raw text (multiple textual tokens)
 MdHtmlBlock =
 	indent: MdIndentTokenList
-	content: MdInlineItemList
+	content: MdHtmlContent
+
+MdHtmlContent = value: 'md_html_literal'
 
 // [foo]: /url "title"
 // ^^^^^^^^^^^^^^^^^^^
@@ -258,6 +261,7 @@ AnyMdInline =
 	| MdInlineHtml
 	| MdEntityReference
 	| MdHtmlBlock
+	| MdCodeContent
 	| MdHardLine
 	| MdTextual
 	| MdQuotePrefix

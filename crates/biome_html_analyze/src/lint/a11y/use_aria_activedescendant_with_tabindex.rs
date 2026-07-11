@@ -77,7 +77,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         let element = ctx.query();
 
         // Must have aria-activedescendant attribute
-        element.find_attribute_by_name("aria-activedescendant")?;
+        element.find_attribute_or_vue_binding("aria-activedescendant")?;
 
         let source_type = ctx.source_type::<HtmlFileSource>();
 
@@ -93,13 +93,13 @@ impl Rule for UseAriaActivedescendantWithTabindex {
 
         // Skip anchor elements with href (natively focusable)
         if is_html_tag(element, source_type, "a")
-            && element.find_attribute_by_name("href").is_some()
+            && element.find_attribute_or_vue_binding("href").is_some()
         {
             return None;
         }
 
         // Check if tabindex is already present
-        if element.find_attribute_by_name("tabindex").is_some() {
+        if element.find_attribute_or_vue_binding("tabindex").is_some() {
             return None;
         }
 

@@ -48,6 +48,51 @@ Module TypeId(1) => sync Function "bar" {
 }
 ```
 
+# `/src/foo.ts` (Module 2)
+
+## Source
+
+```ts
+export function foo(): number {
+	return 1;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(25..28)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+foo => BindingTypeData {
+  Types Module(0) TypeId(1),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number: 1
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+```
+
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -92,51 +137,6 @@ Module TypeId(2) => Import Symbol: All from "/src/reexports.ts"
 Module TypeId(3) => Module(0) TypeId(2).bar
 
 Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
-```
-
-# `/src/foo.ts` (Module 2)
-
-## Source
-
-```ts
-export function foo(): number {
-	return 1;
-}
-```
-
-## Module Info
-
-```
-Exports {
-  "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(25..28)
-  }
-}
-Imports {
-  No imports
-}
-```
-
-## Exported Bindings
-
-```
-foo => BindingTypeData {
-  Types Module(0) TypeId(1),
-}
-```
-
-## Registered types
-
-```
-Module TypeId(0) => number: 1
-
-Module TypeId(1) => sync Function "foo" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: number
-}
 ```
 
 # `/src/reexports.ts` (Module 1)

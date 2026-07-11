@@ -1,16 +1,29 @@
 use crate::file_handlers::html::is_component_element;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
-use crate::workspace::{DefinitionReference, GoToDefinitionResult, LocalEmbeddedLanguage};
+#[cfg(feature = "html_embeds")]
+use crate::workspace::LocalEmbeddedLanguage;
+use crate::workspace::{DefinitionReference, GoToDefinitionResult};
+#[cfg(feature = "module_graph")]
 use biome_fs::BiomePath;
-use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlAttribute, HtmlComponentName, HtmlRoot, HtmlTextExpression,
-};
+use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
+#[cfg(feature = "html_embeds")]
+use biome_html_syntax::{HtmlComponentName, HtmlTextExpression};
+#[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleDb;
-use biome_rowan::{AstNode, TextRange, TokenAtOffset};
+#[cfg(feature = "module_graph")]
+use biome_rowan::TextRange;
+use biome_rowan::{AstNode, TokenAtOffset};
+#[cfg(feature = "module_graph")]
+use biome_workspace_db::WorkspaceDb;
+#[cfg(feature = "html_embeds")]
+use biome_workspace_db::embedded::bindings::{
+    InternedBindingTokenText, get_binding_by_token_text, get_binding_with_source,
+};
+#[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let root: HtmlRoot = params.parse.tree();
+    let root: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
     let token = match root.syntax().token_at_offset(params.cursor_offset) {
         TokenAtOffset::Single(token) => token,
@@ -70,27 +83,39 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
         }
 
         // This branch is responsible for resolving component names.
+        #[cfg(feature = "html_embeds")]
         if let Some(element) = HtmlComponentName::cast_ref(&ancestor)
-            && let Some(embedded_bindings) = params.services.embedded_bindings()
             && let Some(element_value) = element.value_token().ok()
-            && let Some(binding) =
-                embedded_bindings.get_binding_with_source(element_value.text_trimmed())
-            && let Some(source) = binding.source()
+            && let Some(binding) = get_binding_with_source(
+                &params.workspace_db,
+                InternedBindingTokenText::new(
+                    &params.workspace_db,
+                    params.path.clone(),
+                    element_value.token_text_trimmed(),
+                ),
+            )
+            && let Some(source) = binding.source.as_ref()
         {
             return Some(DefinitionReference::HtmlComponent {
-                local_name: binding.token_text().to_string(),
+                local_name: binding.text.to_string(),
                 source: source.to_string(),
             });
         }
 
+        #[cfg(feature = "html_embeds")]
         if let Some(element) = HtmlTextExpression::cast_ref(&ancestor)
-            && let Some(embedded_bindings) = params.services.embedded_bindings()
             && let Some(element_value) = element.html_literal_token().ok()
-            && let Some(binding) =
-                embedded_bindings.get_binding_by_name(element_value.text_trimmed())
+            && let Some(binding) = get_binding_by_token_text(
+                &params.workspace_db,
+                InternedBindingTokenText::new(
+                    &params.workspace_db,
+                    params.path.clone(),
+                    element_value.token_text_trimmed(),
+                ),
+            )
         {
             return Some(DefinitionReference::LocalEmbedded {
-                range: *binding.range(),
+                range: binding.range,
                 to_language: LocalEmbeddedLanguage::Js,
             });
         }
@@ -100,17 +125,23 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
 }
 
 pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
+    #[cfg(feature = "module_graph")]
     let mut result = GoToDefinitionResult::default();
+    #[cfg(not(feature = "module_graph"))]
+    let result = GoToDefinitionResult::default();
     match params.definition_ref {
+        #[cfg(feature = "module_graph")]
         DefinitionReference::HtmlComponent { local_name, source } => {
             resolve_import_definition(
                 local_name,
                 source,
                 params.path.as_path(),
-                params.module_db,
+                &params.workspace_db,
                 &mut result,
             );
         }
+        #[cfg(not(feature = "module_graph"))]
+        DefinitionReference::HtmlComponent { .. } => return None,
         DefinitionReference::Local { .. }
         | DefinitionReference::Import { .. }
         | DefinitionReference::CssClass { .. }
@@ -120,11 +151,12 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
     Some(result)
 }
 
+#[cfg(feature = "module_graph")]
 fn resolve_import_definition(
     _local_name: &str,
     source: &str,
     current_path: &Utf8Path,
-    module_db: &dyn ModuleDb,
+    module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
     let module_info = module_db.html_module_info_for_path(current_path)?;

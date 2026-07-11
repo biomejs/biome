@@ -89,29 +89,42 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
             return p.line_start_leading_indent();
         }
 
-        // If the current token still contains the preserved pre-marker
-        // indentation, measure to the first non-whitespace character on the
-        // line. Measuring to the current token start would incorrectly report
-        // column 0 for nested list markers.
-        if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            return p.line_start_leading_indent();
-        }
-
-        // Virtual line start: compute actual column from source text.
-        // The leading whitespace was consumed as trivia, but we need the
-        // real column for indented code block detection in nested lists.
         let source = p.source().source_text();
         let pos: usize = p.cur_range().start().into();
 
         // Find the start of the current line
         let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
 
-        // Count columns from line start to current position
+        // Whether the line's leading whitespace (the run before the first
+        // non-whitespace character) contains a tab. This is true both when the
+        // tab sits before the cursor and when it is the current token itself.
+        let leading_has_tab = source[line_start..]
+            .chars()
+            .take_while(|c| matches!(c, ' ' | '\t'))
+            .any(|c| c == '\t');
+
+        if !leading_has_tab {
+            // Pure-space indentation: keep the original behavior. When the
+            // current token still carries the pre-marker indentation, measure
+            // to the first non-whitespace via the standard helper; otherwise
+            // count characters up to the cursor (no tabs means each one
+            // advances the column by one).
+            if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                return p.line_start_leading_indent();
+            }
+            return source[line_start..pos].chars().count();
+        }
+
+        // Leading whitespace contains a tab: compute the marker column across
+        // the full run, because part of the whitespace may already be consumed
+        // as trivia. For ` \t- foo`, the tab expands to column 4 regardless of
+        // the consumed space, so the marker indent is 4, not 1.
         let mut column = 0;
-        for c in source[line_start..pos].chars() {
+        for c in source[line_start..].chars() {
             match c {
                 '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
-                _ => column += 1,
+                ' ' => column += 1,
+                _ => break,
             }
         }
         column
@@ -159,6 +172,60 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
     }
 }
 
+/// Detect a sibling list item at the enclosing item's marker indent.
+///
+/// `at_bullet_list_item` and `at_order_list_item` check from the content indent,
+/// which suits child detection but misses siblings when the marker is followed
+/// by more than one space or a tab, since the marker indent then sits below the
+/// content indent.
+///
+/// Returns true only when an enclosing list item exists and a bullet or ordered
+/// marker sits on the current line at that indent.
+pub(crate) fn at_sibling_list_marker(p: &mut MarkdownParser) -> bool {
+    let marker_indent = p.state().list_item_marker_indent;
+    if marker_indent == 0 {
+        return false;
+    }
+    p.lookahead(|p| {
+        if !p.at_line_start() {
+            return false;
+        }
+        let indent = p.line_start_leading_indent();
+        if indent != marker_indent {
+            return false;
+        }
+        skip_leading_whitespace_tokens(p);
+
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            if !is_single_dash_setext_marker(p.cur_text()) {
+                return false;
+            }
+            p.bump_remap(T![-]);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
+            let text = p.cur_text();
+            p.bump_remap(if text == "-" {
+                T![-]
+            } else if text == "*" {
+                T![*]
+            } else {
+                T![+]
+            });
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+        false
+    })
+}
+
 fn skip_list_marker_indent(p: &mut MarkdownParser) {
     // Consume whitespace as whitespace trivia (structural, no skipped trivia).
     while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
@@ -174,20 +241,30 @@ fn skip_list_marker_indent(p: &mut MarkdownParser) {
 fn emit_indent_char_list(p: &mut MarkdownParser, max_columns: usize) -> usize {
     let list_m = p.start();
     let mut consumed = 0usize;
-    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        let text = p.cur_text();
-        let width: usize = text
-            .chars()
-            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-            .sum();
-        if max_columns > 0 && consumed + width > max_columns {
-            break;
+
+    // Indentation arrives as one whitespace token per character; measure the
+    // run on the source and consume it as a single MdIndentToken.
+    if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        let mut len = 0usize;
+        for byte in p.source_after_current().bytes() {
+            let width = match byte {
+                b' ' => 1,
+                b'\t' => TAB_STOP_SPACES,
+                _ => break,
+            };
+            if max_columns > 0 && consumed + width > max_columns {
+                break;
+            }
+            consumed += width;
+            len += 1;
         }
-        consumed += width;
-        let char_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        char_m.complete(p, MD_INDENT_TOKEN);
+
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
+
     list_m.complete(p, MD_INDENT_TOKEN_LIST);
     consumed
 }
@@ -785,9 +862,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     let marker_width = 1;
 
     // Bump the bullet marker
-    let mut setext_marker = false;
     if p.at(MD_SETEXT_UNDERLINE_LITERAL) && is_single_dash_setext_marker(p.cur_text()) {
-        setext_marker = true;
         p.bump_remap(T![-]);
     } else if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
         let text = p.cur_text();
@@ -807,32 +882,23 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     }
 
     // Count spaces BEFORE consuming (peek from source text)
-    let spaces_after_marker = if setext_marker {
-        0
-    } else {
-        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width)
-    };
+    let spaces_after_marker =
+        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
 
-    let first_line_empty = if setext_marker {
-        true
-    } else {
-        p.lookahead(|p| {
-            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        })
-    };
+    let first_line_empty = p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        p.at(NEWLINE) || p.at(T![EOF])
+    });
 
     // Post-marker space (first whitespace token after marker)
-    if !setext_marker {
-        emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
-    }
+    emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
 
     // Content indent (remaining whitespace tokens on first line).
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if !setext_marker && !first_line_empty && spaces_after_marker > 1 {
+    if spaces_after_marker > 1 {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {
@@ -851,11 +917,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
 
-    let effective_spaces = if setext_marker {
-        0
-    } else {
-        spaces_after_marker
-    };
+    let effective_spaces = spaces_after_marker;
 
     p.state_mut().list_item_required_indent =
         if effective_spaces > INDENT_CODE_BLOCK_SPACES || first_line_empty {
@@ -1163,7 +1225,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     // Content indent.
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if !first_line_empty && spaces_after_marker > 1 {
+    if spaces_after_marker > 1 {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {
@@ -2392,30 +2454,27 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
     dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
-fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, mut byte_count: usize) {
+fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, byte_count: usize) {
     let list_m = p.start();
-    while byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if !text.is_empty()
-            && text.starts_with([' ', '\t'])
-            && !text.chars().all(|c| c == ' ' || c == '\t')
-        {
-            let old_range = p.cur_range();
-            p.re_lex(MarkdownReLexContext::ListPostMarker);
-            if p.cur_range() == old_range {
-                break;
-            }
-            continue;
-        }
-        if !text.chars().all(|c| c == ' ' || c == '\t') {
-            break;
-        }
 
-        byte_count = byte_count.saturating_sub(text.len());
-        let token_m = p.start();
-        p.bump_remap(MD_INDENT_CHAR);
-        token_m.complete(p, MD_INDENT_TOKEN);
+    // Indentation may arrive as per-character tokens or bundled together
+    // with marker text in one token (for example "  1. child"). Measure the
+    // whitespace prefix on the source and consume up to `byte_count` bytes
+    // of it as a single MdIndentToken, regardless of how it was tokenized.
+    if byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with([' ', '\t']) {
+        let len = p
+            .source_after_current()
+            .bytes()
+            .take(byte_count)
+            .take_while(|byte| matches!(byte, b' ' | b'\t'))
+            .count();
+
+        if len > 0 {
+            let end = p.cur_range().start() + TextSize::from(len as u32);
+            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
+        }
     }
+
     list_m.complete(p, MD_INDENT_TOKEN_LIST);
 }
 
@@ -2484,6 +2543,14 @@ fn emit_required_continuation_indent(p: &mut MarkdownParser, indent: usize) {
 /// Parse an ATX heading on the first line of list item content.
 /// Returns `true` if a heading was parsed.
 fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> bool {
+    // Inside a list item, `# Bar` sits mid-line, so the lexer produces one
+    // plain-text token for it. Re-lex it as if it were at a line start so the
+    // `#` becomes its own token again (same approach as quote.rs).
+    // This must happen before the lookahead below, because re-lexing clears
+    // any buffered lookahead.
+    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('#') {
+        p.force_relex_at_line_start();
+    }
     let atx_heading_info = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);

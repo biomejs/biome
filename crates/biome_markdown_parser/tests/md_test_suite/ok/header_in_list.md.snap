@@ -79,10 +79,7 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
                                 },
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@14..16 "  " [] [],
                                 },
                             ],
                             underline_token: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] [],
@@ -93,10 +90,7 @@ MdDocument {
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
-                                },
-                                MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@21..22 " " [] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@20..22 "  " [] [],
                                 },
                             ],
                         },
@@ -364,19 +358,15 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@10..13 "Bar" [] []
                 1: MD_TEXTUAL@13..14
                   0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-                2: MD_INDENT_TOKEN@14..15
-                  0: MD_INDENT_CHAR@14..15 " " [] []
-                3: MD_INDENT_TOKEN@15..16
-                  0: MD_INDENT_CHAR@15..16 " " [] []
+                2: MD_INDENT_TOKEN@14..16
+                  0: MD_INDENT_CHAR@14..16 "  " [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] []
             1: MD_NEWLINE@19..20
               0: NEWLINE@19..20 "\n" [] []
             2: MD_CONTINUATION_INDENT@20..22
               0: MD_INDENT_TOKEN_LIST@20..22
-                0: MD_INDENT_TOKEN@20..21
-                  0: MD_INDENT_CHAR@20..21 " " [] []
-                1: MD_INDENT_TOKEN@21..22
-                  0: MD_INDENT_CHAR@21..22 " " [] []
+                0: MD_INDENT_TOKEN@20..22
+                  0: MD_INDENT_CHAR@20..22 "  " [] []
             3: MD_PARAGRAPH@22..26
               0: MD_INLINE_ITEM_LIST@22..26
                 0: MD_TEXTUAL@22..25

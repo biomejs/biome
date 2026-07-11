@@ -99,8 +99,8 @@ impl Rule for UseScopedStyles {
 
         let attributes = opening.attributes();
         if source_type.is_vue() {
-            let has_scoped = attributes.find_by_name("scoped").is_some();
-            let has_module = attributes.find_by_name("module").is_some();
+            let has_scoped = attributes.find_attribute_by_name("scoped").is_some();
+            let has_module = attributes.find_attribute_by_name("module").is_some();
 
             if has_scoped || has_module {
                 return None;

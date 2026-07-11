@@ -13,7 +13,10 @@ use std::time::Duration;
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
-    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
+    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {
+        assert_lex!(MarkdownLexContext::default(), $src, $($kind:$len,)*)
+    };
+    ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
         let mut lexer = MarkdownLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
@@ -21,7 +24,7 @@ macro_rules! assert_lex {
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        while lexer.next_token($context) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
@@ -262,15 +265,15 @@ fn star_token_single() {
 
 #[test]
 fn brackets() {
-    // Brackets for links - text is grouped into single tokens
+    // Brackets for links - text is grouped into single tokens.
+    // Parens are plain text in Regular context; the parser re-lexes the
+    // link tail in LinkDefinition context to get L_PAREN/R_PAREN tokens.
     assert_lex! {
         "[text](url)",
         L_BRACK:1,
         MD_TEXTUAL_LITERAL:4, // "text" grouped
         R_BRACK:1,
-        L_PAREN:1,
-        MD_TEXTUAL_LITERAL:3, // "url" grouped
-        R_PAREN:1,
+        MD_TEXTUAL_LITERAL:5, // "(url)" grouped
     }
 }
 
@@ -279,22 +282,22 @@ fn bang_token() {
     // Exclamation for images
     assert_lex! {
         "!",
-        BANG:1,
+        MD_TEXTUAL_LITERAL:1,
     }
 }
 
 #[test]
 fn image_syntax() {
-    // Image syntax - text is grouped into single tokens
+    // Image syntax - text is grouped into single tokens.
+    // Parens are plain text in Regular context; the parser re-lexes the
+    // link tail in LinkDefinition context to get L_PAREN/R_PAREN tokens.
     assert_lex! {
         "![alt](src)",
         BANG:1,
         L_BRACK:1,
         MD_TEXTUAL_LITERAL:3, // "alt" grouped
         R_BRACK:1,
-        L_PAREN:1,
-        MD_TEXTUAL_LITERAL:3, // "src" grouped
-        R_PAREN:1,
+        MD_TEXTUAL_LITERAL:5, // "(src)" grouped
     }
 }
 
@@ -449,6 +452,19 @@ fn ordered_list_marker_dot() {
 }
 
 #[test]
+fn ordered_list_marker_only_padding_is_split() {
+    // Marker-only padding belongs to the list prefix, not an inline hard break.
+    assert_lex! {
+        "1.   \n",
+        MD_ORDERED_LIST_MARKER:2,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
 fn ordered_list_marker_paren() {
     // Ordered list marker with parenthesis
     assert_lex! {
@@ -525,6 +541,23 @@ fn setext_underline_dashes() {
         "--\n",
         MD_SETEXT_UNDERLINE_LITERAL:2,
         NEWLINE:1,
+    }
+
+    // Trailing whitespace is allowed for setext underlines, but it must remain
+    // separate so a single-dash line can still be parsed as an empty list item.
+    assert_lex! {
+        "-   \n",
+        MD_SETEXT_UNDERLINE_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
+    }
+
+    assert_lex! {
+        "--  \n",
+        MD_SETEXT_UNDERLINE_LITERAL:2,
+        MD_HARD_LINE_LITERAL:3,
     }
 
     // Three+ dashes is a thematic break at lexer level
@@ -606,6 +639,28 @@ fn vertical_tab_at_line_start() {
         "text\n\u{b}more",
         MD_TEXTUAL_LITERAL:4,
         NEWLINE:1,
+        MD_TEXTUAL_LITERAL:5,
+    }
+}
+
+#[test]
+fn parens_are_tokens_in_link_definition_context() {
+    // In Regular context parens are plain text, but inside link destinations
+    // and titles the parser lexes with the LinkDefinition context, where `(`
+    // and `)` are proper bracket tokens as required by the MdInlineLink and
+    // MdLinkReferenceDefinition grammar.
+    assert_lex! {
+        MarkdownLexContext::LinkDefinition,
+        "(url)",
+        L_PAREN:1,
+        MD_TEXTUAL_LITERAL:3, // "url"
+        R_PAREN:1,
+    }
+
+    // The same input in Regular context is a single plain-text token.
+    assert_lex! {
+        MarkdownLexContext::Regular,
+        "(url)",
         MD_TEXTUAL_LITERAL:5,
     }
 }

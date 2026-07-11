@@ -215,9 +215,11 @@ fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
 }
 
 /// Check if at a title start token.
+/// Text-based checks cover both L_PAREN tokens (LinkDefinition context)
+/// and plain-text tokens starting with `(` (Regular context).
 fn at_title_start(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
-    text.starts_with('"') || text.starts_with('\'') || p.at(L_PAREN)
+    text.starts_with('"') || text.starts_with('\'') || text.starts_with('(')
 }
 
 /// Result of skipping destination tokens.
@@ -336,7 +338,7 @@ fn skip_title_tokens(p: &mut MarkdownParser) -> bool {
         '"'
     } else if p.cur_text().starts_with('\'') {
         '\''
-    } else if p.at(L_PAREN) {
+    } else if p.cur_text().starts_with('(') {
         ')'
     } else {
         return false;
@@ -522,8 +524,50 @@ fn parse_link_destination(p: &mut MarkdownParser) {
         }
     }
 
+    consume_trailing_destination_whitespace(p);
+
     list.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_LINK_DESTINATION);
+}
+
+fn consume_trailing_destination_whitespace(p: &mut MarkdownParser) {
+    let should_consume = p.lookahead(|p| {
+        let mut saw_whitespace = false;
+        while is_space_or_tab_token(p) {
+            p.bump_link_definition();
+            saw_whitespace = true;
+        }
+
+        if !saw_whitespace {
+            return false;
+        }
+
+        if p.at(EOF) {
+            return true;
+        }
+
+        if p.at(NEWLINE) {
+            if p.at_blank_line() {
+                return true;
+            }
+
+            if !title_on_next_line(p) {
+                return true;
+            }
+
+            p.bump_link_definition();
+            skip_whitespace_tokens(p);
+            !skip_title_tokens(p)
+        } else {
+            false
+        }
+    });
+
+    if should_consume {
+        while is_space_or_tab_token(p) {
+            bump_textual_link_def(p);
+        }
+    }
 }
 
 /// Consume the current token as MdTextual using LinkDefinition context.
@@ -545,7 +589,7 @@ fn at_link_title(p: &mut MarkdownParser) -> bool {
             p.bump_link_definition();
         }
         let text = p.cur_text();
-        text.starts_with('"') || text.starts_with('\'') || p.at(L_PAREN)
+        text.starts_with('"') || text.starts_with('\'') || text.starts_with('(')
     })
 }
 
@@ -657,12 +701,10 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
             break;
         }
 
-        // Check for closing delimiter (must be unescaped)
-        let is_close = if close_char == ')' {
-            p.at(R_PAREN)
-        } else {
-            ends_with_unescaped_close(p.cur_text(), close_char)
-        };
+        // Check for closing delimiter (must be unescaped).
+        // Text-based for all delimiters: in Regular context `)` is part of a
+        // plain-text token, and an R_PAREN token's text is `)` anyway.
+        let is_close = ends_with_unescaped_close(p.cur_text(), close_char);
         if is_close {
             // Use Regular context for title content
             bump_textual(p);

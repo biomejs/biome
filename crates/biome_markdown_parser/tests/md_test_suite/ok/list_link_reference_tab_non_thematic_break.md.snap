@@ -65,13 +65,7 @@ MdDocument {
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@13..14 "-" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@14..15 "-" [] [],
-                                },
-                                MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@15..16 "x" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@13..16 "--x" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
@@ -126,13 +120,9 @@ MdDocument {
                   0: MD_INDENT_CHAR@12..13 "\t" [] []
             3: MD_PARAGRAPH@13..17
               0: MD_INLINE_ITEM_LIST@13..17
-                0: MD_TEXTUAL@13..14
-                  0: MD_TEXTUAL_LITERAL@13..14 "-" [] []
-                1: MD_TEXTUAL@14..15
-                  0: MD_TEXTUAL_LITERAL@14..15 "-" [] []
-                2: MD_TEXTUAL@15..16
-                  0: MD_TEXTUAL_LITERAL@15..16 "x" [] []
-                3: MD_TEXTUAL@16..17
+                0: MD_TEXTUAL@13..16
+                  0: MD_TEXTUAL_LITERAL@13..16 "--x" [] []
+                1: MD_TEXTUAL@16..17
                   0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
   2: EOF@17..17 "" [] []
 

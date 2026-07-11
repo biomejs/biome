@@ -61,10 +61,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@56..57 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@57..58 " " [] [],
+                            value_token: MD_TEXTUAL_LITERAL@56..58 "  " [] [],
                         },
                     ],
                     title: MdLinkTitle {
@@ -277,10 +274,8 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@51..55 "/uri" [] []
             2: MD_TEXTUAL@55..56
               0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
-            3: MD_TEXTUAL@56..57
-              0: MD_TEXTUAL_LITERAL@56..57 " " [] []
-            4: MD_TEXTUAL@57..58
-              0: MD_TEXTUAL_LITERAL@57..58 " " [] []
+            3: MD_TEXTUAL@56..58
+              0: MD_TEXTUAL_LITERAL@56..58 "  " [] []
           5: MD_LINK_TITLE@58..67
             0: MD_INLINE_ITEM_LIST@58..67
               0: MD_TEXTUAL@58..65

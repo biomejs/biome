@@ -41,7 +41,7 @@ smallvec                 = { workspace = true }
 
 [dev-dependencies]
 biome_html_parser = { path = "../biome_html_parser" }
-biome_test_utils  = { path = "../biome_test_utils" }
+biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
