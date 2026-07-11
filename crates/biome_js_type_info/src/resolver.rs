@@ -749,11 +749,11 @@ pub trait TypeResolver {
     }
 
     /// Whether resolving a qualifier with type arguments eagerly expands a generic alias
-    /// application into its substituted body. Defaults to `true`. Resolvers that defer
-    /// expansion to a later stage override this to `false` and keep the application as
-    /// `InstanceOf(target, args)`.
+    /// application into its substituted body. Defaults to `false`: the application is kept
+    /// as `InstanceOf(target, args)` and expanded later, when its targets are resolvable.
+    /// Resolvers that expand during resolution override this to `true`.
     fn should_instantiate_generic_qualifiers(&self) -> bool {
-        true
+        false
     }
 
     // #region Utilities for test inspection

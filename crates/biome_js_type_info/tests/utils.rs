@@ -142,6 +142,11 @@ impl TypeResolver for HardcodedSymbolResolver {
         TypeResolverLevel::Thin
     }
 
+    /// The harness resolves everything it knows up front, so applications expand eagerly.
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        true
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types
             .iter()

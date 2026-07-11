@@ -723,6 +723,11 @@ impl TypeResolver for LazyInstantiationResolver<'_> {
         self.resolver.level()
     }
 
+    /// Materialization runs after the freeze, so nested applications are expanded right away.
+    fn should_instantiate_generic_qualifiers(&self) -> bool {
+        true
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.resolver.find_type(type_data)
     }
@@ -850,11 +855,6 @@ impl TypeResolver for ModuleResolver {
             return self.register_lazy_type(type_data);
         }
         self.types.insert_cow(type_data)
-    }
-
-    /// Expansion happens through the lazy instantiation path instead, memoized per application.
-    fn should_instantiate_generic_qualifiers(&self) -> bool {
-        false
     }
 
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {

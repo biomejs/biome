@@ -1019,11 +1019,6 @@ impl TypeResolver for JsModuleInfoCollector {
         }
     }
 
-    /// Cross-module targets only resolve later, so collection keeps applications deferred.
-    fn should_instantiate_generic_qualifiers(&self) -> bool {
-        false
-    }
-
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
