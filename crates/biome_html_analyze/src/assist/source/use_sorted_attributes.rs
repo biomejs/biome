@@ -364,30 +364,31 @@ impl SortableHtmlAttribute {
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                if let Some(arg) = dir.arg().ok().and_then(|arg| arg.arg()) {
-                    match arg {
-                        AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => {
-                            SortCategory::Unknown
-                        }
-                        AnyVueDirectiveArgument::VueDynamicArgument(_) => {
-                            SortCategory::VueOtherAttribute
-                        }
-                        AnyVueDirectiveArgument::VueStaticArgument(arg) => {
-                            if let Ok(arg_name) =
-                                arg.name_token().as_ref().map(|token| token.text_trimmed())
-                            {
-                                match arg_name {
-                                    "is" => SortCategory::VueDefinition,
-                                    "key" => SortCategory::VueUnique,
-                                    _ => SortCategory::VueOtherAttribute,
-                                }
-                            } else {
-                                SortCategory::VueCustomDirective
+                let Ok(directive_arg) = dir.arg() else {
+                    return SortCategory::VueCustomDirective;
+                };
+                // Argument-less `:="props"` is equivalent to `v-bind="props"`.
+                let Some(arg) = directive_arg.arg() else {
+                    return SortCategory::VueOtherAttribute;
+                };
+                match arg {
+                    AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => SortCategory::Unknown,
+                    AnyVueDirectiveArgument::VueDynamicArgument(_) => {
+                        SortCategory::VueOtherAttribute
+                    }
+                    AnyVueDirectiveArgument::VueStaticArgument(arg) => {
+                        if let Ok(arg_name) =
+                            arg.name_token().as_ref().map(|token| token.text_trimmed())
+                        {
+                            match arg_name {
+                                "is" => SortCategory::VueDefinition,
+                                "key" => SortCategory::VueUnique,
+                                _ => SortCategory::VueOtherAttribute,
                             }
+                        } else {
+                            SortCategory::VueCustomDirective
                         }
                     }
-                } else {
-                    SortCategory::VueCustomDirective
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVOnShorthandDirective(_)) => {
