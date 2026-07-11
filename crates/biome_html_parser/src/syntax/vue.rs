@@ -169,9 +169,13 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
         return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
     }
-    parse_vue_dynamic_argument(p)
-        .or_else(|| parse_vue_static_argument(p))
-        .ok();
+    // `:="props"` (argument-less v-bind shorthand) is valid Vue syntax, identical
+    // to `v-bind="props"` -- the argument is optional here, unlike in v-on/v-slot.
+    if p.at(T!['[']) || p.at(HTML_LITERAL) {
+        parse_vue_dynamic_argument(p)
+            .or_else(|| parse_vue_static_argument(p))
+            .ok();
+    }
 
     Present(m.complete(p, VUE_DIRECTIVE_ARGUMENT))
 }

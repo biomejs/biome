@@ -364,7 +364,7 @@ impl SortableHtmlAttribute {
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                if let Ok(arg) = dir.arg().and_then(|arg| arg.arg()) {
+                if let Some(arg) = dir.arg().ok().and_then(|arg| arg.arg()) {
                     match arg {
                         AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => {
                             SortCategory::Unknown
@@ -485,13 +485,12 @@ impl SortableAttribute for SortableHtmlAttribute {
                     "v-on" | "v-bind" | "v-slot" => dir
                         .arg()?
                         .arg()
-                        .ok()
                         .and_then(|arg| vue_directive_arg_token(&arg)),
                     _ => dir.name_token().ok(),
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                vue_directive_arg_token(&dir.arg().ok()?.arg().ok()?)
+                vue_directive_arg_token(&dir.arg().ok()?.arg()?)
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVSlotShorthandDirective(dir)) => {
                 vue_directive_arg_token(&dir.arg().ok()?)
