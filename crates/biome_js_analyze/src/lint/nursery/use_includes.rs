@@ -1,16 +1,18 @@
 use crate::JsRuleAction;
+use crate::services::typed::Typed;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, JsArrowFunctionExpression, JsBinaryExpression,
-    JsBinaryOperator, JsCallExpression, JsFunctionExpression, JsReferenceIdentifier, T,
+    AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
+    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
+    JsFunctionBody, JsFunctionExpression, JsIdentifierBinding, JsParameters, JsReferenceIdentifier,
+    T,
 };
 use biome_js_type_info::{ResolvedTypeData, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, declare_node_union};
-use crate::services::typed::Typed;
 
 declare_lint_rule! {
     /// Prefer `Array#includes()` over `Array#indexOf()` checks.
@@ -84,7 +86,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub UseIncludesQuery = JsBinaryExpression | JsCallExpression
+    pub AnyUseIncludesExpression = JsBinaryExpression | JsCallExpression
 }
 
 /// Whether the pattern represents a presence or absence check.
@@ -134,31 +136,26 @@ pub enum UseIncludesState {
 use biome_rule_options::use_includes::UseIncludesOptions;
 
 impl Rule for UseIncludes {
-    type Query = Typed<UseIncludesQuery>;
+    type Query = Typed<AnyUseIncludesExpression>;
     type State = UseIncludesState;
     type Signals = Option<Self::State>;
     type Options = UseIncludesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {
-            UseIncludesQuery::JsBinaryExpression(binary) => detect_index_of_pattern(ctx, binary),
-            UseIncludesQuery::JsCallExpression(call) => detect_some_pattern(ctx, call),
+            AnyUseIncludesExpression::JsBinaryExpression(binary) => {
+                detect_index_of_pattern(ctx, binary)
+            }
+            AnyUseIncludesExpression::JsCallExpression(call) => detect_some_pattern(ctx, call),
         }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
             UseIncludesState::IndexOf {
-                binary,
-                method,
-                kind,
-                ..
+                binary, method, ..
             } => {
                 let method = method.as_str();
-                let preferred = match kind {
-                    CheckKind::Includes => "includes()",
-                    CheckKind::NotIncludes => "!...includes()",
-                };
 
                 Some(
                     RuleDiagnostic::new(
@@ -170,9 +167,6 @@ impl Rule for UseIncludes {
                     )
                     .note(markup! {
                         <Emphasis>{method}</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
-                    })
-                    .note(markup! {
-                        "Use "<Emphasis>{preferred}</Emphasis>" instead, which directly expresses the intent and returns a boolean."
                     }),
                 )
             }
@@ -185,7 +179,7 @@ impl Rule for UseIncludes {
                     },
                 )
                 .note(markup! {
-                    "Use "<Emphasis>"includes()"</Emphasis>" instead, which directly expresses the intent without a callback."
+                    "A callback that only checks equality is harder to read and less efficient than a direct membership test."
                 }),
             ),
         }
@@ -222,11 +216,10 @@ impl Rule for UseIncludes {
                     ctx.metadata().applicability(),
                     match kind {
                         CheckKind::Includes => {
-                            markup! { "Replace with "<Emphasis>".includes()"</Emphasis>"." }
-                                .to_owned()
+                            markup! { "Use "<Emphasis>"includes()"</Emphasis>" instead." }.to_owned()
                         }
                         CheckKind::NotIncludes => {
-                            markup! { "Replace with "<Emphasis>"!...includes()"</Emphasis>"." }
+                            markup! { "Use "<Emphasis>"!includes()"</Emphasis>" instead." }
                                 .to_owned()
                         }
                     },
@@ -248,7 +241,7 @@ impl Rule for UseIncludes {
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
-                    markup! { "Replace with "<Emphasis>".includes()"</Emphasis>"." }.to_owned(),
+                    markup! { "Use "<Emphasis>"includes()"</Emphasis>" instead." }.to_owned(),
                     mutation,
                 ))
             }
@@ -260,9 +253,11 @@ impl Rule for UseIncludes {
 /// `call` and `search` becomes the single argument.
 fn make_includes_call(
     call: &JsCallExpression,
-    search: biome_js_syntax::AnyJsCallArgument,
+    search: AnyJsCallArgument,
 ) -> Option<JsCallExpression> {
-    let callee = call.callee().ok()?;
+    // The callee may be wrapped in parentheses (e.g. `(arr.some)(...)`); the
+    // parentheses are never semantically required around a call's callee.
+    let callee = call.callee().ok()?.omit_parentheses();
     let member = callee.as_js_static_member_expression()?;
     let object = member.object().ok()?;
 
@@ -322,7 +317,8 @@ fn detect_some_pattern(
     ctx: &RuleContext<UseIncludes>,
     call: &JsCallExpression,
 ) -> Option<UseIncludesState> {
-    let callee = call.callee().ok()?;
+    // The callee may be parenthesized, e.g. `(arr).some(...)` or `(arr.some)(...)`.
+    let callee = call.callee().ok()?.omit_parentheses();
     let member = callee.as_js_static_member_expression()?;
     let name = member.member().ok()?;
     if name.as_js_name()?.value_token().ok()?.text_trimmed() != "some" {
@@ -338,20 +334,18 @@ fn detect_some_pattern(
     let callback = callback.as_any_js_expression()?.clone().omit_parentheses();
 
     let (param, comparison) = match &callback {
-        AnyJsExpression::JsArrowFunctionExpression(arrow) => {
-            arrow_param_and_comparison(arrow)?
-        }
-        AnyJsExpression::JsFunctionExpression(function) => {
-            function_param_and_comparison(function)?
-        }
+        AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow_param_and_comparison(arrow)?,
+        AnyJsExpression::JsFunctionExpression(function) => function_param_and_comparison(function)?,
         _ => return None,
     };
 
-    let search = comparison_search_value(&comparison, &param)?;
+    let search = comparison_search_value(ctx, &comparison, &param)?;
 
     // `includes()` only exists on arrays and tuples in this form; `some()`
-    // does not exist on strings, so restrict to array-like receivers.
-    let object = member.object().ok()?;
+    // does not exist on strings, so restrict to array-like receivers. The
+    // receiver may be parenthesized (`(arr).some(...)`), so unwrap it before
+    // resolving its type.
+    let object = member.object().ok()?.omit_parentheses();
     if !all_type_variants_match(&ctx.type_of_expression(&object), |current, raw| {
         current.is_array_of(|_| true) || matches!(raw, TypeData::Tuple(_))
     }) {
@@ -368,20 +362,17 @@ fn detect_some_pattern(
 /// from an arrow callback like `x => x === search` or `(x) => { return x === search; }`.
 fn arrow_param_and_comparison(
     arrow: &JsArrowFunctionExpression,
-) -> Option<(String, JsBinaryExpression)> {
+) -> Option<(JsIdentifierBinding, JsBinaryExpression)> {
+    // An async callback returns a promise, so `some(async ...)` is not a plain
+    // membership test and cannot be expressed with `includes()`.
     if arrow.async_token().is_some() {
         return None;
     }
     let param = match arrow.parameters().ok()? {
-        biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(binding) => binding
-            .as_js_identifier_binding()?
-            .name_token()
-            .ok()?
-            .text_trimmed()
-            .to_string(),
-        biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(params) => {
-            single_identifier_parameter(&params)?
+        AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
+            binding.as_js_identifier_binding()?.clone()
         }
+        AnyJsArrowFunctionParameters::JsParameters(params) => single_identifier_parameter(&params)?,
     };
     let comparison = match arrow.body().ok()? {
         AnyJsFunctionBody::AnyJsExpression(expr) => as_strict_equality(&expr)?,
@@ -394,7 +385,9 @@ fn arrow_param_and_comparison(
 /// from a function-expression callback like `function (x) { return x === search; }`.
 fn function_param_and_comparison(
     function: &JsFunctionExpression,
-) -> Option<(String, JsBinaryExpression)> {
+) -> Option<(JsIdentifierBinding, JsBinaryExpression)> {
+    // Async callbacks return a promise and generator callbacks return an
+    // iterator, so neither is a plain membership predicate.
     if function.async_token().is_some() || function.star_token().is_some() {
         return None;
     }
@@ -403,9 +396,9 @@ fn function_param_and_comparison(
     Some((param, comparison))
 }
 
-/// Returns the name of the parameter when `params` holds exactly one plain
+/// Returns the parameter binding when `params` holds exactly one plain
 /// identifier parameter without a default value or rest/destructuring.
-fn single_identifier_parameter(params: &biome_js_syntax::JsParameters) -> Option<String> {
+fn single_identifier_parameter(params: &JsParameters) -> Option<JsIdentifierBinding> {
     let items = params.items();
     if items.len() != 1 {
         return None;
@@ -421,16 +414,13 @@ fn single_identifier_parameter(params: &biome_js_syntax::JsParameters) -> Option
             .ok()?
             .as_any_js_binding()?
             .as_js_identifier_binding()?
-            .name_token()
-            .ok()?
-            .text_trimmed()
-            .to_string(),
+            .clone(),
     )
 }
 
 /// Returns the returned expression when `body` consists of a single
 /// `return <expr>;` statement.
-fn single_return_value(body: &biome_js_syntax::JsFunctionBody) -> Option<AnyJsExpression> {
+fn single_return_value(body: &JsFunctionBody) -> Option<AnyJsExpression> {
     let statements = body.statements();
     if statements.len() != 1 {
         return None;
@@ -448,6 +438,10 @@ fn as_strict_equality(expr: &AnyJsExpression) -> Option<JsBinaryExpression> {
         .omit_parentheses()
         .as_js_binary_expression()?
         .clone();
+    // Only `===` is safe to rewrite. `includes()` compares with SameValueZero,
+    // which matches `===` (aside from `NaN`), whereas loose `==` performs type
+    // coercion: `[1].some(x => x == "1")` is `true` but `[1].includes("1")` is
+    // `false`, so `==` must not be rewritten.
     if binary.operator().ok()? == JsBinaryOperator::StrictEquality {
         Some(binary)
     } else {
@@ -458,46 +452,63 @@ fn as_strict_equality(expr: &AnyJsExpression) -> Option<JsBinaryExpression> {
 /// Given `param === search` (in either orientation), returns the search value,
 /// rejecting comparisons where the search value itself references the parameter.
 fn comparison_search_value(
+    ctx: &RuleContext<UseIncludes>,
     comparison: &JsBinaryExpression,
-    param: &str,
+    param: &JsIdentifierBinding,
 ) -> Option<AnyJsExpression> {
     let left = comparison.left().ok()?;
     let right = comparison.right().ok()?;
 
-    let search = if is_reference_to(&left, param) {
+    let search = if is_reference_to(ctx, &left, param) {
         right
-    } else if is_reference_to(&right, param) {
+    } else if is_reference_to(ctx, &right, param) {
         left
     } else {
         return None;
     };
 
-    if references_name(&search, param) {
+    // The search value must not depend on the callback parameter — `includes()`
+    // takes a fixed value, so `arr.some(x => x === f(x))` cannot be rewritten.
+    if references_binding(ctx, &search, param) {
         return None;
     }
     Some(search)
 }
 
-/// Whether `expr` is exactly a reference to the identifier `name`.
-fn is_reference_to(expr: &AnyJsExpression, name: &str) -> bool {
+/// Whether `expr` is exactly a reference that resolves to the `param` binding.
+fn is_reference_to(
+    ctx: &RuleContext<UseIncludes>,
+    expr: &AnyJsExpression,
+    param: &JsIdentifierBinding,
+) -> bool {
     expr.clone()
         .omit_parentheses()
         .as_js_identifier_expression()
         .and_then(|ident| ident.name().ok())
-        .and_then(|name| name.value_token().ok())
-        .is_some_and(|token| token.text_trimmed() == name)
+        .is_some_and(|reference| resolves_to(ctx, &reference, param))
 }
 
-/// Whether any reference to `name` appears within `expr`.
-fn references_name(expr: &AnyJsExpression, name: &str) -> bool {
+/// Whether any reference within `expr` resolves to the `param` binding.
+fn references_binding(
+    ctx: &RuleContext<UseIncludes>,
+    expr: &AnyJsExpression,
+    param: &JsIdentifierBinding,
+) -> bool {
     expr.syntax()
         .descendants()
         .filter_map(JsReferenceIdentifier::cast)
-        .any(|reference| {
-            reference
-                .value_token()
-                .is_ok_and(|token| token.text_trimmed() == name)
-        })
+        .any(|reference| resolves_to(ctx, &reference, param))
+}
+
+/// Whether `reference` resolves to the `param` binding via the semantic model.
+/// A name comparison would misfire on a shadowing binding of the same name.
+fn resolves_to(
+    ctx: &RuleContext<UseIncludes>,
+    reference: &JsReferenceIdentifier,
+    param: &JsIdentifierBinding,
+) -> bool {
+    ctx.binding_of(reference)
+        .is_some_and(|binding| &binding == param.syntax())
 }
 
 /// Returns `Some((call, method))` when `expr` is a call to

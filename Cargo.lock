@@ -5130,6 +5130,7 @@ dependencies = [
  "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_js_syntax",
  "biome_json_analyze",
  "biome_json_factory",

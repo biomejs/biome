@@ -46,3 +46,15 @@ arr.some((x) => x === 1);
 arr.some(x => { return x === 1; });
 arr.some(function (x) { return x === 1; });
 !arr.some(x => x === 1);
+
+// parenthesized receiver — should still be flagged
+(arr).some(x => x === 1);
+(arr).indexOf(1) !== -1;
+
+// shadowing: the inner `x` is a different binding, so the search value does not
+// depend on the callback parameter — semantic resolution (not name matching)
+// correctly allows this to be rewritten
+arr.some(x => x === (function (x) { return x; })(1));
+
+// parenthesized callee — the whole `arr.some` is wrapped
+(arr.some)(x => x === 1);

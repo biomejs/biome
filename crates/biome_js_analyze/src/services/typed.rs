@@ -110,6 +110,16 @@ impl TypedService {
             .as_ref()
             .is_some_and(|model| model.binding(reference).is_some())
     }
+
+    /// Returns the syntax node of the binding that `reference` resolves to, if
+    /// any. Unlike a name comparison, this resolves through the semantic model,
+    /// so it correctly distinguishes shadowing bindings that share a name.
+    pub fn binding_of(&self, reference: &JsReferenceIdentifier) -> Option<JsSyntaxNode> {
+        self.model
+            .as_ref()
+            .and_then(|model| model.binding(reference))
+            .map(|binding| binding.syntax())
+    }
 }
 
 impl FromServices for TypedService {

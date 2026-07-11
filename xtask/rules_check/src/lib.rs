@@ -352,7 +352,16 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<JsLanguage>(config)?;
 
-                let services = services_builder.build_for_js_file_source(file_source);
+                // Build a semantic model so that `Typed` rules relying on it
+                // (e.g. binding resolution) behave in doc examples as they do
+                // in real analysis. Mirrors the CSS path and the spec harness.
+                let semantic_model = biome_js_semantic::semantic_model(
+                    &root,
+                    biome_js_semantic::SemanticModelOptions::from(&file_source),
+                );
+                let services = services_builder
+                    .build_for_js_file_source(file_source)
+                    .with_semantic_model(semantic_model);
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
