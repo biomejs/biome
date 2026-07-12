@@ -6,6 +6,8 @@ expression: invalid.js
 ```js
 /* should generate diagnostics */
 !foo === bar
+(!foo) === bar
+(!foo) !== bar
 
 ```
 
@@ -18,7 +20,10 @@ invalid.js:2:1 lint/nursery/noNegationInEqualityCheck ━━━━━━━━�
     1 │ /* should generate diagnostics */
   > 2 │ !foo === bar
       │ ^^^^^^^^^^^^
-    3 │ 
+  > 3 │ (!foo) === bar
+      │ ^^^^^^
+    4 │ (!foo) !== bar
+    5 │ 
   
   i Due to operator precedence, the negation binds more tightly than the equality operator. The expression !foo === bar evaluates as (!foo) === bar, not !(foo === bar).
   

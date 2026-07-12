@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsBinaryExpression, JsSyntaxKind::*, JsSyntaxToken};
+use biome_js_syntax::{JsBinaryExpression, JsParenthesizedExpression, JsSyntaxKind::*, JsSyntaxToken};
 use biome_js_syntax::is_negation;
 use biome_rowan::AstNode;
 use biome_rule_options::no_negation_in_equality_check::NoNegationInEqualityCheckOptions;
@@ -66,12 +66,24 @@ impl Rule for NoNegationInEqualityCheck {
 
         let left = node.left().ok()?;
 
-        // Check if the left side is a negation expression (!expr)
-        let unary = is_negation(left.syntax())?;
+        // Unwrap parenthesized expressions, e.g. `(!foo) === bar`
+        let left = left.syntax().clone();
+        let unary = if let Some(paren) = JsParenthesizedExpression::cast_ref(&left) {
+            let inner = paren.expression().ok()?;
+            is_negation(inner.syntax())?
+        } else {
+            is_negation(&left)?
+        };
 
-        // Skip double negation (!!expr) — this is intentional boolean coercion
+        // Skip double negation (!!expr or !(!expr)) — this is intentional boolean coercion
         let argument = unary.argument().ok()?;
-        if is_negation(argument.syntax()).is_some() {
+        // The inner argument might also be parenthesized, e.g. !(!foo) === bar
+        let argument_inner = if let Some(paren) = JsParenthesizedExpression::cast_ref(argument.syntax()) {
+            paren.expression().ok()?.syntax().clone()
+        } else {
+            argument.syntax().clone()
+        };
+        if is_negation(&argument_inner).is_some() {
             return None;
         }
 
