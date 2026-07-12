@@ -27,6 +27,8 @@ mod buffer;
 mod builders;
 pub mod comments;
 pub mod diagnostics;
+#[cfg(debug_assertions)]
+mod format_audit;
 pub mod format_element;
 mod format_extensions;
 pub mod formatter;
@@ -50,6 +52,8 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
+#[cfg(debug_assertions)]
+use crate::format_audit::FormatAudit;
 use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
 #[cfg(debug_assertions)]
@@ -1772,6 +1776,7 @@ pub fn format_node_with_source_map_generation<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -1848,6 +1853,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     document.propagate_expand();
 
     state.assert_formatted_all_tokens(&root);
+    state.assert_no_audit_events();
 
     let context = state.into_context();
     let comments = context.comments();
@@ -2278,6 +2284,8 @@ pub struct FormatState<Context> {
     // the Formatter is still completely immutable in release builds
     #[cfg(debug_assertions)]
     pub printed_tokens: PrintedTokens,
+    #[cfg(debug_assertions)]
+    format_audit: FormatAudit,
 }
 
 impl<Context> std::fmt::Debug for FormatState<Context>
@@ -2308,6 +2316,8 @@ impl<Context> FormatState<Context> {
 
             #[cfg(debug_assertions)]
             printed_tokens: Default::default(),
+            #[cfg(debug_assertions)]
+            format_audit: Default::default(),
         }
     }
 
@@ -2349,6 +2359,17 @@ impl<Context> FormatState<Context> {
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    pub fn record_audit_event(&mut self, _event: impl Into<String>) {}
+
+    /// Records a formatter audit event that must be resolved before formatting completes.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn record_audit_event(&mut self, event: impl Into<String>) {
+        self.format_audit.record_event(event);
+    }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
     pub fn set_token_tracking_disabled(&mut self, _: bool) {}
 
     /// Disables or enables token tracking for a portion of the code.
@@ -2381,6 +2402,17 @@ impl<Context> FormatState<Context> {
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         self.printed_tokens.assert_all_tracked(root);
     }
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {}
+
+    /// Asserts in debug builds that no formatter audit events were recorded.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_no_audit_events(&self) {
+        self.format_audit.assert_no_events();
+    }
 }
 
 impl<Context> FormatState<Context>
@@ -2391,6 +2423,8 @@ where
         FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens: self.printed_tokens.snapshot(),
+            #[cfg(debug_assertions)]
+            format_audit: self.format_audit.snapshot(),
         }
     }
 
@@ -2398,11 +2432,14 @@ where
         let FormatStateSnapshot {
             #[cfg(debug_assertions)]
             printed_tokens,
+            #[cfg(debug_assertions)]
+            format_audit,
         } = snapshot;
 
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.restore(printed_tokens);
+                self.format_audit.restore(format_audit);
             }
         }
     }
@@ -2411,6 +2448,8 @@ where
 pub struct FormatStateSnapshot {
     #[cfg(debug_assertions)]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
+    #[cfg(debug_assertions)]
+    format_audit: format_audit::FormatAuditSnapshot,
 }
 
 #[cfg(test)]
@@ -2535,5 +2574,28 @@ mod tests {
             } if source_position == TextSize::from(7)
         ));
         assert!(matches!(elements[1], FormatElement::Token { text: ";" }));
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic(expected = "formatter audit failed")]
+    fn format_state_reports_audit_events() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+
+        state.record_audit_event("missing explicit formatter decision");
+
+        state.assert_no_audit_events();
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    fn format_state_restores_audit_events_with_snapshot() {
+        let mut state = FormatState::new(SimpleFormatContext::default());
+        let snapshot = state.snapshot();
+
+        state.record_audit_event("speculative formatter decision");
+        state.restore_snapshot(snapshot);
+
+        state.assert_no_audit_events();
     }
 }
