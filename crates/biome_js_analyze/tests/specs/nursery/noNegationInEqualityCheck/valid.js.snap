@@ -5,9 +5,10 @@ expression: valid.js
 # Input
 ```js
 /* should not generate diagnostics */
-foo !== bar
-!!foo === bar
-!(!foo) === bar
-!((!foo)) === bar
+foo !== bar;
+!!foo === bar;
+!(!foo) === bar;
+!((!foo)) === bar;
+!(((!foo))) === bar;
 
 ```
