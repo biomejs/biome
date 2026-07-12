@@ -8,6 +8,6 @@ impl FormatNodeRule<CssAttributeModifier> for FormatCssAttributeModifier {
     fn fmt_fields(&self, node: &CssAttributeModifier, f: &mut CssFormatter) -> FormatResult<()> {
         let CssAttributeModifierFields { value } = node.as_fields();
 
-        write!(f, [value.format()])
+        write!(f, [value.format()?.with_text_case(CssCase::Preserve)])
     }
 }

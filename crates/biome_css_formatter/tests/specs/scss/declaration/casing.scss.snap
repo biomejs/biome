@@ -1,0 +1,448 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/declaration/casing.scss
+---
+
+# Input
+
+```scss
+@USE "x" AS KeepUse;
+
+@USE "reset" AS *;
+
+@FORWARD "tokens" show $KeepVar, KeepMixin;
+
+@FORWARD "tokens" hide $KeepVar, KeepMixin;
+
+@FORWARD "theme" with ($Keep: KeepValue !DEFAULT);
+
+@USE "theme" WITH ($Keep: 1 !DEFAULT, $Other: KeepValue);
+
+@IMPORT "KeepPlain.scss";
+
+@IMPORT "Keep#{$Name}.scss";
+
+@IMPORT "KeepImport.CSS" PRINT and (MIN-WIDTH: 700PX);
+
+KeepUse.$Keep: 1 !GLOBAL;
+
+$Keep: 2 !DEFAULT;
+
+$Keep: KeepUse.KeepMember;
+
+$KeepParen: (KeepValue);
+
+$KeepUnary: -$Keep;
+
+$KeepNotParen: NOT ($Keep AND $Other);
+
+@FOR $I FROM 1 THROUGH 2 { .KeepClass { COLOR: RED; } }
+
+@FOR $I FROM 1 TO 2 { .KeepClass { COLOR: RED; } }
+
+@FUNCTION KeepFunction($Input) { @RETURN $Input; }
+
+@MIXIN KeepMixin($Keep: 15IN, $Args...) {
+    @CONTENT($Keep);
+
+    @INCLUDE KeepOther($Args...);
+
+    $KeepList: KeepOne, KeepTwo,;
+
+    $KeepMap: (KeepKey: KeepValue, #{$Keep}: $Keep,);
+
+    $KeepString: "prefix #{$Keep} suffix";
+
+    $KeepInterpolatedValue: 1#{$Name};
+
+    WIDTH: ($Keep + KeepValue);
+
+    BACKGROUND: {
+        COLOR: RED;
+    }
+
+    #{$Keep}: {
+        COLOR: RED;
+    }
+
+    :root {
+        --Keep-custom-Prop: $Keep;
+    }
+
+    @MEDIA (MIN-WIDTH: 700PX) {
+        .KeepClass:HOVER::FIRST-letter {
+            COLOR: #AAbbCC;
+            background: Var(--Keep-custom-Prop);
+            transform: KeepUse.KeepFunc($Keep);
+            filter: #{$KeepFunc}($Keep);
+        }
+
+        &:Not(:NTH-child(2n+1))::PART(KeepPart) {
+            COLOR: #AAbbCC;
+        }
+    }
+}
+
+.KeepClass:#{$KeepPseudo}(> .KeepChild:HOVER) { COLOR: RED; }
+
+.KeepClass:#{$KeepSelector}(.KeepOther:HOVER) { COLOR: RED; }
+
+.KeepClass:#{$KeepNth}(2N+1 OF .KeepClass:HOVER) { COLOR: RED; }
+
+.KeepNthFixed:NTH-child(#{$Sign}2n + #{$Offset}) { COLOR: RED; }
+
+.KeepClass:#{$KeepValue}(KeepValue, HOVER) { COLOR: RED; }
+
+.KeepClass::#{$KeepElement}(.KeepSlot:HOVER) { COLOR: RED; }
+
+.KeepClass::#{$KeepElementValue}(KeepPart, KeepOther) { COLOR: RED; }
+
+#{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}=#{$KeepAttrValue} #{$KeepMod}] { COLOR: RED; }
+
+@MEDIA #{$Query} { .KeepClass:HOVER { COLOR: RED; } }
+
+@MEDIA #{$Query}, PRINT AND (MIN-WIDTH: 700PX) { .KeepClass:HOVER { COLOR: RED; } }
+
+@CONTAINER (#{$Feature}: #{$Value}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@CONTAINER (#{$Min} <= WIDTH <= #{$Max}) { .KeepClass:HOVER { COLOR: RED; } }
+
+@supports #{"(DISPLAY: GRID)"} AND (COLOR: RED) { .KeepClass:HOVER { COLOR: RED; } }
+
+@supports (COLOR: RED) OR SELECTOR(A:HOVER) { .KeepClass:HOVER { COLOR: RED; } }
+
+@PAGE KeepScssPage:FIRST { $KeepPageColor: RED; BACKGROUND: { COLOR: $KeepPageColor; } }
+
+@EACH $Name IN KeepOne, KeepTwo { .#{$Name} { COLOR: RED; } }
+
+@EACH $Key, $Value IN (KeepKey: KeepValue, OtherKey: OtherValue) { .#{$Key} { COLOR: $Value; } }
+
+@WHILE $Keep > 0 { $Keep: $Keep - 1 !GLOBAL; .KeepClass { COLOR: RED; } }
+
+@AT-ROOT (WITHOUT: MEDIA SUPPORTS) { .KeepClass { COLOR: RED; } }
+
+@AT-ROOT (WITH: MEDIA SUPPORTS) { .KeepClass { COLOR: RED; } }
+
+@AT-ROOT .KeepRoot:HOVER { COLOR: RED; }
+
+@IF NOT $Keep AND $Other OR $Keep { .KeepClass { COLOR: RED; } }
+
+.if-sass { color: if(sass($Keep): RED; else: BLUE); }
+
+.if-sass-case{COLOR:IF(SASS($Keep):RED; ELSE:BLUE)}
+
+@IF $Keep { .KeepClass { COLOR: RED; } } @ELSE IF $Other { .KeepClass { BACKGROUND: RED; } } @ELSE { .KeepClass { BORDER-COLOR: RED; } }
+
+@INCLUDE KeepMixin($Keep:15IN);
+
+.KeepClass { @EXTEND %KeepPlaceholder !OPTIONAL; }
+
+@INCLUDE KeepMixin($Keep:15IN) USING ($Item) { COLOR: RED; }
+
+@DEBUG $Keep;
+
+@WARN $Keep;
+
+@ERROR $Keep;
+
+@keyframes #{$KeepFrames}{TO{COLOR:RED}}
+
+@keyframes $KeepFrames{TO{COLOR:RED}}
+
+.Block { $Parent: &; &__Elem--MOD { COLOR: RED; } &-100 { COLOR: RED; } &-#{$State} { COLOR: RED; } &#{$State}-MOD { COLOR: RED; } }
+
+%KeepPlaceholder{COLOR:RED;}
+
+```
+
+
+# Formatted
+
+```scss
+@use "x" AS KeepUse;
+
+@use "reset" AS *;
+
+@forward "tokens" show $KeepVar, KeepMixin;
+
+@forward "tokens" hide $KeepVar, KeepMixin;
+
+@forward "theme" with (
+	$Keep: KeepValue !DEFAULT
+);
+
+@use "theme" WITH (
+	$Keep: 1 !DEFAULT,
+	$Other: KeepValue
+);
+
+@import "KeepPlain.scss";
+
+@import "Keep#{$Name}.scss";
+
+@import "KeepImport.CSS" PRINT and (min-width: 700px);
+
+KeepUse.$Keep: 1 !GLOBAL;
+
+$Keep: 2 !DEFAULT;
+
+$Keep: KeepUse.KeepMember;
+
+$KeepParen: (KeepValue);
+
+$KeepUnary: -$Keep;
+
+$KeepNotParen: NOT($Keep AND $Other);
+
+@for $I FROM 1 THROUGH 2 {
+	.KeepClass {
+		color: RED;
+	}
+}
+
+@for $I FROM 1 TO 2 {
+	.KeepClass {
+		color: RED;
+	}
+}
+
+@function KeepFunction($Input) {
+	@return $Input;
+}
+
+@mixin KeepMixin($Keep: 15in, $Args...) {
+	@content($Keep);
+
+	@include KeepOther($Args...);
+
+	$KeepList: KeepOne, KeepTwo;
+
+	$KeepMap: (
+		KeepKey: KeepValue,
+		#{$Keep}: $Keep,
+	);
+
+	$KeepString: "prefix #{$Keep} suffix";
+
+	$KeepInterpolatedValue: 1#{$Name};
+
+	width: ($Keep + KeepValue);
+
+	background: {
+		color: RED;
+	}
+
+	#{$Keep}: {
+		color: RED;
+	}
+
+	:root {
+		--Keep-custom-Prop: $Keep;
+	}
+
+	@media (min-width: 700px) {
+		.KeepClass:hover::first-letter {
+			color: #aabbcc;
+			background: Var(--Keep-custom-Prop);
+			transform: KeepUse.KeepFunc($Keep);
+			filter: #{$KeepFunc}($Keep);
+		}
+
+		&:not(:nth-child(2n + 1))::part(KeepPart) {
+			color: #aabbcc;
+		}
+	}
+}
+
+.KeepClass:#{$KeepPseudo}(> .KeepChild:hover) {
+	color: RED;
+}
+
+.KeepClass:#{$KeepSelector}(.KeepOther:hover) {
+	color: RED;
+}
+
+.KeepClass:#{$KeepNth}(2n + 1 OF .KeepClass:hover) {
+	color: RED;
+}
+
+.KeepNthFixed:nth-child(#{$Sign}2n + #{$Offset}) {
+	color: RED;
+}
+
+.KeepClass:#{$KeepValue}(KeepValue, HOVER) {
+	color: RED;
+}
+
+.KeepClass::#{$KeepElement}(.KeepSlot:hover) {
+	color: RED;
+}
+
+.KeepClass::#{$KeepElementValue}(KeepPart, KeepOther) {
+	color: RED;
+}
+
+#{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
+	color: RED;
+}
+
+@media #{$Query} {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@media #{$Query}, PRINT AND (min-width: 700px) {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@container (#{$Feature}: #{$Value}) {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@container (#{$Min} <= width <= #{$Max}) {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@supports #{"(DISPLAY: GRID)"} AND (COLOR: RED) {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@supports (COLOR: RED) OR SELECTOR(A:hover) {
+	.KeepClass:hover {
+		color: RED;
+	}
+}
+
+@page KeepScssPage:FIRST {
+	$KeepPageColor: RED;
+	background: {
+		color: $KeepPageColor;
+	}
+}
+
+@each $Name IN KeepOne, KeepTwo {
+	.#{$Name} {
+		color: RED;
+	}
+}
+
+@each $Key, $Value IN (KeepKey: KeepValue, OtherKey: OtherValue) {
+	.#{$Key} {
+		color: $Value;
+	}
+}
+
+@while $Keep > 0 {
+	$Keep: $Keep - 1 !GLOBAL;
+	.KeepClass {
+		color: RED;
+	}
+}
+
+@at-root (WITHOUT: MEDIA SUPPORTS) {
+	.KeepClass {
+		color: RED;
+	}
+}
+
+@at-root (WITH: MEDIA SUPPORTS) {
+	.KeepClass {
+		color: RED;
+	}
+}
+
+@at-root .KeepRoot:hover {
+	color: RED;
+}
+
+@if NOT $Keep AND $Other OR $Keep {
+	.KeepClass {
+		color: RED;
+	}
+}
+
+.if-sass {
+	color: if(sass($Keep): RED; else: BLUE);
+}
+
+.if-sass-case {
+	color: IF(SASS($Keep): RED; ELSE: BLUE);
+}
+
+@if $Keep {
+	.KeepClass {
+		color: RED;
+	}
+} @else if $Other {
+	.KeepClass {
+		background: RED;
+	}
+} @else {
+	.KeepClass {
+		border-color: RED;
+	}
+}
+
+@include KeepMixin($Keep: 15in);
+
+.KeepClass {
+	@extend %KeepPlaceholder !OPTIONAL;
+}
+
+@include KeepMixin($Keep: 15in) USING ($Item) {
+	color: RED;
+}
+
+@debug $Keep;
+
+@warn $Keep;
+
+@error $Keep;
+
+@keyframes #{$KeepFrames} {
+	to {
+		color: RED;
+	}
+}
+
+@keyframes $KeepFrames {
+	to {
+		color: RED;
+	}
+}
+
+.Block {
+	$Parent: &;
+	&__Elem--MOD {
+		color: RED;
+	}
+	&-100 {
+		color: RED;
+	}
+	&-#{$State} {
+		color: RED;
+	}
+	&#{$State}-MOD {
+		color: RED;
+	}
+}
+
+%KeepPlaceholder {
+	color: RED;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  124: #{$KeepType}.#{$KeepClass}##{$KeepId}[data-#{$KeepAttr}="#{$KeepAttrValue}" #{$KeepMod}] {
+```

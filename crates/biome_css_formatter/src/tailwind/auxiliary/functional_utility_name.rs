@@ -15,7 +15,7 @@ impl FormatNodeRule<TwFunctionalUtilityName> for FormatTwFunctionalUtilityName {
         write!(
             f,
             [
-                identifier.format(),
+                identifier?.format().with_text_case(CssCase::Preserve),
                 minus_token.format(),
                 star_token.format()
             ]

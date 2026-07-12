@@ -18,7 +18,7 @@ impl FormatNodeRule<CssImportSupports> for FormatCssImportSupports {
         write!(
             f,
             [
-                supports_token.format(),
+                supports_token.format()?.with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(&condition.format(), should_insert_space),

@@ -27,7 +27,7 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
                 [
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format()
+                    in_token.format().with_text_case(CssCase::Preserve)
                 ]
             );
         }
@@ -48,7 +48,7 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
                     f,
                     [
                         gap_before_in,
-                        in_token.format(),
+                        in_token.format().with_text_case(CssCase::Preserve),
                         FormatGapAfterEachIn::new(&in_token, values.syntax()),
                         values.format()
                     ]
@@ -158,7 +158,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 [
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format()
+                    in_token.format().with_text_case(CssCase::Preserve)
                 ]
             );
         };
@@ -174,7 +174,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 &group(&format_args![
                     bindings.format(),
                     soft_line_break_or_space(),
-                    in_token.format(),
+                    in_token.format().with_text_case(CssCase::Preserve),
                     FormatGapAfterEachIn::new(in_token, first_value_syntax),
                     format_leading_comments(values.syntax()),
                     first_value_node.format(),
@@ -198,7 +198,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                 [group(&format_args![
                     bindings.format(),
                     space(),
-                    in_token.format(),
+                    in_token.format().with_text_case(CssCase::Preserve),
                     FormatGapAfterEachIn::new(in_token, first_value_syntax),
                     format_leading_comments(values.syntax()),
                     first_value_node.format(),
@@ -230,7 +230,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                         &group(&indent(&format_args![
                             binding.node()?.format(),
                             hard_line_break(),
-                            in_token.format(),
+                            in_token.format().with_text_case(CssCase::Preserve),
                             space(),
                             format_leading_comments(values.syntax())
                         ])),
@@ -251,7 +251,7 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                     &group(&indent(&format_args![
                         binding.node()?.format(),
                         soft_line_break_or_space(),
-                        in_token.format(),
+                        in_token.format().with_text_case(CssCase::Preserve),
                         FormatGapAfterEachIn::new(in_token, first_value_syntax),
                         format_leading_comments(values.syntax()),
                         first_value_node.format(),

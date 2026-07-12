@@ -1,12 +1,14 @@
 use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
+use crate::utils::case::css_wide_keyword_case;
 use biome_css_syntax::{
-    CssFunction, CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind,
-    ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
+    CssFunction, CssGenericDelimiter, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssSyntaxKind, ScssExpression, ScssIncludeArgumentList, css_grid_template_property,
 };
-use biome_formatter::{CstFormatContext, format_args, write};
-use biome_formatter::{FormatOptions, FormatResult};
+use biome_formatter::{
+    CstFormatContext, FormatOptions, FormatResult, FormatWithRule, format_args, write,
+};
 use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
 use std::cmp;
 
@@ -61,7 +63,8 @@ fn try_write_fill_comma_groups<N, I>(
 ) -> Option<FormatResult<()>>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     if !matches!(layout, ValueListLayout::Fill) {
         return None;
@@ -95,7 +98,8 @@ fn write_fill_comma_groups<N, I>(
 ) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     let mut groups: Vec<Vec<I>> = Vec::new();
     let mut current_group: Vec<I> = Vec::new();
@@ -124,7 +128,7 @@ where
 
             for element in group_items {
                 let is_comma = is_comma_delimiter(element);
-                let formatted = element.clone().into_format();
+                let formatted = format_component_value_element(element.clone());
 
                 inner_fill.entry(
                     &format_once(|f| {
@@ -151,7 +155,8 @@ where
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I: AstNode<Language = CssLanguage> + Clone + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
 {
     let layout = get_value_list_layout(node, f.context().comments(), f);
 
@@ -173,7 +178,8 @@ where
         if node.len() == 1 {
             let mut builder = f.join_nodes_with_soft_line();
 
-            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+            for element in node.iter() {
+                let formatted = format_component_value_element(element.clone());
                 builder.entry(element.syntax(), &formatted);
             }
 
@@ -193,7 +199,8 @@ where
             let mut fill = f.fill();
             let mut at_group_boundary = false;
 
-            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+            for element in node.iter() {
+                let formatted = format_component_value_element(element.clone());
                 fill.entry(
                     &format_once(|f| {
                         // If the current element is not a comma, insert a soft line break or a space.
@@ -296,6 +303,18 @@ where
             write!(f, [group(&values)])
         }
     }
+}
+
+/// Formats an element while applying CSS-wide keyword casing to identifiers.
+fn format_component_value_element<I>(element: I) -> impl Format<CssFormatContext>
+where
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    I::Format: FormatWithRule<CssFormatContext, Item = I>,
+{
+    let case = CssIdentifier::cast_ref(element.syntax()).map_or(CssCase::Preserve, |identifier| {
+        css_wide_keyword_case(&identifier)
+    });
+    element.into_format().with_text_case(case)
 }
 
 #[derive(Copy, Clone, Debug)]

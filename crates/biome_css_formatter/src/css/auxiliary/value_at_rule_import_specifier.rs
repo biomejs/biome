@@ -12,6 +12,6 @@ impl FormatNodeRule<CssValueAtRuleImportSpecifier> for FormatCssValueAtRuleImpor
     ) -> FormatResult<()> {
         let CssValueAtRuleImportSpecifierFields { name } = node.as_fields();
 
-        write!(f, [name.format()])
+        write!(f, [name?.format().with_text_case(CssCase::Preserve)])
     }
 }

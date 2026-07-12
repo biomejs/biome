@@ -26,7 +26,7 @@ impl FormatNodeRule<CssPseudoElementFunctionCustomIdentifier>
         write!(
             f,
             [
-                name.format(),
+                name?.format().with_text_case(CssCase::Lowercase),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(&ident.format(), should_insert_space),

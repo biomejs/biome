@@ -2,8 +2,11 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::has_source_gap_before_token;
 use crate::utils::component_value_list::{ValueListLayout, get_value_list_layout};
 use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, CssDeclaration, CssGenericProperty,
-    CssGenericPropertyFields, CssLanguage, CssSupportsFeatureDeclaration,
+    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssSelectorIdentifier,
+    CssContainerStyleInParens, CssContainerStyleQueryInParens, CssDeclaration, CssGenericProperty,
+    CssGenericPropertyFields, CssIdentifier, CssIfStyleTest, CssIfSupportsTest, CssImportSupports,
+    CssLanguage, CssPseudoClassFunctionIdentifier, CssPseudoClassIdentifier, CssQualifiedRule,
+    CssSupportsFeatureDeclaration,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::format_dangling_comment;
@@ -16,8 +19,9 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
     fn fmt_fields(&self, node: &CssGenericProperty, f: &mut CssFormatter) -> FormatResult<()> {
         let CssGenericPropertyFields { name, .. } = node.as_fields();
         let colon_comments = CssPropertyColonComments::new(node);
+        let name = name?;
 
-        write!(f, [name.format()])?;
+        write_property_name(node, &name, f)?;
         colon_comments.fmt_colon_boundary(f)?;
         colon_comments.fmt_value_boundary(f)
     }
@@ -39,6 +43,97 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
         // No-op: `fmt_value_boundary` prints `a { color:/* a */ red; }`.
         Ok(())
     }
+}
+
+fn write_property_name(
+    property: &CssGenericProperty,
+    name: &AnyCssDeclarationName,
+    f: &mut CssFormatter,
+) -> FormatResult<()> {
+    let Some(identifier) = name.as_css_identifier() else {
+        return write!(f, [name.format()]);
+    };
+
+    let case = if is_already_lowercase(identifier) || should_preserve_property_name(property) {
+        CssCase::Preserve
+    } else {
+        CssCase::Lowercase
+    };
+
+    write!(f, [identifier.format().with_text_case(case)])
+}
+
+fn is_already_lowercase(name: &CssIdentifier) -> bool {
+    name.value_token().is_ok_and(|token| {
+        token
+            .token_text_trimmed()
+            .bytes()
+            .all(|byte| !byte.is_ascii_uppercase())
+    })
+}
+
+fn should_preserve_property_name(property: &CssGenericProperty) -> bool {
+    is_support_or_style_test_declaration(property)
+        || is_css_modules_import_export_declaration(property)
+}
+
+fn is_support_or_style_test_declaration(property: &CssGenericProperty) -> bool {
+    let Some(declaration) = property.parent::<CssDeclaration>() else {
+        return false;
+    };
+
+    declaration.syntax().ancestors().any(|ancestor| {
+        CssSupportsFeatureDeclaration::can_cast(ancestor.kind())
+            || CssImportSupports::can_cast(ancestor.kind())
+            || CssIfSupportsTest::can_cast(ancestor.kind())
+            || CssContainerStyleQueryInParens::can_cast(ancestor.kind())
+            || CssContainerStyleInParens::can_cast(ancestor.kind())
+            || CssIfStyleTest::can_cast(ancestor.kind())
+    })
+}
+
+fn is_css_modules_import_export_declaration(property: &CssGenericProperty) -> bool {
+    let Some(declaration) = property.parent::<CssDeclaration>() else {
+        return false;
+    };
+
+    let Some(rule) = declaration
+        .syntax()
+        .ancestors()
+        .find_map(CssQualifiedRule::cast)
+    else {
+        return false;
+    };
+
+    rule.prelude()
+        .syntax()
+        .descendants()
+        .any(is_css_modules_import_export_pseudo)
+}
+
+fn is_css_modules_import_export_pseudo(node: biome_css_syntax::CssSyntaxNode) -> bool {
+    if let Some(pseudo) = CssPseudoClassIdentifier::cast(node.clone()) {
+        return pseudo.name().is_ok_and(|name| {
+            selector_identifier_text_eq(&name, "export")
+                || selector_identifier_text_eq(&name, "import")
+        });
+    }
+
+    CssPseudoClassFunctionIdentifier::cast(node).is_some_and(|pseudo| {
+        pseudo.name().is_ok_and(|name| {
+            identifier_text_eq(&name, "export") || identifier_text_eq(&name, "import")
+        })
+    })
+}
+
+fn selector_identifier_text_eq(name: &AnyCssSelectorIdentifier, expected: &str) -> bool {
+    matches!(name, AnyCssSelectorIdentifier::CssIdentifier(identifier) if identifier_text_eq(identifier, expected))
+}
+
+fn identifier_text_eq(identifier: &biome_css_syntax::CssIdentifier, expected: &str) -> bool {
+    identifier
+        .value_token()
+        .is_ok_and(|token| token.token_text_trimmed().eq_ignore_ascii_case(expected))
 }
 
 /// Formats declaration-colon comments like `a { color/* a */:/* b */ red; }`.

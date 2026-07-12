@@ -12,7 +12,7 @@ impl FormatNodeRule<CssUnknownValueAtRule> for FormatCssUnknownValueAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [name.format()])?;
+        write!(f, [name?.format().with_text_case(CssCase::Lowercase)])?;
 
         if let Ok(components) = components {
             if components.items().next().is_some() {

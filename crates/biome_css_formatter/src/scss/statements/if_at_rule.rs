@@ -34,7 +34,7 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
             }
         });
 
-        write!(f, [if_token.format()])?;
+        write!(f, [if_token.format()?.with_text_case(CssCase::Lowercase)])?;
 
         if !should_split_after_if {
             write!(f, [space()])?;

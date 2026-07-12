@@ -16,32 +16,6 @@ use biome_string_case::StrLikeExtension;
 
 use crate::{AsFormat, CssFormatter, prelude::CssFormatContext};
 
-pub(crate) struct FormatTokenAsLowercase {
-    token: SyntaxToken<CssLanguage>,
-}
-
-impl From<SyntaxToken<CssLanguage>> for FormatTokenAsLowercase {
-    fn from(value: SyntaxToken<CssLanguage>) -> Self {
-        Self { token: value }
-    }
-}
-
-impl Format<CssFormatContext> for FormatTokenAsLowercase {
-    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let original = self.token.text_trimmed();
-        match original.to_ascii_lowercase_cow() {
-            Cow::Borrowed(_) => write!(f, [self.token.format()]),
-            Cow::Owned(lowercase) => write!(
-                f,
-                [format_replaced(
-                    &self.token,
-                    &text(&lowercase, Some(self.token.text_trimmed_range().start())),
-                )]
-            ),
-        }
-    }
-}
-
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
     /// Variants to track tokens that are inside a CssCharsetRule
@@ -311,16 +285,33 @@ impl<'token> LiteralStringNormaliser<'token> {
 
 pub(crate) struct FormatDimensionUnit {
     token: SyntaxToken<CssLanguage>,
+    preserve_source_case: bool,
 }
 
 impl From<SyntaxToken<CssLanguage>> for FormatDimensionUnit {
     fn from(value: SyntaxToken<CssLanguage>) -> Self {
-        Self { token: value }
+        Self {
+            token: value,
+            preserve_source_case: false,
+        }
+    }
+}
+
+impl FormatDimensionUnit {
+    pub(crate) fn preserve_source_case(value: SyntaxToken<CssLanguage>) -> Self {
+        Self {
+            token: value,
+            preserve_source_case: true,
+        }
     }
 }
 
 impl Format<CssFormatContext> for FormatDimensionUnit {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.preserve_source_case {
+            return write!(f, [self.token.format()]);
+        }
+
         let original = self.token.text_trimmed();
 
         match original.to_ascii_lowercase_cow() {

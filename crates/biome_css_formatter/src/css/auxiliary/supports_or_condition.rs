@@ -17,7 +17,7 @@ impl FormatNodeRule<CssSupportsOrCondition> for FormatCssSupportsOrCondition {
             [
                 left.format(),
                 space(),
-                or_token.format(),
+                or_token.format()?.with_text_case(CssCase::Preserve),
                 soft_line_break_or_space(),
                 right.format()
             ]

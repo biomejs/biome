@@ -12,7 +12,14 @@ impl FormatNodeRule<CssUnknownBlockAtRule> for FormatCssUnknownBlockAtRule {
             block,
         } = node.as_fields();
 
-        write!(f, [name.format(), space(), components.format()])?;
+        write!(
+            f,
+            [
+                name?.format().with_text_case(CssCase::Lowercase),
+                space(),
+                components.format()
+            ]
+        )?;
 
         if components.is_ok_and(|components| components.items().next().is_some()) {
             write!(f, [space()])?;

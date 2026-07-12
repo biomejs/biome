@@ -1,6 +1,9 @@
 use crate::{
     prelude::*,
-    utils::string_utils::{FormatDimensionUnit, FormatTokenAsLowercase},
+    utils::{
+        case::should_preserve_interpolated_property_dimension_unit_case,
+        string_utils::FormatDimensionUnit,
+    },
 };
 use biome_css_syntax::{CssUnknownDimension, CssUnknownDimensionFields};
 use biome_formatter::write;
@@ -14,11 +17,18 @@ impl FormatNodeRule<CssUnknownDimension> for FormatCssUnknownDimension {
             unit_token,
         } = node.as_fields();
 
+        let unit_token = unit_token?;
+        let unit = if should_preserve_interpolated_property_dimension_unit_case(node.syntax()) {
+            FormatDimensionUnit::preserve_source_case(unit_token)
+        } else {
+            FormatDimensionUnit::from(unit_token)
+        };
+
         let var_name = write!(
             f,
             [
-                FormatTokenAsLowercase::from(value_token?),
-                FormatDimensionUnit::from(unit_token?),
+                value_token.format()?.with_text_case(CssCase::Lowercase),
+                unit,
             ]
         );
         var_name
