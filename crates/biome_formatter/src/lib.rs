@@ -41,6 +41,7 @@ pub mod printer;
 pub mod separated;
 mod source_map;
 pub mod token;
+mod token_case;
 pub mod trivia;
 
 use crate::formatter::Formatter;
@@ -56,6 +57,9 @@ pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, Pri
 use crate::format_audit::FormatAudit;
 use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
+pub use crate::format_extensions::{
+    FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
+};
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -83,6 +87,7 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
+pub use token_case::{FormatRuleWithTextCase, FormatTextCaseExt, TextCase};
 
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
