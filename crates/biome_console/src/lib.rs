@@ -3,7 +3,7 @@
 use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
-use termcolor::{ColorChoice, StandardStream};
+use termcolor::{ColorChoice, StandardStream, WriteColor};
 use write::{StringBuffer, Termcolor};
 
 pub mod fmt;
@@ -153,12 +153,7 @@ impl Console for EnvConsole {
             LogLevel::Error => self.err.lock(),
             LogLevel::Log => self.out.lock(),
         };
-
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
-
-        writeln!(out).unwrap();
+        write_to_console(&mut out, args, true);
     }
 
     fn print(&mut self, level: LogLevel, args: Markup) {
@@ -166,12 +161,7 @@ impl Console for EnvConsole {
             LogLevel::Error => self.err.lock(),
             LogLevel::Log => self.out.lock(),
         };
-
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
-
-        write!(out, "").unwrap();
+        write_to_console(&mut out, args, false);
     }
 
     fn read(&mut self) -> Option<String> {
@@ -187,6 +177,36 @@ impl Console for EnvConsole {
         let result = handle.read_to_string(&mut buffer);
         // Skipping the error for now
         if result.is_ok() { Some(buffer) } else { None }
+    }
+}
+
+/// Render `args` as markup into `out`, optionally followed by a newline.
+///
+/// A broken-pipe error from the underlying stream is treated as a clean
+/// termination: when the consumer has closed the pipe (e.g. `biome ... | head`
+/// or a CI step that times out early) writing will fail with
+/// `io::ErrorKind::BrokenPipe`, and panicking would mask the legitimate output
+/// already produced before the pipe closed. Any other I/O error is unexpected
+/// and panics, matching the previous behaviour of `.unwrap()` on the write
+/// results.
+fn write_to_console<W: WriteColor>(out: &mut W, args: Markup, with_newline: bool) {
+    let markup = fmt::Formatter::new(&mut Termcolor(out)).write_markup(args);
+    if let Err(e) = markup {
+        if e.kind() == io::ErrorKind::BrokenPipe {
+            return;
+        }
+        panic!("failed to write markup to console: {e}");
+    }
+    let trailing = if with_newline {
+        writeln!(out)
+    } else {
+        write!(out, "")
+    };
+    if let Err(e) = trailing {
+        if e.kind() == io::ErrorKind::BrokenPipe {
+            return;
+        }
+        panic!("failed to write to console: {e}");
     }
 }
 
@@ -279,5 +299,67 @@ impl Console for FileBufferConsole {
 
     fn clear(&mut self) {
         self.out.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Mock writer that fails every write/flush with `BrokenPipe`. Models the
+    /// scenario where stdout/stderr has been redirected to a pipe whose reader
+    /// closed early (e.g. `biome ... | head`).
+    struct BrokenPipeWriter;
+
+    impl io::Write for BrokenPipeWriter {
+        fn write(&mut self, _buf: &[u8]) -> io::Result<usize> {
+            Err(io::Error::from(io::ErrorKind::BrokenPipe))
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Err(io::Error::from(io::ErrorKind::BrokenPipe))
+        }
+    }
+
+    impl WriteColor for BrokenPipeWriter {}
+
+    /// `Vec<u8>` does not implement `WriteColor` on its own; wrap it so we
+    /// can verify the happy path goes through formatter + writeln machinery.
+    struct BufWriteColor {
+        buf: Vec<u8>,
+    }
+
+    impl io::Write for BufWriteColor {
+        fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+            self.buf.write(buf)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    impl WriteColor for BufWriteColor {}
+
+    #[test]
+    fn write_to_console_does_not_panic_on_broken_pipe() {
+        let mut out = BrokenPipeWriter;
+        // Both calls exercise the markup-write path (the first write into
+        // the broken pipe fails with BrokenPipe). Neither must panic.
+        write_to_console(&mut out, markup!({ "hello" }), true);
+        write_to_console(&mut out, markup!({ "world" }), false);
+    }
+
+    #[test]
+    fn write_to_console_writes_happy_path() {
+        let mut out = BufWriteColor { buf: Vec::new() };
+        write_to_console(&mut out, markup!({ "hi" }), true);
+        write_to_console(&mut out, markup!({ "!" }), false);
+        let rendered = String::from_utf8(out.buf).unwrap();
+        assert!(rendered.contains("hi"));
+        assert!(rendered.contains("!"));
+        // The first call appended a newline; the second did not, so the
+        // output ends with the bang rather than a trailing blank line.
+        assert!(rendered.ends_with("!"));
     }
 }
