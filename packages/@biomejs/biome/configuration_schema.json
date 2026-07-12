@@ -6718,7 +6718,7 @@
 					]
 				},
 				"noNegationInEqualityCheck": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
+					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
 						{ "type": "null" }
