@@ -3,7 +3,7 @@
 use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
-use termcolor::{ColorChoice, StandardStream, WriteColor};
+use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 use write::{StringBuffer, Termcolor};
 
 pub mod fmt;
@@ -190,23 +190,25 @@ impl Console for EnvConsole {
 /// and panics, matching the previous behaviour of `.unwrap()` on the write
 /// results.
 fn write_to_console<W: WriteColor>(out: &mut W, args: Markup, with_newline: bool) {
-    let markup = fmt::Formatter::new(&mut Termcolor(out)).write_markup(args);
-    if let Err(e) = markup {
-        if e.kind() == io::ErrorKind::BrokenPipe {
-            return;
-        }
-        panic!("failed to write markup to console: {e}");
+    check_write(
+        fmt::Formatter::new(&mut Termcolor(out)).write_markup(args),
+        "failed to write markup to console",
+    );
+
+    if with_newline {
+        check_write(writeln!(out), "failed to write to console");
     }
-    let trailing = if with_newline {
-        writeln!(out)
-    } else {
-        write!(out, "")
-    };
-    if let Err(e) = trailing {
-        if e.kind() == io::ErrorKind::BrokenPipe {
-            return;
+}
+
+/// Inspect a write result: a `BrokenPipe` error is silently swallowed (the
+/// consumer has closed the pipe, so the partial output we managed to flush is
+/// the final answer); any other I/O error is unexpected and panics with
+/// `"{msg}: {err}"` to surface the failure loudly.
+fn check_write(result: io::Result<()>, msg: &str) {
+    if let Err(e) = result {
+        if e.kind() != io::ErrorKind::BrokenPipe {
+            panic!("{msg}: {e}");
         }
-        panic!("failed to write to console: {e}");
     }
 }
 
@@ -321,7 +323,19 @@ mod tests {
         }
     }
 
-    impl WriteColor for BrokenPipeWriter {}
+    impl WriteColor for BrokenPipeWriter {
+        fn supports_color(&self) -> bool {
+            false
+        }
+
+        fn set_color(&mut self, _spec: &ColorSpec) -> io::Result<()> {
+            Ok(())
+        }
+
+        fn reset(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
 
     /// `Vec<u8>` does not implement `WriteColor` on its own; wrap it so we
     /// can verify the happy path goes through formatter + writeln machinery.
@@ -339,7 +353,19 @@ mod tests {
         }
     }
 
-    impl WriteColor for BufWriteColor {}
+    impl WriteColor for BufWriteColor {
+        fn supports_color(&self) -> bool {
+            false
+        }
+
+        fn set_color(&mut self, _spec: &ColorSpec) -> io::Result<()> {
+            Ok(())
+        }
+
+        fn reset(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
 
     #[test]
     fn write_to_console_does_not_panic_on_broken_pipe() {
