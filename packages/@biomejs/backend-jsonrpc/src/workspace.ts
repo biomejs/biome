@@ -2564,6 +2564,11 @@ See https://biomejs.dev/linter/rules/no-unused-classes
 	 */
 	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-useless-length-check 
+	 */
+	noUselessLengthCheck?: NoUselessLengthCheckConfiguration;
+	/**
 	* Disallow type conversions that do not change the type of an expression.
 See https://biomejs.dev/linter/rules/no-useless-type-conversion 
 	 */
@@ -4755,6 +4760,9 @@ export type NoUntrustedLicensesConfiguration =
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
+export type NoUselessLengthCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessLengthCheckOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -6641,6 +6649,10 @@ export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
 }
+export interface RuleWithNoUselessLengthCheckOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessLengthCheckOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -8367,6 +8379,7 @@ Defaults to `false`.
 	requireOsiApproved?: boolean;
 }
 export type NoUnusedClassesOptions = {};
+export type NoUselessLengthCheckOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
@@ -9674,7 +9687,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
@@ -9711,6 +9723,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -9720,6 +9733,7 @@ export type Category =
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
@@ -9739,7 +9753,6 @@ export type Category =
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
-	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
@@ -9755,6 +9768,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"

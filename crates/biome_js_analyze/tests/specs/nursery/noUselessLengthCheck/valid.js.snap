@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// The check and the call operate on different values.
+const a = array.length === 0 || other.every(Boolean);
+
+// Wrong operator / method pairing (not redundant).
+const b = array.length === 0 && array.every(Boolean);
+const c = array.length !== 0 || array.some(Boolean);
+
+// `every()` with a non-emptiness check under `&&` is meaningful, not redundant.
+const d = array.length > 0 && array.every(Boolean);
+
+// Standalone calls.
+const e = array.every(Boolean);
+const f = array.some(Boolean);
+
+// Not a length check.
+const g = array.size === 0 || array.every(Boolean);
+
+```

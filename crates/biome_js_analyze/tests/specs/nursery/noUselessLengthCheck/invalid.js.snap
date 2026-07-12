@@ -1,0 +1,181 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// `every()` returns true for [], so the emptiness check is redundant.
+const a = array.length === 0 || array.every(Boolean);
+const b = array.length < 1 || array.every(Boolean);
+
+// `some()` returns false for [], so the non-emptiness check is redundant.
+const c = array.length !== 0 && array.some(Boolean);
+const d = array.length > 0 && array.some(Boolean);
+const e = array.length >= 1 && array.some(Boolean);
+
+// Length check on the right operand.
+const f = array.every(Boolean) || array.length === 0;
+
+// Member-chain receiver.
+const g = foo.bar.length === 0 || foo.bar.every(Boolean);
+
+```
+
+# Diagnostics
+```
+invalid.js:4:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+    3 │ // `every()` returns true for [], so the emptiness check is redundant.
+  > 4 │ const a = array.length === 0 || array.every(Boolean);
+      │           ^^^^^^^^^^^^^^^^^^
+    5 │ const b = array.length < 1 || array.every(Boolean);
+    6 │ 
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    4 │ const·a·=·array.length·===·0·||·array.every(Boolean);
+      │           ----------------------                     
+
+```
+
+```
+invalid.js:5:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+    3 │ // `every()` returns true for [], so the emptiness check is redundant.
+    4 │ const a = array.length === 0 || array.every(Boolean);
+  > 5 │ const b = array.length < 1 || array.every(Boolean);
+      │           ^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // `some()` returns false for [], so the non-emptiness check is redundant.
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    5 │ const·b·=·array.length·<·1·||·array.every(Boolean);
+      │           --------------------                     
+
+```
+
+```
+invalid.js:8:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+     7 │ // `some()` returns false for [], so the non-emptiness check is redundant.
+   > 8 │ const c = array.length !== 0 && array.some(Boolean);
+       │           ^^^^^^^^^^^^^^^^^^
+     9 │ const d = array.length > 0 && array.some(Boolean);
+    10 │ const e = array.length >= 1 && array.some(Boolean);
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    8 │ const·c·=·array.length·!==·0·&&·array.some(Boolean);
+      │           ----------------------                    
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+     7 │ // `some()` returns false for [], so the non-emptiness check is redundant.
+     8 │ const c = array.length !== 0 && array.some(Boolean);
+   > 9 │ const d = array.length > 0 && array.some(Boolean);
+       │           ^^^^^^^^^^^^^^^^
+    10 │ const e = array.length >= 1 && array.some(Boolean);
+    11 │ 
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    9 │ const·d·=·array.length·>·0·&&·array.some(Boolean);
+      │           --------------------                    
+
+```
+
+```
+invalid.js:10:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+     8 │ const c = array.length !== 0 && array.some(Boolean);
+     9 │ const d = array.length > 0 && array.some(Boolean);
+  > 10 │ const e = array.length >= 1 && array.some(Boolean);
+       │           ^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Length check on the right operand.
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    10 │ const·e·=·array.length·>=·1·&&·array.some(Boolean);
+       │           ---------------------                    
+
+```
+
+```
+invalid.js:13:35 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+    12 │ // Length check on the right operand.
+  > 13 │ const f = array.every(Boolean) || array.length === 0;
+       │                                   ^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Member-chain receiver.
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    13 │ const·f·=·array.every(Boolean)·||·array.length·===·0;
+       │                                --------------------- 
+
+```
+
+```
+invalid.js:16:11 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This length check is redundant.
+  
+    15 │ // Member-chain receiver.
+  > 16 │ const g = foo.bar.length === 0 || foo.bar.every(Boolean);
+       │           ^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i every() returns true and some() returns false for an empty array, so the check does not change the result. Remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant length check.
+  
+    16 │ const·g·=·foo.bar.length·===·0·||·foo.bar.every(Boolean);
+       │           ------------------------                       
+
+```
